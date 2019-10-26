@@ -1,0 +1,16 @@
+{
+  "name": "sdk-core",
+  "version": "1.0.0",
+  "description": "Light core sdk of CoolWalletS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "key-encoder": "^2.0.3",
+    "elliptic":"^6.5.1"
+  }
+}
