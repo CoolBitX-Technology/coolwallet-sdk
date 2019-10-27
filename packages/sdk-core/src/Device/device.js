@@ -1,10 +1,11 @@
-import * as apdu from '../apdu/device'
-import { ECIESenc } from '../crypto/encryptions'
+import * as deviceApdu from '../apdu/device'
+import { ECIESenc, ECIESDec } from '../crypto/encryptions'
 import { SEPublicKey } from '../config/key'
+import { core } from '../..'
 
 /**
  * @param {string} appPublicKey
- * @param {Transport}
+ * @param {Transport} transport
  * @param {String} password
  * @param {String} device_name
  * @returns {Promise}
@@ -32,6 +33,23 @@ export const registerDevice = async (appPublicKey, transport, password, device_n
     data = ECIESenc(SEPublicKey, data)
     P1 = '01'
   }
-  const appId = await apdu.registerDevice(transport, data, P1)
+  const appId = await deviceApdu.registerDevice(transport, data, P1)
   return appId
+}
+
+/**
+ * Get Pairing password for current device
+ * @param {Transport} transport 
+ * @param {string} appId 
+ * @param {string} appPrivKey 
+ * @return {Promise<string>}
+ */
+export const getPairingPassword = async (transport, appId, appPrivKey) => {
+  const signature = await core.auth.generalAuthorization(transport, appId, appPrivKey, 'GET_PAIR_PWD');
+  const encryptedPassword = await deviceApdu.getPairingPassword(transport, signature);
+  await deviceApdu.powerOff(transport)
+  
+  let password = ECIESDec(appPrivKey, encryptedPassword);
+  password = password.replace(/f/gi, '');
+  return password
 }
