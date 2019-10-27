@@ -153,7 +153,7 @@ export default {
     P2: '00',
     ERR: 'Create Wallet Failed',
   },
-  FINISH_BACKUP: {
+  CHECKSUM: {
     CLA: '80',
     INS: '2E',
     P1: '00',

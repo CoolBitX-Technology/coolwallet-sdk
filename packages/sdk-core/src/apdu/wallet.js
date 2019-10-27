@@ -52,13 +52,13 @@ export const createWallet = async (transport, strengthWithSig) => {
 };
 
 /**
- * 
+ * Finish create wallet with checksum.
  * @param {Transport} transport 
  * @param {string} hex_checkSum data field
  * @return {Promise<boolean>}
  */
-export const finishBackup = async (transport, hex_checkSum) => {
-  await executeCommand(transport, 'FINISH_BACKUP', 'SE', hex_checkSum)
+export const submitCheckSum = async (transport, hex_checkSum) => {
+  await executeCommand(transport, 'CHECKSUM', 'SE', hex_checkSum)
   return true
 };
 
