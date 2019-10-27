@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bip32": "^2.0.4",
+    "bip66": "^1.1.5",
     "crypto": "^1.0.1",
-    "key-encoder": "^2.0.3",
-    "elliptic":"^6.5.1"
+    "elliptic": "^6.5.1",
+    "key-encoder": "^2.0.3"
   }
 }

@@ -293,6 +293,13 @@ export default {
     P2: '00',
     ERR: 'Set token failed',
   },
+  SET_CUSTOM_TOKEN: {
+    CLA: '80',
+    INS: '3E',
+    P1: '04',
+    P2: '18',
+    ERR: 'Set custom token failed',
+  },
   BACKUP_REGISTER_DATA: {
     CLA: '80',
     INS: '80',
