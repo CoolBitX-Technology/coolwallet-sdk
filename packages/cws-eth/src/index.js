@@ -10,7 +10,7 @@ export default class ETH extends ECDSACoin {
 
   /**
    * Get Ethereum address by index
-   * @param {number} addressIndex 
+   * @param {number} addressIndex
    * @return {string}
    */
   async getAddress(addressIndex) {
@@ -25,7 +25,14 @@ export default class ETH extends ECDSACoin {
    * @param {String} publicKey
    */
   async signTransaction(payload, addressIndex, publicKey = undefined) {
-    return await ethSign.signTransaction(this.transport, this.coinType, payload, addressIndex, publicKey)
+    return await ethSign.signTransaction(
+      this.transport,
+      this.wallet.appPrivateKey,
+      this.coinType,
+      payload,
+      addressIndex,
+      publicKey
+    )
   }
 
   /**
@@ -38,7 +45,15 @@ export default class ETH extends ECDSACoin {
    */
   async signMessage(message, addressIndex, publicKey = undefined, isHashRequired = false) {
     await core.auth.versionCheck(this.transport, 81)
-    return await ethSign.signMessage(this.transport, this.coinType, message, addressIndex, publicKey, isHashRequired)
+    return await ethSign.signMessage(
+      this.transport,
+      this.wallet.appPrivateKey,
+      this.coinType,
+      message,
+      addressIndex,
+      publicKey,
+      isHashRequired
+    )
   }
 
   /**
@@ -49,6 +64,13 @@ export default class ETH extends ECDSACoin {
    */
   async signTypedData(addressIndex, publicKey = undefined) {
     await core.auth.versionCheck(this.transport, 84)
-    return await ethSign.signTypedData(this.transport, this.coinType, typedData, addressIndex, publicKey)
+    return await ethSign.signTypedData(
+      this.transport,
+      this.wallet.appPrivateKey,
+      this.coinType,
+      typedData,
+      addressIndex,
+      publicKey
+    )
   }
 }

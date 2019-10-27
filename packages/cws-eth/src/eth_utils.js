@@ -1,4 +1,4 @@
-import rlp from 'rlp'
+const rlp = require('rlp')
 import Web3 from 'web3'
 import elliptic from 'elliptic'
 import { core, apdu } from 'sdk-core'
@@ -10,7 +10,7 @@ const ec = new elliptic.ec('secp256k1')
 
 /**
  * @description Check SE Commands by Raw Payload
- * @param {Trasnport} transport
+ * @param {Transport} transport
  * @param {Array<Buffer>} rawPayload
  * @param {{symbol:string, decimals:number}} erc20Info
  * @return {Promise<{P1: String, P2: String, readType: String, preAction: function}>}
@@ -119,7 +119,7 @@ export const genEthSigFromSESig = async (canonicalSignature, payload, compressed
  * @param {String} p1
  * @return {Function}
  */
-export const apduForParsingMessage = (trasnport, msgBuf, p1) => {
+export const apduForParsingMessage = (transport, msgBuf, p1) => {
   let rawData = msgBuf.toString('hex')
   rawData = handleHex(rawData)
   let patch = Math.ceil(rawData.length / 500)
@@ -128,7 +128,7 @@ export const apduForParsingMessage = (trasnport, msgBuf, p1) => {
     for (let i = 0; i < patch; i++) {
       let patchData = rawData.substr(i * 500, 500)
       let p2 = patch === 1 ? '00' : (i === patch - 1 ? '8' : '0') + (i + 1)
-      await apdu.tx.prepTx(trasnport, patchData, p1, p2)
+      await apdu.tx.prepTx(transport, patchData, p1, p2)
     }
   }
 }
