@@ -1,5 +1,3 @@
-import { derivePubKey } from '../Wallet/keyDerivation'
-
 export class ECDSACoin {
   constructor(wallet, coinType) {
     this.wallet = wallet
@@ -12,8 +10,7 @@ export class ECDSACoin {
    * @returns {Promise<{publicKey: string, parentPublicKey: string, parentChainCode: string}>}
    */
   async getPublicKey(addressIndex) {
-    const { accountPublicKey, accountChainCode } = await this.wallet.getAccountExtKey(this.coinType, 0)
-    return derivePubKey(accountPublicKey, accountChainCode, 0, addressIndex)
+    return await this.wallet.getECDSAPublicKey(this.coinType, addressIndex)
   }
 }
 
