@@ -67,7 +67,7 @@ const aes256CbcEncrypt = (iv, key, plaintext) => {
   return Buffer.concat([firstChunk, secondChunk])
 }
 
-const aes256CbcDecrypt = (iv, key, ciphertext) => {
+export const aes256CbcDecrypt = (iv, key, ciphertext) => {
   let isCipherBuffer = ciphertext
   if (!Buffer.isBuffer(ciphertext)) {
     isCipherBuffer = Buffer.from(isCipherBuffer, 'hex')
