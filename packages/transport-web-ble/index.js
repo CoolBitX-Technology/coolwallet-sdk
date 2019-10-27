@@ -27,9 +27,7 @@ export class WebBleTransport {
       console.log(`found device id: "${device.id}", name: "${device.name}"`)
 
       // Connect to GATT Server
-      device.addEventListener('gattserverdisconnected', event => {
-        console.log('Device ' + event.target.name + ' is disconnected.')
-      })
+      device.addEventListener('gattserverdisconnected', this._onDeviceDisconnect )
       this.server = await device.gatt.connect()
 
       // Get Service
@@ -45,8 +43,8 @@ export class WebBleTransport {
       await this.statusCharacteristic.startNotifications()
       this.statusCharacteristic.addEventListener('characteristicvaluechanged', this._onCharateristicStatusChange)
     } catch (error) {
-      console.log('error :', error.message)
       if (this.server) await this.server.disconnect()
+      throw error
     }
   }
 
@@ -57,8 +55,8 @@ export class WebBleTransport {
    * @returns {string}
    */
   async request(command, data) {
-    if (!this.server) throw Error('No Connection')
-    console.log(`WebBLE request command: ${command}, data: ${data}`)
+    if (!this.server) throw Error('No Bluetooth Connection.')
+    console.log(`WebBLE request command: ${command},\tdata: ${data}`)
     const commandBuf = hexStringToByte(command)
 
     await this.commandCharacteristic.writeValue(commandBuf)
@@ -104,6 +102,11 @@ export class WebBleTransport {
       this.eventPromise.resolve()
     }
   }
+
+  async _onDeviceDisconnect(event){ 
+    console.log('Device ' + event.target.name + ' is disconnected.')
+  }
+
 
   async _waitForStatusChange() {
     return new Promise((resolve, reject) => {
