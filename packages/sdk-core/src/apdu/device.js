@@ -28,7 +28,7 @@ export const resetCard = async (transport) => {
  * @param {string} data 
  * @return {Promise<boolean>} isCardRecognized
  */
-export const sayHi = (transport, data,) => {
+export const sayHi = async (transport, data,) => {
   try {
     const { status } = await executeCommand(transport, 'SAY_HI', 'SE', data)
     return status === RESPONSE.SUCCESS
@@ -42,7 +42,7 @@ export const sayHi = (transport, data,) => {
  * @param {Transport} transport 
  * @return {Promise<string>}
  */
-export const getNonce = (transport) => {
+export const getNonce = async (transport) => {
   const { outputData: nonce } = await executeCommand(transport, 'GET_NONCE', 'SE')
   return nonce
 };
@@ -51,7 +51,7 @@ export const getNonce = (transport) => {
  * Get basic card information 
  * @param {Transport} transport 
  */
-export const getCardInfo = (transport) => {
+export const getCardInfo = async (transport) => {
   const { outputData } = await executeCommand(transport, 'GET_CARD_INFO', 'SE')
   const databuf = Buffer.from(outputData, 'hex');
   const pairIndex = databuf.slice(0, 1).toString('hex');
@@ -80,7 +80,7 @@ export const getCardInfo = (transport) => {
  * @param {Transport} transport
  * @return {Promise<boolean>}
  */
-export const startUpdate = (transport) => {
+export const startUpdate = async (transport) => {
   await executeCommand(transport, 'START_UPDATE', 'SE')
   return true
 };
@@ -90,7 +90,7 @@ export const startUpdate = (transport) => {
  * @param {Transport}
  * @return {Promise<boolean>}
  */
-export const finishUpdate = (transport) => {
+export const finishUpdate = async (transport) => {
   await executeCommand(transport, 'FINISH_UPDATE', 'SE')
   return true
 };
@@ -100,7 +100,7 @@ export const finishUpdate = (transport) => {
  * @param {Transport} 
  * @return {Promise<boolean>}
  */
-export const powerOff = (transport) => {
+export const powerOff = async (transport) => {
   await executeCommand(transport, 'PWR_OFF', 'SE')
   return true
 };
@@ -111,7 +111,7 @@ export const powerOff = (transport) => {
  * @param {string} data 
  * @return {Promise<boolean>}
  */
-export const updateBalance = (transport, data) => {
+export const updateBalance = async (transport, data) => {
   await executeCommand(transport, 'UPDATE_BALANCE', 'SE', data)
   return true
 };
@@ -122,7 +122,7 @@ export const updateBalance = (transport, data) => {
  * @param {string} data 
  * @return {Promise<string>}
  */
-export const getPairPassword = (transport, data) => {
+export const getPairPassword = async (transport, data) => {
   const { outputData } =  await executeCommand(transport, 'GET_PAIR_PWD', 'SE', data)
   return outputData
 };
@@ -134,7 +134,7 @@ export const getPairPassword = (transport, data) => {
  * @param {string} P1 
  * @return {Promise<boolean>}
  */
-export const updateKeyId = (transport, data, P1) => {
+export const updateKeyId = async (transport, data, P1) => {
   await executeCommand(transport, 'UPDATE_KEYID', 'SE', data, P1)
   return true
 };
@@ -144,7 +144,7 @@ export const updateKeyId = (transport, data, P1) => {
  * @param {Transport} transport 
  * @param {string} P1 
  */
-export const getLastKeyId = (transport, P1) => {
+export const getLastKeyId = async (transport, P1) => {
   const { outputData } = await executeCommand(transport, 'GET_KEYID', 'SE', null, P1)
   return outputData
 };
@@ -156,7 +156,7 @@ export const getLastKeyId = (transport, P1) => {
  * @param {string} lock 01 to lock your card 
  * @return {Promise<string>}
  */
-export const switchLockStatus = (transport, signature, lock) => {
+export const switchLockStatus = async (transport, signature, lock) => {
   await executeCommand(transport, 'CHANGE_PAIR_STATUS', 'SE', signature, lock)
   return true
 };
@@ -167,7 +167,7 @@ export const switchLockStatus = (transport, signature, lock) => {
  * @param {string} signature 
  * @return {Promise<Array<{appId:string, deviceName: string}>>}
  */
-export const getPairedDevices = (transport, signature) => {
+export const getPairedDevices = async (transport, signature) => {
   const { outputData } = await executeCommand(transport, 'GET_PAIRED_DEVICES', 'SE', signature)
   const devices = outputData.match(/.{100}/g);
   const allDevices = devices.map(device => {
@@ -186,7 +186,7 @@ export const getPairedDevices = (transport, signature) => {
  * @param {string} appIdWithSig 
  * @return {Promise<boolean>}
  */
-export const removePairedDevice = (transport, appIdWithSig) => {
+export const removePairedDevice = async (transport, appIdWithSig) => {
   await executeCommand(transport, 'REMOVE_DEVICES', 'SE', appIdWithSig)
   return true
 };
@@ -197,7 +197,7 @@ export const removePairedDevice = (transport, appIdWithSig) => {
  * @param {string} nameWithSig 
  * @return {Promise<boolean>}
  */
-export const renameDevice = (transport, nameWithSig) => {
+export const renameDevice = async (transport, nameWithSig) => {
   await executeCommand(transport, 'RENAME_DEVICES', 'SE', nameWithSig)
   return true
 };
@@ -210,7 +210,7 @@ export const renameDevice = (transport, nameWithSig) => {
  * @param {string} detailFlag 00 if want to show detail, 01 otherwise
  * @return {Promise<boolean>}
  */
-export const toggleDisplayAddress = (transport, signature, detailFlag) => {
+export const toggleDisplayAddress = async (transport, signature, detailFlag) => {
   await executeCommand(transport, 'SHOW_FULL_ADDRESS', 'SE', signature, detailFlag)
   return true
 };
@@ -220,7 +220,7 @@ export const toggleDisplayAddress = (transport, signature, detailFlag) => {
  * @param {Transport} transport
  * @return {Prmose<number>}
  */
-export const getSEVersion = (transport) => {
+export const getSEVersion = async (transport) => {
   const { outputData } = await executeCommand(transport, 'GET_SE_VERSION', 'SE')
   return parseInt(outputData, 16)
 };
@@ -229,48 +229,8 @@ export const getSEVersion = (transport) => {
  * Cancel last APDU
  * @param {Transport} transport 
  */
-export const cancelAPDU = (transport) => {
+export const cancelAPDU = async (transport) => {
   await executeCommand(transport, 'CANCEL_APDU', 'SE')
 };
 
-/**
- * backup seed in SE.
- * @param {Transport} transport 
- * @param {string} signedCommand 
- * @return {Promise<boolean>}
- */
-export const backupRegisterData = (transport, signedCommand) => {
-  const { status }= await executeCommand(transport, 'BACKUP_REGISTER_DATA', 'SE', signedCommand)
-  return status === RESPONSE.SUCCESS
-};
 
-/**
- * Recover wallet automatically with backed up seed.
- * @param {Transport} transport 
- * @return {Promise<boolean>}
- */
-export const recoverWithBackedUpData = (transport) => {
-  await executeCommand(transport, 'RECOVER_REGISER_DATA', 'SE')
-  return true;
-};
-
-/**
- * check if there's backed up data in SE.
- * @param {Transport} transport 
- * @return {Promise<boolean>} true: may need recovery after update.
- */
-export const checkBackuptatus = (transport) => {
-  const {outputData} = await executeCommand(transport, 'CHECK_BACKUP_RECOVER', 'SE')
-  return outputData === '01'
-};
-
-/**
- * Delete backed up seed in SE.
- * @param {Transport} trasnport 
- * @param {string} signedCommand 
- * @return {Promise<boolean>}
- */
-export const deleteSeedBackup = (transport, signedCommand) => {
-  const { status } = await executeCommand(transport, 'DELETE_REGISTER_BACKUP', 'SE', signedCommand)
-  return status === RESPONSE.SUCCESS ;
-};
