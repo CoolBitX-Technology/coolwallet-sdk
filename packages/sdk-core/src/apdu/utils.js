@@ -1,4 +1,3 @@
-
 export const assemblyCommandAndData = (cla, ins, p1, p2, oriData) => {
   let pid = '00',
     cmd_len = '09'
