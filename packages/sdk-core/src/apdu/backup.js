@@ -34,7 +34,7 @@ export const checkBackuptatus = async transport => {
 
 /**
  * Delete backed up seed in SE.
- * @param {Transport} trasnport
+ * @param {Transport} transport
  * @param {string} signedCommand
  * @return {Promise<boolean>}
  */
