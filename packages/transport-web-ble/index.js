@@ -27,7 +27,7 @@ export class WebBleTransport {
       console.log(`found device id: "${device.id}", name: "${device.name}"`)
 
       // Connect to GATT Server
-      device.addEventListener('gattserverdisconnected', this._onDeviceDisconnect )
+      device.addEventListener('gattserverdisconnected', this._onDeviceDisconnect)
       this.server = await device.gatt.connect()
 
       // Get Service
@@ -103,10 +103,9 @@ export class WebBleTransport {
     }
   }
 
-  async _onDeviceDisconnect(event){ 
+  async _onDeviceDisconnect(event) {
     console.log('Device ' + event.target.name + ' is disconnected.')
   }
-
 
   async _waitForStatusChange() {
     return new Promise((resolve, reject) => {
