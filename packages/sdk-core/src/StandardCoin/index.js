@@ -1,9 +1,8 @@
 import * as derivation from './derive'
 
 export class ECDSACoin {
-  constructor(transport, appPublicKey, appPrivateKey, appId, coinType) {
+  constructor(transport, appPrivateKey, appId, coinType) {
     this.transport = transport
-    this.appPublicKey = appPublicKey
     this.appPrivateKey = appPrivateKey
     this.appId = appId
     this.coinType = coinType
@@ -24,15 +23,14 @@ export class ECDSACoin {
       this.coinType,
       0
     )
-    const { publicKey } = derivePubKey(accountPublicKey, accountChainCode, 0, addressIndex)
+    const { publicKey } = derivation.derivePubKey(accountPublicKey, accountChainCode, 0, addressIndex)
     return publicKey
   }
 }
 
 export class EDDSACoin {
-  constructor(transport, appPublicKey, appPrivateKey, appId, coinType) {
+  constructor(transport, appPrivateKey, appId, coinType) {
     this.transport = transport
-    this.appPublicKey = appPublicKey
     this.appPrivateKey = appPrivateKey
     this.appId = appId
     this.coinType = coinType
