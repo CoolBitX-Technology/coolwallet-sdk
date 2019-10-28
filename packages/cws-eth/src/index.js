@@ -61,7 +61,7 @@ export default class ETH extends ECDSACoin {
    * @param {String} addressIndex
    * @param {String} publicKey
    */
-  async signTypedData(addressIndex, publicKey = undefined) {
+  async signTypedData(typedData, addressIndex, publicKey = undefined) {
     await core.auth.versionCheck(this.transport, 84)
     return await ethSign.signTypedData(
       this.transport,

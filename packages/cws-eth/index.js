@@ -1,3 +1,3 @@
-import ETH from './src'
+import cwsETH from './src'
 
-export default ETH
+export default cwsETH
