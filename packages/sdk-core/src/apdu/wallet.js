@@ -1,8 +1,15 @@
 import { executeCommand } from './execute'
+import { RESPONSE } from '../config/response'
 
-export const setSeed = async (transport, seedHex) => {
-  await executeCommand(transport, 'SET_SEED', 'SE', seedHex) 
-  return true
+/**
+ * set bip32 root seed
+ * @param {Transport} transport 
+ * @param {string} seedHexWithSig
+ * @return {Promise<boolean>} 
+ */
+export const setSeed = async (transport, seedHexWithSig) => {
+  const { status } = await executeCommand(transport, 'SET_SEED', 'SE', seedHexWithSig) 
+  return status === RESPONSE.SUCCESS
 };
 
 /**
@@ -12,8 +19,8 @@ export const setSeed = async (transport, seedHex) => {
  * @return {Promise<boolean>}
  */
 export const createWallet = async (transport, strengthWithSig) => {
-  await executeCommand(transport, 'CREATE_WALLET', 'SE', strengthWithSig)
-  return true
+  const { status } = await executeCommand(transport, 'CREATE_WALLET', 'SE', strengthWithSig)
+  return status === RESPONSE.SUCCESS
 };
 
 /**
@@ -23,7 +30,7 @@ export const createWallet = async (transport, strengthWithSig) => {
  * @return {Promise<boolean>}
  */
 export const submitCheckSum = async (transport, hex_checkSum) => {
-  await executeCommand(transport, 'CHECKSUM', 'SE', hex_checkSum)
-  return true
+  const { status } = await executeCommand(transport, 'CHECKSUM', 'SE', hex_checkSum)
+  return status === RESPONSE.SUCCESS
 };
 
