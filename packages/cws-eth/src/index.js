@@ -13,7 +13,7 @@ export default class ETH extends ECDSACoin {
    * @return {string}
    */
   async getAddress(addressIndex) {
-    const publicKey = await this.getPublicKey(addressIndex)
+    const { publicKey } = await this.getPublicKey(addressIndex)
     return pubKeyToAddress(publicKey)
   }
 

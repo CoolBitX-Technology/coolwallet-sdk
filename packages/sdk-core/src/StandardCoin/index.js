@@ -23,8 +23,7 @@ export class ECDSACoin {
       this.coinType,
       0
     )
-    const { publicKey } = derivation.derivePubKey(accountPublicKey, accountChainCode, 0, addressIndex)
-    return publicKey
+    return derivation.derivePubKey(accountPublicKey, accountChainCode, 0, addressIndex)
   }
 }
 
