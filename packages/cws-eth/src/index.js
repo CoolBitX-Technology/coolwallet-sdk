@@ -3,9 +3,8 @@ import { pubKeyToAddress } from './eth_utils'
 import { ECDSACoin, core } from 'sdk-core'
 
 export default class ETH extends ECDSACoin {
-  constructor(wallet) {
-    super(wallet, '3C')
-    this.transport = this.wallet.transport
+  constructor(transport, appPrivateKey, appId) {
+    super(transport, appPrivateKey, appId, '3C')
   }
 
   /**
@@ -27,7 +26,7 @@ export default class ETH extends ECDSACoin {
   async signTransaction(payload, addressIndex, publicKey = undefined) {
     return await ethSign.signTransaction(
       this.transport,
-      this.wallet.appPrivateKey,
+      this.appPrivateKey,
       this.coinType,
       payload,
       addressIndex,
@@ -47,7 +46,7 @@ export default class ETH extends ECDSACoin {
     await core.auth.versionCheck(this.transport, 81)
     return await ethSign.signMessage(
       this.transport,
-      this.wallet.appPrivateKey,
+      this.appPrivateKey,
       this.coinType,
       message,
       addressIndex,
@@ -66,7 +65,7 @@ export default class ETH extends ECDSACoin {
     await core.auth.versionCheck(this.transport, 84)
     return await ethSign.signTypedData(
       this.transport,
-      this.wallet.appPrivateKey,
+      this.appPrivateKey,
       this.coinType,
       typedData,
       addressIndex,
