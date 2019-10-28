@@ -1,6 +1,6 @@
 import { ECIESDec } from '../crypto/encryptions'
-import { generalAuthorization } from './auth'
-import * as apdu from '../apdu/wallet'
+import { generalAuthorization } from '../core/auth'
+import * as apdu from '../apdu/coin'
 const bip32 = require('bip32');
 
 /**
@@ -36,6 +36,7 @@ export const getAccountExtKey = async (transport, appId, appPrivateKey, coinSETy
  * @param {string} coinSEType
  * @param {number} accountIndex
  * @param {boolean} authFirst
+ * @return {Promise<Buffer>}
  */
 export const getEd25519PublicKey = async (transport, appId, appPrivateKey, coinSEType, accountIndex, authFirst = true) => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey)
@@ -68,19 +69,4 @@ export const derivePubKey = (accountPublicKey, chainCode, changeIndex = 0, addre
   const parentChainCode = changeNode.chainCode.toString('hex')
 
   return { publicKey, parentPublicKey, parentChainCode }
-}
-
-/**
- * A wrapper of getAccountExtKey(0) and Derive
- * @param {Transport} transport 
- * @param {string} appId 
- * @param {string} appPrivateKey 
- * @param {string} coinSEType 
- * @param {number} addrIndex 
- * @return {Promise<string>}
- */
-export const getECDSAPublicKey = async (transport, appId, appPrivateKey, coinSEType, addrIndex) => {
-  const { accountPublicKey, accountChainCode } = await getAccountExtKey(transport, appId, appPrivateKey, coinSEType, 0)
-  const { publicKey } = derivePubKey(accountPublicKey, accountChainCode, 0, addrIndex)
-  return publicKey
 }

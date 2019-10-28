@@ -1,4 +1,4 @@
-import * as derivation from '../core/derive'
+import * as derivation from './derive'
 
 export class ECDSACoin {
   constructor(transport, appPublicKey, appPrivateKey, appId, coinType) {
