@@ -3,13 +3,14 @@ import { hexStringToByte, convertToHex } from './util'
 const PACKET_DATA_SIZE = 18
 
 export class WebBleTransport {
-  constructor() {
+  constructor(verbose=true) {
     this.eventPromise
     this.server = undefined
     this.statusCharacteristic = undefined
     this.commandCharacteristic = undefined
     this.dataCharacteristic = undefined
     this.responseCharacteristic = undefined
+    this.verbose = verbose
 
     this.connect = this.connect.bind(this)
     this.disconnect = this.disconnect.bind(this)
@@ -24,7 +25,7 @@ export class WebBleTransport {
   async connect() {
     try {
       const device = await navigator.bluetooth.requestDevice({ filters: [{ services: [0xa000] }] })
-      console.log(`found device id: "${device.id}", name: "${device.name}"`)
+      if (this.verbose) console.log(`found device id: "${device.id}", name: "${device.name}"`)
 
       // Connect to GATT Server
       device.addEventListener('gattserverdisconnected', this._onDeviceDisconnect)
@@ -33,7 +34,7 @@ export class WebBleTransport {
       // Get Service
       const services = await this.server.getPrimaryServices()
       const service = services[0]
-      console.log(`Service uuid: ${service.uuid}`)
+      if (this.verbose) console.log(`Service uuid: ${service.uuid}`)
 
       this.commandCharacteristic = await service.getCharacteristic(0xa007)
       this.dataCharacteristic = await service.getCharacteristic(0xa008)
@@ -42,6 +43,8 @@ export class WebBleTransport {
 
       await this.statusCharacteristic.startNotifications()
       this.statusCharacteristic.addEventListener('characteristicvaluechanged', this._onCharateristicStatusChange)
+      if (this.verbose) console.log('bluetooth connection established.')
+
     } catch (error) {
       if (this.server) await this.server.disconnect()
       throw error
@@ -56,7 +59,7 @@ export class WebBleTransport {
    */
   async request(command, data) {
     if (!this.server) throw Error('No Bluetooth Connection.')
-    console.log(`WebBLE request command: ${command},\tdata: ${data}`)
+    if (this.verbose) console.log(`WebBLE request command: ${command},\tdata: ${data}`)
     const commandBuf = hexStringToByte(command)
 
     await this.commandCharacteristic.writeValue(commandBuf)
@@ -104,7 +107,7 @@ export class WebBleTransport {
   }
 
   async _onDeviceDisconnect(event) {
-    console.log('Device ' + event.target.name + ' is disconnected.')
+    if (this.verbose) console.log('Device ' + event.target.name + ' is disconnected.')
   }
 
   async _waitForStatusChange() {
