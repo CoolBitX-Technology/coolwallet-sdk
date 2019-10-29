@@ -1,12 +1,4 @@
 declare module 'sdk-core' {
-    export class CWSWallet {
-      constructor()
-    }
-
-    export class CWSDevice {
-
-    }
-
     export class EDDSACoin {
       constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string)
       /**
