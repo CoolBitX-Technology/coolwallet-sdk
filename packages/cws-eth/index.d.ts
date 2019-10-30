@@ -8,17 +8,17 @@ declare class cwsETH {
   /**
    * Sign Ethereum Transaction.
    */
-  async signTransaction(payload:string, addressIndex:number, publicKey:string) : Promise<string>
+  async signTransaction(payload:string, addressIndex:number, publicKey?:string) : Promise<string>
 
   /**
    * Sign Arbitrary Message.
    */
-  async signMessage(message:string, addressIndex:number, publicKey:string, isHashRequired?:Boolean) : Promise<string>
+  async signMessage(message:string, addressIndex:number, publicKey?:string, isHashRequired?:Boolean) : Promise<string>
 
   /**
    * Sign EIP712 typed data
    */
-  async signTypedData(typedData: Object,  addressIndex:number, publicKey:string) : Promise<string>
+  async signTypedData(typedData: Object,  addressIndex:number, publicKey?:string) : Promise<string>
 }
 
 export default cwsETH
