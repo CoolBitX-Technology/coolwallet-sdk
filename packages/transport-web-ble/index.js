@@ -3,14 +3,16 @@ import { hexStringToByte, convertToHex } from './util'
 const PACKET_DATA_SIZE = 18
 
 export class WebBleTransport {
-  constructor(verbose=true) {
-    this.eventPromise
+  constructor(verbose = true) {
+    this.connected = false
+
     this.server = undefined
     this.statusCharacteristic = undefined
     this.commandCharacteristic = undefined
     this.dataCharacteristic = undefined
     this.responseCharacteristic = undefined
     this.verbose = verbose
+    this.eventPromise
 
     this.connect = this.connect.bind(this)
     this.disconnect = this.disconnect.bind(this)
@@ -44,7 +46,7 @@ export class WebBleTransport {
       await this.statusCharacteristic.startNotifications()
       this.statusCharacteristic.addEventListener('characteristicvaluechanged', this._onCharateristicStatusChange)
       if (this.verbose) console.log('bluetooth connection established.')
-
+      this.connected = true;
     } catch (error) {
       if (this.server) await this.server.disconnect()
       throw error
@@ -73,6 +75,7 @@ export class WebBleTransport {
 
   async disconnect() {
     if (this.server) await this.server.disconnect()
+    this.connected = false
   }
 
   async _sendData(data) {
@@ -108,6 +111,7 @@ export class WebBleTransport {
 
   async _onDeviceDisconnect(event) {
     if (this.verbose) console.log('Device ' + event.target.name + ' is disconnected.')
+    this.connected = false
   }
 
   async _waitForStatusChange() {
