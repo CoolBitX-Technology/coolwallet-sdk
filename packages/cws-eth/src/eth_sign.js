@@ -2,7 +2,6 @@ const rlp = require('rlp')
 import { core } from 'sdk-core'
 import * as ethUtil from './eth_utils'
 import Web3 from 'web3'
-import { keccak256 } from 'js-sha3'
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util'
 let web3 = new Web3()
 
@@ -69,7 +68,7 @@ export const signMessage = async (
 
   if (isHashRequired) {
     preAction = ethUtil.apduForParsingMessage(msgBuf, '07') // send prehashed message to card
-    msgBuf = Buffer.from(keccak256(msgBuf), 'hex')
+    msgBuf =  Buffer.from(web3.utils.keccak256(msgBuf), 'hex')
   }
 
   const len = msgBuf.length.toString()

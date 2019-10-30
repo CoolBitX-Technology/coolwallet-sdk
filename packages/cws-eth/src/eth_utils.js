@@ -2,7 +2,6 @@ const rlp = require('rlp')
 import Web3 from 'web3'
 import elliptic from 'elliptic'
 import { core, apdu } from 'sdk-core'
-import { keccak256 } from 'js-sha3'
 import * as token from './token'
 
 let web3 = new Web3()
@@ -94,7 +93,7 @@ export const genEthSigFromSESig = async (canonicalSignature, payload, compressed
     if (isTesting) {
       data = payload
     } else {
-      const hash = keccak256(payload)
+      const hash = web3.utils.keccak256(payload)
       data = Buffer.from(handleHex(hash), 'hex')
     }
 
