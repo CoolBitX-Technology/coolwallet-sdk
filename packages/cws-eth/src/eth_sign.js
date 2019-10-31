@@ -87,7 +87,7 @@ export const signMessage = async (
     preAction
   )
 
-  if (cancel) return
+  if (cancel) throw 'User canceled.'
 
   const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
   const signature = '0x' + r + s + v.toString(16)
@@ -128,7 +128,7 @@ export const signTypedData = async (transport, appPrivateKey, coinType, typedDat
     preAction
   )
 
-  if (cancel) return
+  if (cancel) throw 'User canceled.'
 
   const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
   const signature = '0x' + r + s + v.toString(16)
