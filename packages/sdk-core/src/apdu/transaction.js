@@ -30,7 +30,7 @@ export const finishPrepare = async (transport) => {
  * @return {Promise<string>}
  */
 export const getSignatureKey = async (transport) => {
-  const { outputData:signatureKey } = await executeCommand(transport, 'GET_TX_KEY', 'SE') 
+  const { outputData: signatureKey } = await executeCommand(transport, 'GET_TX_KEY', 'SE') 
   return signatureKey
 }
 
