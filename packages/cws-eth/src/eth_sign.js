@@ -29,9 +29,9 @@ export const signTransaction = async (transport, appPrivateKey, coinType, payloa
     false,
     preAction
   )
-  if (cancel) return
+  if (cancel) throw 'User canceled.'
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey, false)
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
   const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s)
   return serialized_tx
 }
@@ -43,7 +43,7 @@ export const signTransaction = async (transport, appPrivateKey, coinType, payloa
  * @param {String} message hex or utf-8
  * @param {Number} addressIndex
  * @param {String} publicKey
- * @param {Boolean} needHash
+ * @param {Boolean} isHashRequired used by joyso
  * @return {Promise<String>}
  */
 export const signMessage = async (
@@ -63,7 +63,7 @@ export const signMessage = async (
   if (web3.utils.isHex(message)) {
     msgBuf = Buffer.from(ethUtil.removeHex0x(message), 'hex')
   } else {
-    msgBuf = Buffer.from(decodeURIComponent(message), 'utf8')
+    msgBuf = Buffer.from(message, 'utf8')
   }
 
   if (isHashRequired) {
@@ -74,7 +74,6 @@ export const signMessage = async (
   const len = msgBuf.length.toString()
   const prefix = Buffer.from('\u0019Ethereum Signed Message:\n' + len)
   const payload = Buffer.concat([prefix, msgBuf])
-  console.log(`sign message payload : ${payload.toString('hex')}`)
 
   const dataForSE = core.flow.prepareSEData(keyId, payload, 'F5')
 
@@ -90,7 +89,7 @@ export const signMessage = async (
 
   if (cancel) return
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey, false)
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
   const signature = '0x' + r + s + v.toString(16)
   return signature
 }
@@ -131,7 +130,7 @@ export const signTypedData = async (transport, appPrivateKey, coinType, typedDat
 
   if (cancel) return
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey, false)
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
   const signature = '0x' + r + s + v.toString(16)
 
   return signature

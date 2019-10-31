@@ -82,22 +82,14 @@ export const removeHex0x = hex => {
  * @description Generate Canonical Signature from Der Signature
  * @param {{r:string, s:string}} canonicalSignature
  * @param {Buffer} payload
- * @param {String} keyId hex string
- * @param {Boolean} isTesting
+ * @param {String} compressedPubkey hex string
  * @return {Promise<{v: Number, r: String, s: String}>}
  */
-export const genEthSigFromSESig = async (canonicalSignature, payload, compressedPubkey = undefined, isTesting = false) => {
+export const genEthSigFromSESig = async (canonicalSignature, payload, compressedPubkey) => {
   try {
-    // msg hash
-    let data
-    if (isTesting) {
-      data = payload
-    } else {
-      const hash = web3.utils.keccak256(payload)
-      data = Buffer.from(handleHex(hash), 'hex')
-    }
-
-    let keyPair = ec.keyFromPublic(compressedPubkey, 'hex')
+    const hash = web3.utils.keccak256(payload.toString('hex'))
+    const data = Buffer.from(handleHex(hash), 'hex')
+    const keyPair = ec.keyFromPublic(compressedPubkey, 'hex')
 
     // get v
     let recoveryParam = ec.getKeyRecoveryParam(data, canonicalSignature, keyPair.pub)
