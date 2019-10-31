@@ -112,6 +112,5 @@ export const decryptSignatureFromSE = (encryptedSignature, signatureKey, isEDDSA
 export const addressIndexToKeyId = (coinType, addressIndex) => {
   addressIndex = addressIndex.toString(16).padStart(4, '0')
   const keyId = coinType + '0000' + addressIndex
-  console.log(`Convert to keyId: ${keyId}`)
   return keyId
 }
