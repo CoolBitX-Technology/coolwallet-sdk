@@ -4,9 +4,8 @@ import { generalAuthorization } from '../core/auth'
 import { ECIESenc } from '../crypto/encryptions'
 
 export default class CWSWallet {
-  constructor(transport, appPublicKey, appPrivateKey, appId) {
+  constructor(transport, appPrivateKey, appId) {
     this.transport = transport
-    this.appPublicKey = appPublicKey
     this.appPrivateKey = appPrivateKey
     this.appId = appId
 

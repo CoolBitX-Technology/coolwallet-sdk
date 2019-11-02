@@ -4,13 +4,13 @@ import { SEPublicKey } from '../config/key'
 import { core } from '../..'
 
 /**
- * @param {string} appPublicKey
  * @param {Transport} transport
+ * @param {string} appPublicKey
  * @param {String} password
  * @param {String} device_name
  * @returns {Promise}
  */
-export const registerDevice = async (appPublicKey, transport, password, device_name) => {
+export const registerDevice = async (transport, appPublicKey, password, device_name) => {
   let nameToUTF = Buffer.from(device_name, 'utf8')
   const maxLen = 30
 

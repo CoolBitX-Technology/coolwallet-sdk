@@ -2,9 +2,8 @@ import * as device from './device'
 import * as deviceApdu from '../apdu/device'
 
 export default class CWSDevice {
-  constructor(transport, appPublicKey, appPrivateKey, appId=undefined) {
+  constructor(transport, appPrivateKey, appId=undefined) {
     this.transport = transport
-    this.appPublicKey = appPublicKey
     this.appPrivateKey = appPrivateKey
     this.appId = appId
 
@@ -27,8 +26,8 @@ export default class CWSDevice {
     return await deviceApdu.resetCard(this.transport)
   }
 
-  async registerDevice(password, deviceName) {
-    return await device.registerDevice(this.appPublicKey, this.transport, password, deviceName)
+  async registerDevice(appPublicKey, password, deviceName) {
+    return await device.registerDevice(this.transport, appPublicKey, password, deviceName)
   }
 
   async getPairingPassword(){
