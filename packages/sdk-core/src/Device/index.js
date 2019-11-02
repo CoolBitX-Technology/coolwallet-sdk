@@ -9,7 +9,7 @@ export default class CWSDevice {
 
     this.setAppId = this.setAppId.bind(this)
     this.getSEVersion = this.getSEVersion.bind(this)
-    this.registerDevice = this.registerDevice.bind(this)
+    this.register = this.register.bind(this)
     this.resetCard = this.resetCard.bind(this)
     this.getPairingPassword = this.getPairingPassword.bind(this)
   }
@@ -26,7 +26,7 @@ export default class CWSDevice {
     return await deviceApdu.resetCard(this.transport)
   }
 
-  async registerDevice(appPublicKey, password, deviceName) {
+  async register(appPublicKey, password, deviceName) {
     return await device.registerDevice(this.transport, appPublicKey, password, deviceName)
   }
 

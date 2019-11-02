@@ -11,7 +11,7 @@ declare module 'sdk-core' {
     /**
      * Register current device, get appId from card. 
      */
-    async registerDevice(appPublicKey: string, password: string, deviceName: string ): Promise<string>
+    async register(appPublicKey: string, password: string, deviceName: string ): Promise<string>
     async getPairingPassword(): Promise<string>
   }
 
