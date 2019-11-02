@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/sdk-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Light core sdk of CoolWalletS",
   "main": "index.js",
   "scripts": {
