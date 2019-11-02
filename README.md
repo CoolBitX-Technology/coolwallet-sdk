@@ -28,7 +28,7 @@ Use this package for device registration, wallet creation, and other settings.
 
 Used to sign transactions of different cryptocurrencies.
 
-Currently supported coins: BTC, ETH, BNB, EOS, XLM, XRP, ZEN. Open a PR if you want the sdk of any one of them to come out first.
+Currently supported coins: BTC, ETH, BNB, EOS, XLM, XRP, ZEN. Open an issue if you want the sdk of any one of them to come out first.
 
 | Package | Version | Description |
 | -------- | -------- | -------- |
