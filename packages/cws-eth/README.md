@@ -28,6 +28,7 @@ The address generated is compatible to BIP44 with **account** and **change** set
 ```none
 m/44'/60'/0'/0/{i}
 ```
+
 In the design of current hardware, we only support path `m/44'/60'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
 
 ### signTransaction
