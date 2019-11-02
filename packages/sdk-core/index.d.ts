@@ -1,4 +1,4 @@
-declare module 'sdk-core' {
+declare module '@coolwallets/sdk-core' {
   
   export function generateKeyPair(): { publicKey: string, privateKey: string }
 
