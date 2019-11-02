@@ -1,5 +1,5 @@
 {
-  "name": "cws-eth",
+  "name": "@coolwallets/eth",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -12,7 +12,14 @@
     "elliptic": "^6.5.1",
     "eth-sig-util": "^2.5.0",
     "rlp": "^2.2.3",
-    "sdk-core": "file:../sdk-core",
+    "@coolwallets/sdk-core": "^0.0.1",
     "web3": "^1.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-js-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "sdk-core",
+  "name": "@coolwallets/sdk-core",
   "version": "0.0.1",
   "description": "Light core sdk of CoolWalletS",
   "main": "index.js",
@@ -14,5 +14,12 @@
     "elliptic": "^6.5.1",
     "key-encoder": "^2.0.3",
     "rlp": "^2.2.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-js-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
   }
 }

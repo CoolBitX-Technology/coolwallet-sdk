@@ -1,11 +1,18 @@
 {
-  "name": "cws-web-ble",
+  "name": "@coolwallets/transport-web-ble",
   "version": "0.0.1",
-  "description": "",
+  "description": "web ble transport layer for coolwallets.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "anton@coolbitx.com",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-js-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
+  }
 }
