@@ -14,7 +14,7 @@ To communicate with CoolWalletS device, you need to specify a bluetooth transpor
 
 | Package |   Version   |   Description   |
 | -- | -- |--|
-|[`transport-web-ble`](/packages/transport-web-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/transport-web-ble) | Web Bluetooth support   |
+|[`@coolwallets/transport-web-ble`](/packages/transport-web-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/transport-web-ble) | Web Bluetooth support   |
 
 ### Core
 
@@ -22,7 +22,7 @@ Use this package for device registration, wallet creation, and other settings.
 
 | Package |   Version   |   Description   |
 | -- | -- |--|
-|[`sdk-core`](/packages/transport-web-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/sdk-core) | Core functionalities    |
+|[`@coolwallets/sdk-core`](/packages/transport-web-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/sdk-core) | Core functionalities    |
 
 ### Coin Apps
 
@@ -32,4 +32,4 @@ Currently supported coins: BTC, ETH, BNB, EOS, XLM, XRP, ZEN. Open an issue if y
 
 | Package | Version | Description |
 | -------- | -------- | -------- |
-| [`cws-eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallets/eth)  |  Ethereum Application API  |
+| [`@coolwallets/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallets/eth)  |  Ethereum Application API  |
