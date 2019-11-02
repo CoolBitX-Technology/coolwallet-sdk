@@ -2,7 +2,7 @@ import { hexStringToByte, convertToHex } from './util'
 
 const PACKET_DATA_SIZE = 18
 
-export class WebBleTransport {
+export default class WebBleTransport {
   constructor(verbose = true) {
     this.connected = false
 
