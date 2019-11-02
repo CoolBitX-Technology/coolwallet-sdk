@@ -22,7 +22,7 @@ Use this package for device registration, wallet creation, and other settings.
 
 | Package |   Version   |   Description   |
 | -- | -- |--|
-|[`@coolwallets/sdk-core`](/packages/transport-web-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/sdk-core) | Core functionalities    |
+|[`@coolwallets/sdk-core`](/packages/sdk-core) | ![version](https://img.shields.io/npm/v/@coolwallets/sdk-core) | Core functionalities    |
 
 ### Coin Apps
 
