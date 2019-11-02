@@ -30,7 +30,7 @@ module.exports = {
         "jsx-quotes": [ 2, "prefer-single" ],
         "max-len": [ "error", { "code": 130,"ignoreUrls": true, "ignoreStrings": true, "ignoreTrailingComments": true } ],
 		"object-curly-spacing": [ "warn", "always" ],
-        "comma-dangle": "warn",
+        "comma-dangle": "off",
         "no-mixed-spaces-and-tabs": "off",
         "eqeqeq": "warn",
         "block-scoped-var": "error"

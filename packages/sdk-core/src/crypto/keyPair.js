@@ -9,4 +9,3 @@ export const generateKeyPair = () => {
   const privateKey = keyPair.getPrivate('hex')
   return { privateKey, publicKey }
 }
-

@@ -1,16 +1,16 @@
 import { assemblyCommandAndData } from './utils'
 import { RESPONSE, DFU_RESPONSE } from '../config/response'
 import COMMAND from '../config/command'
-import ErrorCode from '../config/error';
+import ErrorCode from '../config/error'
 
 /**
- * 
- * @param {Transport} transport 
- * @param {string} commandName 
- * @param {string} commandType 
- * @param {string} data 
- * @param {string} params1 
- * @param {string} params2 
+ *
+ * @param {Transport} transport
+ * @param {string} commandName
+ * @param {string} commandType
+ * @param {string} data
+ * @param {string} params1
+ * @param {string} params2
  */
 export const executeCommand = async (transport, commandName, commandType = 'SE', data, params1, params2) => {
   console.log(`Execute Command: ${commandName}`)
@@ -36,8 +36,8 @@ const executeAPDU = async (commandName, transport, apdu, commandType) => {
   if (commandType === 'SE') {
     const status = response.slice(-4)
     if (status !== RESPONSE.SUCCESS && status !== RESPONSE.CANCELED) {
-      if(ErrorCode[commandName] && ErrorCode[commandName].hasOwnProperty(status)) {
-        throw ErrorCode[commandName][status].msg;
+      if (ErrorCode[commandName] && ErrorCode[commandName].hasOwnProperty(status)) {
+        throw ErrorCode[commandName][status].msg
       }
       throw status
     }
@@ -47,7 +47,7 @@ const executeAPDU = async (commandName, transport, apdu, commandType) => {
     const status = response.slice(4, 6)
     const outputData = response.slice(6)
     if (status === DFU_RESPONSE.RECHARGING_ERROR) throw 'Please insert your card into the charger to initiate the update.'
-    else if (status !== DFU_RESPONSE.SUCCESS) throw status;
+    else if (status !== DFU_RESPONSE.SUCCESS) throw status
     return { status, outputData }
   }
 }

@@ -30,8 +30,8 @@ export const generalAuthorization = async (transport, appId, appPrivateKey, comm
 
 /**
  * check if function is supported with current SE version.
- * @param {Transport} transport 
- * @param {number} requiredSEVersion 
+ * @param {Transport} transport
+ * @param {number} requiredSEVersion
  * @return {Promise<void>}
  */
 export const versionCheck = async (transport, requiredSEVersion) => {

@@ -28,7 +28,7 @@ export const parseDERsignature = signature => {
 
 /**
  * @param {{r:string, s:string}}
- * @return 
+ * @return
  */
 export const convertToDER = sig => {
   let r = Buffer.from(sig.r, 'hex')

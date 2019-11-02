@@ -1,8 +1,8 @@
 import crypto from 'crypto'
 
 /**
- * @param {string} recipientPubKey 
- * @param {string} msg 
+ * @param {string} recipientPubKey
+ * @param {string} msg
  * @returns {string}
  */
 export const ECIESenc = (recipientPubKey, msg) => {
@@ -24,9 +24,9 @@ export const ECIESenc = (recipientPubKey, msg) => {
 }
 
 /**
- * 
- * @param {string} recipientPrivKey 
- * @param {string} encryption 
+ *
+ * @param {string} recipientPrivKey
+ * @param {string} encryption
  * @returns {Buffer}
  */
 export const ECIESDec = (recipientPrivKey, encryption) => {
@@ -79,9 +79,9 @@ export const aes256CbcDecrypt = (iv, key, ciphertext) => {
 }
 
 /**
- * 
- * @param {Buffer} key 
- * @param {Buffer} msg 
+ *
+ * @param {Buffer} key
+ * @param {Buffer} msg
  * @returns {Buffer}
  */
 const hmacSha1 = (key, msg) => {

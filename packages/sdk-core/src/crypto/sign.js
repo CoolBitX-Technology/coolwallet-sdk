@@ -1,10 +1,10 @@
-import crypto from 'crypto';
-import KeyEncoder from 'key-encoder';
+import crypto from 'crypto'
+import KeyEncoder from 'key-encoder'
 const keyencoder = new KeyEncoder('secp256k1')
 
 /**
  * @param {string} data hex
- * @param {string | Buffer} rawpriv 
+ * @param {string | Buffer} rawpriv
  * @returns {Buffer}
  */
 export const sign = (data, rawpriv) => {
