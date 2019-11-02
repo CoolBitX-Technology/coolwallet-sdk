@@ -1,7 +1,7 @@
 const rlp = require('rlp')
 import Web3 from 'web3'
 import elliptic from 'elliptic'
-import { core, apdu } from 'sdk-core'
+import { core, apdu } from '@coolwallets/sdk-core'
 import * as token from './token'
 
 let web3 = new Web3()
