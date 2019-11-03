@@ -87,7 +87,7 @@ export const removeHex0x = hex => {
  */
 export const genEthSigFromSESig = async (canonicalSignature, payload, compressedPubkey) => {
   try {
-    const hash = web3.utils.keccak256(payload.toString('hex'))
+    const hash = web3.utils.keccak256(payload)
     const data = Buffer.from(handleHex(hash), 'hex')
     const keyPair = ec.keyFromPublic(compressedPubkey, 'hex')
 

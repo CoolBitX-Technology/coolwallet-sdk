@@ -14,6 +14,7 @@ export default class ETH extends ECDSACoin {
    */
   async getAddress(addressIndex) {
     const { publicKey } = await this.getPublicKey(addressIndex)
+    console.log(`pubkeyu ${publicKey}`)
     return pubKeyToAddress(publicKey)
   }
 
