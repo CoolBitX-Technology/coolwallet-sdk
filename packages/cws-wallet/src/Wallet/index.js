@@ -1,8 +1,8 @@
 import * as pairing from '../pairing'
 import * as creation from '../create'
-import { apdu } from 'sdk-core'
+import { apdu } from '@coolwallets/core'
 
-export default class Wallet {
+export default class CoolWallet {
   constructor(transport, appPrivateKey, appId = undefined) {
     this.transport = transport
     this.appPrivateKey = appPrivateKey

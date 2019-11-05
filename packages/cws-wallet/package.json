@@ -1,5 +1,5 @@
 {
-  "name": "cws-wallet",
+  "name": "@coolwallets/wallet",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "sdk-core": "file:../sdk-core",
+    "@coolwallets/core": "file:../sdk-core",
     "elliptic": "^6.5.1"
   }
 }

@@ -2,7 +2,7 @@ declare module '@coolwallets/wallet' {
   
     export function generateKeyPair(): { publicKey: string, privateKey: string }
   
-    export class Wallet {
+    export default class Wallet {
       constructor(transport: Transport, appPrivateKey: string, appId?: string )
   
       setAppId(appId: string):void
@@ -18,7 +18,5 @@ declare module '@coolwallets/wallet' {
       sendCheckSum(sumOfSeed: number): Promise<boolean>
       setSeed(seedHex: string): Promise<string>
     }
-  
-    
   }
   

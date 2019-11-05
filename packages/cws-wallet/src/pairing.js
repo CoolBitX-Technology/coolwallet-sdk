@@ -1,4 +1,4 @@
-import { apdu, crypto, config, core  } from 'sdk-core'
+import { apdu, crypto, config, core  } from '@coolwallets/core'
 
 /**
  * @param {Transport} transport

@@ -1,7 +1,5 @@
 import { generateKeyPair } from './src/keypair'
-import Wallet from './src/Wallet'
+import CoolWallet from './src/Wallet'
 
-export {
-    generateKeyPair,
-    Wallet
-}
+export { generateKeyPair }
+export default CoolWallet

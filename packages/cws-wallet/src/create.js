@@ -1,4 +1,4 @@
-import { apdu, core, crypto, config } from 'sdk-core'
+import { apdu, core, crypto, config } from '@coolwallets/core'
 const SEPublicKey = config.KEY.SEPublicKey
 
 /**

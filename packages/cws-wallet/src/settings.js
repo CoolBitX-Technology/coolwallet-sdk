@@ -1,4 +1,4 @@
-import { apdu } from 'sdk-core'
+import { apdu } from '@coolwallets/core'
 
 /**
  * Get Baisc information of CoolWalletS
