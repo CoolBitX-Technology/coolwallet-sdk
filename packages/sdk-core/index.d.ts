@@ -1,40 +1,74 @@
-declare module '@coolwallets/sdk-core' {
-  
-  export function generateKeyPair(): { publicKey: string, privateKey: string }
+declare module '@coolwallets/core' {
+  export namespace apdu {
+    export namespace coin {
+      export function authGetExtendedKey(transport: Transport, signature: string): Promise<string>
+      export function getAccountExtendedKey(transport: Trasnport, coinType: string, accIndex: string): Promise<string>
+      export function getEd25519AccountPublicKey(transport: Transport, coinType: string, accIndex:string): Promise<string>
+    }
 
-  export class CWSDevice {
-    constructor(transport: Transport, appPrivateKey: string, appId?: string )
+    export namespace control {
+      export function sayHi(transport: Transport, appId: string): Promise<Boolean>
+      export function getNonce(transport: Transport): Promise<string>
+      export function cancelAPDU(transport: Transport): Promise<void>
+      export function powerOff(transport: Transport): Promise<void>
+    }
 
-    setAppId(appId: string):void
-    getSEVersion(): Promise<number>
-    resetCard(): Promise<void>
-    /**
-     * Register current device, get appId from card. 
-     */
-    register(appPublicKey: string, password: string, deviceName: string ): Promise<string>
-    getPairingPassword(): Promise<string>
+    export namespace pairing {
+      export function registerDevice(transport: Transport, data: string, P1: string): Promise<string>
+      export function getPairingPassword(transport: Transport, data: string): Promise<string>
+    }
+
+    export namespace setting {
+      export function resetCard(transport: Transport): Promise<boolean>
+      export function getCardInfo(transport: Transport): Promise<string>
+    }
   }
 
-  export class CWSWallet {
-    constructor(transport: Transport, appPrivateKey: string, appId: string )
-    createWallet(strength: number): Promise<boolean>
-    sendCheckSum(sumOfSeed: number): Promise<boolean>
-    setSeed(seedHex: string): Promise<string>
+  export namespace config {
+    export namespace KEY {
+      export const SEPublicKey: string
+    }
   }
 
-  export class EDDSACoin {
-    constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string)
-    /**
-     * For EDDSA based coins
-     */
-    getPublicKey(addressIndex: number): Promise<string>
+  export namespace core {
+    export namespace auth {
+      export function generalAuthorization(
+        transport: Transport,
+        appId: string,
+        appPrivateKey: string,
+        commandName: string,
+        data: string,
+        params1: string,
+        params2: string,
+        test: string
+      ): Promise<string>
+
+      export function versionCheck(transport: Transport, requiredSEVersion: number): Promise<void>
+    }
+
+    export namespace txFlow {
+      export function prepareSEData(keyId: string, rawData: Buffer | Array<Buffer>, readType: string): Buffer
+      export function sendDataToCoolWallet(
+        transport: Transport,
+        appPrivateKey: String,
+        data: Buffer,
+        P1: String,
+        P2: String,
+        isEDDSA?: Boolean,
+        preAction?: Function,
+        txPrepareComplteCallback?: Function,
+        authorizedCallback?: Function,
+        return_canonical?: Boolean
+      ): Promise<{ signature: { r: string; s: string } | string | Buffer; cancel: boolean }>
+    }
+
+    export namespace txUtil {}
   }
 
-  export class ECDSACoin {
-    constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string)
-    /**
-     * For ECDSA based coins
-     */
-    getPublicKey(addressIndex: number): Promise<{ publicKey: string; parentPublicKey: string; parentChainCode: string }>
+  export namespace crypto {
+    export namespace encryption {
+      export function ECIESenc(recipientPubKey: string, msg: string): string
+      export function ECIESDec(recipientPrivKey: string, encryption:string) : Buffer 
+    }
   }
 }

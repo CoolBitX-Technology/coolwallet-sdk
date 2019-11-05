@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallets/sdk-core",
+  "name": "@coolwallets/core",
   "version": "0.0.3",
-  "description": "Light core sdk of CoolWalletS",
+  "description": "Light core library of CoolWalletS apdu commands.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,9 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bip32": "^2.0.4",
     "bip66": "^1.1.5",
-    "elliptic": "^6.5.1",
     "key-encoder": "^2.0.3",
     "rlp": "^2.2.3"
   },

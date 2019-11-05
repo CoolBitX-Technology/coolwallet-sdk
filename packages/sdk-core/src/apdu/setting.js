@@ -1,4 +1,5 @@
 import { executeCommand } from './execute'
+import { RESPONSE } from '../config/response'
 
 /**
  * Reset CoolWalletS (clear all data)
@@ -6,8 +7,8 @@ import { executeCommand } from './execute'
  * @return {Promise<boolean>}
  */
 export const resetCard = async transport => {
-  await executeCommand(transport, 'RESET_PAIR', 'SE')
-  return true
+  const { status } = await executeCommand(transport, 'RESET_PAIR', 'SE')
+  return status === RESPONSE.SUCCESS
 }
 
 /**

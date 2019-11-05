@@ -1,4 +1,5 @@
 import { executeCommand } from './execute'
+import { RESPONSE } from '../config/response'
 
 /**
  * Response boolean (isCardRecognized)
