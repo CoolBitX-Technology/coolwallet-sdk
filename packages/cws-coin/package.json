@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "bip32": "^2.0.4",
-    "@coolwallets/core": "file:../sdk-core"
+    "@coolwallets/core": "0.0.1"
   }
 }
