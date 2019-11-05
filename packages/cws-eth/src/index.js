@@ -1,6 +1,7 @@
 import * as ethSign from './eth_sign'
 import { pubKeyToAddress } from './eth_utils'
-import { ECDSACoin, core } from '@coolwallets/sdk-core'
+import { core } from '@coolwallets/core'
+import { ECDSACoin } from '@coolwallets/coin'
 
 export default class ETH extends ECDSACoin {
   constructor(transport, appPrivateKey, appId) {
@@ -13,7 +14,7 @@ export default class ETH extends ECDSACoin {
    * @return {string}
    */
   async getAddress(addressIndex) {
-    const { publicKey } = await this.getPublicKey(addressIndex)
+    const publicKey = await this.getPublicKey(addressIndex)
     return pubKeyToAddress(publicKey)
   }
 
@@ -24,7 +25,7 @@ export default class ETH extends ECDSACoin {
    * @param {String} publicKey
    */
   async signTransaction(payload, addressIndex, publicKey = undefined) {
-    if (!publicKey) publicKey = (await this.getPublicKey(addressIndex)).publicKey
+    if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signTransaction(
       this.transport,
       this.appPrivateKey,
@@ -45,7 +46,7 @@ export default class ETH extends ECDSACoin {
    */
   async signMessage(message, addressIndex, publicKey = undefined, isHashRequired = false) {
     await core.auth.versionCheck(this.transport, 81)
-    if (!publicKey) publicKey = (await this.getPublicKey(addressIndex)).publicKey
+    if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signMessage(
       this.transport,
       this.appPrivateKey,
@@ -66,7 +67,7 @@ export default class ETH extends ECDSACoin {
    */
   async signTypedData(typedData, addressIndex, publicKey = undefined) {
     await core.auth.versionCheck(this.transport, 84)
-    if (!publicKey) publicKey = (await this.getPublicKey(addressIndex)).publicKey
+    if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signTypedData(
       this.transport,
       this.appPrivateKey,

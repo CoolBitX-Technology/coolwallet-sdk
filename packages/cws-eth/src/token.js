@@ -1,4 +1,4 @@
-import { apdu } from '@coolwallets/sdk-core'
+import { apdu } from '@coolwallets/core'
 
 /**
  * @param {string} data

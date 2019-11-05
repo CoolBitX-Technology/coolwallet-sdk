@@ -1,5 +1,5 @@
 const rlp = require('rlp')
-import { core } from '@coolwallets/sdk-core'
+import { core } from '@coolwallets/core'
 import * as ethUtil from './eth_utils'
 import Web3 from 'web3'
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util'
