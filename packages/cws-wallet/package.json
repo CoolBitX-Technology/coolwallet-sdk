@@ -1,0 +1,15 @@
+{
+  "name": "cws-wallet",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "sdk-core": "file:../sdk-core",
+    "elliptic": "^6.5.1"
+  }
+}
