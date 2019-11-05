@@ -5,7 +5,7 @@ If you're building a WebApp with CoolWalletS, this is the one you need to use as
 ## Install
 
 ```shell
-npm  i @coolwallets/transport-web-ble
+npm i @coolwallets/transport-web-ble
 ```
 
 ## Usage
