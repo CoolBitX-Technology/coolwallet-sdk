@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@coolwallets/core": "file:../sdk-core",
+    "@coolwallets/core": "0.0.1",
     "elliptic": "^6.5.1"
   }
 }
