@@ -15,8 +15,8 @@ import WebBleTransport from '@coolwallets/transport-web-ble'
 const transport = new WebBleTransport()
 
 // use transport in other package:
-import { CWSWallet } from '@coolwallets/sdk-core'
-const wallet = new CWSWallet(transport, appPrivateKey, appId)
+import CoolWallet from '@coolwallets/wallet'
+const wallet = new CoolWallet(transport, appPrivateKey, appId)
 
 ```
 
