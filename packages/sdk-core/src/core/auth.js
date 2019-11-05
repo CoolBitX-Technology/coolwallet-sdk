@@ -1,6 +1,6 @@
 import COMMAND from '../config/command'
 import { sign } from '../crypto/sign'
-import { device as deviceAPDU } from '../apdu'
+import { control, setting } from '../apdu'
 
 /**
  * Get Command signature to append to some specific APDU commands.
@@ -15,7 +15,7 @@ import { device as deviceAPDU } from '../apdu'
  */
 export const generalAuthorization = async (transport, appId, appPrivateKey, commandName, data, params1, params2) => {
   const dataPackets = !!data ? data : ''
-  const nonce = await deviceAPDU.getNonce(transport)
+  const nonce = await control.getNonce(transport)
 
   const commandParams = COMMAND[commandName]
   const P1 = !!params1 ? params1 : commandParams.P1
@@ -24,7 +24,7 @@ export const generalAuthorization = async (transport, appId, appPrivateKey, comm
   const signatureParams = command + dataPackets + nonce
   const signature = sign(signatureParams, appPrivateKey).toString('hex')
 
-  await deviceAPDU.sayHi(transport, appId)
+  await control.sayHi(transport, appId)
   return signature
 }
 
@@ -35,6 +35,6 @@ export const generalAuthorization = async (transport, appId, appPrivateKey, comm
  * @return {Promise<void>}
  */
 export const versionCheck = async (transport, requiredSEVersion) => {
-  const SEVersion = await deviceAPDU.getSEVersion(transport)
+  const SEVersion = await setting.getSEVersion(transport)
   if (SEVersion < requiredSEVersion) throw Error(`Function not supported, require SE ${requiredSEVersion}`)
 }

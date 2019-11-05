@@ -79,7 +79,7 @@ export const getCWSEncryptionKey = async (transport, authorizedCallback) => {
   const signatureKey = await apdu.tx.getSignatureKey(transport)
 
   await apdu.tx.clearTransaction(transport)
-  await apdu.device.powerOff(transport)
+  await apdu.control.powerOff(transport)
   return signatureKey
 }
 

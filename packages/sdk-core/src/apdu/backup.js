@@ -7,7 +7,7 @@ import { RESPONSE } from '../config/response'
  * @param {string} signedCommand
  * @return {Promise<boolean>}
  */
-export const backupRegisterData = async (transport, signedCommand) => {
+export const backupSeed = async (transport, signedCommand) => {
   const { status } = await executeCommand(transport, 'BACKUP_REGISTER_DATA', 'SE', signedCommand)
   return status === RESPONSE.SUCCESS
 }
@@ -17,7 +17,7 @@ export const backupRegisterData = async (transport, signedCommand) => {
  * @param {Transport} transport
  * @return {Promise<boolean>}
  */
-export const recoverWithBackedUpData = async transport => {
+export const recoverSeed = async transport => {
   await executeCommand(transport, 'RECOVER_REGISER_DATA', 'SE')
   return true
 }
@@ -27,7 +27,7 @@ export const recoverWithBackedUpData = async transport => {
  * @param {Transport} transport
  * @return {Promise<boolean>} true: may need recovery after update.
  */
-export const checkBackuptatus = async transport => {
+export const checkBackupStatus = async transport => {
   const { outputData } = await executeCommand(transport, 'CHECK_BACKUP_RECOVER', 'SE')
   return outputData === '01'
 }

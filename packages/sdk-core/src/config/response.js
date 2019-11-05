@@ -1,16 +1,10 @@
 export const DFU_RESPONSE = {
   SUCCESS: '00',
-  RECHARGING_ERROR: '02',
+  CHARGING_ERROR: '02',
 }
 
 export const RESPONSE = {
   SUCCESS: '9000',
   FAILED: 'FFFF',
   CANCELED: '7F00',
-  SW_CONDITIONS_NOT_SATISFIED: '6985',
-}
-export const STATE = {
-  PENDING: 'CC',
-  NOT_AUTHORIZED: 'FF',
-  AUTHORIZED: '90',
 }

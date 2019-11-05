@@ -46,7 +46,7 @@ const executeAPDU = async (commandName, transport, apdu, commandType) => {
   } else {
     const status = response.slice(4, 6)
     const outputData = response.slice(6)
-    if (status === DFU_RESPONSE.RECHARGING_ERROR) throw 'Please insert your card into the charger to initiate the update.'
+    if (status === DFU_RESPONSE.CHARGING_ERROR) throw 'Please insert your card into the charger to initiate the update.'
     else if (status !== DFU_RESPONSE.SUCCESS) throw status
     return { status, outputData }
   }

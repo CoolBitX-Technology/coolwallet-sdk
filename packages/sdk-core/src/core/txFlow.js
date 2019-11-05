@@ -1,6 +1,6 @@
 import * as txUtil from './txUtil'
 import * as rlp from 'rlp'
-import { sayHi } from '../apdu/device'
+import { sayHi } from '../apdu/control'
 
 /**
  * @description Prepare RLP Data for CoolWallet
