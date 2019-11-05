@@ -20,7 +20,7 @@ To communicate with CoolWalletS device, you need to specify a bluetooth transpor
 
 | Package                                   | Version                                                    | Description          |
 | ----------------------------------------- | ---------------------------------------------------------- | -------------------- |
-| [`@coolwallets/core`](/packages/sdk-core) | ![version](https://img.shields.io/npm/v/@coolwallets/core) | APDU commands, default encryptions and keypair generation for other SDKs. |
+| [`@coolwallets/core`](/packages/core) | ![version](https://img.shields.io/npm/v/@coolwallets/core) | APDU commands, default encryptions and keypair generation for other SDKs. |
 
 ### Base App
 
