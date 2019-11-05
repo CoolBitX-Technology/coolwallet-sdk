@@ -1,7 +1,7 @@
 # CoolWalletS Javascript SDK
 
 <p align="center"><img src="logo.png" width="500"/></p> <p align="center"> JavaScript SDK to communicate with CoolWalletS. </p> <p align="center">  <a href="https://opensource.org/licenses/MIT/">    
-   <img src="https://img.shields.io/github/license/CoolBitX-Technology/coolwallet-js-sdk"/>  
+   <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/>  
 </a></p>
 
 This is the monorepo of all the packages you need to build your own app with CoolWalletS hardware wallet.

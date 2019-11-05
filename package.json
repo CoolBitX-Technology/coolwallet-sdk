@@ -7,5 +7,5 @@
     "eslint-plugin-react": "^7.14.3",
     "prettier-eslint": "^9.0.0"
   },
-  "license": "ISC"
+  "license": "Apache-2.0"
 }
