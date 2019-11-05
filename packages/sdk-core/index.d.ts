@@ -21,6 +21,7 @@ declare module '@coolwallets/core' {
     export namespace setting {
       export function resetCard(transport: Transport): Promise<boolean>
       export function getCardInfo(transport: Transport): Promise<string>
+      export function getSEVersion(transport: Transport): Promise<number>
     }
   }
 
