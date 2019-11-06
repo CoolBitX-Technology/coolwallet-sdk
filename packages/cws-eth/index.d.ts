@@ -8,7 +8,11 @@ declare class cwsETH {
   /**
    * Sign Ethereum Transaction.
    */
-  async signTransaction(payload: string, addressIndex: number, publicKey?: string): Promise<string>
+  async signTransaction(
+    transaction: { nonce: string; gasPrice: string; gasLimit: string; to: string; value: string; data: string },
+    addressIndex: number,
+    publicKey?: string
+  ): Promise<string>
 
   /**
    * Sign Arbitrary Message.
