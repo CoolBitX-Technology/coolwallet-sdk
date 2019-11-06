@@ -8,22 +8,39 @@ let web3 = new Web3()
 const ec = new elliptic.ec('secp256k1')
 
 /**
- * @description Check SE Commands by Raw Payload
- * @param {Transport} transport
- * @param {Array<Buffer>} rawPayload
- * @param {{symbol:string, decimals:number}} erc20Info
- * @return {Promise<{P1: String, P2: String, readType: String, preAction: function}>}
+ * Get raw payload
+ * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string}} transaction 
+ * @param {number} chainId 
  */
-export const checkSECommands = async (transport, rawPayload, erc20Info) => {
+export const getRawHex = (transaction, chainId) => {
+  const fields = ['nonce', 'gasPrice', 'gasLimit', 'to', 'value', 'data']
+  let raw = fields.map(field => {
+    const hex = handleHex(transaction[field])
+    if (hex === '00' || hex === '') {
+      return Buffer.allocUnsafe(0)
+    }
+    return Buffer.from(hex, 'hex')
+  }) 
+  raw[6] = Buffer.from([chainId])
+  raw[7] = Buffer.allocUnsafe(0)
+  raw[8] = Buffer.allocUnsafe(0)
+  return raw
+}
+
+/**
+ * 
+ * @param {Transport} transport 
+ * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string}} transaction 
+ */
+export const getReadTypeAndParmas = async (transport, transaction) => {
   let P1 = '00'
   let P2 = '00'
-  if (!Array.isArray(rawPayload)) throw 'Not ethereum transaction format'
 
-  const to = rawPayload[3].toString('hex')
-  const data = rawPayload[5].toString('hex')
+  const to = handleHex(transaction.to.toString('hex'))
+  const data = handleHex(transaction.data.toString('hex'))
 
   // transfer ETH
-  if (data === '') return { P1, P2, readType: '3C' }
+  if (data === '' || data === '00') return { P1, P2, readType: '3C' }
 
   if (token.isSupportedERC20Transaction(data) && erc20Info) {
     const preActionPayload = token.getSetTokenPayload(to, erc20Info.symbol, erc20Info.decimals)
@@ -42,10 +59,10 @@ export const checkSECommands = async (transport, rawPayload, erc20Info) => {
  * @param {Number} v
  * @param {String} r
  * @param {String} s
+ * @param {Number} chainId
  * @return {String}
  */
-export const composeSignedTransacton = (payload, v, r, s) => {
-  const chainId = 1
+export const composeSignedTransacton = (payload, v, r, s, chainId) => {
   v += chainId * 2 + 8
 
   let transaction = payload.slice(0, 6)
@@ -87,7 +104,7 @@ export const removeHex0x = hex => {
  */
 export const genEthSigFromSESig = async (canonicalSignature, payload, compressedPubkey) => {
   try {
-    const hash = web3.utils.keccak256(payload)
+    const hash = web3.utils.keccak256(rlp.encode(payload))
     const data = Buffer.from(handleHex(hash), 'hex')
     const keyPair = ec.keyFromPublic(compressedPubkey, 'hex')
 

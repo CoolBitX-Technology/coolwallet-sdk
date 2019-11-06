@@ -1,4 +1,3 @@
-const rlp = require('rlp')
 import { core } from '@coolwallets/core'
 import * as ethUtil from './eth_utils'
 import Web3 from 'web3'
@@ -10,15 +9,14 @@ let web3 = new Web3()
  * @param {Transport} transport
  * @param {String} appPrivateKey
  * @param {coinType} coinType
- * @param {String} payload
+ * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string}} transaction
  * @param {Number} addressIndex
  * @param {String} publicKey
  */
-export const signTransaction = async (transport, appPrivateKey, coinType, payload, addressIndex, publicKey) => {
+export const signTransaction = async (transport, appPrivateKey, coinType, chainId, transaction, addressIndex, publicKey) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
-  payload = Buffer.from(payload, 'hex')
-  const rawPayload = rlp.decode(payload)
-  const { P1, P2, readType, preAction } = await ethUtil.checkSECommands(transport, rawPayload)
+  const rawPayload = ethUtil.getRawHex(transaction, chainId)
+  const { P1, P2, readType, preAction } = await ethUtil.getReadTypeAndParmas(transport, transaction)
   const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType)
   const { signature: canonicalSignature, cancel } = await core.flow.sendDataToCoolWallet(
     transport,
@@ -31,8 +29,8 @@ export const signTransaction = async (transport, appPrivateKey, coinType, payloa
   )
   if (cancel) throw 'User canceled.'
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
-  const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s)
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rawPayload, publicKey)
+  const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, chainId)
   return serialized_tx
 }
 
