@@ -36,9 +36,16 @@ In the design of current hardware, we only support path `m/44'/60'/0'/0/{i}` for
 Sign Ethereum Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
 
 ```javascript
-const payload = "eb81f884b2d05e00825208940644de2a0cf3f11ef6ad89c264585406ea346a96870107c0e2fc200080018080";
+const tx = {
+    nonce: "0x21d",
+    gasPrice: "0x59682f00",
+    gasLimit: "0x5208",
+    to: "0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C",
+    value: "0x5af3107a4000",
+    data: "0x00"
+}
 // sign with address index 0
-const signedTx = await ETH.signTransaction(payload, 0)
+const signedTx = await ETH.signTransaction(tx, 0)
 ```
 
 ### signMessage
