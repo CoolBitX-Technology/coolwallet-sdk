@@ -108,7 +108,7 @@ const byeToHex = (byte: number): string => {
   return (byte < 16 ? '0' : '') + byte.toString(16);
 }
 
-const hexToByteArray = (hex: string): number[] => {
+export const hexToByteArray = (hex: string): number[] => {
   if (!hex) {
     return [];
   }
