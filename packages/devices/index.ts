@@ -1,3 +1,4 @@
+import { hexToByteArray } from "./ble/sendAPDU";
 const devices = {
   cws: {
     id: "cws",
@@ -48,8 +49,8 @@ export type DeviceModel = {
   bluetoothSpec?: Array<{
     serviceUuid: string,
     writeUuid: string,
-    parametersUuid: string,
-    notifyUuid: string,
+    dataUuid: string,
+    checkUuid: string,
     readUuid: string
   }>
 };
@@ -59,7 +60,9 @@ export type BluetoothInfos = {
   deviceModel: DeviceModel,
   serviceUuid: string,
   writeUuid: string,
-  parametersUuid: string,
-  notifyUuid: string,
+  dataUuid: string,
+  checkUuid: string,
   readUuid: string
 };
+
+export { hexToByteArray }
