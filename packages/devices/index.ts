@@ -1,4 +1,6 @@
 import { hexToByteArray } from "./ble/sendAPDU";
+export * from "./types";
+
 const devices = {
   cws: {
     id: "cws",
