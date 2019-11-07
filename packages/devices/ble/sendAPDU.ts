@@ -1,6 +1,7 @@
 import {
   PACKET_DATA_SIZE,
-  FINISH_STATUS_CODE
+  MCU_FINISH_CODE,
+  COMMAND_FINISH_CODE
 } from "../Constants";
 
 let timeoutId: number;
@@ -37,7 +38,7 @@ const _sendDataToCard = async (sendDataToCard, packets, index = 0) => {
 const _readDataFromCard = async (readDataFromCard, prev = '', nextPackageSN = 1, retryTimes = 0) => {
   const resultDataRaw = await readDataFromCard();
   const resultData = byteArrayToHex(resultDataRaw);
-  if (resultData === FINISH_STATUS_CODE) {
+  if (resultData === MCU_FINISH_CODE) {
     return prev
   } else {
     return _readDataFromCard(readDataFromCard, prev + resultData.slice(4), nextPackageSN + 1)
@@ -50,7 +51,7 @@ const _checkCardStatus = async (checkCardStatus, readDataFromCard) => {
     return;
 
   const status = await checkCardStatus();
-  if (status === 0) {
+  if (status === COMMAND_FINISH_CODE) {
     isFinish = true;
     try {
       const resultFromCard = await _readDataFromCard(readDataFromCard);

@@ -1,2 +1,3 @@
 export const PACKET_DATA_SIZE = 18;
-export const FINISH_STATUS_CODE = 'fc';
+export const MCU_FINISH_CODE = 'fc';
+export const COMMAND_FINISH_CODE = 0;
