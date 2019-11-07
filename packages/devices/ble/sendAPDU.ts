@@ -83,7 +83,7 @@ export const sendAPDU = async (
   readDataFromCard: () => Promise<number[]>,
   command: string,
   packets: string,
-) => {
+): Promise<string> => {
 
   const bytesCommand = hexToByteArray(command);
   await sendCommandToCard(bytesCommand);
