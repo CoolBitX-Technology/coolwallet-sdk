@@ -1,5 +1,5 @@
 declare class cwsETH {
-  constructor(transport: CWSTransport, appPrivateKey: string, appId: string)
+  constructor(transport: CWSTransport, appPrivateKey: string, appId: string, chainId: number)
   /**
    * Get Ethereum address by index
    */
