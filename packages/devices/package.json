@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/devices",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "devices layer for coolwallets.",
   "main": "index.ts",
   "scripts": {
