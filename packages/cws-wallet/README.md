@@ -33,12 +33,18 @@ After we have our keys ready, we need to register our device (app) so the wallet
 This can be done by the `CoolWallet` instance. In the constructor, we need to put in a `Transport` object for bluetooth transport, and the `appPrivateKey` we just generated to sign all the commands. Here's a example how to use `web-ble-transport` with `CoolWallet`
 
 ```javascript
+import WebBleTransport from '@coolwallets/transport-web-ble'
 import CoolWallet from '@coolwallets/wallet'
+
 const transport = new WebBleTransport();
 const myCoolWalletS =  new CoolWallet(transport, appPrivateKey)
 ```
 
 You may notice that there's one more optional field called `appId` in the constructor, we don't have it yet so we will ignore it, and we will put the value in later with `setAppId` after we get our own `appId` from `register`.
+
+There're 3 parameters in the `register` method, `appPublicKey`, `password`and `device_name`. If this is the first app ever connect to your CoolWalletS, you can set whatever you want as password, the next app would need this password to register itself to the hardware.
+
+The `register()` function would return an unique `appId`, this is also something you have to save, and provide as contructor argument next time you want to create a **CoolWallet** instance as mentioned before.
 
 ```javascript
 myCoolWalletS.register(appPublicKey, '123456', 'myFirstApp')
@@ -49,7 +55,8 @@ myCoolWalletS.register(appPublicKey, '123456', 'myFirstApp')
     })
 ```
 
-Congrats! Now your App can communicate with the hardware wallet, If you need to pair another App with the wallet, use the **registered** credential to call `getPairingPassword()` and use it as the second parameter in `register()`.
+A registered app can also called `getPairingPassword()`
+to generate a new random password and deprecate the old one.
 
 ### 3. Create a Wallet
 
