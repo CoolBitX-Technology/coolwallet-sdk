@@ -23,6 +23,7 @@ const slicePackets = (index: number, packets): string => {
 }
 
 const _sendDataToCard = async (sendDataToCard, packets, index = 0) => {
+
   if (packets.length === 0) {
     return
   }
@@ -79,7 +80,7 @@ export const sendAPDU = async (
   sendCommandToCard: (commands: number[]) => Promise<void>,
   sendDataToCard: (packets: number[]) => Promise<void>,
   checkCardStatus: () => Promise<number>,
-  readDataFromCard: () => Promise<string>,
+  readDataFromCard: () => Promise<number[]>,
   command: string,
   packets: string,
 ) => {
