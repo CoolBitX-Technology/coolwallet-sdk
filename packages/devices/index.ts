@@ -1,4 +1,4 @@
-import { hexToByteArray } from "./ble/sendAPDU";
+export * from "./ble/sendAPDU";
 export * from "./types";
 
 const devices = {
@@ -66,5 +66,3 @@ export type BluetoothInfos = {
   checkUuid: string,
   readUuid: string
 };
-
-export { hexToByteArray }
