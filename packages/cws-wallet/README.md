@@ -56,7 +56,7 @@ myCoolWalletS.register(appPublicKey, '123456', 'myFirstApp')
 ```
 
 A registered app can also called `getPairingPassword()`
-to generate a new random password as the old password deprecates.
+to generate a new random password and deprecate the old one.
 
 ### 3. Create a Wallet
 
