@@ -42,7 +42,8 @@ const tx = {
     gasLimit: "0x5208",
     to: "0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C",
     value: "0x5af3107a4000",
-    data: "0x00"
+    data: "0x00",
+    chainId: 1
 }
 // sign with address index 0
 const signedTx = await ETH.signTransaction(tx, 0)

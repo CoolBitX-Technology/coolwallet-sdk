@@ -9,13 +9,14 @@ let web3 = new Web3()
  * @param {Transport} transport
  * @param {String} appPrivateKey
  * @param {coinType} coinType
- * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string}} transaction
+ * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string, chainId: number}} transaction
  * @param {Number} addressIndex
  * @param {String} publicKey
+ * @return {Promise<string>}
  */
-export const signTransaction = async (transport, appPrivateKey, coinType, chainId, transaction, addressIndex, publicKey) => {
+export const signTransaction = async (transport, appPrivateKey, coinType, transaction, addressIndex, publicKey) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
-  const rawPayload = ethUtil.getRawHex(transaction, chainId)
+  const rawPayload = ethUtil.getRawHex(transaction)
   const { P1, P2, readType, preAction } = await ethUtil.getReadTypeAndParmas(transport, transaction)
   const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType)
   const { signature: canonicalSignature, cancel } = await core.flow.sendDataToCoolWallet(
@@ -30,7 +31,7 @@ export const signTransaction = async (transport, appPrivateKey, coinType, chainI
   if (cancel) throw 'User canceled.'
 
   const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rawPayload, publicKey)
-  const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, chainId)
+  const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId)
   return serialized_tx
 }
 

@@ -1,15 +1,15 @@
 declare class cwsETH {
-  constructor(transport: CWSTransport, appPrivateKey: string, appId: string, chainId: number)
+  constructor(transport: Transport, appPrivateKey: string, appId: string)
   /**
    * Get Ethereum address by index
    */
-  async getAddress(addressIndex: string): Promise<string>
+  getAddress(addressIndex: string): Promise<string>
 
   /**
    * Sign Ethereum Transaction.
    */
-  async signTransaction(
-    transaction: { nonce: string; gasPrice: string; gasLimit: string; to: string; value: string; data: string },
+  signTransaction(
+    transaction: { nonce: string; gasPrice: string; gasLimit: string; to: string; value: string; data: string, chainId:number },
     addressIndex: number,
     publicKey?: string
   ): Promise<string>
@@ -17,12 +17,12 @@ declare class cwsETH {
   /**
    * Sign Arbitrary Message.
    */
-  async signMessage(message: string, addressIndex: number, publicKey?: string, isHashRequired?: Boolean): Promise<string>
+  signMessage(message: string, addressIndex: number, publicKey?: string, isHashRequired?: Boolean): Promise<string>
 
   /**
    * Sign EIP712 typed data
    */
-  async signTypedData(typedData: Object, addressIndex: number, publicKey?: string): Promise<string>
+  signTypedData(typedData: Object, addressIndex: number, publicKey?: string): Promise<string>
 }
 
 export = cwsETH

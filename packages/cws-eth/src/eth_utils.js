@@ -9,10 +9,10 @@ const ec = new elliptic.ec('secp256k1')
 
 /**
  * Get raw payload
- * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string}} transaction 
- * @param {number} chainId 
+ * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string, chainId: number}} transaction 
+ * @return {Array<Buffer>}
  */
-export const getRawHex = (transaction, chainId) => {
+export const getRawHex = (transaction) => {
   const fields = ['nonce', 'gasPrice', 'gasLimit', 'to', 'value', 'data']
   let raw = fields.map(field => {
     const hex = handleHex(transaction[field])
@@ -21,7 +21,7 @@ export const getRawHex = (transaction, chainId) => {
     }
     return Buffer.from(hex, 'hex')
   }) 
-  raw[6] = Buffer.from([chainId])
+  raw[6] = Buffer.from([transaction.chainId])
   raw[7] = Buffer.allocUnsafe(0)
   raw[8] = Buffer.allocUnsafe(0)
   return raw
@@ -59,7 +59,7 @@ export const getReadTypeAndParmas = async (transport, transaction) => {
  * @param {Number} v
  * @param {String} r
  * @param {String} s
- * @param {Number} chainId
+ * @param {number} chainId
  * @return {String}
  */
 export const composeSignedTransacton = (payload, v, r, s, chainId) => {

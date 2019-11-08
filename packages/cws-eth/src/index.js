@@ -4,9 +4,8 @@ import { core } from '@coolwallets/core'
 import { ECDSACoin } from '@coolwallets/coin'
 
 export default class ETH extends ECDSACoin {
-  constructor(transport, appPrivateKey, appId, chainId=1) {
+  constructor(transport, appPrivateKey, appId) {
     super(transport, appPrivateKey, appId, '3C')
-    this.chainId = chainId
   }
 
   /**
@@ -21,7 +20,7 @@ export default class ETH extends ECDSACoin {
 
   /**
    * Sign Ethereum Transaction.
-   * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string}} transaction
+   * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string, chainId: number}} transaction
    * @param {Number} addressIndex
    * @param {String} publicKey
    */
@@ -31,7 +30,6 @@ export default class ETH extends ECDSACoin {
       this.transport,
       this.appPrivateKey,
       this.coinType,
-      this.chainId,
       transaction,
       addressIndex,
       publicKey
