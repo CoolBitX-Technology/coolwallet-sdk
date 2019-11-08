@@ -1,3 +1,1 @@
-export interface Characteristic {
-
-}
+export type Characteristic = any

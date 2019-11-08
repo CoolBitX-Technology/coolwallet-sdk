@@ -4,6 +4,11 @@ import { Characteristic } from "./types";
 export * from "./types";
 
 export default class Transport {
+  device: Device;
+  writeCharacteristic: Characteristic;
+  dataCharacteristic: Characteristic;
+  checkCharacteristic: Characteristic;
+  readCharacteristic: Characteristic;
   constructor(
     device: Device,
     writeCharacteristic: Characteristic,
@@ -16,7 +21,7 @@ export default class Transport {
     throw new Error('not implemented');
   };
 
-  static listen(callback: (error, device: { name: string, mac: string }) => void) {
+  static listen(callback: (error, device: { name: string, id: string }) => void) {
     throw new Error('not implemented');
   }
 
@@ -24,23 +29,23 @@ export default class Transport {
     throw new Error('not implemented');
   }
 
-  static disconnect = async (id: string) => {
+  static disconnect = async (id: string): Promise<void> => {
     throw new Error('not implemented');
   };
 
-  sendCommandToCard = async (command: number[]) => {
+  sendCommandToCard = async (command: number[]): Promise<void> => {
     throw new Error('not implemented');
   };
 
-  sendDataToCard = async (packets: number[]) => {
+  sendDataToCard = async (packets: number[]): Promise<void> => {
     throw new Error('not implemented');
   };
 
-  checkCardStatus = async () => {
+  checkCardStatus = async (): Promise<number> => {
     throw new Error('not implemented');
   };
 
-  readDataFromCard = async () => {
+  readDataFromCard = async (): Promise<number[]> => {
     throw new Error('not implemented');
   };
 
