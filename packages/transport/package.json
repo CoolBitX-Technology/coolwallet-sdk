@@ -1,8 +1,8 @@
 {
   "name": "@coolwallets/transport",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "transport layer for coolwallets.",
-  "main": "index.ts",
+  "main": "lib/transport.min.js",
   "scripts": {
     "build": "./node_modules/.bin/webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
