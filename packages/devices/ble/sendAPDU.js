@@ -5,6 +5,7 @@ import {
 } from "../Constants";
 
 let isFinish = false;
+let resultPromise = {};
 /**
  * @param {number} index
  * @param {number[]} data
