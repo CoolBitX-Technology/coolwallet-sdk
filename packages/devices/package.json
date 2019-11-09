@@ -1,9 +1,10 @@
 {
   "name": "@coolwallets/devices",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "devices layer for coolwallets.",
-  "main": "index.ts",
+  "main": "lib/devices.js",
   "scripts": {
+    "build": "./node_modules/.bin/webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "kunming0525@gmail.com",
@@ -14,5 +15,9 @@
   },
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   }
 }

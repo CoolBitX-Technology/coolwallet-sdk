@@ -4,24 +4,34 @@ import {
   COMMAND_FINISH_CODE
 } from "../Constants";
 
-let timeoutId: number;
 let isFinish = false;
-let resultPromise: {
-  resolve: (value?: string | PromiseLike<string>) => void,
-  reject: (reason?: any) => void
-};
-
-const isFinalPart = (index: number, data): boolean => {
+/**
+ * @param {number} index
+ * @param {number[]} data
+ * @returns {boolean}
+ */
+const isLastPacket = (index, data) => {
   return (index + 1) * PACKET_DATA_SIZE > data.length;
 }
 
-const slicePackets = (index: number, packets): string => {
+/**
+ * @param {number} index
+ * @param {number[]} packets
+ * @returns {number[]}
+ */
+const slicePackets = (index, packets) => {
   const dataStartIndex = index * PACKET_DATA_SIZE;
   const dataEndindex = (index + 1) * PACKET_DATA_SIZE;
   const data = packets.slice(dataStartIndex, dataEndindex);
   return data;
 }
 
+/**
+ * @param {(command:number[])=>Promise<void>} sendDataToCard
+ * @param {number[]} packets
+ * @param {number} index
+ * @returns {void}
+ */
 const _sendDataToCard = async (sendDataToCard, packets, index = 0) => {
 
   if (packets.length === 0) {
@@ -31,21 +41,32 @@ const _sendDataToCard = async (sendDataToCard, packets, index = 0) => {
 
   await sendDataToCard([index + 1, data.length, ...data]);
 
-  if (!isFinalPart(index + 1, data)) {
+  if (!isLastPacket(index + 1, data)) {
     return _sendDataToCard(sendDataToCard, packets, index + 1)
   }
 }
 
-const _readDataFromCard = async (readDataFromCard, prev = '', nextPackageSN = 1, retryTimes = 0) => {
+/**
+ * @param {()=>Promise<number[]>} readDataFromCard
+ * @param {string} prev
+ * @param {number} index
+ * @returns {string}
+ */
+const _readDataFromCard = async (readDataFromCard, prev = '') => {
   const resultDataRaw = await readDataFromCard();
   const resultData = byteArrayToHex(resultDataRaw);
   if (resultData === MCU_FINISH_CODE) {
     return prev
   } else {
-    return _readDataFromCard(readDataFromCard, prev + resultData.slice(4), nextPackageSN + 1)
+    return _readDataFromCard(readDataFromCard, prev + resultData.slice(4))
   }
 }
 
+/**
+ * @param {()=>Promise<number>} checkCardStatus
+ * @param {()=>Promise<number[]>} readDataFromCard
+ * @returns {void}
+ */
 const _checkCardStatus = async (checkCardStatus, readDataFromCard) => {
   clearTimeout(timeoutId);
   if (isFinish)
@@ -68,7 +89,12 @@ const _checkCardStatus = async (checkCardStatus, readDataFromCard) => {
   }
 }
 
-const checkCardStatusAndReadDataFromCard = (checkCardStatus, readDataFromCard) => new Promise<string>((resolve, reject) => {
+/**
+ * @param {()=>Promise<number>} checkCardStatus
+ * @param {()=>Promise<number[]>} readDataFromCard
+ * @returns {void}
+ */
+const checkCardStatusAndReadDataFromCard = (checkCardStatus, readDataFromCard) => new Promise((resolve, reject) => {
   resultPromise = {
     resolve,
     reject
@@ -76,14 +102,23 @@ const checkCardStatusAndReadDataFromCard = (checkCardStatus, readDataFromCard) =
   _checkCardStatus(checkCardStatus, readDataFromCard);
 })
 
+/**
+ * @param {(command:number[])=>Promise<void>} sendCommandToCard
+ * @param {(packets:number[])=>Promise<void>} sendDataToCard
+ * @param {()=>Promise<number>} checkCardStatus
+ * @param {()=>Promise<number[]>} readDataFromCard
+ * @param {string} command
+ * @param {string} packets
+ * @returns {string}
+ */
 export const sendAPDU = async (
-  sendCommandToCard: (commands: number[]) => Promise<void>,
-  sendDataToCard: (packets: number[]) => Promise<void>,
-  checkCardStatus: () => Promise<number>,
-  readDataFromCard: () => Promise<number[]>,
-  command: string,
-  packets: string,
-): Promise<string> => {
+  sendCommandToCard,
+  sendDataToCard,
+  checkCardStatus,
+  readDataFromCard,
+  command,
+  packets
+) => {
 
   const bytesCommand = hexToByteArray(command);
   await sendCommandToCard(bytesCommand);
@@ -98,17 +133,29 @@ export const sendAPDU = async (
   return result;
 };
 
-const byteArrayToHex = (byteArray: number[]): string => {
+/**
+ * @param {number[]} byteArray
+ * @returns {string}
+ */
+const byteArrayToHex = (byteArray) => {
   return byteArray.map((byte) => {
     return byeToHex(byte)
   }).join('')
 }
 
-const byeToHex = (byte: number): string => {
+/**
+ * @param {number} byte
+ * @returns {string}
+ */
+const byeToHex = (byte) => {
   return (byte < 16 ? '0' : '') + byte.toString(16);
 }
 
-export const hexToByteArray = (hex: string): number[] => {
+/**
+ * @param {string} hex
+ * @returns {number[]}
+ */
+const hexToByteArray = (hex) => {
   if (!hex) {
     return [];
   }
