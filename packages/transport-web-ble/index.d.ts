@@ -1,4 +1,4 @@
-declare class WebBleTransport {
+export default class WebBleTransport {
   constructor(verbose?: boolean)
     connect(): Promise<void>;
     request(command: string, data: string):Promise<string>;

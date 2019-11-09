@@ -19,4 +19,3 @@ import CoolWallet from '@coolwallets/wallet'
 const wallet = new CoolWallet(transport, appPrivateKey, appId)
 
 ```
-
