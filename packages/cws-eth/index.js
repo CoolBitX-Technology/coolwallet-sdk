@@ -1,3 +1,3 @@
-import cwsETH from './src'
+import cwsETH from './lib'
 
 export default cwsETH
