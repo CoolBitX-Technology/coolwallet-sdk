@@ -6,6 +6,7 @@ import {
 
 let isFinish = false;
 let resultPromise = {};
+let timeoutId;
 /**
  * @param {number} index
  * @param {number[]} data
