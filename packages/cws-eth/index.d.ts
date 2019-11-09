@@ -1,4 +1,4 @@
-declare class cwsETH {
+export default class cwsETH {
   constructor(transport: Transport, appPrivateKey: string, appId: string)
   /**
    * Get Ethereum address by index
@@ -24,5 +24,3 @@ declare class cwsETH {
    */
   signTypedData(typedData: Object, addressIndex: number, publicKey?: string): Promise<string>
 }
-
-export = cwsETH
