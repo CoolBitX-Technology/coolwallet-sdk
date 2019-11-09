@@ -22,11 +22,11 @@ export default class Transport {
     throw new Error('not implemented');
   }
 
-  static async connect(deviceId) {
+  static async connect(deviceOrId) {
     throw new Error('not implemented');
   }
 
-  static async disconnect(id) {
+  static async disconnect(deviceOrId) {
     throw new Error('not implemented');
   };
 

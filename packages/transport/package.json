@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/transport",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "transport layer for coolwallets.",
   "main": "lib/transport.min.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "author": "kunming0525@gmail.com",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@coolwallets/devices": "^0.0.6"
+    "@coolwallets/devices": "^0.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.7.2",

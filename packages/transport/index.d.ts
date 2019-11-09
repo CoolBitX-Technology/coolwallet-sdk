@@ -12,7 +12,7 @@ export default class Transport {
 
   static connect(deviceOrId: object | string): Promise<Transport>;
 
-  static disconnect(id: string): Promise<void>;
+  static disconnect(deviceOrId: object | string): Promise<void>;
 
   sendCommandToCard(command: number[]): Promise<void>;
 
