@@ -1,5 +1,6 @@
 import Transport from '@coolwallets/transport';
 import { getBluetoothServiceUuids, getInfosForServiceUuid } from "@coolwallets/devices";
+import { convertToHex } from "./util";
 
 let server;
 let commandCharacteristic;
@@ -40,6 +41,7 @@ export default class WebBleTransport extends Transport {
   static async connect(device) {
     device.addEventListener('gattserverdisconnected', this._onDeviceDisconnect)
     server = await device.gatt.connect();
+    console.log(`${device.name} connected`);
     const services = await server.getPrimaryServices();
     const service = services[0];
     const uuids = getInfosForServiceUuid(service.uuid);
@@ -81,14 +83,12 @@ export default class WebBleTransport extends Transport {
   }
 
   checkCardStatus = async () => {
-    console.log('checkCardStatus')
     const status = await statusCharacteristic.readValue();
-    return status;
+    return convertToHex(status)[0];
   }
 
   readDataFromCard = async () => {
-    console.log('readDataFromCard')
     const response = await responseCharacteristic.readValue();
-    return response;
+    return convertToHex(response)[0];
   }
 }
