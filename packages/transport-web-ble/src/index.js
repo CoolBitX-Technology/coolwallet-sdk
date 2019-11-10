@@ -1,6 +1,6 @@
 import Transport from '@coolwallets/transport';
 import { getBluetoothServiceUuids, getInfosForServiceUuid } from "@coolwallets/devices";
-import { convertToHex } from "./util";
+import { convertToNumberArray } from "./util";
 
 let server;
 let commandCharacteristic;
@@ -84,11 +84,11 @@ export default class WebBleTransport extends Transport {
 
   checkCardStatus = async () => {
     const status = await statusCharacteristic.readValue();
-    return convertToHex(status)[0];
+    return convertToNumberArray(status)[0];
   }
 
   readDataFromCard = async () => {
     const response = await responseCharacteristic.readValue();
-    return convertToHex(response)[0];
+    return convertToNumberArray(response);
   }
 }
