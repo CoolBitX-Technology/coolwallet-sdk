@@ -1,5 +1,3 @@
-export * from './ble/sendAPDU';
-
 const devices = {
   cws: {
     id: 'cws',

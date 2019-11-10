@@ -9,11 +9,11 @@ let resultPromise = {};
 let timeoutId;
 /**
  * @param {number} index
- * @param {number[]} data
+ * @param {number[]} packets
  * @returns {boolean}
  */
-const isLastPacket = (index, data) => {
-  return (index + 1) * PACKET_DATA_SIZE > data.length;
+const isLastPacket = (index, packets) => {
+  return (index) * PACKET_DATA_SIZE > packets.length;
 }
 
 /**
@@ -40,10 +40,10 @@ const _sendDataToCard = async (sendDataToCard, packets, index = 0) => {
     return
   }
   const data = slicePackets(index, packets);
-
+  console.log('_sendDataToCard data', data);
   await sendDataToCard([index + 1, data.length, ...data]);
 
-  if (!isLastPacket(index + 1, data)) {
+  if (!isLastPacket(index + 1, packets)) {
     return _sendDataToCard(sendDataToCard, packets, index + 1)
   }
 }
@@ -57,6 +57,7 @@ const _sendDataToCard = async (sendDataToCard, packets, index = 0) => {
 const _readDataFromCard = async (readDataFromCard, prev = '') => {
   const resultDataRaw = await readDataFromCard();
   const resultData = byteArrayToHex(resultDataRaw);
+  console.log('_readDataFromCard resultData', resultData);
   if (resultData === MCU_FINISH_CODE) {
     return prev
   } else {
@@ -75,6 +76,7 @@ const _checkCardStatus = async (checkCardStatus, readDataFromCard) => {
     return;
 
   const status = await checkCardStatus();
+  console.log('_checkCardStatus status', status);
   if (status === COMMAND_FINISH_CODE) {
     isFinish = true;
     try {
