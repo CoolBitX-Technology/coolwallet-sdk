@@ -1,14 +1,14 @@
 {
   "name": "@coolwallets/transport-web-ble",
-  "version": "0.0.2",
+  "version": "0.0.10",
   "description": "web ble transport layer for coolwallets.",
-  "main": "lib/index.js",
+  "main": "lib/transport-web-ble.min.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src -d public"
+    "build": "./node_modules/.bin/webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "anton@coolbitx.com",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CoolBitX-Technology/coolwallet-js-sdk.git"
@@ -16,8 +16,13 @@
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
   },
+  "dependencies": {
+    "@coolwallets/devices": "^0.0.8",
+    "@coolwallets/transport": "^0.0.8"
+  },
   "devDependencies": {
     "@babel/core": "^7.7.2",
+    "@babel/plugin-proposal-class-properties": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "babel-loader": "^8.0.6",
     "webpack": "^4.41.2",

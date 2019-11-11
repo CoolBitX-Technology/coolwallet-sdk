@@ -1,0 +1,45 @@
+{
+  "name": "@coolwallets/transport-react-native-ble",
+  "version": "0.0.1-beta.1",
+  "description": "react-native ble transport layer for coolwallets.",
+  "main": "lib/transport-react-native-ble.min.js",
+  "scripts": {
+    "build": "./node_modules/.bin/webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kunming0525@gmail.com",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-js-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
+  },
+  "peerDependencies": {
+    "react": "^16.6.3",
+    "react-native": "^0.58.0"
+  },
+  "dependencies": {
+    "@coolwallets/devices": "^0.0.8",
+    "@coolwallets/transport": "^0.0.8",
+    "buffer": "^5.4.3",
+    "react-native-ble-plx": "^1.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.7.2",
+    "@babel/runtime": "7.7.2",
+    "@react-native-community/eslint-config": "0.0.3",
+    "babel-jest": "24.9.0",
+    "eslint": "6.6.0",
+    "jest": "24.9.0",
+    "metro-react-native-babel-preset": "^0.54.1",
+    "react-test-renderer": "^16.6.3",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}

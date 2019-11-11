@@ -1,15 +1,15 @@
 const path = require('path');
 
 module.exports = {
-  entry: './index.js',
+  entry: './src/index.js',
   resolve: {
     extensions: ['.js'],
   },
   output: {
     path: path.join(__dirname, '/lib'),
-    filename: 'devices.min.js',
+    filename: 'transport-react-native-ble.min.js',
     libraryTarget: 'umd',
-    library: 'devices',
+    library: 'transport-react-native-ble',
     umdNamedDefine: true,
   },
   module: {
@@ -20,10 +20,11 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env']
+            presets: ['module:metro-react-native-babel-preset'],
           }
         }
       }
     ]
-  }
+  },
+  externals: /^(@coolwallets.*|react|react-native)/
 };

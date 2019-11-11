@@ -1,4 +1,5 @@
 const path = require('path');
+
 module.exports = {
   entry: './src/index.js',
   resolve: {
@@ -6,7 +7,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, '/lib'),
-    filename: 'index.js',
+    filename: 'transport-web-ble.min.js',
     libraryTarget: 'umd',
     library: 'transport-web-ble',
     umdNamedDefine: true,
@@ -19,7 +20,8 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env']
+            presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-proposal-class-properties']
           }
         }
       }

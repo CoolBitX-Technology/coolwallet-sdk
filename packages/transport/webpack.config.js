@@ -7,9 +7,9 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, '/lib'),
-    filename: 'devices.min.js',
+    filename: 'transport.min.js',
     libraryTarget: 'umd',
-    library: 'devices',
+    library: 'transport',
     umdNamedDefine: true,
   },
   module: {
@@ -20,10 +20,12 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env']
+            presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-proposal-class-properties']
           }
         }
       }
     ]
-  }
+  },
+  externals: /^@coolwallets.*/
 };

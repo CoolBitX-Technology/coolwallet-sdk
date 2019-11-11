@@ -1,15 +1,24 @@
 {
   "name": "@coolwallets/transport",
-  "version": "0.0.2",
+  "version": "0.0.8",
   "description": "transport layer for coolwallets.",
-  "main": "index.ts",
+  "main": "lib/transport.min.js",
   "scripts": {
+    "build": "./node_modules/.bin/webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "kunming0525@gmail.com",
   "license": "Apache-2.0",
-  "dependencies": {
-    "@coolwallets/devices": "^0.0.2"
+  "peerDependencies": {
+    "@coolwallets/devices": "^0.0.8"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/plugin-proposal-class-properties": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   },
   "repository": {
     "type": "git",
