@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "private": false,
+  "private": true,
   "devDependencies": {
     "lerna": "^3.18.3",
     "@typescript-eslint/parser": "^2.3.0",
