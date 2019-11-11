@@ -10,12 +10,21 @@ npm i @coolwallets/transport-web-ble
 
 ## Usage
 
+The `listen()` method takes in an callback function to handle bluetooth scanning.
+In web-ble, this is when the popup show and the user select the device to pair, so the returned `device` is only one selected device.
+
 ```javascript
 import WebBleTransport from '@coolwallets/transport-web-ble'
-const transport = new WebBleTransport()
+await WebBleTransport.listen(async (error, device) => { // browser shows popup
+  if (device) {
+    const transport = await WebBleTransport.connect(device)
+    /**
+     * Do something with transport
+     **/
+  } else throw error
+})
 
 // use transport in other package:
 import CoolWallet from '@coolwallets/wallet'
 const wallet = new CoolWallet(transport, appPrivateKey, appId)
-
 ```
