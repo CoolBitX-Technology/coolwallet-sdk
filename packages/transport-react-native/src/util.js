@@ -1,4 +1,4 @@
-export function convertHexToByteArray(hex) {
+export function convertToNumberArray(hex) {
   if (!hex) {
     return [];
   }
