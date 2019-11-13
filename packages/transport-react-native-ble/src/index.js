@@ -15,7 +15,7 @@ import { Buffer } from 'buffer';
 
 import Transport from "@coolwallets/transport";
 
-import { convertHexToByteArray } from "./util";
+import { convertToNumberArray } from "./util";
 
 const transportsCache = {};
 const bleManager = new BleManager();
@@ -260,7 +260,7 @@ export default class RNBleTransport extends Transport {
     try {
       const status = await checkCharacteristic.read();
       const hexStatus = Buffer.from(status.value, 'base64').toString('hex');
-      return convertHexToByteArray(hexStatus)[0];
+      return convertToNumberArray(hexStatus)[0];
     } catch (e) {
       throw new Error(`checkCardStatus DisconnectedDeviceDuringOperation(${e.message})`);
     }
@@ -270,7 +270,7 @@ export default class RNBleTransport extends Transport {
     try {
       const result = await readCharacteristic.read();
       const hexResult = Buffer.from(result.value, 'base64').toString('hex');
-      return convertHexToByteArray(hexResult);
+      return convertToNumberArray(hexResult);
     } catch (e) {
       throw new Error(`readDataFromCard DisconnectedDeviceDuringOperation(${e.message})`);
     }
