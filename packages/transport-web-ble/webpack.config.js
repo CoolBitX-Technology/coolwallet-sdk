@@ -7,7 +7,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, '/lib'),
-    filename: 'transport-web-ble.min.js',
+    filename: 'index.js',
     libraryTarget: 'umd',
     library: 'transport-web-ble',
     umdNamedDefine: true,
