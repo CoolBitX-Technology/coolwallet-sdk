@@ -36,17 +36,17 @@ export const getReadTypeAndParmas = async (transport, transaction) => {
   let P1 = '00'
   let P2 = '00'
 
-  const to = handleHex(transaction.to.toString('hex'))
+  // const to = handleHex(transaction.to.toString('hex'))
   const data = handleHex(transaction.data.toString('hex'))
 
   // transfer ETH
   if (data === '' || data === '00') return { P1, P2, readType: '3C' }
 
-  if (token.isSupportedERC20Transaction(data) && erc20Info) {
-    const preActionPayload = token.getSetTokenPayload(to, erc20Info.symbol, erc20Info.decimals)
-    const preAction = token.getSetTokenPreAction(transport, false, preActionPayload)
-    return { P1, P2, readType: 'C2', preAction }
-  }
+  // if (token.isSupportedERC20Transaction(data) && erc20Info) {
+  //   const preActionPayload = token.getSetTokenPayload(to, erc20Info.symbol, erc20Info.decimals)
+  //   const preAction = token.getSetTokenPreAction(transport, false, preActionPayload)
+  //   return { P1, P2, readType: 'C2', preAction }
+  // }
 
   // smart contract
   await core.auth.versionCheck(transport, 84)
