@@ -1,8 +1,8 @@
 {
   "name": "@coolwallets/devices",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "devices layer for coolwallets.",
-  "main": "lib/devices.min.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "./node_modules/.bin/webpack",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -7,7 +7,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, '/lib'),
-    filename: 'devices.min.js',
+    filename: 'index.js',
     libraryTarget: 'umd',
     library: 'devices',
     umdNamedDefine: true,
