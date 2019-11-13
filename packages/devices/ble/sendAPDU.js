@@ -40,7 +40,7 @@ const _sendDataToCard = async (sendDataToCard, packets, index = 0) => {
     return
   }
   const data = slicePackets(index, packets);
-  console.log('_sendDataToCard data', data);
+  console.debug('_sendDataToCard data', data);
   await sendDataToCard([index + 1, data.length, ...data]);
 
   if (!isLastPacket(index + 1, packets)) {
@@ -57,7 +57,7 @@ const _sendDataToCard = async (sendDataToCard, packets, index = 0) => {
 const _readDataFromCard = async (readDataFromCard, prev = '') => {
   const resultDataRaw = await readDataFromCard();
   const resultData = byteArrayToHex(resultDataRaw);
-  console.log('_readDataFromCard resultData', resultData);
+  console.debug('_readDataFromCard resultData', resultData);
   if (resultData === MCU_FINISH_CODE) {
     return prev
   } else {
@@ -76,7 +76,7 @@ const _checkCardStatus = async (checkCardStatus, readDataFromCard) => {
     return;
 
   const status = await checkCardStatus();
-  console.log('_checkCardStatus status', status);
+  console.debug('_checkCardStatus status', status);
   if (status === COMMAND_FINISH_CODE) {
     isFinish = true;
     try {
