@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/eth",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "",
   "main": "lib/index.js",
   "author": "",
@@ -9,7 +9,7 @@
     "elliptic": "^6.5.1",
     "eth-sig-util": "^2.5.0",
     "rlp": "^2.2.3",
-    "@coolwallets/core": "0.0.1-beta",
+    "@coolwallets/core": "0.0.3",
     "@coolwallets/coin": "0.0.1-beta",
     "web3": "^1.2.2"
   },

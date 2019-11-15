@@ -28,6 +28,7 @@ export default class ETH extends ECDSACoin {
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signTransaction(
       this.transport,
+      this.appId,
       this.appPrivateKey,
       this.coinType,
       transaction,
@@ -49,6 +50,7 @@ export default class ETH extends ECDSACoin {
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signMessage(
       this.transport,
+      this.appId,
       this.appPrivateKey,
       this.coinType,
       message,
@@ -70,6 +72,7 @@ export default class ETH extends ECDSACoin {
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signTypedData(
       this.transport,
+      this.appId,
       this.appPrivateKey,
       this.coinType,
       typedData,

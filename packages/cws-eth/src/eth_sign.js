@@ -7,6 +7,7 @@ let web3 = new Web3()
 /**
  * sign ETH Transaction
  * @param {Transport} transport
+ * @param {string} appId
  * @param {String} appPrivateKey
  * @param {coinType} coinType
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string, chainId: number}} transaction
@@ -14,13 +15,14 @@ let web3 = new Web3()
  * @param {String} publicKey
  * @return {Promise<string>}
  */
-export const signTransaction = async (transport, appPrivateKey, coinType, transaction, addressIndex, publicKey) => {
+export const signTransaction = async (transport, appId, appPrivateKey, coinType, transaction, addressIndex, publicKey) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
   const rawPayload = ethUtil.getRawHex(transaction)
   const { P1, P2, readType, preAction } = await ethUtil.getReadTypeAndParmas(transport, transaction)
   const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType)
   const { signature: canonicalSignature, cancel } = await core.flow.sendDataToCoolWallet(
     transport,
+    appId,
     appPrivateKey,
     dataForSE,
     P1,
@@ -38,6 +40,7 @@ export const signTransaction = async (transport, appPrivateKey, coinType, transa
 /**
  * Sign Message.
  * @param {Transport} transport
+ * @param {String} appId
  * @param {String} appPrivateKey
  * @param {String} message hex or utf-8
  * @param {Number} addressIndex
@@ -47,6 +50,7 @@ export const signTransaction = async (transport, appPrivateKey, coinType, transa
  */
 export const signMessage = async (
   transport,
+  appId,
   appPrivateKey,
   coinType,
   message,
@@ -78,6 +82,7 @@ export const signMessage = async (
 
   const { signature: canonicalSignature, cancel } = await core.flow.sendDataToCoolWallet(
     transport,
+    appId,
     appPrivateKey,
     dataForSE,
     '00',
@@ -96,6 +101,7 @@ export const signMessage = async (
 /**
  * @description Sign Typed Data
  * @param {Transport} transport
+ * @param {String} appId
  * @param {String} appPrivateKey
  * @param {String} coinType
  * @param {Object} typedData
@@ -103,7 +109,7 @@ export const signMessage = async (
  * @param {Stirng} publicKey
  * @return {Promise<String>}
  */
-export const signTypedData = async (transport, appPrivateKey, coinType, typedData, addressIndex, publicKey) => {
+export const signTypedData = async (transport, appId, appPrivateKey, coinType, typedData, addressIndex, publicKey) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
 
   const sanitizedData = typedDataUtils.sanitizeData(typedData)
@@ -114,11 +120,11 @@ export const signTypedData = async (transport, appPrivateKey, coinType, typedDat
   const domainSeparate = typedDataUtils.hashStruct('EIP712Domain', sanitizedData.domain, sanitizedData.types)
   const dataHash = Buffer.from(web3.utils.sha3(encodedData).substr(2), 'hex')
   const payload = Buffer.concat([prefix, domainSeparate, dataHash])
-  console.log(`sign typed data payload : ${payload.toString('hex')}`)
   const dataForSE = core.flow.prepareSEData(keyId, payload, 'F3')
 
   const { signature: canonicalSignature, cancel } = await core.flow.sendDataToCoolWallet(
     transport,
+    appId,
     appPrivateKey,
     dataForSE,
     '00',
