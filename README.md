@@ -15,7 +15,7 @@ To communicate with CoolWalletS device, you need to specify a bluetooth transpor
 | Package                                                         | Version                                                                 | Description           |
 | --------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------- |
 | [`@coolwallets/transport-web-ble`](/packages/transport-web-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/transport-web-ble) | Web Bluetooth transport |
-| [`@coolwallets/transport-react-native-ble`](/packages/transport-react-native) | ![version](https://img.shields.io/npm/v/@coolwallets/transport-react-native-ble) | React-Native Bluetooth transport |
+| [`@coolwallets/transport-react-native-ble`](/packages/transport-react-native-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/transport-react-native-ble) | React-Native Bluetooth transport |
 ### Core
 
 | Package                                   | Version                                                    | Description          |
