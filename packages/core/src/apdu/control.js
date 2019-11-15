@@ -9,7 +9,6 @@ import { RESPONSE } from '../config/response'
  */
 export const sayHi = async (transport, appId) => {
   try {
-    console.log(`calling sayhi wih appId ${appId}`)
     const { status } = await executeCommand(transport, 'SAY_HI', 'SE', appId)
     return status === RESPONSE.SUCCESS
   } catch (error) {
