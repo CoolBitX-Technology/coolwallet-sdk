@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/transport-web-ble",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "web ble transport layer for coolwallets.",
   "main": "lib/index.js",
   "scripts": {
