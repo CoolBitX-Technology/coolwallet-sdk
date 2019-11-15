@@ -22,16 +22,10 @@ const isLastPacket = (index, packets) => {
  * @returns {number[]}
  */
 const slicePackets = (index, packets) => {
-  try{
-    const dataStartIndex = index * PACKET_DATA_SIZE;
-    const dataEndindex = (index + 1) * PACKET_DATA_SIZE;
-    const data = packets.slice(dataStartIndex, dataEndindex);
-    return data;
-  } catch (err) {
-    console.log(`slice package error `, err)
-    console.log(`packcets:`, packets)
-  }
-  
+  const dataStartIndex = index * PACKET_DATA_SIZE;
+  const dataEndindex = (index + 1) * PACKET_DATA_SIZE;
+  const data = packets.slice(dataStartIndex, dataEndindex);
+  return data;
 }
 
 /**
@@ -65,10 +59,8 @@ const _readDataFromCard = async (readDataFromCard, prev = '') => {
   const resultData = byteArrayToHex(resultDataRaw);
   console.debug('_readDataFromCard resultData', resultData);
   if (resultData === MCU_FINISH_CODE) {
-    console.log(`Return La`)
     return prev
   } else {
-    console.debug(`recursive`)
     return _readDataFromCard(readDataFromCard, prev + resultData.slice(4))
   }
 }

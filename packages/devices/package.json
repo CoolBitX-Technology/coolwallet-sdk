@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/devices",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "devices layer for coolwallets.",
   "main": "lib/index.js",
   "scripts": {
