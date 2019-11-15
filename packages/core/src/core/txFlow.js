@@ -23,6 +23,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
 /**
  * @description Send Data to CoolWallet
  * @param {Transport} transport
+ * @param {String} appId
  * @param {String} appPrivateKey
  * @param {Buffer} data for SE (output of prepareSEData)
  * @param {String} P1 hex string
@@ -36,6 +37,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
  */
 export const sendDataToCoolWallet = async (
   transport,
+  appId,
   appPrivateKey,
   data,
   P1,
@@ -48,11 +50,11 @@ export const sendDataToCoolWallet = async (
 ) => {
   let hexForSE = data.toString('hex')
 
-  await sayHi(transport)
+  await sayHi(transport, appId)
 
   if (typeof preAction === 'function') await preAction()
 
-  const commandSignature = await txUtil.signForCoolWallet(appPrivateKey, hexForSE, P1, P2)
+  const commandSignature = txUtil.signForCoolWallet(appPrivateKey, hexForSE, P1, P2)
   const encryptedSignature = await txUtil.getSingleEncryptedSignature(
     transport,
     hexForSE,

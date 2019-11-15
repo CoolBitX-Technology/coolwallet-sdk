@@ -10,9 +10,9 @@ import * as apdu from '../apdu'
  * @param {String} data hex string
  * @param {String} P1 hex string
  * @param {String} P2 hex string
- * @return {Promise<String>} signature
+ * @return {String} signature
  */
-export const signForCoolWallet = async (appPrivateKey, data, P1, P2) => {
+export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
   const command = COMMAND.TX_PREPARE
   const prefix = command.CLA + command.INS + P1 + P2
   const payload = prefix + data
