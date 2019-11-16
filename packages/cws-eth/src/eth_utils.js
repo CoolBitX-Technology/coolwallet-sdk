@@ -2,7 +2,6 @@ const rlp = require('rlp')
 import Web3 from 'web3'
 import elliptic from 'elliptic'
 import { core, apdu } from '@coolwallets/core'
-import * as token from './token'
 
 let web3 = new Web3()
 const ec = new elliptic.ec('secp256k1')
@@ -104,7 +103,7 @@ export const removeHex0x = hex => {
  */
 export const genEthSigFromSESig = async (canonicalSignature, payload, compressedPubkey) => {
   try {
-    const hash = web3.utils.keccak256(rlp.encode(payload))
+    const hash = web3.utils.keccak256(payload)
     const data = Buffer.from(handleHex(hash), 'hex')
     const keyPair = ec.keyFromPublic(compressedPubkey, 'hex')
 

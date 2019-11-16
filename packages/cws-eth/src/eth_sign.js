@@ -2,6 +2,7 @@ import { core } from '@coolwallets/core'
 import * as ethUtil from './eth_utils'
 import Web3 from 'web3'
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util'
+const rlp = require('rlp')
 let web3 = new Web3()
 
 /**
@@ -32,7 +33,7 @@ export const signTransaction = async (transport, appId, appPrivateKey, coinType,
   )
   if (cancel) throw 'User canceled.'
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rawPayload, publicKey)
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey)
   const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId)
   return serialized_tx
 }
