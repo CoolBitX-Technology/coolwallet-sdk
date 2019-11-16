@@ -71,7 +71,7 @@ export const signMessage = async (
   }
 
   if (isHashRequired) {
-    preAction = ethUtil.apduForParsingMessage(msgBuf, '07') // send prehashed message to card
+    preAction = ethUtil.apduForParsingMessage(transport, msgBuf, '07') // send prehashed message to card
     msgBuf =  Buffer.from(web3.utils.keccak256(msgBuf), 'hex')
   }
 
@@ -115,7 +115,7 @@ export const signTypedData = async (transport, appId, appPrivateKey, coinType, t
 
   const sanitizedData = typedDataUtils.sanitizeData(typedData)
   const encodedData = typedDataUtils.encodeData(sanitizedData.primaryType, sanitizedData.message, sanitizedData.types)
-  const preAction = ethUtil.apduForParsingMessage(encodedData, '09')
+  const preAction = ethUtil.apduForParsingMessage(transport, encodedData, '09')
 
   const prefix = Buffer.from('1901', 'hex')
   const domainSeparate = typedDataUtils.hashStruct('EIP712Domain', sanitizedData.domain, sanitizedData.types)
