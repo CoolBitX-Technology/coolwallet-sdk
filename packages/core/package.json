@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Light core library of CoolWalletS apdu commands.",
   "main": "lib/index.js",
   "scripts": {
