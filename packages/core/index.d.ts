@@ -51,6 +51,7 @@ declare module '@coolwallets/core' {
       export function prepareSEData(keyId: string, rawData: Buffer | Array<Buffer>, readType: string): Buffer
       export function sendDataToCoolWallet(
         transport: Transport,
+        appId: String,
         appPrivateKey: String,
         data: Buffer,
         P1: String,
