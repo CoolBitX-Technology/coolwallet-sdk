@@ -23,8 +23,10 @@ export default class ETH extends ECDSACoin {
    * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string, chainId: number}} transaction
    * @param {Number} addressIndex
    * @param {String} publicKey
+   * @param {Function} confirmCB
+   * @param {Function} authorizedCB
    */
-  async signTransaction(transaction, addressIndex, publicKey = undefined) {
+  async signTransaction(transaction, addressIndex, publicKey = undefined, confirmCB = null, authorizedCB = null) {
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signTransaction(
       this.transport,
@@ -33,7 +35,9 @@ export default class ETH extends ECDSACoin {
       this.coinType,
       transaction,
       addressIndex,
-      publicKey
+      publicKey,
+      confirmCB,
+      authorizedCB
     )
   }
 
@@ -43,9 +47,11 @@ export default class ETH extends ECDSACoin {
    * @param {Number} addressIndex
    * @param {String} publicKey
    * @param {Boolean} isHashRequired
+   * @param {Function} confirmCB
+   * @param {Function} authorizedCB
    * @return {Promise<String>}
    */
-  async signMessage(message, addressIndex, publicKey = undefined, isHashRequired = false) {
+  async signMessage(message, addressIndex, publicKey = undefined, isHashRequired = false, confirmCB = null, authorizedCB = null) {
     await core.auth.versionCheck(this.transport, 81)
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signMessage(
@@ -56,7 +62,9 @@ export default class ETH extends ECDSACoin {
       message,
       addressIndex,
       publicKey,
-      isHashRequired
+      isHashRequired,
+      confirmCB,
+      authorizedCB
     )
   }
 
@@ -65,9 +73,11 @@ export default class ETH extends ECDSACoin {
    * @param {Object} typedData
    * @param {String} addressIndex
    * @param {String} publicKey
+   * @param {Function} confirmCB
+   * @param {Function} authorizedCB
    * @return {Object}
    */
-  async signTypedData(typedData, addressIndex, publicKey = undefined) {
+  async signTypedData(typedData, addressIndex, publicKey = undefined, confirmCB = null, authorizedCB = null) {
     await core.auth.versionCheck(this.transport, 84)
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
     return await ethSign.signTypedData(
@@ -77,7 +87,9 @@ export default class ETH extends ECDSACoin {
       this.coinType,
       typedData,
       addressIndex,
-      publicKey
+      publicKey,
+      confirmCB,
+      authorizedCB
     )
   }
 }

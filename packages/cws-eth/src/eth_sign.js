@@ -14,9 +14,21 @@ let web3 = new Web3()
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string, chainId: number}} transaction
  * @param {Number} addressIndex
  * @param {String} publicKey
+ * @param {Function} confirmCB
+ * @param {Function} authorizedCB
  * @return {Promise<string>}
  */
-export const signTransaction = async (transport, appId, appPrivateKey, coinType, transaction, addressIndex, publicKey) => {
+export const signTransaction = async (
+  transport,
+  appId,
+  appPrivateKey,
+  coinType,
+  transaction,
+  addressIndex,
+  publicKey,
+  confirmCB = null,
+  authorizedCB = null
+) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
   const rawPayload = ethUtil.getRawHex(transaction)
   const { P1, P2, readType, preAction } = await ethUtil.getReadTypeAndParmas(transport, transaction)
@@ -29,7 +41,9 @@ export const signTransaction = async (transport, appId, appPrivateKey, coinType,
     P1,
     P2,
     false,
-    preAction
+    preAction,
+    confirmCB,
+    authorizedCB
   )
   if (cancel) throw 'User canceled.'
 
@@ -47,6 +61,8 @@ export const signTransaction = async (transport, appId, appPrivateKey, coinType,
  * @param {Number} addressIndex
  * @param {String} publicKey
  * @param {Boolean} isHashRequired used by joyso
+ * @param {Function} confirmCB
+ * @param {Function} authorizedCB
  * @return {Promise<String>}
  */
 export const signMessage = async (
@@ -57,7 +73,9 @@ export const signMessage = async (
   message,
   addressIndex,
   publicKey,
-  isHashRequired = false
+  isHashRequired = false,
+  confirmCB = null,
+  authorizedCB = null
 ) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
 
@@ -72,7 +90,7 @@ export const signMessage = async (
 
   if (isHashRequired) {
     preAction = ethUtil.apduForParsingMessage(transport, msgBuf, '07') // send prehashed message to card
-    msgBuf =  Buffer.from(web3.utils.keccak256(msgBuf), 'hex')
+    msgBuf = Buffer.from(web3.utils.keccak256(msgBuf), 'hex')
   }
 
   const len = msgBuf.length.toString()
@@ -89,7 +107,9 @@ export const signMessage = async (
     '00',
     '00',
     false,
-    preAction
+    preAction,
+    confirmCB,
+    authorizedCB
   )
 
   if (cancel) throw 'User canceled.'
@@ -106,11 +126,23 @@ export const signMessage = async (
  * @param {String} appPrivateKey
  * @param {String} coinType
  * @param {Object} typedData
- * @param {String} addressIndex
+ * @param {number} addressIndex
  * @param {Stirng} publicKey
+ * @param {Function?} confirmCB
+ * @param {Function?} authorizedCB
  * @return {Promise<String>}
  */
-export const signTypedData = async (transport, appId, appPrivateKey, coinType, typedData, addressIndex, publicKey) => {
+export const signTypedData = async (
+  transport,
+  appId,
+  appPrivateKey,
+  coinType,
+  typedData,
+  addressIndex,
+  publicKey,
+  confirmCB = null,
+  authorizedCB = null
+) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
 
   const sanitizedData = typedDataUtils.sanitizeData(typedData)
@@ -131,7 +163,9 @@ export const signTypedData = async (transport, appId, appPrivateKey, coinType, t
     '00',
     '00',
     false,
-    preAction
+    preAction,
+    confirmCB,
+    authorizedCB
   )
 
   if (cancel) throw 'User canceled.'
