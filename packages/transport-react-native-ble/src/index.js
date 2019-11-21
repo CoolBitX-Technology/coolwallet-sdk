@@ -1,12 +1,9 @@
 import {
   BleManager,
-  ConnectionPriority,
   BleErrorCode,
-  LogLevel
 } from "react-native-ble-plx";
 
 import {
-  DeviceModel,
   getBluetoothServiceUuids,
   getInfosForServiceUuid,
 } from "@coolwallets/devices";
@@ -26,7 +23,7 @@ let checkCharacteristic;
 let readCharacteristic;
 
 const retrieveInfos = services => {
-  if (!services || services.length == 0) return;
+  if (!services || services.length === 0) return;
   let infos;
   services.map(service => {
     const info = getInfosForServiceUuid(service.uuid);
@@ -201,7 +198,7 @@ export default class RNBleTransport extends Transport {
       this.readDataFromCard
     );
 
-    const onDisconnect = e => {
+    const onDisconnect = () => {
       transport.notYetDisconnected = false;
       disconnectedSub.remove();
       delete transportsCache[transport.device.id];
