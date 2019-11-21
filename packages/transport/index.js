@@ -30,6 +30,10 @@ export default class Transport {
     throw new Error('not implemented');
   };
 
+  static setOnDisconnect(deviceOrId, onDisonnect) {
+    throw new Error('not implemented');
+  }
+
   async sendCommandToCard(command) {
     throw new Error('not implemented');
   };

@@ -14,6 +14,8 @@ export default class Transport {
 
   static disconnect(deviceOrId: object | string): Promise<void>;
 
+  static setOnDisconnect(deviceOrId: object | string, onDisconnect: function): void;
+
   sendCommandToCard(command: number[]): Promise<void>;
 
   sendDataToCard(packets: number[]): Promise<void>;

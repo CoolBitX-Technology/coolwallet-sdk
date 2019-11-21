@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/transport",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "transport layer for coolwallets.",
   "main": "lib/transport.min.js",
   "scripts": {
