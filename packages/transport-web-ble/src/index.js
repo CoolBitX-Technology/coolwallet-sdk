@@ -61,13 +61,17 @@ export default class WebBleTransport extends Transport {
     return transport;
   }
 
-  static async disconnect(device) {
+  static async disconnect() {
     if (server) await server.disconnect()
     server = undefined
     commandCharacteristic = undefined
     dataCharacteristic = undefined
     statusCharacteristic = undefined
     responseCharacteristic = undefined
+  }
+
+  static setOnDisconnect(device, onDisconnect) {
+    device.addEventListener('gattserverdisconnected', onDisconnect)
   }
 
   async _onDeviceDisconnect(event) {
