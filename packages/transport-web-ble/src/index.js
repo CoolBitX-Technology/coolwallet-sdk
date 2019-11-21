@@ -41,7 +41,7 @@ export default class WebBleTransport extends Transport {
   static async connect(device) {
     device.addEventListener('gattserverdisconnected', this._onDeviceDisconnect)
     server = await device.gatt.connect();
-    console.log(`${device.name} connected`);
+    console.debug(`${device.name} connected`);
     const services = await server.getPrimaryServices();
     const service = services[0];
     const uuids = getInfosForServiceUuid(service.uuid);
@@ -71,7 +71,7 @@ export default class WebBleTransport extends Transport {
   }
 
   async _onDeviceDisconnect(event) {
-    console.log('Device ' + event.target.name + ' is disconnected.');
+    console.debug('Device ' + event.target.name + ' is disconnected.');
   }
 
   sendCommandToCard = async (command) => {
