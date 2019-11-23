@@ -37,3 +37,11 @@ Currently supported coins: BTC, ETH, BNB, EOS, XLM, XRP, ZEN. Open an issue if y
 | Package                                 | Version                                                   | Description              |
 | --------------------------------------- | --------------------------------------------------------- | ------------------------ |
 | [`@coolwallets/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallets/eth) | Ethereum Application API |
+
+## Examples
+
+If you want to build your own app with this sdk, you might find the following repository useful:
+
+* [React Example](https://github.com/antoncoding/cws-web-ble-demo) (with `web-ble`)
+
+* [React-Native Example](https://github.com/kunmingLiu/cws-rn-ble-demo) (with `rn-ble`)
