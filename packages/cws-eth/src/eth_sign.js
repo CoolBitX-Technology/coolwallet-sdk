@@ -147,7 +147,6 @@ export const signTypedData = async (
 
   const sanitizedData = typedDataUtils.sanitizeData(typedData)
   const encodedData = typedDataUtils.encodeData(sanitizedData.primaryType, sanitizedData.message, sanitizedData.types)
-  const preAction = ethUtil.apduForParsingMessage(transport, encodedData, '09')
 
   const prefix = Buffer.from('1901', 'hex')
   const domainSeparate = typedDataUtils.hashStruct('EIP712Domain', sanitizedData.domain, sanitizedData.types)
@@ -163,7 +162,7 @@ export const signTypedData = async (
     '00',
     '00',
     false,
-    preAction,
+    null,
     confirmCB,
     authorizedCB
   )

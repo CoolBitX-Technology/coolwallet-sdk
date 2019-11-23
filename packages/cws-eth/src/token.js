@@ -15,8 +15,9 @@ export const isSupportedERC20Transaction = data => {
  * @param {String} contractAddress contract Address (0x prefixed)
  * @param {Number} decimals
  * @param {String} symbol
+ * @return {String}
  */
-export const getSetTokenPayload = async (contractAddress, symbol, decimals) => {
+export const getSetTokenPayload = (contractAddress, symbol, decimals) => {
   const unit = handleHex(decimals.toString(16))
   const len = handleHex(symbol.length.toString(16))
   const symb = handleHex(web3.utils.asciiToHex(symbol))

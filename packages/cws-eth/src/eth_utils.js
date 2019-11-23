@@ -3,6 +3,7 @@ import Web3 from 'web3'
 import elliptic from 'elliptic'
 import { core, apdu } from '@coolwallets/core'
 
+import * as token from './token'
 let web3 = new Web3()
 const ec = new elliptic.ec('secp256k1')
 
@@ -139,6 +140,18 @@ export const apduForParsingMessage = (transport, msgBuf, p1) => {
     }
   }
 }
+
+/**
+ * @description get APDU set token function 
+ * @param {String} address
+ * @return {Function}
+ */
+export const apduSetToken = (contractAddress, symbol, decimals, sn=1) => {
+	return async () => {
+		let setTokenPayload = token.getSetTokenPayload(contractAddress, symbol, decimals);
+		await apdu.tx.setCustomToken(setTokenPayload, sn);
+	};
+};
 
 /**
  * Convert public key to address
