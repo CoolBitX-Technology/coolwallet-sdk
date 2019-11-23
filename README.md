@@ -40,8 +40,10 @@ Currently supported coins: BTC, ETH, BNB, EOS, XLM, XRP, ZEN. Open an issue if y
 
 ## Examples
 
-If you want to build your own app with this sdk, you might find the following repository useful:
+If you want to build your own app with this sdk, you might find the following repos useful:
 
 * [React Example](https://github.com/antoncoding/cws-web-ble-demo) (with `web-ble`)
 
 * [React-Native Example](https://github.com/kunmingLiu/cws-rn-ble-demo) (with `rn-ble`)
+
+If you build something new, welcome to contact us to put your work in the list.
