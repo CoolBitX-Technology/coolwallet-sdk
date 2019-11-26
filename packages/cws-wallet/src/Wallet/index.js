@@ -19,6 +19,10 @@ export default class CoolWallet {
     this.appId = appId
   }
 
+  async getCardInfo() {
+    return await apdu.setting.getCardInfo(this.transport)
+  }
+
   async getSEVersion() {
     return await apdu.setting.getSEVersion(this.transport)
   }
@@ -33,6 +37,10 @@ export default class CoolWallet {
 
   async getPairingPassword() {
     return await pairing.getPairingPassword(this.transport, this.appId, this.appPrivateKey)
+  }
+
+  async getPairedApps() {
+    return await pairing.getPairedApps(this.transport, this.appId, this.appPrivateKey)
   }
 
   // For wallet creation

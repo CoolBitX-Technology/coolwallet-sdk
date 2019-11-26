@@ -35,6 +35,19 @@ export const register = async (transport, appPublicKey, password, device_name) =
 }
 
 /**
+ * 
+ * @param {Transport} transport 
+ * @param {string} appId 
+ * @param {string} appPrivKey
+ * @return {Promise<Array<{appId:string, }>>}
+ */
+export const getPairedApps = async (transport, appId, appPrivKey) => {
+  const signature = await core.auth.generalAuthorization(transport, appId, appPrivKey, 'GET_PAIRED_DEVICES');
+  const apps  = await apdu.pairing.getPairedApps(transport, signature)
+  return apps
+}
+
+/**
  * Get Pairing password for current device
  * @param {Transport} transport 
  * @param {string} appId 
