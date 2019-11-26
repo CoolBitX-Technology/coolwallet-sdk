@@ -1,4 +1,5 @@
 import { executeCommand } from './execute'
+import { RESPONSE } from '../config/response'
 
 /**
  * Pair current device with CWS card
@@ -27,19 +28,17 @@ export const getPairingPassword = async (transport, data) => {
  * Get list of paired devices
  * @param {Transport} transport
  * @param {string} signature
- * @return {Promise<Array<{appId:string, deviceName: string}>>}
+ * @return {Promise<Array<{appId:string, appName: string}>>}
  */
-export const getPairedDevices = async (transport, signature) => {
+export const getPairedApps = async (transport, signature) => {
   const { outputData } = await executeCommand(transport, 'GET_PAIRED_DEVICES', 'SE', signature)
-  const devices = outputData.match(/.{100}/g)
-  const allDevices = devices.map(device => {
-    const appId = device.slice(0, 40)
-    const utfDevicename = device.slice(40)
-    const toBuf = Buffer.from(utfDevicename, 'hex')
-    const deviceName = toBuf.toString().replace(/\u0000/gi, '')
-    return { appId, deviceName }
+  const appsInfo = outputData.match(/.{100}/g)
+  const apps = appsInfo.map(appInfo => {
+    const appId = appInfo.slice(0, 40)
+    const appName = Buffer.from(appInfo.slice(40), 'hex').toString().replace(/\u0000/gi, '') 
+    return { appId, appName }
   })
-  return allDevices
+  return apps
 }
 
 /**
@@ -49,8 +48,8 @@ export const getPairedDevices = async (transport, signature) => {
  * @return {Promise<boolean>}
  */
 export const removePairedDevice = async (transport, appIdWithSig) => {
-  await executeCommand(transport, 'REMOVE_DEVICES', 'SE', appIdWithSig)
-  return true
+  const { status } = await executeCommand(transport, 'REMOVE_DEVICES', 'SE', appIdWithSig)
+  return status === RESPONSE.SUCCESS
 }
 
 /**
@@ -60,6 +59,6 @@ export const removePairedDevice = async (transport, appIdWithSig) => {
  * @return {Promise<boolean>}
  */
 export const renameDevice = async (transport, nameWithSig) => {
-  await executeCommand(transport, 'RENAME_DEVICES', 'SE', nameWithSig)
-  return true
+  const { status } = await executeCommand(transport, 'RENAME_DEVICES', 'SE', nameWithSig)
+  return status === RESPONSE.SUCCESS
 }

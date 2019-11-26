@@ -16,6 +16,10 @@ declare module '@coolwallets/core' {
     export namespace pairing {
       export function registerDevice(transport: Transport, data: string, P1: string): Promise<string>
       export function getPairingPassword(transport: Transport, data: string): Promise<string>
+      export function getPairedApps(trasnport: Transport, signature:string ):Promise<Array<{appId: string, appName: string}>>
+      export function removePairedDevice(trasnport: Transport, appIdWithSig:string):Promise<Boolean>
+      export function renameDevice(trasnport:Transport, nameWithSig:string):Promise<Boolean>
+
     }
 
     export namespace setting {
