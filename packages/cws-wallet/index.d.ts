@@ -7,6 +7,7 @@ declare module '@coolwallets/wallet' {
   
       setAppId(appId: string):void
       getSEVersion(): Promise<number>
+      checkRegistered(): Promise<boolean>
       getCardInfo(): Promise<{ paired:boolean, locked:boolean, walletCreated:boolean, showDetail:boolean, pairRemainTimes:number }>
       resetCard(): Promise<void>
       /**

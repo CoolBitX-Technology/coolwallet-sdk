@@ -24,6 +24,10 @@ export default class CoolWallet {
     return await setting.getCardInfo(this.transport)
   }
 
+  async checkRegistered() {
+    return await apdu.control.sayHi(this.transport, this.appId)
+  }
+
   async getSEVersion() {
     return await apdu.setting.getSEVersion(this.transport)
   }
