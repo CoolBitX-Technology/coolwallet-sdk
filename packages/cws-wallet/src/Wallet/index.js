@@ -1,5 +1,6 @@
 import * as pairing from '../pairing'
 import * as creation from '../create'
+import * as setting from '../settings'
 import { apdu } from '@coolwallets/core'
 
 export default class CoolWallet {
@@ -20,7 +21,7 @@ export default class CoolWallet {
   }
 
   async getCardInfo() {
-    return await apdu.setting.getCardInfo(this.transport)
+    return await setting.getCardInfo(this.transport)
   }
 
   async getSEVersion() {

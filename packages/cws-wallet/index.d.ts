@@ -7,12 +7,14 @@ declare module '@coolwallets/wallet' {
   
       setAppId(appId: string):void
       getSEVersion(): Promise<number>
+      getCardInfo(): Promise<{ paired:boolean, locked:boolean, walletCreated:boolean, showDetail:boolean, pairRemainTimes:number }>
       resetCard(): Promise<void>
       /**
        * Register current device, get appId from card. 
        */
       register(appPublicKey: string, password: string, deviceName: string ): Promise<string>
       getPairingPassword(): Promise<string>
+      getPairedApps(): Promise<Array<{appId:string, appName:string}>>
     
       createWallet(strength: number): Promise<boolean>
       sendCheckSum(sumOfSeed: number): Promise<boolean>
