@@ -15,6 +15,27 @@ export const prepTx = async (transport, payload, P1, P2) => {
 }
 
 /**
+ * Scriptable step 1
+ * @todo append signature
+ * @param {Transport} transport 
+ * @param {string} script 
+ */
+export const sendScript = async (transport, script ) => {
+  const { status } = await executeCommand(transport, 'SEND_SCRIPT', 'SE', script)
+  return status === RESPONSE.SUCCESS
+}
+
+/**
+ * Scriptable step 2
+ * @param {*} transport 
+ * @param {*} argument 
+ */
+export const executeScript = async (transport, argument) => {
+  const { outputData: encryptedSignature } = await executeCommand(transport, 'EXECUTE_SCRIPT', 'SE', argument)
+  return encryptedSignature
+}
+
+/**
  * Inform CoolWalletS that tx_prepare is completed.
  * @param {Transport} transport
  * @return {Promse<boolean>}

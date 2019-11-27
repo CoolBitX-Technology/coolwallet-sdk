@@ -71,6 +71,18 @@ export default {
     P1: null,
     P2: null,
   },
+  SEND_SCRIPT: {
+    CLA: '80',
+    INS: 'AC',
+    P1: '00',
+    P2: '00'
+  },
+  EXECUTE_SCRIPT: {
+    CLA: '80',
+    INS: 'A2',
+    P1: '00',
+    P2: '00'
+  },
   TX_PREPARE_FOR_TESTNET: {
     CLA: '80',
     INS: '42',

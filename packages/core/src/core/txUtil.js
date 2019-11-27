@@ -20,6 +20,15 @@ export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
   return signature_buffer.toString('hex')
 }
 
+export const getEncryptedSignatureByScripts = async (transport, script, argument, txPrepareComplteCallback = null) => {
+  await apdu.tx.sendScript(transport, script)
+  const encryptedSignature = await apdu.tx.executeScript(transport, argument)
+  await apdu.tx.finishPrepare(transport)
+  if (typeof txPrepareComplteCallback === 'function') txPrepareComplteCallback()
+  
+  return encryptedSignature
+}
+
 /**
  * do TX_PREP and get encrypted signature.
  * @param {Transport} transport
