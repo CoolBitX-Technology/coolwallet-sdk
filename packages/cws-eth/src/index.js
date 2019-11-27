@@ -41,6 +41,20 @@ export default class ETH extends ECDSACoin {
     )
   }
 
+  async signTransferNew(transaction, addressIndex, publicKey, confirmCB=null, authorizedCB=null) {
+    if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
+    return await ethSign.signTransactionNew(
+      this.transport,
+      this.appId,
+      this.appPrivateKey,
+      transaction,
+      addressIndex,
+      publicKey,
+      confirmCB,
+      authorizedCB
+    )
+  }
+
   /**
    * Sign Arbitrary Message.
    * @param {String} message hex or utf-8

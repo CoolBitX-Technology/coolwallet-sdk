@@ -52,6 +52,38 @@ export const signTransaction = async (
   return serialized_tx
 }
 
+export const signTransactionNew = async (
+  transport,
+  appId,
+  appPrivateKey,
+  transaction,
+  addressIndex,
+  publicKey,
+  confirmCB = null,
+  authorizedCB = null,
+) => {
+  
+  const rawPayload = ethUtil.getRawHex(transaction)
+  
+  const { script, argument } = await ethUtil.getScriptAndArguments(addressIndex, transaction)
+  const { signature: canonicalSignature, cancel } = await core.flow.sendScriptAndDataToCard(
+    transport,
+    appId,
+    appPrivateKey,
+    script,
+    argument,
+    false,
+    confirmCB,
+    authorizedCB,
+    true
+  )
+  if (cancel) throw 'User canceled.'
+
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey)
+  const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId)
+  return serialized_tx
+}
+
 /**
  * Sign Message.
  * @param {Transport} transport

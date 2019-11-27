@@ -4,6 +4,8 @@ import elliptic from 'elliptic'
 import { core, apdu } from '@coolwallets/core'
 
 import * as token from './token'
+import * as scripts from './scripts'
+
 let web3 = new Web3()
 const ec = new elliptic.ec('secp256k1')
 
@@ -52,6 +54,45 @@ export const getReadTypeAndParmas = async (transport, transaction) => {
   await core.auth.versionCheck(transport, 84)
   return { P1, P2, readType: '33' }
 }
+
+/**
+ * 
+ * @param {number} addressIndex 
+ * @param {*} transaction 
+ */
+export const getScriptAndArguments = async (addressIndex, transaction) => {
+  // 15 32 8000002C 8000003C 80000000 00000000 00000000
+  const SEPath = '1532' + '8000002C' + '8000003C' + '80000000' + '00000000' 
+                  + '00' + addressIndex.toString(16).padStart(6,'0')
+                  
+  // // Got from path
+  // const postfix = path.split('/').map(index => {
+  //   let harden = index.contains("'")
+  //   if (harden) index = index.replace("'","")
+  //   let hex = parseInt(index).toString(16).padStart(6, '0')
+  //   return harden
+  //     ? '80' + hex
+  //     : '00' + hex
+  // }).join()
+  // const SEPath = '1532' + postfix
+
+  console.log(`got sepath ${SEPath}`)
+
+  const script = scripts.TRANSFER;
+  const argument = handleHex(transaction.to)                              // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
+    + handleHex(transaction.value).padStart(20, '0')                      // 000000b1a2bc2ec50000
+    + handleHex(transaction.gasPrice).padStart(20, '0')                   // 0000000000020c855800
+    + handleHex(transaction.gasLimit).padStart(20, '0')                   // 0000000000000000520c
+    + handleHex(transaction.nonce).padStart(20, '0')                      // 00000000000000000289
+    + handleHex(transaction.chainId.toString(16)).padStart(4, '0');       // 0001
+
+  console.log(`sciprt:\t${script}`)
+  console.log(`argument:\t ${SEPath} + ${argument}`)
+  return { 
+    script, 
+    argument: SEPath + argument
+  }
+} 
 
 /**
  * @description Compose Signed Transaction
