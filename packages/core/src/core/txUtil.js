@@ -24,6 +24,8 @@ export const getEncryptedSignatureByScripts = async (transport, script, argument
   await apdu.tx.sendScript(transport, script)
   const encryptedSignature = await apdu.tx.executeScript(transport, argument)
   await apdu.tx.finishPrepare(transport)
+  // const signedTx = await apdu.tx.getSignedHex(transport)
+  // console.debug(`hex: ${signedTx} `)
   if (typeof txPrepareComplteCallback === 'function') txPrepareComplteCallback()
   
   return encryptedSignature

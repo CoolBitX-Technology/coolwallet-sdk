@@ -35,6 +35,11 @@ export const executeScript = async (transport, argument) => {
   return encryptedSignature
 }
 
+export const getSignedHex = async (transport) => {
+  const { outputData: signedTx } = await executeCommand(transport, 'GET_SIGNED_HEX', 'SE')
+  return signedTx
+}
+
 /**
  * Inform CoolWalletS that tx_prepare is completed.
  * @param {Transport} transport

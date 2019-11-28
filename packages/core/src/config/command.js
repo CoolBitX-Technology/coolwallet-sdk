@@ -83,6 +83,12 @@ export default {
     P1: '00',
     P2: '00'
   },
+  GET_SIGNED_HEX: {
+    CLA: '80',
+    INS: 'A6',
+    P1: '00',
+    P2: '00',
+  },
   TX_PREPARE_FOR_TESTNET: {
     CLA: '80',
     INS: '42',
