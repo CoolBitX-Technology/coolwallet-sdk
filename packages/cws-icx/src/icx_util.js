@@ -2,11 +2,10 @@ import elliptic from 'elliptic'
 import IconService from 'icon-sdk-js'
 import { sha3_256 } from 'js-sha3'
 import * as scripts from './scripts'
-
 import CONFIG from './config'
 
 const ec = new elliptic.ec('secp256k1')
-const { IconBuilder, IconAmount, IconConverter } = IconService
+const { IconBuilder, IconConverter } = IconService
 
 /**
  * Convert public key to address
@@ -32,14 +31,14 @@ export const getScriptAndArguments = (addressIndex, transaction) => {
 
   const script = scripts.TRANSFER
   const argument =
-    handleHex(transaction.from) + // e86b015c06145965931aff551d4958256a86226e
-    handleHex(transaction.to) + // 76f46307b53686f2dd4a2c8ca2f22492e842c4bf
+    removePrefix(transaction.from) + // e86b015c06145965931aff551d4958256a86226e
+    removePrefix(transaction.to) + // 76f46307b53686f2dd4a2c8ca2f22492e842c4bf
     handleHex(transaction.value).padStart(20, '0') + // 00000de0b6b3a7640000
     handleHex(transaction.time).padStart(20, '0') + // 00000005852187bc8800
     handleHex(transaction.networkId.toString(16)).padStart(4, '0') // 0001
 
   console.log(`sciprt:\t${script}`)
-  console.log(`argument:\t ${SEPath} \n+\t${argument}`)
+  console.log(`argument:\t ${SEPath}\n+\t${argument}`)
   return {
     script,
     argument: SEPath + argument,
@@ -55,26 +54,29 @@ export const getScriptAndArguments = (addressIndex, transaction) => {
  */
 export const generateRawTx = async (transaction, canonicalSignature, publicKey) => {
   try {
-    const rawTxObj = buildTransactionObj(transaction)
+    let rawTxObj = buildTransactionObj(transaction)
     const phraseToSign = generateHashKey(rawTxObj)
     const signature = generateFullCanonicalSig(canonicalSignature, phraseToSign, publicKey) //signature and recovery
     const b64encoded = Buffer.from(signature, 'hex').toString('base64')
-
-    let transaction = JSON.parse(rawTxObj)
-    transaction.signature = b64encoded
-    return transaction
+    
+    rawTxObj.signature = b64encoded
+    return rawTxObj
   } catch (error) {
     throw 'ICX generateRawTx Error: ' + error
   }
 }
 
+/**
+ * 
+ * @param {{from:string, to:string, value:string, time:string, networkId:number}} transaction
+ */
 const buildTransactionObj = transaction => {
   const txObj = new IconBuilder.IcxTransactionBuilder()
     .from(transaction.from)
     .to(transaction.to)
-    .value(IconAmount.of(amount, CONFIG.UNIT).toLoop())
+    .value( parseInt(transaction.value, 16) )
     .stepLimit(IconConverter.toBigNumber(CONFIG.STEP_LIMIT))
-    .nid(IconConverter.toBigNumber(transaction / networkId)) // network id
+    .nid(IconConverter.toBigNumber(transaction.networkId)) // network id
     // .nonce(IconConverter.toBigNumber(nonce))
     .version(IconConverter.toBigNumber(CONFIG.VERSION))
     .timestamp(transaction.time)
@@ -211,4 +213,28 @@ function escapeString(value) {
   newString = newString.replace('[', '\\[')
   newString = newString.replace(']', '\\]')
   return newString
+}
+
+export const handleHex = hex => {
+  return evenHexDigit(removeHex0x(hex))
+}
+
+/**
+ * @description Check if Hex and Even Digit
+ * @param {string} hex
+ * @return {string}
+ */
+const evenHexDigit = hex => {
+  return hex.length % 2 !== 0 ? `0${hex}` : hex
+}
+
+/**
+ * @description Check and Remove Hex Prefix 0x
+ */
+export const removeHex0x = hex => {
+  return hex.slice(0, 2) === '0x' ? hex.slice(2) : hex
+}
+
+export const removePrefix = hex => {
+  return hex.slice(0, 2) === 'hx' ? hex.slice(2) : hex
 }
