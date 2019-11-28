@@ -88,7 +88,7 @@ const buildTransactionObj = transaction => {
 /**
  * 
  * @param {{r:string, s: string}} canonicalSignature 
- * @param {srting} phraseToSign 
+ * @param {string} phraseToSign 
  * @param {string} compressedPubkey 
  * @returns {string}
  */

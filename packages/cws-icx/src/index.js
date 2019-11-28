@@ -4,7 +4,7 @@ import { ECDSACoin } from '@coolwallets/coin'
 
 export default class ICX extends ECDSACoin {
   constructor(transport, appPrivateKey, appId) {
-    super(transport, appPrivateKey, appId, '3C')
+    super(transport, appPrivateKey, appId, '4A')
   }
 
   /**
