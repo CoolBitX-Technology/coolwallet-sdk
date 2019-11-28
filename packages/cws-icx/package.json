@@ -1,0 +1,17 @@
+{
+  "name": "@coolwallets/icx",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "anton@coolbitx.com",
+  "license": "ISC",
+  "dependencies": {
+    "@coolwallets/coin": "file:../cws-coin",
+    "@coolwallets/core": "file:../core",
+    "icon-sdk-js": "0.0.18",
+    "js-sha3": "^0.8.0"
+  }
+}

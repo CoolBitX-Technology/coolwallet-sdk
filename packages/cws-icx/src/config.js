@@ -1,0 +1,5 @@
+export default {
+    UNIT: 1000000000000000000,
+    STEP_LIMIT: 100000,
+    VERSION: 3,
+}
