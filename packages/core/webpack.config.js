@@ -24,5 +24,10 @@ module.exports = {
         }
       }
     ]
+  },
+  externals: {
+    'bip66': 'bip66',
+    'key-encoder': 'key-encoder',
+    'rlp': 'rlp',
   }
 };
