@@ -24,5 +24,9 @@ module.exports = {
         }
       }
     ]
+  },
+  externals: {
+    '@coolwallets/core': '@coolwallets/core',
+    'bip32': 'bip32'
   }
 };

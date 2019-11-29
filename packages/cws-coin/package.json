@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/coin",
-  "version": "0.0.1-beta",
+  "version": "0.0.2-beta",
   "description": "Basic coin class for key derivation",
   "main": "lib/index.js",
   "scripts": {
