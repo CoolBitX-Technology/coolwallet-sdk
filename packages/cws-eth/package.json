@@ -2,14 +2,14 @@
   "name": "@coolwallets/eth",
   "version": "0.1.8",
   "description": "",
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
     "elliptic": "^6.5.1",
     "eth-sig-util": "^2.5.0",
     "rlp": "^2.2.3",
-    "@coolwallets/core": "0.0.4",
+    "@coolwallets/core": "file:../core",
     "@coolwallets/coin": "0.0.1-beta",
     "web3": "^1.2.2"
   },

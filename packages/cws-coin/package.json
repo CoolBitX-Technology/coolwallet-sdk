@@ -10,6 +10,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "bip32": "^2.0.4",
+    "@coolwallets/transport": "0.0.9",
     "@coolwallets/core": "0.0.1-beta"
   },
   "devDependencies": {

@@ -1,3 +1,5 @@
+import Transport from '@coolwallets/transport'
+
 declare module '@coolwallets/coin' {
   export class ECDSACoin {
     constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string)
