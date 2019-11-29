@@ -10,7 +10,7 @@
     "eth-sig-util": "^2.5.0",
     "rlp": "^2.2.3",
     "@coolwallets/core": "0.0.5-beta",
-    "@coolwallets/coin": "0.0.2-beta",
+    "@coolwallets/coin": "0.0.3-beta",
     "web3": "^1.2.2"
   },
   "devDependencies": {

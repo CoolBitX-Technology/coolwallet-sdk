@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/coin",
-  "version": "0.0.2-beta",
+  "version": "0.0.3-beta",
   "description": "Basic coin class for key derivation",
   "main": "lib/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "bip32": "^2.0.4",
-    "@coolwallets/core": "0.0.1-beta"
+    "@coolwallets/core": "0.0.5-beta"
   },
   "devDependencies": {
     "@babel/core": "^7.7.2",
