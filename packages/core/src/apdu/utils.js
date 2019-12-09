@@ -45,6 +45,7 @@ export const assemblyCommandAndData = (cla, ins, p1, p2, oriData) => {
   data_length = Buffer.from([data_length])
 
   const command = pid + cmd_len + cla + ins + p1 + p2 + oriData_length + XOR_length + data_length.toString('hex')
+  console.debug(`command ${command}, data ${data}`)
   return { command, data: packets }
 }
 
