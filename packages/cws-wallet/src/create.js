@@ -25,7 +25,7 @@ export async function createWallet(transport, appId, appPrivateKey, strength) {
  */
 export async function sendCheckSum(transport, checkSum) {
   let sumHex = checkSum.toString(16).padStart(8, '0')
-  return await apdu.wallet.submitCheckSum(this.transport, sumHex)
+  return await apdu.wallet.submitCheckSum(transport, sumHex)
 }
 
 /**
