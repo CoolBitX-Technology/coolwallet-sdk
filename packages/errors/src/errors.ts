@@ -1,4 +1,4 @@
-import { createErrorClass } from './helper.js'
+import { createErrorClass } from './helper'
 
 // SayHi
 export const NotRegistered = createErrorClass('AppNotRegistered', 'Please register first' )
