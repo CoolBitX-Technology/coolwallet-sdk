@@ -36,3 +36,5 @@ export const InvalidSideField = createErrorClass('InvalidSideField', 'Invalid Si
 export const OmniValueTooHigh = createErrorClass('OmniValueTooHigh', 'Omni ouput exceed limit: 5420 sat.')
 export const InvalidRLPFormat = createErrorClass('InvalidRLPFormat', 'Invalid RLP Data')
 export const InvalidJsonFormat = createErrorClass('InvalidJsonFormat', 'Invalid Json Data')
+
+export const FirmwareVersionTooLow = createErrorClass('FirmwareVersionTooLow', 'Operaion not supported by current firmware version.')
