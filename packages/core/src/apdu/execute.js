@@ -1,5 +1,5 @@
 import COMMAND from '../config/command'
-import { OperationCanceled } from '@coolwallets/errors'
+import { OperationCanceled, NoTransport } from '@coolwallets/errors'
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils'
 import { RESPONSE, DFU_RESPONSE } from '../config/response'
 
@@ -33,6 +33,7 @@ export const executeCommand = async (transport, commandName, commandType = 'SE',
  * @param {string} commandType SE or MCU
  */
 const executeAPDU = async (commandName, transport, apdu, commandType) => {
+  if (typeof transport.request !== 'function' ) throw new NoTransport()
   const response = await transport.request(apdu.command, apdu.data)
   if (commandType === 'SE') {
     const status = response.slice(-4)

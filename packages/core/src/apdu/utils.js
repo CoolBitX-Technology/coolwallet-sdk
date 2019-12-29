@@ -70,7 +70,7 @@ const getCheckSum = data => {
  * @return {Errors.SDKError}
  */
 export const throwSDKError = (command, code) => {
-  code = code.toUpperCase()
+  code = code.toLowerCase()
   switch (command) {
     case 'SAY_HI':{
       switch(code){
