@@ -1,7 +1,7 @@
 import COMMAND from '../config/command'
 import { sign } from '../crypto/sign'
 import { control, setting } from '../apdu'
-
+import { FirmwareVersionTooLow } from '@coolwallets/errors'
 /**
  * Get Command signature to append to some specific APDU commands.
  * @param {Transport} transport
@@ -36,5 +36,5 @@ export const generalAuthorization = async (transport, appId, appPrivateKey, comm
  */
 export const versionCheck = async (transport, requiredSEVersion) => {
   const SEVersion = await setting.getSEVersion(transport)
-  if (SEVersion < requiredSEVersion) throw Error(`Function not supported, require SE ${requiredSEVersion}`)
+  if (SEVersion < requiredSEVersion) throw new FirmwareVersionTooLow()
 }

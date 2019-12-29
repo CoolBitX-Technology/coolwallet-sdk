@@ -33,7 +33,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {Function} authorizedCallback
  * @param {Boolean} isTestnet blind signing for SE version 67
  * @param {Boolean} return_canonical
- * @return {Promise<{signature: {r: string, s: string} | string | Buffer, cancel:boolean}>}
+ * @return {Promise< {r: string, s: string} | string | Buffer }>}
  */
 export const sendDataToCoolWallet = async (
   transport,
@@ -64,8 +64,6 @@ export const sendDataToCoolWallet = async (
   )
   const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback)
 
-  if (signatureKey === undefined) return { signature: {}, cancel: true }
-
   const signature = txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, isEDDSA, return_canonical)
-  return { signature, cancel: false }
+  return signature
 }
