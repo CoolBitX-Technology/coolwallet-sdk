@@ -1,5 +1,13 @@
 import { createErrorClass } from './helper'
 
+// Transport
+export const NoTransport = createErrorClass('NoTransport', 'Transport Object not specified.')
+
+// General
+export const PleaseResetHardware = createErrorClass('PleaseResetHardware', 'Bad Firmware status. Please reset your CoolWalletS.')
+export const FirmwareVersionTooLow = createErrorClass('FirmwareVersionTooLow', 'Operaion not supported by current firmware version.')
+export const OperationCanceled = createErrorClass('OperationCanceled', 'Operation canceled by the user.')
+
 // SayHi
 export const NotRegistered = createErrorClass('AppNotRegistered', 'Please register first' )
 
@@ -36,8 +44,3 @@ export const OmniValueTooHigh = createErrorClass('OmniValueTooHigh', 'Omni ouput
 export const InvalidRLPFormat = createErrorClass('InvalidRLPFormat', 'Invalid RLP Data')
 export const InvalidJsonFormat = createErrorClass('InvalidJsonFormat', 'Invalid Json Data')
 export const DataLengthP2Mismatch = createErrorClass('DataLengthP2Mismatch', 'Truncated Data length and P2 Mismatch.')
-
-// General
-export const PleaseResetHardware = createErrorClass('PleaseResetHardware', 'Bad Firmware status. Please reset your CoolWalletS.')
-export const FirmwareVersionTooLow = createErrorClass('FirmwareVersionTooLow', 'Operaion not supported by current firmware version.')
-export const OperationCanceled = createErrorClass('OperationCanceled', 'Operation canceled by the user.')
