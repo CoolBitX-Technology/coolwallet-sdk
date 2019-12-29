@@ -1,16 +1,17 @@
 {
   "name": "@coolwallets/core",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Light core library of CoolWalletS apdu commands.",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel --presets es2015 -d lib/ src",
+    "build": "babel -d lib/ src",
     "publish-single": "npm run build && npm publish"
   },
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
+    "@coolwallets/errors": "0.0.3",
     "bip66": "^1.1.5",
     "key-encoder": "^2.0.3",
     "rlp": "^2.2.3"
@@ -23,11 +24,8 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.2",
-    "@babel/preset-env": "^7.7.1",
-    "babel-loader": "^8.0.6",
-    "babel-preset-es2015": "^6.24.1",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1"
   }
 }
