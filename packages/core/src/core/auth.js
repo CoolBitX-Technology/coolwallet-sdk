@@ -36,5 +36,5 @@ export const generalAuthorization = async (transport, appId, appPrivateKey, comm
  */
 export const versionCheck = async (transport, requiredSEVersion) => {
   const SEVersion = await setting.getSEVersion(transport)
-  if (SEVersion < requiredSEVersion) throw new FirmwareVersionTooLow()
+  if (SEVersion < requiredSEVersion) throw new FirmwareVersionTooLow(requiredSEVersion)
 }
