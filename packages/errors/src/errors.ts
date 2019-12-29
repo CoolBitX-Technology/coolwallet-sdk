@@ -22,7 +22,6 @@ export const CoinNotSupported = createErrorClass('CoinNotSupported', 'Cion not s
 
 // Tx 
 export const CoinNotInitialized = createErrorClass('CoinNotInitialized', 'Coin Not initialized. Try get its publickey first.')
-
 export const InvalidData = createErrorClass('InvalidData', 'Invalid Transaction Data.')
 export const HashOutputMissmatch = createErrorClass('HashOutputMissmatch', 'Hashed output and raw output mismatch')
 export const OutputTooLong = createErrorClass('OutputTooLong', 'Length of Output too long')
@@ -36,5 +35,9 @@ export const InvalidSideField = createErrorClass('InvalidSideField', 'Invalid Si
 export const OmniValueTooHigh = createErrorClass('OmniValueTooHigh', 'Omni ouput exceed limit: 5420 sat.')
 export const InvalidRLPFormat = createErrorClass('InvalidRLPFormat', 'Invalid RLP Data')
 export const InvalidJsonFormat = createErrorClass('InvalidJsonFormat', 'Invalid Json Data')
+export const DataLengthP2Mismatch = createErrorClass('DataLengthP2Mismatch', 'Truncated Data length and P2 Mismatch.')
 
+// General
+export const PleaseResetHardware = createErrorClass('PleaseResetHardware', 'Bad Firmware status. Please reset your CoolWalletS.')
 export const FirmwareVersionTooLow = createErrorClass('FirmwareVersionTooLow', 'Operaion not supported by current firmware version.')
+export const OperationCanceled = createErrorClass('OperationCanceled', 'Operation canceled by the user.')
