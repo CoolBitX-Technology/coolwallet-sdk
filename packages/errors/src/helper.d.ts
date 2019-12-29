@@ -1,1 +1,0 @@
-export function createErrorClass(name:string, message:string) : Error;

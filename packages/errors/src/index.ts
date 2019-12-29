@@ -1,2 +1,5 @@
 export * from './SDKError'
-export * from './errors'
+export * from './transport'
+export * from './pairing'
+export * from './general'
+export * from './wallet'
