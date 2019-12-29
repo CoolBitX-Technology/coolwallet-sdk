@@ -149,6 +149,6 @@ export const throwSDKError = (command, code) => {
   }
 }
 
-const SDKUnknownWithCode = (command, code) => {
+export const SDKUnknownWithCode = (command, code) => {
   return new Errors.SDKError('Unknown', `${command} - ${code}`)
 }

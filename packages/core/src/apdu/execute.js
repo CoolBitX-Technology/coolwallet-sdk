@@ -1,7 +1,7 @@
-import { assemblyCommandAndData } from './utils'
-import { RESPONSE, DFU_RESPONSE } from '../config/response'
 import COMMAND from '../config/command'
-import ErrorCode from '../config/error'
+import { OperationCanceled } from '@coolwallets/errors'
+import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils'
+import { RESPONSE, DFU_RESPONSE } from '../config/response'
 
 /**
  *
@@ -13,7 +13,8 @@ import ErrorCode from '../config/error'
  * @param {string} params2
  */
 export const executeCommand = async (transport, commandName, commandType = 'SE', data, params1, params2) => {
-  console.log(`Execute Command: ${commandName}`)
+  /* eslint-disable-next-line */
+  console.debug(`Execute Command: ${commandName}`)
   const commandParams = COMMAND[commandName]
 
   const P1 = !!params1 ? params1 : commandParams.P1
@@ -35,19 +36,22 @@ const executeAPDU = async (commandName, transport, apdu, commandType) => {
   const response = await transport.request(apdu.command, apdu.data)
   if (commandType === 'SE') {
     const status = response.slice(-4)
-    if (status !== RESPONSE.SUCCESS && status !== RESPONSE.CANCELED) {
-      if (ErrorCode[commandName] && ErrorCode[commandName].hasOwnProperty(status)) {
-        throw ErrorCode[commandName][status].msg
+    switch (status) {
+      case RESPONSE.SUCCESS: {
+        const outputData = response.slice(0, -4)
+        return { status, outputData }
       }
-      throw status
+      case RESPONSE.CANCELED:{
+        throw new OperationCanceled()
+      }
+      default: { // In case of error
+        throwSDKError(commandName, status)
+      }   
     }
-    const outputData = response.slice(0, -4)
-    return { status, outputData }
   } else {
     const status = response.slice(4, 6)
     const outputData = response.slice(6)
-    if (status === DFU_RESPONSE.CHARGING_ERROR) throw 'Please insert your card into the charger to initiate the update.'
-    else if (status !== DFU_RESPONSE.SUCCESS) throw status
+    if (status !== DFU_RESPONSE.SUCCESS) throw SDKUnknownWithCode(commandName, status)
     return { status, outputData }
   }
 }
