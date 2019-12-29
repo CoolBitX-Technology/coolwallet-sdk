@@ -33,7 +33,7 @@ export const signTransaction = async (
   const rawPayload = ethUtil.getRawHex(transaction)
   const { P1, P2, readType, preAction } = await ethUtil.getReadTypeAndParmas(transport, transaction)
   const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType)
-  const { signature: canonicalSignature, cancel } = await core.flow.sendDataToCoolWallet(
+  const canonicalSignature = await core.flow.sendDataToCoolWallet(
     transport,
     appId,
     appPrivateKey,
@@ -45,7 +45,6 @@ export const signTransaction = async (
     confirmCB,
     authorizedCB
   )
-  if (cancel) throw 'User canceled.'
 
   const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey)
   const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId)
@@ -99,7 +98,7 @@ export const signMessage = async (
 
   const dataForSE = core.flow.prepareSEData(keyId, payload, 'F5')
 
-  const { signature: canonicalSignature, cancel } = await core.flow.sendDataToCoolWallet(
+  const canonicalSignature = await core.flow.sendDataToCoolWallet(
     transport,
     appId,
     appPrivateKey,
@@ -111,8 +110,6 @@ export const signMessage = async (
     confirmCB,
     authorizedCB
   )
-
-  if (cancel) throw 'User canceled.'
 
   const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
   const signature = '0x' + r + s + v.toString(16)
@@ -154,7 +151,7 @@ export const signTypedData = async (
   const payload = Buffer.concat([prefix, domainSeparate, dataHash])
   const dataForSE = core.flow.prepareSEData(keyId, payload, 'F3')
 
-  const { signature: canonicalSignature, cancel } = await core.flow.sendDataToCoolWallet(
+  const canonicalSignature = await core.flow.sendDataToCoolWallet(
     transport,
     appId,
     appPrivateKey,
@@ -166,8 +163,6 @@ export const signTypedData = async (
     confirmCB,
     authorizedCB
   )
-
-  if (cancel) throw 'User canceled.'
 
   const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
   const signature = '0x' + r + s + v.toString(16)
