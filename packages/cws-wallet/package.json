@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/wallet",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -11,8 +11,8 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@coolwallets/core": "^0.0.11",
-    "@coolwallets/errors": "^0.0.3",
+    "@coolwallets/core": "^0.0.12",
+    "@coolwallets/errors": "^0.0.4",
     "elliptic": "^6.5.1"
   },
   "devDependencies": {
