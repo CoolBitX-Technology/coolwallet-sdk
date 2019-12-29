@@ -1,14 +1,13 @@
 {
   "name": "@coolwallets/errors",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
     "build:js": "babel -d lib/ src",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
-    "build": "npm run build:js && npm run build:types && npm run build:ts",
-    "publish": "npm run build && npm publish"
+    "build": "npm run build:js && npm run build:types && npm run build:ts"
   },
   "author": "anton",
   "license": "ISC",
