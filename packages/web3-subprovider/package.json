@@ -1,0 +1,27 @@
+{
+  "name": "@coolwallets/web3-subprovider",
+  "version": "0.0.1",
+  "description": "Web3 wrapper on coolwalletS sdk",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hardware wallet",
+    "web3",
+    "coolwallets",
+    "ethereum",
+    "signing",
+    "coolbitx",
+    "subprovider",
+    "provider"
+  ],
+  "author": "antonassocareer@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "@coolwallets/eth": "0.1.11",
+    "@coolwallets/wallet": "^0.0.12",
+    "@coolwallets/transport": "0.0.9",
+    "web3-provider-engine": "^15.0.4"
+  }
+}
