@@ -1,5 +1,5 @@
-const HDKey = require('hdkey')
-const ethUtil = require('ethereumjs-util')
+import HDKey from 'hdkey'
+import ethUtil from 'ethereumjs-util'
 const BRIDGE_URL = 'https://coolbitx-technology.github.io/coolwallet-connect/#/iframe'
 const MAX_INDEX = 1000
 
@@ -84,10 +84,10 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     return result
   }
 
-  unlock(addrIndex?: number) {
+  unlock(addrIndex?: number) : Promise<string> {
     if (this.hasAccountKey() && typeof addrIndex === 'undefined') return Promise.resolve('already unlocked')
     if (this.hasAccountKey() && typeof addrIndex === 'number') {
-      return this._addressFromIndex(addrIndex)
+      return Promise.resolve(this._addressFromIndex(addrIndex))
     }
     // unlock: get publickey and chainCodes
     return new Promise((resolve, reject) => {

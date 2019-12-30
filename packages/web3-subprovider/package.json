@@ -4,7 +4,7 @@
   "description": "Web3 wrapper on coolwalletS sdk",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline"
   },
   "keywords": [
     "hardware wallet",
@@ -19,9 +19,14 @@
   "author": "antonassocareer@gmail.com",
   "license": "ISC",
   "dependencies": {
-    "@coolwallets/eth": "0.1.11",
-    "@coolwallets/wallet": "^0.0.12",
-    "@coolwallets/transport": "0.0.9",
+    "hdkey": "^1.1.1",
+    "ethereumjs-util": "6.2.0",
     "web3-provider-engine": "^15.0.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.7",
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/preset-typescript": "^7.7.7"
   }
 }
