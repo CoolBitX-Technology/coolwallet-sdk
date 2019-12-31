@@ -6,10 +6,9 @@ const MAX_INDEX = 1000
 import HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet'
 
 type Options = {
-  // should use actively validate on the device
-  accountsLength?: number
-  // offset index to use to start derivating the accounts
-  accountsOffset?: number
+  accountsLength: number
+  accountsOffset: number
+  networkId: number
 }
 
 type PostMessage = {
@@ -107,7 +106,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
           to: this._normalize(tx.to),
           value: this._normalize(tx.value),
           data: this._normalize(tx.data),
-          chainId: tx._chainId,
+          chainId: this.options.networkId,
           nonce: this._normalize(tx.nonce),
           gasLimit: this._normalize(tx.gasLimit),
           gasPrice: this._normalize(tx.gasPrice),
