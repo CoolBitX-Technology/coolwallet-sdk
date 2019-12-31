@@ -36,6 +36,11 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
           .then(signature => callback(null, signature))
           .catch(error => callback(error))
       },
+      signPersonalMessage: async (msgParams, callback) => {
+        this._signPersonalMessage(msgParams.from, msgParams.data)
+          .then(signature => callback(null, signature))
+          .catch(error => callback(error))
+      },
       signTransaction: async (txParams, callback) => {
         this._signTransaction(txParams.from, txParams)
           .then(tx => callback(null, tx))

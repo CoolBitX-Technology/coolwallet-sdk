@@ -35,20 +35,16 @@ engine.start()
 const web3 = new Web3(engine);
 ```
 
-### Usage
+### Supported Methods
+
+* web3.eth.getAccounts
+* web3.eth.signTransaction
+* web3.eth.sign
+* web3.eth.personal.sign
+* web3.eth.signTypedData
 
 ```javascript
-
-// Use it as web3
-function handleGetAccount () {
-  web3.eth.getAccounts((error, accounts)=>{
-    if(accounts) console.log(accounts)
-    if(error) console.error(error)
-  }
-}
-
 // Sign Transaction
-
 function handleSignTransaction () {
   const tx = {
     "from": from,
