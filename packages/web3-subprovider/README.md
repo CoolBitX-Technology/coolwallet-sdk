@@ -1,6 +1,5 @@
 # Web3-Subprovoder
 
-
 ## Introduction
 
 Create a HookedWalletSubprovider for CoolWalletS.
@@ -23,6 +22,7 @@ const rpcUrl = 'https://mainnet.infura.io/v3/{your token}'
 const options = {
   accountsLength: 5,
   accountsOffset: 0,
+  networkId: 1
 }
 const coolwallet = new CoolWalletSubProvider(options)
 
@@ -38,4 +38,23 @@ function handleGetAccount () {
   }
 }
 
+// Sign Transaction
+
+function handleSignTransaction () {
+  const tx = {
+    "from": from,
+    "nonce": "0x3b",
+    "gasPrice": "0xe8754700",
+    "gasLimit": "0x520c",
+    "to": "0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C",
+    "value": "0x2386f26fc10000",
+  }
+  web3.eth.signTransaction(tx,(error, signed)=>{
+    if(signed) {
+      web3.eth.sendSignedTransaction(signed.raw, (err, hash)=>{
+        if(hash) console.log(`tx hash: ${hash}`)
+      })
+    }
+  })
+}
 ```
