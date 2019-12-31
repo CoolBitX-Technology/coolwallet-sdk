@@ -4,7 +4,9 @@
   "description": "Web3 wrapper on coolwalletS sdk",
   "main": "lib/index.js",
   "scripts": {
-    "build": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline"
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts"
   },
   "keywords": [
     "hardware wallet",

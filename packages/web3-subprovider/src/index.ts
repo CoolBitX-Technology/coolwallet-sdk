@@ -1,9 +1,9 @@
+import HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet'
+
 const HDKey = require('hdkey')
 const ethUtil = require('ethereumjs-util')
 const BRIDGE_URL = 'https://coolbitx-technology.github.io/coolwallet-connect/#/iframe'
 const MAX_INDEX = 1000
-
-import HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet'
 
 type Options = {
   accountsLength: number
@@ -54,7 +54,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     this._setupIframe()
   } // end of constructor
 
-  hasAccountKey() {
+  hasAccountKey():boolean {
     return !!(this.hdk && this.hdk.publicKey)
   }
 
@@ -87,7 +87,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     })
   }
 
-  async _getAccounts() {
+  async _getAccounts(): Promise<Array<string>> {
     return new Promise((resolve)=>{
       this.unlock()
         .then(()=>{
@@ -97,7 +97,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  _signTransaction(address, tx) {
+  _signTransaction(address:string, tx): Promise<string> {
     return new Promise((resolve, reject) => {
       this.unlock().then( () => {
         const addrIndex = this._indexFromAddress(address)
@@ -131,7 +131,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
   }
 
   // For personal_sign, we need to prefix the message:
-  _signPersonalMessage(withAccount, message) {
+  _signPersonalMessage(withAccount:string, message:string) : Promise<string> {
     return new Promise((resolve, reject) => {
       this.unlock().then( () => {
         const addrIndex = this._indexFromAddress(withAccount)
@@ -157,7 +157,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     })
   }
 
-  _signTypedData(withAccount, typedData) {
+  _signTypedData(withAccount:string, typedData:any) {
     return new Promise((resolve, reject) => {
       this.unlock().then( () => {
         const addrIndex = this._indexFromAddress(withAccount)
@@ -201,7 +201,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     })
   }
 
-  _deriveAddresses(from: number, to: number) {
+  _deriveAddresses(from: number, to: number) :string[] {
     const accounts = []
 
     for (let i = from; i < to; i++) {
@@ -212,30 +212,30 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     return accounts
   }
 
-  _padLeftEven(hex:string) {
+  _padLeftEven(hex:string):string {
     return hex.length % 2 !== 0 ? `0${hex}` : hex
   }
 
-  _normalize(buf:Buffer) {
+  _normalize(buf:Buffer): string {
     return this._padLeftEven(ethUtil.bufferToHex(buf).toLowerCase())
   }
 
-  _publicKeyFromIndex(i:number) {
+  _publicKeyFromIndex(i:number):Buffer {
     const dkey = this.hdk.derive(`m/${i}`)
     return dkey.publicKey
   }
 
-  _addressFromIndex(i:number) {
+  _addressFromIndex(i:number):string {
     const pubkeyBuf = this._publicKeyFromIndex(i)
     return this._addressFromPublicKey(pubkeyBuf)
   }
 
-  _addressFromPublicKey(publicKey: Buffer) {
+  _addressFromPublicKey(publicKey: Buffer):string {
     const address = ethUtil.pubToAddress(publicKey, true).toString('hex')
     return ethUtil.toChecksumAddress(address)
   }
 
-  _indexFromAddress(address:string) {
+  _indexFromAddress(address:string):number {
     const checksummedAddress = ethUtil.toChecksumAddress(address)
     let index = this.paths[checksummedAddress]
     if (typeof index === 'undefined') {
