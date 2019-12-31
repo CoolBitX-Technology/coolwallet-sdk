@@ -8,6 +8,8 @@ This provider opens up CoolWalletS Connect as a service bridge to handle transac
 
 ## Example Usage
 
+### Start Web3
+
 ```javascript
 
 // Starting web3 engine with CoolWallet Subprovider
@@ -29,6 +31,13 @@ const coolwallet = new CoolWalletSubProvider(options)
 engine.addProvider(coolwallet)
 engine.addProvider(new RpcSubprovider({ rpcUrl }))
 engine.start()
+
+const web3 = new Web3(engine);
+```
+
+### Usage
+
+```javascript
 
 // Use it as web3
 function handleGetAccount () {
