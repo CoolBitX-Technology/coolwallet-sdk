@@ -1,5 +1,5 @@
-import HDKey from 'hdkey'
-import ethUtil from 'ethereumjs-util'
+const HDKey = require('hdkey')
+const ethUtil = require('ethereumjs-util')
 const BRIDGE_URL = 'https://coolbitx-technology.github.io/coolwallet-connect/#/iframe'
 const MAX_INDEX = 1000
 
@@ -27,49 +27,25 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
 
   constructor(options: Options) {
     super({
-      getAccounts: async cb => {
-        try {
-          const accounts = await this.getAccounts()
-          if (accounts && accounts.length) {
-            cb(null, accounts)
-          } else {
-            cb(new Error('Failed to get accounts'))
-          }
-        } catch (error) {
-          cb(error)
-        }
+      getAccounts: callback => {
+        this._getAccounts()
+          .then(accounts => callback(null, accounts))
+          .catch(error => callback(error)) 
       },
-      signMessage: async (msgParams, cb) => {
-        try {
-          const result = await this.signMessage(msgParams.from, msgParams.data)
-          cb(null, result)
-        } catch (error) {
-          cb(error)
-        }
+      signMessage: async (msgParams, callback) => {
+        this._signPersonalMessage(msgParams.from, msgParams.data)
+          .then(signature => callback(null, signature))
+          .catch(error => callback(error))
       },
-      signPersonalMessage: async (msgParams, cb) => {
-        try {
-          const result = await this.signPersonalMessage(msgParams.from, msgParams.data)
-          cb(null, result)
-        } catch (error) {
-          cb(error)
-        }
+      signTransaction: async (txParams, callback) => {
+        this._signTransaction(txParams.from, txParams)
+          .then(tx => callback(null, tx))
+          .catch(error => callback(error))
       },
-      signTransaction: async (txParams, cb) => {
-        try {
-          const result = await this.signTransaction(txParams.from, txParams)
-          cb(null, result)
-        } catch (error) {
-          cb(error)
-        }
-      },
-      signTypedMessage: async (msgParams, cb) => {
-        try {
-          const result = await this.signTypedData(msgParams.from, msgParams.data)
-          cb(null, result)
-        } catch (error) {
-          cb(error)
-        }
+      signTypedMessage: async (msgParams, callback) => {
+        this._signTypedData(msgParams.from, msgParams.data)
+        .then(data => callback(null, data))
+        .catch(error => callback(error))
       },
     })
     this.options = options
@@ -80,8 +56,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
   } // end of constructor
 
   hasAccountKey() {
-    const result = !!(this.hdk && this.hdk.publicKey)
-    return result
+    return !!(this.hdk && this.hdk.publicKey)
   }
 
   unlock(addrIndex?: number) : Promise<string> {
@@ -113,14 +88,19 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     })
   }
 
-  getAccounts() {
-    return this._getAccounts(this.options.accountsOffset, this.options.accountsOffset + this.options.accountsLength)
+  async _getAccounts() {
+    return new Promise((resolve)=>{
+      this.unlock()
+        .then(()=>{
+          resolve(this._deriveAddresses(this.options.accountsOffset, this.options.accountsOffset + this.options.accountsLength))
+        })
+    })
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  signTransaction(address, tx) {
+  _signTransaction(address, tx) {
     return new Promise((resolve, reject) => {
-      this.unlock().then(_ => {
+      this.unlock().then( () => {
         const addrIndex = this._indexFromAddress(address)
         const publicKey = this._publicKeyFromIndex(addrIndex).toString('hex')
         const transaction = {
@@ -151,14 +131,10 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     })
   }
 
-  signMessage(withAccount, data) {
-    return this.signPersonalMessage(withAccount, data)
-  }
-
   // For personal_sign, we need to prefix the message:
-  signPersonalMessage(withAccount, message) {
+  _signPersonalMessage(withAccount, message) {
     return new Promise((resolve, reject) => {
-      this.unlock().then(_ => {
+      this.unlock().then( () => {
         const addrIndex = this._indexFromAddress(withAccount)
         const publicKey = this._publicKeyFromIndex(addrIndex).toString('hex')
         this._postMsgToBridge(
@@ -182,9 +158,9 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     })
   }
 
-  signTypedData(withAccount, typedData) {
+  _signTypedData(withAccount, typedData) {
     return new Promise((resolve, reject) => {
-      this.unlock().then(_ => {
+      this.unlock().then( () => {
         const addrIndex = this._indexFromAddress(withAccount)
         const publicKey = this._publicKeyFromIndex(addrIndex).toString('hex')
         this._postMsgToBridge(
@@ -219,7 +195,6 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
   _postMsgToBridge(msg: PostMessage, cb:Function) {
     msg.target = 'CWS-IFRAME'
     this.iframe.contentWindow.postMessage(msg, '*')
-
     window.addEventListener('message', ({ data }) => {
       if (data && data.action && data.action === `${msg.action}-reply`) {
         cb(data)
@@ -227,7 +202,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
     })
   }
 
-  _getAccounts(from: number, to: number) {
+  _deriveAddresses(from: number, to: number) {
     const accounts = []
 
     for (let i = from; i < to; i++) {
