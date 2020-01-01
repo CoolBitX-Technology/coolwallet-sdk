@@ -12,20 +12,22 @@ This is the monorepo of all the packages you need to build your own app with Coo
 
 To communicate with CoolWalletS device, you need to specify a bluetooth transport.
 
-| Package                                                         | Version                                                                 | Description           |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------- |
-| [`@coolwallets/transport-web-ble`](/packages/transport-web-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/transport-web-ble) | Web Bluetooth transport |
+| Package                                                                           | Version                                                                          | Description                      |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------- |
+| [`@coolwallets/transport-web-ble`](/packages/transport-web-ble)                   | ![version](https://img.shields.io/npm/v/@coolwallets/transport-web-ble)          | Web Bluetooth transport          |
 | [`@coolwallets/transport-react-native-ble`](/packages/transport-react-native-ble) | ![version](https://img.shields.io/npm/v/@coolwallets/transport-react-native-ble) | React-Native Bluetooth transport |
+
 ### Core
 
-| Package                                   | Version                                                    | Description          |
-| ----------------------------------------- | ---------------------------------------------------------- | -------------------- |
+| Package                               | Version                                                    | Description                                                               |
+| ------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------- |
 | [`@coolwallets/core`](/packages/core) | ![version](https://img.shields.io/npm/v/@coolwallets/core) | APDU commands, default encryptions and keypair generation for other SDKs. |
 
 ### Base App
 
-| Package                                   | Version                                                    | Description          |
-| ----------------------------------------- | ---------------------------------------------------------- | -------------------- |
+| Package                                   | Version                                                      | Description |
+| ----------------------------------------- | ------------------------------------------------------------ | ----------- |
+| [`@coolwallets/errors`](/packages/errors) | ![version](https://img.shields.io/npm/v/@coolwallets/errors) | Errors      |
 | [`@coolwallets/wallet`](/packages/cws-wallet) | ![version](https://img.shields.io/npm/v/@coolwallets/wallet) | Wallet creation, device pairing and basic settings. |
 
 ### Coin Apps
@@ -42,8 +44,8 @@ Currently supported coins: BTC, ETH, BNB, EOS, XLM, XRP, ZEN. Open an issue if y
 
 If you want to build your own app with this sdk, you might find the following repos useful:
 
-* [React Example](https://github.com/antoncoding/cws-web-ble-demo) (with `web-ble`)
+- [React Example](https://github.com/antoncoding/cws-web-ble-demo) (with `web-ble`)
 
-* [React-Native Example](https://github.com/kunmingLiu/cws-rn-ble-demo) (with `rn-ble`)
+- [React-Native Example](https://github.com/kunmingLiu/cws-rn-ble-demo) (with `rn-ble`)
 
 If you build something new, welcome to contact us to put your work in the list.
