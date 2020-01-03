@@ -1,6 +1,5 @@
-import Transport from '@coolwallets/transport'
-
 declare module '@coolwallets/core' {
+  type Transport = import("@coolwallets/transport").default;
   export namespace apdu {
     export namespace coin {
       export function authGetExtendedKey(transport: Transport, signature: string): Promise<string>
@@ -70,7 +69,9 @@ declare module '@coolwallets/core' {
       ): Promise<{ r: string; s: string } | string | Buffer>
     }
 
-    export namespace txUtil {}
+    export namespace util {
+      export function addressIndexToKeyId(coinType:string, addressIndex:number): string
+    }
   }
 
   export namespace crypto {
