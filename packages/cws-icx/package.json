@@ -23,7 +23,7 @@
   "license": "ISC",
   "dependencies": {
     "elliptic": "^6.5.1",
-    "@coolwallets/core": "^0.0.14",
+    "@coolwallets/core": "^0.0.17",
     "@coolwallets/coin": "^0.1.0",
     "@coolwallets/transport": "^0.0.10",
     "js-sha3": "^0.8.0"

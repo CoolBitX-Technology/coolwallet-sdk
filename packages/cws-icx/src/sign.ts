@@ -23,8 +23,8 @@ export const signTransaction = async (
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
   const phraseToSign = icxUtil.generateHashKey(rawTx)
   const rawPayload = Buffer.from(phraseToSign, 'utf-8')
-  const dataForSE = core.txFlow.prepareSEData(keyId, rawPayload, coinType)
-  const signature = await core.txFlow.sendDataToCoolWallet(
+  const dataForSE = core.flow.prepareSEData(keyId, rawPayload, coinType)
+  const signature = await core.flow.sendDataToCoolWallet(
     transport,
     appId,
     appPrivateKey,
