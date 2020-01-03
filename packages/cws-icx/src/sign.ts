@@ -1,5 +1,6 @@
 import * as icxUtil from './util'
 import { core } from '@coolwallets/core'
+// eslint-disable-next-line no-unused-vars
 import Transport from '@coolwallets/transport'
 
 /**
