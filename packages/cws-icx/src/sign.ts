@@ -5,10 +5,6 @@ import Transport from '@coolwallets/transport'
 
 /**
  * Sign ICON Transaction
- * @param {string} coinType
- * @param {object|string} rawTx
- * @param {number} addressIndex
- * @param {string} publicKey
  */
 export const signTransaction = async (
   transport: Transport,

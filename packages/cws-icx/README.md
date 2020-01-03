@@ -51,6 +51,7 @@ const txObj = new IconBuilder.IcxTransactionBuilder()
     .version(IconConverter.toBigNumber(3))
     .timestamp(timestamp)
     .build();
+
 // Returns raw transaction object
 const rawTx = IconConverter.toRawTransaction(txObj);
 

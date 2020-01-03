@@ -10,9 +10,7 @@ export default class ICX extends ECDSACoin {
   }
 
   /**
-   * Get Ethereum address by index
-   * @param {number} addressIndex
-   * @return {string}
+   * Get ICON address by index
    */
   async getAddress(addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(addressIndex)
