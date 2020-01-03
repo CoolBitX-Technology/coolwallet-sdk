@@ -11,6 +11,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
+    "@coolwallets/transport": "^0.0.9",
     "@coolwallets/errors": "^0.0.4",
     "bip66": "^1.1.5",
     "key-encoder": "^2.0.3",

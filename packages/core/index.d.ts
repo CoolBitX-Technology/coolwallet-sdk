@@ -1,8 +1,10 @@
+import Transport from '@coolwallets/transport'
+
 declare module '@coolwallets/core' {
   export namespace apdu {
     export namespace coin {
       export function authGetExtendedKey(transport: Transport, signature: string): Promise<string>
-      export function getAccountExtendedKey(transport: Trasnport, coinType: string, accIndex: string): Promise<string>
+      export function getAccountExtendedKey(transport: Transport, coinType: string, accIndex: string): Promise<string>
       export function getEd25519AccountPublicKey(transport: Transport, coinType: string, accIndex:string): Promise<string>
     }
 
