@@ -26,6 +26,7 @@ module.exports = {
     ]
   },
   externals: {
+    '@coolwallets/transport': '@coolwallets/transport',
     '@coolwallets/core': '@coolwallets/core',
     'bip32': 'bip32'
   }
