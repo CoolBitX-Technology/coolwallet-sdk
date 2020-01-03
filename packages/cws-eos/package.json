@@ -10,10 +10,10 @@
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "keywords": [
-    "icx",
-    "icon",
+    "eos",
     "hardwarewallet",
     "coolwallets",
+    "coolbitx",
     "javascript",
     "transaction",
     "signing",

@@ -18,7 +18,7 @@ export const hashTransferData = (data: TransferData): string => {
   b2.writeUint64(encodeName(to, false))
   var arr = quantity.split(' ')
 
-  b2.writeInt64(arr[0].replace('.', ''))
+  b2.writeInt64(Number(arr[0].replace('.', '')))
   var symbol = arr[1]
   var pad = '\0'.repeat(7 - symbol.length)
   var precision = arr[0].split('.')[1].length

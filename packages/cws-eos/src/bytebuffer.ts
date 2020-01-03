@@ -26,7 +26,7 @@ export const toTransferByteBuffer = (txObject: Transaction) => {
     b2.writeUint64(encodeName(txObject.data.to, false))
     let arr = txObject.data.quantity.split(' ')
 
-    b2.writeUInt64(arr[0].replace('.', ''))
+    b2.writeInt64(Number(arr[0].replace('.', '')))
 
     let symbol = arr[1]
     let pad = '\0'.repeat(7 - symbol.length)
