@@ -15,7 +15,7 @@ module.exports = {
         "Buffer": true,
         "process": true
     },    
-	// "extends": ["airbnb"],
+	"extends": ["airbnb"],
     "parserOptions": {
         "ecmaFeatures": {
             "experimentalObjectRestSpread": true,
@@ -33,7 +33,7 @@ module.exports = {
         "no-extra-boolean-cast": "off",
         "no-unreachable": "warn",
         "no-case-declarations": "warn",
-        "key-spacing": "off",
+        "key-spacing": "warn",
         "jsx-quotes": [ 2, "prefer-single" ],
         "max-len": [ "error", { "code": 130,"ignoreUrls": true, "ignoreStrings": true, "ignoreTrailingComments": true } ],
 		"object-curly-spacing": [ "warn", "always" ],
