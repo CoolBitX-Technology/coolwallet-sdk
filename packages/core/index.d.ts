@@ -65,7 +65,7 @@ declare module '@coolwallets/core' {
         txPrepareComplteCallback?: Function,
         authorizedCallback?: Function,
         return_canonical?: Boolean
-      ): Promise<{ signature: { r: string; s: string } | string | Buffer; cancel: boolean }>
+      ): Promise<{ r: string; s: string } | string | Buffer>
     }
 
     export namespace txUtil {}
