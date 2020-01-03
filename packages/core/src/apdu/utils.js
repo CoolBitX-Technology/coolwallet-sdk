@@ -78,6 +78,12 @@ export const throwSDKError = (command, code) => {
         default: throw SDKUnknownWithCode(command, code)
       }
     }
+    case 'GET_PAIR_PWD':{
+      switch(code){
+        case '6a82': throw new Errors.NotRegistered()
+        default: throw SDKUnknownWithCode(command, code)
+      }
+    }
     case 'REGISTER': {
       switch(code) {
         case '6985': throw new Errors.CardLocked()
