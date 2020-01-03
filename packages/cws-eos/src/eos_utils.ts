@@ -1,42 +1,43 @@
-import ByteBuffer from 'bytebuffer'
-import { encodeName, toTransferByteBuffer } from './bytebuffer'
+import ByteBuffer from 'bytebuffer';
+// eslint-disable-next-line
+import { encodeName, toTransferByteBuffer } from './bufferUtil';
 
-type TransferData = import('./types').TransferData
-type Transaction = import('./types').Transaction
+type TransferData = import('./types').TransferData;
+type Transaction = import('./types').Transaction;
 
 /**
  * encode data object in action
  */
 export const hashTransferData = (data: TransferData): string => {
-  const from = data.from
-  const to = data.to
-  const quantity = data.quantity
-  const memo = data.memo
+  const { from } = data;
+  const { to } = data;
+  const { quantity } = data;
+  const { memo } = data;
 
-  var b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-  b2.writeUint64(encodeName(from, false))
-  b2.writeUint64(encodeName(to, false))
-  var arr = quantity.split(' ')
+  const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN);
+  b2.writeUint64(encodeName(from, false));
+  b2.writeUint64(encodeName(to, false));
+  const arr = quantity.split(' ');
 
-  b2.writeInt64(Number(arr[0].replace('.', '')))
-  var symbol = arr[1]
-  var pad = '\0'.repeat(7 - symbol.length)
-  var precision = arr[0].split('.')[1].length
-  b2.append(String.fromCharCode(precision) + symbol + pad)
-  b2.writeVString(memo)
-  return b2.copy(0, b2.offset).toString('hex')
-}
+  b2.writeInt64(Number(arr[0].replace('.', '')));
+  const symbol = arr[1];
+  const pad = '\0'.repeat(7 - symbol.length);
+  const precision = arr[0].split('.')[1].length;
+  b2.append(String.fromCharCode(precision) + symbol + pad);
+  b2.writeVString(memo);
+  return b2.copy(0, b2.offset).toString('hex');
+};
 
 /**
  * concat chainId, signBuf, contextFreeData into buff
  */
-export const genSignBuf = (txObject: Transaction, chain_id: string): Buffer => {
-  const binary = toTransferByteBuffer(txObject).toBinary()
-  const buf = Buffer.from(binary, 'binary')
-  const chainIdBuf = Buffer.from(chain_id, 'hex')
-  const packedContextFreeData = Buffer.from(new Uint8Array(32))
-  return Buffer.concat([chainIdBuf, buf, packedContextFreeData])
-}
+export const genSignBuf = (txObject: Transaction, chainId: string): Buffer => {
+  const binary = toTransferByteBuffer(txObject).toBinary();
+  const buf = Buffer.from(binary, 'binary');
+  const chainIdBuf = Buffer.from(chainId, 'hex');
+  const packedContextFreeData = Buffer.from(new Uint8Array(32));
+  return Buffer.concat([chainIdBuf, buf, packedContextFreeData]);
+};
 
 /**
  * return signed transaction object ready to broadcast
@@ -44,15 +45,15 @@ export const genSignBuf = (txObject: Transaction, chain_id: string): Buffer => {
  * @param {string} signature
  */
 export const genSignedTxV1 = (txObject: Transaction, signature: string) => {
-  let expiration = new Date(txObject.expiration * 1000).toISOString().split('.')[0]
+  const expiration = new Date(txObject.expiration * 1000).toISOString().split('.')[0];
 
-  const hashedData = hashTransferData(txObject.data)
-  console.log(`data hash: ${hashedData}`)
+  const hashedData = hashTransferData(txObject.data);
+  console.log(`data hash: ${hashedData}`);
   const signedTransaction = {
     signatures: [signature],
     compression: 'none',
     transaction: {
-      expiration: expiration,
+      expiration,
       ref_block_num: txObject.ref_block_num,
       ref_block_prefix: txObject.ref_block_prefix,
       max_net_usage_words: txObject.max_net_usage_words,
@@ -64,11 +65,11 @@ export const genSignedTxV1 = (txObject: Transaction, signature: string) => {
           account: 'eosio.token',
           name: 'transfer',
           authorization: [{ actor: txObject.data.from, permission: 'active' }],
-          data: hashedData,
-        },
+          data: hashedData
+        }
       ],
-      transaction_extensions: [],
-    },
-  }
-  return signedTransaction
-}
+      transaction_extensions: []
+    }
+  };
+  return signedTransaction;
+};

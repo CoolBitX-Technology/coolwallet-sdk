@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 export type Transaction = {
   expiration:number
   ref_block_num:number
