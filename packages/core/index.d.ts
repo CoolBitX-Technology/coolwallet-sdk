@@ -52,7 +52,7 @@ declare module '@coolwallets/core' {
       export function versionCheck(transport: Transport, requiredSEVersion: number): Promise<void>
     }
 
-    export namespace txFlow {
+    export namespace flow {
       export function prepareSEData(keyId: string, rawData: Buffer | Array<Buffer>, readType: string): Buffer
       export function sendDataToCoolWallet(
         transport: Transport,
