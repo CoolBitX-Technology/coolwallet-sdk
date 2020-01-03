@@ -39,6 +39,7 @@ Currently supported coins: BTC, ETH, BNB, EOS, XLM, XRP, ZEN. Open an issue if y
 | Package                                 | Version                                                   | Description              |
 | --------------------------------------- | --------------------------------------------------------- | ------------------------ |
 | [`@coolwallets/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallets/eth) | Ethereum Application API |
+| [`@coolwallets/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallets/icx) | Icon Application API |
 
 ## Examples
 
