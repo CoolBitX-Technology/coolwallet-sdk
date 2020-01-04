@@ -1,13 +1,13 @@
-import * as derivation from './derive'
+import * as derivation from './derive.js';
 
 export default class ECDSACoin {
   constructor(transport, appPrivateKey, appId, coinType) {
-    this.transport = transport
-    this.appPrivateKey = appPrivateKey
-    this.appId = appId
-    this.coinType = coinType
+    this.transport = transport;
+    this.appPrivateKey = appPrivateKey;
+    this.appId = appId;
+    this.coinType = coinType;
 
-    this.getPublicKey = this.getPublicKey.bind(this)
+    this.getPublicKey = this.getPublicKey.bind(this);
   }
 
   /**
@@ -22,9 +22,9 @@ export default class ECDSACoin {
       this.appPrivateKey,
       this.coinType,
       0
-    )
-    const nodeInfo = derivation.derivePubKey(accountPublicKey, accountChainCode, 0, addressIndex)
-    return nodeInfo.publicKey
+    );
+    const nodeInfo = derivation.derivePubKey(accountPublicKey, accountChainCode, 0, addressIndex);
+    return nodeInfo.publicKey;
   }
 
   /**
@@ -38,8 +38,12 @@ export default class ECDSACoin {
       this.appPrivateKey,
       this.coinType,
       0
-    )
-    const { parentPublicKey, parentChainCode } = derivation.derivePubKey(accountPublicKey, accountChainCode, 0)
-    return { parentPublicKey, parentChainCode }
+    );
+    const { parentPublicKey, parentChainCode } = derivation.derivePubKey(
+      accountPublicKey,
+      accountChainCode,
+      0
+    );
+    return { parentPublicKey, parentChainCode };
   }
 }

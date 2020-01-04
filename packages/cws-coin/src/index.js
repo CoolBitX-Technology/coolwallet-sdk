@@ -1,4 +1,4 @@
-import ECDSACoin from './ECDSA'
-import EDDSACoin from './EDDSA'
+import ECDSACoin from './ECDSA';
+import EDDSACoin from './EDDSA';
 
-export { ECDSACoin, EDDSACoin }
+export { ECDSACoin, EDDSACoin };

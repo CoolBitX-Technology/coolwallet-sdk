@@ -1,13 +1,13 @@
-import * as derivation from './derive'
+import * as derivation from './derive.js';
 
 export default class EDDSACoin {
   constructor(transport, appPrivateKey, appId, coinType) {
-    this.transport = transport
-    this.appPrivateKey = appPrivateKey
-    this.appId = appId
-    this.coinType = coinType
+    this.transport = transport;
+    this.appPrivateKey = appPrivateKey;
+    this.appId = appId;
+    this.coinType = coinType;
 
-    this.getPublicKey = this.getPublicKey.bind(this)
+    this.getPublicKey = this.getPublicKey.bind(this);
   }
 
   /**
@@ -18,6 +18,12 @@ export default class EDDSACoin {
    * @returns {Promise<string>}
    */
   async getPublicKey(accountIndex) {
-    return await derivation.getEd25519PublicKey(this.transport, this.appId, this.appPrivateKey, this.coinType, accountIndex)
+    return derivation.getEd25519PublicKey(
+      this.transport,
+      this.appId,
+      this.appPrivateKey,
+      this.coinType,
+      accountIndex
+    );
   }
 }
