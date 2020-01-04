@@ -14,8 +14,8 @@ module.exports = {
         "__dirname": false,
         "Buffer": true,
         "process": true
-    },    
-	"extends": ["airbnb"],
+  },
+	extends: ["airbnb"],
     "parserOptions": {
         "ecmaFeatures": {
             "experimentalObjectRestSpread": true,
@@ -24,22 +24,35 @@ module.exports = {
         "ecmaVersion": 8,
         "sourceType": "module"
     },
-    "plugins": [
-        "react"
-    ],
+    "plugins": [ "react" ],
     "rules": {
         "no-console":  "off",
         "no-unused-vars": "warn",
-        "no-extra-boolean-cast": "off",
         "no-unreachable": "warn",
         "no-case-declarations": "warn",
         "key-spacing": "warn",
         "jsx-quotes": [ 2, "prefer-single" ],
-        "max-len": [ "error", { "code": 130,"ignoreUrls": true, "ignoreStrings": true, "ignoreTrailingComments": true } ],
 		"object-curly-spacing": [ "warn", "always" ],
         "comma-dangle": "off",
         "no-mixed-spaces-and-tabs": "off",
         "eqeqeq": "warn",
-        "block-scoped-var": "error"
-    }
+        "block-scoped-var": "error",
+        "import/extensions": [ // import ts files
+            "error",
+            "ignorePackages",
+            {
+              "js": "never",
+              "jsx": "never",
+              "ts": "never",
+              "tsx": "never"
+            }
+         ]
+    },
+    "settings": {
+        "import/resolver": {
+          "node": {
+            "extensions": [".js", ".jsx", ".ts", ".tsx"]
+          }
+        }
+      },
 };
