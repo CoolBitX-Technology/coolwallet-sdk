@@ -4,7 +4,8 @@
   "description": "Basic coin class for key derivation",
   "main": "lib/index.js",
   "scripts": {
-    "build": "./node_modules/.bin/webpack"
+    "build": "babel -d lib/ src",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -14,10 +15,8 @@
     "@coolwallets/transport": "^0.0.10"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.2",
-    "@babel/preset-env": "^7.7.1",
-    "babel-loader": "^8.0.6",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1"
   }
 }
