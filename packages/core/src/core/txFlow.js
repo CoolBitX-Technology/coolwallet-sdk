@@ -1,6 +1,6 @@
-import * as txUtil from './txUtil'
-import * as rlp from 'rlp'
-import { sayHi } from '../apdu/control'
+import * as rlp from 'rlp';
+import * as txUtil from './txUtil.js';
+import { sayHi } from '../apdu/control.js';
 
 /**
  * @description Prepare RLP Data for CoolWallet
@@ -10,15 +10,15 @@ import { sayHi } from '../apdu/control'
  * @return {Buffer}
  */
 export const prepareSEData = (keyId, rawData, readType) => {
-  let inputIdBuffer = Buffer.from('00', 'hex')
-  let signDataBuffer = Buffer.from('00', 'hex')
-  let readTypeBuffer = Buffer.from(readType, 'hex')
-  let keyIdBuffer = Buffer.from(keyId, 'hex')
+  const inputIdBuffer = Buffer.from('00', 'hex');
+  const signDataBuffer = Buffer.from('00', 'hex');
+  const readTypeBuffer = Buffer.from(readType, 'hex');
+  const keyIdBuffer = Buffer.from(keyId, 'hex');
 
-  let data = [inputIdBuffer, signDataBuffer, readTypeBuffer, keyIdBuffer, rawData]
-  let dataForSE = rlp.encode(data)
-  return dataForSE
-}
+  const data = [inputIdBuffer, signDataBuffer, readTypeBuffer, keyIdBuffer, rawData];
+  const dataForSE = rlp.encode(data);
+  return dataForSE;
+};
 
 /**
  * @description Send Data to CoolWallet
@@ -48,22 +48,27 @@ export const sendDataToCoolWallet = async (
   authorizedCallback = null,
   return_canonical = true
 ) => {
-  let hexForSE = data.toString('hex')
+  const hexForSE = data.toString('hex');
 
-  await sayHi(transport, appId)
+  await sayHi(transport, appId);
 
-  if (typeof preAction === 'function') await preAction()
+  if (typeof preAction === 'function') await preAction();
 
-  const commandSignature = txUtil.signForCoolWallet(appPrivateKey, hexForSE, P1, P2)
+  const commandSignature = txUtil.signForCoolWallet(appPrivateKey, hexForSE, P1, P2);
   const encryptedSignature = await txUtil.getSingleEncryptedSignature(
     transport,
     hexForSE,
     P1,
     commandSignature,
     txPrepareComplteCallback
-  )
-  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback)
+  );
+  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
 
-  const signature = txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, isEDDSA, return_canonical)
-  return signature
-}
+  const signature = txUtil.decryptSignatureFromSE(
+    encryptedSignature,
+    signatureKey,
+    isEDDSA,
+    return_canonical,
+  );
+  return signature;
+};

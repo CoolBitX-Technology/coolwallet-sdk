@@ -1,8 +1,8 @@
-import { sign } from '../crypto/sign'
-import { aes256CbcDecrypt } from '../crypto/encryptions'
-import * as signatureTools from '../crypto/signature'
-import COMMAND from '../config/command'
-import * as apdu from '../apdu'
+import { sign } from '../crypto/sign.js';
+import { aes256CbcDecrypt } from '../crypto/encryptions.js';
+import * as signatureTools from '../crypto/signature.js';
+import COMMAND from '../config/command.js';
+import * as apdu from '../apdu/index.js';
 
 /**
  * get command signature for CoolWalletS
@@ -13,12 +13,12 @@ import * as apdu from '../apdu'
  * @return {String} signature
  */
 export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
-  const command = COMMAND.TX_PREPARE
-  const prefix = command.CLA + command.INS + P1 + P2
-  const payload = prefix + data
-  const signature_buffer = sign(Buffer.from(payload, 'hex'), appPrivateKey)
-  return signature_buffer.toString('hex')
-}
+  const command = COMMAND.TX_PREPARE;
+  const prefix = command.CLA + command.INS + P1 + P2;
+  const payload = prefix + data;
+  const signatureBuuffer = sign(Buffer.from(payload, 'hex'), appPrivateKey);
+  return signatureBuuffer.toString('hex');
+};
 
 /**
  * do TX_PREP and get encrypted signature.
@@ -30,20 +30,20 @@ export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
  *
  */
 export const getSingleEncryptedSignature = async (transport, hexForSE, P1, signature, txPrepareComplteCallback = null) => {
-  let encryptedSignature
-  let sendData = hexForSE + signature
-  let patch = Math.ceil(sendData.length / 500)
+  let encryptedSignature;
+  const sendData = hexForSE + signature;
+  const patch = Math.ceil(sendData.length / 500);
   for (let i = 0; i < patch; i++) {
-    let patchData = sendData.substr(i * 500, 500)
-    let p2 = patch === 1 ? '00' : (i === patch - 1 ? '8' : '0') + (i + 1)
-    encryptedSignature = await apdu.tx.prepTx(transport, patchData, P1, p2)
+    const patchData = sendData.substr(i * 500, 500);
+    const p2 = patch === 1 ? '00' : (i === patch - 1 ? '8' : '0') + (i + 1);
+    encryptedSignature = await apdu.tx.prepTx(transport, patchData, P1, p2);
   }
-  await apdu.tx.finishPrepare(transport)
+  await apdu.tx.finishPrepare(transport);
 
-  if (typeof txPrepareComplteCallback === 'function') txPrepareComplteCallback()
+  if (typeof txPrepareComplteCallback === 'function') txPrepareComplteCallback();
 
-  return encryptedSignature
-}
+  return encryptedSignature;
+};
 
 /**
  * Send signing data to CoolWalletS, wait for encrypted signatures.
@@ -52,17 +52,19 @@ export const getSingleEncryptedSignature = async (transport, hexForSE, P1, signa
  * @returns {Promise<Array<{encryptedSignature:String, publicKey:String}>>}
  */
 export const getEncryptedSignatures = async (transport, TxpPrepCommands) => {
-  let sigArr = []
+  const sigArr = [];
   for (const command of TxpPrepCommands) {
-    const { encodedData, P1, P2, publicKey } = command
-    const encryptedSignature = await apdu.tx.prepTx(transport, encodedData, P1, P2)
+    const {
+      encodedData, P1, P2, publicKey
+    } = command;
+    const encryptedSignature = await apdu.tx.prepTx(transport, encodedData, P1, P2);
     if (encryptedSignature !== '' && encryptedSignature !== null) {
-      sigArr.push({ encryptedSignature, publicKey })
+      sigArr.push({ encryptedSignature, publicKey });
     }
   }
-  await apdu.tx.finishPrepare(transport)
-  return sigArr
-}
+  await apdu.tx.finishPrepare(transport);
+  return sigArr;
+};
 
 /**
  * get the key used to encrypt transaction signature by CWS
@@ -71,46 +73,46 @@ export const getEncryptedSignatures = async (transport, TxpPrepCommands) => {
  * @returns {Promise<String>}
  */
 export const getCWSEncryptionKey = async (transport, authorizedCallback) => {
-  let success = await apdu.tx.getTxDetail(transport)
-  if (!success) return undefined
+  const success = await apdu.tx.getTxDetail(transport);
+  if (!success) return undefined;
 
-  if (typeof authorizedCallback === 'function') authorizedCallback()
+  if (typeof authorizedCallback === 'function') authorizedCallback();
 
-  const signatureKey = await apdu.tx.getSignatureKey(transport)
+  const signatureKey = await apdu.tx.getSignatureKey(transport);
 
-  await apdu.tx.clearTransaction(transport)
-  await apdu.control.powerOff(transport)
-  return signatureKey
-}
+  await apdu.tx.clearTransaction(transport);
+  await apdu.control.powerOff(transport);
+  return signatureKey;
+};
 
 /**
  * @description Decrypt Data from CoolWallet
  * @param {String} encryptedSignature
  * @param {String} signatureKey
  * @param {Boolean} isEDDSA
- * @param {Boolean} return_canonical
+ * @param {Boolean} returnCanonical
  * @return {{r:string, s:string} | string } canonical signature or DER signature
  */
-export const decryptSignatureFromSE = (encryptedSignature, signatureKey, isEDDSA = false, return_canonical = true) => {
-  let iv = Buffer.alloc(16)
-  iv.fill(0)
-  const derSigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature)
+export const decryptSignatureFromSE = (encryptedSignature, signatureKey, isEDDSA = false, returnCanonical = true) => {
+  const iv = Buffer.alloc(16);
+  iv.fill(0);
+  const derSigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature);
 
-  if (isEDDSA) return derSigBuff
+  if (isEDDSA) return derSigBuff;
 
-  const sigObj = signatureTools.parseDERsignature(derSigBuff.toString('hex'))
-  const canonicalSignature = signatureTools.getCanonicalSignature(sigObj)
-  if (return_canonical) return canonicalSignature
+  const sigObj = signatureTools.parseDERsignature(derSigBuff.toString('hex'));
+  const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
+  if (returnCanonical) return canonicalSignature;
 
-  return signatureTools.convertToDER(canonicalSignature)
-}
+  return signatureTools.convertToDER(canonicalSignature);
+};
 
 /**
  * @param {String} coinType
  * @param {String} Number
  */
 export const addressIndexToKeyId = (coinType, addressIndex) => {
-  addressIndex = addressIndex.toString(16).padStart(4, '0')
-  const keyId = coinType + '0000' + addressIndex
-  return keyId
-}
+  const indexHex = addressIndex.toString(16).padStart(4, '0');
+  const keyId = `${coinType}0000${indexHex}`;
+  return keyId;
+};
