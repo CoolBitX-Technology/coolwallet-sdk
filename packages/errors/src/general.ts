@@ -1,9 +1,10 @@
-import { SDKError } from './SDKError'
+/* eslint-disable max-classes-per-file  */
+import SDKError from './SDKError';
 
 export class PleaseResetHardware extends SDKError {
   constructor() {
     super('PleaseResetHardware', 'Bad Firmware status. Please reset your CoolWalletS.');
-    Object.setPrototypeOf(this, new.target.prototype);;
+    Object.setPrototypeOf(this, new.target.prototype);
     this.constructor = SDKError;
   }
 }
@@ -11,7 +12,7 @@ export class PleaseResetHardware extends SDKError {
 export class FirmwareVersionTooLow extends SDKError {
   constructor(requiredVersion:number) {
     super('FirmwareVersionTooLow', `Firmware version too low. Please update to ${requiredVersion}`);
-    Object.setPrototypeOf(this, new.target.prototype);;
+    Object.setPrototypeOf(this, new.target.prototype);
     this.constructor = SDKError;
   }
 }
@@ -19,17 +20,15 @@ export class FirmwareVersionTooLow extends SDKError {
 export class CoinNotSupported extends SDKError {
   constructor() {
     super('CoinNotSupported', 'Cion not supported. Try update your hardware');
-    Object.setPrototypeOf(this, new.target.prototype);;
+    Object.setPrototypeOf(this, new.target.prototype);
     this.constructor = SDKError;
   }
 }
 
-
-
 export class OperationCanceled extends SDKError {
   constructor() {
     super('OperationCanceled', 'Operation canceled by the user.');
-    Object.setPrototypeOf(this, new.target.prototype);;
+    Object.setPrototypeOf(this, new.target.prototype);
     this.constructor = SDKError;
   }
 }
