@@ -15,7 +15,7 @@ module.exports = {
         "Buffer": true,
         "process": true
   },
-	extends: ["airbnb", "prettier"],
+	extends: ["airbnb"],
     "parserOptions": {
         "ecmaFeatures": {
             "experimentalObjectRestSpread": true,
