@@ -9,7 +9,7 @@ export const assemblyCommandAndData = (cla, ins, p1, p2, oriData) => {
   // flag = true;
   let packets = '';
 
-  if (!!oriData) {
+  if (oriData) {
     packets = oriData;
     const data = packets.match(/.{2}/g);
     const checksum = getCheckSum(data);
