@@ -1,4 +1,8 @@
-export * from './SDKError';
+import SDKError from './SDKError';
+
+export {
+  SDKError
+};
 export * from './transport';
 export * from './transaction';
 export * from './pairing';
