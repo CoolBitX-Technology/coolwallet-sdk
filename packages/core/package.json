@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/core",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Light core library of CoolWalletS apdu commands.",
   "main": "lib/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@coolwallets/transport": "^0.0.10",
-    "@coolwallets/errors": "^0.0.5",
+    "@coolwallets/errors": "^0.0.6",
     "bip66": "^1.1.5",
     "key-encoder": "^2.0.3",
     "rlp": "^2.2.3"
