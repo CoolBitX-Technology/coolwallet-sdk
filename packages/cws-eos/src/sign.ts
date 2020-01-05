@@ -77,7 +77,7 @@ export default async function signTransfer(
 ) {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
   const signBuf = genSignBuf(txObject, chainId);
-  const dataForSE = core.flow.prepareSEData(keyId, signBuf, coinType);
+  const dataForSE = core.flow.prepareSEData(keyId, signBuf, 'f6');
   const canonicalSignature = await core.flow.sendDataToCoolWallet(
     transport,
     appId,

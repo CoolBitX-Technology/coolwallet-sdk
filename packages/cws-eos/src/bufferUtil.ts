@@ -10,7 +10,7 @@ const charidx = (ch: string) => {
   return idx;
 };
 
-export const encodeName = (name: string, littleEndian: boolean = true): Long => {
+export const encodeName = (name: string, littleEndian: boolean = true): number => {
   if (name.length > 12) throw new TypeError('A name can be up to 12 characters long');
 
   let bitstr = '';
@@ -34,8 +34,8 @@ export const encodeName = (name: string, littleEndian: boolean = true): Long => 
     const n = Number(b).toString(16);
     leHex += (n.length === 1 ? '0' : '') + n;
   });
-
-  return Long.fromString(leHex, true, 16);
+  return parseInt(leHex, 16);
+  // return Long.fromString(leHex, true, 16);
 };
 
 export const toTransferByteBuffer = (txObject: Transaction) => {
