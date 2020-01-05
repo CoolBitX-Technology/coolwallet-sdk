@@ -1,5 +1,4 @@
 import ByteBuffer from 'bytebuffer';
-// eslint-disable-next-line
 import { encodeName, toTransferByteBuffer } from './bufferUtil';
 
 type TransferData = import('./types').TransferData;

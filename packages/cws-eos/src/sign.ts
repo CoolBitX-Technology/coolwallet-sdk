@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import BigInteger from 'bigi';
 import base58 from 'bs58';
 
-// eslint-disable-next-line
 import { genSignBuf, genSignedTxV1 } from './eos_utils';
 
 type Transport = import('@coolwallets/transport').default;

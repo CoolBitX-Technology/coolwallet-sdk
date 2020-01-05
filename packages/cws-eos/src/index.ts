@@ -1,5 +1,4 @@
 import { ECDSACoin } from '@coolwallets/coin';
-// eslint-disable-next-line
 import signTransfer from './sign';
 
 type Transport = import('@coolwallets/transport').default;
