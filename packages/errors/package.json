@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/errors",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Error objects for CoolWalletS SDK",
   "main": "lib/index.js",
   "scripts": {
