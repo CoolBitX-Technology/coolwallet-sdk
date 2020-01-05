@@ -7,7 +7,12 @@ type Transaction = import('./types').Transaction;
 export default class EOS extends ECDSACoin {
   public chainId: string;
 
-  constructor(transport: Transport, appPrivateKey: string, appId: string, chainId: undefined | string) {
+  constructor(
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    chainId: undefined | string
+  ) {
     super(transport, appPrivateKey, appId, 'C2');
     this.chainId = chainId || 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906';
   }
@@ -30,7 +35,7 @@ export default class EOS extends ECDSACoin {
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ) {
-    const publicKeyToUse = (publicKey === undefined)
+    const publicKeyToUse = publicKey === undefined
       ? await this.getPublicKey(addressIndex)
       : publicKey;
 

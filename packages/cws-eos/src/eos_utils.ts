@@ -8,10 +8,12 @@ type Transaction = import('./types').Transaction;
  * encode data object in action
  */
 export const hashTransferData = (data: TransferData): string => {
-  const { from } = data;
-  const { to } = data;
-  const { quantity } = data;
-  const { memo } = data;
+  const {
+    from,
+    to,
+    quantity,
+    memo,
+  } = data;
 
   const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN);
   b2.writeUint64(encodeName(from, false));
@@ -47,7 +49,6 @@ export const genSignedTxV1 = (txObject: Transaction, signature: string) => {
   const expiration = new Date(txObject.expiration * 1000).toISOString().split('.')[0];
 
   const hashedData = hashTransferData(txObject.data);
-  console.log(`data hash: ${hashedData}`);
   const signedTransaction = {
     signatures: [signature],
     compression: 'none',
