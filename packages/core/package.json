@@ -14,7 +14,8 @@
     "@coolwallets/errors": "^0.0.6",
     "bip66": "^1.1.5",
     "key-encoder": "^2.0.3",
-    "rlp": "^2.2.3"
+    "rlp": "^2.2.3",
+    "bn.js": "^5.1.1"
   },
   "repository": {
     "type": "git",

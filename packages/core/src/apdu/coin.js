@@ -28,9 +28,17 @@ export const getAccountExtendedKey = async (transport, coinType, accIndex) => {
  * @param {Transport} transport
  * @param {string} coinType P1
  * @param {string} accIndex P2
+ * @param {string} protocol
  * @return {Promise<string>}
  */
-export const getEd25519AccountPublicKey = async (transport, coinType, accIndex) => {
-  const { outputData } = await executeCommand(transport, 'GET_ED25519_ACC_PUBKEY', 'SE', null, coinType, accIndex);
-  return outputData;
+export const getEd25519AccountPublicKey = async (transport, coinType, accIndex, protocol) => {
+  if (protocol === 'BIP44') {
+    const { outputData } = await executeCommand(transport, 'GET_ED25519_ACC_PUBKEY', 'SE', null, coinType, accIndex);
+    return outputData;
+  }
+  if (protocol === 'SLIP0010') {
+    const { outputData } = await executeCommand(transport, 'GET_XLM_ACC_PUBKEY', 'SE', null, coinType, accIndex);
+    return outputData;
+  }
+  throw Error('Unsupported protocol');
 };
