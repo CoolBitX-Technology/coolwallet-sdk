@@ -1,30 +1,7 @@
 import { OperationCanceled, NoTransport } from '@coolwallets/errors';
-import COMMAND from '../config/command';
-import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
-import { RESPONSE, DFU_RESPONSE } from '../config/response';
-
-/**
- *
- * @param {Transport} transport
- * @param {string} commandName
- * @param {string} commandType
- * @param {string} data
- * @param {string} params1
- * @param {string} params2
- */
-export const executeCommand = async (transport, commandName, commandType = 'SE', data, params1, params2) => {
-  /* eslint-disable-next-line */
-  console.debug(`Execute Command: ${commandName}`);
-  const commandParams = COMMAND[commandName];
-
-  const P1 = !!params1 ? params1 : commandParams.P1;
-  const P2 = !!params2 ? params2 : commandParams.P2;
-
-  const apdu = assemblyCommandAndData(commandParams.CLA, commandParams.INS, P1, P2, data);
-  const result = await executeAPDU(commandName, transport, apdu, commandType);
-
-  return result;
-};
+import COMMAND from '../config/command.js';
+import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils.js';
+import { RESPONSE, DFU_RESPONSE } from '../config/response.js';
 
 /**
  * @param {string} commandName
@@ -56,4 +33,28 @@ const executeAPDU = async (commandName, transport, apdu, commandType) => {
     if (status !== DFU_RESPONSE.SUCCESS) throw SDKUnknownWithCode(commandName, status);
     return { status, outputData };
   }
+};
+
+/**
+ *
+ * @param {Transport} transport
+ * @param {string} commandName
+ * @param {string} commandType
+ * @param {string} data
+ * @param {string} params1
+ * @param {string} params2
+ */
+// eslint-disable-next-line import/prefer-default-export
+export const executeCommand = async (transport, commandName, commandType = 'SE', data, params1, params2) => {
+  /* eslint-disable-next-line */
+  console.debug(`Execute Command: ${commandName}`);
+  const commandParams = COMMAND[commandName];
+
+  const P1 = params1 || commandParams.P1;
+  const P2 = params2 || commandParams.P2;
+
+  const apdu = assemblyCommandAndData(commandParams.CLA, commandParams.INS, P1, P2, data);
+  const result = await executeAPDU(commandName, transport, apdu, commandType);
+
+  return result;
 };

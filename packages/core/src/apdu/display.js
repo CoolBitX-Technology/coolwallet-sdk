@@ -1,4 +1,4 @@
-import { executeCommand } from './execute';
+import { executeCommand } from './execute.js';
 
 /**
  * Display "UPDATE" on wallet display

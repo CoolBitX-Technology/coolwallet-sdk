@@ -1,4 +1,4 @@
-import { executeCommand } from './execute';
+import { executeCommand } from './execute.js';
 
 /**
  * Authorization for requesting account keys

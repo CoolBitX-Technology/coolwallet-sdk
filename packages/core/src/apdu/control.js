@@ -1,5 +1,5 @@
-import { executeCommand } from './execute';
-import { RESPONSE } from '../config/response';
+import { executeCommand } from './execute.js';
+import { RESPONSE } from '../config/response.js';
 
 /**
  * Response boolean (isCardRecognized)

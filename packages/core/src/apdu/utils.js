@@ -1,11 +1,24 @@
 import * as Errors from '@coolwallets/errors';
 
+const getCheckSum = (data) => {
+  let XORTemp = 0;
+  for (let i = 0; i < data.length; i++) {
+    XORTemp ^= parseInt(data[i], 16);
+  }
+  let temp = XORTemp.toString(16);
+  if (temp.length % 2 !== 0) {
+    temp = `0${temp}`;
+  }
+
+  return temp;
+};
+
 export const assemblyCommandAndData = (cla, ins, p1, p2, oriData) => {
   const pid = '00';
-  const cmd_len = '09';
+  const cmdLen = '09';
 
-  const packet_length = 18;
-  let data_length = 0;
+  const packetLength = 18;
+  let dataLength = 0;
   // flag = true;
   let packets = '';
 
@@ -18,50 +31,38 @@ export const assemblyCommandAndData = (cla, ins, p1, p2, oriData) => {
 
   const dataBuf = Buffer.from(packets, 'hex');
   let copiedData = dataBuf;
-  let XOR_length = dataBuf.length;
-  let oriData_length = XOR_length;
+  let XORLength = dataBuf.length;
+  let oriDataLength = XORLength;
 
   if (packets.length > 0) {
     copiedData = Buffer.from(copiedData, 'hex');
-    const length = copiedData.length / packet_length;
-    const remains = copiedData.length % packet_length;
-    data_length += length;
+    const length = copiedData.length / packetLength;
+    const remains = copiedData.length % packetLength;
+    dataLength += length;
     if (remains > 0) {
-      data_length++;
+      dataLength++;
     }
 
-    oriData_length -= 1;
+    oriDataLength -= 1;
   }
 
   const oriDataBuf = Buffer.allocUnsafe(4);
   oriDataBuf.fill(0);
-  oriDataBuf.writeInt16BE(oriData_length, 0);
-  oriData_length = oriDataBuf.slice(0, 2).toString('hex');
-  oriData_length = oriData_length.toString('hex').padStart(4, '0');
+  oriDataBuf.writeInt16BE(oriDataLength, 0);
+  oriDataLength = oriDataBuf.slice(0, 2).toString('hex');
+  oriDataLength = oriDataLength.toString('hex').padStart(4, '0');
 
   const XORData = Buffer.allocUnsafe(4);
   XORData.fill(0);
-  XORData.writeInt16BE(XOR_length, 0);
-  XOR_length = XORData.slice(0, 2).toString('hex');
-  XOR_length = XOR_length.toString('hex').padStart(4, '0');
-  data_length = Buffer.from([data_length]);
+  XORData.writeInt16BE(XORLength, 0);
+  XORLength = XORData.slice(0, 2).toString('hex');
+  XORLength = XORLength.toString('hex').padStart(4, '0');
+  dataLength = Buffer.from([dataLength]);
 
-  const command = pid + cmd_len + cla + ins + p1 + p2 + oriData_length + XOR_length + data_length.toString('hex');
+  const command = pid + cmdLen + cla + ins + p1 + p2 + oriDataLength + XORLength + dataLength.toString('hex');
   return { command, data: packets };
 };
 
-const getCheckSum = (data) => {
-  let XOR_temp = 0;
-  for (let i = 0; i < data.length; i++) {
-    XOR_temp ^= parseInt(data[i], 16);
-  }
-  let temp = XOR_temp.toString(16);
-  if (temp.length % 2 !== 0) {
-    temp = `0${temp}`;
-  }
-
-  return temp;
-};
 
 export const SDKUnknownWithCode = (command, code) => new Errors.SDKError('Unknown', `${command} - ${code}`);
 
