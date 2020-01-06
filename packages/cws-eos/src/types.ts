@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable camelcase */
 
 export type Transaction = {
   expiration:number
