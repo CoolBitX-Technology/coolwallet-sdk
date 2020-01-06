@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/xlm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "XLM application API for coolwallets",
   "main": "lib/index.js",
   "scripts": {
@@ -21,6 +21,7 @@
   "author": "anton@coolbitx.com",
   "license": "ISC",
   "dependencies": {
+    "@coolwallets/errors": "0.0.6",
     "@coolwallets/coin": "^0.1.2",
     "@coolwallets/core": "^0.0.20",
     "@coolwallets/transport": "0.0.10",

@@ -1,4 +1,5 @@
 import { EDDSACoin } from '@coolwallets/coin';
+import { SDKError } from '@coolwallets/errors';
 import { pubKeyToAddress } from './utils';
 import signTx from './sign';
 
@@ -10,7 +11,8 @@ export default class XLM extends EDDSACoin {
     super(transport, appPrivateKey, appId, '94');
   }
 
-  async getAccount(accountIndex: number, protocol: protocol): Promise<string> {
+  async getAccount(accountIndex: number, protocol: protocol = 'SLIP0010'): Promise<string> {
+    if (accountIndex !== 0) throw new SDKError('Not Supported', 'Only support account index = 0 for now.');
     const pubKey = await this.getPublicKey(accountIndex, protocol);
     return pubKeyToAddress(pubKey);
   }
@@ -22,11 +24,11 @@ export default class XLM extends EDDSACoin {
     signatureBase: Buffer,
     accountIndex: number,
     protocol: protocol | undefined,
-    confirmCB = () => {},
-    authorizedCB = () => {},
+    confirmCB: Function | undefined,
+    authorizedCB: Function | undefined,
   ) : Promise<Buffer> {
-    const protocolToUse = protocol || 'BIP44';
-
+    if (accountIndex !== 0) throw new SDKError('Not Supported', 'Only support account index = 0 for now.');
+    const protocolToUse = protocol || 'SLIP0010';
     const signature = signTx(
       this.transport,
       this.appPrivateKey,
