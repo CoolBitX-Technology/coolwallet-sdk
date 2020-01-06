@@ -32,6 +32,7 @@ const accountBip44 = await XLM.getAccount(accountIndex, 'BIP44');
 console.log(accountBip44)
 // GBE6DJHSIR6RLPCTJLIYBCA7VUOFNJ5YW6MSAOJL3QQ4E2BI3OA5EFP4
 ```
+
 We call the second parameter **protocol**, which can only be either `'BIP44'` or `'SLIP0010'`. You will need to specify the protocol parameter when you're signing a transaction.
 
 ### signTransaction
@@ -62,7 +63,6 @@ let tx = txBuilder.build();
 const signatureBase = tx.signatureBase(); // this is what we need.
 
 // Sign with CoolWalletS
-
 const signature = await XLM.signTransaction(signatureBase, accountIndex)
 
 ```
@@ -78,7 +78,7 @@ const hint = kp.signatureHint(); // this value depends only on public key
 const ds = new Stellar.xdr.DecoratedSignature({ hint, signature });
 tx.signatures.push(ds);
 
-// the tx object is ready to broadcast
+// the tx object is now ready to be broadcast
 await server.submitTransaction(tx);
 
 ```

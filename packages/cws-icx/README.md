@@ -1,4 +1,4 @@
-# CoolWalletS ICX App
+# CoolWalletS Icon (ICX) App
 
 ICON API of CoolWalletS.
 

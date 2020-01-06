@@ -1,4 +1,4 @@
-# CoolWalletS ETH App
+# CoolWalletS Ethereum App
 
 Ethereum API of CoolWalletS.
 

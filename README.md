@@ -34,13 +34,15 @@ To communicate with CoolWalletS device, you need to specify a bluetooth transpor
 
 Used to sign transactions of different cryptocurrencies.
 
-Currently supported coins: BTC, ETH, BNB, EOS, XLM, XRP, ZEN. Open an issue if you want the sdk of any one of them to come out first.
-
 | Package                                 | Version                                                   | Description              |
 | --------------------------------------- | --------------------------------------------------------- | ------------------------ |
 | [`@coolwallets/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallets/eth) | Ethereum Application API |
 | [`@coolwallets/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallets/icx) | Icon Application API |
 | [`@coolwallets/eos`](/packages/cws-eos) | ![version](https://img.shields.io/npm/v/@coolwallets/eos) | EOS Application API |
+| [`@coolwallets/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallets/xlm) | Stellar Application API |
+
+Other supported coins: BTC, BCH, BNB, XRP, ZEN. Open an issue if you want the sdk of any one of them to come out first.
+
 
 ## Examples
 
