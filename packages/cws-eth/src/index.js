@@ -1,11 +1,11 @@
-import * as ethSign from './eth_sign'
-import { pubKeyToAddress } from './eth_utils'
-import { core } from '@coolwallets/core'
-import { ECDSACoin } from '@coolwallets/coin'
+import { core } from '@coolwallets/core';
+import { ECDSACoin } from '@coolwallets/coin';
+import * as ethSign from './eth_sign.js';
+import { pubKeyToAddress } from './eth_utils.js';
 
 export default class ETH extends ECDSACoin {
   constructor(transport, appPrivateKey, appId) {
-    super(transport, appPrivateKey, appId, '3C')
+    super(transport, appPrivateKey, appId, '3C');
   }
 
   /**
@@ -14,21 +14,28 @@ export default class ETH extends ECDSACoin {
    * @return {string}
    */
   async getAddress(addressIndex) {
-    const publicKey = await this.getPublicKey(addressIndex)
-    return pubKeyToAddress(publicKey)
+    const publicKey = await this.getPublicKey(addressIndex);
+    return pubKeyToAddress(publicKey);
   }
 
   /**
    * Sign Ethereum Transaction.
-   * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string, chainId: number}} transaction
+   * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
+   * value:string, data:string, chainId: number}} transaction
    * @param {Number} addressIndex
    * @param {String} publicKey
    * @param {Function} confirmCB
    * @param {Function} authorizedCB
    */
-  async signTransaction(transaction, addressIndex, publicKey = undefined, confirmCB = null, authorizedCB = null) {
-    if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
-    return await ethSign.signTransaction(
+  async signTransaction(
+    transaction,
+    addressIndex,
+    publicKey = undefined,
+    confirmCB = null,
+    authorizedCB = null
+  ) {
+    if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
+    return ethSign.signTransaction(
       this.transport,
       this.appId,
       this.appPrivateKey,
@@ -38,7 +45,7 @@ export default class ETH extends ECDSACoin {
       publicKey,
       confirmCB,
       authorizedCB
-    )
+    );
   }
 
   /**
@@ -51,10 +58,17 @@ export default class ETH extends ECDSACoin {
    * @param {Function} authorizedCB
    * @return {Promise<String>}
    */
-  async signMessage(message, addressIndex, publicKey = undefined, isHashRequired = false, confirmCB = null, authorizedCB = null) {
-    await core.auth.versionCheck(this.transport, 81)
-    if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
-    return await ethSign.signMessage(
+  async signMessage(
+    message,
+    addressIndex,
+    publicKey = undefined,
+    isHashRequired = false,
+    confirmCB = null,
+    authorizedCB = null
+  ) {
+    await core.auth.versionCheck(this.transport, 81);
+    if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
+    return ethSign.signMessage(
       this.transport,
       this.appId,
       this.appPrivateKey,
@@ -65,7 +79,7 @@ export default class ETH extends ECDSACoin {
       isHashRequired,
       confirmCB,
       authorizedCB
-    )
+    );
   }
 
   /**
@@ -77,10 +91,16 @@ export default class ETH extends ECDSACoin {
    * @param {Function} authorizedCB
    * @return {Object}
    */
-  async signTypedData(typedData, addressIndex, publicKey = undefined, confirmCB = null, authorizedCB = null) {
-    await core.auth.versionCheck(this.transport, 84)
-    if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
-    return await ethSign.signTypedData(
+  async signTypedData(
+    typedData,
+    addressIndex,
+    publicKey = undefined,
+    confirmCB = null,
+    authorizedCB = null
+  ) {
+    await core.auth.versionCheck(this.transport, 84);
+    if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
+    return ethSign.signTypedData(
       this.transport,
       this.appId,
       this.appPrivateKey,
@@ -90,6 +110,6 @@ export default class ETH extends ECDSACoin {
       publicKey,
       confirmCB,
       authorizedCB
-    )
+    );
   }
 }

@@ -1,9 +1,11 @@
-import { core } from '@coolwallets/core'
-import * as ethUtil from './eth_utils'
-import Web3 from 'web3'
-import { TypedDataUtils as typedDataUtils } from 'eth-sig-util'
-const rlp = require('rlp')
-let web3 = new Web3()
+import { core } from '@coolwallets/core';
+import Web3 from 'web3';
+import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
+import * as ethUtil from './eth_utils.js';
+
+const rlp = require('rlp');
+
+const web3 = new Web3();
 
 /**
  * sign ETH Transaction
@@ -11,7 +13,8 @@ let web3 = new Web3()
  * @param {string} appId
  * @param {String} appPrivateKey
  * @param {coinType} coinType
- * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string, value:string, data:string, chainId: number}} transaction
+ * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
+ * value:string, data:string, chainId: number}} transaction
  * @param {Number} addressIndex
  * @param {String} publicKey
  * @param {Function} confirmCB
@@ -29,10 +32,15 @@ export const signTransaction = async (
   confirmCB = null,
   authorizedCB = null
 ) => {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
-  const rawPayload = ethUtil.getRawHex(transaction)
-  const { P1, P2, readType, preAction } = await ethUtil.getReadTypeAndParmas(transport, transaction)
-  const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType)
+  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
+  const rawPayload = ethUtil.getRawHex(transaction);
+  const {
+    P1, P2, readType, preAction
+  } = await ethUtil.getReadTypeAndParmas(
+    transport,
+    transaction
+  );
+  const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
   const canonicalSignature = await core.flow.sendDataToCoolWallet(
     transport,
     appId,
@@ -44,12 +52,15 @@ export const signTransaction = async (
     preAction,
     confirmCB,
     authorizedCB
-  )
+  );
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey)
-  const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId)
-  return serialized_tx
-}
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(
+    canonicalSignature,
+    rlp.encode(rawPayload),
+    publicKey
+  );
+  return ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+};
 
 /**
  * Sign Message.
@@ -76,27 +87,27 @@ export const signMessage = async (
   confirmCB = null,
   authorizedCB = null
 ) => {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
+  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
 
-  let msgBuf
-  let preAction
+  let msgBuf;
+  let preAction;
 
   if (web3.utils.isHex(message)) {
-    msgBuf = Buffer.from(ethUtil.removeHex0x(message), 'hex')
+    msgBuf = Buffer.from(ethUtil.removeHex0x(message), 'hex');
   } else {
-    msgBuf = Buffer.from(message, 'utf8')
+    msgBuf = Buffer.from(message, 'utf8');
   }
 
   if (isHashRequired) {
-    preAction = ethUtil.apduForParsingMessage(transport, msgBuf, '07') // send prehashed message to card
-    msgBuf = Buffer.from(web3.utils.keccak256(msgBuf), 'hex')
+    preAction = ethUtil.apduForParsingMessage(transport, msgBuf, '07'); // send prehashed message to card
+    msgBuf = Buffer.from(web3.utils.keccak256(msgBuf), 'hex');
   }
 
-  const len = msgBuf.length.toString()
-  const prefix = Buffer.from('\u0019Ethereum Signed Message:\n' + len)
-  const payload = Buffer.concat([prefix, msgBuf])
+  const len = msgBuf.length.toString();
+  const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${len}`);
+  const payload = Buffer.concat([prefix, msgBuf]);
 
-  const dataForSE = core.flow.prepareSEData(keyId, payload, 'F5')
+  const dataForSE = core.flow.prepareSEData(keyId, payload, 'F5');
 
   const canonicalSignature = await core.flow.sendDataToCoolWallet(
     transport,
@@ -109,12 +120,12 @@ export const signMessage = async (
     preAction,
     confirmCB,
     authorizedCB
-  )
+  );
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
-  const signature = '0x' + r + s + v.toString(16)
-  return signature
-}
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
+  const signature = `0x${r}${s}${v.toString(16)}`;
+  return signature;
+};
 
 /**
  * @description Sign Typed Data
@@ -140,16 +151,24 @@ export const signTypedData = async (
   confirmCB = null,
   authorizedCB = null
 ) => {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex)
+  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
 
-  const sanitizedData = typedDataUtils.sanitizeData(typedData)
-  const encodedData = typedDataUtils.encodeData(sanitizedData.primaryType, sanitizedData.message, sanitizedData.types)
+  const sanitizedData = typedDataUtils.sanitizeData(typedData);
+  const encodedData = typedDataUtils.encodeData(
+    sanitizedData.primaryType,
+    sanitizedData.message,
+    sanitizedData.types
+  );
 
-  const prefix = Buffer.from('1901', 'hex')
-  const domainSeparate = typedDataUtils.hashStruct('EIP712Domain', sanitizedData.domain, sanitizedData.types)
-  const dataHash = Buffer.from(web3.utils.sha3(encodedData).substr(2), 'hex')
-  const payload = Buffer.concat([prefix, domainSeparate, dataHash])
-  const dataForSE = core.flow.prepareSEData(keyId, payload, 'F3')
+  const prefix = Buffer.from('1901', 'hex');
+  const domainSeparate = typedDataUtils.hashStruct(
+    'EIP712Domain',
+    sanitizedData.domain,
+    sanitizedData.types
+  );
+  const dataHash = Buffer.from(web3.utils.sha3(encodedData).substr(2), 'hex');
+  const payload = Buffer.concat([prefix, domainSeparate, dataHash]);
+  const dataForSE = core.flow.prepareSEData(keyId, payload, 'F3');
 
   const canonicalSignature = await core.flow.sendDataToCoolWallet(
     transport,
@@ -162,10 +181,10 @@ export const signTypedData = async (
     null,
     confirmCB,
     authorizedCB
-  )
+  );
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey)
-  const signature = '0x' + r + s + v.toString(16)
+  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
+  const signature = `0x${r}${s}${v.toString(16)}`;
 
-  return signature
-}
+  return signature;
+};
