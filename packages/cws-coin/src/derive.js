@@ -3,7 +3,12 @@ import { core, apdu, crypto } from '@coolwallets/core';
 const bip32 = require('bip32');
 
 const authGetKey = async (transport, appId, appPrivateKey) => {
-  const signature = await core.auth.generalAuthorization(transport, appId, appPrivateKey, 'AUTH_EXT_KEY');
+  const signature = await core.auth.generalAuthorization(
+    transport,
+    appId,
+    appPrivateKey,
+    'AUTH_EXT_KEY'
+  );
   return apdu.coin.authGetExtendedKey(transport, signature);
 };
 
@@ -55,16 +60,21 @@ export const getEd25519PublicKey = async (
   appPrivateKey,
   coinSEType,
   accountIndex,
+  protocol,
   authFirst = true
 ) => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
   const accIndexHex = accountIndex.toString(16).padStart(2, '0');
-  const response = await apdu.coin.getEd25519AccountPublicKey(transport, coinSEType, accIndexHex);
+  const response = await apdu.coin.getEd25519AccountPublicKey(
+    transport,
+    coinSEType,
+    accIndexHex,
+    protocol
+  );
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
   return decryptedData;
 };
-
 
 /**
  * @description Derive an address's public key from a account node
@@ -74,7 +84,10 @@ export const getEd25519PublicKey = async (
  * @param {Number} addressIndex
  */
 export const derivePubKey = (accountPublicKey, chainCode, changeIndex = 0, addressIndex = 0) => {
-  const accountNode = bip32.fromPublicKey(Buffer.from(accountPublicKey, 'hex'), Buffer.from(chainCode, 'hex'));
+  const accountNode = bip32.fromPublicKey(
+    Buffer.from(accountPublicKey, 'hex'),
+    Buffer.from(chainCode, 'hex')
+  );
   const changeNode = accountNode.derive(changeIndex);
   const addressNode = changeNode.derive(addressIndex);
   const publicKey = addressNode.publicKey.toString('hex');
