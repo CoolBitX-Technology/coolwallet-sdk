@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/eos",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "EOS Application API for CoolWalletS ",
   "main": "lib/index.js",
   "scripts": {
