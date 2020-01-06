@@ -34,13 +34,14 @@ You have to use [eosjs-ecc](https://github.com/EOSIO/eosjs-ecc) to convert the r
 
 ```javascript
 import { PublicKey } from 'eosjs-ecc'
-const EOSPublicKey = PublicKey.fromHex(rawPublicKey).toString();
+const EOSPublicKey = await PublicKey.fromHex(rawPublicKey).toString();
 
 console.log(EOSPublicKey)
 // EOS5hUxwCqCZCLbRsKsRMng6xYgMUpCw5HKhVDEmW48nXNrCxd8Dw
 ```
 
 ### Sign Transaction
+
 CoolWalletS currently only support signing transaction with single eos transfer action.
 
 ```javascript
