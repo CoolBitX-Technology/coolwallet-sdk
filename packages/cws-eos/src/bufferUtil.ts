@@ -10,11 +10,14 @@ const charidx = (ch: string) => {
   return idx;
 };
 
-export const encodeName = (name: string, littleEndian: boolean = true): number => {
+export const encodeName = (name: string, littleEndian: boolean = true): any => {
+  if (typeof name !== 'string') throw new TypeError('name parameter is a required string');
   if (name.length > 12) throw new TypeError('A name can be up to 12 characters long');
 
   let bitstr = '';
-  for (let i = 0; i <= 12; i += 1) {
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i <= 12; i++) {
+    // process all 64 bits (even if name is short)
     const c = i < name.length ? charidx(name[i]) : 0;
     const bitlen = i < 12 ? 5 : 4;
     let bits = Number(c).toString(2);
@@ -34,8 +37,7 @@ export const encodeName = (name: string, littleEndian: boolean = true): number =
     const n = Number(b).toString(16);
     leHex += (n.length === 1 ? '0' : '') + n;
   });
-  return parseInt(leHex, 16);
-  // return Long.fromString(leHex, true, 16);
+  return Long.fromString(leHex, true, 16).toString();
 };
 
 export const toTransferByteBuffer = (txObject: Transaction) => {
