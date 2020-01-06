@@ -18,15 +18,8 @@ export default class EOS extends ECDSACoin {
   }
 
   /**
-   * Get EOS address by index
-   */
-  // async getAddress(addressIndex: number): Promise<string> {
-  //   const publicKey = await this.getPublicKey(addressIndex)
-  //   return pubKeyToAddress(publicKey)
-  // }
-
-  /**
    * Sign EOS Transaction.
+   * @return signature
    */
   async signTransaction(
     transaction: Transaction,
@@ -34,7 +27,7 @@ export default class EOS extends ECDSACoin {
     publicKey: string | undefined = undefined,
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
-  ) {
+  ) : Promise<string> {
     const publicKeyToUse = publicKey === undefined
       ? await this.getPublicKey(addressIndex)
       : publicKey;

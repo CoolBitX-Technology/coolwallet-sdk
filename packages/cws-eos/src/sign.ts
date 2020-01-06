@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import BigInteger from 'bigi';
 import base58 from 'bs58';
 
-import { genSignBuf, genSignedTxV1 } from './eos_utils';
+import { genSignBuf } from './eos_utils';
 
 type Transport = import('@coolwallets/transport').default;
 type Transaction = import('./types').Transaction;
@@ -74,7 +74,7 @@ export default async function signTransfer(
   publicKey: string,
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined
-) {
+) : Promise<string> {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
   const signBuf = genSignBuf(txObject, chainId);
   const dataForSE = core.flow.prepareSEData(keyId, signBuf, 'f6');
@@ -93,6 +93,5 @@ export default async function signTransfer(
   );
 
   const signature = convertToSignature(canonicalSignature, signBuf, publicKey);
-  const signedTransaction = genSignedTxV1(txObject, signature);
-  return signedTransaction;
+  return signature;
 }
