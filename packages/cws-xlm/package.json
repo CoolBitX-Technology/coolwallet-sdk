@@ -1,0 +1,37 @@
+{
+  "name": "@coolwallets/xlm",
+  "version": "0.0.1",
+  "description": "XLM application API for coolwallets",
+  "main": "lib/index.js",
+  "scripts": {
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+  },
+  "keywords": [
+    "cryptocurrency",
+    "coolwallets",
+    "coolbitx",
+    "stellar",
+    "xlm",
+    "transaction",
+    "hardwarewallet"
+  ],
+  "author": "anton@coolbitx.com",
+  "license": "ISC",
+  "dependencies": {
+    "@coolwallets/coin": "^0.1.2",
+    "@coolwallets/core": "^0.0.20",
+    "@coolwallets/transport": "0.0.10",
+    "@types/crc": "^3.4.0",
+    "base32.js": "^0.1.0",
+    "crc": "^3.8.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7"
+  }
+}
