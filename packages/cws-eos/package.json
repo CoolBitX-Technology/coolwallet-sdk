@@ -32,13 +32,13 @@
     "long": "^4.0.0"
   },
   "devDependencies": {
-    "@types/bigi": "^1.4.2",
-    "@types/bs58": "^4.0.1",
-    "@types/bytebuffer": "^5.0.40",
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7"
+    "@babel/preset-typescript": "^7.7.7",
+    "@types/bigi": "^1.4.2",
+    "@types/bs58": "^4.0.1",
+    "@types/bytebuffer": "^5.0.40"
   }
 }
