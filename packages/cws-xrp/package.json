@@ -33,6 +33,7 @@
     "@coolwallets/coin": "^0.1.2",
     "@coolwallets/core": "^0.0.20",
     "@coolwallets/transport": "0.0.10",
-    "base-x": "^3.0.7"
+    "base-x": "^3.0.7",
+    "ripple-binary-codec": "^0.2.6"
   }
 }

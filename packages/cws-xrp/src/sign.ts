@@ -1,45 +1,31 @@
 import { core } from '@coolwallets/core';
 
+const codec = require('ripple-binary-codec');
+
 type Transport = import('@coolwallets/transport').default;
+type Payment = import('./types').Payment
 
-const generateRawTx = (signature: any, payload:Buffer): string => {
-  const newPayload = payload.slice(8).toString('hex'); // Remove Hash Prefix
-
-  const payloadBody = newPayload.slice(84);
-
-  if (payloadBody.slice(0, 2) !== '73') throw Error('Slicing XRP Payload Error, expect 73');
-  const pubKeyLen = parseInt(payloadBody.slice(2, 4), 16) * 2;
-
-
-  const payloadPre = newPayload.slice(0, 88 + pubKeyLen); // before signingPubKey
-  const payloadPost = newPayload.slice(88 + pubKeyLen); // after, including [account, destination]
-
-  if (payloadPost.length !== 88 || payloadPost.slice(0, 2) !== '81') {
-    throw Error(`Slicing error: wrong cut of postfix ${payloadPost}`);
-  }
-
-  const signatureHeader = '74';
-  const sigLen = signature.length / 2;
-  const sigHexLen = sigLen.toString(16);
-
-  const sigHex = signatureHeader + sigHexLen + signature;
-  const fullTx = payloadPre + sigHex + payloadPost;
-  return fullTx;
+const generateRawTx = (signature: any, payment:Payment): string => {
+  /* eslint-disable-next-line no-param-reassign */
+  payment.TxnSignature = signature.toUpperCase();
+  return codec.encodeForSigning(payment);
 };
 
-
 // eslint-disable-next-line import/prefer-default-export
-export const signTransaction = async (
+export const signPayment = async (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
   coinType: string,
-  payload: Buffer,
+  payment: Payment,
   addressIndex: number,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined
 ): Promise<string> => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
+  // eslint-disable-next-line no-param-reassign
+  payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
+  const payload = Buffer.from(codec.encodeForSigning(payment), 'hex');
   const dataForSE = core.flow.prepareSEData(keyId, payload, coinType);
   const signature = await core.flow.sendDataToCoolWallet(
     transport,
@@ -55,5 +41,5 @@ export const signTransaction = async (
     false
   );
 
-  return generateRawTx(signature, payload);
+  return generateRawTx(signature, payment);
 };
