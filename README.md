@@ -39,10 +39,11 @@ Used to sign transactions of different cryptocurrencies.
 | [`@coolwallets/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallets/eth) | Ethereum Application API |
 | [`@coolwallets/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallets/xrp) | Ripple Application API |
 | [`@coolwallets/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallets/xlm) | Stellar Application API |
+| [`@coolwallets/bnb`](/packages/cws-bnb) | ![version](https://img.shields.io/npm/v/@coolwallets/bnb) | Binance Application API |
 | [`@coolwallets/eos`](/packages/cws-eos) | ![version](https://img.shields.io/npm/v/@coolwallets/eos) | EOS Application API |
 | [`@coolwallets/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallets/icx) | Icon Application API |
 
-Other supported coins: BTC, BCH, BNB, ZEN. Open an issue if you want the sdk of any one of them to come out first.
+Other supported coins: BTC, BCH, ZEN. Open an issue if you want the sdk of any one of them to come out first.
 
 ## Examples
 
