@@ -3,6 +3,10 @@ import signTransaction from './sign';
 
 type Transport = import('@coolwallets/transport').default;
 
+type Transfer = import('./types').Transfer;
+type PlaceOrder = import('./types').PlaceOrder;
+type CancelOrder = import('./types').CancelOrder;
+
 export default class BNB extends ECDSACoin {
   constructor(transport: Transport, appPrivateKey: string, appId: string) {
     super(transport, appPrivateKey, appId, 'CA');
@@ -12,7 +16,7 @@ export default class BNB extends ECDSACoin {
    * Sign Binance tansfer transaction.
    */
   async signTransfer(
-    signObj: any,
+    signObj: Transfer,
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
@@ -34,8 +38,8 @@ export default class BNB extends ECDSACoin {
   /**
    * Sign Order operation on Binance
    */
-  async makeOrder(
-    signObj: any,
+  async placeOrder(
+    signObj: PlaceOrder,
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
@@ -58,7 +62,7 @@ export default class BNB extends ECDSACoin {
    * Sign Cancel operation on Binance
    */
   async cancelOrder(
-    signObj: any,
+    signObj: CancelOrder,
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined

@@ -2,16 +2,10 @@ import { core } from '@coolwallets/core';
 import * as bnbUtil from './util';
 
 type Transport = import('@coolwallets/transport').default;
+type BNBTx = import('./types').Transaction;
 
 /**
  * Sign Binance Tranaction
- * @param {string} coinType
- * @param {string} readType
- * @param {object} signObj
- * @param {number} addressIndex
- * @param {boolean} returnTx
- * @param {string} publicKey
- * @return {string | object} transaction Hex or signature object { wcSignature, wcPublicKey }
  */
 export default async function signTransaction(
   transport: Transport,
@@ -19,7 +13,7 @@ export default async function signTransaction(
   appPrivateKey:string,
   coinType:string,
   readType:string,
-  signObj: any,
+  signObj: BNBTx,
   addressIndex: number,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
