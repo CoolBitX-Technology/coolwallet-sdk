@@ -26,11 +26,13 @@
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7"
+    "@babel/preset-typescript": "^7.7.7",
+    "@types/bech32": "^1.1.1"
   },
   "dependencies": {
     "@coolwallets/coin": "^0.1.2",
     "@coolwallets/core": "^0.0.20",
-    "@coolwallets/transport": "0.0.10"
+    "@coolwallets/transport": "0.0.10",
+    "bech32": "^1.1.3"
   }
 }

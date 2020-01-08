@@ -1,5 +1,6 @@
 import { ECDSACoin } from '@coolwallets/coin';
 import signTransaction from './sign';
+import { publicKeyToAddress } from './util';
 
 type Transport = import('@coolwallets/transport').default;
 
@@ -10,6 +11,14 @@ type CancelOrder = import('./types').CancelOrder;
 export default class BNB extends ECDSACoin {
   constructor(transport: Transport, appPrivateKey: string, appId: string) {
     super(transport, appPrivateKey, appId, 'CA');
+  }
+
+  /**
+   * Get Binance address by index
+   */
+  async getAddress(addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(addressIndex);
+    return publicKeyToAddress(publicKey);
   }
 
   /**
@@ -36,7 +45,7 @@ export default class BNB extends ECDSACoin {
   }
 
   /**
-   * Sign Order operation on Binance
+   * Sign PlaceOrder Transaction
    */
   async placeOrder(
     signObj: PlaceOrder,
@@ -59,7 +68,7 @@ export default class BNB extends ECDSACoin {
   }
 
   /**
-   * Sign Cancel operation on Binance
+   * Sign CancelOrder Transaction
    */
   async cancelOrder(
     signObj: CancelOrder,
