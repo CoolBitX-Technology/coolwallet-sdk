@@ -56,7 +56,7 @@ const txObj = new IconBuilder.IcxTransactionBuilder()
 const rawTx = IconConverter.toRawTransaction(txObj);
 
 // sign with address index 0
-const signedTx = await ETH.signTransaction(rawTx, 0)
+const signedTx = await ICON.signTransaction(rawTx, 0)
 ```
 
 The signed transaction will be in form of `Object`, which you can use the official sdk to broadcast.
