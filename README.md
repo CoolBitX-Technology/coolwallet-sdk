@@ -1,8 +1,18 @@
+ <!-- markdownlint-disable no-inline-html -->
+
 # CoolWalletS Javascript SDK
 
-<p align="center"><img src="logo.png" width="500"/></p> <p align="center"> JavaScript SDK to communicate with CoolWalletS. </p> <p align="center">  <a href="https://opensource.org/licenses/MIT/">    
-   <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/>  
-</a></p>
+
+<p align="center">
+<img src="logo.png" width="500"/>
+</p>
+<p align="center"> JavaScript SDK to communicate with CoolWalletS.</p>
+<p align="center">
+<a href="https://opensource.org/licenses/apache2.0/"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/></a>
+<a href="https://discordapp.com/channels/640544929680064512/660894930604130304/"><img src="https://img.shields.io/discord/640544929680064512.svg?color=768AD4&label=Discord"/></a> <a href="https://twitter.com/coolwallet"><img src="https://img.shields.io/twitter/follow/coolwallet.svg?label=CoolWallet&style=social"/></a>
+
+</p>
+
 
 This is the monorepo of all the packages you need to build your own app with CoolWalletS hardware wallet.
 
