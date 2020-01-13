@@ -53,6 +53,7 @@ module.exports = {
     'comma-dangle': 'off',
     eqeqeq: 'warn',
     'block-scoped-var': 'error',
+    'import/prefer-default-export': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',
