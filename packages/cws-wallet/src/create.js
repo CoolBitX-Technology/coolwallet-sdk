@@ -1,5 +1,8 @@
-import { apdu, core, crypto, config } from '@coolwallets/core'
-const SEPublicKey = config.KEY.SEPublicKey
+import {
+  apdu, core, crypto, config
+} from '@coolwallets/core';
+
+const { SEPublicKey } = config.KEY;
 
 /**
  * Create a new seed with SE.
@@ -10,11 +13,17 @@ const SEPublicKey = config.KEY.SEPublicKey
  * @return {Promise<boolean>}
  */
 export async function createWallet(transport, appId, appPrivateKey, strength) {
-  let strengthHex = strength.toString(16)
-  if (strengthHex.length % 2 > 0) strengthHex = '0' + strengthHex
-  const signature = await core.auth.generalAuthorization(transport, appId, appPrivateKey, 'CREATE_WALLET', strengthHex)
-  const strengthWithSig = strengthHex + signature
-  return await apdu.wallet.createWallet(transport, strengthWithSig)
+  let strengthHex = strength.toString(16);
+  if (strengthHex.length % 2 > 0) strengthHex = `0${strengthHex}`;
+  const signature = await core.auth.generalAuthorization(
+    transport,
+    appId,
+    appPrivateKey,
+    'CREATE_WALLET',
+    strengthHex
+  );
+  const strengthWithSig = strengthHex + signature;
+  return apdu.wallet.createWallet(transport, strengthWithSig);
 }
 
 /**
@@ -24,8 +33,8 @@ export async function createWallet(transport, appId, appPrivateKey, strength) {
  * @return {Promise<boolean>}
  */
 export async function sendCheckSum(transport, checkSum) {
-  let sumHex = checkSum.toString(16).padStart(8, '0')
-  return await apdu.wallet.submitCheckSum(transport, sumHex)
+  const sumHex = checkSum.toString(16).padStart(8, '0');
+  return apdu.wallet.submitCheckSum(transport, sumHex);
 }
 
 /**
@@ -36,8 +45,14 @@ export async function sendCheckSum(transport, checkSum) {
  * @return {Promise<boolean>}
  */
 export async function setSeed(transport, appId, appPrivateKey, seedHex) {
-  const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex)
-  const signature = await core.auth.generalAuthorization(transport, appId, appPrivateKey, 'SET_SEED', encryptedSeed)
-  const signedSeed = encryptedSeed + signature
-  return await apdu.wallet.setSeed(transport, signedSeed)
+  const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
+  const signature = await core.auth.generalAuthorization(
+    transport,
+    appId,
+    appPrivateKey,
+    'SET_SEED',
+    encryptedSeed
+  );
+  const signedSeed = encryptedSeed + signature;
+  return apdu.wallet.setSeed(transport, signedSeed);
 }
