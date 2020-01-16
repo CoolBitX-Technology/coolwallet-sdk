@@ -54,15 +54,16 @@ module.exports = {
     eqeqeq: 'warn',
     'block-scoped-var': 'error',
     'import/prefer-default-export': 'off',
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        jsx: 'never',
-        ts: 'never',
-        tsx: 'never'
-      }
-    ]
+    'no-plusplus': ['error', { allowForLoopAfterthoughts: true }], //off
+    // 'import/extensions': [
+    //   'error',
+    //   'ignorePackages',
+    //   {
+    //     jsx: 'never',
+    //     ts: 'never',
+    //     tsx: 'never'
+    //   }
+    // ]
   },
   settings: {
     'import/resolver': {
