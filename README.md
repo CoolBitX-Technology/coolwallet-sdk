@@ -2,7 +2,6 @@
 
 # CoolWalletS Javascript SDK
 
-
 <p align="center">
 <img src="logo.png" width="500"/>
 </p>
@@ -13,8 +12,21 @@
 
 </p>
 
-
 This is the monorepo of all the packages you need to build your own app with CoolWalletS hardware wallet.
+
+## Quick Start
+
+### 1. Define your [transport](#Transport) layer
+
+Depending on your platform, you may can choose different [transport](#Transport) object to use in you application.
+
+### 2. Register and setup hardware wallet.
+
+To register you application with the wallet, take a look at the [wallet module](/packages/cws-wallet). This giud you through the process of registeration and seed generation.
+
+### 3. Build your Application
+
+Take a look at all the supported modules at [Coin Apps](#Coin-Apps). Used the keys generated in the previous step to initiate coin instances, then you can sign transactions, message with different coin instances.
 
 ## Packages
 
@@ -35,9 +47,9 @@ To communicate with CoolWalletS device, you need to specify a bluetooth transpor
 
 ### Base App
 
-| Package                                   | Version                                                      | Description |
-| ----------------------------------------- | ------------------------------------------------------------ | ----------- |
-| [`@coolwallets/errors`](/packages/errors) | ![version](https://img.shields.io/npm/v/@coolwallets/errors) | Errors      |
+| Package                                       | Version                                                      | Description                                         |
+| --------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------- |
+| [`@coolwallets/errors`](/packages/errors)     | ![version](https://img.shields.io/npm/v/@coolwallets/errors) | Errors                                              |
 | [`@coolwallets/wallet`](/packages/cws-wallet) | ![version](https://img.shields.io/npm/v/@coolwallets/wallet) | Wallet creation, device pairing and basic settings. |
 
 ### Coin Apps
@@ -47,11 +59,11 @@ Used to sign transactions of different cryptocurrencies.
 | Package                                 | Version                                                   | Description              |
 | --------------------------------------- | --------------------------------------------------------- | ------------------------ |
 | [`@coolwallets/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallets/eth) | Ethereum Application API |
-| [`@coolwallets/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallets/xrp) | Ripple Application API |
-| [`@coolwallets/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallets/xlm) | Stellar Application API |
-| [`@coolwallets/bnb`](/packages/cws-bnb) | ![version](https://img.shields.io/npm/v/@coolwallets/bnb) | Binance Application API |
-| [`@coolwallets/eos`](/packages/cws-eos) | ![version](https://img.shields.io/npm/v/@coolwallets/eos) | EOS Application API |
-| [`@coolwallets/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallets/icx) | Icon Application API |
+| [`@coolwallets/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallets/xrp) | Ripple Application API   |
+| [`@coolwallets/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallets/xlm) | Stellar Application API  |
+| [`@coolwallets/bnb`](/packages/cws-bnb) | ![version](https://img.shields.io/npm/v/@coolwallets/bnb) | Binance Application API  |
+| [`@coolwallets/eos`](/packages/cws-eos) | ![version](https://img.shields.io/npm/v/@coolwallets/eos) | EOS Application API      |
+| [`@coolwallets/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallets/icx) | Icon Application API     |
 
 Other supported coins: BTC, BCH, ZEN. Open an issue if you want the sdk of any one of them to come out first.
 
