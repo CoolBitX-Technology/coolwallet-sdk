@@ -1,6 +1,6 @@
 import * as rlp from 'rlp';
-import * as txUtil from './txUtil.js';
-import { sayHi } from '../apdu/control.js';
+import * as txUtil from './txUtil';
+import { sayHi } from '../apdu/control';
 
 /**
  * @description Prepare RLP Data for CoolWallet
@@ -68,7 +68,7 @@ export const sendDataToCoolWallet = async (
     encryptedSignature,
     signatureKey,
     isEDDSA,
-    return_canonical,
+    return_canonical
   );
   return signature;
 };

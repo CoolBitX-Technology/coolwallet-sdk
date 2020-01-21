@@ -1,4 +1,4 @@
-import { executeCommand } from './execute.js';
+import { executeCommand } from './execute';
 
 export const getFWStatus = async (transport) => {
   const { outputData } = await executeCommand(transport, 'CHECK_FW_STATUS', 'MCU');

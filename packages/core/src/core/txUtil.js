@@ -1,8 +1,8 @@
-import { sign } from '../crypto/sign.js';
-import { aes256CbcDecrypt } from '../crypto/encryptions.js';
-import * as signatureTools from '../crypto/signature.js';
-import COMMAND from '../config/command.js';
-import * as apdu from '../apdu/index.js';
+import { sign } from '../crypto/sign';
+import { aes256CbcDecrypt } from '../crypto/encryptions';
+import * as signatureTools from '../crypto/signature';
+import COMMAND from '../config/command';
+import * as apdu from '../apdu/index';
 
 /**
  * get command signature for CoolWalletS
@@ -29,13 +29,20 @@ export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
  * @param {Function} txPrepareComplteCallback
  *
  */
-export const getSingleEncryptedSignature = async (transport, hexForSE, P1, signature, txPrepareComplteCallback = null) => {
+export const getSingleEncryptedSignature = async (
+  transport,
+  hexForSE,
+  P1,
+  signature,
+  txPrepareComplteCallback = null
+) => {
   let encryptedSignature;
   const sendData = hexForSE + signature;
   const patch = Math.ceil(sendData.length / 500);
   for (let i = 0; i < patch; i++) {
     const patchData = sendData.substr(i * 500, 500);
     const p2 = patch === 1 ? '00' : (i === patch - 1 ? '8' : '0') + (i + 1);
+    // eslint-disable-next-line no-await-in-loop
     encryptedSignature = await apdu.tx.prepTx(transport, patchData, P1, p2);
   }
   await apdu.tx.finishPrepare(transport);
@@ -48,7 +55,8 @@ export const getSingleEncryptedSignature = async (transport, hexForSE, P1, signa
 /**
  * Send signing data to CoolWalletS, wait for encrypted signatures.
  * @param {Transport} transport
- * @param {Array<{encodedData:String, P1:String, P2:String}>} TxpPrepCommands Array of txPrepare command object
+ * @param {Array<{encodedData:String, P1:String, P2:String}>}
+ * TxpPrepCommands Array of txPrepare command object
  * @returns {Promise<Array<{encryptedSignature:String, publicKey:String}>>}
  */
 export const getEncryptedSignatures = async (transport, TxpPrepCommands) => {
@@ -57,6 +65,7 @@ export const getEncryptedSignatures = async (transport, TxpPrepCommands) => {
     const {
       encodedData, P1, P2, publicKey
     } = command;
+    // eslint-disable-next-line no-await-in-loop
     const encryptedSignature = await apdu.tx.prepTx(transport, encodedData, P1, P2);
     if (encryptedSignature !== '' && encryptedSignature !== null) {
       sigArr.push({ encryptedSignature, publicKey });
@@ -93,7 +102,12 @@ export const getCWSEncryptionKey = async (transport, authorizedCallback) => {
  * @param {Boolean} returnCanonical
  * @return {{r:string, s:string} | string } canonical signature or DER signature
  */
-export const decryptSignatureFromSE = (encryptedSignature, signatureKey, isEDDSA = false, returnCanonical = true) => {
+export const decryptSignatureFromSE = (
+  encryptedSignature,
+  signatureKey,
+  isEDDSA = false,
+  returnCanonical = true
+) => {
   const iv = Buffer.alloc(16);
   iv.fill(0);
   const derSigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature);

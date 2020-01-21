@@ -1,7 +1,7 @@
 import { OperationCanceled, NoTransport } from '@coolwallets/errors';
-import COMMAND from '../config/command.js';
-import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils.js';
-import { RESPONSE, DFU_RESPONSE } from '../config/response.js';
+import COMMAND from '../config/command';
+import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
+import { RESPONSE, DFU_RESPONSE } from '../config/response';
 
 /**
  * @param {string} commandName
