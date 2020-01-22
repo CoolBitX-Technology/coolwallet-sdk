@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
 
 const HDKey = require('hdkey');
@@ -32,27 +33,27 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
   constructor(options: Options) {
     super({
       getAccounts: (callback) => {
-        this.getAccounts()
+        this._getAccounts()
           .then((accounts) => callback(null, accounts))
           .catch((error) => callback(error));
       },
       signMessage: async (msgParams, callback) => {
-        this.signPersonalMessage(msgParams.from, msgParams.data)
+        this._signPersonalMessage(msgParams.from, msgParams.data)
           .then((signature) => callback(null, signature))
           .catch((error) => callback(error));
       },
       signPersonalMessage: async (msgParams, callback) => {
-        this.signPersonalMessage(msgParams.from, msgParams.data)
+        this._signPersonalMessage(msgParams.from, msgParams.data)
           .then((signature) => callback(null, signature))
           .catch((error) => callback(error));
       },
       signTransaction: async (txParams, callback) => {
-        this.signTransaction(txParams.from, txParams)
+        this._signTransaction(txParams.from, txParams)
           .then((tx) => callback(null, tx))
           .catch((error) => callback(error));
       },
       signTypedMessage: async (msgParams, callback) => {
-        this.signTypedData(msgParams.from, msgParams.data)
+        this._signTypedData(msgParams.from, msgParams.data)
           .then((data) => callback(null, data))
           .catch((error) => callback(error));
       },
@@ -67,137 +68,6 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
   hasAccountKey():boolean {
     return !!(this.hdk && this.hdk.publicKey);
   }
-
-  unlock(addrIndex?: number) : Promise<string> {
-    if (this.hasAccountKey() && typeof addrIndex === 'undefined') return Promise.resolve('already unlocked');
-    if (this.hasAccountKey() && typeof addrIndex === 'number') {
-      return Promise.resolve(this.addressFromIndex(addrIndex));
-    }
-    // unlock: get publickey and chainCodes
-    return new Promise((resolve, reject) => {
-      // eslint-disable-next-line
-      addrIndex |= 0;
-      this.postMsgToBridge(
-        {
-          action: 'coolwallet-unlock',
-          params: {
-            addrIndex,
-          },
-        },
-        ({ success, payload }) => {
-          if (success) {
-            this.hdk.publicKey = Buffer.from(payload.parentPublicKey, 'hex');
-            this.hdk.chainCode = Buffer.from(payload.parentChainCode, 'hex');
-            const address = addressFromPublicKey(Buffer.from(payload.publicKey, 'hex'));
-            resolve(address);
-          } else {
-            reject(payload.error || 'Unknown error');
-          }
-        }
-      );
-    });
-  }
-
-  async getAccounts(): Promise<Array<string>> {
-    return new Promise((resolve) => {
-      this.unlock()
-        .then(() => {
-          resolve(this.deriveAddresses(
-            this.options.accountsOffset,
-            this.options.accountsOffset + this.options.accountsLength
-          ));
-        });
-    });
-  }
-
-  // tx is an instance of the ethereumjs-transaction class.
-  signTransaction(address:string, tx): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.unlock().then(() => {
-        const addrIndex = this.indexFromAddress(address);
-        const publicKey = this.publicKeyFromIndex(addrIndex).toString('hex');
-        const transaction = {
-          to: normalize(tx.to),
-          value: normalize(tx.value),
-          data: normalize(tx.data),
-          chainId: this.options.networkId,
-          nonce: normalize(tx.nonce),
-          gasLimit: normalize(tx.gasLimit),
-          gasPrice: normalize(tx.gasPrice),
-        };
-
-        this.postMsgToBridge(
-          {
-            action: 'coolwallet-sign-transaction',
-            params: {
-              tx: transaction,
-              addrIndex,
-              publicKey,
-            },
-          },
-          ({ success, payload }) => {
-            if (success) resolve(payload);
-            else reject(new Error(payload.error || 'CoolWalletS: Unknown error while signing transaction'));
-          }
-        );
-      });
-    });
-  }
-
-  // For personal_sign, we need to prefix the message:
-  signPersonalMessage(withAccount:string, message:string) : Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.unlock().then(() => {
-        const addrIndex = this.indexFromAddress(withAccount);
-        const publicKey = this.publicKeyFromIndex(addrIndex).toString('hex');
-        this.postMsgToBridge(
-          {
-            action: 'coolwallet-sign-personal-message',
-            params: {
-              addrIndex,
-              message,
-              publicKey,
-            },
-          },
-          ({ success, payload }) => {
-            if (success) {
-              resolve(payload);
-            } else {
-              reject(new Error(payload.error || 'CoolWalletS: Uknown error while signing message'));
-            }
-          }
-        );
-      });
-    });
-  }
-
-  signTypedData(withAccount:string, typedData:any) {
-    return new Promise((resolve, reject) => {
-      this.unlock().then(() => {
-        const addrIndex = this.indexFromAddress(withAccount);
-        const publicKey = this.publicKeyFromIndex(addrIndex).toString('hex');
-        this.postMsgToBridge(
-          {
-            action: 'coolwallet-sign-typed-data',
-            params: {
-              addrIndex,
-              typedData,
-              publicKey,
-            },
-          },
-          ({ success, payload }) => {
-            if (success) {
-              resolve(payload);
-            } else {
-              reject(new Error(payload.error || 'CoolWalletS: Uknown error while signing typed data'));
-            }
-          }
-        );
-      });
-    });
-  }
-
-  /* PRIVATE METHODS */
 
   setupIframe() {
     this.iframe = document.createElement('iframe');
@@ -255,6 +125,127 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
       throw new Error('Unknown address');
     }
     return index;
+  }
+
+  unlock(addrIndex?: number) : Promise<string> {
+    if (this.hasAccountKey() && typeof addrIndex === 'undefined') return Promise.resolve('already unlocked');
+    if (this.hasAccountKey() && typeof addrIndex === 'number') {
+      return Promise.resolve(this.addressFromIndex(addrIndex));
+    }
+    // unlock: get publickey and chainCodes
+    return new Promise((resolve, reject) => {
+      // eslint-disable-next-line
+      addrIndex |= 0;
+      this.postMsgToBridge(
+        {
+          action: 'coolwallet-unlock',
+          params: {
+            addrIndex,
+          },
+        },
+        ({ success, payload }) => {
+          if (success) {
+            this.hdk.publicKey = Buffer.from(payload.parentPublicKey, 'hex');
+            this.hdk.chainCode = Buffer.from(payload.parentChainCode, 'hex');
+            const address = addressFromPublicKey(Buffer.from(payload.publicKey, 'hex'));
+            resolve(address);
+          } else {
+            reject(payload.error || 'Unknown error');
+          }
+        }
+      );
+    });
+  }
+
+  async _getAccounts(): Promise<Array<string>> {
+    await this.unlock();
+    return this.deriveAddresses(
+      this.options.accountsOffset,
+      this.options.accountsOffset + this.options.accountsLength
+    );
+  }
+
+  // tx is an instance of the ethereumjs-transaction class.
+  async _signTransaction(address:string, tx): Promise<string> {
+    await this.unlock();
+    return new Promise((resolve, reject) => {
+      const addrIndex = this.indexFromAddress(address);
+      const publicKey = this.publicKeyFromIndex(addrIndex).toString('hex');
+      const transaction = {
+        to: normalize(tx.to),
+        value: normalize(tx.value),
+        data: normalize(tx.data),
+        chainId: this.options.networkId,
+        nonce: normalize(tx.nonce),
+        gasLimit: normalize(tx.gasLimit),
+        gasPrice: normalize(tx.gasPrice),
+      };
+
+      this.postMsgToBridge(
+        {
+          action: 'coolwallet-sign-transaction',
+          params: {
+            tx: transaction,
+            addrIndex,
+            publicKey,
+          },
+        },
+        ({ success, payload }) => {
+          if (success) { resolve(payload); }
+          reject(new Error(payload.error || 'CoolWalletS: Unknown error while signing transaction'));
+        }
+      );
+    });
+  }
+
+
+  // For personal_sign, we need to prefix the message:
+  async _signPersonalMessage(withAccount:string, message:string) : Promise<string> {
+    await this.unlock();
+    return new Promise((resolve, reject) => {
+      const addrIndex = this.indexFromAddress(withAccount);
+      const publicKey = this.publicKeyFromIndex(addrIndex).toString('hex');
+      this.postMsgToBridge(
+        {
+          action: 'coolwallet-sign-personal-message',
+          params: {
+            addrIndex,
+            message,
+            publicKey,
+          },
+        },
+        ({ success, payload }) => {
+          if (success) {
+            resolve(payload);
+          }
+          reject(payload.error || 'CoolWalletS: Uknown error while signing message');
+        }
+      );
+    });
+  }
+
+  async _signTypedData(withAccount:string, typedData:any) {
+    await this.unlock();
+    return new Promise((resolve, reject) => {
+      const addrIndex = this.indexFromAddress(withAccount);
+      const publicKey = this.publicKeyFromIndex(addrIndex).toString('hex');
+      this.postMsgToBridge(
+        {
+          action: 'coolwallet-sign-typed-data',
+          params: {
+            addrIndex,
+            typedData,
+            publicKey,
+          },
+        },
+        ({ success, payload }) => {
+          if (success) {
+            return resolve(payload);
+          }
+          reject(new Error(payload.error || 'CoolWalletS: Uknown error while signing typed data'));
+        }
+      );
+    });
   }
 }
 
