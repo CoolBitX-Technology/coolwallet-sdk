@@ -191,7 +191,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
           },
         },
         ({ success, payload }) => {
-          if (success) { resolve(payload); }
+          if (success) resolve(payload);
           reject(new Error(payload.error || 'CoolWalletS: Unknown error while signing transaction'));
         }
       );
@@ -240,7 +240,7 @@ export default class CoolWalletSubprovider extends HookedWalletSubprovider {
         },
         ({ success, payload }) => {
           if (success) {
-            return resolve(payload);
+            resolve(payload);
           }
           reject(new Error(payload.error || 'CoolWalletS: Uknown error while signing typed data'));
         }
