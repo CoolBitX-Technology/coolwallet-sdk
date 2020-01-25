@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/web3-subprovider",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Web3 wrapper on coolwalletS sdk",
   "main": "lib/index.js",
   "scripts": {
