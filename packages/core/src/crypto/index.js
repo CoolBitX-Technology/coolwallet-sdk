@@ -1,5 +1,5 @@
-import * as encryption from './encryptions.js';
-import * as sign from './sign.js';
-import * as signature from './signature.js';
+import * as encryption from './encryptions';
+import * as sign from './sign';
+import * as signature from './signature';
 
 export { encryption, sign, signature };

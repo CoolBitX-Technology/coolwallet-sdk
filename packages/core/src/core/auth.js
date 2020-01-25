@@ -1,7 +1,7 @@
 import { FirmwareVersionTooLow } from '@coolwallets/errors';
-import COMMAND from '../config/command.js';
-import { sign } from '../crypto/sign.js';
-import { control, setting } from '../apdu/index.js';
+import COMMAND from '../config/command';
+import { sign } from '../crypto/sign';
+import { control, setting } from '../apdu/index';
 
 /**
  * Get Command signature to append to some specific APDU commands.
