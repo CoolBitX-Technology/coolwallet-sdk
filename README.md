@@ -67,6 +67,14 @@ Used to sign transactions of different cryptocurrencies.
 
 Other supported coins: BTC, BCH, ZEN. Open an issue if you want the sdk of any one of them to come out first.
 
+### Other packages
+
+| Package                                 | Version                                                   | Description              |
+| --------------------------------------- | --------------------------------------------------------- | ------------------------ |
+| [`@coolwallets/web3-subprovider`](/packages/web3-subprovider) | ![version](https://img.shields.io/npm/v/@coolwallets/web3-subprovider) | Web3 subprovoder that can be use with [web3-provider-engine](https://github.com/MetaMask/web3-provider-engine) |
+
+
+
 ## Examples
 
 If you want to build your own app with this sdk, you might find the following repos useful:

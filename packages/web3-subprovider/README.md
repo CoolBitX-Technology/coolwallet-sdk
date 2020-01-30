@@ -1,10 +1,18 @@
 # Web3-Subprovoder
 
+![version](https://img.shields.io/npm/v/@coolwallets/web3-subprovider)
+
 ## Introduction
 
 Create a HookedWalletSubprovider for CoolWalletS.
 
 This provider opens up CoolWalletS Connect as a service bridge to handle transaction signing.
+
+## Installation
+
+```shell
+npm i @coolwallets/web3-subprovider
+```
 
 ## Example Usage
 
@@ -63,3 +71,7 @@ function handleSignTransaction () {
   })
 }
 ```
+
+### Example
+
+* You can find a working example in this [repo](https://github.com/antoncoding/coolwallet-web3-subprovider-test).
