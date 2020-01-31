@@ -1,7 +1,7 @@
 import { core } from '@coolwallets/core';
 import Web3 from 'web3';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
-import * as ethUtil from './eth_utils.js';
+import * as ethUtil from './eth_utils';
 
 const rlp = require('rlp');
 

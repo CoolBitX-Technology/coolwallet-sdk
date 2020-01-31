@@ -1,7 +1,7 @@
 import { core } from '@coolwallets/core';
 import { ECDSACoin } from '@coolwallets/coin';
-import * as ethSign from './eth_sign.js';
-import { pubKeyToAddress } from './eth_utils.js';
+import * as ethSign from './eth_sign';
+import { pubKeyToAddress } from './eth_utils';
 
 export default class ETH extends ECDSACoin {
   constructor(transport, appPrivateKey, appId) {

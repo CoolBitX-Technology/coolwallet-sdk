@@ -15,6 +15,7 @@
     "rlp": "^2.2.3",
     "@coolwallets/core": "^0.0.19",
     "@coolwallets/coin": "0.0.3-beta",
+    "@coolwallets/errors": "0.0.7",
     "web3": "^1.2.2"
   },
   "devDependencies": {

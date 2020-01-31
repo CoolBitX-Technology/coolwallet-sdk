@@ -1,10 +1,12 @@
 import Web3 from 'web3';
 import elliptic from 'elliptic';
+import { DataTooLong } from '@coolwallets/errors';
 import { core, apdu } from '@coolwallets/core';
 
 const rlp = require('rlp');
 
 const web3 = new Web3();
+// eslint-disable-next-line new-cap
 const ec = new elliptic.ec('secp256k1');
 
 
@@ -32,6 +34,9 @@ export const getRawHex = (transaction) => {
   raw[6] = Buffer.from([transaction.chainId]);
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
+
+  const t = rlp.encode(raw);
+  if (t.length > 870) throw new DataTooLong();
   return raw;
 };
 
@@ -119,6 +124,7 @@ export const apduForParsingMessage = (transport, msgBuf, p1) => {
     for (let i = 0; i < patch; i++) {
       const patchData = rawData.substr(i * 500, 500);
       const p2 = patch === 1 ? '00' : (i === patch - 1 ? '8' : '0') + (i + 1);
+      // eslint-disable-next-line no-await-in-loop
       await apdu.tx.prepTx(transport, patchData, p1, p2);
     }
   };
