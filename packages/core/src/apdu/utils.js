@@ -3,6 +3,7 @@ import * as Errors from '@coolwallets/errors';
 const getCheckSum = (data) => {
   let XORTemp = 0;
   for (let i = 0; i < data.length; i++) {
+    // eslint-disable-next-line no-bitwise
     XORTemp ^= parseInt(data[i], 16);
   }
   let temp = XORTemp.toString(16);
@@ -40,7 +41,7 @@ export const assemblyCommandAndData = (cla, ins, p1, p2, oriData) => {
     const remains = copiedData.length % packetLength;
     dataLength += length;
     if (remains > 0) {
-      dataLength++;
+      dataLength += 1;
     }
 
     oriDataLength -= 1;
@@ -129,6 +130,8 @@ export const throwSDKError = (command, errorCode) => {
       switch (code) {
         case '6881':
           throw new Errors.WalletExists();
+        case '6a82':
+          throw new Errors.NotRegistered();
         default:
           throw SDKUnknownWithCode(command, code);
       }
