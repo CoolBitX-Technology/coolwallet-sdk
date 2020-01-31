@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/errors",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Error objects for CoolWalletS SDK",
   "main": "lib/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:js && npm run build:types && npm run build:ts",
-    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+    "publish-single": "npm run build && npm publish"
   },
   "author": "anton",
   "license": "ISC",

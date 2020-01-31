@@ -112,3 +112,11 @@ export class DataLengthP2Mismatch extends SDKError {
     this.constructor = SDKError;
   }
 }
+
+export class DataTooLong extends SDKError {
+  constructor() {
+    super('DataTooLong', 'Data exceed max supported length.');
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.constructor = SDKError;
+  }
+}
