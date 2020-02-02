@@ -1,4 +1,4 @@
-import * as derivation from './derive.js';
+import * as derivation from './derive';
 
 export default class ECDSACoin {
   constructor(transport, appPrivateKey, appId, coinType) {
