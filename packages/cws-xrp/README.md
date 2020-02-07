@@ -22,7 +22,7 @@ const XRP = new cwsXRP(transport, appPrivateKey, appId)
 Get address by address index.
 
 ```javascript
-const address = await ETH.getAddress(0)
+const address = await XRP.getAddress(0)
 // rEoA7FTruU4SMdG99yuuUbUPxp1bh9aZjR
 ```
 
