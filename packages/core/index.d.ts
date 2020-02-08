@@ -46,6 +46,11 @@ declare module '@coolwallets/core' {
       export function getCardInfo(transport: Transport): Promise<string>;
       export function getSEVersion(transport: Transport): Promise<number>;
     }
+
+    export namespace tx {
+      export function setChangeKeyId(
+        transport: Transport, pathWithSig:string, redeemType:string): Promise<string>
+    }
   }
 
   export namespace config {
@@ -62,9 +67,9 @@ declare module '@coolwallets/core' {
         appPrivateKey: string,
         commandName: string,
         data: string,
-        params1: string,
-        params2: string,
-        test: string
+        params1?: string,
+        params2?: string,
+        test?: string
       ): Promise<string>;
 
       export function versionCheck(transport: Transport, requiredSEVersion: number): Promise<void>;
@@ -93,6 +98,7 @@ declare module '@coolwallets/core' {
 
     export namespace util {
       export function addressIndexToKeyId(coinType: string, addressIndex: number): string;
+      export function getEncryptedSignatures()
     }
   }
 
