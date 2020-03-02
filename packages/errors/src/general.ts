@@ -19,7 +19,7 @@ export class FirmwareVersionTooLow extends SDKError {
 
 export class CoinNotSupported extends SDKError {
   constructor() {
-    super('CoinNotSupported', 'Cion not supported. Try update your hardware');
+    super('CoinNotSupported', 'Coin not supported. Please update your hardware');
     Object.setPrototypeOf(this, new.target.prototype);
     this.constructor = SDKError;
   }
