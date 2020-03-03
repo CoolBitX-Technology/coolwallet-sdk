@@ -2,6 +2,7 @@ import { core } from '@coolwallets/core';
 import Web3 from 'web3';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import * as ethUtil from './eth_utils';
+import { removeHex0x } from './string_util';
 
 const rlp = require('rlp');
 
@@ -34,9 +35,10 @@ export const signTransaction = async (
 ) => {
   const rawPayload = ethUtil.getRawHex(transaction);
   const useScript = await core.util.checkSupportScripts(transport);
+  const txType = ethUtil.getTransactionType(transaction);
   let canonicalSignature;
   if (useScript) {
-    const { script, argument } = await ethUtil.getScriptAndArguments(addressIndex, transaction);
+    const { script, argument } = await ethUtil.getScriptAndArguments(txType, addressIndex, transaction);
     const signature = await core.flow.sendScriptAndDataToCard(
       transport,
       appId,
@@ -53,7 +55,7 @@ export const signTransaction = async (
     const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
     const {
       P1, P2, readType, preAction
-    } = await ethUtil.getReadTypeAndParmas(transport, transaction);
+    } = ethUtil.getReadTypeAndParmas(txType);
     const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
     canonicalSignature = await core.flow.sendDataToCoolWallet(
       transport,
@@ -109,7 +111,7 @@ export const signMessage = async (
   let preAction;
 
   if (web3.utils.isHex(message)) {
-    msgBuf = Buffer.from(ethUtil.removeHex0x(message), 'hex');
+    msgBuf = Buffer.from(removeHex0x(message), 'hex');
   } else {
     msgBuf = Buffer.from(message, 'utf8');
   }

@@ -1,8 +1,11 @@
 import Web3 from 'web3';
 import elliptic from 'elliptic';
 import { DataTooLong } from '@coolwallets/errors';
-import { core, apdu } from '@coolwallets/core';
+import { apdu } from '@coolwallets/core';
+
+import { handleHex } from './string_util';
 import * as scripts from './scripts';
+import * as token from './token';
 
 const rlp = require('rlp');
 
@@ -10,12 +13,49 @@ const web3 = new Web3();
 // eslint-disable-next-line new-cap
 const ec = new elliptic.ec('secp256k1');
 
+const transactionType = {
+  TRANSFER: 'TRANSFER',
+  ERC20: 'ERC20',
+  SMART_CONTRACT: 'SMART_CONTRACT'
+};
 
-const evenHexDigit = (hex) => (hex.length % 2 !== 0 ? `0${hex}` : hex);
+/**
+ * Decide Transaction Type
+ * @param {*} transaction
+ */
+export const getTransactionType = (transaction) => {
+  const data = handleHex(transaction.data.toString('hex'));
+  if (data === '' || data === '00') return transactionType.TRANSFER;
+  if (token.isSupportedERC20Method(data) && transaction.tokenInfo) return transactionType.ERC20;
+  return transactionType.SMART_CONTRACT;
+};
 
-export const removeHex0x = (hex) => (hex.slice(0, 2) === '0x' ? hex.slice(2) : hex);
+const getTransferArgument = (transaction) => {
+  const argument = handleHex(transaction.to) // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
+    + handleHex(transaction.value).padStart(20, '0') // 000000b1a2bc2ec50000
+    + handleHex(transaction.gasPrice).padStart(20, '0') // 0000000000020c855800
+    + handleHex(transaction.gasLimit).padStart(20, '0') // 0000000000000000520c
+    + handleHex(transaction.nonce).padStart(16, '0') // 0000000000000289
+    + handleHex(transaction.chainId.toString(16)).padStart(4, '0'); // 0001
+  return argument;
+};
 
-export const handleHex = (hex) => evenHexDigit(removeHex0x(hex));
+const getERC20Argument = (transaction) => {
+  const data = handleHex(transaction.data.toString('hex'));
+  const { to, amount } = token.parseToAndAmount(data);
+  const { symbol, decimals } = transaction.tokenInfo;
+  const tokenInfo = token.getSetTokenPayload(transaction.to, symbol, decimals);
+  const signature = '00'.repeat(72);
+  const argument = handleHex(to)
+  + handleHex(amount).padStart(24, '0') // 000000b1a2bc2ec50000
+  + handleHex(transaction.gasPrice).padStart(20, '0') // 0000000000020c855800
+  + handleHex(transaction.gasLimit).padStart(20, '0') // 0000000000000000520c
+  + handleHex(transaction.nonce).padStart(16, '0') // 0000000000000289
+  + handleHex(transaction.chainId.toString(16)).padStart(4, '0') // 0001
+  + tokenInfo
+  + signature;
+  return argument;
+};
 
 /**
  * Get raw payload
@@ -47,25 +87,19 @@ export const getRawHex = (transaction) => {
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
  * value:string, data:string}} transaction
  */
-export const getReadTypeAndParmas = async (transport, transaction) => {
-  const P1 = '00';
-  const P2 = '00';
-
-  // const to = handleHex(transaction.to.toString('hex'))
-  const data = handleHex(transaction.data.toString('hex'));
-
-  // transfer ETH
-  if (data === '' || data === '00') return { P1, P2, readType: '3C' };
-
-  // if (token.isSupportedERC20Transaction(data) && erc20Info) {
-  //   const preActionPayload = token.getSetTokenPayload(to, erc20Info.symbol, erc20Info.decimals)
-  //   const preAction = token.getSetTokenPreAction(transport, false, preActionPayload)
-  //   return { P1, P2, readType: 'C2', preAction }
-  // }
-
-  // smart contract
-  await core.auth.versionCheck(transport, 84);
-  return { P1, P2, readType: '33' };
+export const getReadTypeAndParmas = async (txType) => {
+  switch (txType) {
+    case transactionType.TRANSFER: {
+      return { P1: '00', P2: '00', readType: '3C' };
+    }
+    // Todo: Add erc20
+    // case transactionType.ERC20: {
+    //   return { P1: '00', P2: '00', readType: 'C2' };
+    // }
+    default: {
+      return { P1: '00', P2: '00', readType: '33' };
+    }
+  }
 };
 
 /**
@@ -73,17 +107,26 @@ export const getReadTypeAndParmas = async (transport, transaction) => {
  * @param {number} addressIndex
  * @param {*} transaction
  */
-export const getScriptAndArguments = async (addressIndex, transaction) => {
+export const getScriptAndArguments = async (txType, addressIndex, transaction) => {
   const addressIdxHex = '00'.concat(addressIndex.toString(16).padStart(6, '0'));
   const SEPath = `15328000002C8000003C8000000000000000${addressIdxHex}`;
-
-  const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-  const argument = handleHex(transaction.to) // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
-    + handleHex(transaction.value).padStart(20, '0') // 000000b1a2bc2ec50000
-    + handleHex(transaction.gasPrice).padStart(20, '0') // 0000000000020c855800
-    + handleHex(transaction.gasLimit).padStart(20, '0') // 0000000000000000520c
-    + handleHex(transaction.nonce).padStart(16, '0') // 0000000000000289
-    + handleHex(transaction.chainId.toString(16)).padStart(4, '0'); // 0001
+  let script;
+  let argument;
+  switch (txType) {
+    case transactionType.TRANSFER: {
+      script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+      argument = getTransferArgument(transaction);
+      break;
+    }
+    case transactionType.ERC20: {
+      script = scripts.ERC20.script + scripts.ERC20.signature;
+      argument = getERC20Argument(transaction);
+      break;
+    }
+    default: {
+      throw new Error(`type ${txType} no implemented`);
+    }
+  }
 
   console.debug(`sciprt:\t${script}`);
   console.debug(`argument:\t${SEPath}+${argument}`);
