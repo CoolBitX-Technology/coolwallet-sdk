@@ -57,7 +57,7 @@ export const getSingleEncryptedSignature = async (transport, hexForSE, P1, signa
 }
 
 /**
- * Send signing data to CoolWalletS, wait for encrypted signatures.
+ * Same as getSingleEncryptedSignature, but used for UTXO based coins to get array of sigs.
  * @param {Transport} transport
  * @param {Array<{encodedData:String, P1:String, P2:String}>} TxpPrepCommands Array of txPrepare command object
  * @returns {Promise<Array<{encryptedSignature:String, publicKey:String}>>}
@@ -76,7 +76,7 @@ export const getEncryptedSignatures = async (transport, TxpPrepCommands) => {
 }
 
 /**
- * get the key used to encrypt transaction signature by CWS
+ * get the key used to encrypt signatures
  * @param {Transport} transport
  * @param {Function} authorizedCallback
  * @returns {Promise<String>}
