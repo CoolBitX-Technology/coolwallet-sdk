@@ -38,7 +38,7 @@ export const signTransaction = async (
   const txType = ethUtil.getTransactionType(transaction);
   let canonicalSignature;
   if (useScript) {
-    const { script, argument } = await ethUtil.getScriptAndArguments(txType, addressIndex, transaction);
+    const { script, argument } = ethUtil.getScriptAndArguments(txType, addressIndex, transaction);
     const signature = await core.flow.sendScriptAndDataToCard(
       transport,
       appId,

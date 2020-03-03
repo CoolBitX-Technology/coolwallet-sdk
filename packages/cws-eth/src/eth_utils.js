@@ -87,7 +87,7 @@ export const getRawHex = (transaction) => {
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
  * value:string, data:string}} transaction
  */
-export const getReadTypeAndParmas = async (txType) => {
+export const getReadTypeAndParmas = (txType) => {
   switch (txType) {
     case transactionType.TRANSFER: {
       return { P1: '00', P2: '00', readType: '3C' };
@@ -107,7 +107,7 @@ export const getReadTypeAndParmas = async (txType) => {
  * @param {number} addressIndex
  * @param {*} transaction
  */
-export const getScriptAndArguments = async (txType, addressIndex, transaction) => {
+export const getScriptAndArguments = (txType, addressIndex, transaction) => {
   const addressIdxHex = '00'.concat(addressIndex.toString(16).padStart(6, '0'));
   const SEPath = `15328000002C8000003C8000000000000000${addressIdxHex}`;
   let script;
@@ -128,8 +128,8 @@ export const getScriptAndArguments = async (txType, addressIndex, transaction) =
     }
   }
 
-  console.debug(`sciprt:\t${script}`);
-  console.debug(`argument:\t${SEPath}+${argument}`);
+  // console.debug(`sciprt:\t${script}`);
+  // console.debug(`argument:\t${SEPath}+${argument}`);
   return {
     script,
     argument: SEPath + argument
