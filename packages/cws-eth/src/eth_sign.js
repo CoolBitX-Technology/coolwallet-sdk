@@ -1,11 +1,9 @@
 import { core } from '@coolwallets/core';
-import Web3 from 'web3';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
+import { isHex, keccak256, toChecksumAddress } from './lib';
 import * as ethUtil from './eth_utils';
 
 const rlp = require('rlp');
-
-const web3 = new Web3();
 
 /**
  * sign ETH Transaction
@@ -92,7 +90,7 @@ export const signMessage = async (
   let msgBuf;
   let preAction;
 
-  if (web3.utils.isHex(message)) {
+  if (isHex(message)) {
     msgBuf = Buffer.from(ethUtil.removeHex0x(message), 'hex');
   } else {
     msgBuf = Buffer.from(message, 'utf8');
@@ -100,7 +98,7 @@ export const signMessage = async (
 
   if (isHashRequired) {
     preAction = ethUtil.apduForParsingMessage(transport, msgBuf, '07'); // send prehashed message to card
-    msgBuf = Buffer.from(web3.utils.keccak256(msgBuf), 'hex');
+    msgBuf = Buffer.from(keccak256(msgBuf), 'hex');
   }
 
   const len = msgBuf.length.toString();
@@ -166,7 +164,7 @@ export const signTypedData = async (
     sanitizedData.domain,
     sanitizedData.types
   );
-  const dataHash = Buffer.from(web3.utils.sha3(encodedData).substr(2), 'hex');
+  const dataHash = Buffer.from(keccak256(encodedData).substr(2), 'hex');
   const payload = Buffer.concat([prefix, domainSeparate, dataHash]);
   const dataForSE = core.flow.prepareSEData(keyId, payload, 'F3');
 

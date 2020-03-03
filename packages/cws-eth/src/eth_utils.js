@@ -1,11 +1,10 @@
-import Web3 from 'web3';
 import elliptic from 'elliptic';
 import { DataTooLong } from '@coolwallets/errors';
 import { core, apdu } from '@coolwallets/core';
+import { keccak256, toChecksumAddress } from './lib';
 
 const rlp = require('rlp');
 
-const web3 = new Web3();
 // eslint-disable-next-line new-cap
 const ec = new elliptic.ec('secp256k1');
 
@@ -95,7 +94,7 @@ export const composeSignedTransacton = (payload, v, r, s, chainId) => {
  * @return {Promise<{v: Number, r: String, s: String}>}
  */
 export const genEthSigFromSESig = async (canonicalSignature, payload, compressedPubkey) => {
-  const hash = web3.utils.keccak256(payload);
+  const hash = keccak256(payload);
   const data = Buffer.from(handleHex(hash), 'hex');
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
 
@@ -157,6 +156,6 @@ function trimFirst12Bytes(hexString) {
 export function pubKeyToAddress(compressedPubkey) {
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
   const pubkey = `0x${keyPair.getPublic(false, 'hex').substr(2)}`;
-  const address = trimFirst12Bytes(web3.utils.keccak256(pubkey));
-  return web3.utils.toChecksumAddress(address);
+  const address = trimFirst12Bytes(keccak256(pubkey));
+  return toChecksumAddress(address);
 }
