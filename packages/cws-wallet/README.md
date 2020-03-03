@@ -12,7 +12,7 @@ npm i @coolwallets/wallet
 
 ### 1. Keypair generation
 
-For every APDU command, CoolWalletS will verify the identity of the requesting device (the App) by a digital signature, so we need to generate a key pair first for our new App.
+For every APDU command, CoolWalletS will verify the identity of the requesting App by a digital signature, so we need to generate a key pair first for our new App.
 
 You can use the `generateKeyPair()` function as follow.
 
@@ -28,7 +28,7 @@ localStorage.setItem('appPrivateKey', appPrivateKey)
 
 ### 2. Device (App) Registration
 
-After we have our keys ready, we need to register our device (app) so the wallet can recognize us.
+After we have our keys ready, we need to register our App so the wallet can recognize us.
 
 This can be done by the `CoolWallet` instance. In the constructor, we need to put in a `Transport` object for bluetooth transport, and the `appPrivateKey` we just generated to sign all the commands. Here's a example how to use `web-ble-transport` with `CoolWallet`
 
@@ -44,10 +44,12 @@ You may notice that there's one more optional field called `appId` in the constr
 
 There're 3 parameters in the `register` method, `appPublicKey`, `password`and `device_name`. If this is the first app ever connect to your CoolWalletS, you can set whatever you want as password, the next app would need this password to register itself to the hardware.
 
+*note: **The password has to be a 8 digits number string.**. The App Name can be whatever you want.
+
 The `register()` function would return an unique `appId`, this is also something you have to save, and provide as contructor argument next time you want to create a **CoolWallet** instance as mentioned before.
 
 ```javascript
-myCoolWalletS.register(appPublicKey, '123456', 'myFirstApp')
+myCoolWalletS.register(appPublicKey, '12345678', 'myFirstApp')
     .then( appId =>{
         localStorage.setItem("appId", appId)
         myCoolWalletS.setAppId(appId)
@@ -55,8 +57,7 @@ myCoolWalletS.register(appPublicKey, '123456', 'myFirstApp')
     })
 ```
 
-A registered app can also called `getPairingPassword()`
-to generate a new random password and deprecate the old one.
+A registered app can also called `getPairingPassword()` to generate a new random password and revoke the old one.
 
 ### 3. Create a Wallet
 
