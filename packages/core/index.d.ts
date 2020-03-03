@@ -90,7 +90,7 @@ declare module '@coolwallets/core' {
         P2: String,
         isEDDSA?: Boolean,
         preAction?: Function,
-        txPrepareComplteCallback?: Function,
+        txPrepareCompleteCallback?: Function,
         authorizedCallback?: Function,
         returnCanonical?: Boolean
       ): Promise<{ r: string; s: string } | string | Buffer>;

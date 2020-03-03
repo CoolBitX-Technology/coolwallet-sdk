@@ -29,8 +29,8 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {String} P1 hex string
  * @param {String} P2 hex string
  * @param {Function} preAction
- * @param {Function} txPrepareComplteCallback
- * @param {Function} authorizedCallback
+ * @param {Function} txPrepareCompleteCallback notify app to show the tx info
+ * @param {Function} authorizedCallback notify app to close the tx info
  * @param {Boolean} isTestnet blind signing for SE version 67
  * @param {Boolean} return_canonical
  * @return {Promise< {r: string, s: string} | string | Buffer }>}
@@ -44,7 +44,7 @@ export const sendDataToCoolWallet = async (
   P2,
   isEDDSA = false,
   preAction = null,
-  txPrepareComplteCallback = null,
+  txPrepareCompleteCallback = null,
   authorizedCallback = null,
   return_canonical = true
 ) => {
@@ -60,7 +60,7 @@ export const sendDataToCoolWallet = async (
     hexForSE,
     P1,
     commandSignature,
-    txPrepareComplteCallback
+    txPrepareCompleteCallback
   );
   const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
 

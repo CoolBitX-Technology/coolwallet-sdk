@@ -26,7 +26,7 @@ export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
  * @param {string} hexForSE
  * @param {string} P1
  * @param {string} signature
- * @param {Function} txPrepareComplteCallback
+ * @param {Function} txPrepareCompleteCallback
  *
  */
 export const getSingleEncryptedSignature = async (
@@ -34,7 +34,7 @@ export const getSingleEncryptedSignature = async (
   hexForSE,
   P1,
   signature,
-  txPrepareComplteCallback = null
+  txPrepareCompleteCallback = null
 ) => {
   let encryptedSignature;
   const sendData = hexForSE + signature;
@@ -47,7 +47,7 @@ export const getSingleEncryptedSignature = async (
   }
   await apdu.tx.finishPrepare(transport);
 
-  if (typeof txPrepareComplteCallback === 'function') txPrepareComplteCallback();
+  if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
 
   return encryptedSignature;
 };
