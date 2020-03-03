@@ -2,6 +2,7 @@ import { FirmwareVersionTooLow } from '@coolwallets/errors';
 import COMMAND from '../config/command';
 import { sign } from '../crypto/sign';
 import { control, setting } from '../apdu/index';
+import { checkSupportScripts } from './txUtil';
 
 /**
  * Get Command signature to append to some specific APDU commands.
@@ -23,6 +24,12 @@ export const generalAuthorization = async (
   params1,
   params2
 ) => {
+  const useScript = await checkSupportScripts(transport);
+  if (useScript) {
+    await control.sayHi(transport, appId);
+    // To do: Implement secure channel signature.
+    return '';
+  }
   const dataPackets = data || '';
   const nonce = await control.getNonce(transport);
 
