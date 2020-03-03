@@ -1,4 +1,5 @@
 const path = require('path');
+
 module.exports = {
   entry: './src/index.js',
   resolve: {
@@ -28,9 +29,9 @@ module.exports = {
   externals: {
     '@coolwallets/core': '@coolwallets/core',
     '@coolwallets/coin': '@coolwallets/coin',
-    'web3': 'web3',
-    'rlp': 'rlp',
-    'elliptic': 'elliptic',
+    web3: 'web3',
+    rlp: 'rlp',
+    elliptic: 'elliptic',
     'eth-sig-util': 'eth-sig-util'
   }
 };

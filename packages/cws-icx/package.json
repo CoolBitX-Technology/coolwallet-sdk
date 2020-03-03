@@ -1,17 +1,38 @@
 {
   "name": "@coolwallets/icx",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/index",
+  "version": "0.0.2",
+  "description": "ICON (ICX) sdk for CoolWalletS ",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
-  "author": "anton@coolbitx.com",
+  "keywords": [
+    "icx",
+    "icon",
+    "hardwarewallet",
+    "coolwallets",
+    "javascript",
+    "transaction",
+    "signing",
+    "cryptocurrency"
+  ],
+  "author": "anton",
   "license": "ISC",
   "dependencies": {
-    "@coolwallets/coin": "file:../cws-coin",
-    "@coolwallets/core": "file:../core",
-    "icon-sdk-js": "0.0.18",
+    "elliptic": "^6.5.1",
+    "@coolwallets/core": "^0.0.19",
+    "@coolwallets/coin": "^0.1.0",
+    "@coolwallets/transport": "^0.0.10",
     "js-sha3": "^0.8.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7"
   }
 }

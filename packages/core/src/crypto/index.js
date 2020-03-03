@@ -1,5 +1,5 @@
-import * as encryption from './encryptions'
-import * as sign from './sign'
-import * as signature from './signature'
+import * as encryption from './encryptions';
+import * as sign from './sign';
+import * as signature from './signature';
 
-export { encryption, sign, signature }
+export { encryption, sign, signature };

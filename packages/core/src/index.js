@@ -1,11 +1,8 @@
-import * as core from './core'
-import * as apdu from './apdu'
-import * as config from './config'
-import * as crypto from './crypto'
+import * as core from './core/index.js';
+import * as apdu from './apdu/index.js';
+import * as config from './config/index.js';
+import * as crypto from './crypto/index.js';
 
 export {
-  config,
-  crypto,
-  core,
-  apdu
-}
+  config, crypto, core, apdu
+};

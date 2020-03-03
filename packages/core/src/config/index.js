@@ -1,6 +1,5 @@
-import COMMAND from './command'
-import ERROR from './error'
-import * as KEY from './key'
-import * as RESPONSE from './response'
+import COMMAND from './command.js';
+import * as KEY from './key.js';
+import * as RESPONSE from './response.js';
 
-export { COMMAND, ERROR, KEY, RESPONSE }
+export { COMMAND, KEY, RESPONSE };

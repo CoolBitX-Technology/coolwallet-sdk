@@ -1,4 +1,5 @@
 import { apdu } from '@coolwallets/core'
+import { PleaseResetHardware as ResetHardwareError } from '@coolwallets/errors'
 
 /**
  * Get Baisc information of CoolWalletS
@@ -16,7 +17,7 @@ export const getCardInfo = async(transport) => {
   const displayType = databuf.slice(9).toString('hex')
 
   if (accountDigest === '81c69f2d90' || accountDigest === '3d84ba58bf' || accountDigest === '83ccf4aab1') {
-    throw Error('Please Recover your CoolWalletS!')
+    throw ResetHardwareError()
   }
 
   const paired = pairStatus === '01'

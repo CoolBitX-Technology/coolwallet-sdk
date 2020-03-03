@@ -1,24 +1,27 @@
 {
   "name": "@coolwallets/eth",
-  "version": "0.1.8",
+  "version": "0.1.13",
   "description": "",
   "main": "src/index.js",
   "author": "",
   "license": "Apache-2.0",
+  "scripts": {
+    "build": "babel -d lib/ src",
+    "publish-single": "npm run build && npm publish"
+  },
   "dependencies": {
     "elliptic": "^6.5.1",
     "eth-sig-util": "^2.5.0",
     "rlp": "^2.2.3",
-    "@coolwallets/core": "file:../core",
-    "@coolwallets/coin": "0.0.1-beta",
+    "@coolwallets/core": "file: ../core",
+    "@coolwallets/coin": "0.0.3-beta",
+    "@coolwallets/errors": "0.0.7",
     "web3": "^1.2.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.2",
-    "@babel/preset-env": "^7.7.1",
-    "babel-loader": "^8.0.6",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1"
   },
   "repository": {
     "type": "git",

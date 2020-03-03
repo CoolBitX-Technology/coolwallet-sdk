@@ -26,5 +26,6 @@ module.exports = {
         }
       }
     ]
-  }
+  },
+  externals: /^(@coolwallets.*|react|react-native)/
 };

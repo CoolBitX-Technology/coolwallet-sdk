@@ -1,22 +1,23 @@
 {
   "name": "@coolwallets/wallet",
-  "version": "0.0.4",
+  "version": "0.0.14",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel -d lib/ src",
+    "publish-single": "npm run build && npm publish"
   },
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@coolwallets/core": "0.0.5",
+    "@coolwallets/core": "^0.0.17",
+    "@coolwallets/errors": "^0.0.4",
     "elliptic": "^6.5.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.2",
-    "@babel/preset-env": "^7.7.1",
-    "babel-loader": "^8.0.6",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1"
   }
 }
