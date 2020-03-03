@@ -3,16 +3,8 @@ module.exports = {
   env: {
     browser: true,
     commonjs: true,
-    es6: true
-  },
-  globals: {
-    __DEV__: false,
-    __TEST__: false,
-    __PROD__: false,
-    __COVERAGE__: false,
-    __dirname: false,
-    Buffer: true,
-    process: true
+    es6: true,
+    jest: true
   },
   extends: ['airbnb'],
   parserOptions: {
@@ -52,7 +44,7 @@ module.exports = {
     'jsx-quotes': [2, 'prefer-single'],
     'object-curly-spacing': ['warn', 'always'],
     'comma-dangle': 'off',
-    eqeqeq: 'warn',
+    'eqeqeq': 'warn',
     'block-scoped-var': 'error',
     'import/prefer-default-export': 'off',
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }], //off
