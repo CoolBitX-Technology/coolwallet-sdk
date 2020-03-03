@@ -31,16 +31,17 @@ export const sendScriptAndDataToCard = async (
   authorizedCallback = null,
   return_canonical = true
 ) => {
-  await sayHi(transport, appId)
-  const encryptedSignature = await txUtil.getEncryptedSignatureByScripts(transport, script, argument, txPrepareComplteCallback)
-  
-  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback)
+  await sayHi(transport, appId);
+  const encryptedSignature = await txUtil.getEncryptedSignatureByScripts(
+    transport,
+    script,
+    argument,
+    txPrepareComplteCallback
+  );
 
-  if (signatureKey === undefined) return { signature: {}, cancel: true }
-
-  const signature = txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, isEDDSA, return_canonical)
-  return { signature, cancel: false }
-}
+  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
+  return txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, isEDDSA, return_canonical);
+};
 
 /**
  * @description Send Data to CoolWallet

@@ -32,7 +32,6 @@ export const generalAuthorization = async (
   const command = commandParams.CLA + commandParams.INS + P1 + P2;
   const signatureParams = command + dataPackets + nonce;
   const signature = sign(signatureParams, appPrivateKey).toString('hex');
-
   await control.sayHi(transport, appId);
   return signature;
 };

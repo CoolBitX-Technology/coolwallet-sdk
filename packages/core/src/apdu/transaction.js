@@ -17,28 +17,33 @@ export const prepTx = async (transport, payload, P1, P2) => {
 /**
  * Scriptable step 1
  * @todo append signature
- * @param {Transport} transport 
- * @param {string} script 
+ * @param {Transport} transport
+ * @param {string} script
  */
-export const sendScript = async (transport, script ) => {
-  const { status } = await executeCommand(transport, 'SEND_SCRIPT', 'SE', script)
-  return status === RESPONSE.SUCCESS
-}
+export const sendScript = async (transport, script) => {
+  const { status } = await executeCommand(transport, 'SEND_SCRIPT', 'SE', script);
+  return status === RESPONSE.SUCCESS;
+};
 
 /**
  * Scriptable step 2
- * @param {*} transport 
- * @param {*} argument 
+ * @param {*} transport
+ * @param {*} argument
  */
 export const executeScript = async (transport, argument) => {
-  const { outputData: encryptedSignature } = await executeCommand(transport, 'EXECUTE_SCRIPT', 'SE', argument)
-  return encryptedSignature
-}
+  const { outputData: encryptedSignature } = await executeCommand(transport, 'EXECUTE_SCRIPT', 'SE', argument);
+  return encryptedSignature;
+};
 
+/**
+ * Get full transactino composed by SE. Can be use to check if card supports scripts.
+ * @todo append signature
+ * @param {Transport} transport
+ */
 export const getSignedHex = async (transport) => {
-  const { outputData: signedTx } = await executeCommand(transport, 'GET_SIGNED_HEX', 'SE')
-  return signedTx
-}
+  const { outputData: signedTx } = await executeCommand(transport, 'GET_SIGNED_HEX', 'SE');
+  return signedTx;
+};
 
 /**
  * Inform CoolWalletS that tx_prepare is completed.

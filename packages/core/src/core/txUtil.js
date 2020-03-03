@@ -5,6 +5,20 @@ import COMMAND from '../config/command';
 import * as apdu from '../apdu/index';
 
 /**
+ * Check if the current SE support script execution
+ * @param {Transport} transport
+ * @returns {Promise<boolean>}
+ */
+export const checkSupportScripts = async (transport) => {
+  try {
+    await apdu.tx.getSignedHex(transport);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+/**
  * get command signature for CoolWalletS
  * @param {String} appPrivateKey
  * @param {String} data hex string
@@ -29,10 +43,8 @@ export const getEncryptedSignatureByScripts = async (
   await apdu.tx.sendScript(transport, script);
   const encryptedSignature = await apdu.tx.executeScript(transport, argument);
   await apdu.tx.finishPrepare(transport);
-  // const signedTx = await apdu.tx.getSignedHex(transport)
-  // console.debug(`hex: ${signedTx} `)
+  // const signedTx = await apdu.tx.getSignedHex(transport);
   if (typeof txPrepareComplteCallback === 'function') txPrepareComplteCallback();
-
   return encryptedSignature;
 };
 

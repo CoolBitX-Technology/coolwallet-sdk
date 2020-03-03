@@ -47,9 +47,8 @@ declare module '@coolwallets/core' {
       export function getSEVersion(transport: Transport): Promise<number>;
     }
 
-    export namespace tx {
-      export function setChangeKeyId(
-        transport: Transport, pathWithSig:string, redeemType:string): Promise<string>
+    export namespace transaction {
+
     }
   }
 
@@ -97,8 +96,12 @@ declare module '@coolwallets/core' {
     }
 
     export namespace util {
-      export function addressIndexToKeyId(coinType: string, addressIndex: number): string;
-      export function getEncryptedSignatures()
+      export function getEncryptedSignatures(
+        transport: Transport,
+        TxpPrepCommands: Array<{encodedData:String, P1:String, P2:String}>
+      ):Promise<Array<{encryptedSignature:String, publicKey:String}>>
+
+      export function checkSupportScripts(transport: Transport): Promise<boolean>
     }
   }
 
