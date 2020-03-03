@@ -25,6 +25,7 @@ module.exports = {
   },
   plugins: ['react'],
   rules: {
+    'max-len':['error', 120],
     'no-use-before-define': ['error', { functions: false, classes: true }],
     'no-restricted-syntax': [
       'error',
