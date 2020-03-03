@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { core } from '@coolwallets/core';
 import { ECDSACoin } from '@coolwallets/coin';
 import * as ethSign from './eth_sign';
@@ -46,20 +47,6 @@ export default class ETH extends ECDSACoin {
       confirmCB,
       authorizedCB
     );
-  }
-
-  async signTransferNew(transaction, addressIndex, publicKey, confirmCB=null, authorizedCB=null) {
-    if (!publicKey) publicKey = await this.getPublicKey(addressIndex)
-    return await ethSign.signTransactionNew(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
-      transaction,
-      addressIndex,
-      publicKey,
-      confirmCB,
-      authorizedCB
-    )
   }
 
   /**

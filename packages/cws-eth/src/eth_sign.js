@@ -30,69 +30,53 @@ export const signTransaction = async (
   addressIndex,
   publicKey,
   confirmCB = null,
-  authorizedCB = null
+  authorizedCB = null,
 ) => {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
   const rawPayload = ethUtil.getRawHex(transaction);
-  const {
-    P1, P2, readType, preAction
-  } = await ethUtil.getReadTypeAndParmas(
-    transport,
-    transaction
-  );
-  const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
-  const canonicalSignature = await core.flow.sendDataToCoolWallet(
-    transport,
-    appId,
-    appPrivateKey,
-    dataForSE,
-    P1,
-    P2,
-    false,
-    preAction,
-    confirmCB,
-    authorizedCB
-  );
+  const useScript = await core.util.checkSupportScripts(transport);
+  let canonicalSignature;
+  if (useScript) {
+    const { script, argument } = await ethUtil.getScriptAndArguments(addressIndex, transaction);
+    const signature = await core.flow.sendScriptAndDataToCard(
+      transport,
+      appId,
+      appPrivateKey,
+      script,
+      argument,
+      false,
+      confirmCB,
+      authorizedCB,
+      true
+    );
+    canonicalSignature = signature;
+  } else {
+    const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
+    const {
+      P1, P2, readType, preAction
+    } = await ethUtil.getReadTypeAndParmas(transport, transaction);
+    const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
+    canonicalSignature = await core.flow.sendDataToCoolWallet(
+      transport,
+      appId,
+      appPrivateKey,
+      dataForSE,
+      P1,
+      P2,
+      false,
+      preAction,
+      confirmCB,
+      authorizedCB
+    );
+  }
 
   const { v, r, s } = await ethUtil.genEthSigFromSESig(
     canonicalSignature,
     rlp.encode(rawPayload),
     publicKey
   );
-  return ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+  const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+  return serializedTx;
 };
-
-export const signTransactionNew = async (
-  transport,
-  appId,
-  appPrivateKey,
-  transaction,
-  addressIndex,
-  publicKey,
-  confirmCB = null,
-  authorizedCB = null,
-) => {
-  
-  const rawPayload = ethUtil.getRawHex(transaction)
-  
-  const { script, argument } = await ethUtil.getScriptAndArguments(addressIndex, transaction)
-  const { signature: canonicalSignature, cancel } = await core.flow.sendScriptAndDataToCard(
-    transport,
-    appId,
-    appPrivateKey,
-    script,
-    argument,
-    false,
-    confirmCB,
-    authorizedCB,
-    true
-  )
-  if (cancel) throw 'User canceled.'
-
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey)
-  const serialized_tx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId)
-  return serialized_tx
-}
 
 /**
  * Sign Message.
