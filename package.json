@@ -19,6 +19,9 @@
   "jest": {
     "testPathIgnorePatterns": [
       "packages/.*/lib"
+    ],
+    "setupFiles":[
+      "<rootDir>/__mocks__/setup.js"
     ]
   },
   "scripts": {
