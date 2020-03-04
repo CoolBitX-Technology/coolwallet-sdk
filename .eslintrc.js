@@ -37,6 +37,7 @@ module.exports = {
           '`with` is disallowed in strict mode because it makes code impossible to predict and optimize.'
       }
     ],
+    'no-use-before-define': 'off',
     'no-unused-vars': 'warn',
     'no-unreachable': 'warn',
     'no-case-declarations': 'warn',
