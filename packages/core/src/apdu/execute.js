@@ -106,8 +106,7 @@ export const sendWithSecureChannel = async (transport, apduHeader, apduData) => 
   const confirmSalt = cipherReturn.slice(68, 76);
   const apduReturn = cipherReturn.slice(76);
   if (confirmSalt !== salt) throw new Error('SC: Returned salt check failed');
-
-  const returnedDataHash = SHA256(apduReturn + confirmSalt);
+  const returnedDataHash = SHA256(confirmSalt + apduReturn).toString('hex');
   if (returnedDataHash !== confirmHash) throw new Error('SC: Returned hash check failed');
 
 
