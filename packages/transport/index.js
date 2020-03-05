@@ -1,4 +1,4 @@
-import { sendAPDU } from "@coolwallets/devices/ble/sendAPDU";
+import { sendAPDU } from '@coolwallets/devices/ble/sendAPDU';
 
 export default class Transport {
   constructor(
@@ -6,7 +6,8 @@ export default class Transport {
     sendCommandToCard,
     sendDataToCard,
     checkCardStatus,
-    readCharacteristic) {
+    readCharacteristic
+  ) {
     this.device = device;
     this.sendCommandToCard = this.sendCommandToCard.bind(this);
     this.sendDataToCard = this.sendDataToCard.bind(this);
@@ -16,7 +17,7 @@ export default class Transport {
 
   static isSupported() {
     throw new Error('not implemented');
-  };
+  }
 
   static listen(callback) {
     throw new Error('not implemented');
@@ -28,7 +29,7 @@ export default class Transport {
 
   static async disconnect(deviceOrId) {
     throw new Error('not implemented');
-  };
+  }
 
   static setOnDisconnect(deviceOrId, onDisonnect) {
     throw new Error('not implemented');
@@ -36,19 +37,19 @@ export default class Transport {
 
   async sendCommandToCard(command) {
     throw new Error('not implemented');
-  };
+  }
 
   async sendDataToCard(packets) {
     throw new Error('not implemented');
-  };
+  }
 
   async checkCardStatus() {
     throw new Error('not implemented');
-  };
+  }
 
   async readDataFromCard() {
     throw new Error('not implemented');
-  };
+  }
 
   request = async (command, packets) => {
     const data = await sendAPDU(

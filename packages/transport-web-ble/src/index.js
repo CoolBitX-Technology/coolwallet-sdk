@@ -1,6 +1,6 @@
 import Transport from '@coolwallets/transport';
-import { getBluetoothServiceUuids, getInfosForServiceUuid } from "@coolwallets/devices";
-import { convertToNumberArray } from "./util";
+import { getBluetoothServiceUuids, getInfosForServiceUuid } from '@coolwallets/devices';
+import { convertToNumberArray } from './util';
 
 let server;
 let commandCharacteristic;
@@ -9,20 +9,6 @@ let statusCharacteristic;
 let responseCharacteristic;
 
 export default class WebBleTransport extends Transport {
-  constructor(device,
-    sendCommandToCard,
-    sendDataToCard,
-    checkCardStatus,
-    readCharacteristic) {
-    super(
-      device,
-      sendCommandToCard,
-      sendDataToCard,
-      checkCardStatus,
-      readCharacteristic
-    )
-  }
-
   static async isSupported() {
     const isSupported = await navigator.bluetooth.getAvailability();
     return isSupported;
@@ -39,7 +25,7 @@ export default class WebBleTransport extends Transport {
   }
 
   static async connect(device) {
-    device.addEventListener('gattserverdisconnected', this._onDeviceDisconnect)
+    device.addEventListener('gattserverdisconnected', this.onDeviceDisconnect);
     server = await device.gatt.connect();
     console.debug(`${device.name} connected`);
     const services = await server.getPrimaryServices();
@@ -62,20 +48,20 @@ export default class WebBleTransport extends Transport {
   }
 
   static async disconnect() {
-    if (server) await server.disconnect()
-    server = undefined
-    commandCharacteristic = undefined
-    dataCharacteristic = undefined
-    statusCharacteristic = undefined
-    responseCharacteristic = undefined
+    if (server) await server.disconnect();
+    server = undefined;
+    commandCharacteristic = undefined;
+    dataCharacteristic = undefined;
+    statusCharacteristic = undefined;
+    responseCharacteristic = undefined;
   }
 
   static setOnDisconnect(device, onDisconnect) {
-    device.addEventListener('gattserverdisconnected', onDisconnect)
+    device.addEventListener('gattserverdisconnected', onDisconnect);
   }
 
-  async _onDeviceDisconnect(event) {
-    console.debug('Device ' + event.target.name + ' is disconnected.');
+  static onDeviceDisconnect(event) {
+    console.debug(`Device ${event.target.name} is disconnected.`);
   }
 
   sendCommandToCard = async (command) => {
