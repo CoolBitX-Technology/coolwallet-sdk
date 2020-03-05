@@ -23,4 +23,16 @@ export default class BTC extends ECDSACoin {
     const publicKey = await this.getPublicKey(addressIndex);
     return pubkeyToP2SHAddress(publicKey);
   }
+
+  async signP2SHTransaction(
+    txFee: string|number,
+    fromAddresses: [string],
+    toAddress: string,
+    changeAddress: string,
+    changeKeyId: string,
+    amount: string|number,
+    readType: string
+  ): Promise<string> {
+
+  }
 }

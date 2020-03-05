@@ -33,8 +33,8 @@ export const signTransaction = async (
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
   const rawPayload = ethUtil.getRawHex(transaction);
   const {
-    P1, P2, readType, preAction
-  } = await ethUtil.getReadTypeAndParmas(
+    readType, preAction
+  } = await ethUtil.getReadType(
     transport,
     transaction
   );
@@ -44,8 +44,7 @@ export const signTransaction = async (
     appId,
     appPrivateKey,
     dataForSE,
-    P1,
-    P2,
+    '00',
     false,
     preAction,
     confirmCB,
@@ -113,7 +112,6 @@ export const signMessage = async (
     appPrivateKey,
     dataForSE,
     '00',
-    '00',
     false,
     preAction,
     confirmCB,
@@ -173,7 +171,6 @@ export const signTypedData = async (
     appId,
     appPrivateKey,
     dataForSE,
-    '00',
     '00',
     false,
     null,

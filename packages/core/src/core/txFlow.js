@@ -26,8 +26,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {String} appId
  * @param {String} appPrivateKey
  * @param {Buffer} data for SE (output of prepareSEData)
- * @param {String} P1 hex string
- * @param {String} P2 hex string
+ * @param {String} txDataType hex string
  * @param {Function} preAction
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
@@ -40,8 +39,7 @@ export const sendDataToCoolWallet = async (
   appId,
   appPrivateKey,
   data,
-  P1,
-  P2,
+  txDataType,
   isEDDSA = false,
   preAction = null,
   txPrepareCompleteCallback = null,
@@ -54,11 +52,11 @@ export const sendDataToCoolWallet = async (
 
   if (typeof preAction === 'function') await preAction();
 
-  const commandSignature = txUtil.signForCoolWallet(appPrivateKey, hexForSE, P1, P2);
+  const commandSignature = txUtil.signForCoolWallet(appPrivateKey, hexForSE, txDataType);
   const encryptedSignature = await txUtil.getSingleEncryptedSignature(
     transport,
     hexForSE,
-    P1,
+    txDataType,
     commandSignature,
     txPrepareCompleteCallback
   );

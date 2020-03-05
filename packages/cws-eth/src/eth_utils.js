@@ -45,25 +45,23 @@ export const getRawHex = (transaction) => {
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
  * value:string, data:string}} transaction
  */
-export const getReadTypeAndParmas = async (transport, transaction) => {
-  const P1 = '00';
-  const P2 = '00';
+export const getReadType = async (transport, transaction) => {
 
   // const to = handleHex(transaction.to.toString('hex'))
   const data = handleHex(transaction.data.toString('hex'));
 
   // transfer ETH
-  if (data === '' || data === '00') return { P1, P2, readType: '3C' };
+  if (data === '' || data === '00') return { readType: '3C' };
 
   // if (token.isSupportedERC20Transaction(data) && erc20Info) {
   //   const preActionPayload = token.getSetTokenPayload(to, erc20Info.symbol, erc20Info.decimals)
   //   const preAction = token.getSetTokenPreAction(transport, false, preActionPayload)
-  //   return { P1, P2, readType: 'C2', preAction }
+  //   return { readType: 'C2', preAction }
   // }
 
   // smart contract
   await core.auth.versionCheck(transport, 84);
-  return { P1, P2, readType: '33' };
+  return { readType: '33' };
 };
 
 /**

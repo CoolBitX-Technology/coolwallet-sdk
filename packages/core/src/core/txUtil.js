@@ -8,23 +8,23 @@ import * as apdu from '../apdu/index';
  * get command signature for CoolWalletS
  * @param {String} appPrivateKey
  * @param {String} data hex string
- * @param {String} P1 hex string
- * @param {String} P2 hex string
+ * @param {String} txDataType hex P1 string
  * @return {String} signature
  */
-export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
+export const signForCoolWallet = (appPrivateKey, data, txDataType) => {
   const command = COMMAND.TX_PREPARE;
-  const prefix = command.CLA + command.INS + P1 + P2;
+  const P2 = '00';
+  const prefix = command.CLA + command.INS + txDataType + P2;
   const payload = prefix + data;
-  const signatureBuuffer = sign(Buffer.from(payload, 'hex'), appPrivateKey);
-  return signatureBuuffer.toString('hex');
+  const signatureBuffer = sign(Buffer.from(payload, 'hex'), appPrivateKey);
+  return signatureBuffer.toString('hex');
 };
 
 /**
  * do TX_PREP and get encrypted signature.
  * @param {Transport} transport
  * @param {string} hexForSE
- * @param {string} P1
+ * @param {string} txDataType P1
  * @param {string} signature
  * @param {Function} txPrepareCompleteCallback
  *
@@ -32,7 +32,7 @@ export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
 export const getSingleEncryptedSignature = async (
   transport,
   hexForSE,
-  P1,
+  txDataType,
   signature,
   txPrepareCompleteCallback = null
 ) => {
@@ -43,7 +43,7 @@ export const getSingleEncryptedSignature = async (
     const patchData = sendData.substr(i * 500, 500);
     const p2 = patch === 1 ? '00' : (i === patch - 1 ? '8' : '0') + (i + 1);
     // eslint-disable-next-line no-await-in-loop
-    encryptedSignature = await apdu.tx.prepTx(transport, patchData, P1, p2);
+    encryptedSignature = await apdu.tx.prepTx(transport, patchData, txDataType, p2);
   }
   await apdu.tx.finishPrepare(transport);
 
