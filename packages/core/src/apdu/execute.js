@@ -2,7 +2,7 @@ import { OperationCanceled, NoTransport } from '@coolwallets/errors';
 import COMMAND from '../config/command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';
-
+import { SHA256 } from '../crypto/hash';
 /**
  * @param {string} commandName
  * @param {Transport} transport
@@ -33,6 +33,7 @@ const executeAPDU = async (commandName, transport, apdu, commandType) => {
     if (status !== DFU_RESPONSE.SUCCESS) throw SDKUnknownWithCode(commandName, status);
     return { status, outputData };
   }
+  return false;
 };
 
 /**
@@ -45,16 +46,84 @@ const executeAPDU = async (commandName, transport, apdu, commandType) => {
  * @param {string} params2
  */
 // eslint-disable-next-line import/prefer-default-export
-export const executeCommand = async (transport, commandName, commandType = 'SE', data, params1, params2) => {
-  /* eslint-disable-next-line */
-  console.debug(`Execute Command: ${commandName}`);
+export const executeCommand = async (
+  transport, commandName, commandType = 'SE', data, params1, params2, supportSC = false
+) => {
   const commandParams = COMMAND[commandName];
 
   const P1 = params1 || commandParams.P1;
   const P2 = params2 || commandParams.P2;
 
+  // data too long: divide and send with SECURE CHANNEL
+  if (supportSC && data.length > 500) {
+    const apduHeader = commandParams.CLA + commandParams.INS + P1 + P2;
+    const result = await sendWithSecureChannel(transport, apduHeader, data);
+    return result;
+  }
+
   const apdu = assemblyCommandAndData(commandParams.CLA, commandParams.INS, P1, P2, data);
+
+  // eslint-disable-next-line no-console
+  console.debug(`Execute Command: ${commandName}`);
   const result = await executeAPDU(commandName, transport, apdu, commandType);
 
   return result;
+};
+
+
+/**
+ * Send apdu with secure channel
+ * @param {Transport} transport
+ * @param {string} apduHeader apdu CLS+INS+P1+P2
+ * @param {string} apduData apdu data field
+ */
+export const sendWithSecureChannel = async (transport, apduHeader, apduData) => {
+  const salt = '88888888';
+  const dataToHash = apduHeader.concat(salt, apduData);
+  const hash = SHA256(dataToHash).toString('hex');
+  const packedData = apduHeader.concat(hash, salt, apduData);
+
+  // const buf = Buffer.allocUnsafe()
+  const channelVersion = '01';
+  const useSecure = '00';
+  const useSign = '00';
+
+  const cypherData = channelVersion.concat(useSecure, useSign, packedData);
+
+  // devide cypher data and send with 250 bytes each command
+  const chunks = cypherData.match(/.{1,500}/g);
+  const totalPackages = chunks.length;
+
+  // Send Data
+  let cipherReturn;
+  for (let i = 0; i < totalPackages; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    cipherReturn = await sendFragment(transport, chunks[i], i, totalPackages);
+  }
+
+  // Confirm integrity of returned Data
+  const confirmHash = cipherReturn.slice(4, 68);
+  const confirmSalt = cipherReturn.slice(68, 76);
+  const apduReturn = cipherReturn.slice(76);
+  if (confirmSalt !== salt) throw new Error('SC: Returned salt check failed');
+
+  const returnedDataHash = SHA256(apduReturn + confirmSalt);
+  if (returnedDataHash !== confirmHash) throw new Error('SC: Returned hash check failed');
+
+
+  return apduReturn;
+};
+
+/**
+ * Send devided command with secure channel's apdu.
+ * @param {Transport} transport
+ * @param {string} data
+ * @param {number} index
+ * @param {number} totalPackages
+ */
+const sendFragment = async (transport, data, index, totalPackages) => {
+  const P1 = index.toString(16).padStart(2, '0');
+  const P2 = totalPackages.toString(16).padStart(2, '0');
+  const { outputData } = await executeCommand(transport, 'SC_SEND_SEGMENT', 'SE', data, P1, P2);
+  return outputData;
 };

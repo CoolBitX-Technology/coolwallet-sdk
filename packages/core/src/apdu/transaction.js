@@ -21,7 +21,15 @@ export const prepTx = async (transport, payload, P1, P2) => {
  * @param {string} script
  */
 export const sendScript = async (transport, script) => {
-  const { status } = await executeCommand(transport, 'SEND_SCRIPT', 'SE', script);
+  const { status } = await executeCommand(
+    transport,
+    'SEND_SCRIPT',
+    'SE',
+    script,
+    null,
+    null,
+    true
+  );
   return status === RESPONSE.SUCCESS;
 };
 
@@ -31,7 +39,15 @@ export const sendScript = async (transport, script) => {
  * @param {*} argument
  */
 export const executeScript = async (transport, argument) => {
-  const { outputData: encryptedSignature } = await executeCommand(transport, 'EXECUTE_SCRIPT', 'SE', argument);
+  const { outputData: encryptedSignature } = await executeCommand(
+    transport,
+    'EXECUTE_SCRIPT',
+    'SE',
+    argument,
+    null,
+    null,
+    true
+  );
   return encryptedSignature;
 };
 

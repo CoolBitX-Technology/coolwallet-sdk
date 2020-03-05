@@ -1,4 +1,5 @@
 import { sign } from '../crypto/sign';
+import { SHA256 } from '../crypto/hash';
 import { aes256CbcDecrypt } from '../crypto/encryptions';
 import * as signatureTools from '../crypto/signature';
 import COMMAND from '../config/command';

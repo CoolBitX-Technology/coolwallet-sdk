@@ -305,5 +305,11 @@ export default {
     INS: '84',
     P1: '00',
     P2: '00'
+  },
+  SC_SEND_SEGMENT: {
+    CLA: '80',
+    INS: 'CC',
+    P1: null,
+    P2: null
   }
 };
