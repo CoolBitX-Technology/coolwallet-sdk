@@ -46,18 +46,17 @@ export const sendDataToCoolWallet = async (
   authorizedCallback = null,
   return_canonical = true
 ) => {
-  const hexForSE = data.toString('hex');
+  const txDataHex = data.toString('hex');
 
   await sayHi(transport, appId);
 
   if (typeof preAction === 'function') await preAction();
 
-  const commandSignature = txUtil.signForCoolWallet(appPrivateKey, hexForSE, txDataType);
   const encryptedSignature = await txUtil.getSingleEncryptedSignature(
     transport,
-    hexForSE,
+    txDataHex,
     txDataType,
-    commandSignature,
+    appPrivateKey,
     txPrepareCompleteCallback
   );
   const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);

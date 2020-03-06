@@ -6,38 +6,32 @@ import * as apdu from '../apdu/index';
 
 /**
  * get command signature for CoolWalletS
- * @param {String} appPrivateKey
- * @param {String} data hex string
+ * @param {String} txDataHex hex string data for SE
  * @param {String} txDataType hex P1 string
+ * @param {String} appPrivateKey
  * @return {String} signature
  */
-export const signForCoolWallet = (appPrivateKey, data, txDataType) => {
+const signForCoolWallet = (txDataHex, txDataType, appPrivateKey) => {
   const command = COMMAND.TX_PREPARE;
+  const P1 = txDataType;
   const P2 = '00';
-  const prefix = command.CLA + command.INS + txDataType + P2;
-  const payload = prefix + data;
+  const prefix = command.CLA + command.INS + P1 + P2;
+  const payload = prefix + txDataHex;
   const signatureBuffer = sign(Buffer.from(payload, 'hex'), appPrivateKey);
   return signatureBuffer.toString('hex');
 };
 
 /**
- * do TX_PREP and get encrypted signature.
+ * get command signature for CoolWalletS
  * @param {Transport} transport
- * @param {string} hexForSE
- * @param {string} txDataType P1
- * @param {string} signature
- * @param {Function} txPrepareCompleteCallback
- *
+ * @param {String} txDataHex hex string data for SE
+ * @param {String} txDataType hex P1 string
+ * @param {String} appPrivateKey
+ * @return {String} signature
  */
-export const getSingleEncryptedSignature = async (
-  transport,
-  hexForSE,
-  txDataType,
-  signature,
-  txPrepareCompleteCallback = null
-) => {
+const prepareTx = async (transport, txDataHex, txDataType, appPrivateKey) => {
   let encryptedSignature;
-  const sendData = hexForSE + signature;
+  const sendData = txDataHex + signForCoolWallet(txDataHex, txDataType, appPrivateKey);
   const patch = Math.ceil(sendData.length / 500);
   for (let i = 0; i < patch; i++) {
     const patchData = sendData.substr(i * 500, 500);
@@ -45,34 +39,55 @@ export const getSingleEncryptedSignature = async (
     // eslint-disable-next-line no-await-in-loop
     encryptedSignature = await apdu.tx.prepTx(transport, patchData, txDataType, p2);
   }
+  return encryptedSignature;
+};
+
+/**
+ * do TX_PREP and get encrypted signature.
+ * @param {Transport} transport
+ * @param {String} txDataHex
+ * @param {String} txDataType
+ * @param {String} appPrivateKey
+ * @param {Function} txPrepareCompleteCallback
+ * @returns {Promise<String>} encryptedSignature
+ */
+export const getSingleEncryptedSignature = async (
+  transport,
+  txDataHex,
+  txDataType,
+  appPrivateKey,
+  txPrepareCompleteCallback = null
+) => {
+  const encryptedSignature = await prepareTx(transport, txDataHex, txDataType, appPrivateKey);
   await apdu.tx.finishPrepare(transport);
-
   if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
-
   return encryptedSignature;
 };
 
 /**
  * Send signing data to CoolWalletS, wait for encrypted signatures.
  * @param {Transport} transport
- * @param {Array<{encodedData:String, P1:String, P2:String}>}
- * TxpPrepCommands Array of txPrepare command object
- * @returns {Promise<Array<{encryptedSignature:String, publicKey:String}>>}
+ * @param {Array<{txDataHex:String, txDataType:String}>} txDataArray
+ * @param {String} appPrivateKey
+ * @param {Function} txPrepareCompleteCallback
+ * @returns {Promise<Array<String>>} array of encryptedSignature
  */
-export const getEncryptedSignatures = async (transport, TxpPrepCommands) => {
-  const sigArr = [];
-  for (const command of TxpPrepCommands) {
-    const {
-      encodedData, P1, P2, publicKey
-    } = command;
+export const getEncryptedSignatures = async (
+  transport,
+  txDataArray,
+  appPrivateKey,
+  txPrepareCompleteCallback = null
+) => {
+  const encryptedSignatureArray = [];
+  for (const txData of txDataArray) {
+    const { txDataHex, txDataType } = txData;
     // eslint-disable-next-line no-await-in-loop
-    const encryptedSignature = await apdu.tx.prepTx(transport, encodedData, P1, P2);
-    if (encryptedSignature !== '' && encryptedSignature !== null) {
-      sigArr.push({ encryptedSignature, publicKey });
-    }
+    const encryptedSignature = await prepareTx(transport, txDataHex, txDataType, appPrivateKey);
+    encryptedSignatureArray.push(encryptedSignature);
   }
   await apdu.tx.finishPrepare(transport);
-  return sigArr;
+  if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
+  return encryptedSignatureArray;
 };
 
 /**
