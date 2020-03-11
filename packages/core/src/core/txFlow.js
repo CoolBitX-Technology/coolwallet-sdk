@@ -20,6 +20,18 @@ export const prepareSEData = (keyId, rawData, readType) => {
   return dataForSE;
 };
 
+/**
+ * sign data with coolwallet via script command
+ * @param {Transport} transport
+ * @param {string} appId
+ * @param {string} appPrivateKey
+ * @param {string} script
+ * @param {string} argument
+ * @param {boolean} isEDDSA
+ * @param {Function} txPrepareComplteCallback
+ * @param {Function} authorizedCallback
+ * @param {boolean} return_canonical
+ */
 export const sendScriptAndDataToCard = async (
   transport,
   appId,
@@ -31,9 +43,10 @@ export const sendScriptAndDataToCard = async (
   authorizedCallback = null,
   return_canonical = true
 ) => {
-  await sayHi(transport, appId);
   const encryptedSignature = await txUtil.getEncryptedSignatureByScripts(
     transport,
+    appId,
+    appPrivateKey,
     script,
     argument,
     txPrepareComplteCallback
@@ -44,7 +57,7 @@ export const sendScriptAndDataToCard = async (
 };
 
 /**
- * @description Send Data to CoolWallet
+ * sign data with coolwallets.
  * @param {Transport} transport
  * @param {String} appId
  * @param {String} appPrivateKey

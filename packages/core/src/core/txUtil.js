@@ -1,23 +1,9 @@
 import { sign } from '../crypto/sign';
-import { SHA256 } from '../crypto/hash';
 import { aes256CbcDecrypt } from '../crypto/encryptions';
 import * as signatureTools from '../crypto/signature';
 import COMMAND from '../config/command';
 import * as apdu from '../apdu/index';
-
-/**
- * Check if the current SE support script execution
- * @param {Transport} transport
- * @returns {Promise<boolean>}
- */
-export const checkSupportScripts = async (transport) => {
-  try {
-    await apdu.tx.getSignedHex(transport);
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
+import { getCommandSignature } from './auth';
 
 /**
  * get command signature for CoolWalletS
@@ -37,14 +23,25 @@ export const signForCoolWallet = (appPrivateKey, data, P1, P2) => {
 
 export const getEncryptedSignatureByScripts = async (
   transport,
+  appId,
+  appPrivKey,
   script,
   argument,
   txPrepareComplteCallback = null
 ) => {
   await apdu.tx.sendScript(transport, script);
-  const encryptedSignature = await apdu.tx.executeScript(transport, argument);
+  const { signature } = await getCommandSignature(
+    transport,
+    appId,
+    appPrivKey,
+    'EXECUTE_SCRIPT',
+    argument,
+    null,
+    null,
+  );
+  const encryptedSignature = await apdu.tx.executeScript(transport, argument, signature);
   await apdu.tx.finishPrepare(transport);
-  // const signedTx = await apdu.tx.getSignedHex(transport);
+
   if (typeof txPrepareComplteCallback === 'function') txPrepareComplteCallback();
   return encryptedSignature;
 };

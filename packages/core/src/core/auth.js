@@ -2,7 +2,7 @@ import { FirmwareVersionTooLow } from '@coolwallets/errors';
 import COMMAND from '../config/command';
 import { sign } from '../crypto/sign';
 import { control, setting } from '../apdu/index';
-import { checkSupportScripts } from './txUtil';
+import { checkSupportScripts } from './controller';
 
 /**
  * Get Command signature to append to some specific APDU commands.
@@ -13,9 +13,9 @@ import { checkSupportScripts } from './txUtil';
  * @param {String} data
  * @param {String} params1
  * @param {String} params2
- * @returns {Promise<string>}
+ * @returns {Promise<{signature: string, forceUseSC: boolean}>}
  */
-export const generalAuthorization = async (
+export const getCommandSignature = async (
   transport,
   appId,
   appPrivateKey,
@@ -24,23 +24,27 @@ export const generalAuthorization = async (
   params1,
   params2
 ) => {
-  const useScript = await checkSupportScripts(transport);
-  if (useScript) {
-    await control.sayHi(transport, appId);
-    // To do: Implement secure channel signature.
-    return '';
-  }
-  const dataPackets = data || '';
   const nonce = await control.getNonce(transport);
+
+  const forceUseSC = await checkSupportScripts(transport);
 
   const commandParams = COMMAND[commandName];
   const P1 = params1 || commandParams.P1;
   const P2 = params2 || commandParams.P2;
-  const command = commandParams.CLA + commandParams.INS + P1 + P2;
-  const signatureParams = command + dataPackets + nonce;
+  const apduHeader = commandParams.CLA + commandParams.INS + P1 + P2;
+  const dataPackets = data || '';
+  const signatureParams = apduHeader + dataPackets + nonce;
   const signature = sign(signatureParams, appPrivateKey).toString('hex');
-  await control.sayHi(transport, appId);
-  return signature;
+
+  if (!forceUseSC) {
+    await control.sayHi(transport, appId);
+    return { signature, forceUseSC };
+  } // return [appId(20B)] [rightJustifiedSignature(72B)]
+
+  // Return AppId with padded signature: Dont need to call [say hi].
+  // the following operaion is forced to used Secure Channel
+  const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
+  return { signature: appIdWithSignature, forceUseSC };
 };
 
 /**
