@@ -1,6 +1,6 @@
+// import Errors from '@coolwallets/errors';
 import { executeCommand } from './execute';
 import { RESPONSE } from '../config/response';
-
 /**
  * Pair current device with CWS card
  * @param {string} data
@@ -18,8 +18,8 @@ export const registerDevice = async (transport, data, P1) => {
  * @param {string} data
  * @return {Promise<string>}
  */
-export const getPairingPassword = async (transport, data) => {
-  const { outputData } = await executeCommand(transport, 'GET_PAIR_PWD', 'SE', data);
+export const getPairingPassword = async (transport, data, forceUseSC) => {
+  const { outputData } = await executeCommand(transport, 'GET_PAIR_PWD', 'SE', data, null, null, true, forceUseSC);
   return outputData;
 };
 
@@ -27,15 +27,23 @@ export const getPairingPassword = async (transport, data) => {
  * Get list of paired devices
  * @param {Transport} transport
  * @param {string} signature
+ * @param {bool} forceUseSC
  * @return {Promise<Array<{appId:string, appName: string}>>}
  */
-export const getPairedApps = async (transport, signature) => {
-  const { outputData } = await executeCommand(transport, 'GET_PAIRED_DEVICES', 'SE', signature);
+export const getPairedApps = async (transport, signature, forceUseSC) => {
+  const { outputData } = await executeCommand(
+    transport,
+    'GET_PAIRED_DEVICES',
+    'SE',
+    signature, null, null,
+    true, forceUseSC
+  );
   const appsInfo = outputData.match(/.{100}/g);
   const apps = appsInfo.map((appInfo) => {
     const appId = appInfo.slice(0, 40);
     const appName = Buffer.from(appInfo.slice(40), 'hex')
       .toString()
+      // eslint-disable-next-line no-control-regex
       .replace(/\u0000/gi, '');
     return { appId, appName };
   });

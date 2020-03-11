@@ -92,14 +92,13 @@ export const sendWithSecureChannel = async (transport, apduHeader, apduData, for
   const hash = SHA256(dataToHash).toString('hex');
   const packedData = apduHeader.concat(hash, salt, apduData);
 
-  // const buf = Buffer.allocUnsafe()
   const channelVersion = '01';
   const useSecure = '00';
   const useSign = forceUseSC ? '01' : '00';
 
   const cypherData = channelVersion.concat(useSecure, useSign, packedData);
 
-  // devide cypher data and send with 250 bytes each command
+  // Devide cypher data and send with 250 bytes each command
   const chunks = cypherData.match(/.{1,500}/g);
   const totalPackages = chunks.length;
 
@@ -109,7 +108,7 @@ export const sendWithSecureChannel = async (transport, apduHeader, apduData, for
     // eslint-disable-next-line no-await-in-loop
     result = await sendFragment(transport, chunks[i], i, totalPackages);
   }
-  // Uncatched error in SC_SEND_SEGMENT command. Return to parent executeCommand
+  // Uncaught error in SC_SEND_SEGMENT command. Return to parent executeCommand
   if (result.status !== RESPONSE.SUCCESS) return result;
 
   const confirmHash = result.outputData.slice(4, 68);

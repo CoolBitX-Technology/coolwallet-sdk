@@ -6,8 +6,8 @@ import { executeCommand } from './execute';
  * @param {string} signature
  * @return { Promise<boolean> }
  */
-export const authGetExtendedKey = async (transport, signature) => {
-  await executeCommand(transport, 'AUTH_EXT_KEY', 'SE', signature);
+export const authGetExtendedKey = async (transport, signature, forceUseSC) => {
+  await executeCommand(transport, 'AUTH_EXT_KEY', 'SE', signature, null, null, true, forceUseSC);
   return true;
 };
 

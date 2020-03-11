@@ -38,15 +38,16 @@ export const sendScript = async (transport, script) => {
  * @param {*} transport
  * @param {*} argument
  */
-export const executeScript = async (transport, argument) => {
+export const executeScript = async (transport, argument, signature) => {
   const { outputData: encryptedSignature } = await executeCommand(
     transport,
     'EXECUTE_SCRIPT',
     'SE',
-    argument,
+    argument + signature,
     null,
     null,
-    true
+    true,
+    true,
   );
   return encryptedSignature;
 };

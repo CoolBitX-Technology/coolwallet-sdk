@@ -7,8 +7,8 @@ import { RESPONSE } from '../config/response';
  * @param {string} seedHexWithSig
  * @return {Promise<boolean>}
  */
-export const setSeed = async (transport, seedHexWithSig) => {
-  const { status } = await executeCommand(transport, 'SET_SEED', 'SE', seedHexWithSig);
+export const setSeed = async (transport, seedHexWithSig, forceUseSC) => {
+  const { status } = await executeCommand(transport, 'SET_SEED', 'SE', seedHexWithSig, null, null, true, forceUseSC);
   return status === RESPONSE.SUCCESS;
 };
 
@@ -18,8 +18,17 @@ export const setSeed = async (transport, seedHexWithSig) => {
  * @param {string} strengthWithSig data field
  * @return {Promise<boolean>}
  */
-export const createWallet = async (transport, strengthWithSig) => {
-  const { status } = await executeCommand(transport, 'CREATE_WALLET', 'SE', strengthWithSig);
+export const createWallet = async (transport, strengthWithSig, forceUseSC) => {
+  const { status } = await executeCommand(
+    transport,
+    'CREATE_WALLET',
+    'SE',
+    strengthWithSig,
+    null,
+    null,
+    true,
+    forceUseSC
+  );
   return status === RESPONSE.SUCCESS;
 };
 
