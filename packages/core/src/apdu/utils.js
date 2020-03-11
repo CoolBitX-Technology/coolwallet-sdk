@@ -194,6 +194,27 @@ export const throwSDKError = (command, errorCode) => {
           throw SDKUnknownWithCode(command, code);
       }
     }
+    case 'SC_SEND_SEGMENT': {
+      switch (code) {
+        case '6296':
+          throw new Error('SecureChannel: this command is not accepted through SC.');
+        case '6297':
+          throw new Error('SecureChannel: Missing command signature');
+        case '6298': {
+          throw new Error('SecureChannel: Data not encrypted');
+        }
+        case '609d': {
+          throw new Errors.NotRegistered();
+        }
+        default: {
+          /**
+           * Receive an error not categorized as Secure Channel Error:
+           * return the data and status, let parent call decide.
+           */
+          return;
+        }
+      }
+    }
     default:
       throw SDKUnknownWithCode(command, code);
   }
