@@ -60,7 +60,7 @@ declare module '@coolwallets/core' {
 
   export namespace core {
     export namespace auth {
-      export function generalAuthorization(
+      export function getCommandSignature(
         transport: Transport,
         appId: string,
         appPrivateKey: string,
@@ -68,8 +68,7 @@ declare module '@coolwallets/core' {
         data: string,
         params1?: string,
         params2?: string,
-        test?: string
-      ): Promise<string>;
+      ): Promise<{signature: string, forceUseSC: boolean}>;
 
       export function versionCheck(transport: Transport, requiredSEVersion: number): Promise<void>;
     }
@@ -100,7 +99,9 @@ declare module '@coolwallets/core' {
         transport: Transport,
         TxpPrepCommands: Array<{encodedData:String, P1:String, P2:String}>
       ):Promise<Array<{encryptedSignature:String, publicKey:String}>>
+    }
 
+    export namespace controller {
       export function checkSupportScripts(transport: Transport): Promise<boolean>
     }
   }
