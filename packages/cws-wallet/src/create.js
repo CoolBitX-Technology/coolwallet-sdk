@@ -15,7 +15,7 @@ const { SEPublicKey } = config.KEY;
 export async function createWallet(transport, appId, appPrivateKey, strength) {
   let strengthHex = strength.toString(16);
   if (strengthHex.length % 2 > 0) strengthHex = `0${strengthHex}`;
-  const signature = await core.auth.generalAuthorization(
+  const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
@@ -23,7 +23,7 @@ export async function createWallet(transport, appId, appPrivateKey, strength) {
     strengthHex
   );
   const strengthWithSig = strengthHex + signature;
-  return apdu.wallet.createWallet(transport, strengthWithSig);
+  return apdu.wallet.createWallet(transport, strengthWithSig, forceUseSC);
 }
 
 /**
@@ -46,7 +46,7 @@ export async function sendCheckSum(transport, checkSum) {
  */
 export async function setSeed(transport, appId, appPrivateKey, seedHex) {
   const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
-  const signature = await core.auth.generalAuthorization(
+  const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
@@ -54,5 +54,5 @@ export async function setSeed(transport, appId, appPrivateKey, seedHex) {
     encryptedSeed
   );
   const signedSeed = encryptedSeed + signature;
-  return apdu.wallet.setSeed(transport, signedSeed);
+  return apdu.wallet.setSeed(transport, signedSeed, forceUseSC);
 }

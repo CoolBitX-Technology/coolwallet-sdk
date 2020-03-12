@@ -34,7 +34,7 @@ export const signTransaction = async (
   authorizedCB = null,
 ) => {
   const rawPayload = ethUtil.getRawHex(transaction);
-  const useScript = await core.util.checkSupportScripts(transport);
+  const useScript = await core.controller.checkSupportScripts(transport);
   const txType = ethUtil.getTransactionType(transaction);
   let canonicalSignature;
   if (useScript) {

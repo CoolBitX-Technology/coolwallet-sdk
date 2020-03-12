@@ -1,16 +1,16 @@
-import { core } from '@coolwallets/core'
-import * as util from './icx_util'
+import { core } from '@coolwallets/core';
+import * as util from './icx_util';
 
 /**
- * 
- * @param {Transport} transport 
- * @param {string} appId 
- * @param {string} appPrivateKey 
- * @param {{from:string, to:string, value:string, time:string, networkId:number}} transaction 
- * @param {number} addressIndex 
- * @param {string} publicKey 
- * @param {Function} confirmCB 
- * @param {Function} authorizedCB 
+ *
+ * @param {Transport} transport
+ * @param {string} appId
+ * @param {string} appPrivateKey
+ * @param {{from:string, to:string, value:string, time:string, networkId:number}} transaction
+ * @param {number} addressIndex
+ * @param {string} publicKey
+ * @param {Function} confirmCB
+ * @param {Function} authorizedCB
  */
 export const signTransaction = async (
   transport,
@@ -22,9 +22,9 @@ export const signTransaction = async (
   confirmCB = null,
   authorizedCB = null,
 ) => {
-  const { script, argument } = util.getScriptAndArguments(addressIndex, transaction)
-  
-  const { signature: canonicalSignature, cancel } = await core.flow.sendScriptAndDataToCard(
+  const { script, argument } = util.getScriptAndArguments(addressIndex, transaction);
+
+  const canonicalSignature = await core.flow.sendScriptAndDataToCard(
     transport,
     appId,
     appPrivateKey,
@@ -34,8 +34,7 @@ export const signTransaction = async (
     confirmCB,
     authorizedCB,
     true
-  )
-  if (cancel) throw 'User canceled.'
+  );
   const txHex = await util.generateRawTx(transaction, canonicalSignature, publicKey);
   return txHex;
-}
+};

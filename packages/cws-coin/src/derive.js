@@ -3,13 +3,13 @@ import { core, apdu, crypto } from '@coolwallets/core';
 const bip32 = require('bip32');
 
 const authGetKey = async (transport, appId, appPrivateKey) => {
-  const signature = await core.auth.generalAuthorization(
+  const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
     'AUTH_EXT_KEY'
   );
-  return apdu.coin.authGetExtendedKey(transport, signature);
+  return apdu.coin.authGetExtendedKey(transport, signature, forceUseSC);
 };
 
 /**

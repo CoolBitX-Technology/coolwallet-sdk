@@ -44,13 +44,13 @@ export const register = async (transport, appPublicKey, password, deviceName) =>
  * @return {Promise<Array<{appId:string, }>>}
  */
 export const getPairedApps = async (transport, appId, appPrivKey) => {
-  const signature = await core.auth.generalAuthorization(
+  const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivKey,
     'GET_PAIRED_DEVICES'
   );
-  const apps = await apdu.pairing.getPairedApps(transport, signature);
+  const apps = await apdu.pairing.getPairedApps(transport, signature, forceUseSC);
   return apps;
 };
 
@@ -62,15 +62,14 @@ export const getPairedApps = async (transport, appId, appPrivKey) => {
  * @return {Promise<string>}
  */
 export const getPairingPassword = async (transport, appId, appPrivKey) => {
-  const signature = await core.auth.generalAuthorization(
+  const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivKey,
     'GET_PAIR_PWD'
   );
-  const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature);
+  const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
   await apdu.control.powerOff(transport);
-
   let password = crypto.encryption.ECIESDec(appPrivKey, encryptedPassword);
   password = password.replace(/f/gi, '');
   return password;
