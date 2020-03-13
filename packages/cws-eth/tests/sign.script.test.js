@@ -3,7 +3,8 @@
 
 import ETH from '../src';
 
-require('@coolwallets/core').core.util.checkSupportScripts = () => true;
+// Mock support script command
+require('@coolwallets/core').core.controller.checkSupportScripts = () => true;
 
 const coreModule = require('@coolwallets/core');
 

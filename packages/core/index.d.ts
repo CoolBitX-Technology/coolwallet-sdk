@@ -84,11 +84,10 @@ declare module '@coolwallets/core' {
         appId: String,
         appPrivateKey: String,
         data: Buffer,
-        P1: String,
-        P2: String,
+        txDataType,
         isEDDSA?: Boolean,
         preAction?: Function,
-        txPrepareComplteCallback?: Function,
+        txPrepareCompleteCallback?: Function,
         authorizedCallback?: Function,
         returnCanonical?: Boolean
       ): Promise<{ r: string; s: string } | string | Buffer>;

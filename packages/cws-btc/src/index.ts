@@ -1,5 +1,5 @@
 import { ECDSACoin } from '@coolwallets/coin';
-import { pubkeyToP2PKHAddress, pubkeyToSegwitAddress } from './util';
+import { pubkeyToP2PKHAddress, pubkeyToP2SHAddress } from './util';
 
 // import { Input, Output, Param } from './types';
 // import * as common from './common';
@@ -26,8 +26,20 @@ export default class BTC extends ECDSACoin {
     return pubkeyToP2PKHAddress(publicKey, this.network);
   }
 
-  async getSegwitAddress(addressIndex: number): Promise<string> {
+  async getP2SHAddress(addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(addressIndex);
-    return pubkeyToSegwitAddress(publicKey, this.network);
+    return pubkeyToP2SHAddress(publicKey);
+  }
+
+  async signP2SHTransaction(
+    txFee: string|number,
+    fromAddresses: [string],
+    toAddress: string,
+    changeAddress: string,
+    changeKeyId: string,
+    amount: string|number,
+    readType: string
+  ): Promise<string> {
+
   }
 }

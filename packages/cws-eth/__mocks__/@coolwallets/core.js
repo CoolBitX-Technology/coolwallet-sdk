@@ -2,8 +2,9 @@
 export const core = {
   util: {
     addressIndexToKeyId: jest.fn(() => '3C0000000000'),
+  },
+  controller: {
     checkSupportScripts: jest.fn(() => false),
-
   },
   flow: {
     prepareSEData: jest.fn(() => Buffer.from('f700003c853c00000000ed82031b84b2d05e0082520c940644de2a0cf3f11ef6ad89c264585406ea346a96880de0b6b3a764000080018080')),

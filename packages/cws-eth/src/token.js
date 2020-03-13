@@ -1,8 +1,5 @@
-// import { apdu } from '@coolwallets/core';
-import Web3 from 'web3';
+import { asciiToHex, padRight } from './lib';
 import { handleHex, removeHex0x } from './string_util';
-
-const web3 = new Web3();
 
 /**
  * @param {string} data
@@ -35,8 +32,8 @@ export const parseToAndAmount = (data) => {
 export const getSetTokenPayload = (contractAddress, symbol, decimals) => {
   const unit = handleHex(decimals.toString(16));
   const len = handleHex(symbol.length.toString(16));
-  const symb = handleHex(web3.utils.asciiToHex(symbol));
-  const setTokenPayload = unit + len + web3.utils.padRight(symb, 14, '0') + removeHex0x(contractAddress);
+  const symb = handleHex(asciiToHex(symbol));
+  const setTokenPayload = unit + len + padRight(symb, 14, '0') + removeHex0x(contractAddress);
   return setTokenPayload;
 };
 

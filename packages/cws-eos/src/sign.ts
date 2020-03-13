@@ -84,7 +84,6 @@ export default async function signTransfer(
     appPrivateKey,
     dataForSE,
     '00',
-    '00',
     false,
     undefined,
     confirmCB,

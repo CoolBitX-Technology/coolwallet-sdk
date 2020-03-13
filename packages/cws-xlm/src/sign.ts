@@ -32,7 +32,6 @@ export default async function signTransaction(
     appPrivateKey,
     dataForSE,
     '00',
-    '00',
     true,
     undefined,
     confirmCB,

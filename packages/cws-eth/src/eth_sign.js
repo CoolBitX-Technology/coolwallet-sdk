@@ -1,12 +1,10 @@
 import { core } from '@coolwallets/core';
-import Web3 from 'web3';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
+import { isHex, keccak256 } from './lib';
 import * as ethUtil from './eth_utils';
 import { removeHex0x } from './string_util';
 
 const rlp = require('rlp');
-
-const web3 = new Web3();
 
 /**
  * sign ETH Transaction
@@ -39,7 +37,7 @@ export const signTransaction = async (
   let canonicalSignature;
   if (useScript) {
     const { script, argument } = ethUtil.getScriptAndArguments(txType, addressIndex, transaction);
-    const signature = await core.flow.sendScriptAndDataToCard(
+    canonicalSignature = await core.flow.sendScriptAndDataToCard(
       transport,
       appId,
       appPrivateKey,
@@ -50,26 +48,23 @@ export const signTransaction = async (
       authorizedCB,
       true
     );
-    canonicalSignature = signature;
   } else {
     const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
-    const {
-      P1, P2, readType, preAction
-    } = ethUtil.getReadTypeAndParmas(txType);
+    const { readType, preAction } = ethUtil.getReadType(txType);
     const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
     canonicalSignature = await core.flow.sendDataToCoolWallet(
       transport,
       appId,
       appPrivateKey,
       dataForSE,
-      P1,
-      P2,
+      '00',
       false,
       preAction,
       confirmCB,
       authorizedCB
     );
   }
+
 
   const { v, r, s } = await ethUtil.genEthSigFromSESig(
     canonicalSignature,
@@ -110,7 +105,7 @@ export const signMessage = async (
   let msgBuf;
   let preAction;
 
-  if (web3.utils.isHex(message)) {
+  if (isHex(message)) {
     msgBuf = Buffer.from(removeHex0x(message), 'hex');
   } else {
     msgBuf = Buffer.from(message, 'utf8');
@@ -118,7 +113,7 @@ export const signMessage = async (
 
   if (isHashRequired) {
     preAction = ethUtil.apduForParsingMessage(transport, msgBuf, '07'); // send prehashed message to card
-    msgBuf = Buffer.from(web3.utils.keccak256(msgBuf), 'hex');
+    msgBuf = Buffer.from(keccak256(msgBuf), 'hex');
   }
 
   const len = msgBuf.length.toString();
@@ -132,7 +127,6 @@ export const signMessage = async (
     appId,
     appPrivateKey,
     dataForSE,
-    '00',
     '00',
     false,
     preAction,
@@ -184,7 +178,7 @@ export const signTypedData = async (
     sanitizedData.domain,
     sanitizedData.types
   );
-  const dataHash = Buffer.from(web3.utils.sha3(encodedData).substr(2), 'hex');
+  const dataHash = Buffer.from(keccak256(encodedData).substr(2), 'hex');
   const payload = Buffer.concat([prefix, domainSeparate, dataHash]);
   const dataForSE = core.flow.prepareSEData(keyId, payload, 'F3');
 
@@ -193,7 +187,6 @@ export const signTypedData = async (
     appId,
     appPrivateKey,
     dataForSE,
-    '00',
     '00',
     false,
     null,

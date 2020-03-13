@@ -1,15 +1,17 @@
-import Web3 from 'web3';
 import elliptic from 'elliptic';
 import { DataTooLong } from '@coolwallets/errors';
+
 import { apdu } from '@coolwallets/core';
 
 import { handleHex } from './string_util';
 import * as scripts from './scripts';
 import * as token from './token';
 
+import { keccak256, toChecksumAddress } from './lib';
+
+
 const rlp = require('rlp');
 
-const web3 = new Web3();
 // eslint-disable-next-line new-cap
 const ec = new elliptic.ec('secp256k1');
 
@@ -87,17 +89,17 @@ export const getRawHex = (transaction) => {
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
  * value:string, data:string}} transaction
  */
-export const getReadTypeAndParmas = (txType) => {
+export const getReadType = (txType) => {
   switch (txType) {
     case transactionType.TRANSFER: {
-      return { P1: '00', P2: '00', readType: '3C' };
+      return { readType: '3C' };
     }
-    // Todo: Add erc20
+    // Todo: Old transfer Add erc20
     // case transactionType.ERC20: {
-    //   return { P1: '00', P2: '00', readType: 'C2' };
+    //   return { readType: 'C2' };
     // }
     default: {
-      return { P1: '00', P2: '00', readType: '33' };
+      return { readType: '33' };
     }
   }
 };
@@ -135,7 +137,6 @@ export const getScriptAndArguments = (txType, addressIndex, transaction) => {
     argument: SEPath + argument
   };
 };
-
 /**
  * @description Compose Signed Transaction
  * @param {Array<Buffer>} payload
@@ -164,7 +165,7 @@ export const composeSignedTransacton = (payload, v, r, s, chainId) => {
  * @return {Promise<{v: Number, r: String, s: String}>}
  */
 export const genEthSigFromSESig = async (canonicalSignature, payload, compressedPubkey) => {
-  const hash = web3.utils.keccak256(payload);
+  const hash = keccak256(payload);
   const data = Buffer.from(handleHex(hash), 'hex');
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
 
@@ -226,6 +227,6 @@ function trimFirst12Bytes(hexString) {
 export function pubKeyToAddress(compressedPubkey) {
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
   const pubkey = `0x${keyPair.getPublic(false, 'hex').substr(2)}`;
-  const address = trimFirst12Bytes(web3.utils.keccak256(pubkey));
-  return web3.utils.toChecksumAddress(address);
+  const address = trimFirst12Bytes(keccak256(pubkey));
+  return toChecksumAddress(address);
 }

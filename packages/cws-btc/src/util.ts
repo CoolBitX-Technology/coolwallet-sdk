@@ -10,7 +10,7 @@ export function pubkeyToP2PKHAddress(publicKey:string, network?: any) : string {
   return address;
 }
 
-export function pubkeyToSegwitAddress(publicKey:string, network?: any) : string {
+export function pubkeyToP2SHAddress(publicKey:string, network?: any) : string {
   const { address } = bitcoin.payments.p2sh({
     redeem: bitcoin.payments.p2wpkh({ pubkey: Buffer.from(publicKey, 'hex'), network }),
   });

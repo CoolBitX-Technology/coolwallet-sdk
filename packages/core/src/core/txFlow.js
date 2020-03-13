@@ -62,11 +62,10 @@ export const sendScriptAndDataToCard = async (
  * @param {String} appId
  * @param {String} appPrivateKey
  * @param {Buffer} data for SE (output of prepareSEData)
- * @param {String} P1 hex string
- * @param {String} P2 hex string
+ * @param {String} txDataType hex string
  * @param {Function} preAction
- * @param {Function} txPrepareComplteCallback
- * @param {Function} authorizedCallback
+ * @param {Function} txPrepareCompleteCallback notify app to show the tx info
+ * @param {Function} authorizedCallback notify app to close the tx info
  * @param {Boolean} isTestnet blind signing for SE version 67
  * @param {Boolean} return_canonical
  * @return {Promise< {r: string, s: string} | string | Buffer }>}
@@ -76,27 +75,25 @@ export const sendDataToCoolWallet = async (
   appId,
   appPrivateKey,
   data,
-  P1,
-  P2,
+  txDataType,
   isEDDSA = false,
   preAction = null,
-  txPrepareComplteCallback = null,
+  txPrepareCompleteCallback = null,
   authorizedCallback = null,
   return_canonical = true
 ) => {
-  const hexForSE = data.toString('hex');
+  const txDataHex = data.toString('hex');
 
   await sayHi(transport, appId);
 
   if (typeof preAction === 'function') await preAction();
 
-  const commandSignature = txUtil.signForCoolWallet(appPrivateKey, hexForSE, P1, P2);
   const encryptedSignature = await txUtil.getSingleEncryptedSignature(
     transport,
-    hexForSE,
-    P1,
-    commandSignature,
-    txPrepareComplteCallback
+    txDataHex,
+    txDataType,
+    appPrivateKey,
+    txPrepareCompleteCallback
   );
   const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
 
