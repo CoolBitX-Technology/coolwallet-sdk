@@ -30,7 +30,6 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {Function} preAction
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
- * @param {Boolean} isTestnet blind signing for SE version 67
  * @param {Boolean} return_canonical
  * @return {Promise< {r: string, s: string} | string | Buffer }>}
  */
@@ -66,4 +65,46 @@ export const sendDataToCoolWallet = async (
     return_canonical
   );
   return signature;
+};
+
+/**
+ * @description Send Data Array to CoolWallet
+ * @param {Transport} transport
+ * @param {String} appId
+ * @param {String} appPrivateKey
+ * @param {Array<{txDataHex:String, txDataType:String}>} txDataArray
+ * @param {Function} txPrepareCompleteCallback notify app to show the tx info
+ * @param {Function} authorizedCallback notify app to close the tx info
+ * @param {Boolean} return_canonical
+ * @return {Promise< {r: string, s: string} | string | Buffer }>}
+ */
+export const sendDataArrayToCoolWallet = async (
+  transport,
+  appId,
+  appPrivateKey,
+  txDataArray,
+  isEDDSA = false,
+  txPrepareCompleteCallback = null,
+  authorizedCallback = null,
+  return_canonical = true
+) => {
+  await sayHi(transport, appId);
+
+  const encryptedSignatureArray = await txUtil.getEncryptedSignatures(
+    transport,
+    txDataArray,
+    appPrivateKey,
+    txPrepareCompleteCallback
+  );
+  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
+
+  const signatures = encryptedSignatureArray.map(
+    (encryptedSignature) => txUtil.decryptSignatureFromSE(
+      encryptedSignature,
+      signatureKey,
+      isEDDSA,
+      return_canonical
+    )
+  );
+  return signatures;
 };
