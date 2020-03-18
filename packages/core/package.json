@@ -1,8 +1,8 @@
 {
   "name": "@coolwallets/core",
-  "version": "0.0.20",
+  "version": "0.2.0-beta.0",
   "description": "Light core library of CoolWalletS apdu commands.",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "babel -d lib/ src",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
