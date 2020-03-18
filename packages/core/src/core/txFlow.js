@@ -7,7 +7,7 @@ import { sayHi } from '../apdu/control';
  * @param {String} keyId hex string
  * @param {Buffer|Array<Buffer>} rawData - signMessage: payload, signTransaction: rawPayload
  * @param {String} readType
- * @return {Buffer}
+ * @return {String} Hex input data for 8032 txPrep
  */
 export const prepareSEData = (keyId, rawData, readType) => {
   const inputIdBuffer = Buffer.from('00', 'hex');
@@ -17,7 +17,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
 
   const data = [inputIdBuffer, signDataBuffer, readTypeBuffer, keyIdBuffer, rawData];
   const dataForSE = rlp.encode(data);
-  return dataForSE;
+  return dataForSE.toString('hex');
 };
 
 /**
@@ -25,7 +25,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {Transport} transport
  * @param {String} appId
  * @param {String} appPrivateKey
- * @param {Buffer} data for SE (output of prepareSEData)
+ * @param {String} txDataHex for SE (output of prepareSEData)
  * @param {String} txDataType hex string
  * @param {Function} preAction
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
@@ -38,7 +38,7 @@ export const sendDataToCoolWallet = async (
   transport,
   appId,
   appPrivateKey,
-  data,
+  txDataHex,
   txDataType,
   isEDDSA = false,
   preAction = null,
@@ -46,8 +46,6 @@ export const sendDataToCoolWallet = async (
   authorizedCallback = null,
   return_canonical = true
 ) => {
-  const txDataHex = data.toString('hex');
-
   await sayHi(transport, appId);
 
   if (typeof preAction === 'function') await preAction();
