@@ -8,6 +8,7 @@ export default class ECDSACoin {
     this.coinType = coinType;
     this.accPublicKey = '';
     this.accChainCode = '';
+    this.publicKeys = {};
 
     this.getPublicKey = this.getPublicKey.bind(this);
   }
@@ -29,8 +30,11 @@ export default class ECDSACoin {
       this.accPublicKey = accountPublicKey;
       this.accChainCode = accountChainCode;
     }
-    const nodeInfo = derivation.derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
-    return nodeInfo.publicKey;
+    if (!this.publicKeys[addressIndex]) {
+      const node = derivation.derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
+      this.publicKeys[addressIndex] = node.publicKey;
+    }
+    return this.publicKeys[addressIndex];
   }
 
   /**
