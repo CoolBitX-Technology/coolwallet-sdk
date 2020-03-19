@@ -1,5 +1,10 @@
+import { core } from '@coolwallets/core';
 import { ECDSACoin } from '@coolwallets/coin';
 import { pubkeyToP2PKHAddress, pubkeyToP2SHAddress } from './util';
+
+type Input = import('./types').Input;
+type Output = import('./types').Output;
+type Change = import('./types').Change;
 
 type Transport = import('@coolwallets/transport').default;
 
@@ -24,14 +29,30 @@ export default class BTC extends ECDSACoin {
     return pubkeyToP2SHAddress(publicKey);
   }
 
+  async signP2PKHTransaction(
+    inputs: [Input],
+    output: Output,
+    change: Change,
+    confirmCB = null,
+    authorizedCB = null,
+  ): Promise<string> {
+
+    const signatures = await core.flow.sendDataArrayToCoolWallet(
+      this.transport,
+      this.appId,
+      this.appPrivateKey,
+      txDataArray,
+      false,
+      confirmCB,
+      authorizedCB,
+      false
+    );
+  }
+
   async signP2SHTransaction(
-    txFee: string|number,
-    fromAddresses: [string],
-    toAddress: string,
-    changeAddress: string,
-    changeKeyId: string,
-    amount: string|number,
-    readType: string
+		inputs: [Input],
+		output: Output,
+    change: Change,
   ): Promise<string> {
 
   }

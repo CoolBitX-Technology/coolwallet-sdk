@@ -1,13 +1,15 @@
-export type input = {
-  txId:string,
-  vout:number,
-  value:number,
-  redeemScript:string,
-  publicKey:string,
-  addressIndex:number
+export type Input = {
+  txHash: string,
+  outputIndex: number,
+  addressIndex: number,
 };
 
-export type output = {
+export type Output = {
+  value: string,
   address: string,
-  value: number
-}
+};
+
+export type Change = {
+  value: string,
+  addressIndex: number,
+};
