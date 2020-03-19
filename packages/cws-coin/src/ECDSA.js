@@ -6,6 +6,8 @@ export default class ECDSACoin {
     this.appPrivateKey = appPrivateKey;
     this.appId = appId;
     this.coinType = coinType;
+    this.accPublicKey = '';
+    this.accChainCode = '';
 
     this.getPublicKey = this.getPublicKey.bind(this);
   }
@@ -16,14 +18,18 @@ export default class ECDSACoin {
    * @returns {Promise < string >}
    */
   async getPublicKey(addressIndex) {
-    const { accountPublicKey, accountChainCode } = await derivation.getAccountExtKey(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
-      this.coinType,
-      0
-    );
-    const nodeInfo = derivation.derivePubKey(accountPublicKey, accountChainCode, 0, addressIndex);
+    if (this.accPublicKey === '' || this.accChainCode === '') {
+      const { accountPublicKey, accountChainCode } = await derivation.getAccountExtKey(
+        this.transport,
+        this.appId,
+        this.appPrivateKey,
+        this.coinType,
+        0
+      );
+      this.accPublicKey = accountPublicKey;
+      this.accChainCode = accountChainCode;
+    }
+    const nodeInfo = derivation.derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
     return nodeInfo.publicKey;
   }
 
