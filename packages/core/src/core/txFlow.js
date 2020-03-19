@@ -27,6 +27,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {String} appPrivateKey
  * @param {String} txDataHex for SE (output of prepareSEData)
  * @param {String} txDataType hex string
+ * @param {Boolean} isEDDSA
  * @param {Function} preAction
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
@@ -73,10 +74,11 @@ export const sendDataToCoolWallet = async (
  * @param {String} appId
  * @param {String} appPrivateKey
  * @param {Array<{txDataHex:String, txDataType:String}>} txDataArray
+ * @param {Boolean} isEDDSA
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
  * @param {Boolean} return_canonical
- * @return {Promise< {r: string, s: string} | string | Buffer }>}
+ * @return {Promise<Array<{r: string, s: string} | string | Buffer }>>}
  */
 export const sendDataArrayToCoolWallet = async (
   transport,
