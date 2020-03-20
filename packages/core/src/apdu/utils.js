@@ -75,6 +75,15 @@ export const SDKUnknownWithCode = (command, code) => new Errors.SDKError('Unknow
  */
 export const throwSDKError = (command, errorCode) => {
   const code = errorCode.toLowerCase();
+  // General Errors
+  switch (code) {
+    case '6d00':
+      throw new Errors.UnkownCommand();
+
+    default:
+  }
+
+  // Command-specified errors
   switch (command) {
     case 'SAY_HI': {
       switch (code) {

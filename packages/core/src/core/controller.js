@@ -1,3 +1,4 @@
+import { UnkownCommand } from '@coolwallets/errors';
 import * as apdu from '../apdu/index';
 
 /**
@@ -10,6 +11,7 @@ export const checkSupportScripts = async (transport) => {
     await apdu.tx.getSignedHex(transport);
     return true;
   } catch (error) {
-    return false;
+    if (error instanceof UnkownCommand) return false;
+    return true;
   }
 };
