@@ -32,3 +32,11 @@ export class OperationCanceled extends SDKError {
     this.constructor = SDKError;
   }
 }
+
+export class UnkownCommand extends SDKError {
+  constructor() {
+    super('UnkownCommand', 'Wrong Command (May need firmware update)');
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.constructor = SDKError;
+  }
+}
