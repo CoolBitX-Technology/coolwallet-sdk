@@ -31,7 +31,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {Function} preAction
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
- * @param {Boolean} return_canonical
+ * @param {Boolean} returnCanonical
  * @return {Promise< {r: string, s: string} | string | Buffer }>}
  */
 export const sendDataToCoolWallet = async (
@@ -44,7 +44,7 @@ export const sendDataToCoolWallet = async (
   preAction = null,
   txPrepareCompleteCallback = null,
   authorizedCallback = null,
-  return_canonical = true
+  returnCanonical = true
 ) => {
   await sayHi(transport, appId);
 
@@ -63,7 +63,7 @@ export const sendDataToCoolWallet = async (
     encryptedSignature,
     signatureKey,
     isEDDSA,
-    return_canonical
+    returnCanonical
   );
   return signature;
 };
@@ -77,7 +77,7 @@ export const sendDataToCoolWallet = async (
  * @param {Boolean} isEDDSA
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
- * @param {Boolean} return_canonical
+ * @param {Boolean} returnCanonical
  * @return {Promise<Array<{r: string, s: string} | string | Buffer }>>}
  */
 export const sendDataArrayToCoolWallet = async (
@@ -88,7 +88,7 @@ export const sendDataArrayToCoolWallet = async (
   isEDDSA = false,
   txPrepareCompleteCallback = null,
   authorizedCallback = null,
-  return_canonical = true
+  returnCanonical = true
 ) => {
   await sayHi(transport, appId);
 
@@ -105,7 +105,7 @@ export const sendDataArrayToCoolWallet = async (
       encryptedSignature,
       signatureKey,
       isEDDSA,
-      return_canonical
+      returnCanonical
     )
   );
   return signatures;

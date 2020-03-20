@@ -85,11 +85,20 @@ declare module '@coolwallets/core' {
         transport: Transport,
         appId: String,
         appPrivateKey: String,
-        data: Buffer,
-        P1: String,
-        P2: String,
+        txDataHex: String,
+        txDataType: String,
         isEDDSA?: Boolean,
         preAction?: Function,
+        txPrepareCompleteCallback?: Function,
+        authorizedCallback?: Function,
+        returnCanonical?: Boolean
+      ): Promise<{ r: string; s: string } | string | Buffer>;
+      export function sendDataArrayToCoolWallet(
+        transport: Transport,
+        appId: String,
+        appPrivateKey: String,
+        txDataArray: Array<{txDataHex:String, txDataType:String}>,
+        isEDDSA?: Boolean,
         txPrepareCompleteCallback?: Function,
         authorizedCallback?: Function,
         returnCanonical?: Boolean
