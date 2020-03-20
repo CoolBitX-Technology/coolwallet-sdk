@@ -1,6 +1,6 @@
 {
   "name": "@coolwallets/eth",
-  "version": "0.2.0-beta.0",
+  "version": "0.2.0-beta.1",
   "description": "",
   "main": "lib/index.js",
   "author": "",
@@ -10,8 +10,8 @@
     "publish-single": "npm run build && npm publish"
   },
   "dependencies": {
-    "@coolwallets/coin": "0.2.0-beta.0",
-    "@coolwallets/core": "0.2.0-beta.0",
+    "@coolwallets/coin": "0.2.0-beta.1",
+    "@coolwallets/core": "0.2.0-beta.1",
     "@coolwallets/errors": "0.0.7",
     "elliptic": "^6.5.1",
     "eth-sig-util": "^2.5.0",
