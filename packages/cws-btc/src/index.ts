@@ -39,7 +39,13 @@ export default class BTC extends ECDSACoin {
     authorizedCB = null,
   ): Promise<string> {
 
-    const outputsHex = genUnsignedOutputsHex(output, change);
+    const outputs = [output];
+    if (change) outputs.push({
+      value: change.value,
+      address: this.getP2PKHAddress(change.addressIndex)
+    });
+    const outputsHex = genUnsignedOutputsHex(outputs);
+
     const txDataArray = getTxDataArray();
     const signatures = await core.flow.sendDataArrayToCoolWallet(
       this.transport,
@@ -62,12 +68,10 @@ export default class BTC extends ECDSACoin {
   }
 }
 
-function genUnsignedOutputsHex(output: Output, change?: Change) {
+function genUnsignedOutputsHex(outputs: [Output]) {
   let outputsHex = '';
-  outputsHex += satoshiStringToHex(output.value);
-  outputsHex += getOutScriptFromAddress(output.address);
-  if (change) {
-    outputsHex += satoshiStringToHex(change.value);
+  for (let output of outputs) {
+    outputsHex += satoshiStringToHex(output.value);
     outputsHex += getOutScriptFromAddress(output.address);
   }
   return outputsHex;
