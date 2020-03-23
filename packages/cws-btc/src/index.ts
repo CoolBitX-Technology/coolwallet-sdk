@@ -1,6 +1,8 @@
 import { core } from '@coolwallets/core';
 import { ECDSACoin } from '@coolwallets/coin';
 import { pubkeyToP2PKHAddress, pubkeyToP2SHAddress } from './util';
+import * as bitcoin from 'bitcoinjs-lib';
+import BN from 'bn.js';
 
 type Input = import('./types').Input;
 type Output = import('./types').Output;
@@ -32,11 +34,13 @@ export default class BTC extends ECDSACoin {
   async signP2PKHTransaction(
     inputs: [Input],
     output: Output,
-    change: Change,
+    change?: Change,
     confirmCB = null,
     authorizedCB = null,
   ): Promise<string> {
 
+    const outputsHex = genUnsignedOutputsHex(output, change);
+    const txDataArray = getTxDataArray();
     const signatures = await core.flow.sendDataArrayToCoolWallet(
       this.transport,
       this.appId,
@@ -50,10 +54,57 @@ export default class BTC extends ECDSACoin {
   }
 
   async signP2SHTransaction(
-		inputs: [Input],
-		output: Output,
+    inputs: [Input],
+    output: Output,
     change: Change,
   ): Promise<string> {
 
   }
+}
+
+function genUnsignedOutputsHex(output: Output, change?: Change) {
+  let outputsHex = '';
+  outputsHex += satoshiStringToHex(output.value);
+  outputsHex += getOutScriptFromAddress(output.address);
+  if (change) {
+    outputsHex += satoshiStringToHex(change.value);
+    outputsHex += getOutScriptFromAddress(output.address);
+  }
+  return outputsHex;
+}
+
+function satoshiStringToHex(satoshi: string) {
+  const bn = new BN(satoshi);
+  const buf = Buffer.from(bn.toString(16), 'hex').reverse();
+  return Buffer.alloc(8).fill(buf, 0, buf.length);
+}
+
+function getOutScriptFromAddress(address: string): string {
+  let payment;
+  if (address.startsWith('1')) {
+    payment = bitcoin.payments.p2pkh({ address });
+  } else if (address.startsWith('3')) {
+    payment = bitcoin.payments.p2sh({ address });
+  } else if (address.startsWith('bc1')) {
+    payment = bitcoin.payments.p2wpkh({ address });
+  }
+  if (!payment || !payment.output) throw new Error(`Unsupport Address : ${address}`);
+  const buf = payment.output;
+  return `${buf.length.toString(16)}${buf.toString('hex')}`;
+}
+
+function getTxDataArray(inputs, output, change) {
+
+}
+
+function getUnsignedDataForInputOfP2PKH(txHash, outputIndex, pubkey, outputHex) {
+  const { output } = bitcoin.payments.p2pkh({ pubkey });
+  const psbt = new bitcoin.Psbt();
+  psbt.addInput({
+    hash: txHash,
+    index: outputIndex,
+  });
+  psbt.addOutputs([{
+  }, {
+  }]);
 }
