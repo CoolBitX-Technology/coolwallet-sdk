@@ -35,6 +35,7 @@
     "@coolwallets/coin": "^0.1.2",
     "@coolwallets/core": "^0.0.20",
     "@coolwallets/transport": "0.0.10",
-    "bitcoinjs-lib": "^5.1.7"
+    "bitcoinjs-lib": "^5.1.7",
+    "bn.js": "^5.1.1"
   }
 }

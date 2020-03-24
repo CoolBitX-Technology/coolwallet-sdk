@@ -2,6 +2,7 @@ export type Input = {
   txHash: string,
   outputIndex: number,
   addressIndex: number,
+  address?: string,
 };
 
 export type Output = {
@@ -12,4 +13,5 @@ export type Output = {
 export type Change = {
   value: string,
   addressIndex: number,
+  address?: string,
 };
