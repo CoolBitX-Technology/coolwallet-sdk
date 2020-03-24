@@ -39,14 +39,10 @@ export default class BTC extends ECDSACoin {
     authorizedCB = null,
   ): Promise<string> {
 
-    const outputs = [output];
-    if (change) outputs.push({
-      value: change.value,
-      address: this.getP2PKHAddress(change.addressIndex)
-    });
-    const outputsHex = genUnsignedOutputsHex(outputs);
+    if (change) change.address = await this.getP2PKHAddress(change.addressIndex);
+    const outputsHex = genUnsignedOutputsHex(output, change);
 
-    const txDataArray = getTxDataArray();
+    const txDataArray = getUnsignedTxDataArray(inputs, outputsHex);
     const signatures = await core.flow.sendDataArrayToCoolWallet(
       this.transport,
       this.appId,
@@ -68,16 +64,18 @@ export default class BTC extends ECDSACoin {
   }
 }
 
-function genUnsignedOutputsHex(outputs: [Output]) {
-  let outputsHex = '';
-  for (let output of outputs) {
-    outputsHex += satoshiStringToHex(output.value);
-    outputsHex += getOutScriptFromAddress(output.address);
+function genUnsignedOutputsHex(output: Output, change?: Output): string {
+  let outputsHex = (change)? '02':'01';
+  outputsHex += satoshiStringToHex(output.value);
+  outputsHex += getOutScriptFromAddress(output.address);
+  if (change) {
+    outputsHex += satoshiStringToHex(change.value);
+    outputsHex += getOutScriptFromAddress(change.address);
   }
   return outputsHex;
 }
 
-function satoshiStringToHex(satoshi: string) {
+function satoshiStringToHex(satoshi: string): string {
   const bn = new BN(satoshi);
   const buf = Buffer.from(bn.toString(16), 'hex').reverse();
   return Buffer.alloc(8).fill(buf, 0, buf.length);
@@ -97,8 +95,15 @@ function getOutScriptFromAddress(address: string): string {
   return `${buf.length.toString(16)}${buf.toString('hex')}`;
 }
 
-function getTxDataArray(inputs, output, change) {
-
+function getUnsignedTxDataArray(inputs: [Input], outputsHex: string) {
+  const txDataArray = [];
+  for (let input of inputs) {
+    const keyId = core.util.addressIndexToKeyId('00', input.addressIndex);
+    const payload = '';
+    payload += '';
+    const dataForSE = core.flow.prepareSEData(keyId, payload, 'F5');
+  }
+  return txDataArray;
 }
 
 function getUnsignedDataForInputOfP2PKH(txHash, outputIndex, pubkey, outputHex) {
