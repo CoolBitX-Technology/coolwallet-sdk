@@ -40,18 +40,24 @@ export default class BTC extends ECDSACoin {
   ): Promise<string> {
 
     for (const input of inputs) {
+      // eslint-disable-next-line no-await-in-loop
       input.address = await this.getP2PKHAddress(input.addressIndex);
     }
-    const changeOutput = change;
-    if (changeOutput) changeOutput.address = await this.getP2PKHAddress(changeOutput.addressIndex);
-    const outputsHex = genUnsignedOutputsHex(output, changeOutput);
+    // eslint-disable-next-line no-param-reassign
+    if (change) change.address = await this.getP2PKHAddress(change.addressIndex);
 
-    const txDataArray = getUnsignedTxDataArray(inputs, outputsHex);
-    const signatures = await core.flow.sendDataArrayToCoolWallet(
+    const actions = getP2PKHSigningActions(
+      this.transport,
+      this.appPrivateKey,
+      inputs,
+      output,
+      change
+    );
+    const signatures = await core.flow.sendBatchDataToCoolWallet(
       this.transport,
       this.appId,
       this.appPrivateKey,
-      txDataArray,
+      actions,
       false,
       confirmCB,
       authorizedCB,
@@ -68,13 +74,13 @@ export default class BTC extends ECDSACoin {
   }
 }
 
-function genUnsignedOutputsHex(output: Output, changeOutput?: Change): string {
-  let outputsHex = changeOutput ? '02' : '01';
+function genUnsignedOutputsHex(output: Output, change?: Change): string {
+  let outputsHex = '';
   outputsHex += satoshiStringToHex(output.value);
   outputsHex += getOutScriptFromAddress(output.address);
-  if (changeOutput && changeOutput.address) {
-    outputsHex += satoshiStringToHex(changeOutput.value);
-    outputsHex += getOutScriptFromAddress(changeOutput.address);
+  if (change && change.address) {
+    outputsHex += satoshiStringToHex(change.value);
+    outputsHex += getOutScriptFromAddress(change.address);
   }
   return outputsHex;
 }
@@ -104,33 +110,35 @@ function getOutScriptFromAddress(address: string): string {
   return `${buf.length.toString(16)}${buf.toString('hex')}`;
 }
 
-function getUnsignedTxDataArray(inputs: [Input], outputsHex: string) {
-  const txDataArray = [];
-  for (const input of inputs) {
+function getP2PKHSigningActions(
+  transport: Transport,
+  appPrivateKey: string,
+  inputs: [Input],
+  output: Output,
+  change?: Change
+) {
+  const p2pkhReadtype = '00';
+  const outputsLen = change ? '02' : '01';
+  const outputsHex = outputsLen + genUnsignedOutputsHex(output, change);
+
+  return inputs.map((input) => {
     const keyId = core.util.addressIndexToKeyId('00', input.addressIndex);
     const payload = composeUnsignedTx(input, outputsHex);
-    const dataForSE = core.flow.prepareSEData(keyId, payload, 'F5');
-  }
-  return txDataArray;
+    const txDataHex = core.flow.prepareSEData(keyId, payload, p2pkhReadtype);
+    const txDataType = '00';
+    return core.util.createPrepareTxAction(transport, txDataHex, txDataType, appPrivateKey);
+  });
 }
 
 function composeUnsignedTx(input: Input, outputsHex: string): Buffer {
-  const {txHash, outputIndex, address} = input;
-  const version = '02000000';
-  const inputCount = '01';
-  const outputIndexHex = outputIndexNumberToHex(outputIndex);
-  const inputScript = getOutScriptFromAddress(input.address);
-  let unsignedTx = version + inputCount 
-}
-
-function getUnsignedDataForInputOfP2PKH(txHash, outputIndex, pubkey, outputHex) {
-  const { output } = bitcoin.payments.p2pkh({ pubkey });
-  const psbt = new bitcoin.Psbt();
-  psbt.addInput({
-    hash: txHash,
-    index: outputIndex,
-  });
-  psbt.addOutputs([{
-  }, {
-  }]);
+  const { txHash, outputIndex, address } = input;
+  if (!address) throw new Error('Property "address" needed for param input.');
+  let unsignedTx = '0200000001'; // version + inputCount
+  unsignedTx += txHash;
+  unsignedTx += outputIndexNumberToHex(outputIndex);
+  unsignedTx += getOutScriptFromAddress(address);
+  unsignedTx += 'ffffffff'; // sequence
+  unsignedTx += outputsHex;
+  unsignedTx += '0000000081000000';
+  return Buffer.from(unsignedTx);
 }

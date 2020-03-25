@@ -80,7 +80,7 @@ declare module '@coolwallets/core' {
         keyId: string,
         rawData: Buffer | Array<Buffer>,
         readType: string
-      ): Buffer;
+      ): string;
       export function sendDataToCoolWallet(
         transport: Transport,
         appId: String,
@@ -107,7 +107,19 @@ declare module '@coolwallets/core' {
 
     export namespace util {
       export function addressIndexToKeyId(coinType: string, addressIndex: number): string;
-      export function getEncryptedSignatures()
+      export function getEncryptedSignatures(
+        transport: Transport,
+        actions: [Function],
+        appPrivateKey: string,
+        txPrepareCompleteCallback?: Function
+      ): Promise<Array<string>>;
+      export function createPrepareTxAction(
+        transport: Transport,
+        txDataHex: string,
+        txDataType: string,
+        appPrivateKey: string,
+        preActions?: [Function]
+      ): Function;
     }
   }
 
