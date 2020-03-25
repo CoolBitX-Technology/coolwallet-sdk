@@ -73,18 +73,18 @@ export const sendDataToCoolWallet = async (
  * @param {Transport} transport
  * @param {String} appId
  * @param {String} appPrivateKey
- * @param {Array<{txDataHex:String, txDataType:String}>} txDataArray
+ * @param {Array<{Function}>} actions
  * @param {Boolean} isEDDSA
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
  * @param {Boolean} returnCanonical
  * @return {Promise<Array<{r: string, s: string} | string | Buffer }>>}
  */
-export const sendDataArrayToCoolWallet = async (
+export const sendBatchDataToCoolWallet = async (
   transport,
   appId,
   appPrivateKey,
-  txDataArray,
+  actions,
   isEDDSA = false,
   txPrepareCompleteCallback = null,
   authorizedCallback = null,
@@ -94,7 +94,7 @@ export const sendDataArrayToCoolWallet = async (
 
   const encryptedSignatureArray = await txUtil.getEncryptedSignatures(
     transport,
-    txDataArray,
+    actions,
     appPrivateKey,
     txPrepareCompleteCallback
   );

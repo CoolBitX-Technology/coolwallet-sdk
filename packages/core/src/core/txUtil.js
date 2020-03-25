@@ -43,6 +43,27 @@ const prepareTx = async (transport, txDataHex, txDataType, appPrivateKey) => {
 };
 
 /**
+ * get command signature for CoolWalletS
+ * @param {Transport} transport
+ * @param {String} txDataHex hex string data for SE
+ * @param {String} txDataType hex P1 string
+ * @param {String} appPrivateKey
+ * @param {Array<{Function}>} preActions
+ * @return {Function} action
+ */
+export const createPrepareTxAction = (
+  transport,
+  txDataHex,
+  txDataType,
+  appPrivateKey,
+  preActions
+) => (async () => {
+  // eslint-disable-next-line no-await-in-loop
+  for (const preAction of preActions) await preAction();
+  return prepareTx(transport, txDataHex, txDataType, appPrivateKey);
+});
+
+/**
  * do TX_PREP and get encrypted signature.
  * @param {Transport} transport
  * @param {String} txDataHex
@@ -67,24 +88,20 @@ export const getSingleEncryptedSignature = async (
 /**
  * Send signing data to CoolWalletS, wait for encrypted signatures.
  * @param {Transport} transport
- * @param {Array<{txDataHex:String, txDataType:String}>} txDataArray
+ * @param {Array<{Function}>} actions
  * @param {String} appPrivateKey
  * @param {Function} txPrepareCompleteCallback
  * @returns {Promise<Array<String>>} array of encryptedSignature
  */
 export const getEncryptedSignatures = async (
   transport,
-  txDataArray,
+  actions,
   appPrivateKey,
   txPrepareCompleteCallback = null
 ) => {
   const encryptedSignatureArray = [];
-  for (const txData of txDataArray) {
-    const { txDataHex, txDataType } = txData;
-    // eslint-disable-next-line no-await-in-loop
-    const encryptedSignature = await prepareTx(transport, txDataHex, txDataType, appPrivateKey);
-    encryptedSignatureArray.push(encryptedSignature);
-  }
+  // eslint-disable-next-line no-await-in-loop
+  for (const action of actions) encryptedSignatureArray.push(await action());
   await apdu.tx.finishPrepare(transport);
   if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
   return encryptedSignatureArray;
