@@ -57,15 +57,15 @@ module.exports = {
     'block-scoped-var': 'error',
     'import/prefer-default-export': 'off',
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }], //off
-    // 'import/extensions': [
-    //   'error',
-    //   'ignorePackages',
-    //   {
-    //     jsx: 'never',
-    //     ts: 'never',
-    //     tsx: 'never'
-    //   }
-    // ]
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never'
+      }
+    ]
   },
   settings: {
     'import/resolver': {
