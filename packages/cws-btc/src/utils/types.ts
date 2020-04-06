@@ -10,6 +10,7 @@ export type Input = {
   preValue: string,
   sequence: number,
   addressIndex: number,
+	pubkeyBuf?: Buffer,
 };
 
 export type Output = {
@@ -20,4 +21,20 @@ export type Output = {
 export type Change = {
   value: string,
   addressIndex: number,
+	pubkeyBuf?: Buffer,
+};
+
+export type PreparedData = {
+	versionBuf: Buffer,
+	inputsCount: Buffer,
+	preparedInputs: {
+		pubkeyBuf: Buffer,
+		preOutPointBuf: Buffer,
+		preValueBuf: Buffer,
+		sequenceBuf: Buffer,
+	}[],
+	outputsCount: Buffer,
+	outputsBuf: Buffer,
+	lockTimeBuf: Buffer,
+	scriptType: ScriptType,
 };

@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import {
-	ScriptType, Input, Output, Change
+	ScriptType, Input, Output, Change, PreparedData
 } from './types';
 
 export {
@@ -12,6 +12,7 @@ export {
 	Input,
 	Output,
 	Change,
+	PreparedData,
 	encodeDerSig,
 	toVarUintPrefixedBuffer,
 	toVarUintBuffer,
