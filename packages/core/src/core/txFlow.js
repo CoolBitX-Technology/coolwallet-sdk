@@ -10,14 +10,14 @@ import { sayHi } from '../apdu/control';
  * @return {String} Hex input data for 8032 txPrep
  */
 export const prepareSEData = (keyId, rawData, readType) => {
-  const inputIdBuffer = Buffer.from('00', 'hex');
-  const signDataBuffer = Buffer.from('00', 'hex');
+	const inputIdBuffer = Buffer.from('00', 'hex');
+	const signDataBuffer = Buffer.from('00', 'hex');
   const readTypeBuffer = Buffer.from(readType, 'hex');
-  const keyIdBuffer = Buffer.from(keyId, 'hex');
-
-  const data = [inputIdBuffer, signDataBuffer, readTypeBuffer, keyIdBuffer, rawData];
-  const dataForSE = rlp.encode(data);
-  return dataForSE.toString('hex');
+	const keyIdBuffer = Buffer.from(keyId, 'hex');
+	
+	const data = [inputIdBuffer, signDataBuffer, readTypeBuffer, keyIdBuffer, rawData];
+	const dataForSE = rlp.encode(data);
+	return dataForSE.toString('hex');
 };
 
 /**
@@ -32,7 +32,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
  * @param {Boolean} returnCanonical
- * @return {Promise< {r: string, s: string} | string | Buffer }>}
+ * @return {Promise< {r: string, s: string} | string | Buffer >}
  */
 export const sendDataToCoolWallet = async (
   transport,
@@ -78,7 +78,7 @@ export const sendDataToCoolWallet = async (
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
  * @param {Boolean} returnCanonical
- * @return {Promise<Array<{r: string, s: string} | string | Buffer }>>}
+ * @return {Promise<Array<{r: string, s: string} | string | Buffer >>}
  */
 export const sendBatchDataToCoolWallet = async (
   transport,

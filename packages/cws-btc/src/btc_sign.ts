@@ -20,7 +20,7 @@ export {
 function createUnsignedTransactions(
 	inputs: Array<Input>,
 	output: Output,
-	change: Change,
+	change: Change | undefined,
 	scriptType: ScriptType,
 	version: number = 1,
 	lockTime: number = 0,
