@@ -2,11 +2,31 @@ import BN from 'bn.js';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import { ScriptType } from './types';
-// console.log(varuint.encode(1).toString('hex'));
+
+export {
+	hash160,
+	hash256,
+	ScriptType,
+	encodeDerSig,
+	toVarUintPrefixedBuffer,
+	toVarUintBuffer,
+	toUintBuffer,
+	addressToOutScript,
+	pubkeyToOutScript,
+	pubkeyToAddress,
+};
+
+function hash160(buf: Buffer): Buffer {
+	return bitcoin.crypto.hash160(buf);
+}
+
+function hash256(buf: Buffer): Buffer {
+	return bitcoin.crypto.hash256(buf);
+}
 
 const ZERO = Buffer.alloc(1, 0);
 
-export function toDER(x: Buffer): Buffer {
+function toDER(x: Buffer): Buffer {
 	let i = 0;
 	while (x[i] === 0) ++i;
 	if (i === x.length) return ZERO;
@@ -15,7 +35,7 @@ export function toDER(x: Buffer): Buffer {
 	return x;
 }
 
-export function encodeDerSig(signature: Buffer, hashType: Buffer): Buffer {
+function encodeDerSig(signature: Buffer, hashType: Buffer): Buffer {
 	const r = toDER(signature.slice(0, 32));
 	const s = toDER(signature.slice(32, 64));
 	return Buffer.concat([bip66Encode(r, s), hashType]);
@@ -48,21 +68,21 @@ function bip66Encode(r: Buffer, s: Buffer) {
 	return signature;
 }
 
-export function toVarUintPrefixedBuffer(buf: Buffer): Buffer {
+function toVarUintPrefixedBuffer(buf: Buffer): Buffer {
 	return Buffer.concat([varuint.encode(buf.length), buf]);
 }
 
-export function toVarUintBuffer(int: number): Buffer {
+function toVarUintBuffer(int: number): Buffer {
 	return varuint.encode(int);
 }
 
-export function toUintBuffer(numberOrString: number|string, byteSize: number): Buffer {
+function toUintBuffer(numberOrString: number|string, byteSize: number): Buffer {
 	const bn = new BN(numberOrString);
 	const buf = Buffer.from(bn.toArray()).reverse();
 	return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
 }
 
-export function addressToOutScript(address: string): Buffer {
+function addressToOutScript(address: string): Buffer {
 	let payment;
 	if (address.startsWith('1')) {
 		payment = bitcoin.payments.p2pkh({ address });
@@ -77,7 +97,7 @@ export function addressToOutScript(address: string): Buffer {
 	return toVarUintPrefixedBuffer(payment.output);
 }
 
-export function pubkeyToOutScript(pubkey: Buffer, scriptType: ScriptType): Buffer {
+function pubkeyToOutScript(pubkey: Buffer, scriptType: ScriptType): Buffer {
 	let payment;
 	if (scriptType === ScriptType.P2PKH) {
 		payment = bitcoin.payments.p2pkh({ pubkey });
@@ -94,7 +114,7 @@ export function pubkeyToOutScript(pubkey: Buffer, scriptType: ScriptType): Buffe
 	return toVarUintPrefixedBuffer(payment.output);
 }
 
-export function pubkeyToAddress(pubkey: Buffer, scriptType: ScriptType): string {
+function pubkeyToAddress(pubkey: Buffer, scriptType: ScriptType): string {
 	let payment;
 	if (scriptType === ScriptType.P2PKH) {
 		payment = bitcoin.payments.p2pkh({ pubkey });
