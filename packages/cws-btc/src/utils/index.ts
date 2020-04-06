@@ -1,12 +1,17 @@
 import BN from 'bn.js';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
-import { ScriptType } from './types';
+import {
+	ScriptType, Input, Output, Change
+} from './types';
 
 export {
 	hash160,
 	hash256,
 	ScriptType,
+	Input,
+	Output,
+	Change,
 	encodeDerSig,
 	toVarUintPrefixedBuffer,
 	toVarUintBuffer,
