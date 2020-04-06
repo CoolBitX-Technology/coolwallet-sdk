@@ -25,6 +25,8 @@ module.exports = {
   },
   plugins: ['react'],
   rules: {
+    'indent': [ 'error', 'tab' ],
+		"no-tabs": 0,
     'no-use-before-define': ['error', { functions: false, classes: true }],
     'no-restricted-syntax': [
       'error',
@@ -51,7 +53,7 @@ module.exports = {
     'jsx-quotes': [2, 'prefer-single'],
     'object-curly-spacing': ['warn', 'always'],
     'comma-dangle': 'off',
-    eqeqeq: 'warn',
+    'eqeqeq': 'warn',
     'block-scoped-var': 'error',
     'import/prefer-default-export': 'off',
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }], //off
