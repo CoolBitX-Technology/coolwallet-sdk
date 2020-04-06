@@ -1,8 +1,15 @@
+export enum ScriptType {
+	P2PKH = 'P2PKH',
+	P2SH_P2WPKH = 'P2SH_P2WPKH',
+	P2WPKH = 'P2WPKH',
+}
+
 export type Input = {
-  txHash: string,
-  outputIndex: number,
+  preTxHash: string,
+  preIndex: number,
+  preValue: string,
+  sequence: number,
   addressIndex: number,
-  address?: string,
 };
 
 export type Output = {
@@ -13,5 +20,4 @@ export type Output = {
 export type Change = {
   value: string,
   addressIndex: number,
-  address?: string,
 };
