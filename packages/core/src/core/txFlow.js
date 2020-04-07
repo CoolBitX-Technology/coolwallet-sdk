@@ -78,7 +78,7 @@ export const sendDataToCoolWallet = async (
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
  * @param {Boolean} returnCanonical
- * @return {Promise<Array<{r: string, s: string} | string | Buffer >>}
+ * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
 export const sendBatchDataToCoolWallet = async (
   transport,

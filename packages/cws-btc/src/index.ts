@@ -1,5 +1,3 @@
-import BN from 'bn.js';
-import * as bitcoin from 'bitcoinjs-lib';
 import { core } from '@coolwallets/core';
 import { ECDSACoin } from '@coolwallets/coin';
 import {
@@ -22,22 +20,19 @@ export default class BTC extends ECDSACoin {
 		this.network = network;
 	}
 
-	async getP2PKHAddress(addressIndex: number): Promise<string> {
+	async getAddress(scriptType: ScriptType, addressIndex: number): Promise<string> {
 		const publicKey = await this.getPublicKey(addressIndex);
-		return pubkeyToAddress(Buffer.from(publicKey, 'hex'), ScriptType.P2PKH);
+		return pubkeyToAddress(Buffer.from(publicKey, 'hex'), scriptType);
 	}
 
-	async getP2SHAddress(addressIndex: number): Promise<string> {
-		const publicKey = await this.getPublicKey(addressIndex);
-		return pubkeyToAddress(Buffer.from(publicKey, 'hex'), ScriptType.P2SH_P2WPKH);
-	}
-
-	async signP2PKHTransaction(
+	async signTransaction(
+		scriptType: ScriptType,
 		inputs: [Input],
 		output: Output,
 		change?: Change,
 		confirmCB?: Function,
 		authorizedCB?: Function,
+
 	): Promise<string> {
 		for (const input of inputs) {
 			// eslint-disable-next-line no-await-in-loop
@@ -53,14 +48,13 @@ export default class BTC extends ECDSACoin {
 		const {
 			preparedData,
 			unsignedTransactions
-		} = createUnsignedTransactions(inputs, output, change, ScriptType.P2PKH);
+		} = createUnsignedTransactions(scriptType, inputs, output, change);
 
-		const actions = getSigningActionsOfP2PKH(
+		const actions = getSigningActions(
 			this.transport,
+			scriptType,
 			this.appPrivateKey,
-			inputs,
-			output,
-			change
+			unsignedTransactions,
 		);
 		const signatures = core.flow.sendBatchDataToCoolWallet(
 			this.transport,
@@ -73,87 +67,20 @@ export default class BTC extends ECDSACoin {
 			false
 		);
 
-		const transaction = composeFinalTransaction(preparedData, signatures);
+		const transaction = composeFinalTransaction(scriptType, preparedData, signatures);
 		return transaction.toString('hex');
 	}
-
-	async signP2SHTransaction(
-		inputs: [Input],
-		output: Output,
-		change?: Change,
-		confirmCB = null,
-		authorizedCB = null,
-	): Promise<string> {
-		for (const input of inputs) {
-			// eslint-disable-next-line no-await-in-loop
-			input.address = await this.getP2SHAddress(input.addressIndex);
-		}
-		// eslint-disable-next-line no-param-reassign
-		if (change) change.address = await this.getP2SHAddress(change.addressIndex);
-
-		const actions = getSigningActionsOfP2SH(
-			this.transport,
-			this.appPrivateKey,
-			inputs,
-			output,
-			change
-		);
-		return core.flow.sendBatchDataToCoolWallet(
-			this.transport,
-			this.appId,
-			this.appPrivateKey,
-			actions,
-			false,
-			confirmCB,
-			authorizedCB,
-			false
-		);
-	}
 }
 
-function genUnsignedOutputsHex(output: Output, change?: Change): string {
-	let outputsHex = '';
-	outputsHex += satoshiStringToHex(output.value);
-	outputsHex += getOutScriptFromAddress(output.address);
-	if (change && change.address) {
-		outputsHex += satoshiStringToHex(change.value);
-		outputsHex += getOutScriptFromAddress(change.address);
-	}
-	return outputsHex;
-}
-
-function satoshiStringToHex(satoshi: string): string {
-	const bn = new BN(satoshi);
-	const buf = Buffer.from(bn.toString(16), 'hex').reverse();
-	return Buffer.alloc(8).fill(buf, 0, buf.length).toString('hex');
-}
-
-function outputIndexNumberToHex(index: number): string {
-	const buf = Buffer.from(index.toString(16), 'hex').reverse();
-	return Buffer.alloc(4).fill(buf, 0, buf.length).toString('hex');
-}
-
-function getOutScriptFromAddress(address: string): string {
-	let payment;
-	if (address.startsWith('1')) {
-		payment = bitcoin.payments.p2pkh({ address });
-	} else if (address.startsWith('3')) {
-		payment = bitcoin.payments.p2sh({ address });
-	} else if (address.startsWith('bc1')) {
-		payment = bitcoin.payments.p2wpkh({ address });
-	}
-	if (!payment || !payment.output) throw new Error(`Unsupport Address : ${address}`);
-	const buf = payment.output;
-	return `${buf.length.toString(16)}${buf.toString('hex')}`;
-}
-
-function getSigningActionsOfP2PKH(
+function getSigningActions(
 	transport: Transport,
+	scriptType: ScriptType,
 	appPrivateKey: string,
-	inputs: [Input],
-	output: Output,
-	change?: Change
-) {
+	unsignedTransactions: Array<Buffer>,
+
+): Array<Function> {
+	if (scriptType === ScriptType.P2PKH) {
+	}
 	const p2pkhReadtype = '00';
 	const outputsLen = change ? '02' : '01';
 	const outputsHex = outputsLen + genUnsignedOutputsHex(output, change);
@@ -161,26 +88,6 @@ function getSigningActionsOfP2PKH(
 	return inputs.map((input) => {
 		const keyId = core.util.addressIndexToKeyId('00', input.addressIndex);
 		const payload = composeUnsignedTxOfP2PKH(input, outputsHex);
-		const txDataHex = core.flow.prepareSEData(keyId, payload, p2pkhReadtype);
-		const txDataType = '00';
-		return core.util.createPrepareTxAction(transport, txDataHex, txDataType, appPrivateKey);
-	});
-}
-
-function getSigningActionsOfP2SH(
-	transport: Transport,
-	appPrivateKey: string,
-	inputs: [Input],
-	output: Output,
-	change?: Change
-) {
-	const p2pkhReadtype = '00';
-	const outputsLen = change ? '02' : '01';
-	const outputsHex = outputsLen + genUnsignedOutputsHex(output, change);
-
-	return inputs.map((input) => {
-		const keyId = core.util.addressIndexToKeyId('00', input.addressIndex);
-		const payload = composeUnsignedTxOfP2SH(input, outputsHex);
 		const txDataHex = core.flow.prepareSEData(keyId, payload, p2pkhReadtype);
 		const txDataType = '00';
 		return core.util.createPrepareTxAction(transport, txDataHex, txDataType, appPrivateKey);

@@ -36,5 +36,4 @@ export type PreparedData = {
 	outputsCount: Buffer,
 	outputsBuf: Buffer,
 	lockTimeBuf: Buffer,
-	scriptType: ScriptType,
 };

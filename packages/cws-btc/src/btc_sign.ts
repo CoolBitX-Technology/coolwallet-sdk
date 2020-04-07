@@ -18,10 +18,10 @@ export {
 };
 
 function createUnsignedTransactions(
+	scriptType: ScriptType,
 	inputs: Array<Input>,
 	output: Output,
 	change: Change | undefined,
-	scriptType: ScriptType,
 	version: number = 1,
 	lockTime: number = 0,
 ): ({
@@ -111,18 +111,18 @@ function createUnsignedTransactions(
 			outputsCount,
 			outputsBuf,
 			lockTimeBuf,
-			scriptType,
 		},
 		unsignedTransactions,
 	};
 }
 
 function composeFinalTransaction(
+	scriptType: ScriptType,
 	preparedData: PreparedData,
 	derSigAndHashTypes: Array<Buffer>
 ): Buffer {
 	const {
-		versionBuf, inputsCount, preparedInputs, outputsCount, outputsBuf, lockTimeBuf, scriptType
+		versionBuf, inputsCount, preparedInputs, outputsCount, outputsBuf, lockTimeBuf
 	} = preparedData;
 
 	if (scriptType !== ScriptType.P2PKH

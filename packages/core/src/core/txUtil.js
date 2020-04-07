@@ -132,7 +132,7 @@ export const getCWSEncryptionKey = async (transport, authorizedCallback) => {
  * @param {String} signatureKey
  * @param {Boolean} isEDDSA
  * @param {Boolean} returnCanonical
- * @return {{r:string, s:string} | string } canonical signature or DER signature
+ * @return {{r:string, s:string} | Buffer } canonical or DER signature
  */
 export const decryptSignatureFromSE = (
   encryptedSignature,
@@ -144,13 +144,10 @@ export const decryptSignatureFromSE = (
   iv.fill(0);
   const derSigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature);
 
-  if (isEDDSA) return derSigBuff;
+  if (isEDDSA || !returnCanonical) return derSigBuff;
 
-  const sigObj = signatureTools.parseDERsignature(derSigBuff.toString('hex'));
-  const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
-  if (returnCanonical) return canonicalSignature;
-
-  return signatureTools.convertToDER(canonicalSignature);
+  const canonicalSig = signatureTools.parseDERsignature(derSigBuff.toString('hex'));
+  return canonicalSig;
 };
 
 /**
