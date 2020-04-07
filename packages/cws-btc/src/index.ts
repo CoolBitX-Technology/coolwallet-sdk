@@ -38,7 +38,7 @@ export default class BTC extends ECDSACoin {
 		change?: Change,
 		confirmCB?: Function,
 		authorizedCB?: Function,
-	): Promise<Array<string>> {
+	): Promise<string> {
 		for (const input of inputs) {
 			// eslint-disable-next-line no-await-in-loop
 			const pubkey = await this.getPublicKey(input.addressIndex);
@@ -50,9 +50,10 @@ export default class BTC extends ECDSACoin {
 			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 
-		const { preparedData, unsignedTransactions } = createUnsignedTransactions(
-			inputs, output, change, ScriptType.P2PKH
-		);
+		const {
+			preparedData,
+			unsignedTransactions
+		} = createUnsignedTransactions(inputs, output, change, ScriptType.P2PKH);
 
 		const actions = getSigningActionsOfP2PKH(
 			this.transport,
@@ -61,7 +62,7 @@ export default class BTC extends ECDSACoin {
 			output,
 			change
 		);
-		return core.flow.sendBatchDataToCoolWallet(
+		const signatures = core.flow.sendBatchDataToCoolWallet(
 			this.transport,
 			this.appId,
 			this.appPrivateKey,
@@ -71,6 +72,9 @@ export default class BTC extends ECDSACoin {
 			authorizedCB,
 			false
 		);
+
+		const transaction = composeFinalTransaction(preparedData, signatures);
+		return transaction.toString('hex');
 	}
 
 	async signP2SHTransaction(
