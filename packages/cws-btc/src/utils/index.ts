@@ -88,19 +88,24 @@ function toUintBuffer(numberOrString: number|string, byteSize: number): Buffer {
 	return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
 }
 
-function addressToOutScript(address: string): Buffer {
+function addressToOutScript(address: string): ({ scriptType: ScriptType, outScript: Buffer }) {
+	let scriptType;
 	let payment;
 	if (address.startsWith('1')) {
+		scriptType = ScriptType.P2PKH;
 		payment = bitcoin.payments.p2pkh({ address });
 	} else if (address.startsWith('3')) {
+		scriptType = ScriptType.P2SH_P2WPKH;
 		payment = bitcoin.payments.p2sh({ address });
 	} else if (address.startsWith('bc1')) {
+		scriptType = ScriptType.P2WPKH;
 		payment = bitcoin.payments.p2wpkh({ address });
 	} else {
 		throw new Error(`Unsupport Address : ${address}`);
 	}
 	if (!payment.output) throw new Error(`No OutScript for Address : ${address}`);
-	return toVarUintPrefixedBuffer(payment.output);
+	const outScript = toVarUintPrefixedBuffer(payment.output);
+	return { scriptType, outScript };
 }
 
 function pubkeyToOutScript(pubkey: Buffer, scriptType: ScriptType): Buffer {

@@ -56,8 +56,9 @@ function createUnsignedTransactions(
 		};
 	});
 
+	const { scriptType: outputType, outScript: outputScript } = addressToOutScript(output.address);
 	const outputArray = [
-		Buffer.concat([toUintBuffer(output.value, 8), addressToOutScript(output.address)])
+		Buffer.concat([toUintBuffer(output.value, 8), outputScript])
 	];
 	if (change) {
 		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
@@ -108,6 +109,7 @@ function createUnsignedTransactions(
 			versionBuf,
 			inputsCount,
 			preparedInputs,
+			outputType,
 			outputsCount,
 			outputsBuf,
 			lockTimeBuf,

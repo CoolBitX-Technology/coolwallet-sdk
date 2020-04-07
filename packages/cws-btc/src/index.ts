@@ -5,6 +5,7 @@ import {
 	Input,
 	Output,
 	Change,
+	PreparedData,
 	pubkeyToAddress,
 } from './utils';
 
@@ -76,6 +77,7 @@ function getSigningActions(
 	transport: Transport,
 	scriptType: ScriptType,
 	appPrivateKey: string,
+	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>,
 
 ): Array<Function> {

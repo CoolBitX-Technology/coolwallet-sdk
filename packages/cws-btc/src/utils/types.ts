@@ -33,6 +33,7 @@ export type PreparedData = {
 		preValueBuf: Buffer,
 		sequenceBuf: Buffer,
 	}[],
+	outputType: ScriptType,
 	outputsCount: Buffer,
 	outputsBuf: Buffer,
 	lockTimeBuf: Buffer,
