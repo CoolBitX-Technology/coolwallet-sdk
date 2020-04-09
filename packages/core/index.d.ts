@@ -93,11 +93,12 @@ declare module '@coolwallets/core' {
         authorizedCallback?: Function,
         returnCanonical?: Boolean
       ): Promise<{ r: string; s: string } | string | Buffer>;
-      export function sendDataArrayToCoolWallet(
+      export function sendBatchDataToCoolWallet(
         transport: Transport,
         appId: String,
         appPrivateKey: String,
-        txDataArray: Array<{txDataHex:String, txDataType:String}>,
+        preActions: Function[],
+        actions: Function[],
         isEDDSA?: Boolean,
         txPrepareCompleteCallback?: Function,
         authorizedCallback?: Function,
@@ -113,13 +114,17 @@ declare module '@coolwallets/core' {
         appPrivateKey: string,
         txPrepareCompleteCallback?: Function
       ): Promise<Array<string>>;
-      export function createPrepareTxAction(
+      export function prepareOutputData(
+        transport: Transport,
+        txDataHex: string,
+        txDataType: string,
+      ): void;
+      export function prepareTx(
         transport: Transport,
         txDataHex: string,
         txDataType: string,
         appPrivateKey: string,
-        preActions?: [Function]
-      ): Function;
+      ): string;
     }
   }
 

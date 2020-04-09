@@ -39,7 +39,7 @@ function createUnsignedTransactions(
 
 	const inputsCount = toVarUintBuffer(inputs.length);
 	const preparedInputs = inputs.map(({
-		preTxHash, preIndex, preValue, sequence, pubkeyBuf
+		preTxHash, preIndex, preValue, sequence, addressIndex, pubkeyBuf
 	}) => {
 		if (!pubkeyBuf) throw new Error('Public Key not exists !!');
 
@@ -52,7 +52,7 @@ function createUnsignedTransactions(
 		const sequenceBuf = (sequence) ? toUintBuffer(sequence, 4) : Buffer.from('ffffffff', 'hex');
 
 		return {
-			pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
+			addressIndex, pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
 		};
 	});
 

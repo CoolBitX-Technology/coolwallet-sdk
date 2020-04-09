@@ -51,16 +51,18 @@ export default class BTC extends ECDSACoin {
 			unsignedTransactions
 		} = createUnsignedTransactions(scriptType, inputs, output, change);
 
-		const actions = getSigningActions(
+		const { preActions, actions } = getSigningActions(
 			this.transport,
 			scriptType,
 			this.appPrivateKey,
+			preparedData,
 			unsignedTransactions,
 		);
 		const signatures = core.flow.sendBatchDataToCoolWallet(
 			this.transport,
 			this.appId,
 			this.appPrivateKey,
+			preActions,
 			actions,
 			false,
 			confirmCB,
@@ -80,19 +82,21 @@ function getSigningActions(
 	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>,
 
-): Array<Function> {
-	if (scriptType === ScriptType.P2PKH) {
-	}
-	const p2pkhReadtype = '00';
-	const outputsLen = change ? '02' : '01';
-	const outputsHex = outputsLen + genUnsignedOutputsHex(output, change);
+): ({preActions: Array<Function>, actions: Array<Function>}) {
+	const preAction = async () => {
+		const txDataHex = preparedData.outputsBuf.toString('hex');
+		const txDataType = (preparedData.outputType === ScriptType.P2SH_P2WPKH) ? '0C' : '01';
+		return core.util.prepareOutputData(transport, txDataHex, txDataType);
+	};
+	const preActions = [preAction];
 
-	return inputs.map((input) => {
-		const keyId = core.util.addressIndexToKeyId('00', input.addressIndex);
-		const payload = composeUnsignedTxOfP2PKH(input, outputsHex);
-		const txDataHex = core.flow.prepareSEData(keyId, payload, p2pkhReadtype);
+	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
+		const keyId = core.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
+		const readType = '01';
+		const txDataHex = core.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
-		return core.util.createPrepareTxAction(transport, txDataHex, txDataType, appPrivateKey);
-	});
-}
+		return core.util.prepareTx(transport, txDataHex, txDataType, appPrivateKey);
+	}));
 
+	return { preActions, actions };
+}

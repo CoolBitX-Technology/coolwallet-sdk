@@ -28,6 +28,7 @@ export type PreparedData = {
 	versionBuf: Buffer,
 	inputsCount: Buffer,
 	preparedInputs: {
+		addressIndex: number,
 		pubkeyBuf: Buffer,
 		preOutPointBuf: Buffer,
 		preValueBuf: Buffer,

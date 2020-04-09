@@ -22,6 +22,16 @@ const signForCoolWallet = (txDataHex, txDataType, appPrivateKey) => {
 };
 
 /**
+ * send output data for bitcoin family
+ * @param {Transport} transport
+ * @param {String} txDataHex hex string data for SE
+ * @param {String} txDataType hex P1 string
+ */
+export const prepareOutputData = async (transport, txDataHex, txDataType) => {
+  await apdu.tx.prepTx(transport, txDataHex, txDataType, '00');
+};
+
+/**
  * get command signature for CoolWalletS
  * @param {Transport} transport
  * @param {String} txDataHex hex string data for SE
@@ -29,7 +39,7 @@ const signForCoolWallet = (txDataHex, txDataType, appPrivateKey) => {
  * @param {String} appPrivateKey
  * @return {String} signature
  */
-const prepareTx = async (transport, txDataHex, txDataType, appPrivateKey) => {
+export const prepareTx = async (transport, txDataHex, txDataType, appPrivateKey) => {
   let encryptedSignature;
   const sendData = txDataHex + signForCoolWallet(txDataHex, txDataType, appPrivateKey);
   const patch = Math.ceil(sendData.length / 500);
@@ -41,27 +51,6 @@ const prepareTx = async (transport, txDataHex, txDataType, appPrivateKey) => {
   }
   return encryptedSignature;
 };
-
-/**
- * get command signature for CoolWalletS
- * @param {Transport} transport
- * @param {String} txDataHex hex string data for SE
- * @param {String} txDataType hex P1 string
- * @param {String} appPrivateKey
- * @param {Array<{Function}>} preActions
- * @return {Function} action
- */
-export const createPrepareTxAction = (
-  transport,
-  txDataHex,
-  txDataType,
-  appPrivateKey,
-  preActions
-) => (async () => {
-  // eslint-disable-next-line no-await-in-loop
-  for (const preAction of preActions) await preAction();
-  return prepareTx(transport, txDataHex, txDataType, appPrivateKey);
-});
 
 /**
  * do TX_PREP and get encrypted signature.
@@ -88,17 +77,19 @@ export const getSingleEncryptedSignature = async (
 /**
  * Send signing data to CoolWalletS, wait for encrypted signatures.
  * @param {Transport} transport
+ * @param {Array<{Function}>} preActions
  * @param {Array<{Function}>} actions
- * @param {String} appPrivateKey
  * @param {Function} txPrepareCompleteCallback
  * @returns {Promise<Array<String>>} array of encryptedSignature
  */
 export const getEncryptedSignatures = async (
   transport,
+  preActions,
   actions,
-  appPrivateKey,
   txPrepareCompleteCallback = null
 ) => {
+  // eslint-disable-next-line no-await-in-loop
+  for (const preAction of preActions) await preAction();
   const encryptedSignatureArray = [];
   // eslint-disable-next-line no-await-in-loop
   for (const action of actions) encryptedSignatureArray.push(await action());

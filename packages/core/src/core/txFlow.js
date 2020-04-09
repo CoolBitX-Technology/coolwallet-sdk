@@ -12,9 +12,9 @@ import { sayHi } from '../apdu/control';
 export const prepareSEData = (keyId, rawData, readType) => {
 	const inputIdBuffer = Buffer.from('00', 'hex');
 	const signDataBuffer = Buffer.from('00', 'hex');
-  const readTypeBuffer = Buffer.from(readType, 'hex');
+	const readTypeBuffer = Buffer.from(readType, 'hex');
 	const keyIdBuffer = Buffer.from(keyId, 'hex');
-	
+
 	const data = [inputIdBuffer, signDataBuffer, readTypeBuffer, keyIdBuffer, rawData];
 	const dataForSE = rlp.encode(data);
 	return dataForSE.toString('hex');
@@ -73,6 +73,7 @@ export const sendDataToCoolWallet = async (
  * @param {Transport} transport
  * @param {String} appId
  * @param {String} appPrivateKey
+ * @param {Array<{Function}>} preActions
  * @param {Array<{Function}>} actions
  * @param {Boolean} isEDDSA
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
@@ -84,6 +85,7 @@ export const sendBatchDataToCoolWallet = async (
   transport,
   appId,
   appPrivateKey,
+  preActions,
   actions,
   isEDDSA = false,
   txPrepareCompleteCallback = null,
@@ -94,8 +96,8 @@ export const sendBatchDataToCoolWallet = async (
 
   const encryptedSignatureArray = await txUtil.getEncryptedSignatures(
     transport,
+    preActions,
     actions,
-    appPrivateKey,
     txPrepareCompleteCallback
   );
   const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
