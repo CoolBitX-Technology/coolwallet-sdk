@@ -84,7 +84,7 @@ declare module '@coolwallets/core' {
         appId: String,
         appPrivateKey: String,
         data: Buffer,
-        txDataType,
+        txDataType: any,
         isEDDSA?: Boolean,
         preAction?: Function,
         txPrepareCompleteCallback?: Function,
@@ -98,6 +98,11 @@ declare module '@coolwallets/core' {
         transport: Transport,
         TxpPrepCommands: Array<{encodedData:String, P1:String, P2:String}>
       ):Promise<Array<{encryptedSignature:String, publicKey:String}>>
+
+      export function addressIndexToKeyId(
+        coinType: string,
+        addressIndex: number
+      ): string
     }
 
     export namespace controller {
