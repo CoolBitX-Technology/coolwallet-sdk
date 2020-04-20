@@ -92,7 +92,7 @@ declare module '@coolwallets/core' {
         txPrepareCompleteCallback?: Function,
         authorizedCallback?: Function,
         returnCanonical?: Boolean
-      ): Promise<{ r: string; s: string } | string | Buffer>;
+      ): Promise<{ r: string; s: string } | Buffer>;
       export function sendBatchDataToCoolWallet(
         transport: Transport,
         appId: String,
@@ -103,7 +103,7 @@ declare module '@coolwallets/core' {
         txPrepareCompleteCallback?: Function,
         authorizedCallback?: Function,
         returnCanonical?: Boolean
-      ): Promise<{ r: string; s: string } | string | Buffer>;
+      ): Promise<{ r: string; s: string } | Buffer>;
     }
 
     export namespace util {

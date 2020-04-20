@@ -58,7 +58,7 @@ export default class BTC extends ECDSACoin {
 			preparedData,
 			unsignedTransactions,
 		);
-		const signatures = core.flow.sendBatchDataToCoolWallet(
+		const signatures = await core.flow.sendBatchDataToCoolWallet(
 			this.transport,
 			this.appId,
 			this.appPrivateKey,
@@ -70,7 +70,7 @@ export default class BTC extends ECDSACoin {
 			false
 		);
 
-		const transaction = composeFinalTransaction(scriptType, preparedData, signatures);
+		const transaction = composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
 		return transaction.toString('hex');
 	}
 }

@@ -32,7 +32,7 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
  * @param {Boolean} returnCanonical
- * @return {Promise< {r: string, s: string} | string | Buffer >}
+ * @return {Promise< {r: string, s: string} | Buffer >}
  */
 export const sendDataToCoolWallet = async (
   transport,
