@@ -16,9 +16,12 @@ type Transport = import('@coolwallets/transport').default;
 export default class BTC extends ECDSACoin {
 	public network: any;
 
+	public ScriptType: any;
+
 	constructor(transport: Transport, appPrivateKey: string, appId: string, network: any) {
 		super(transport, appPrivateKey, appId, '00');
 		this.network = network;
+		this.ScriptType = ScriptType;
 	}
 
 	async getAddress(scriptType: ScriptType, addressIndex: number): Promise<string> {
