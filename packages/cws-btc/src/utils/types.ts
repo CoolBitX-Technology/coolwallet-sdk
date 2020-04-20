@@ -8,7 +8,7 @@ export type Input = {
   preTxHash: string,
   preIndex: number,
   preValue: string,
-  sequence: number,
+  sequence?: number,
   addressIndex: number,
 	pubkeyBuf?: Buffer,
 };
