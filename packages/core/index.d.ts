@@ -103,7 +103,7 @@ declare module '@coolwallets/core' {
         txPrepareCompleteCallback?: Function,
         authorizedCallback?: Function,
         returnCanonical?: Boolean
-      ): Promise<{ r: string; s: string } | Buffer>;
+      ): Promise<Array<{ r: string; s: string } | Buffer>>;
     }
 
     export namespace util {
