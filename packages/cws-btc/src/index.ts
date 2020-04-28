@@ -6,7 +6,7 @@ import {
 	Output,
 	Change,
 	PreparedData,
-	pubkeyToAddress,
+	pubkeyToAddressAndOutScript,
 } from './utils';
 
 import { createUnsignedTransactions, composeFinalTransaction } from './btc_sign';
@@ -24,9 +24,10 @@ export default class BTC extends ECDSACoin {
 		this.ScriptType = ScriptType;
 	}
 
-	async getAddress(scriptType: ScriptType, addressIndex: number): Promise<string> {
+	async getAddressAndOutScript(scriptType: ScriptType, addressIndex: number)
+		: Promise<{ address: string, outScript: Buffer }> {
 		const publicKey = await this.getPublicKey(addressIndex);
-		return pubkeyToAddress(Buffer.from(publicKey, 'hex'), scriptType);
+		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
 	}
 
 	async signTransaction(

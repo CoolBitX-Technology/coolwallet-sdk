@@ -14,12 +14,10 @@ export {
 	Change,
 	PreparedData,
 	encodeDerSig,
-	toVarUintPrefixedBuffer,
 	toVarUintBuffer,
 	toUintBuffer,
 	addressToOutScript,
-	pubkeyToOutScript,
-	pubkeyToAddress,
+	pubkeyToAddressAndOutScript,
 };
 
 function hash160(buf: Buffer): Buffer {
@@ -74,10 +72,6 @@ function bip66Encode(r: Buffer, s: Buffer) {
 	return signature;
 }
 
-function toVarUintPrefixedBuffer(buf: Buffer): Buffer {
-	return Buffer.concat([varuint.encode(buf.length), buf]);
-}
-
 function toVarUintBuffer(int: number): Buffer {
 	return varuint.encode(int);
 }
@@ -104,28 +98,12 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 		throw new Error(`Unsupport Address : ${address}`);
 	}
 	if (!payment.output) throw new Error(`No OutScript for Address : ${address}`);
-	const outScript = toVarUintPrefixedBuffer(payment.output);
+	const outScript = payment.output;
 	return { scriptType, outScript };
 }
 
-function pubkeyToOutScript(pubkey: Buffer, scriptType: ScriptType): Buffer {
-	let payment;
-	if (scriptType === ScriptType.P2PKH) {
-		payment = bitcoin.payments.p2pkh({ pubkey });
-	} else if (scriptType === ScriptType.P2SH_P2WPKH) {
-		payment = bitcoin.payments.p2sh({
-			redeem: bitcoin.payments.p2wpkh({ pubkey }),
-		});
-	} else if (scriptType === ScriptType.P2WPKH) {
-		payment = bitcoin.payments.p2wpkh({ pubkey });
-	} else {
-		throw new Error(`Unsupport ScriptType : ${scriptType}`);
-	}
-	if (!payment.output) throw new Error(`No OutScript for ScriptType : ${scriptType}`);
-	return toVarUintPrefixedBuffer(payment.output);
-}
-
-function pubkeyToAddress(pubkey: Buffer, scriptType: ScriptType): string {
+function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
+	: { address: string, outScript: Buffer } {
 	let payment;
 	if (scriptType === ScriptType.P2PKH) {
 		payment = bitcoin.payments.p2pkh({ pubkey });
@@ -139,5 +117,6 @@ function pubkeyToAddress(pubkey: Buffer, scriptType: ScriptType): string {
 		throw new Error(`Unsupport ScriptType : ${scriptType}`);
 	}
 	if (!payment.address) throw new Error(`No Address for ScriptType : ${scriptType}`);
-	return payment.address;
+	if (!payment.output) throw new Error(`No OutScript for ScriptType : ${scriptType}`);
+	return { address: payment.address, outScript: payment.output };
 }

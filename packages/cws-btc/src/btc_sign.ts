@@ -9,7 +9,7 @@ import {
 	toVarUintBuffer,
 	toUintBuffer,
 	addressToOutScript,
-	pubkeyToOutScript,
+	pubkeyToAddressAndOutScript,
 } from './utils';
 
 export {
@@ -56,15 +56,21 @@ function createUnsignedTransactions(
 		};
 	});
 
-	const { scriptType: outputType, outScript: outputScript } = addressToOutScript(output.address);
+	const {
+		scriptType: outputType,
+		outScript: outputScript
+	} = addressToOutScript(output.address);
+	const outputScriptLen = toVarUintBuffer(outputScript.length);
+
 	const outputArray = [
-		Buffer.concat([toUintBuffer(output.value, 8), outputScript])
+		Buffer.concat([toUintBuffer(output.value, 8), outputScriptLen, outputScript])
 	];
 	if (change) {
 		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
 		const changeValue = toUintBuffer(change.value, 8);
-		const outScript = pubkeyToOutScript(change.pubkeyBuf, scriptType);
-		outputArray.push(Buffer.concat([changeValue, outScript]));
+		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
+		const outScriptLen = toVarUintBuffer(outScript.length);
+		outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
 	}
 
 	const outputsCount = toVarUintBuffer((change) ? 2 : 1);
@@ -78,11 +84,14 @@ function createUnsignedTransactions(
 		pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
 	}) => {
 		if (scriptType === ScriptType.P2PKH) {
+			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2PKH);
+			const outScriptLen = toVarUintBuffer(outScript.length);
 			return Buffer.concat([
 				versionBuf,
 				toVarUintBuffer(1),
 				preOutPointBuf,
-				pubkeyToOutScript(pubkeyBuf, ScriptType.P2PKH), // preOutScriptBuf
+				outScriptLen, // preOutScriptBuf
+				outScript, // preOutScriptBuf
 				sequenceBuf,
 				outputsCount,
 				outputsBuf,
@@ -173,9 +182,10 @@ function composeFinalTransaction(
 		pubkeyBuf, preOutPointBuf, sequenceBuf
 	}) => {
 		if (scriptType === ScriptType.P2SH_P2WPKH) {
-			const inScript = pubkeyToOutScript(pubkeyBuf, ScriptType.P2WPKH);
+			const { outScript: inScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2WPKH);
+			const inScriptLen = toVarUintBuffer(inScript.length);
 			return Buffer.concat([
-				preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
+				preOutPointBuf, toVarUintBuffer(inScript.length), inScriptLen, inScript, sequenceBuf
 			]);
 		}
 		return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
