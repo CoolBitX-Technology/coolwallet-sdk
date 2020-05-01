@@ -1,4 +1,4 @@
-import { core } from '@coolwallets/core';
+import { core, apdu } from '@coolwallets/core';
 import { ECDSACoin } from '@coolwallets/coin';
 import {
 	ScriptType,
@@ -6,6 +6,7 @@ import {
 	Output,
 	Change,
 	PreparedData,
+	addressToOutScript,
 	pubkeyToAddressAndOutScript,
 } from './utils';
 
@@ -18,10 +19,13 @@ export default class BTC extends ECDSACoin {
 
 	public ScriptType: any;
 
+	public addressToOutScript: Function;
+
 	constructor(transport: Transport, appPrivateKey: string, appId: string, network: any) {
 		super(transport, appPrivateKey, appId, '00');
 		this.network = network;
 		this.ScriptType = ScriptType;
+		this.addressToOutScript = addressToOutScript;
 	}
 
 	async getAddressAndOutScript(scriptType: ScriptType, addressIndex: number)
@@ -58,7 +62,9 @@ export default class BTC extends ECDSACoin {
 		const { preActions, actions } = getSigningActions(
 			this.transport,
 			scriptType,
+			this.appId,
 			this.appPrivateKey,
+			change,
 			preparedData,
 			unsignedTransactions,
 		);
@@ -82,17 +88,36 @@ export default class BTC extends ECDSACoin {
 function getSigningActions(
 	transport: Transport,
 	scriptType: ScriptType,
+	appId: string,
 	appPrivateKey: string,
+	change: Change | undefined,
 	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>,
 
 ): ({preActions: Array<Function>, actions: Array<Function>}) {
-	const preAction = async () => {
+	const preActions = [];
+
+	if (change) {
+		const changeAction = async () => {
+			const cmd = 'SET_CHANGE_KEYID';
+			if (scriptType === ScriptType.P2WPKH) throw new Error('not support P2WPKH change');
+			const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
+			const keyId = change.addressIndex.toString(16).padStart(10, '0');
+			const sig = await core.auth.generalAuthorization(
+				transport, appId, appPrivateKey, cmd, keyId, redeemType
+			);
+			const pathWithSig = keyId + sig;
+			await apdu.tx.setChangeKeyId(transport, pathWithSig, redeemType);
+		};
+		preActions.push(changeAction);
+	}
+
+	const parsingOutputAction = async () => {
 		const txDataHex = preparedData.outputsBuf.toString('hex');
 		const txDataType = (preparedData.outputType === ScriptType.P2SH_P2WPKH) ? '0C' : '01';
 		return core.util.prepareOutputData(transport, txDataHex, txDataType);
 	};
-	const preActions = [preAction];
+	preActions.push(parsingOutputAction);
 
 	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
 		const keyId = core.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
