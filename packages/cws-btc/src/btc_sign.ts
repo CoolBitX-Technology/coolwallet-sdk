@@ -182,10 +182,13 @@ function composeFinalTransaction(
 		pubkeyBuf, preOutPointBuf, sequenceBuf
 	}) => {
 		if (scriptType === ScriptType.P2SH_P2WPKH) {
-			const { outScript: inScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2WPKH);
-			const inScriptLen = toVarUintBuffer(inScript.length);
+			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2WPKH);
+			const inScript = Buffer.concat([
+				Buffer.from(outScript.length.toString(16), 'hex'),
+				outScript,
+			]);
 			return Buffer.concat([
-				preOutPointBuf, toVarUintBuffer(inScript.length), inScriptLen, inScript, sequenceBuf
+				preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
 			]);
 		}
 		return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
