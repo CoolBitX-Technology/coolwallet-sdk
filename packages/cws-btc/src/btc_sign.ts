@@ -130,7 +130,7 @@ function createUnsignedTransactions(
 function composeFinalTransaction(
 	scriptType: ScriptType,
 	preparedData: PreparedData,
-	derSigAndHashTypes: Array<Buffer>
+	signatures: Array<Buffer>
 ): Buffer {
 	const {
 		versionBuf, inputsCount, preparedInputs, outputsCount, outputsBuf, lockTimeBuf
@@ -145,10 +145,11 @@ function composeFinalTransaction(
 	if (scriptType === ScriptType.P2PKH) {
 		const inputsBuf = Buffer.concat(preparedInputs.map((data, i) => {
 			const { pubkeyBuf, preOutPointBuf, sequenceBuf } = data;
-			const signature = derSigAndHashTypes[i];
+			const signature = signatures[i];
 			const inScript = Buffer.concat([
-				Buffer.from(signature.length.toString(16), 'hex'),
+				Buffer.from((signature.length + 1).toString(16), 'hex'),
 				signature,
+				Buffer.from('81', 'hex'),
 				Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
 				pubkeyBuf,
 			]);
@@ -168,10 +169,11 @@ function composeFinalTransaction(
 
 	const flagBuf = Buffer.from('0001', 'hex');
 	const segwitBuf = Buffer.concat(preparedInputs.map(({ pubkeyBuf }, i) => {
-		const signature = derSigAndHashTypes[i];
+		const signature = signatures[i];
 		const segwitScript = Buffer.concat([
-			Buffer.from(signature.length.toString(16), 'hex'),
+			Buffer.from((signature.length + 1).toString(16), 'hex'),
 			signature,
+			Buffer.from('01', 'hex'),
 			Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
 			pubkeyBuf,
 		]);
