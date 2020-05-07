@@ -114,7 +114,7 @@ function getSigningActions(
 
 	const parsingOutputAction = async () => {
 		const txDataHex = preparedData.outputsBuf.toString('hex');
-		const txDataType = (preparedData.outputType === ScriptType.P2SH_P2WPKH) ? '0C' : '01';
+		const txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0C' : '01';
 		return core.util.prepareOutputData(transport, txDataHex, txDataType);
 	};
 	preActions.push(parsingOutputAction);
