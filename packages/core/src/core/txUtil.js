@@ -1,9 +1,9 @@
-import { sign } from '../crypto/sign';
-import { aes256CbcDecrypt } from '../crypto/encryptions';
-import * as signatureTools from '../crypto/signature';
-import COMMAND from '../config/command';
-import * as apdu from '../apdu/index';
-import { getCommandSignature } from './auth';
+import { sign } from "../crypto/sign";
+import { aes256CbcDecrypt } from "../crypto/encryptions";
+import * as signatureTools from "../crypto/signature";
+import COMMAND from "../config/command";
+import * as apdu from "../apdu/index";
+import { getCommandSignature } from "./auth";
 
 /**
  * get command signature for CoolWalletS
@@ -15,11 +15,11 @@ import { getCommandSignature } from './auth';
 const signForCoolWallet = (txDataHex, txDataType, appPrivateKey) => {
   const command = COMMAND.TX_PREPARE;
   const P1 = txDataType;
-  const P2 = '00';
+  const P2 = "00";
   const prefix = command.CLA + command.INS + P1 + P2;
   const payload = prefix + txDataHex;
-  const signatureBuffer = sign(Buffer.from(payload, 'hex'), appPrivateKey);
-  return signatureBuffer.toString('hex');
+  const signatureBuffer = sign(Buffer.from(payload, "hex"), appPrivateKey);
+  return signatureBuffer.toString("hex");
 };
 
 export const getEncryptedSignatureByScripts = async (
@@ -35,15 +35,20 @@ export const getEncryptedSignatureByScripts = async (
     transport,
     appId,
     appPrivKey,
-    'EXECUTE_SCRIPT',
+    "EXECUTE_SCRIPT",
     argument,
     null,
-    null,
+    null
   );
-  const encryptedSignature = await apdu.tx.executeScript(transport, argument, signature);
+  const encryptedSignature = await apdu.tx.executeScript(
+    transport,
+    argument,
+    signature
+  );
   await apdu.tx.finishPrepare(transport);
 
-  if (typeof txPrepareComplteCallback === 'function') txPrepareComplteCallback();
+  if (typeof txPrepareComplteCallback === "function")
+    txPrepareComplteCallback();
   return encryptedSignature;
 };
 
@@ -57,13 +62,19 @@ export const getEncryptedSignatureByScripts = async (
  */
 const prepareTx = async (transport, txDataHex, txDataType, appPrivateKey) => {
   let encryptedSignature;
-  const sendData = txDataHex + signForCoolWallet(txDataHex, txDataType, appPrivateKey);
+  const sendData =
+    txDataHex + signForCoolWallet(txDataHex, txDataType, appPrivateKey);
   const patch = Math.ceil(sendData.length / 500);
   for (let i = 0; i < patch; i++) {
     const patchData = sendData.substr(i * 500, 500);
-    const p2 = patch === 1 ? '00' : (i === patch - 1 ? '8' : '0') + (i + 1);
+    const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
     // eslint-disable-next-line no-await-in-loop
-    encryptedSignature = await apdu.tx.prepTx(transport, patchData, txDataType, p2);
+    encryptedSignature = await apdu.tx.prepTx(
+      transport,
+      patchData,
+      txDataType,
+      p2
+    );
   }
   return encryptedSignature;
 };
@@ -84,9 +95,15 @@ export const getSingleEncryptedSignature = async (
   appPrivateKey,
   txPrepareCompleteCallback = null
 ) => {
-  const encryptedSignature = await prepareTx(transport, txDataHex, txDataType, appPrivateKey);
+  const encryptedSignature = await prepareTx(
+    transport,
+    txDataHex,
+    txDataType,
+    appPrivateKey
+  );
   await apdu.tx.finishPrepare(transport);
-  if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
+  if (typeof txPrepareCompleteCallback === "function")
+    txPrepareCompleteCallback();
   return encryptedSignature;
 };
 
@@ -108,11 +125,17 @@ export const getEncryptedSignatures = async (
   for (const txData of txDataArray) {
     const { txDataHex, txDataType } = txData;
     // eslint-disable-next-line no-await-in-loop
-    const encryptedSignature = await prepareTx(transport, txDataHex, txDataType, appPrivateKey);
+    const encryptedSignature = await prepareTx(
+      transport,
+      txDataHex,
+      txDataType,
+      appPrivateKey
+    );
     encryptedSignatureArray.push(encryptedSignature);
   }
   await apdu.tx.finishPrepare(transport);
-  if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
+  if (typeof txPrepareCompleteCallback === "function")
+    txPrepareCompleteCallback();
   return encryptedSignatureArray;
 };
 
@@ -126,7 +149,7 @@ export const getCWSEncryptionKey = async (transport, authorizedCallback) => {
   const success = await apdu.tx.getTxDetail(transport);
   if (!success) return undefined;
 
-  if (typeof authorizedCallback === 'function') authorizedCallback();
+  if (typeof authorizedCallback === "function") authorizedCallback();
 
   const signatureKey = await apdu.tx.getSignatureKey(transport);
 
@@ -151,11 +174,15 @@ export const decryptSignatureFromSE = (
 ) => {
   const iv = Buffer.alloc(16);
   iv.fill(0);
-  const derSigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature);
+  const derSigBuff = aes256CbcDecrypt(
+    iv,
+    Buffer.from(signatureKey, "hex"),
+    encryptedSignature
+  );
 
   if (isEDDSA) return derSigBuff;
 
-  const sigObj = signatureTools.parseDERsignature(derSigBuff.toString('hex'));
+  const sigObj = signatureTools.parseDERsignature(derSigBuff.toString("hex"));
   const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
   if (returnCanonical) return canonicalSignature;
 
@@ -167,7 +194,7 @@ export const decryptSignatureFromSE = (
  * @param {String} Number
  */
 export const addressIndexToKeyId = (coinType, addressIndex) => {
-  const indexHex = addressIndex.toString(16).padStart(4, '0');
+  const indexHex = addressIndex.toString(16).padStart(4, "0");
   const keyId = `${coinType}0000${indexHex}`;
   return keyId;
 };
