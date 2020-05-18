@@ -1,24 +1,23 @@
-import elliptic from 'elliptic';
-import { DataTooLong } from '@coolwallets/errors';
+import elliptic from "elliptic";
+import { DataTooLong } from "@coolwallets/errors";
 
-import { apdu } from '@coolwallets/core';
+import { apdu } from "@coolwallets/core";
 
-import { handleHex } from './string_util';
-import * as scripts from './scripts';
-import * as token from './token';
+import { handleHex } from "./string_util";
+import * as scripts from "./scripts";
+import * as token from "./token";
 
-import { keccak256, toChecksumAddress } from './lib';
+import { keccak256, toChecksumAddress } from "./lib";
 
-
-const rlp = require('rlp');
+const rlp = require("rlp");
 
 // eslint-disable-next-line new-cap
-const ec = new elliptic.ec('secp256k1');
+const ec = new elliptic.ec("secp256k1");
 
 const transactionType = {
-  TRANSFER: 'TRANSFER',
-  ERC20: 'ERC20',
-  SMART_CONTRACT: 'SMART_CONTRACT'
+  TRANSFER: "TRANSFER",
+  ERC20: "ERC20",
+  SMART_CONTRACT: "SMART_CONTRACT",
 };
 
 /**
@@ -26,36 +25,39 @@ const transactionType = {
  * @param {*} transaction
  */
 export const getTransactionType = (transaction) => {
-  const data = handleHex(transaction.data.toString('hex'));
-  if (data === '' || data === '00') return transactionType.TRANSFER;
-  if (token.isSupportedERC20Method(data) && transaction.tokenInfo) return transactionType.ERC20;
+  const data = handleHex(transaction.data.toString("hex"));
+  if (data === "" || data === "00") return transactionType.TRANSFER;
+  if (token.isSupportedERC20Method(data) && transaction.tokenInfo)
+    return transactionType.ERC20;
   return transactionType.SMART_CONTRACT;
 };
 
 const getTransferArgument = (transaction) => {
-  const argument = handleHex(transaction.to) // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
-    + handleHex(transaction.value).padStart(20, '0') // 000000b1a2bc2ec50000
-    + handleHex(transaction.gasPrice).padStart(20, '0') // 0000000000020c855800
-    + handleHex(transaction.gasLimit).padStart(20, '0') // 0000000000000000520c
-    + handleHex(transaction.nonce).padStart(16, '0') // 0000000000000289
-    + handleHex(transaction.chainId.toString(16)).padStart(4, '0'); // 0001
+  const argument =
+    handleHex(transaction.to) + // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
+    handleHex(transaction.value).padStart(20, "0") + // 000000b1a2bc2ec50000
+    handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
+    handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
+    handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
+    handleHex(transaction.chainId.toString(16)).padStart(4, "0"); // 0001
   return argument;
 };
 
 const getERC20Argument = (transaction) => {
-  const data = handleHex(transaction.data.toString('hex'));
+  const data = handleHex(transaction.data.toString("hex"));
   const { to, amount } = token.parseToAndAmount(data);
   const { symbol, decimals } = transaction.tokenInfo;
   const tokenInfo = token.getSetTokenPayload(transaction.to, symbol, decimals);
-  const signature = '00'.repeat(72);
-  const argument = handleHex(to)
-  + handleHex(amount).padStart(24, '0') // 000000b1a2bc2ec50000
-  + handleHex(transaction.gasPrice).padStart(20, '0') // 0000000000020c855800
-  + handleHex(transaction.gasLimit).padStart(20, '0') // 0000000000000000520c
-  + handleHex(transaction.nonce).padStart(16, '0') // 0000000000000289
-  + handleHex(transaction.chainId.toString(16)).padStart(4, '0') // 0001
-  + tokenInfo
-  + signature;
+  const signature = "00".repeat(72);
+  const argument =
+    handleHex(to) +
+    handleHex(amount).padStart(24, "0") + // 000000b1a2bc2ec50000
+    handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
+    handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
+    handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
+    handleHex(transaction.chainId.toString(16)).padStart(4, "0") + // 0001
+    tokenInfo +
+    signature;
   return argument;
 };
 
@@ -66,13 +68,13 @@ const getERC20Argument = (transaction) => {
  * @return {Array<Buffer>}
  */
 export const getRawHex = (transaction) => {
-  const fields = ['nonce', 'gasPrice', 'gasLimit', 'to', 'value', 'data'];
+  const fields = ["nonce", "gasPrice", "gasLimit", "to", "value", "data"];
   const raw = fields.map((field) => {
     const hex = handleHex(transaction[field]);
-    if (hex === '00' || hex === '') {
+    if (hex === "00" || hex === "") {
       return Buffer.allocUnsafe(0);
     }
-    return Buffer.from(hex, 'hex');
+    return Buffer.from(hex, "hex");
   });
   raw[6] = Buffer.from([transaction.chainId]);
   raw[7] = Buffer.allocUnsafe(0);
@@ -92,14 +94,14 @@ export const getRawHex = (transaction) => {
 export const getReadType = (txType) => {
   switch (txType) {
     case transactionType.TRANSFER: {
-      return { readType: '3C' };
+      return { readType: "3C" };
     }
     // Todo: Old transfer Add erc20
     // case transactionType.ERC20: {
     //   return { readType: 'C2' };
     // }
     default: {
-      return { readType: '33' };
+      return { readType: "33" };
     }
   }
 };
@@ -110,7 +112,7 @@ export const getReadType = (txType) => {
  * @param {*} transaction
  */
 export const getScriptAndArguments = (txType, addressIndex, transaction) => {
-  const addressIdxHex = '00'.concat(addressIndex.toString(16).padStart(6, '0'));
+  const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
   const SEPath = `15328000002C8000003C8000000000000000${addressIdxHex}`;
   let script;
   let argument;
@@ -134,7 +136,7 @@ export const getScriptAndArguments = (txType, addressIndex, transaction) => {
   // console.debug(`argument:\t${SEPath}+${argument}`);
   return {
     script,
-    argument: SEPath + argument
+    argument: SEPath + argument,
   };
 };
 /**
@@ -151,10 +153,14 @@ export const composeSignedTransacton = (payload, v, r, s, chainId) => {
 
   const transaction = payload.slice(0, 6);
 
-  transaction.push(Buffer.from([vValue]), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
+  transaction.push(
+    Buffer.from([vValue]),
+    Buffer.from(r, "hex"),
+    Buffer.from(s, "hex")
+  );
 
   const serializedTx = rlp.encode(transaction);
-  return `0x${serializedTx.toString('hex')}`;
+  return `0x${serializedTx.toString("hex")}`;
 };
 
 /**
@@ -164,13 +170,21 @@ export const composeSignedTransacton = (payload, v, r, s, chainId) => {
  * @param {String} compressedPubkey hex string
  * @return {Promise<{v: Number, r: String, s: String}>}
  */
-export const genEthSigFromSESig = async (canonicalSignature, payload, compressedPubkey) => {
+export const genEthSigFromSESig = async (
+  canonicalSignature,
+  payload,
+  compressedPubkey
+) => {
   const hash = keccak256(payload);
-  const data = Buffer.from(handleHex(hash), 'hex');
-  const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
+  const data = Buffer.from(handleHex(hash), "hex");
+  const keyPair = ec.keyFromPublic(compressedPubkey, "hex");
 
   // get v
-  const recoveryParam = ec.getKeyRecoveryParam(data, canonicalSignature, keyPair.pub);
+  const recoveryParam = ec.getKeyRecoveryParam(
+    data,
+    canonicalSignature,
+    keyPair.pub
+  );
   const v = recoveryParam + 27;
   const { r } = canonicalSignature;
   const { s } = canonicalSignature;
@@ -186,14 +200,14 @@ export const genEthSigFromSESig = async (canonicalSignature, payload, compressed
  * @return {Function}
  */
 export const apduForParsingMessage = (transport, msgBuf, p1) => {
-  let rawData = msgBuf.toString('hex');
+  let rawData = msgBuf.toString("hex");
   rawData = handleHex(rawData);
   const patch = Math.ceil(rawData.length / 500);
   // if (patch > 1) return; // To Do : if card support patch, remove this line
   return async () => {
     for (let i = 0; i < patch; i++) {
       const patchData = rawData.substr(i * 500, 500);
-      const p2 = patch === 1 ? '00' : (i === patch - 1 ? '8' : '0') + (i + 1);
+      const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
       // eslint-disable-next-line no-await-in-loop
       await apdu.tx.prepTx(transport, patchData, p1, p2);
     }
@@ -216,7 +230,7 @@ export const apduForParsingMessage = (transport, msgBuf, p1) => {
  * @return {string} 20 bytes address + "0x" prefixed
  */
 function trimFirst12Bytes(hexString) {
-  return '0x'.concat(hexString.substr(hexString.length - 40));
+  return "0x".concat(hexString.substr(hexString.length - 40));
 }
 
 /**
@@ -225,8 +239,8 @@ function trimFirst12Bytes(hexString) {
  * @return {string}
  */
 export function pubKeyToAddress(compressedPubkey) {
-  const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
-  const pubkey = `0x${keyPair.getPublic(false, 'hex').substr(2)}`;
+  const keyPair = ec.keyFromPublic(compressedPubkey, "hex");
+  const pubkey = `0x${keyPair.getPublic(false, "hex").substr(2)}`;
   const address = trimFirst12Bytes(keccak256(pubkey));
   return toChecksumAddress(address);
 }
