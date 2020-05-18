@@ -1,13 +1,13 @@
-import { core, apdu, crypto } from '@coolwallets/core';
+import { core, apdu, crypto } from "@coolwallets/core";
 
-const bip32 = require('bip32');
+const bip32 = require("bip32");
 
 const authGetKey = async (transport, appId, appPrivateKey) => {
   const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
-    'AUTH_EXT_KEY'
+    "AUTH_EXT_KEY"
   );
   return apdu.coin.authGetExtendedKey(transport, signature, forceUseSC);
 };
@@ -32,18 +32,22 @@ export const getAccountExtKey = async (
 
   let accIndexHex = accIndex.toString(16);
   if (accIndexHex.length % 2 > 0) accIndexHex = `0${accIndexHex}`;
-  const response = await apdu.coin.getAccountExtendedKey(transport, coinSEType, accIndexHex);
+  const response = await apdu.coin.getAccountExtendedKey(
+    transport,
+    coinSEType,
+    accIndexHex
+  );
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
-  if (!decryptedData) throw Error('Decryption Failed');
+  if (!decryptedData) throw Error("Decryption Failed");
 
-  const accBuf = Buffer.from(decryptedData, 'hex');
+  const accBuf = Buffer.from(decryptedData, "hex");
   const publicKey = accBuf.slice(0, 33);
   const chainCode = accBuf.slice(33);
 
   return {
     accountIndex: accIndexHex,
-    accountPublicKey: publicKey.toString('hex'),
-    accountChainCode: chainCode.toString('hex')
+    accountPublicKey: publicKey.toString("hex"),
+    accountChainCode: chainCode.toString("hex"),
   };
 };
 
@@ -65,7 +69,7 @@ export const getEd25519PublicKey = async (
 ) => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
-  const accIndexHex = accountIndex.toString(16).padStart(2, '0');
+  const accIndexHex = accountIndex.toString(16).padStart(2, "0");
   const response = await apdu.coin.getEd25519AccountPublicKey(
     transport,
     coinSEType,
@@ -83,17 +87,22 @@ export const getEd25519PublicKey = async (
  * @param {Number} changeIndex
  * @param {Number} addressIndex
  */
-export const derivePubKey = (accountPublicKey, chainCode, changeIndex = 0, addressIndex = 0) => {
+export const derivePubKey = (
+  accountPublicKey,
+  chainCode,
+  changeIndex = 0,
+  addressIndex = 0
+) => {
   const accountNode = bip32.fromPublicKey(
-    Buffer.from(accountPublicKey, 'hex'),
-    Buffer.from(chainCode, 'hex')
+    Buffer.from(accountPublicKey, "hex"),
+    Buffer.from(chainCode, "hex")
   );
   const changeNode = accountNode.derive(changeIndex);
   const addressNode = changeNode.derive(addressIndex);
-  const publicKey = addressNode.publicKey.toString('hex');
+  const publicKey = addressNode.publicKey.toString("hex");
 
-  const parentPublicKey = changeNode.publicKey.toString('hex');
-  const parentChainCode = changeNode.chainCode.toString('hex');
+  const parentPublicKey = changeNode.publicKey.toString("hex");
+  const parentChainCode = changeNode.chainCode.toString("hex");
 
   return { publicKey, parentPublicKey, parentChainCode };
 };
