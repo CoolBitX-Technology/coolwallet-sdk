@@ -1,6 +1,6 @@
 export type Payment = {
-  TransactionType: 'Payment';
-  Flags: 2147483648;
+  TransactionType: string | "Payment";
+  Flags: number | 2147483648;
   Sequence: number;
   DestinationTag: number;
   LastLedgerSequence: number;
@@ -10,5 +10,10 @@ export type Payment = {
   SigningPubKey: string;
   Account: string;
   Destination: string;
-  TxnSignature?: string
+  TxnSignature?: string;
+};
+
+export type Transaction = {
+  to: string;
+  value: string;
 };
