@@ -53,6 +53,16 @@ export const getEncryptedSignatureByScripts = async (
 };
 
 /**
+ * send output data for bitcoin family
+ * @param {Transport} transport
+ * @param {String} txDataHex hex string data for SE
+ * @param {String} txDataType hex P1 string
+ */
+export const prepareOutputData = async (transport, txDataHex, txDataType) => {
+  await apdu.tx.prepTx(transport, txDataHex, txDataType, "00");
+};
+
+/**
  * get command signature for CoolWalletS
  * @param {Transport} transport
  * @param {String} txDataHex hex string data for SE
@@ -60,7 +70,12 @@ export const getEncryptedSignatureByScripts = async (
  * @param {String} appPrivateKey
  * @return {String} signature
  */
-const prepareTx = async (transport, txDataHex, txDataType, appPrivateKey) => {
+export const prepareTx = async (
+  transport,
+  txDataHex,
+  txDataType,
+  appPrivateKey
+) => {
   let encryptedSignature;
   const sendData =
     txDataHex + signForCoolWallet(txDataHex, txDataType, appPrivateKey);
@@ -110,29 +125,22 @@ export const getSingleEncryptedSignature = async (
 /**
  * Same as getSingleEncryptedSignature, but used for UTXO based coins to get array of sigs.
  * @param {Transport} transport
- * @param {Array<{txDataHex:String, txDataType:String}>} txDataArray
- * @param {String} appPrivateKey
+ * @param {Array<{Function}>} preActions
+ * @param {Array<{Function}>} actions
  * @param {Function} txPrepareCompleteCallback
  * @returns {Promise<Array<String>>} array of encryptedSignature
  */
 export const getEncryptedSignatures = async (
   transport,
-  txDataArray,
-  appPrivateKey,
+  preActions,
+  actions,
   txPrepareCompleteCallback = null
 ) => {
+  // eslint-disable-next-line no-await-in-loop
+  for (const preAction of preActions) await preAction();
   const encryptedSignatureArray = [];
-  for (const txData of txDataArray) {
-    const { txDataHex, txDataType } = txData;
-    // eslint-disable-next-line no-await-in-loop
-    const encryptedSignature = await prepareTx(
-      transport,
-      txDataHex,
-      txDataType,
-      appPrivateKey
-    );
-    encryptedSignatureArray.push(encryptedSignature);
-  }
+  // eslint-disable-next-line no-await-in-loop
+  for (const action of actions) encryptedSignatureArray.push(await action());
   await apdu.tx.finishPrepare(transport);
   if (typeof txPrepareCompleteCallback === "function")
     txPrepareCompleteCallback();
@@ -164,7 +172,7 @@ export const getCWSEncryptionKey = async (transport, authorizedCallback) => {
  * @param {String} signatureKey
  * @param {Boolean} isEDDSA
  * @param {Boolean} returnCanonical
- * @return {{r:string, s:string} | string } canonical signature or DER signature
+ * @return {{r:string, s:string} | Buffer } canonical or DER signature
  */
 export const decryptSignatureFromSE = (
   encryptedSignature,

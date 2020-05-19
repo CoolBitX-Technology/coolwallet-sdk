@@ -91,13 +91,13 @@ declare module "@coolwallets/core" {
         keyId: string,
         rawData: Buffer | Array<Buffer>,
         readType: string
-      ): Buffer;
+      ): string;
       export function sendDataToCoolWallet(
         transport: Transport,
         appId: String,
         appPrivateKey: String,
-        data: Buffer,
-        txDataType: any,
+        txDataHex: String,
+        txDataType: String,
         isEDDSA?: Boolean,
         preAction?: Function,
         txPrepareCompleteCallback?: Function,
@@ -115,6 +115,17 @@ declare module "@coolwallets/core" {
         authorizedCallback?: Function,
         return_canonical?: boolean
       ): Promise<string>;
+      export function sendBatchDataToCoolWallet(
+        transport: Transport,
+        appId: String,
+        appPrivateKey: String,
+        preActions: Function[],
+        actions: Function[],
+        isEDDSA?: Boolean,
+        txPrepareCompleteCallback?: Function,
+        authorizedCallback?: Function,
+        returnCanonical?: Boolean
+      ): Promise<Array<{ r: string; s: string } | Buffer>>;
     }
 
     export namespace util {
@@ -126,6 +137,23 @@ declare module "@coolwallets/core" {
       export function addressIndexToKeyId(
         coinType: string,
         addressIndex: number
+      ): string;
+      /*export function getEncryptedSignatures(
+        transport: Transport,
+        actions: [Function],
+        appPrivateKey: string,
+        txPrepareCompleteCallback?: Function
+      ): Promise<Array<string>>;*/
+      export function prepareOutputData(
+        transport: Transport,
+        txDataHex: string,
+        txDataType: string
+      ): void;
+      export function prepareTx(
+        transport: Transport,
+        txDataHex: string,
+        txDataType: string,
+        appPrivateKey: string
       ): string;
     }
 
