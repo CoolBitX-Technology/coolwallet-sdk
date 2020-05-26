@@ -19,42 +19,6 @@ import { createUnsignedTransactions, composeFinalTransaction } from './btc_sign'
 type Transport = import('@coolwallets/transport').default;
 
 export default class BTC extends ECDSACoin {
-<<<<<<< HEAD
-  public network: any;
-
-  // public params: Param;
-
-  constructor(transport: Transport, appPrivateKey: string, appId: string, network: any) {
-    super(transport, appPrivateKey, appId, '00');
-    this.network = network;
-    // this.params = BTCONFIG.PARAMS;
-  }
-
-  /**
-   * Get Bitcoin address by index
-   */
-  async getP2PKHAddress(addressIndex: number): Promise<string> {
-    const publicKey = await this.getPublicKey(addressIndex);
-    return pubkeyToP2PKHAddress(publicKey, this.network);
-  }
-
-  async getP2SHAddress(addressIndex: number): Promise<string> {
-    const publicKey = await this.getPublicKey(addressIndex);
-    return pubkeyToP2SHAddress(publicKey);
-  }
-
-  async signP2SHTransaction(
-    txFee: string|number,
-    fromAddresses: [string],
-    toAddress: string,
-    changeAddress: string,
-    changeKeyId: string,
-    amount: string|number,
-    readType: string
-  ): Promise<string> {
-
-  }
-=======
 	public network: any;
 
 	public ScriptType: any;
@@ -134,7 +98,7 @@ function getSigningActions(
 	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>,
 
-): ({preActions: Array<Function>, actions: Array<Function>}) {
+): ({ preActions: Array<Function>, actions: Array<Function> }) {
 	const preActions = [];
 
 	if (change) {
@@ -143,10 +107,10 @@ function getSigningActions(
 			if (scriptType === ScriptType.P2WPKH) throw new Error('not support P2WPKH change');
 			const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
 			const keyId = change.addressIndex.toString(16).padStart(10, '0');
-			const sig = await core.auth.generalAuthorization(
+			const sig = await core.auth.getCommandSignature(
 				transport, appId, appPrivateKey, cmd, keyId, redeemType
 			);
-			const pathWithSig = keyId + sig;
+			const pathWithSig = keyId + sig.signature;
 			await apdu.tx.setChangeKeyId(transport, pathWithSig, redeemType);
 		};
 		preActions.push(changeAction);
@@ -168,5 +132,4 @@ function getSigningActions(
 	}));
 
 	return { preActions, actions };
->>>>>>> dev
 }

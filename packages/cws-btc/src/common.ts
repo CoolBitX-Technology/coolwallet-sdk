@@ -4,14 +4,14 @@ import { core, apdu } from '@coolwallets/core';
  * Set change address's path to CoolWalletS.
  */
 export const setChangeKeyid = async (
-  transport:any,
-  appId:string,
-  appPrivateKey:string,
-  coinType:string,
-  changeAddressIndex:number,
-  redeemType:string) => {
+  transport: any,
+  appId: string,
+  appPrivateKey: string,
+  coinType: string,
+  changeAddressIndex: number,
+  redeemType: string) => {
   const changeKeyId = core.util.addressIndexToKeyId(coinType, changeAddressIndex);
-  const signature = await core.auth.generalAuthorization(
+  const sig = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
@@ -19,7 +19,7 @@ export const setChangeKeyid = async (
     changeKeyId,
     redeemType
   );
-  const keyData = changeKeyId + signature;
+  const keyData = changeKeyId + sig.signature;
   await apdu.tx.setChangeKeyId(transport, keyData, redeemType);
 
 
