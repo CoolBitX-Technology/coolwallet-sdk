@@ -53,6 +53,10 @@ export default class CoolWallet {
     return creation.createWallet(this.transport, this.appId, this.appPrivateKey, strength);
   }
 
+  async createSeedByApp(strength, randomBytes) {
+    return creation.createSeedByApp(this.transport, strength, randomBytes);
+  }
+
   async sendCheckSum(sum) {
     return creation.sendCheckSum(this.transport, sum);
   }
@@ -60,4 +64,20 @@ export default class CoolWallet {
   async setSeed(seedHex) {
     return creation.setSeed(this.transport, this.appId, this.appPrivateKey, seedHex);
   }
+
+  async initSecureRecovery(strength) {
+    return creation.initSecureRecovery(this.transport, strength);
+  }
+
+  async setSecureRecveryIdx(index) {
+    return creation.setSecureRecveryIdx(this.transport, index);
+  }
+
+  async cancelSecureRecovery(type) {
+    return creation.cancelSecureRecovery(this.transport, type);
+  }
 }
+
+
+
+
