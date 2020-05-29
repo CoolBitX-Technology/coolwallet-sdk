@@ -306,13 +306,12 @@ export default {
     P1: '00',
     P2: '00'
   },
-<<<<<<< HEAD
   SC_SEND_SEGMENT: {
     CLA: '80',
     INS: 'CC',
     P1: null,
     P2: null
-=======
+  },
   MCU_SET_MNEMONIC_INFO: {
     CLA: "7F",
     INS: "10",
@@ -330,6 +329,11 @@ export default {
     INS: "12",
     P1: null,
     P2: "00"
->>>>>>> add method 'create by app', 'secure recover'
+  },
+  GET_MCU_STATUS: {
+    CLA: "7F",
+    INS: "13",
+    P1: "00",
+    P2: "00"
   }
 };

@@ -1,6 +1,6 @@
 import { apdu } from '@coolwallets/core';
 import * as pairing from '../pairing.js';
-import * as creation from '../create.js';
+import { recovery, creation} from '../create.js';
 import * as setting from '../settings.js';
 
 export default class CoolWallet {
@@ -65,16 +65,24 @@ export default class CoolWallet {
     return creation.setSeed(this.transport, this.appId, this.appPrivateKey, seedHex);
   }
 
+  async setSeed(seedHex) {
+    return recovery.setSeed(this.transport, this.appId, this.appPrivateKey, seedHex);
+  }
+
   async initSecureRecovery(strength) {
-    return creation.initSecureRecovery(this.transport, strength);
+    return recovery.initSecureRecovery(this.transport, strength);
   }
 
   async setSecureRecveryIdx(index) {
-    return creation.setSecureRecveryIdx(this.transport, index);
+    return recovery.setSecureRecveryIdx(this.transport, index);
   }
 
   async cancelSecureRecovery(type) {
-    return creation.cancelSecureRecovery(this.transport, type);
+    return recovery.cancelSecureRecovery(this.transport, type);
+  }
+
+  async getSecureRecoveryStatus() {
+    return recovery.getSecureRecoveryStatus(this.transport);
   }
 }
 
