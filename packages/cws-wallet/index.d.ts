@@ -20,6 +20,10 @@ declare module '@coolwallets/wallet' {
       createWallet(strength: number): Promise<boolean>
       sendCheckSum(sumOfSeed: number): Promise<boolean>
       setSeed(seedHex: string): Promise<string>
+      initSecureRecovery(strength: number): object
+      setSecureRecoveryIdx(index: number): object
+      cancelSecureRecovery(type: number): object
+      getSecureRecoveryStatus(): object
     }
   }
   
