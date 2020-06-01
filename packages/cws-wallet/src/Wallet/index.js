@@ -73,8 +73,8 @@ export default class CoolWallet {
     return recovery.initSecureRecovery(this.transport, strength);
   }
 
-  async setSecureRecveryIdx(index) {
-    return recovery.setSecureRecveryIdx(this.transport, index);
+  async setSecureRecoveryIdx(index) {
+    return recovery.setSecureRecoveryIdx(this.transport, index);
   }
 
   async cancelSecureRecovery(type) {

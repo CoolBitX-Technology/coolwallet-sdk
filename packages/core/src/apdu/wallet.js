@@ -58,7 +58,7 @@ export const initSecureRecovery = async (transport, P1) => {
  * @param {Transport} transport
  * @param {string} P1 
  */
-export const setSecureRecveryIdx = async (transport, P1) => {
+export const setSecureRecoveryIdx = async (transport, P1) => {
   const { status } = await executeCommand(transport, 'MCU_SET_CHARACTER_ID', 'SE', null, P1, null);
   return status === RESPONSE.SUCCESS;
 };

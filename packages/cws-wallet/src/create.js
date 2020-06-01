@@ -92,9 +92,9 @@ async function initSecureRecovery (transport, strength) {
  * @param {Transport} transport
  * @param {number} index 
  */
-async function setSecureRecveryIdx(transport, index) {
+async function setSecureRecoveryIdx(transport, index) {
   const P1 = index.toString(16).padStart(2, '0'); 
-  return apdu.wallet.setSecureRecveryIdx(transport, P1);
+  return apdu.wallet.setSecureRecoveryIdx(transport, P1);
 };
 
 /**
@@ -124,4 +124,4 @@ async function getSecureRecoveryStatus(transport){
 
 
 export let creation = { createWallet, sendCheckSum, setSeed, createSeedByApp };
-export let recovery = { setSeed, initSecureRecovery, setSecureRecveryIdx, cancelSecureRecovery, getSecureRecoveryStatus };
+export let recovery = { setSeed, initSecureRecovery, setSecureRecoveryIdx, cancelSecureRecovery, getSecureRecoveryStatus };
