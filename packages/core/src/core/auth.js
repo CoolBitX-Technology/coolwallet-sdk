@@ -43,7 +43,8 @@ export const getCommandSignature = async (
 
   // Return AppId with padded signature: Dont need to call [say hi].
   // the following operaion is forced to used Secure Channel
-  const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
+  // const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
+  const appIdWithSignature = signature.padStart(144, '0'); // Pad to 72B
   return { signature: appIdWithSignature, forceUseSC };
 };
 
