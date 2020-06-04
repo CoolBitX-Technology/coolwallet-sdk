@@ -22,7 +22,8 @@ export const getCommandSignature = async (
   commandName,
   data,
   params1,
-  params2
+  params2,
+  createWallet
 ) => {
   const nonce = await control.getNonce(transport);
 
@@ -41,10 +42,16 @@ export const getCommandSignature = async (
     return { signature, forceUseSC };
   } // return [appId(20B)] [rightJustifiedSignature(72B)]
 
+  // v200 create wallet by card can not Secure Channel so forceUseSC = false
+  // v200 signature = [apduData(Variety)][appId(20B)[rightJustifiedSignature(72B)]
+  const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
+  if (createWallet) {
+    return { signature: appIdWithSignature, forceUseSC: false };
+  }
+
   // Return AppId with padded signature: Dont need to call [say hi].
   // the following operaion is forced to used Secure Channel
   // const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
-  const appIdWithSignature = signature.padStart(144, '0'); // Pad to 72B
   return { signature: appIdWithSignature, forceUseSC };
 };
 
