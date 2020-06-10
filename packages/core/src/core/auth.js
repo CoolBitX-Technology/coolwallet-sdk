@@ -23,7 +23,7 @@ export const getCommandSignature = async (
   data,
   params1,
   params2,
-  createWallet
+  isCreateWallet
 ) => {
   const nonce = await control.getNonce(transport);
 
@@ -45,7 +45,7 @@ export const getCommandSignature = async (
   // v200 create wallet by card can not Secure Channel so forceUseSC = false
   // v200 signature = [apduData(Variety)][appId(20B)[rightJustifiedSignature(72B)]
   const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
-  if (createWallet) {
+  if (isCreateWallet) {
     return { signature: appIdWithSignature, forceUseSC: false };
   }
 
