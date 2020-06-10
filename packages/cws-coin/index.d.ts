@@ -1,4 +1,4 @@
-import Transport from '@coolwallets/transport'
+//import Transport from '@coolwallets/transport'
 
 declare module '@coolwallets/coin' {
   type Transport = import('@coolwallets/transport').default;
@@ -29,6 +29,6 @@ declare module '@coolwallets/coin' {
 
     constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string);
 
-    getPublicKey(addressIndex: number, protocol:string): Promise<string>;
+    getPublicKey(addressIndex: number, protocol: string): Promise<string>;
   }
 }

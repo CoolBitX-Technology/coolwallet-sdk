@@ -83,6 +83,12 @@ export default {
     P1: '00',
     P2: '00'
   },
+  EXECUTE_UTXO_SCRIPT: {
+    CLA: '80',
+    INS: 'A4',
+    P1: '00',
+    P2: '00'
+  },
   GET_SIGNED_HEX: {
     CLA: '80',
     INS: 'A6',

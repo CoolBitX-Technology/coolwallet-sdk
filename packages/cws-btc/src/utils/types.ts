@@ -5,22 +5,22 @@ export enum ScriptType {
 }
 
 export type Input = {
-  preTxHash: string,
-  preIndex: number,
-  preValue: string,
-  sequence?: number,
-  addressIndex: number,
+	preTxHash: string,
+	preIndex: number,
+	preValue: string,
+	sequence?: number,
+	addressIndex: number,
 	pubkeyBuf?: Buffer,
 };
 
 export type Output = {
-  value: string,
-  address: string,
+	value: string,
+	address: string,
 };
 
 export type Change = {
-  value: string,
-  addressIndex: number,
+	value: string,
+	addressIndex: number,
 	pubkeyBuf?: Buffer,
 };
 
