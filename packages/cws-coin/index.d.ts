@@ -1,4 +1,4 @@
-import Transport from '@coolwallets/transport'
+
 
 declare module '@coolwallets/coin' {
   type Transport = import('@coolwallets/transport').default;
