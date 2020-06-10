@@ -21,7 +21,10 @@ async function createWallet(transport, appId, appPrivateKey, strength) {
     appId,
     appPrivateKey,
     'CREATE_WALLET',
-    strengthHex
+    strengthHex,
+    null,
+    null,
+    true
   );
   const strengthWithSig = strengthHex + signature;
   return apdu.wallet.createWallet(transport, strengthWithSig, forceUseSC);
