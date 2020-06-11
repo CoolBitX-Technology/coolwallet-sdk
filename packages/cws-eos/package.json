@@ -22,7 +22,6 @@
   "author": "anton@coolbitx.com",
   "license": "ISC",
   "dependencies": {
-    "@coolwallets/coin": "^0.1.0",
     "@coolwallets/core": "0.0.19",
     "@coolwallets/transport": "^0.0.10",
     "bigi": "^1.4.2",

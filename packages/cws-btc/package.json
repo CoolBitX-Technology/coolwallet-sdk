@@ -33,7 +33,6 @@
     "jest": "^26.0.1"
   },
   "dependencies": {
-    "@coolwallets/coin": "0.2.0-beta.1",
     "@coolwallets/core": "0.2.0-beta.1",
     "@coolwallets/transport": "0.0.10",
     "@types/bn.js": "^4.11.6",
