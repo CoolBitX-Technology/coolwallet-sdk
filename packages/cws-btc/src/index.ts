@@ -1,5 +1,5 @@
 import { core, apdu } from '@coolwallets/core';
-import { ECDSACoin } from '@coolwallets/coin';
+import { ECDSACoin } from '@coolwallets/core';
 import {
 	ScriptType,
 	Input,

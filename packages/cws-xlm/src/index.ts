@@ -1,4 +1,4 @@
-import { EDDSACoin } from '@coolwallets/coin';
+import { EDDSACoin } from '@coolwallets/core';
 import { SDKError } from '@coolwallets/errors';
 import { pubKeyToAddress } from './utils';
 import signTx from './sign';

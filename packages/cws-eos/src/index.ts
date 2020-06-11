@@ -1,4 +1,4 @@
-import { ECDSACoin } from '@coolwallets/coin';
+import { ECDSACoin } from '@coolwallets/core';
 import signTransfer from './sign';
 
 type Transport = import('@coolwallets/transport').default;

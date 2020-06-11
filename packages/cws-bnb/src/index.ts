@@ -1,4 +1,4 @@
-import { ECDSACoin } from '@coolwallets/coin';
+import { ECDSACoin } from '@coolwallets/core';
 import signTransaction from './sign';
 import { publicKeyToAddress } from './util';
 

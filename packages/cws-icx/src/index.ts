@@ -1,4 +1,4 @@
-import { ECDSACoin } from '@coolwallets/coin';
+import { ECDSACoin } from '@coolwallets/core';
 import * as icxSign from './sign';
 import { pubKeyToAddress } from './util';
 

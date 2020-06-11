@@ -1,6 +1,11 @@
 import * as derivation from './derive';
 
 export default class EDDSACoin {
+
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  coinType: string;
   constructor(transport, appPrivateKey, appId, coinType) {
     this.transport = transport;
     this.appPrivateKey = appPrivateKey;

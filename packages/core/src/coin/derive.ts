@@ -1,4 +1,4 @@
-import { core, apdu, crypto } from "@coolwallets/core";
+import { core, apdu, crypto } from "../index";
 
 const bip32 = require("bip32");
 
@@ -7,7 +7,8 @@ const authGetKey = async (transport, appId, appPrivateKey) => {
     transport,
     appId,
     appPrivateKey,
-    "AUTH_EXT_KEY"
+    "AUTH_EXT_KEY",
+    null, null, null, null
   );
   return apdu.coin.authGetExtendedKey(transport, signature, forceUseSC);
 };
@@ -40,6 +41,7 @@ export const getAccountExtKey = async (
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
   if (!decryptedData) throw Error("Decryption Failed");
 
+  // TODO
   const accBuf = Buffer.from(decryptedData, "hex");
   const publicKey = accBuf.slice(0, 33);
   const chainCode = accBuf.slice(33);
