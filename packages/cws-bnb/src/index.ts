@@ -1,4 +1,4 @@
-import { ECDSACoin } from '@coolwallets/core';
+import { coin as COIN } from '@coolwallets/core';
 import signTransaction from './sign';
 import { publicKeyToAddress } from './util';
 
@@ -8,7 +8,7 @@ type Transfer = import('./types').Transfer;
 type PlaceOrder = import('./types').PlaceOrder;
 type CancelOrder = import('./types').CancelOrder;
 
-export default class BNB extends ECDSACoin {
+export default class BNB extends COIN.ECDSACoin {
   constructor(transport: Transport, appPrivateKey: string, appId: string) {
     super(transport, appPrivateKey, appId, 'CA');
   }

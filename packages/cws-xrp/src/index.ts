@@ -1,11 +1,11 @@
-import { ECDSACoin } from "@coolwallets/coin";
+import { coin as COIN } from "@coolwallets/core";
 import * as xrpSign from "./sign";
 import * as xrpUtil from "./util";
 
 type Transport = import("@coolwallets/transport").default;
 type Payment = import("./types").Payment;
 
-export default class XRP extends ECDSACoin {
+export default class XRP extends COIN.ECDSACoin {
   constructor(transport: Transport, appPrivateKey: string, appId: string) {
     super(transport, appPrivateKey, appId, "90");
   }

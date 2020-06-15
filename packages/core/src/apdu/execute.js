@@ -1,4 +1,4 @@
-import { OperationCanceled, NoTransport } from '@coolwallets/errors';
+import { OperationCanceled, NoTransport } from '../error/index';
 import COMMAND from '../config/command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';

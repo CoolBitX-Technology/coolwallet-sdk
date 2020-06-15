@@ -1,10 +1,10 @@
-import { ECDSACoin } from '@coolwallets/core';
+import { coin as COIN } from '@coolwallets/core';
 import signTransfer from './sign';
 
 type Transport = import('@coolwallets/transport').default;
 type Transaction = import('./types').Transaction;
 
-export default class EOS extends ECDSACoin {
+export default class EOS extends COIN.ECDSACoin {
   public chainId: string;
 
   constructor(

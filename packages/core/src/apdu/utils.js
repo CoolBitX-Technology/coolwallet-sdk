@@ -1,4 +1,4 @@
-import * as Errors from '@coolwallets/errors';
+import {error as Errors} from '../index' ;
 
 const getCheckSum = (data) => {
   let XORTemp = 0;

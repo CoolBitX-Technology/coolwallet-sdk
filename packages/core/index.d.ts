@@ -280,33 +280,48 @@ declare module '@coolwallets/core' {
 		}
 	}
 
-	export class ECDSACoin {
-		public transport: Transport;
+	export namespace coin {
+		export class ECDSACoin {
+			public transport: Transport;
 
-		public appId: string;
+			public appId: string;
 
-		public appPrivateKey: string;
+			public appPrivateKey: string;
 
-		public coinType: string;
+			public coinType: string;
 
-		constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string);
+			constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string);
 
-		getPublicKey(addressIndex: number): Promise<string>;
+			getPublicKey(addressIndex: number): Promise<string>;
 
-		getBIP32NodeInfo(): Promise<{ parentPublicKey: string; parentChainCode: string }>;
+			getBIP32NodeInfo(): Promise<{ parentPublicKey: string; parentChainCode: string }>;
+		}
+
+		export class EDDSACoin {
+			public transport: Transport;
+
+			public appId: string;
+
+			public appPrivateKey: string;
+
+			public coinType: string;
+
+			constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string);
+
+			getPublicKey(addressIndex: number, protocol:string): Promise<string>;
+		}
 	}
 
-	export class EDDSACoin {
-		public transport: Transport;
+	export namespace error {
+		export class SDKError {
+			public name: string
+			constructor(name: string, message: string);
+		}
 
-		public appId: string;
+		
 
-		public appPrivateKey: string;
-
-		public coinType: string;
-
-		constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string);
-
-		getPublicKey(addressIndex: number, protocol: string): Promise<string>;
+		
 	}
+	
+
 }

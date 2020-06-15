@@ -1,4 +1,3 @@
-// import Errors from '@coolwallets/errors';
 import { executeCommand } from './execute';
 import { RESPONSE } from '../config/response';
 /**
