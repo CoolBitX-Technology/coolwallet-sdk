@@ -1,8 +1,7 @@
-import { coin as COIN } from '@coolwallets/core';
+import { coin as COIN, Transport} from '@coolwallets/core';
 import signTransaction from './sign';
 import { publicKeyToAddress } from './util';
 
-type Transport = import('@coolwallets/transport').default;
 
 type Transfer = import('./types').Transfer;
 type PlaceOrder = import('./types').PlaceOrder;

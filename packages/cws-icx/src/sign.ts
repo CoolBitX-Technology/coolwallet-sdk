@@ -1,7 +1,7 @@
-import { core } from '@coolwallets/core';
+import { core, Transport } from '@coolwallets/core';
 import * as icxUtil from './util';
 
-type Transport = import('@coolwallets/transport').default;
+// type Transport = import('@coolwallets/transport').default;
 
 /**
  * Sign ICON Transaction
@@ -34,6 +34,7 @@ export default async function signTransaction (
     authorizedCB,
     true
   );
+  
 
   const txObject = await icxUtil.generateRawTx(signature, rawTx, publicKey);
   return txObject;

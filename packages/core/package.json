@@ -10,7 +10,6 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@coolwallets/transport": "^0.0.10",
     "bip66": "^1.1.5",
     "key-encoder": "^2.0.3",
     "rlp": "^2.2.3",
@@ -26,6 +25,8 @@
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
-    "@babel/preset-env": "^7.7.1"
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "@babel/plugin-proposal-class-properties": "^7.7.0"
   }
 }

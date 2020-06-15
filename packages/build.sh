@@ -1,9 +1,5 @@
 set -e
 
-cd transport
-npm link
-cd ..
-
 cd core
 npm link
 npm run-script build
@@ -30,7 +26,7 @@ npm run-script build
 cd ..
 
 cd cws-icx
-npm link @coolwallets/core @coolwallets/transport
+npm link @coolwallets/core
 npm run-script build
 cd ..
 
@@ -47,8 +43,22 @@ npm run-script build
 cd ..
 
 cd cws-xrp
+npm link @coolwallets/core
 npm run-script build
 cd ..
 
+cd transport-react-native-ble
+npm link @coolwallets/core
+npm install
+npm link @coolwallets/core
+npm run-script build
+cd ..
+
+cd transport-web-ble
+npm link @coolwallets/core
+npm install
+npm link @coolwallets/core
+npm run-script build
+cd ..
 
 

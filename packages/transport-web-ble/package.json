@@ -17,8 +17,7 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
   },
   "dependencies": {
-    "@coolwallets/devices": "0.0.12",
-    "@coolwallets/transport": "0.0.9"
+    "@coolwallets/core": "0.2.0-beta.1"
   },
   "devDependencies": {
     "@babel/core": "^7.7.2",

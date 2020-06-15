@@ -28,7 +28,6 @@ module.exports = {
   },
   externals: {
     '@coolwallets/core': '@coolwallets/core',
-    '@coolwallets/coin': '@coolwallets/coin',
     web3: 'web3',
     rlp: 'rlp',
     elliptic: 'elliptic',

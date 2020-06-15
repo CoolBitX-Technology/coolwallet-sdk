@@ -1,8 +1,8 @@
-import { coin as COIN, error as ERROR } from '@coolwallets/core';
+import { coin as COIN, error as ERROR, Transport } from '@coolwallets/core';
 import { pubKeyToAddress } from './utils';
 import signTx from './sign';
 
-type Transport = import('@coolwallets/transport').default;
+// type Transport = import('@coolwallets/transport').default;
 type protocol = import('./types').protocol
 
 export default class XLM extends COIN.EDDSACoin {

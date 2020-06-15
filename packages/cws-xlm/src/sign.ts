@@ -1,6 +1,6 @@
-import { core } from '@coolwallets/core';
+import { core, Transport } from '@coolwallets/core';
 
-type Transport = import('@coolwallets/transport').default;
+// type Transport = import('@coolwallets/transport').default;
 type protocol = import('./types').protocol
 
 const accountIndexToKeyId = (coinType:string, accountIndex:number) => {
@@ -38,6 +38,7 @@ export default async function signTransaction(
     authorizedCB,
     false,
   );
+  
 
   return <Buffer> signature;
 }

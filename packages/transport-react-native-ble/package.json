@@ -23,8 +23,7 @@
     "react-native-ble-plx": "^1.1.0"
   },
   "dependencies": {
-    "@coolwallets/devices": "^0.0.8",
-    "@coolwallets/transport": "^0.0.8",
+    "@coolwallets/core": "0.2.0-beta.1",
     "buffer": "^5.4.3"
   },
   "devDependencies": {
