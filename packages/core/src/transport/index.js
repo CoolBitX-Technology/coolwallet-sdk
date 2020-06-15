@@ -1,4 +1,4 @@
-import { sendAPDU } from '../index';
+import { sendAPDU } from '../device/ble/sendAPDU';
 
 export default class Transport {
   constructor(

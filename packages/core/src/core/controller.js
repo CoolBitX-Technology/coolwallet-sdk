@@ -1,4 +1,4 @@
-import { UnkownCommand } from '../index';
+import { UnkownCommand } from '../error/index';
 import * as apdu from '../apdu/index';
 
 /**
