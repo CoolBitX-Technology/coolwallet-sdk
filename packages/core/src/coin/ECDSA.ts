@@ -8,7 +8,7 @@ export default class ECDSACoin {
   accPublicKey: string;
   accChainCode: string;
   publicKeys: object;
-  constructor(transport, appPrivateKey, appId, coinType) {
+  constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string) {
     this.transport = transport;
     this.appPrivateKey = appPrivateKey;
     this.appId = appId;
@@ -25,7 +25,7 @@ export default class ECDSACoin {
    * @param {Number} addressIndex address index in BIP44 pointing to the target public key.
    * @returns {Promise < string >}
    */
-  async getPublicKey(addressIndex) {
+  async getPublicKey(addressIndex: number) {
     if (this.accPublicKey === '' || this.accChainCode === '') {
       const { accountPublicKey, accountChainCode } = await derivation.getAccountExtKey(
         this.transport,
