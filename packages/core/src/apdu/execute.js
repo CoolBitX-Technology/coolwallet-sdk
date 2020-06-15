@@ -1,4 +1,4 @@
-import { OperationCanceled, NoTransport } from '../error/index';
+import { OperationCanceled, NoTransport } from '../index';
 import COMMAND from '../config/command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';
