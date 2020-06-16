@@ -3,6 +3,7 @@ import COMMAND from '../config/command';
 import { sign } from '../crypto/sign';
 import { control, setting } from '../apdu/index';
 import { checkSupportScripts } from './controller';
+import Transport from '../transport';
 
 /**
  * Get Command signature to append to some specific APDU commands.
@@ -16,14 +17,14 @@ import { checkSupportScripts } from './controller';
  * @returns {Promise<{signature: string, forceUseSC: boolean}>}
  */
 export const getCommandSignature = async (
-  transport,
-  appId,
-  appPrivateKey,
-  commandName,
-  data,
-  params1,
-  params2,
-  isCreateWallet
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  commandName: string,
+  data: string,
+  params1: string | undefined,
+  params2: string | undefined,
+  isCreateWallet: boolean = false
 ) => {
   const nonce = await control.getNonce(transport);
 
@@ -61,7 +62,7 @@ export const getCommandSignature = async (
  * @param {number} requiredSEVersion
  * @return {Promise<void>}
  */
-export const versionCheck = async (transport, requiredSEVersion) => {
+export const versionCheck = async (transport: Transport, requiredSEVersion: number) => {
   const SEVersion = await setting.getSEVersion(transport);
   if (SEVersion < requiredSEVersion) throw new FirmwareVersionTooLow(requiredSEVersion);
 };

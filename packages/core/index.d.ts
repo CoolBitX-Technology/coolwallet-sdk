@@ -112,6 +112,16 @@ declare module '@coolwallets/core' {
 			): Promise<
 				string
 			>;
+
+			export function prepTx(
+				transport: transport,
+				payload: string,
+				P1: string,
+				P2: string
+			): Promise<
+				string
+			>;
+
 		}
 	}
 
@@ -310,6 +320,11 @@ declare module '@coolwallets/core' {
 
 			getPublicKey(addressIndex: number, protocol:string): Promise<string>;
 		}
+		export interface Coin {
+			getAddress: Function;
+			signTransaction: Function;
+		}
+
 	}
 
 	export namespace error {

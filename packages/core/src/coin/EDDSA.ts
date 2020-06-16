@@ -1,4 +1,5 @@
 import * as derivation from './derive';
+import Transport from "../transport";
 
 export default class EDDSACoin {
 

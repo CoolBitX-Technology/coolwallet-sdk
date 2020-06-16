@@ -1,6 +1,7 @@
 import * as rlp from 'rlp';
 import * as txUtil from './txUtil';
 import { sayHi } from '../apdu/control';
+import Transport from "../transport";
 
 /**
  * @description Prepare RLP Data for CoolWallet
@@ -9,7 +10,7 @@ import { sayHi } from '../apdu/control';
  * @param {String} readType
  * @return {String} Hex input data for 8032 txPrep
  */
-export const prepareSEData = (keyId, rawData, readType) => {
+export const prepareSEData = (keyId: string, rawData: Buffer | Array<Buffer>, readType: string): string => {
 	const inputIdBuffer = Buffer.from('00', 'hex');
 	const signDataBuffer = Buffer.from('00', 'hex');
 	const readTypeBuffer = Buffer.from(readType, 'hex');
@@ -33,15 +34,15 @@ export const prepareSEData = (keyId, rawData, readType) => {
  * @param {boolean} return_canonical
  */
 export const sendScriptAndDataToCard = async (
-  transport,
-  appId,
-  appPrivateKey,
-  script,
-  argument,
-  isEDDSA = false,
-  txPrepareComplteCallback = null,
-  authorizedCallback = null,
-  return_canonical = true
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  script: string,
+  argument: string,
+  isEDDSA: boolean = false,
+  txPrepareComplteCallback: Function | undefined = undefined,
+  authorizedCallback: Function | undefined = undefined,
+  return_canonical: boolean = true
 ) => {
   const encryptedSignature = await txUtil.getEncryptedSignatureByScripts(
     transport,
@@ -71,16 +72,16 @@ export const sendScriptAndDataToCard = async (
  * @return {Promise< {r: string, s: string} | Buffer >}
  */
 export const sendDataToCoolWallet = async (
-  transport,
-  appId,
-  appPrivateKey,
-  txDataHex,
-  txDataType,
-  isEDDSA = false,
-  preAction = null,
-  txPrepareCompleteCallback = null,
-  authorizedCallback = null,
-  returnCanonical = true
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  txDataHex: string,
+  txDataType: string,
+  isEDDSA: boolean = false,
+  preAction: Function | undefined = undefined,
+  txPrepareCompleteCallback: Function | undefined = undefined,
+  authorizedCallback: Function | undefined = undefined,
+  returnCanonical: boolean = true
 ) => {
   await sayHi(transport, appId);
 
@@ -118,15 +119,15 @@ export const sendDataToCoolWallet = async (
  * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
 export const sendBatchDataToCoolWallet = async (
-  transport,
-  appId,
-  appPrivateKey,
-  preActions,
-  actions,
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  preActions: Array<Function>,
+  actions: Array<Function>,
   isEDDSA = false,
-  txPrepareCompleteCallback = null,
-  authorizedCallback = null,
-  returnCanonical = true
+  txPrepareCompleteCallback: Function | undefined = undefined,
+  authorizedCallback: Function | undefined = undefined,
+  returnCanonical: boolean = true
 ) => {
   await sayHi(transport, appId);
 

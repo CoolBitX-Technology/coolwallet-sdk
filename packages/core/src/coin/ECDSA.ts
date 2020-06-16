@@ -1,4 +1,5 @@
 import * as derivation from './derive';
+import Transport from "../transport";
 
 export default class ECDSACoin {
   transport: Transport;
@@ -7,7 +8,7 @@ export default class ECDSACoin {
   coinType: string;
   accPublicKey: string;
   accChainCode: string;
-  publicKeys: object;
+  publicKeys: any;
   constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string) {
     this.transport = transport;
     this.appPrivateKey = appPrivateKey;

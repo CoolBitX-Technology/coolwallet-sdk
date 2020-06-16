@@ -4,6 +4,7 @@ import * as signatureTools from "../crypto/signature";
 import COMMAND from "../config/command";
 import * as apdu from "../apdu/index";
 import { getCommandSignature } from "./auth";
+import Transport from "../transport";
 
 /**
  * get command signature for CoolWalletS
@@ -12,7 +13,7 @@ import { getCommandSignature } from "./auth";
  * @param {String} appPrivateKey
  * @return {String} signature
  */
-const signForCoolWallet = (txDataHex, txDataType, appPrivateKey) => {
+const signForCoolWallet = (txDataHex: string, txDataType: string, appPrivateKey: string) => {
   const command = COMMAND.TX_PREPARE;
   const P1 = txDataType;
   const P2 = "00";
@@ -23,12 +24,12 @@ const signForCoolWallet = (txDataHex, txDataType, appPrivateKey) => {
 };
 
 export const getEncryptedSignatureByScripts = async (
-  transport,
-  appId,
-  appPrivKey,
-  script,
-  argument,
-  txPrepareComplteCallback = null
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  script: string,
+  argument: string,
+  txPrepareComplteCallback: Function | undefined = undefined
 ) => {
   await apdu.tx.sendScript(transport, script);
   const { signature } = await getCommandSignature(
@@ -37,8 +38,8 @@ export const getEncryptedSignatureByScripts = async (
     appPrivKey,
     "EXECUTE_SCRIPT",
     argument,
-    null,
-    null
+    undefined,
+    undefined
   );
   const encryptedSignature = await apdu.tx.executeScript(
     transport,
@@ -58,7 +59,7 @@ export const getEncryptedSignatureByScripts = async (
  * @param {String} txDataHex hex string data for SE
  * @param {String} txDataType hex P1 string
  */
-export const prepareOutputData = async (transport, txDataHex, txDataType) => {
+export const prepareOutputData = async (transport: Transport, txDataHex: string, txDataType: string) => {
   await apdu.tx.prepTx(transport, txDataHex, txDataType, "00");
 };
 
@@ -71,10 +72,10 @@ export const prepareOutputData = async (transport, txDataHex, txDataType) => {
  * @return {String} signature
  */
 export const prepareTx = async (
-  transport,
-  txDataHex,
-  txDataType,
-  appPrivateKey
+  transport: Transport,
+  txDataHex: string,
+  txDataType: string,
+  appPrivateKey: string
 ) => {
   let encryptedSignature;
   const sendData =
@@ -104,11 +105,11 @@ export const prepareTx = async (
  * @returns {Promise<String>} encryptedSignature
  */
 export const getSingleEncryptedSignature = async (
-  transport,
-  txDataHex,
-  txDataType,
-  appPrivateKey,
-  txPrepareCompleteCallback = null
+  transport: Transport,
+  txDataHex: string,
+  txDataType: string,
+  appPrivateKey: string,
+  txPrepareCompleteCallback: Function | undefined = undefined
 ) => {
   const encryptedSignature = await prepareTx(
     transport,
@@ -131,10 +132,10 @@ export const getSingleEncryptedSignature = async (
  * @returns {Promise<Array<String>>} array of encryptedSignature
  */
 export const getEncryptedSignatures = async (
-  transport,
-  preActions,
-  actions,
-  txPrepareCompleteCallback = null
+  transport: Transport,
+  preActions: Array<Function>,
+  actions: Array<Function>,
+  txPrepareCompleteCallback: Function | undefined = undefined
 ) => {
   // eslint-disable-next-line no-await-in-loop
   for (const preAction of preActions) await preAction();
@@ -153,7 +154,7 @@ export const getEncryptedSignatures = async (
  * @param {Function} authorizedCallback
  * @returns {Promise<String>}
  */
-export const getCWSEncryptionKey = async (transport, authorizedCallback) => {
+export const getCWSEncryptionKey = async (transport: Transport, authorizedCallback: Function | undefined) => {
   const success = await apdu.tx.getTxDetail(transport);
   if (!success) return undefined;
 
@@ -175,10 +176,10 @@ export const getCWSEncryptionKey = async (transport, authorizedCallback) => {
  * @return {{r:string, s:string} | Buffer } canonical or DER signature
  */
 export const decryptSignatureFromSE = (
-  encryptedSignature,
-  signatureKey,
-  isEDDSA = false,
-  returnCanonical = true
+  encryptedSignature: string,
+  signatureKey: string,
+  isEDDSA: boolean = false,
+  returnCanonical: boolean = true
 ) => {
   const iv = Buffer.alloc(16);
   iv.fill(0);
@@ -199,9 +200,9 @@ export const decryptSignatureFromSE = (
 
 /**
  * @param {String} coinType
- * @param {String} Number
+ * @param {String} addressIndex
  */
-export const addressIndexToKeyId = (coinType, addressIndex) => {
+export const addressIndexToKeyId = (coinType: string, addressIndex: number) => {
   const indexHex = addressIndex.toString(16).padStart(4, "0");
   const keyId = `${coinType}0000${indexHex}`;
   return keyId;

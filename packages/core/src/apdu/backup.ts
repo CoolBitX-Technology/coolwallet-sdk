@@ -1,5 +1,6 @@
 import { executeCommand } from './execute';
 import { RESPONSE } from '../config/response';
+import Transport from '../transport';
 
 /**
  * backup seed in SE.
@@ -7,7 +8,7 @@ import { RESPONSE } from '../config/response';
  * @param {string} signedCommand
  * @return {Promise<boolean>}
  */
-export const backupSeed = async (transport, signedCommand) => {
+export const backupSeed = async (transport: Transport, signedCommand: string) => {
   const { status } = await executeCommand(transport, 'BACKUP_REGISTER_DATA', 'SE', signedCommand);
   return status === RESPONSE.SUCCESS;
 };

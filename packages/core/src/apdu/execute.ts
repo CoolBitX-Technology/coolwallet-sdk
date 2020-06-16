@@ -3,6 +3,7 @@ import COMMAND from '../config/command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';
 import { SHA256 } from '../crypto/hash';
+import Transport from '../transport';
 
 
 /**
@@ -11,7 +12,7 @@ import { SHA256 } from '../crypto/hash';
  * @param {{command:string, data:string}} apdu
  * @param {string} commandType SE or MCU
  */
-const executeAPDU = async (commandName, transport, apdu, commandType) => {
+const executeAPDU = async (commandName: string, transport: Transport, apdu: { command: string, data: string }, commandType: string): Promise<{ status: string, outputData: string }> => {
   if (typeof transport.request !== 'function') throw new NoTransport();
   const response = await transport.request(apdu.command, apdu.data);
   if (commandType === 'SE') {
@@ -38,10 +39,10 @@ const executeAPDU = async (commandName, transport, apdu, commandType) => {
  * @returns {Promise<{status: string, outputData: string}>}
  */
 export const executeCommand = async (
-  transport, commandName, commandType = 'SE', data, params1, params2,
-  supportSC = false,
-  forceUseSC = false,
-) => {
+  transport: Transport, commandName: string, commandType: string = 'SE', data: string, params1: string, params2: string,
+  supportSC: boolean = false,
+  forceUseSC: boolean = false,
+): Promise<{ status: string, outputData: string }> => {
   const commandParams = COMMAND[commandName];
 
   const P1 = params1 || commandParams.P1;

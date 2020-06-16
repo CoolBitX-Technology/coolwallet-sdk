@@ -1,8 +1,9 @@
 import { core, apdu, crypto } from "../index";
+import Transport from "../transport";
 
 const bip32 = require("bip32");
 
-const authGetKey = async (transport, appId, appPrivateKey) => {
+const authGetKey = async (transport: Transport, appId: string, appPrivateKey: string) => {
   const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
@@ -22,11 +23,11 @@ const authGetKey = async (transport, appId, appPrivateKey) => {
  * @returns {Promise<{accountIndex:String, accountPublicKey:String, accountChainCode:String}>}
  */
 export const getAccountExtKey = async (
-  transport,
-  appId,
-  appPrivateKey,
-  coinSEType,
-  accIndex,
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  coinSEType: string,
+  accIndex: number,
   authFirst = true
 ) => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
@@ -41,7 +42,6 @@ export const getAccountExtKey = async (
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
   if (!decryptedData) throw Error("Decryption Failed");
 
-  // TODO
   const accBuf = Buffer.from(decryptedData, "hex");
   const publicKey = accBuf.slice(0, 33);
   const chainCode = accBuf.slice(33);
@@ -61,12 +61,12 @@ export const getAccountExtKey = async (
  * @return {Promise<Buffer>}
  */
 export const getEd25519PublicKey = async (
-  transport,
-  appId,
-  appPrivateKey,
-  coinSEType,
-  accountIndex,
-  protocol,
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  coinSEType: string,
+  accountIndex: number,
+  protocol: string,
   authFirst = true
 ) => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
@@ -90,8 +90,8 @@ export const getEd25519PublicKey = async (
  * @param {Number} addressIndex
  */
 export const derivePubKey = (
-  accountPublicKey,
-  chainCode,
+  accountPublicKey: string,
+  chainCode: string,
   changeIndex = 0,
   addressIndex = 0
 ) => {
