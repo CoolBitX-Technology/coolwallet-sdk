@@ -1,22 +1,22 @@
 declare module '@coolwallets/core' {
-	type Transport = import('@coolwallets/transport').default;
+	type transport = import('./src/transport/index').default;
 	export namespace apdu {
 		export namespace coin {
 			export function authGetExtendedKey(
-				transport: Transport,
+				transport: transport,
 				signature: string
 			): Promise<
 				string
 			>;
 			export function getAccountExtendedKey(
-				transport: Transport,
+				transport: transport,
 				coinType: string,
 				accIndex: string
 			): Promise<
 				string
 			>;
 			export function getEd25519AccountPublicKey(
-				transport: Transport,
+				transport: transport,
 				coinType: string,
 				accIndex: string,
 				protocol: string
@@ -27,23 +27,23 @@ declare module '@coolwallets/core' {
 
 		export namespace control {
 			export function sayHi(
-				transport: Transport,
+				transport: transport,
 				appId: string
 			): Promise<
 				Boolean
 			>;
 			export function getNonce(
-				transport: Transport
+				transport: transport
 			): Promise<
 				string
 			>;
 			export function cancelAPDU(
-				transport: Transport
+				transport: transport
 			): Promise<
 				void
 			>;
 			export function powerOff(
-				transport: Transport
+				transport: transport
 			): Promise<
 				void
 			>;
@@ -51,20 +51,20 @@ declare module '@coolwallets/core' {
 
 		export namespace pairing {
 			export function registerDevice(
-				transport: Transport,
+				transport: transport,
 				data: string,
 				P1: string
 			): Promise<
 				string
 			>;
 			export function getPairingPassword(
-				transport: Transport,
+				transport: transport,
 				data: string
 			): Promise<
 				string
 			>;
 			export function getPairedApps(
-				trasnport: Transport,
+				trasnport: transport,
 				signature: string
 			): Promise<
 				Array<{
@@ -73,13 +73,13 @@ declare module '@coolwallets/core' {
 				}>
 			>;
 			export function removePairedDevice(
-				trasnport: Transport,
+				trasnport: transport,
 				appIdWithSig: string
 			): Promise<
 				Boolean
 			>;
 			export function renameDevice(
-				trasnport: Transport,
+				trasnport: transport,
 				nameWithSig: string
 			): Promise<
 				Boolean
@@ -88,17 +88,17 @@ declare module '@coolwallets/core' {
 
 		export namespace setting {
 			export function resetCard(
-				transport: Transport
+				transport: transport
 			): Promise<
 				boolean
 			>;
 			export function getCardInfo(
-				transport: Transport
+				transport: transport
 			): Promise<
 				string
 			>;
 			export function getSEVersion(
-				transport: Transport
+				transport: transport
 			): Promise<
 				number
 			>;
@@ -106,7 +106,7 @@ declare module '@coolwallets/core' {
 
 		export namespace tx {
 			export function setChangeKeyId(
-				transport: Transport,
+				transport: transport,
 				pathWithSig: string,
 				redeemType: string
 			): Promise<
@@ -124,7 +124,7 @@ declare module '@coolwallets/core' {
 	export namespace core {
 		export namespace auth {
 			export function getCommandSignature(
-				transport: Transport,
+				transport: transport,
 				appId: string,
 				appPrivateKey: string,
 				commandName: string,
@@ -150,7 +150,7 @@ declare module '@coolwallets/core' {
 			>; */
 
 			export function versionCheck(
-				transport: Transport,
+				transport: transport,
 				requiredSEVersion: number
 			): Promise<
 				void
@@ -168,7 +168,7 @@ declare module '@coolwallets/core' {
 				readType: string
 			): string;
 			export function sendDataToCoolWallet(
-				transport: Transport,
+				transport: transport,
 				appId: String,
 				appPrivateKey: String,
 				txDataHex: String,
@@ -187,7 +187,7 @@ declare module '@coolwallets/core' {
 				| Buffer
 			>;
 			export function sendScriptAndDataToCard(
-				transport: Transport,
+				transport: transport,
 				appId: string,
 				appPrivateKey: string,
 				script: string,
@@ -200,7 +200,7 @@ declare module '@coolwallets/core' {
 				string
 			>;
 			export function sendBatchDataToCoolWallet(
-				transport: Transport,
+				transport: transport,
 				appId: String,
 				appPrivateKey: String,
 				preActions: Function[],
@@ -222,7 +222,7 @@ declare module '@coolwallets/core' {
 
 		export namespace util {
 			export function getEncryptedSignatures(
-				transport: Transport,
+				transport: transport,
 				TxpPrepCommands: Array<{
 					encodedData: String;
 					P1: String;
@@ -246,12 +246,12 @@ declare module '@coolwallets/core' {
         txPrepareCompleteCallback?: Function
       ): Promise<Array<string>>; */
 			export function prepareOutputData(
-				transport: Transport,
+				transport: transport,
 				txDataHex: string,
 				txDataType: string
 			): void;
 			export function prepareTx(
-				transport: Transport,
+				transport: transport,
 				txDataHex: string,
 				txDataType: string,
 				appPrivateKey: string
@@ -260,7 +260,7 @@ declare module '@coolwallets/core' {
 
 		export namespace controller {
 			export function checkSupportScripts(
-				transport: Transport
+				transport: transport
 			): Promise<
 				boolean
 			>;
@@ -279,4 +279,99 @@ declare module '@coolwallets/core' {
 			): Buffer;
 		}
 	}
+
+	export namespace coin {
+		export class ECDSACoin {
+			public transport: transport;
+
+			public appId: string;
+
+			public appPrivateKey: string;
+
+			public coinType: string;
+
+			constructor(transport: transport, appPrivateKey: string, appId: string, coinType: string);
+
+			getPublicKey(addressIndex: number): Promise<string>;
+
+			getBIP32NodeInfo(): Promise<{ parentPublicKey: string; parentChainCode: string }>;
+		}
+
+		export class EDDSACoin {
+			public transport: transport;
+
+			public appId: string;
+
+			public appPrivateKey: string;
+
+			public coinType: string;
+
+			constructor(transport: transport, appPrivateKey: string, appId: string, coinType: string);
+
+			getPublicKey(addressIndex: number, protocol:string): Promise<string>;
+		}
+	}
+
+	export namespace error {
+		export class SDKError {
+			public name: string
+			constructor(name: string, message: string);
+		}
+	}
+	export class Transport {
+		constructor(
+			device: any,
+			sendCommandToCard: Function,
+			sendDataToCard: Function,
+			checkCardStatus: Function,
+			readCharacteristic: Function)
+
+		static isSupported(): Promise<boolean>;
+
+		static listen(callback: (error: Error, device: any) => void): any;
+
+		static connect(deviceOrId: object | string): Promise<transport>;
+
+		static disconnect(deviceOrId: object | string): Promise<void>;
+
+		static setOnDisconnect(deviceOrId: object | string, onDisconnect: Function): void;
+
+		sendCommandToCard(command: number[]): Promise<void>;
+
+		sendDataToCard(packets: number[]): Promise<void>;
+
+		checkCardStatus(): Promise<number>;
+
+		readDataFromCard(): Promise<number[]>;
+	}
+	
+	export namespace device {
+		export type DeviceModelId = string;
+
+		export type DeviceModel = {
+			id: string,
+			productName: string,
+			bluetoothSpec?: Array<{
+				serviceUuid: string,
+				writeUuid: string,
+				dataUuid: string,
+				checkUuid: string,
+				readUuid: string
+			}>
+		};
+
+		export type BluetoothInfos = {
+			deviceModel: DeviceModel,
+			serviceUuid: string,
+			writeUuid: string,
+			dataUuid: string,
+			checkUuid: string,
+			readUuid: string
+		};
+
+		export function getBluetoothServiceUuids(): string[];
+
+		export function getInfosForServiceUuid(uuid: string): BluetoothInfos;
+	}
+
 }

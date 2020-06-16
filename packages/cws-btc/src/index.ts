@@ -1,5 +1,5 @@
-import { core, apdu } from '@coolwallets/core';
-import { ECDSACoin } from '@coolwallets/coin';
+import { core, apdu, coin as COIN, Transport } from '@coolwallets/core';
+import {  } from '@coolwallets/core';
 import {
 	ScriptType,
 	Input,
@@ -16,9 +16,9 @@ import { createUnsignedTransactions, composeFinalTransaction } from './btc_sign'
 // import * as common from './common';
 // import { BTC as BTCONFIG } from './constants';
 
-type Transport = import('@coolwallets/transport').default;
+// type Transport = import('@coolwallets/transport').default;
 
-export default class BTC extends ECDSACoin {
+export default class BTC extends COIN.ECDSACoin {
 	public network: any;
 
 	public ScriptType: any;

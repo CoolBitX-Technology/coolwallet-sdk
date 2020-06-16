@@ -1,4 +1,4 @@
-import { FirmwareVersionTooLow } from '@coolwallets/errors';
+import { FirmwareVersionTooLow } from '../error/index';
 import COMMAND from '../config/command';
 import { sign } from '../crypto/sign';
 import { control, setting } from '../apdu/index';

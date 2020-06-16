@@ -1,4 +1,4 @@
-import { sendAPDU } from '@coolwallets/devices/ble/sendAPDU';
+import { sendAPDU } from '../device/ble/sendAPDU';
 
 export default class Transport {
   constructor(

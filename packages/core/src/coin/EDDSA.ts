@@ -1,7 +1,12 @@
 import * as derivation from './derive';
 
 export default class EDDSACoin {
-  constructor(transport, appPrivateKey, appId, coinType) {
+
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  coinType: string;
+  constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string) {
     this.transport = transport;
     this.appPrivateKey = appPrivateKey;
     this.appId = appId;
@@ -18,7 +23,7 @@ export default class EDDSACoin {
    * @param {string} protocol
    * @returns {Promise<string>}
    */
-  async getPublicKey(accountIndex, protocol = 'SLIP0010') {
+  async getPublicKey(accountIndex: number, protocol = 'SLIP0010') {
     return derivation.getEd25519PublicKey(
       this.transport,
       this.appId,

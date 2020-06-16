@@ -10,9 +10,7 @@
     "publish-single": "npm run build && npm publish"
   },
   "dependencies": {
-    "@coolwallets/coin": "0.2.0-beta.1",
     "@coolwallets/core": "0.2.0-beta.1",
-    "@coolwallets/errors": "0.0.7",
     "elliptic": "^6.5.1",
     "eth-sig-util": "^2.5.0",
     "rlp": "^2.2.3",

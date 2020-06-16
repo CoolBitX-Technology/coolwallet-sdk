@@ -1,5 +1,5 @@
 import elliptic from "elliptic";
-import { DataTooLong } from "@coolwallets/errors";
+import { DataTooLong } from "@coolwallets/core";
 
 import { apdu } from "@coolwallets/core";
 
