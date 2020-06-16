@@ -13,6 +13,10 @@ import { SHA256 } from '../crypto/hash';
  */
 const executeAPDU = async (commandName, transport, apdu, commandType) => {
   if (typeof transport.request !== 'function') throw new NoTransport();
+  if (!transport.request) {
+    transport.requestAPDUV2(apdu.command + apdu.data)
+        return
+  }
   const response = await transport.request(apdu.command, apdu.data);
   if (commandType === 'SE') {
     const status = response.slice(-4);
