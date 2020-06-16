@@ -1,5 +1,6 @@
 import { executeCommand } from './execute';
 import { RESPONSE } from '../config/response';
+import Transport from '../transport';
 
 /**
  * Send sign data to CoolWalletS
@@ -9,9 +10,9 @@ import { RESPONSE } from '../config/response';
  * @param {string} P2
  * @return {Promise<string>}
  */
-export const prepTx = async (transport, payload, P1, P2) => {
-  const { outputData: encryptedSignature } = await executeCommand(transport, 'TX_PREPARE', 'SE', payload, P1, P2);
-  return encryptedSignature;
+export const prepTx = async (transport: Transport, payload: string, P1: string, P2: string): Promise<string> => {
+  const { outputData } = await executeCommand(transport, 'TX_PREPARE', 'SE', payload, P1, P2);
+  return outputData;
 };
 
 /**
@@ -20,14 +21,14 @@ export const prepTx = async (transport, payload, P1, P2) => {
  * @param {Transport} transport
  * @param {string} script
  */
-export const sendScript = async (transport, script) => {
+export const sendScript = async (transport: Transport, script: string) => {
   const { status } = await executeCommand(
     transport,
     'SEND_SCRIPT',
     'SE',
     script,
-    null,
-    null,
+    undefined,
+    undefined,
     true
   );
   return status === RESPONSE.SUCCESS;
@@ -38,14 +39,14 @@ export const sendScript = async (transport, script) => {
  * @param {*} transport
  * @param {*} argument
  */
-export const executeScript = async (transport, argument, signature) => {
+export const executeScript = async (transport: Transport, argument: string, signature: string) => {
   const { outputData: encryptedSignature } = await executeCommand(
     transport,
     'EXECUTE_SCRIPT',
     'SE',
     argument + signature,
-    null,
-    null,
+    undefined,
+    undefined,
     true,
     true,
   );
@@ -57,7 +58,7 @@ export const executeScript = async (transport, argument, signature) => {
  * @todo append signature
  * @param {Transport} transport
  */
-export const getSignedHex = async (transport) => {
+export const getSignedHex = async (transport: Transport) => {
   const { outputData: signedTx } = await executeCommand(transport, 'GET_SIGNED_HEX', 'SE');
   return signedTx;
 };
@@ -67,7 +68,7 @@ export const getSignedHex = async (transport) => {
  * @param {Transport} transport
  * @return {Promse<boolean>}
  */
-export const finishPrepare = async (transport) => {
+export const finishPrepare = async (transport: Transport): Promise<boolean> => {
   await executeCommand(transport, 'FINISH_PREPARE', 'SE');
   return true;
 };
@@ -77,7 +78,7 @@ export const finishPrepare = async (transport) => {
  * @param {Transport} transport
  * @return {Promise<string>}
  */
-export const getSignatureKey = async (transport) => {
+export const getSignatureKey = async (transport: Transport): Promise<string> => {
   const { outputData: signatureKey } = await executeCommand(transport, 'GET_TX_KEY', 'SE');
   return signatureKey;
 };
@@ -87,7 +88,7 @@ export const getSignatureKey = async (transport) => {
  * @param {Transport} transport
  * @return {Promise<boolean>}
  */
-export const clearTransaction = async (transport) => {
+export const clearTransaction = async (transport: Transport): Promise<boolean> => {
   await executeCommand(transport, 'CLEAR_TX', 'SE');
   return true;
 };
@@ -97,7 +98,7 @@ export const clearTransaction = async (transport) => {
  * @param {Transport} transport
  * @return {Promise<boolean>} true: success, false: canceled.
  */
-export const getTxDetail = async (transport) => {
+export const getTxDetail = async (transport: Transport): Promise<boolean> => {
   const { status } = await executeCommand(transport, 'GET_TX_DETAIL', 'SE');
   return status === RESPONSE.SUCCESS;
 };
@@ -109,7 +110,7 @@ export const getTxDetail = async (transport) => {
  * @param {number} sn 1: normal erc20, 2: second token in 0x.
  * @return {Promise<boolean>}
  */
-export const setToken = async (transport, payload, sn = 1) => {
+export const setToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
   const status = sn === 1
     ? await executeCommand(transport, 'SET_ERC20_TOKEN', 'SE', payload)
     : await executeCommand(transport, 'SET_SECOND_ERC20_TOKEN', 'SE', payload);
@@ -123,7 +124,7 @@ export const setToken = async (transport, payload, sn = 1) => {
  * @param {number} sn 1: normal erc20, 2: second token in 0x.
  * @return {Promise<boolean>}
  */
-export const setCustomToken = async (transport, payload, sn = 1) => {
+export const setCustomToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
   const status = sn === 1
     ? await executeCommand(transport, 'SET_ERC20_TOKEN', 'SE', payload, '04', '18')
     : await executeCommand(transport, 'SET_SECOND_ERC20_TOKEN', 'SE', payload, '04', '18');
@@ -137,7 +138,7 @@ export const setCustomToken = async (transport, payload, sn = 1) => {
  * @param {string} redeemType P1
  * @return {Promise<boolean>}
  */
-export const setChangeKeyId = async (transport, pathWithSig, redeemType) => {
+export const setChangeKeyId = async (transport: Transport, pathWithSig: string, redeemType: string): Promise<boolean> => {
   await executeCommand(transport, 'SET_CHANGE_KEYID', 'SE', pathWithSig, redeemType);
   return true;
 };

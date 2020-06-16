@@ -1,18 +1,18 @@
 import crypto from 'crypto';
 
-const sha512 = (msg) => crypto
+const sha512 = (msg: string) => crypto
   .createHash('sha512')
   .update(msg)
   .digest();
 
-const aes256CbcEncrypt = (iv, key, plaintext) => {
+const aes256CbcEncrypt = (iv: any, key: any, plaintext: any) => {
   const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
   const firstChunk = cipher.update(plaintext);
   const secondChunk = cipher.final();
   return Buffer.concat([firstChunk, secondChunk]);
 };
 
-export const aes256CbcDecrypt = (iv, key, ciphertext) => {
+export const aes256CbcDecrypt = (iv: any, key: any, ciphertext: any) => {
   let isCipherBuffer = ciphertext;
   if (!Buffer.isBuffer(ciphertext)) {
     isCipherBuffer = Buffer.from(isCipherBuffer, 'hex');
@@ -29,12 +29,12 @@ export const aes256CbcDecrypt = (iv, key, ciphertext) => {
  * @param {Buffer} msg
  * @returns {Buffer}
  */
-const hmacSha1 = (key, msg) => crypto
+const hmacSha1 = (key: Buffer, msg: Buffer): Buffer => crypto
   .createHmac('sha1', key)
   .update(msg)
   .digest();
 
-const equalConstTime = (b1, b2) => {
+const equalConstTime = (b1: Buffer, b2: Buffer) => {
   if (b1.length !== b2.length) {
     return false;
   }
@@ -52,7 +52,7 @@ const equalConstTime = (b1, b2) => {
  * @param {string} msg
  * @returns {string}
  */
-export const ECIESenc = (recipientPubKey, msg) => {
+export const ECIESenc = (recipientPubKey: string, msg: string): string => {
   const msgBuf = Buffer.from(msg, 'hex');
   const ephemeral = crypto.createECDH('secp256k1');
   ephemeral.generateKeys();
@@ -76,7 +76,7 @@ export const ECIESenc = (recipientPubKey, msg) => {
  * @param {string} encryption
  * @returns {Buffer}
  */
-export const ECIESDec = (recipientPrivKey, encryption) => {
+export const ECIESDec = (recipientPrivKey: string, encryption: string) => {
   const encryptionBuf = Buffer.from(encryption, 'hex');
   const ephemeralPubKey = encryptionBuf.slice(0, 65);
   const mac = encryptionBuf.slice(65, 85);

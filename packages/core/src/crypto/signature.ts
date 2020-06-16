@@ -5,8 +5,8 @@ import BN from 'bn.js';
  * @description
  * @param {String} signature derSig hex string
  */
-export const parseDERsignature = (signature) => {
-	const obj = {};
+export const parseDERsignature = (signature: string) => {
+	const obj = { r: '', s: '' };
 	const index = signature.slice(0, 4);
 	if (index === '3045') {
 		if (signature.slice(7, 8) === '1') {
@@ -30,7 +30,7 @@ export const parseDERsignature = (signature) => {
  * @param {{r:string, s:string}}
  * @return {Buffer}
  */
-export const convertToDER = (sig) => {
+export const convertToDER = (sig: { r: string, s: string }) => {
 	let r = Buffer.from(sig.r, 'hex');
 	let s = Buffer.from(sig.s, 'hex');
 
@@ -53,7 +53,7 @@ export const convertToDER = (sig) => {
 	return derSignature;
 };
 
-export const getCanonicalSignature = (signature) => {
+export const getCanonicalSignature = (signature: { s?: any; r?: any; }) => {
 	const modulusString = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141';
 	const modulus = new BN(modulusString, 16);
 	const s = new BN(signature.s, 16);

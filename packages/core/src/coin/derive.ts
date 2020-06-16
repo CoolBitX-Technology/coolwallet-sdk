@@ -9,7 +9,7 @@ const authGetKey = async (transport: Transport, appId: string, appPrivateKey: st
     appId,
     appPrivateKey,
     "AUTH_EXT_KEY",
-    null, null, null, null
+    undefined, undefined, undefined, undefined
   );
   return apdu.coin.authGetExtendedKey(transport, signature, forceUseSC);
 };
@@ -28,8 +28,8 @@ export const getAccountExtKey = async (
   appPrivateKey: string,
   coinSEType: string,
   accIndex: number,
-  authFirst = true
-) => {
+  authFirst: boolean = true
+): Promise<{ accountIndex: string; accountPublicKey: string; accountChainCode: string; }> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
   let accIndexHex = accIndex.toString(16);

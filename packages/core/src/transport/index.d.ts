@@ -23,4 +23,6 @@ export default class Transport {
   checkCardStatus(): Promise<number>;
 
   readDataFromCard(): Promise<number[]>;
+
+  request(command: string, packets: string): Promise<string>;
 }

@@ -8,7 +8,7 @@ import Transport from '../transport';
  * @param {string} signedCommand
  * @return {Promise<boolean>}
  */
-export const backupSeed = async (transport: Transport, signedCommand: string) => {
+export const backupSeed = async (transport: Transport, signedCommand: string): Promise<boolean> => {
   const { status } = await executeCommand(transport, 'BACKUP_REGISTER_DATA', 'SE', signedCommand);
   return status === RESPONSE.SUCCESS;
 };
@@ -18,7 +18,7 @@ export const backupSeed = async (transport: Transport, signedCommand: string) =>
  * @param {Transport} transport
  * @return {Promise<boolean>}
  */
-export const recoverSeed = async (transport) => {
+export const recoverSeed = async (transport: Transport): Promise<boolean> => {
   await executeCommand(transport, 'RECOVER_REGISER_DATA', 'SE');
   return true;
 };
@@ -28,7 +28,7 @@ export const recoverSeed = async (transport) => {
  * @param {Transport} transport
  * @return {Promise<boolean>} true: may need recovery after update.
  */
-export const checkBackupStatus = async (transport) => {
+export const checkBackupStatus = async (transport: Transport): Promise<boolean> => {
   const { outputData } = await executeCommand(transport, 'CHECK_BACKUP_RECOVER', 'SE');
   return outputData === '01';
 };
@@ -39,7 +39,7 @@ export const checkBackupStatus = async (transport) => {
  * @param {string} signedCommand
  * @return {Promise<boolean>}
  */
-export const deleteSeedBackup = async (transport, signedCommand) => {
+export const deleteSeedBackup = async (transport: Transport, signedCommand: string) => {
   const { status } = await executeCommand(transport, 'DELETE_REGISTER_BACKUP', 'SE', signedCommand);
   return status === RESPONSE.SUCCESS;
 };

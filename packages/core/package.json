@@ -13,6 +13,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
+    "@types/node": "^14.0.13",
     "bip66": "^1.1.5",
     "bn.js": "^5.1.1",
     "key-encoder": "^2.0.3",

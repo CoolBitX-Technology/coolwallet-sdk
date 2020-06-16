@@ -76,7 +76,7 @@ export const prepareTx = async (
   txDataHex: string,
   txDataType: string,
   appPrivateKey: string
-) => {
+): Promise<string> => {
   let encryptedSignature;
   const sendData =
     txDataHex + signForCoolWallet(txDataHex, txDataType, appPrivateKey);
@@ -92,7 +92,11 @@ export const prepareTx = async (
       p2
     );
   }
-  return encryptedSignature;
+  if (encryptedSignature){
+    return encryptedSignature;
+  } else {
+    throw new Error('prepareTx get encryptedSignature failed')
+  }
 };
 
 /**
@@ -110,7 +114,7 @@ export const getSingleEncryptedSignature = async (
   txDataType: string,
   appPrivateKey: string,
   txPrepareCompleteCallback: Function | undefined = undefined
-) => {
+): Promise<string> => {
   const encryptedSignature = await prepareTx(
     transport,
     txDataHex,
@@ -156,7 +160,7 @@ export const getEncryptedSignatures = async (
  */
 export const getCWSEncryptionKey = async (transport: Transport, authorizedCallback: Function | undefined) => {
   const success = await apdu.tx.getTxDetail(transport);
-  if (!success) return undefined;
+  if (!success) throw new Error('get tx detail status fail!!');
 
   if (typeof authorizedCallback === "function") authorizedCallback();
 

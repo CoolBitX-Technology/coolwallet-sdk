@@ -1,6 +1,6 @@
 import {error as Errors} from '../index' ;
 
-const getCheckSum = (data) => {
+const getCheckSum = (data: any) => {
   let XORTemp = 0;
   for (let i = 0; i < data.length; i++) {
     // eslint-disable-next-line no-bitwise
@@ -14,7 +14,7 @@ const getCheckSum = (data) => {
   return temp;
 };
 
-export const assemblyCommandAndData = (cla, ins, p1, p2, oriData) => {
+export const assemblyCommandAndData = (cla: string, ins: string, p1: string, p2: string, oriData: string) => {
   const pid = '00';
   const cmdLen = '09';
 
@@ -50,22 +50,20 @@ export const assemblyCommandAndData = (cla, ins, p1, p2, oriData) => {
   const oriDataBuf = Buffer.allocUnsafe(4);
   oriDataBuf.fill(0);
   oriDataBuf.writeInt16BE(oriDataLength, 0);
-  oriDataLength = oriDataBuf.slice(0, 2).toString('hex');
-  oriDataLength = oriDataLength.toString('hex').padStart(4, '0');
+  const hexOriDataLength = oriDataBuf.slice(0, 2).toString('hex').padStart(4, '0');
 
   const XORData = Buffer.allocUnsafe(4);
   XORData.fill(0);
   XORData.writeInt16BE(XORLength, 0);
-  XORLength = XORData.slice(0, 2).toString('hex');
-  XORLength = XORLength.toString('hex').padStart(4, '0');
-  dataLength = Buffer.from([dataLength]);
+  const hexXORLength = XORData.slice(0, 2).toString('hex').padStart(4, '0');
+  const hexBataLength = Buffer.from([dataLength]).toString('hex');
 
-  const command = pid + cmdLen + cla + ins + p1 + p2 + oriDataLength + XORLength + dataLength.toString('hex');
+  const command = pid + cmdLen + cla + ins + p1 + p2 + hexOriDataLength + hexXORLength + hexBataLength;
   return { command, data: packets };
 };
 
 
-export const SDKUnknownWithCode = (command, code) => new Errors.SDKError('Unknown', `${command} - ${code}`);
+export const SDKUnknownWithCode = (command: string, code: string) => new Errors.SDKError('Unknown', `${command} - ${code}`);
 
 /**
  * Map SE Error code to SDK Error.
@@ -73,7 +71,7 @@ export const SDKUnknownWithCode = (command, code) => new Errors.SDKError('Unknow
  * @param {string} errorCode
  * @return {Errors.SDKError}
  */
-export const throwSDKError = (command, errorCode) => {
+export const throwSDKError = (command: string, errorCode: string) => {
   const code = errorCode.toLowerCase();
   // General Errors
   switch (code) {
@@ -178,7 +176,7 @@ export const throwSDKError = (command, errorCode) => {
         case '6001':
           throw new Errors.HashOutputMissmatch();
         case '6002':
-          throw new Errors.OutputTooLong();
+          throw new Errors.DataTooLong();
         case '6003':
           throw new Errors.InvalidChangeRedeemScript();
         case '6004':

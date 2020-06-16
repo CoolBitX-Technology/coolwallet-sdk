@@ -9,7 +9,7 @@ const keyencoder = new KeyEncoder('secp256k1');
  * @returns {Buffer}
  */
 // eslint-disable-next-line import/prefer-default-export
-export const sign = (data, rawpriv) => {
+export const sign = (data: string, rawpriv: string | Buffer): Buffer => {
   const signer = crypto.createSign('sha256');
   const dataBuf = Buffer.from(data, 'hex');
   signer.update(dataBuf);

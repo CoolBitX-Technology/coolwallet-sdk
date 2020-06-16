@@ -21,7 +21,7 @@ export const getCommandSignature = async (
   appId: string,
   appPrivateKey: string,
   commandName: string,
-  data: string,
+  data: string | undefined,
   params1: string | undefined,
   params2: string | undefined,
   isCreateWallet: boolean = false
