@@ -1,9 +1,11 @@
-import elliptic from 'elliptic'
-import IconService from 'icon-sdk-js'
+// import elliptic from 'elliptic'
+// import IconService from 'icon-sdk-js'
 import { sha3_256 } from 'js-sha3'
-import * as scripts from './scripts'
-import CONFIG from './config'
+import * as scripts from '../scripts'
+import CONFIG from '../config'
 
+const elliptic = require('elliptic');
+const IconService = require('icon-sdk-js');
 const ec = new elliptic.ec('secp256k1')
 const { IconBuilder, IconConverter } = IconService
 
@@ -12,11 +14,11 @@ const { IconBuilder, IconConverter } = IconService
  * @param {string} compressedPubkey
  * @return {string}
  */
-export function pubKeyToAddress(compressedPubkey) {
+export function pubKeyToAddress(compressedPubkey: string): string {
   let keyPair = ec.keyFromPublic(compressedPubkey, 'hex')
   let publicKey = keyPair.getPublic(false, 'hex').substr(2)
-  publicKey = Buffer.from(publicKey, 'hex')
-  let address = 'hx' + sha3_256(publicKey).slice(-40)
+  let bufferPublicKey = Buffer.from(publicKey, 'hex')
+  let address = 'hx' + sha3_256(bufferPublicKey).slice(-40)
   return address
 }
 
@@ -25,7 +27,7 @@ export function pubKeyToAddress(compressedPubkey) {
  * @param {number} addressIndex
  * @param {{from:string, to:string, value:string, time:string, networkId:number}} transaction
  */
-export const getScriptAndArguments = (addressIndex, transaction) => {
+export const getScriptAndArguments = (addressIndex: number, transaction: { from: string, to: string, value: string, time: string, networkId: number }) => {
   // 15 32 8000002C 8000004A 80000000 00000000 00000000
   const SEPath = '1532' + '8000002C' + '8000004A' + '80000000' + '00000000' + '00' + addressIndex.toString(16).padStart(6, '0')
 
@@ -52,7 +54,7 @@ export const getScriptAndArguments = (addressIndex, transaction) => {
  * @param {string} publicKey
  * @returns {object}
  */
-export const generateRawTx = async (transaction, canonicalSignature, publicKey) => {
+export const generateRawTx = async (transaction: { from: string, to: string, value: string, time: string, networkId: number }, canonicalSignature: { r: string, s: string }, publicKey: string) => {
   try {
     let rawTxObj = buildTransactionObj(transaction)
     const phraseToSign = generateHashKey(rawTxObj)
@@ -70,7 +72,7 @@ export const generateRawTx = async (transaction, canonicalSignature, publicKey) 
  * 
  * @param {{from:string, to:string, value:string, time:string, networkId:number}} transaction
  */
-const buildTransactionObj = transaction => {
+const buildTransactionObj = (transaction: { from: string; to: string; value: string; time: string; networkId: number }) => {
   const txObj = new IconBuilder.IcxTransactionBuilder()
     .from(transaction.from)
     .to(transaction.to)
@@ -94,7 +96,7 @@ const buildTransactionObj = transaction => {
  * @param {string} compressedPubkey 
  * @returns {string}
  */
-const generateFullCanonicalSig = (canonicalSignature, phraseToSign, compressedPubkey) => {
+const generateFullCanonicalSig = (canonicalSignature: { r: string, s: string }, phraseToSign: string, compressedPubkey: string): string => {
   const hashcode = sha3_256.update(phraseToSign).hex()
   const data = Buffer.from(handleHex(hashcode), 'hex')
   return recoverSignature(canonicalSignature, data, compressedPubkey)  
@@ -107,17 +109,18 @@ const generateFullCanonicalSig = (canonicalSignature, phraseToSign, compressedPu
  * @param {string} compressedPubkey 
  * @returns {string}
  */
-const recoverSignature = (canonicalSignature, hash, compressedPubkey) => {
-  let keyPair = ec.keyFromPublic(compressedPubkey, 'hex')
-  let recoveryParam = ec.getKeyRecoveryParam(hash, canonicalSignature, keyPair.pub)
-  let v = recoveryParam === 0 
+const recoverSignature = (canonicalSignature: { r: string, s: string }, hash: Buffer, compressedPubkey: string): string => {
+  const keyPair = ec.keyFromPublic(compressedPubkey, 'hex')
+  const recoveryParam = ec.getKeyRecoveryParam(hash, canonicalSignature, keyPair.pub)
+  
+  const v = recoveryParam === 0 
     ? '00'
     : '01'
   return canonicalSignature.r + canonicalSignature.s + v
 }
 
 
-function generateHashKey(obj) {
+function generateHashKey(obj: string) {
   let jsonObject
   try {
     jsonObject = JSON.parse(obj)
@@ -132,7 +135,7 @@ function generateHashKey(obj) {
   return result
 }
 
-function objTraverse(obj) {
+function objTraverse(obj: { [x: string]: any }) {
   let result = ''
   result += '{'
   let keys
@@ -172,7 +175,7 @@ function objTraverse(obj) {
   return result
 }
 
-function arrTraverse(arr) {
+function arrTraverse(arr: string | any[]) {
   let result = ''
   result += '['
   for (let j = 0; j < arr.length; j++) {
@@ -204,7 +207,7 @@ function arrTraverse(arr) {
   return result
 }
 
-function escapeString(value) {
+function escapeString(value: any) {
   let newString = String.raw`${value}`
   newString = newString.replace('\\', '\\\\')
   newString = newString.replace('.', '\\.')
@@ -215,7 +218,7 @@ function escapeString(value) {
   return newString
 }
 
-export const handleHex = hex => {
+export const handleHex = (hex: string) => {
   return evenHexDigit(removeHex0x(hex))
 }
 
@@ -224,17 +227,17 @@ export const handleHex = hex => {
  * @param {string} hex
  * @return {string}
  */
-const evenHexDigit = hex => {
+const evenHexDigit = (hex: string) => {
   return hex.length % 2 !== 0 ? `0${hex}` : hex
 }
 
 /**
  * @description Check and Remove Hex Prefix 0x
  */
-export const removeHex0x = hex => {
+export const removeHex0x = (hex: string) => {
   return hex.slice(0, 2) === '0x' ? hex.slice(2) : hex
 }
 
-export const removePrefix = hex => {
+export const removePrefix = (hex: string) => {
   return hex.slice(0, 2) === 'hx' ? hex.slice(2) : hex
 }

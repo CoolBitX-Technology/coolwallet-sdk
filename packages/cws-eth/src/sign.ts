@@ -1,8 +1,8 @@
-import { core } from '@coolwallets/core';
+import { core, Transport, transport } from '@coolwallets/core';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import { isHex, keccak256 } from './lib';
-import * as ethUtil from './eth_utils';
-import { removeHex0x } from './string_util';
+import * as ethUtil from './utils/ethUtils';
+import { removeHex0x } from './utils/stringUtil';
 
 const rlp = require('rlp');
 
@@ -21,16 +21,16 @@ const rlp = require('rlp');
  * @return {Promise<string>}
  */
 export const signTransaction = async (
-  transport,
-  appId,
-  appPrivateKey,
-  coinType,
-  transaction,
-  addressIndex,
-  publicKey,
-  confirmCB = null,
-  authorizedCB = null,
-) => {
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  coinType: string,
+  transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number},
+  addressIndex: number,
+  publicKey: string,
+  confirmCB: Function | undefined = undefined,
+  authorizedCB: Function | undefined = undefined,
+): Promise<string> => {
   const rawPayload = ethUtil.getRawHex(transaction);
   const useScript = await core.controller.checkSupportScripts(transport);
   const txType = ethUtil.getTransactionType(transaction);
@@ -89,16 +89,16 @@ export const signTransaction = async (
  * @return {Promise<String>}
  */
 export const signMessage = async (
-  transport,
-  appId,
-  appPrivateKey,
-  coinType,
-  message,
-  addressIndex,
-  publicKey,
-  isHashRequired = false,
-  confirmCB = null,
-  authorizedCB = null
+  transport: transport,
+  appId: string,
+  appPrivateKey: string,
+  coinType: string,
+  message: string,
+  addressIndex: number,
+  publicKey: string,
+  isHashRequired: boolean = false,
+  confirmCB: Function | undefined = undefined,
+  authorizedCB: Function | undefined = undefined
 ) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
 
@@ -153,16 +153,16 @@ export const signMessage = async (
  * @return {Promise<String>}
  */
 export const signTypedData = async (
-  transport,
-  appId,
-  appPrivateKey,
-  coinType,
-  typedData,
-  addressIndex,
-  publicKey,
-  confirmCB = null,
-  authorizedCB = null
-) => {
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  coinType: string,
+  typedData: object,
+  addressIndex: number,
+  publicKey: string,
+  confirmCB: Function | undefined = undefined,
+  authorizedCB: Function | undefined = undefined
+): Promise<string> => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
 
   const sanitizedData = typedDataUtils.sanitizeData(typedData);
@@ -189,7 +189,7 @@ export const signTypedData = async (
     dataForSE,
     '00',
     false,
-    null,
+    undefined,
     confirmCB,
     authorizedCB
   );

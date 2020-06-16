@@ -7,7 +7,7 @@ type BNBTx = import('./types').Transaction;
 /**
  * Sign Binance Tranaction
  */
-export default async function signTransaction(
+export default async function signTransfer(
   transport: Transport,
   appId: string,
   appPrivateKey:string,

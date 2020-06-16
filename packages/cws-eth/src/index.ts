@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
-import { core } from '@coolwallets/core';
+import { core, Transport } from '@coolwallets/core';
 import { coin as COIN } from '@coolwallets/core';
-import * as ethSign from './eth_sign';
-import { pubKeyToAddress } from './eth_utils';
+import * as ethSign from './sign';
+import { pubKeyToAddress } from './utils/ethUtils';
 
-export default class ETH extends COIN.ECDSACoin {
-  constructor(transport, appPrivateKey, appId) {
+export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
+  constructor(transport: Transport, appPrivateKey: string, appId: string) {
     super(transport, appPrivateKey, appId, '3C');
   }
 
@@ -14,7 +14,7 @@ export default class ETH extends COIN.ECDSACoin {
    * @param {number} addressIndex
    * @return {string}
    */
-  async getAddress(addressIndex) {
+  async getAddress(addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(addressIndex);
     return pubKeyToAddress(publicKey);
   }
@@ -29,11 +29,11 @@ export default class ETH extends COIN.ECDSACoin {
    * @param {Function} authorizedCB
    */
   async signTransaction(
-    transaction,
-    addressIndex,
-    publicKey = undefined,
-    confirmCB = null,
-    authorizedCB = null
+    transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number},
+    addressIndex: number,
+    publicKey: string | undefined = undefined,
+    confirmCB: Function | undefined = undefined,
+    authorizedCB: Function | undefined = undefined
   ) {
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
     return ethSign.signTransaction(
@@ -60,13 +60,13 @@ export default class ETH extends COIN.ECDSACoin {
    * @return {Promise<String>}
    */
   async signMessage(
-    message,
-    addressIndex,
-    publicKey = undefined,
-    isHashRequired = false,
-    confirmCB = null,
-    authorizedCB = null
-  ) {
+    message: string,
+    addressIndex: number,
+    publicKey: string | undefined = undefined,
+    isHashRequired: boolean = false,
+    confirmCB: Function | undefined = undefined,
+    authorizedCB: Function | undefined = undefined
+  ): Promise<string> {
     await core.auth.versionCheck(this.transport, 81);
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
     return ethSign.signMessage(
@@ -86,18 +86,17 @@ export default class ETH extends COIN.ECDSACoin {
   /**
    * Sign EIP712 typed data
    * @param {Object} typedData
-   * @param {String} addressIndex
+   * @param {Number} addressIndex
    * @param {String} publicKey
    * @param {Function} confirmCB
    * @param {Function} authorizedCB
-   * @return {Object}
    */
   async signTypedData(
-    typedData,
-    addressIndex,
-    publicKey = undefined,
-    confirmCB = null,
-    authorizedCB = null
+    typedData: object,
+    addressIndex: number,
+    publicKey: string | undefined = undefined,
+    confirmCB: Function | undefined = undefined,
+    authorizedCB: Function | undefined = undefined
   ) {
     await core.auth.versionCheck(this.transport, 84);
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
