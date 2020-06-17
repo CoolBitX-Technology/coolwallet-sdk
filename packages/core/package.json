@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallets/core",
-  "version": "0.2.0-beta.1",
-  "description": "Light core library of CoolWalletS apdu commands.",
+  "name": "@coolwallet3/core",
+  "version": "0.1.0-beta.0",
+  "description": "Light core library of CoolWallet apdu commands.",
   "main": "lib/index.js",
   "scripts": {
     "build:js": "babel -d lib/ src",
@@ -19,10 +19,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-js-sdk.git"
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
