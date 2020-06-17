@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/core",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "Light core library of CoolWallet apdu commands.",
   "main": "lib/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "build": "npm run build:js && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
-  "author": "",
+  "author": "coolwallet-team",
   "license": "Apache-2.0",
   "dependencies": {
     "bip66": "^1.1.5",
