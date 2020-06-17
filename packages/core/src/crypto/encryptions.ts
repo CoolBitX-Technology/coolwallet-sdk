@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const sha512 = (msg: string) => crypto
+const sha512 = (msg: string | Buffer) => crypto
   .createHash('sha512')
   .update(msg)
   .digest();
@@ -57,7 +57,8 @@ export const ECIESenc = (recipientPubKey: string, msg: string): string => {
   const ephemeral = crypto.createECDH('secp256k1');
   ephemeral.generateKeys();
   const sharedSecret = ephemeral.computeSecret(Buffer.from(recipientPubKey, 'hex'), 'hex');
-  const hashedSecret = sha512(Buffer.from(sharedSecret, 'hex').toString("hex"));
+  const hashedSecret = sha512(Buffer.from(sharedSecret, 'hex'));
+
   const encryptionKey = hashedSecret.slice(0, 32);
   const macKey = hashedSecret.slice(32);
   const iv = Buffer.allocUnsafe(16);
