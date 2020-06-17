@@ -20,5 +20,12 @@
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "jest": "^26.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }
