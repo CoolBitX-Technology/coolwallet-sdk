@@ -1,5 +1,5 @@
 {
-  "name": "@coolwallet3/core",
+  "name": "@coolwallet/core",
   "version": "0.1.0-beta.0",
   "description": "Light core library of CoolWallet apdu commands.",
   "main": "lib/index.js",
