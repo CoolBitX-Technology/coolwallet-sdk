@@ -20,8 +20,8 @@ export {
 	createUnsignedTransactions,
 	getSigningActions,
 	composeFinalTransaction,
-
-	getScriptAndArguments,
+	getScriptAndArgument,
+	getUtxoArguments
 };
 
 function hash160(buf: Buffer): Buffer {
@@ -86,7 +86,7 @@ function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer
 	return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
 }
 
-function addressToOutScript(address: string): ({ scriptType: ScriptType, outScript: Buffer }) {
+function addressToOutScript(address: string): ({ scriptType: ScriptType, outScript: Buffer, outHash?: Buffer }) {
 	let scriptType;
 	let payment;
 	if (address.startsWith('1')) {
@@ -103,11 +103,12 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 	}
 	if (!payment.output) throw new Error(`No OutScript for Address : ${address}`);
 	const outScript = payment.output;
-	return { scriptType, outScript };
+	const outHash = payment.hash;
+	return { scriptType, outScript, outHash };
 }
 
 function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
-	: { address: string, outScript: Buffer } {
+	: { address: string, outScript: Buffer, hash: Buffer } {
 	let payment;
 	if (scriptType === ScriptType.P2PKH) {
 		payment = bitcoin.payments.p2pkh({ pubkey });
@@ -122,7 +123,8 @@ function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
 	}
 	if (!payment.address) throw new Error(`No Address for ScriptType : ${scriptType}`);
 	if (!payment.output) throw new Error(`No OutScript for ScriptType : ${scriptType}`);
-	return { address: payment.address, outScript: payment.output };
+	if (!payment.hash) throw new Error(`No OutScript for ScriptType : ${scriptType}`);
+	return { address: payment.address, outScript: payment.output, hash: payment.hash };
 }
 
 function createUnsignedTransactions(
@@ -136,12 +138,6 @@ function createUnsignedTransactions(
 	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>
 }) {
-	if (scriptType !== ScriptType.P2PKH
-		&& scriptType !== ScriptType.P2WPKH
-		&& scriptType !== ScriptType.P2SH_P2WPKH) {
-		throw new Error(`Unsupport ScriptType : ${scriptType}`);
-	}
-
 	const versionBuf = toUintBuffer(version, 4);
 	const lockTimeBuf = toUintBuffer(lockTime, 4);
 
@@ -192,7 +188,7 @@ function createUnsignedTransactions(
 		pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
 	}) => {
 		if (scriptType === ScriptType.P2PKH) {
-			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2PKH);
+			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, scriptType);
 			const outScriptLen = toVarUintBuffer(outScript.length);
 			return Buffer.concat([
 				versionBuf,
@@ -206,19 +202,20 @@ function createUnsignedTransactions(
 				lockTimeBuf,
 				Buffer.from('81000000', 'hex'),
 			]);
+		} else {
+			return Buffer.concat([
+				versionBuf,
+				hashPrevouts,
+				hashSequence,
+				preOutPointBuf,
+				Buffer.from(`1976a914${hash160(pubkeyBuf).toString('hex')}88ac`, 'hex'), // ScriptCode
+				preValueBuf,
+				sequenceBuf,
+				hashOutputs,
+				lockTimeBuf,
+				Buffer.from('01000000', 'hex'),
+			]);
 		}
-		return Buffer.concat([
-			versionBuf,
-			hashPrevouts,
-			hashSequence,
-			preOutPointBuf,
-			Buffer.from(`1976a914${hash160(pubkeyBuf).toString('hex')}88ac`, 'hex'), // ScriptCode
-			preValueBuf,
-			sequenceBuf,
-			hashOutputs,
-			lockTimeBuf,
-			Buffer.from('01000000', 'hex'),
-		]);
 	});
 
 	return {
@@ -318,81 +315,150 @@ function composeFinalTransaction(
 			outputsBuf,
 			lockTimeBuf,
 		]);
-	}
+	} else {
+		const flagBuf = Buffer.from('0001', 'hex');
+		const segwitBuf = Buffer.concat(preparedInputs.map(({ pubkeyBuf }, i) => {
+			const signature = signatures[i];
+			const segwitScript = Buffer.concat([
+				Buffer.from((signature.length + 1).toString(16), 'hex'),
+				signature,
+				Buffer.from('01', 'hex'),
+				Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
+				pubkeyBuf,
+			]);
+			return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
+		}));
 
-	const flagBuf = Buffer.from('0001', 'hex');
-	const segwitBuf = Buffer.concat(preparedInputs.map(({ pubkeyBuf }, i) => {
-		const signature = signatures[i];
-		const segwitScript = Buffer.concat([
-			Buffer.from((signature.length + 1).toString(16), 'hex'),
-			signature,
-			Buffer.from('01', 'hex'),
-			Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
-			pubkeyBuf,
+		const inputsBuf = Buffer.concat(preparedInputs.map(({
+			pubkeyBuf, preOutPointBuf, sequenceBuf
+		}) => {
+			if (scriptType === ScriptType.P2SH_P2WPKH) {
+				const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, scriptType);
+				const inScript = Buffer.concat([
+					Buffer.from(outScript.length.toString(16), 'hex'),
+					outScript,
+				]);
+				return Buffer.concat([
+					preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
+				]);
+			}
+			return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
+		}));
+
+		return Buffer.concat([
+			versionBuf,
+			flagBuf,
+			inputsCount,
+			inputsBuf,
+			outputsCount,
+			outputsBuf,
+			segwitBuf,
+			lockTimeBuf,
 		]);
-		return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
-	}));
-
-	const inputsBuf = Buffer.concat(preparedInputs.map(({
-		pubkeyBuf, preOutPointBuf, sequenceBuf
-	}) => {
-		if (scriptType === ScriptType.P2SH_P2WPKH) {
-			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2WPKH);
-			const inScript = Buffer.concat([
-				Buffer.from(outScript.length.toString(16), 'hex'),
-				outScript,
-			]);
-			return Buffer.concat([
-				preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
-			]);
-		}
-		return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
-	}));
-
-	return Buffer.concat([
-		versionBuf,
-		flagBuf,
-		inputsCount,
-		inputsBuf,
-		outputsCount,
-		outputsBuf,
-		segwitBuf,
-		lockTimeBuf,
-	]);
+	}
 }
 
 function getArgument(
-	scriptType: ScriptType,
-	payment: Array<Input>
-) {
-	if (scriptType !== ScriptType.P2PKH
-		&& scriptType !== ScriptType.P2WPKH
-		&& scriptType !== ScriptType.P2SH_P2WPKH) {
-		throw new Error(`Unsupport ScriptType : ${scriptType}`);
-	}
-	let argument =
-		handleHex("");
-
-	//handleHex(payment.Flags.toString(16).padStart(8, "0"));
-	return argument;
-};
-
-function getScriptAndArguments(
-	scriptType: ScriptType,
 	inputs: Array<Input>,
 	output: Output,
-	change: Change | undefined,
-	version: number = 1,
-	lockTime: number = 0, )
-	: { script: string, argument: string } {
+	change?: Change,
+): string {
+	const {
+		scriptType: outputType,
+		outScript: outputScript,
+		outHash: outputHash
+	} = addressToOutScript(output.address);
+	if (!outputHash) {
+		throw new Error(`OutputHash Undefined`);
+	}
+	let outputScriptType;
+	let outputHashBuf;
+	if (outputType == ScriptType.P2PKH) {
+		outputScriptType = toUintBuffer(0, 1);
+		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+	} else if (outputType == ScriptType.P2SH_P2WPKH) {
+		outputScriptType = toUintBuffer(1, 1);
+		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+	} else if (outputType == ScriptType.P2WPKH) {
+		outputScriptType = toUintBuffer(2, 1);
+		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+	} else {
+		throw new Error(`Unsupport ScriptType : ${outputType}`);
+	}
+	const outputAmount = toUintBuffer(output.value, 8);
+	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
+	let haveChange;
+	let changeScriptType;
+	let changeAmount;
+	let changePath;
+	if (change) {
+		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
+		haveChange = toUintBuffer(1, 1);
+		changeScriptType = toUintBuffer(outputType, 1);
+		changeAmount = toUintBuffer(change.value, 8);
+		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
+		changePath = Buffer.from(`328000002C800000008000000000000000${addressIdxHex}`, 'hex');
+	} else {
+		haveChange = Buffer.from('00', 'hex');
+		changeScriptType = Buffer.from('00', 'hex');
+		changeAmount = Buffer.from('0000000000000000', 'hex');
+		changePath = Buffer.from('000000000000000000000000000000000000000000', 'hex');
+	}
+	const prevouts = inputs.map(input => {
+		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
+		toUintBuffer(input.preIndex, 4)])
+	})
+	const hashPrevouts = hash256(Buffer.concat(prevouts));
+	const sequences = inputs.map(input => {
+		return Buffer.concat([
+			(input.sequence) ? toUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
+			//Buffer.from(input.sequence, 'hex').reverse(),
+			toUintBuffer(input.preIndex, 4)
+		])
+	})
+	const hashSequence = hash256(Buffer.concat(sequences));
 
-	let script;
-	let argument;
+	return Buffer.concat([
+		outputScriptType,
+		outputAmount,
+		outputHashBuf,
+		haveChange,
+		changeScriptType,
+		changeAmount,
+		changePath,
+		hashPrevouts,
+		hashSequence,
+	]).toString('hex');
+};
 
-	script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-	argument = getArgument(scriptType, inputs);
+function getScriptAndArgument(
+	inputs: Array<Input>,
+	output: Output,
+	change: Change | undefined
+): {
+	script: string,
+	argument: string
+} {
+	const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+	const argument = getArgument(inputs, output, change);
 	return {
 		script,
 		argument,
 	};
+};
+
+function getUtxoArguments(
+	inputs: Array<Input>,
+	preparedData: PreparedData,
+): Array<string> {
+	const utxoArguments = preparedData.preparedInputs.map(
+		(preparedInput) => {
+			const outPoint = preparedInput.preOutPointBuf;
+			// todo
+			const inputScriptType = toUintBuffer(0, 1);
+			const inputAmount = preparedInput.preValueBuf;
+			const inputHash = hash160(preparedInput.pubkeyBuf);
+			return Buffer.concat([outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
+		});
+	return utxoArguments;
 };

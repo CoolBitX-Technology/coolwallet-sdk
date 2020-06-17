@@ -3,7 +3,6 @@ import { aes256CbcDecrypt } from "../crypto/encryptions";
 import * as signatureTools from "../crypto/signature";
 import COMMAND from "../config/command";
 import * as apdu from "../apdu/index";
-import { getCommandSignature } from "./auth";
 
 /**
  * get command signature for CoolWalletS
@@ -22,32 +21,66 @@ const signForCoolWallet = (txDataHex, txDataType, appPrivateKey) => {
   return signatureBuffer.toString("hex");
 };
 
-export const getEncryptedSignatureByScripts = async (
+export const getEncryptedSignaturesByScript = async (
   transport,
   appId,
   appPrivKey,
   script,
   argument,
-  txPrepareComplteCallback = null
+  utxoArguments,
+  txPrepareCompleteCallback = null
 ) => {
   await apdu.tx.sendScript(transport, script);
-  const { signature } = await getCommandSignature(
+  await apdu.tx.executeScript(
     transport,
     appId,
     appPrivKey,
-    "EXECUTE_SCRIPT",
-    argument,
-    null,
-    null
+    argument
   );
+  const encryptedSignatureArray = [];
+  // eslint-disable-next-line no-await-in-loop
+  for (const utxoArgument of utxoArguments) {
+    encryptedSignatureArray.push(
+      await apdu.tx.executeUtxoScript(
+        transport,
+        appId,
+        appPrivKey,
+        utxoArgument
+      )
+    );
+  }
+  /*const encryptedSignatureArray = utxoArguments.map(
+    (utxoArgument) => await apdu.tx.executeUtxoScript(
+      transport,
+      appId,
+      appPrivKey,
+      utxoArgument
+    )
+  )*/
+  await apdu.tx.finishPrepare(transport);
+  if (typeof txPrepareCompleteCallback === "function")
+    txPrepareComplteCallback();
+  return encryptedSignatureArray;
+};
+
+export const getSingleEncryptedSignatureByScript = async (
+  transport,
+  appId,
+  appPrivKey,
+  script,
+  argument,
+  txPrepareCompleteCallback = null
+) => {
+  await apdu.tx.sendScript(transport, script);
   const encryptedSignature = await apdu.tx.executeScript(
     transport,
-    argument,
-    signature
+    appId,
+    appPrivKey,
+    argument
   );
   await apdu.tx.finishPrepare(transport);
 
-  if (typeof txPrepareComplteCallback === "function")
+  if (typeof txPrepareCompleteCallback === "function")
     txPrepareComplteCallback();
   return encryptedSignature;
 };
@@ -137,10 +170,14 @@ export const getEncryptedSignatures = async (
   txPrepareCompleteCallback = null
 ) => {
   // eslint-disable-next-line no-await-in-loop
-  for (const preAction of preActions) await preAction();
+  for (const preAction of preActions) {
+    await preAction();
+  }
   const encryptedSignatureArray = [];
   // eslint-disable-next-line no-await-in-loop
-  for (const action of actions) encryptedSignatureArray.push(await action());
+  for (const action of actions) {
+    encryptedSignatureArray.push(await action());
+  }
   await apdu.tx.finishPrepare(transport);
   if (typeof txPrepareCompleteCallback === "function")
     txPrepareCompleteCallback();

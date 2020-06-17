@@ -39,12 +39,13 @@ export const getCommandSignature = async (
   if (!forceUseSC) {
     await control.sayHi(transport, appId);
     return { signature, forceUseSC };
-  } // return [appId(20B)] [rightJustifiedSignature(72B)]
-
-  // Return AppId with padded signature: Dont need to call [say hi].
-  // the following operaion is forced to used Secure Channel
-  const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
-  return { signature: appIdWithSignature, forceUseSC };
+  } else {
+    // return [appId(20B)] [rightJustifiedSignature(72B)]
+    // Return AppId with padded signature: Dont need to call [say hi].
+    // the following operaion is forced to used Secure Channel
+    const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
+    return { signature: appIdWithSignature, forceUseSC };
+  }
 };
 
 /**

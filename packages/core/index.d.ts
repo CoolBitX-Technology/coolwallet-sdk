@@ -167,6 +167,46 @@ declare module '@coolwallets/core' {
 					>,
 				readType: string
 			): string;
+
+			export function sendScriptAndDataToCard(
+				transport: Transport,
+				appId: string,
+				appPrivateKey: string,
+				script: string,
+				argument: string,
+				isEDDSA?: boolean,
+				txPrepareComplteCallback?: Function,
+				authorizedCallback?: Function,
+				return_canonical?: boolean
+			): Promise<
+				| {
+					r: string;
+					s: string;
+				}
+				| string
+				| Buffer
+			>;
+			export function sendBatchScriptAndDataToCard(
+				transport: Transport,
+				appId: string,
+				appPrivateKey: string,
+				script: string,
+				argument: string,
+				utxoArguments: Array<string>,
+				isEDDSA?: boolean,
+				txPrepareComplteCallback?: Function,
+				authorizedCallback?: Function,
+				return_canonical?: boolean
+			): Promise<
+				Array<
+					| {
+						r: string;
+						s: string;
+					}
+					| string
+					| Buffer
+				>
+			>;
 			export function sendDataToCoolWallet(
 				transport: Transport,
 				appId: String,
@@ -185,19 +225,6 @@ declare module '@coolwallets/core' {
 				}
 				| string
 				| Buffer
-			>;
-			export function sendScriptAndDataToCard(
-				transport: Transport,
-				appId: string,
-				appPrivateKey: string,
-				script: string,
-				argument: string,
-				isEDDSA?: boolean,
-				txPrepareComplteCallback?: Function,
-				authorizedCallback?: Function,
-				return_canonical?: boolean
-			): Promise<
-				string
 			>;
 			export function sendBatchDataToCoolWallet(
 				transport: Transport,

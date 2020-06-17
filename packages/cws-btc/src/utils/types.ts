@@ -1,7 +1,8 @@
 export enum ScriptType {
-	P2PKH = 'P2PKH',
-	P2SH_P2WPKH = 'P2SH_P2WPKH',
-	P2WPKH = 'P2WPKH',
+	P2PKH = 0,
+	P2SH_P2WPKH = 1,
+	P2WPKH = 2,
+	P2WSH = 3,
 }
 
 export type Input = {

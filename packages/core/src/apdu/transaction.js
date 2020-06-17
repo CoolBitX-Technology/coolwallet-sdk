@@ -1,5 +1,6 @@
 import { executeCommand } from './execute';
 import { RESPONSE } from '../config/response';
+import { getCommandSignature } from "../core/auth";
 
 /**
  * Send sign data to CoolWalletS
@@ -38,12 +39,59 @@ export const sendScript = async (transport, script) => {
  * @param {*} transport
  * @param {*} argument
  */
-export const executeScript = async (transport, argument, signature) => {
+export const executeScript = async (
+  transport,
+  appId,
+  appPrivKey,
+  argument
+) => {
+  const { signature } = await getCommandSignature(
+    transport,
+    appId,
+    appPrivKey,
+    "EXECUTE_SCRIPT",
+    argument,
+    null,
+    null
+  );
   const { outputData: encryptedSignature } = await executeCommand(
     transport,
     'EXECUTE_SCRIPT',
     'SE',
     argument + signature,
+    null,
+    null,
+    true,
+    true,
+  );
+  return encryptedSignature;
+};
+
+/**
+ * Scriptable step 3
+ * @param {*} transport
+ * @param {*} argument
+ */
+export const executeUtxoScript = async (
+  transport,
+  appId,
+  appPrivKey,
+  utxoArgument
+) => {
+  const { signature } = await getCommandSignature(
+    transport,
+    appId,
+    appPrivKey,
+    "EXECUTE_UTXO_SCRIPT",
+    utxoArgument,
+    null,
+    null
+  );
+  await executeCommand(
+    transport,
+    'EXECUTE_UTXO_SCRIPT',
+    'SE',
+    utxoArgument + signature,
     null,
     null,
     true,
