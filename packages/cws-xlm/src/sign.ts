@@ -1,6 +1,5 @@
-import { core, Transport } from '@coolwallets/core';
+import { core, Transport } from '@coolwallet/core';
 
-// type Transport = import('@coolwallets/transport').default;
 type protocol = import('./types').protocol
 
 const accountIndexToKeyId = (coinType:string, accountIndex:number) => {

@@ -1,17 +1,17 @@
-# CoolWalletS Ripple (XRP) App
+# CoolWallet Ripple (XRP) App
 
-![version](https://img.shields.io/npm/v/@coolwallets/xrp)
+![version](https://img.shields.io/npm/v/@coolwallet/xrp)
 
 ## Install
 
 ```shell
-npm i @coolwallets/xrp
+npm i @coolwallet/xrp
 ```
 
 ## Usage
 
 ```javascript
-import cwsXRP from '@coolwallets/xrp'
+import cwsXRP from '@coolwallet/xrp'
 
 const XRP = new cwsXRP(transport, appPrivateKey, appId)
 
@@ -28,7 +28,7 @@ const address = await XRP.getAddress(0)
 
 ### signPayment
 
-CoolWalletS only support singing basic transaction type **Payment**.
+CoolWallet only support singing basic transaction type **Payment**.
 
 The field `TransactionType` must be `Payment`, and the `Flags` must be set to 2147483648.
 

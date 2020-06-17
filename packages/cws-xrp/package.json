@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallets/xrp",
-  "version": "0.0.1",
-  "description": "CoolwalletS Ripple App",
+  "name": "@coolwallet/xrp",
+  "version": "0.1.0-beta.0",
+  "description": "Coolwallet Ripple App",
   "main": "lib/index.js",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
@@ -13,7 +13,7 @@
     "XRP",
     "xrp",
     "ripple",
-    "coolwallets",
+    "coolwallet",
     "xrp",
     "javascript",
     "hardwarewallet",
@@ -21,7 +21,7 @@
     "coolbitx",
     "transaction"
   ],
-  "author": "anton@coolbitx.com",
+  "author": "coolwallet-team",
   "license": "ISC",
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -30,10 +30,17 @@
     "@babel/preset-typescript": "^7.7.7"
   },
   "dependencies": {
-    "@coolwallets/core": "0.2.0-beta.1",
+    "@coolwallet/core": "~0.1.0-beta.4",
     "@types/node": "^13.11.1",
     "base-x": "^3.0.7",
     "ripple-binary-codec": "^0.2.6",
     "typescript": "^3.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }

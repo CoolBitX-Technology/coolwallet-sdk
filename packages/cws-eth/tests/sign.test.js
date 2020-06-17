@@ -6,7 +6,7 @@ const appId = '0533ac5f177331221642adc02f7265bc3edb84d1';
 // const appPublicKey = '04cc68637846686549886133daa6acc4dceeed546bc04b8f258211df59ba2e28bbb5d4a1384a920acf0bbd1654dbcb5431ea1629e9856551bccb425c641de9f801';
 const appPrivateKey = '57a1c4ecdfc2dad7d392bf0f707ddd7280623f1b7de21e5efd42895b4b178737';
 
-const coreModule = require('@coolwallets/core');
+const coreModule = require('@coolwallet/core');
 
 class Transport {}
 

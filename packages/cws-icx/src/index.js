@@ -1,6 +1,6 @@
 import * as icx from './icx_sign'
 import { pubKeyToAddress } from './icx_util'
-import { coin as COIN } from '@coolwallets/core'
+import { coin as COIN } from '@coolwallet/core'
 
 export default class ICX extends COIN.ECDSACoin {
   constructor(transport, appPrivateKey, appId) {

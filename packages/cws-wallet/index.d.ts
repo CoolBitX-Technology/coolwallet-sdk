@@ -1,4 +1,4 @@
-declare module '@coolwallets/wallet' {
+declare module '@coolwallet/wallet' {
   
     export function generateKeyPair(): { publicKey: string, privateKey: string }
   

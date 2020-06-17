@@ -1,19 +1,19 @@
-# CoolWalletS Icon (ICX) App
+# CoolWallet Icon (ICX) App
 
-ICON API of CoolWalletS.
+ICON API of CoolWallet.
 
-![version](https://img.shields.io/npm/v/@coolwallets/icx)
+![version](https://img.shields.io/npm/v/@coolwallet/icx)
 
 ## Install
 
 ```shell
-npm install @coolwallets/icx
+npm install @coolwallet/icx
 ```
 
 ## Usage
 
 ```javascript
-import cwsICX from '@coolwallets/icx'
+import cwsICX from '@coolwallet/icx'
 const ICON = new cwsICX(transport, appPrivateKey, appId)
 ```
 

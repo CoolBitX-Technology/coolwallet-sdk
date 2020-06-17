@@ -1,4 +1,4 @@
-declare module '@coolwallets/core' {
+declare module '@coolwallet/core' {
 	type transport = import('./src/transport/index').default;
 	export namespace apdu {
 		export namespace coin {

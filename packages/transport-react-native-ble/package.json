@@ -1,29 +1,22 @@
 {
-  "name": "@coolwallets/transport-react-native-ble",
-  "version": "0.0.1-beta.4",
-  "description": "react-native ble transport layer for coolwallets.",
+  "name": "@coolwallet/transport-react-native-ble",
+  "version": "0.1.0-beta.0",
+  "description": "react-native ble transport layer for coolwallet.",
   "main": "lib/transport-react-native-ble.min.js",
   "scripts": {
     "build": "./node_modules/.bin/webpack",
     "upload": "rm -rf lib && ./node_modules/.bin/webpack && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "kunming0525@gmail.com",
+  "author": "coolwallet-team",
   "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-js-sdk.git"
-  },
-  "bugs": {
-    "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
-  },
   "peerDependencies": {
     "react": "^16.6.3",
     "react-native": "^0.58.0",
     "react-native-ble-plx": "^1.1.0"
   },
   "dependencies": {
-    "@coolwallets/core": "0.2.0-beta.1",
+    "@coolwallet/core": "~0.1.0-beta.4",
     "buffer": "^5.4.3"
   },
   "devDependencies": {
@@ -41,5 +34,12 @@
   },
   "jest": {
     "preset": "react-native"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }

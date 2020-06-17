@@ -1,7 +1,7 @@
-import { apdu, error as ERROR } from '@coolwallets/core';
+import { apdu, error as ERROR } from '@coolwallet/core';
 
 /**
- * Get Baisc information of CoolWalletS
+ * Get Baisc information of CoolWallet
  * @param {Tranpsort} transport
  * @return {Promise<{ paired:boolean, locked:boolean, walletCreated:boolean, showDetail:boolean, pairRemainTimes:number }>}
  */
@@ -16,7 +16,7 @@ export const getCardInfo = async (transport) => {
   const displayType = databuf.slice(9).toString('hex');
 
   if (accountDigest === '81c69f2d90' || accountDigest === '3d84ba58bf' || accountDigest === '83ccf4aab1') {
-    throw ERROR.SDKError('PleaseResetHardware', 'Bad Firmware status. Please reset your CoolWalletS.');
+    throw ERROR.SDKError('PleaseResetHardware', 'Bad Firmware status. Please reset your CoolWallet.');
   }
 
   const paired = pairStatus === '01';

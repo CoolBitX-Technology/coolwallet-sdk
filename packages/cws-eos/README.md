@@ -1,19 +1,19 @@
-# CoolWalletS EOS App
+# CoolWallet EOS App
 
-EOS API of CoolWalletS.
+EOS API of CoolWallet.
 
-![version](https://img.shields.io/npm/v/@coolwallets/eos)
+![version](https://img.shields.io/npm/v/@coolwallet/eos)
 
 ## Install
 
 ```shell
-npm install @coolwallets/eos
+npm install @coolwallet/eos
 ```
 
 ## Usage
 
 ```javascript
-import cwsEOS from '@coolwallets/eos';
+import cwsEOS from '@coolwallet/eos';
 
 const chainId = 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473';
 const EOS = new cwsEOS(transport, appPrivateKey, appId, chainId);
@@ -23,7 +23,7 @@ The chain id is default to mainnet: `aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a1
 
 ### Get EOS PublicKey
 
-Before broadcasting a transaction, you may need to get the public keys from CoolWalletS and use them to crate a EOS account.
+Before broadcasting a transaction, you may need to get the public keys from CoolWallet and use them to crate a EOS account.
 
 ```javascript
 let rawPublicKey = cwsEOS.getPublicKey(0)
@@ -42,7 +42,7 @@ console.log(EOSPublicKey)
 
 ### Sign Transaction
 
-CoolWalletS currently only support signing transaction with single eos transfer action.
+CoolWallet currently only support signing transaction with single eos transfer action.
 
 ```javascript
 

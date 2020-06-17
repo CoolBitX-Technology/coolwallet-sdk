@@ -1,4 +1,4 @@
-import { core } from '@coolwallets/core';
+import { core } from '@coolwallet/core';
 import * as util from './icx_util';
 
 /**

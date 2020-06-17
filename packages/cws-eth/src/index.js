@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { core } from '@coolwallets/core';
-import { coin as COIN } from '@coolwallets/core';
+import { core } from '@coolwallet/core';
+import { coin as COIN } from '@coolwallet/core';
 import * as ethSign from './eth_sign';
 import { pubKeyToAddress } from './eth_utils';
 

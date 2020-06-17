@@ -6,11 +6,11 @@ import {
 import {
   getBluetoothServiceUuids,
   getInfosForServiceUuid,
-} from "@coolwallets/core";
+} from "@coolwallet/core";
 
 import { Buffer } from 'buffer';
 
-import Transport from "@coolwallets/core";
+import Transport from "@coolwallet/core";
 
 import { convertToNumberArray } from "./util";
 

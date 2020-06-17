@@ -1,17 +1,17 @@
-# CoolWalletS Binance (BNB) App
+# CoolWallet Binance (BNB) App
 
-![version](https://img.shields.io/npm/v/@coolwallets/bnb)
+![version](https://img.shields.io/npm/v/@coolwallet/bnb)
 
 ## Install
 
 ```shell
-npm install @coolwallets/bnb
+npm install @coolwallet/bnb
 ```
 
 ## Usage
 
 ```javascript
-import cwsBNB from '@coolwallets/bnb';
+import cwsBNB from '@coolwallet/bnb';
 const BNB = new cwsBNB(transport, appPrivateKey, appId);
 ```
 
@@ -28,7 +28,7 @@ console.log(address);
 
 ### Sign Transactions
 
-CoolWalletS currently support 3 types of Binance DEX transaction: Transfer, PlaceOrder and CancelOrder.
+CoolWallet currently support 3 types of Binance DEX transaction: Transfer, PlaceOrder and CancelOrder.
 
 #### signTransfer
 

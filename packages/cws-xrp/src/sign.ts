@@ -1,10 +1,9 @@
-import { core, Transport } from "@coolwallets/core";
+import { core, Transport } from "@coolwallet/core";
 import * as coinUtil from "./util";
 import { Transaction } from "./types";
 
 const codec = require("ripple-binary-codec");
 
-// type Transport = import("@coolwallets/transport").default;
 type Payment = import("./types").Payment;
 
 const generateRawTx = (signature: any, payment: Payment): string => {

@@ -1,7 +1,7 @@
-import { core, apdu } from '@coolwallets/core';
+import { core, apdu } from '@coolwallet/core';
 
 /**
- * Set change address's path to CoolWalletS.
+ * Set change address's path to CoolWallet.
  */
 export const setChangeKeyid = async (
   transport: any,

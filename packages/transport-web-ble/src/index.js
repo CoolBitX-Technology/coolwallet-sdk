@@ -1,5 +1,5 @@
-import Transport from '@coolwallets/core';
-import { getBluetoothServiceUuids, getInfosForServiceUuid } from '@coolwallets/core';
+import Transport from '@coolwallet/core';
+import { getBluetoothServiceUuids, getInfosForServiceUuid } from '@coolwallet/core';
 import { convertToNumberArray } from './util';
 
 let server;

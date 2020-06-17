@@ -1,4 +1,4 @@
-import { apdu } from '@coolwallets/core';
+import { apdu } from '@coolwallet/core';
 import * as pairing from '../pairing.js';
 import { recovery, creation} from '../create.js';
 import * as setting from '../settings.js';

@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallets/xlm",
-  "version": "0.0.2",
-  "description": "XLM application API for coolwallets",
+  "name": "@coolwallet/xlm",
+  "version": "0.1.0-beta.0",
+  "description": "Coolwallet Stella sdk",
   "main": "lib/index.js",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
@@ -11,17 +11,17 @@
   },
   "keywords": [
     "cryptocurrency",
-    "coolwallets",
+    "coolwallet",
     "coolbitx",
     "stellar",
     "xlm",
     "transaction",
     "hardwarewallet"
   ],
-  "author": "anton@coolbitx.com",
+  "author": "coolwallet-team",
   "license": "ISC",
   "dependencies": {
-    "@coolwallets/core": "^0.0.20",
+    "@coolwallet/core": "~0.1.0-beta.4",
     "@types/crc": "^3.4.0",
     "base32.js": "^0.1.0",
     "crc": "^3.8.0"
@@ -31,5 +31,12 @@
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }

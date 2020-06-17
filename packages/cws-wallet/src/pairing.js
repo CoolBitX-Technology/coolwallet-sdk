@@ -1,6 +1,6 @@
 import {
   apdu, crypto, config, core
-} from '@coolwallets/core';
+} from '@coolwallet/core';
 
 /**
  * @param {Transport} transport

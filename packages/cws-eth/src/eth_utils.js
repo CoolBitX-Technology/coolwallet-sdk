@@ -1,7 +1,7 @@
 import elliptic from "elliptic";
-import { DataTooLong } from "@coolwallets/core";
+import { DataTooLong } from "@coolwallet/core";
 
-import { apdu } from "@coolwallets/core";
+import { apdu } from "@coolwallet/core";
 
 import { handleHex } from "./string_util";
 import * as scripts from "./scripts";

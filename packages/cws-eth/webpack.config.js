@@ -27,7 +27,7 @@ module.exports = {
     ]
   },
   externals: {
-    '@coolwallets/core': '@coolwallets/core',
+    '@coolwallet/core': '@coolwallet/core',
     web3: 'web3',
     rlp: 'rlp',
     elliptic: 'elliptic',

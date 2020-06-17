@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallets/eos",
-  "version": "0.0.3",
-  "description": "EOS Application API for CoolWalletS ",
+  "name": "@coolwallet/eos",
+  "version": "0.1.0-beta.0",
+  "description": "CoolWallet EOS sdk",
   "main": "lib/index.js",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
@@ -12,17 +12,17 @@
   "keywords": [
     "eos",
     "hardwarewallet",
-    "coolwallets",
+    "coolwallet",
     "coolbitx",
     "javascript",
     "transaction",
     "signing",
     "cryptocurrency"
   ],
-  "author": "anton@coolbitx.com",
+  "author": "coolwallet-team",
   "license": "ISC",
   "dependencies": {
-    "@coolwallets/core": "0.0.19",
+    "@coolwallet/core": "~0.1.0-beta.4",
     "bigi": "^1.4.2",
     "bs58": "^4.0.0",
     "bytebuffer": "^5.0.1",
@@ -38,5 +38,12 @@
     "@types/bigi": "^1.4.2",
     "@types/bs58": "^4.0.1",
     "@types/bytebuffer": "^5.0.40"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }

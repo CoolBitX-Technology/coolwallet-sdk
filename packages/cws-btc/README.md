@@ -1,17 +1,17 @@
-# CoolWalletS Bitcoin (LTC) App
+# CoolWallet Bitcoin (LTC) App
 
-![version](https://img.shields.io/npm/v/@coolwallets/btc)
+![version](https://img.shields.io/npm/v/@coolwallet/btc)
 
 ## Install
 
 ```shell
-npm i @coolwallets/btc
+npm i @coolwallet/btc
 ```
 
 ## Usage
 
 ```javascript
-import cwsBTC from '@coolwallets/btc'
+import cwsBTC from '@coolwallet/btc'
 
 const BTC = new cwsBTC(transport, appPrivateKey, appId)
 
