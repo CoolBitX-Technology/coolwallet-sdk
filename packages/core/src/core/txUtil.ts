@@ -1,7 +1,7 @@
 import { sign } from "../crypto/sign";
 import { aes256CbcDecrypt } from "../crypto/encryptions";
 import * as signatureTools from "../crypto/signature";
-import COMMAND from "../config/command";
+import { COMMAND } from "../config/command";
 import * as apdu from "../apdu/index";
 import { getCommandSignature } from "./auth";
 import Transport from "../transport";
@@ -13,13 +13,13 @@ import Transport from "../transport";
  * @param {String} appPrivateKey
  * @return {String} signature
  */
-const signForCoolWallet = (txDataHex: string, txDataType: string, appPrivateKey: string) => {
+const signForCoolWallet = (txDataHex: string, txDataType: string, appPrivateKey: string): string => {
   const command = COMMAND.TX_PREPARE;
   const P1 = txDataType;
   const P2 = "00";
   const prefix = command.CLA + command.INS + P1 + P2;
   const payload = prefix + txDataHex;
-  const signatureBuffer = sign(Buffer.from(payload, "hex"), appPrivateKey);
+  const signatureBuffer = sign(Buffer.from(payload, "hex").toString("hex"), appPrivateKey);
   return signatureBuffer.toString("hex");
 };
 
@@ -140,7 +140,7 @@ export const getEncryptedSignatures = async (
   preActions: Array<Function>,
   actions: Array<Function>,
   txPrepareCompleteCallback: Function | undefined = undefined
-) => {
+): Promise<Array<string>> => {
   // eslint-disable-next-line no-await-in-loop
   for (const preAction of preActions) await preAction();
   const encryptedSignatureArray = [];
@@ -158,7 +158,7 @@ export const getEncryptedSignatures = async (
  * @param {Function} authorizedCallback
  * @returns {Promise<String>}
  */
-export const getCWSEncryptionKey = async (transport: Transport, authorizedCallback: Function | undefined) => {
+export const getCWSEncryptionKey = async (transport: Transport, authorizedCallback: Function | undefined): Promise<string> => {
   const success = await apdu.tx.getTxDetail(transport);
   if (!success) throw new Error('get tx detail status fail!!');
 
@@ -184,7 +184,7 @@ export const decryptSignatureFromSE = (
   signatureKey: string,
   isEDDSA: boolean = false,
   returnCanonical: boolean = true
-) => {
+): { r: string; s: string; } | Buffer => {
   const iv = Buffer.alloc(16);
   iv.fill(0);
   const derSigBuff = aes256CbcDecrypt(

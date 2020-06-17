@@ -1,4 +1,29 @@
-const devices = {
+export type DeviceModelId = string;
+
+export type Device = {
+  [cws: string]: DeviceModel
+}
+
+export type DeviceModel = {
+  id: string,
+  productName: string,
+  bluetoothSpec?: Array<BluetoothSpec>
+};
+
+export type BluetoothSpec = {
+  serviceUuid: string,
+  writeUuid: string,
+  dataUuid: string,
+  checkUuid: string,
+  readUuid: string
+}
+
+export type BluetoothInfos = {
+  deviceModel: DeviceModel,
+} & BluetoothSpec;
+
+
+const devices: Device = {
   cws: {
     id: 'cws',
     productName: 'CoolWallets',
@@ -14,8 +39,8 @@ const devices = {
   }
 };
 
-let bluetoothServices = [];
-const serviceUuidToInfos = {};
+let bluetoothServices = Array();
+const serviceUuidToInfos: { [key: string]: any} = {};
 
 for (let id in devices) {
   const deviceModel = devices[id];
@@ -32,10 +57,10 @@ for (let id in devices) {
   }
 }
 
-export const getBluetoothServiceUuids = () => {
+export const getBluetoothServiceUuids = (): string[] => {
   return bluetoothServices
 };
 
-export const getInfosForServiceUuid = (uuid) => {
+export const getInfosForServiceUuid = (uuid: string): BluetoothInfos => {
   return serviceUuidToInfos[uuid.toLowerCase()];
 }

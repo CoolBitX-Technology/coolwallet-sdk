@@ -14,7 +14,7 @@ const getCheckSum = (data: any) => {
   return temp;
 };
 
-export const assemblyCommandAndData = (cla: string, ins: string, p1: string, p2: string, oriData: string) => {
+export const assemblyCommandAndData = (cla: string, ins: string, p1: string | undefined, p2: string | undefined, oriData: string) => {
   const pid = '00';
   const cmdLen = '09';
 
@@ -36,7 +36,7 @@ export const assemblyCommandAndData = (cla: string, ins: string, p1: string, p2:
   let oriDataLength = XORLength;
 
   if (packets.length > 0) {
-    copiedData = Buffer.from(copiedData, 'hex');
+    // copiedData = Buffer.from(copiedData, 'hex');
     const length = copiedData.length / packetLength;
     const remains = copiedData.length % packetLength;
     dataLength += length;

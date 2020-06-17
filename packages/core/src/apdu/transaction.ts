@@ -111,7 +111,7 @@ export const getTxDetail = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<boolean>}
  */
 export const setToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
-  const status = sn === 1
+  const { status}  = sn === 1
     ? await executeCommand(transport, 'SET_ERC20_TOKEN', 'SE', payload)
     : await executeCommand(transport, 'SET_SECOND_ERC20_TOKEN', 'SE', payload);
   return status === RESPONSE.SUCCESS;
@@ -125,7 +125,7 @@ export const setToken = async (transport: Transport, payload: string, sn: number
  * @return {Promise<boolean>}
  */
 export const setCustomToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
-  const status = sn === 1
+  const { status } = sn === 1
     ? await executeCommand(transport, 'SET_ERC20_TOKEN', 'SE', payload, '04', '18')
     : await executeCommand(transport, 'SET_SECOND_ERC20_TOKEN', 'SE', payload, '04', '18');
   return status === RESPONSE.SUCCESS;

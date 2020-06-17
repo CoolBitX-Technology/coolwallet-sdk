@@ -56,8 +56,8 @@ export const ECIESenc = (recipientPubKey: string, msg: string): string => {
   const msgBuf = Buffer.from(msg, 'hex');
   const ephemeral = crypto.createECDH('secp256k1');
   ephemeral.generateKeys();
-  const sharedSecret = ephemeral.computeSecret(Buffer.from(recipientPubKey, 'hex'), null, 'hex');
-  const hashedSecret = sha512(Buffer.from(sharedSecret, 'hex'));
+  const sharedSecret = ephemeral.computeSecret(Buffer.from(recipientPubKey, 'hex'), 'hex');
+  const hashedSecret = sha512(Buffer.from(sharedSecret, 'hex').toString("hex"));
   const encryptionKey = hashedSecret.slice(0, 32);
   const macKey = hashedSecret.slice(32);
   const iv = Buffer.allocUnsafe(16);
@@ -76,15 +76,15 @@ export const ECIESenc = (recipientPubKey: string, msg: string): string => {
  * @param {string} encryption
  * @returns {Buffer}
  */
-export const ECIESDec = (recipientPrivKey: string, encryption: string) => {
+export const ECIESDec = (recipientPrivKey: string, encryption: string): string | undefined => {
   const encryptionBuf = Buffer.from(encryption, 'hex');
   const ephemeralPubKey = encryptionBuf.slice(0, 65);
   const mac = encryptionBuf.slice(65, 85);
   const ciphertext = encryptionBuf.slice(85);
   const recipient = crypto.createECDH('secp256k1');
   recipient.setPrivateKey(Buffer.from(recipientPrivKey, 'hex'));
-  const sharedSecret = recipient.computeSecret(ephemeralPubKey, null, 'hex');
-  const hashedSecret = sha512(Buffer.from(sharedSecret, 'hex'));
+  const sharedSecret = recipient.computeSecret(ephemeralPubKey, 'hex');
+  const hashedSecret = sha512(sharedSecret);
   const encryptionKey = hashedSecret.slice(0, 32);
   const macKey = hashedSecret.slice(32);
 
@@ -92,9 +92,8 @@ export const ECIESDec = (recipientPrivKey: string, encryption: string) => {
   iv.fill(0);
   const dataToMac = Buffer.concat([iv, ephemeralPubKey, ciphertext]);
   const realMac = hmacSha1(macKey, dataToMac);
-
   if (equalConstTime(mac, realMac)) {
     return aes256CbcDecrypt(iv, encryptionKey, ciphertext).toString('hex');
   }
-  return false;
+  return undefined;
 };

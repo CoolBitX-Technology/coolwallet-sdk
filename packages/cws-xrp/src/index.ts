@@ -1,8 +1,8 @@
-import { coin as COIN, Transport } from "@coolwallets/core";
+import { coin as COIN, transport } from "@coolwallets/core";
 import * as xrpSign from "./sign";
 import * as xrpUtil from "./util";
 
-// type Transport = import("@coolwallets/transport").default;
+type Transport = transport.default;
 type Payment = import("./types").Payment;
 
 export default class XRP extends COIN.ECDSACoin implements COIN.Coin{

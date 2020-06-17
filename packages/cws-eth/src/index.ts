@@ -1,9 +1,10 @@
 /* eslint-disable no-param-reassign */
-import { core, Transport } from '@coolwallets/core';
+import { core, transport } from '@coolwallets/core';
 import { coin as COIN } from '@coolwallets/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 
+type Transport = transport.default;
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor(transport: Transport, appPrivateKey: string, appId: string) {
     super(transport, appPrivateKey, appId, '3C');

@@ -1,11 +1,11 @@
-import { core, Transport } from '@coolwallets/core';
+import { core, transport } from '@coolwallets/core';
 import crypto from 'crypto';
 import BigInteger from 'bigi';
 import base58 from 'bs58';
 
 import { genSignBuf } from './eos_utils';
 
-// type Transport = import('@coolwallets/transport').default;
+type Transport = transport.default;
 type Transaction = import('./types').Transaction;
 const elliptic = require('elliptic');
 

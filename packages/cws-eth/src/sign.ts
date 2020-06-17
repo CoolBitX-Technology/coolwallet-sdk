@@ -1,10 +1,11 @@
-import { core, Transport, transport } from '@coolwallets/core';
+import { core, transport, error } from '@coolwallets/core';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import { isHex, keccak256 } from './lib';
 import * as ethUtil from './utils/ethUtils';
 import { removeHex0x } from './utils/stringUtil';
 
 const rlp = require('rlp');
+type Transport = transport.default;
 
 /**
  * sign ETH Transaction
@@ -27,7 +28,7 @@ export const signTransaction = async (
   coinType: string,
   transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number},
   addressIndex: number,
-  publicKey: string,
+  publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined,
 ): Promise<string> => {
@@ -50,7 +51,7 @@ export const signTransaction = async (
     );
   } else {
     const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
-    const { readType, preAction } = ethUtil.getReadType(txType);
+    const { readType } = ethUtil.getReadType(txType);
     const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
     canonicalSignature = await core.flow.sendDataToCoolWallet(
       transport,
@@ -59,20 +60,22 @@ export const signTransaction = async (
       dataForSE,
       '00',
       false,
-      preAction,
+      undefined,
       confirmCB,
       authorizedCB
     );
   }
-
-
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(
-    canonicalSignature,
-    rlp.encode(rawPayload),
-    publicKey
-  );
-  const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
-  return serializedTx;
+  if (!Buffer.isBuffer(canonicalSignature)){
+    const { v, r, s } = await ethUtil.genEthSigFromSESig(
+      canonicalSignature,
+      rlp.encode(rawPayload),
+      publicKey
+    );
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    return serializedTx;
+  } else {
+    throw new error.SDKError('signTransaction failed', 'canonicalSignature type error');
+  }
 };
 
 /**
@@ -89,13 +92,13 @@ export const signTransaction = async (
  * @return {Promise<String>}
  */
 export const signMessage = async (
-  transport: transport,
+  transport: Transport,
   appId: string,
   appPrivateKey: string,
   coinType: string,
   message: string,
   addressIndex: number,
-  publicKey: string,
+  publicKey: string | undefined = undefined,
   isHashRequired: boolean = false,
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined
@@ -134,9 +137,13 @@ export const signMessage = async (
     authorizedCB
   );
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
-  const signature = `0x${r}${s}${v.toString(16)}`;
-  return signature;
+  if (!Buffer.isBuffer(canonicalSignature)) {
+    const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
+    const signature = `0x${r}${s}${v.toString(16)}`;
+    return signature;
+  } else {
+    throw new error.SDKError('signMessage failed', 'canonicalSignature type error');
+  }
 };
 
 /**
@@ -157,9 +164,9 @@ export const signTypedData = async (
   appId: string,
   appPrivateKey: string,
   coinType: string,
-  typedData: object,
+  typedData: any,
   addressIndex: number,
-  publicKey: string,
+  publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined
 ): Promise<string> => {
@@ -194,8 +201,14 @@ export const signTypedData = async (
     authorizedCB
   );
 
-  const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
-  const signature = `0x${r}${s}${v.toString(16)}`;
+  if (!Buffer.isBuffer(canonicalSignature)) {
+    const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
+    const signature = `0x${r}${s}${v.toString(16)}`;
 
-  return signature;
+    return signature;
+  } else {
+    throw new error.SDKError('signTypedData failed', 'canonicalSignature type error');
+  }
+
+
 };

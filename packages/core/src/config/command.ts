@@ -1,4 +1,14 @@
-export default {
+type COMMANDS = {
+  [key: string]: {
+    CLA: string,
+    INS: string,
+    P1: string | undefined,
+    P2: string | undefined
+  };
+};
+
+
+export const COMMAND: COMMANDS = {
   ECHO: {
     CLA: '80',
     INS: '68',
@@ -8,7 +18,7 @@ export default {
   REGISTER: {
     CLA: '80',
     INS: '10',
-    P1: null,
+    P1: undefined,
     P2: '00'
   },
   SAY_HI: {
@@ -20,7 +30,7 @@ export default {
   CHANGE_PAIR_STATUS: {
     CLA: '80',
     INS: '14',
-    P1: null,
+    P1: undefined,
     P2: '00'
   },
   GET_PAIRED_DEVICES: {
@@ -62,14 +72,14 @@ export default {
   SET_CHANGE_KEYID: {
     CLA: '80',
     INS: '40',
-    P1: null,
+    P1: undefined,
     P2: '00'
   },
   TX_PREPARE: {
     CLA: '80',
     INS: '32',
-    P1: null,
-    P2: null
+    P1: undefined,
+    P2: undefined
   },
   SEND_SCRIPT: {
     CLA: '80',
@@ -92,8 +102,8 @@ export default {
   TX_PREPARE_FOR_TESTNET: {
     CLA: '80',
     INS: '42',
-    P1: null,
-    P2: null
+    P1: undefined,
+    P2: undefined
   },
   FINISH_PREPARE: {
     CLA: '80',
@@ -134,20 +144,20 @@ export default {
   GET_EXT_KEY: {
     CLA: '80',
     INS: '28',
-    P1: null,
-    P2: null
+    P1: undefined,
+    P2: undefined
   },
   GET_ED25519_ACC_PUBKEY: {
     CLA: '80',
     INS: '94',
-    P1: null,
-    P2: null
+    P1: undefined,
+    P2: undefined
   },
   GET_XLM_ACC_PUBKEY: {
     CLA: '80',
     INS: '96',
-    P1: null,
-    P2: null
+    P1: undefined,
+    P2: undefined
   },
   CREATE_WALLET: {
     CLA: '80',
@@ -194,13 +204,13 @@ export default {
   GET_KEYID: {
     CLA: '80',
     INS: '6C',
-    P1: null,
+    P1: undefined,
     P2: '00'
   },
   SHOW_FULL_ADDRESS: {
     CLA: '80',
     INS: '64',
-    P1: null,
+    P1: undefined,
     P2: '00'
   },
   GET_SE_VERSION: {
@@ -260,8 +270,8 @@ export default {
   FW_UPDATE: {
     CLA: 'FF',
     INS: '6F',
-    P1: null,
-    P2: null
+    P1: undefined,
+    P2: undefined
   },
   SELECT_APPLET: {
     CLA: '00',
@@ -309,25 +319,25 @@ export default {
   SC_SEND_SEGMENT: {
     CLA: '80',
     INS: 'CC',
-    P1: null,
-    P2: null
+    P1: undefined,
+    P2: undefined
   },
   MCU_SET_MNEMONIC_INFO: {
     CLA: "7F",
     INS: "10",
-    P1: null,
+    P1: undefined,
     P2: "00"
   },
   MCU_SET_CHARACTER_ID: {
     CLA: "7F",
     INS: "11",
-    P1: null,
+    P1: undefined,
     P2: "00"
   },
   MCU_CANCEL_RECOVERY: {
     CLA: "7F",
     INS: "12",
-    P1: null,
+    P1: undefined,
     P2: "00"
   },
   GET_MCU_STATUS: {

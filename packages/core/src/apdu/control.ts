@@ -40,7 +40,7 @@ export const cancelAPDU = async (transport: Transport) => {
  * @param {Transport}
  * @return {Promise<boolean>}
  */
-export const powerOff = async (transport): Promise<boolean> => {
+export const powerOff = async (transport: Transport): Promise<boolean> => {
   await executeCommand(transport, 'PWR_OFF', 'SE');
   return true;
 };

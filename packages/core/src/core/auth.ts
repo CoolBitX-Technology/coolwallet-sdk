@@ -1,5 +1,5 @@
 import { FirmwareVersionTooLow } from '../error/index';
-import COMMAND from '../config/command';
+import { COMMAND } from '../config/command';
 import { sign } from '../crypto/sign';
 import { control, setting } from '../apdu/index';
 import { checkSupportScripts } from './controller';
@@ -23,7 +23,7 @@ export const getCommandSignature = async (
   commandName: string,
   data: string | undefined,
   params1: string | undefined,
-  params2: string | undefined,
+  params2: string | undefined = undefined,
   isCreateWallet: boolean = false
 ) => {
   const nonce = await control.getNonce(transport);

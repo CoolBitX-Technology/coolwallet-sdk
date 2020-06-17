@@ -1,6 +1,7 @@
-import bip66 from 'bip66';
+// import bip66 from 'bip66';
 import BN from 'bn.js';
 
+const bip66 = require('bip66')
 /**
  * @description
  * @param {String} signature derSig hex string
@@ -30,26 +31,24 @@ export const parseDERsignature = (signature: string) => {
  * @param {{r:string, s:string}}
  * @return {Buffer}
  */
-export const convertToDER = (sig: { r: string, s: string }) => {
-	let r = Buffer.from(sig.r, 'hex');
-	let s = Buffer.from(sig.s, 'hex');
+export const convertToDER = (sig: { r: string, s: string }): { r: string; s: string; } => {
+	let canRBuffer = Buffer.from(sig.r, 'hex');
+	let canSBuffer = Buffer.from(sig.s, 'hex');
 
-	const canSBuffer = Buffer.from(s, 'hex');
-	const canRBuffer = Buffer.from(r, 'hex');
 	// eslint-disable-next-line no-bitwise
 	if (canSBuffer[0] & 0x80) {
 		const buf = Buffer.alloc(1);
 		const temp = Buffer.concat([buf, canSBuffer], canSBuffer.length + 1);
-		s = temp;
+		canSBuffer = temp;
 	}
 	// eslint-disable-next-line no-bitwise
 	if (canRBuffer[0] & 0x80) {
 		const buf = Buffer.alloc(1);
 		const temp = Buffer.concat([buf, canRBuffer], canRBuffer.length + 1);
-		r = temp;
+		canRBuffer = temp;
 	}
 
-	const derSignature = bip66.encode(r, s);
+	const derSignature = bip66.encode(canRBuffer, canSBuffer);
 	return derSignature;
 };
 

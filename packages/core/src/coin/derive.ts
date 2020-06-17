@@ -67,8 +67,8 @@ export const getEd25519PublicKey = async (
   coinSEType: string,
   accountIndex: number,
   protocol: string,
-  authFirst = true
-) => {
+  authFirst: boolean = true
+): Promise<string | undefined> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
   const accIndexHex = accountIndex.toString(16).padStart(2, "0");

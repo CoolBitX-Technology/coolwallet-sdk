@@ -1,5 +1,5 @@
 // import elliptic from "elliptic";
-import { DataTooLong, Transport } from "@coolwallets/core";
+import { error, transport } from "@coolwallets/core";
 
 import { apdu } from "@coolwallets/core";
 
@@ -10,6 +10,8 @@ import * as token from "../token";
 import { keccak256, toChecksumAddress } from "../lib";
 
 const rlp = require("rlp");
+
+type Transport = transport.default;
 
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
@@ -82,7 +84,7 @@ export const getRawHex = (transaction: any): Array<Buffer> => {
   raw[8] = Buffer.allocUnsafe(0);
 
   const t = rlp.encode(raw);
-  if (t.length > 870) throw new DataTooLong();
+  if (t.length > 870) throw new error.DataTooLong();
   return raw;
 };
 
@@ -172,9 +174,9 @@ export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: st
  * @return {Promise<{v: Number, r: String, s: String}>}
  */
 export const genEthSigFromSESig = async (
-  canonicalSignature: { r: string; s: string; },
+  canonicalSignature: { r: string; s: string },
   payload: Buffer,
-  compressedPubkey: string
+  compressedPubkey: string | undefined = undefined
 ): Promise<{ v: number; r: string; s: string; }> => {
   const hash = keccak256(payload);
   const data = Buffer.from(handleHex(hash), "hex");

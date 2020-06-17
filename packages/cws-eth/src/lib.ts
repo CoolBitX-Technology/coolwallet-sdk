@@ -1,4 +1,6 @@
-import Web3 from "web3";
+// import Web3 from "web3";
+
+const Web3 = require('Web3');
 
 const web3 = new Web3();
 

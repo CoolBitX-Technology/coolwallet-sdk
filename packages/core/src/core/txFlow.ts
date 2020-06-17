@@ -82,7 +82,7 @@ export const sendDataToCoolWallet = async (
   txPrepareCompleteCallback: Function | undefined = undefined,
   authorizedCallback: Function | undefined = undefined,
   returnCanonical: boolean = true
-) => {
+): Promise<{ r: string; s: string; } | Buffer> => {
   await sayHi(transport, appId);
 
   if (typeof preAction === 'function') await preAction();

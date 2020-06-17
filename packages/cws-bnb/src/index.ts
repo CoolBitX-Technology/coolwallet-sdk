@@ -1,4 +1,4 @@
-import { coin as COIN, Transport} from '@coolwallets/core';
+import { coin as COIN, transport} from '@coolwallets/core';
 import signTransfer from './sign';
 import { publicKeyToAddress } from './util';
 
@@ -6,6 +6,7 @@ import { publicKeyToAddress } from './util';
 type Transfer = import('./types').Transfer;
 type PlaceOrder = import('./types').PlaceOrder;
 type CancelOrder = import('./types').CancelOrder;
+type Transport = transport.default;
 
 export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   constructor(transport: Transport, appPrivateKey: string, appId: string) {

@@ -1,7 +1,7 @@
-import { core, Transport } from '@coolwallets/core';
+import { core, transport } from '@coolwallets/core';
 import * as bnbUtil from './util';
 
-// type Transport = import('@coolwallets/transport').default;
+type Transport = transport.default;
 type BNBTx = import('./types').Transaction;
 
 /**

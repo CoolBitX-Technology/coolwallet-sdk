@@ -1,5 +1,5 @@
 import { OperationCanceled, NoTransport } from '../error/index';
-import COMMAND from '../config/command';
+import {COMMAND} from '../config/command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';
 import { SHA256 } from '../crypto/hash';
@@ -14,6 +14,10 @@ import Transport from '../transport/index';
  */
 const executeAPDU = async (commandName: string, transport: Transport, apdu: { command: string, data: string }, commandType: string): Promise<{ status: string, outputData: string }> => {
   if (typeof transport.request !== 'function') throw new NoTransport();
+  // TODO app transport
+  if (!transport.request) {
+    return await transport.requestAPDUV2(apdu);
+  } 
   const response = await transport.request(apdu.command, apdu.data);
   if (commandType === 'SE') {
     const status = response.slice(-4);
