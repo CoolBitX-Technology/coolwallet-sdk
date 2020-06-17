@@ -19,7 +19,7 @@ export const authGetExtendedKey = async (transport: Transport, signature: string
  * @param {string} accIndex P2
  * @return {Promise<string>}
  */
-export const getAccountExtendedKey = async (transport: any, coinType: string, accIndex: string): Promise<string> => {
+export const getAccountExtendedKey = async (transport: Transport, coinType: string, accIndex: string): Promise<string> => {
   const { outputData } = await executeCommand(transport, 'GET_EXT_KEY', 'SE', undefined, coinType, accIndex);
   return outputData;
 };
