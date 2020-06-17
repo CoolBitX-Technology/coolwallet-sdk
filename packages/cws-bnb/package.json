@@ -1,6 +1,6 @@
 {
-  "name": "@coolwallets/bnb",
-  "version": "0.0.1",
+  "name": "@coolwallet/bnb",
+  "version": "0.1.0-beta.0",
   "description": "Binance API for CoolWalletS",
   "main": "lib/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "hardwarewallet",
     "sdk"
   ],
-  "author": "anton@coolbitx.com",
+  "author": "coolwallet-team",
   "license": "ISC",
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -30,7 +30,14 @@
     "@types/bech32": "^1.1.1"
   },
   "dependencies": {
-    "@coolwallets/core": "^0.0.20",
+    "@coolwallet/core": "~0.1.0-beta.4",
     "bech32": "^1.1.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }
