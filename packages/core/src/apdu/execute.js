@@ -12,7 +12,7 @@ import { SHA256 } from '../crypto/hash';
  * @param {string} commandType SE or MCU
  */
 const executeAPDU = async (commandName, transport, apdu, commandType) => {
-  if (!transport.request) {
+  if (transport.requestAPDUV2) {
     return await transport.requestAPDUV2(apdu);
   }
   if (typeof transport.request !== 'function') throw new NoTransport();
