@@ -3,6 +3,7 @@ import {
 } from '@coolwallets/core';
 type Transport = transport.default;
 
+const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;
 
 /**
  * @param {Transport} transport
@@ -34,7 +35,7 @@ export const register = async (transport: Transport, appPublicKey: string, passw
     data = crypto.encryption.ECIESenc(config.KEY.SEPublicKey, data);
     P1 = '01';
   }
-  const appId = await apdu.pairing.registerDevice(transport, data, P1);
+  const { outputData: appId } = await apdu.execute.executeCommand(transport, 'REGISTER', 'SE', data, P1);
   return appId;
 };
 
@@ -54,7 +55,25 @@ export const getPairedApps = async (transport: Transport, appId: string, appPriv
     undefined,
     undefined
   );
-  const apps = await apdu.pairing.getPairedApps(transport, signature, forceUseSC);
+  const { outputData } = await apdu.execute.executeCommand(
+    transport,
+    'GET_PAIRED_DEVICES',
+    'SE',
+    signature, undefined, undefined,
+    true, forceUseSC
+  );
+  const appsInfo = outputData.match(/.{100}/g);
+  if (!appsInfo) {
+    throw new Error('appsInfo is undefined')
+  }
+  const apps = appsInfo.map((appInfo) => {
+    const appId = appInfo.slice(0, 40);
+    const appName = Buffer.from(appInfo.slice(40), 'hex')
+      .toString()
+      // eslint-disable-next-line no-control-regex
+      .replace(/\u0000/gi, '');
+    return { appId, appName };
+  });
   return apps;
 };
 
@@ -74,10 +93,34 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
     undefined,
     undefined
   );
-  const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
+  const { outputData: encryptedPassword } = await apdu.execute.executeCommand(transport, 'GET_PAIR_PWD', 'SE', signature, undefined, undefined, true, forceUseSC);
+  
+  // const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
   await apdu.control.powerOff(transport);
   let password = crypto.encryption.ECIESDec(appPrivKey, encryptedPassword);
   if (!password) throw new error.SDKError('getPairingPassword error', 'password is undefined')
   password = password.replace(/f/gi, '');
   return password;
+};
+
+/**
+ * Remove Paired device by id
+ * @param {Transport} transport
+ * @param {string} appIdWithSig
+ * @return {Promise<boolean>}
+ */
+export const removePairedDevice = async (transport: Transport, appIdWithSig: string): Promise<boolean> => {
+  const { status } = await apdu.execute.executeCommand(transport, 'REMOVE_DEVICES', 'SE', appIdWithSig);
+  return status === SUCCESS;
+};
+
+/**
+ * Rename current device
+ * @param {Transport} transport
+ * @param {string} nameWithSig
+ * @return {Promise<boolean>}
+ */
+export const renameDevice = async (transport: Transport, nameWithSig: string): Promise<boolean> => {
+  const { status } = await apdu.execute.executeCommand(transport, 'RENAME_DEVICES', 'SE', nameWithSig);
+  return status === SUCCESS;
 };
