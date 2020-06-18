@@ -47,7 +47,6 @@ async function signTransaction(
 			change,
 		);
 		const utxoArguments = getUtxoArguments(inputs, preparedData);
-		//signatures = await core.flow.sendBatchScriptAndDataToCard();
 		signatures = await core.flow.sendBatchScriptAndDataToCard(
 			transport,
 			appId,

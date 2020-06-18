@@ -13,6 +13,10 @@ import { SHA256 } from '../crypto/hash';
  */
 const executeAPDU = async (commandName, transport, apdu, commandType) => {
   if (typeof transport.request !== 'function') throw new NoTransport();
+  console.log("{")
+  console.log(" command: " + apdu.command)
+  console.log(" data: " + apdu.data)
+  console.log("}")
   const response = await transport.request(apdu.command, apdu.data);
   if (commandType === 'SE') {
     const status = response.slice(-4);
@@ -87,15 +91,16 @@ export const executeCommand = async (
  * @param {string} apduData apdu data field
  */
 export const sendWithSecureChannel = async (transport, apduHeader, apduData, forceUseSC) => {
+  //todo
   const salt = '88888888';
   const dataToHash = apduHeader.concat(salt, apduData);
   const hash = SHA256(dataToHash).toString('hex');
   const packedData = apduHeader.concat(hash, salt, apduData);
-
+  console.log("Secure channel: " + packedData.toString('hex'))
   const channelVersion = '01';
   const useSecure = '00';
   const useSign = forceUseSC ? '01' : '00';
-
+  // cipherData = [channelVersion(1B)] [useSecure(1B)] [useSign(1B)] [packedData(Variety)]
   const cypherData = channelVersion.concat(useSecure, useSign, packedData);
 
   // Devide cypher data and send with 250 bytes each command

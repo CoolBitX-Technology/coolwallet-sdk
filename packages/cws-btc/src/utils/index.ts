@@ -86,6 +86,12 @@ function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer
 	return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
 }
 
+function toNonReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
+	const bn = new BN(numberOrString);
+	const buf = Buffer.from(bn.toArray());
+	return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
+}
+
 function addressToOutScript(address: string): ({ scriptType: ScriptType, outScript: Buffer, outHash?: Buffer }) {
 	let scriptType;
 	let payment;
@@ -373,6 +379,7 @@ function getArgument(
 	}
 	let outputScriptType;
 	let outputHashBuf;
+	//todo
 	if (outputType == ScriptType.P2PKH) {
 		outputScriptType = toUintBuffer(0, 1);
 		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
@@ -385,7 +392,7 @@ function getArgument(
 	} else {
 		throw new Error(`Unsupport ScriptType : ${outputType}`);
 	}
-	const outputAmount = toUintBuffer(output.value, 8);
+	const outputAmount = toNonReverseUintBuffer(output.value, 8);
 	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
 	let haveChange;
 	let changeScriptType;
@@ -395,7 +402,7 @@ function getArgument(
 		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
 		haveChange = toUintBuffer(1, 1);
 		changeScriptType = toUintBuffer(outputType, 1);
-		changeAmount = toUintBuffer(change.value, 8);
+		changeAmount = toNonReverseUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
 		changePath = Buffer.from(`328000002C800000008000000000000000${addressIdxHex}`, 'hex');
 	} else {
@@ -443,7 +450,7 @@ function getScriptAndArgument(
 	const argument = getArgument(inputs, output, change);
 	return {
 		script,
-		argument,
+		argument: "00" + argument,// keylength zero
 	};
 };
 
@@ -453,12 +460,14 @@ function getUtxoArguments(
 ): Array<string> {
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
+			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
+			const SEPath = `15328000002C800000008000000000000000${addressIdxHex}`;
 			const outPoint = preparedInput.preOutPointBuf;
 			// todo
 			const inputScriptType = toUintBuffer(0, 1);
-			const inputAmount = preparedInput.preValueBuf;
+			const inputAmount = preparedInput.preValueBuf.reverse();
 			const inputHash = hash160(preparedInput.pubkeyBuf);
-			return Buffer.concat([outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
+			return Buffer.concat([Buffer.from(SEPath, 'hex'), outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
 		});
 	return utxoArguments;
 };
