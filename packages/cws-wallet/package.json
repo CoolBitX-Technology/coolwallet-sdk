@@ -4,9 +4,11 @@
   "description": "",
   "main": "lib/index.js",
   "scripts": {
-    "test": "jest --coverage",
-    "build": "babel -d lib/ src",
-    "publish-single": "npm run build && npm publish"
+    "build:js": "babel -d lib/ src",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:js && npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "author": "",
   "license": "Apache-2.0",

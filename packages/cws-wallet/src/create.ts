@@ -1,19 +1,21 @@
 import {
-  apdu, core, crypto, config
+  apdu, core, crypto, config, transport
 } from '@coolwallets/core';
 
-const bip39 = require('bip39')
+const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;
+
+type Transport = transport.default;
 
 /**
  * Create a new seed with SE.
- * @param {transport} transport
+ * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivateKey
  * @param {Number} strength 12, 18, 24
  * @return {Promise<boolean>}
  */
-async function createWallet(transport, appId, appPrivateKey, strength) {
+async function createWallet(transport: Transport, appId: string, appPrivateKey: string, strength: number): Promise<boolean> {
   let strengthHex = strength.toString(16);
   if (strengthHex.length % 2 > 0) strengthHex = `0${strengthHex}`;
   const { signature, forceUseSC } = await core.auth.getCommandSignature(
@@ -22,8 +24,8 @@ async function createWallet(transport, appId, appPrivateKey, strength) {
     appPrivateKey,
     'CREATE_WALLET',
     strengthHex,
-    null,
-    null,
+    undefined,
+    undefined,
     true
   );
   const strengthWithSig = strengthHex + signature;
@@ -32,11 +34,11 @@ async function createWallet(transport, appId, appPrivateKey, strength) {
 
 /**
  * Send sum of number seeds.
- * @param {transport}
+ * @param {Transport}
  * @param {number} checkSum
  * @return {Promise<boolean>}
  */
-async function sendCheckSum(transport, checkSum) {
+async function sendCheckSum(transport: Transport, checkSum: number): Promise<boolean> {
   const sumHex = checkSum.toString(16).padStart(8, '0');
   return apdu.wallet.submitCheckSum(transport, sumHex);
 }
@@ -48,14 +50,15 @@ async function sendCheckSum(transport, checkSum) {
  * @param {string} seedHex
  * @return {Promise<boolean>}
  */
-async function setSeed(transport, appId, appPrivateKey, seedHex) {
+async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string): Promise<boolean> {
   const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
   const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
     'SET_SEED',
-    encryptedSeed
+    encryptedSeed,
+    undefined
   );
   const signedSeed = encryptedSeed + signature;
   return apdu.wallet.setSeed(transport, signedSeed, forceUseSC);
@@ -63,12 +66,12 @@ async function setSeed(transport, appId, appPrivateKey, seedHex) {
 
 /**
  * 
- * @param {Transport}
+ * @param {Transport} transport
  * @param {number} strength 
  * @param {number} randomBytes
  * @return {Promise<string>}
  */
-async function createSeedByApp(transport, strength, randomBytes) {
+async function createSeedByApp(transport: Transport, strength: number, randomBytes: Buffer): Promise<string> {
 
   const toBit = strength * 10.7;
   const toFloor = Math.floor(toBit);
@@ -82,10 +85,10 @@ async function createSeedByApp(transport, strength, randomBytes) {
 
 /**
  *
- * @param {Transport}
+ * @param {Transport} transport
  * @param {number} strength 
  */
-async function initSecureRecovery (transport, strength) {
+async function initSecureRecovery(transport: Transport, strength: number) {
   const P1 = strength.toString(16).padStart(2, '0');
   return apdu.wallet.initSecureRecovery(transport, P1);
 };
@@ -95,7 +98,7 @@ async function initSecureRecovery (transport, strength) {
  * @param {Transport} transport
  * @param {number} index 
  */
-async function setSecureRecoveryIdx(transport, index) {
+async function setSecureRecoveryIdx(transport: Transport, index: number) {
   const P1 = index.toString(16).padStart(2, '0'); 
   return apdu.wallet.setSecureRecoveryIdx(transport, P1);
 };
@@ -103,9 +106,9 @@ async function setSecureRecoveryIdx(transport, index) {
 /**
  *
  * @param {Transport} transport
- * @param {number} type
+ * @param {string} type
  */
-async function cancelSecureRecovery(transport, type) {
+async function cancelSecureRecovery(transport: Transport, type: string) {
   let P1;
   if (type === '00') {
     P1 = '05';
@@ -121,7 +124,7 @@ async function cancelSecureRecovery(transport, type) {
  *
  * @param {Transport} transport
  */
-async function getSecureRecoveryStatus(transport){
+async function getSecureRecoveryStatus(transport: Transport){
   return apdu.wallet.getSecureRecoveryStatus(transport);
 }
 
