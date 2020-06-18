@@ -1,10 +1,10 @@
-import { coin as COIN, Transport } from '@coolwallets/core';
+import { coin as COIN, transport } from '@coolwallets/core';
 import signTransaction from './sign';
-import { pubKeyToAddress } from './util';
+import { pubKeyToAddress } from './utils/util';
 
-// type Transport = import('@coolwallets/transport').default;
+type Transport = transport.default;
 
-export default class ICX extends COIN.ECDSACoin {
+export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
   constructor(transport: Transport, appPrivateKey: string, appId: string) {
     super(transport, appPrivateKey, appId, '4A');
   }
@@ -23,7 +23,7 @@ export default class ICX extends COIN.ECDSACoin {
   async signTransaction(
     transaction: string | Object,
     addressIndex: number,
-    publicKey: string | undefined = undefined,
+    publicKey: string,
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ) {

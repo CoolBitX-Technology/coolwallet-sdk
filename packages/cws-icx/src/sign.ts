@@ -1,7 +1,7 @@
-import { core, Transport } from '@coolwallets/core';
-import * as icxUtil from './util';
+import { core, transport } from '@coolwallets/core';
+import * as icxUtil from './utils/util';
 
-// type Transport = import('@coolwallets/transport').default;
+type Transport = transport.default;
 
 /**
  * Sign ICON Transaction
