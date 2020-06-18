@@ -1,22 +1,21 @@
 declare module '@coolwallet/core' {
-	type transport = import('./src/transport/index').default;
 	export namespace apdu {
 		export namespace coin {
 			export function authGetExtendedKey(
-				transport: transport,
+				transport: Transport,
 				signature: string
 			): Promise<
 				string
 			>;
 			export function getAccountExtendedKey(
-				transport: transport,
+				transport: Transport,
 				coinType: string,
 				accIndex: string
 			): Promise<
 				string
 			>;
 			export function getEd25519AccountPublicKey(
-				transport: transport,
+				transport: Transport,
 				coinType: string,
 				accIndex: string,
 				protocol: string
@@ -27,23 +26,23 @@ declare module '@coolwallet/core' {
 
 		export namespace control {
 			export function sayHi(
-				transport: transport,
+				transport: Transport,
 				appId: string
 			): Promise<
 				Boolean
 			>;
 			export function getNonce(
-				transport: transport
+				transport: Transport
 			): Promise<
 				string
 			>;
 			export function cancelAPDU(
-				transport: transport
+				transport: Transport
 			): Promise<
 				void
 			>;
 			export function powerOff(
-				transport: transport
+				transport: Transport
 			): Promise<
 				void
 			>;
@@ -51,20 +50,20 @@ declare module '@coolwallet/core' {
 
 		export namespace pairing {
 			export function registerDevice(
-				transport: transport,
+				transport: Transport,
 				data: string,
 				P1: string
 			): Promise<
 				string
 			>;
 			export function getPairingPassword(
-				transport: transport,
+				transport: Transport,
 				data: string
 			): Promise<
 				string
 			>;
 			export function getPairedApps(
-				trasnport: transport,
+				transport: Transport,
 				signature: string
 			): Promise<
 				Array<{
@@ -73,13 +72,13 @@ declare module '@coolwallet/core' {
 				}>
 			>;
 			export function removePairedDevice(
-				trasnport: transport,
+				transport: Transport,
 				appIdWithSig: string
 			): Promise<
 				Boolean
 			>;
 			export function renameDevice(
-				trasnport: transport,
+				transport: Transport,
 				nameWithSig: string
 			): Promise<
 				Boolean
@@ -88,17 +87,17 @@ declare module '@coolwallet/core' {
 
 		export namespace setting {
 			export function resetCard(
-				transport: transport
+				transport: Transport
 			): Promise<
 				boolean
 			>;
 			export function getCardInfo(
-				transport: transport
+				transport: Transport
 			): Promise<
 				string
 			>;
 			export function getSEVersion(
-				transport: transport
+				transport: Transport
 			): Promise<
 				number
 			>;
@@ -106,7 +105,7 @@ declare module '@coolwallet/core' {
 
 		export namespace tx {
 			export function setChangeKeyId(
-				transport: transport,
+				transport: Transport,
 				pathWithSig: string,
 				redeemType: string
 			): Promise<
@@ -124,7 +123,7 @@ declare module '@coolwallet/core' {
 	export namespace core {
 		export namespace auth {
 			export function getCommandSignature(
-				transport: transport,
+				transport: Transport,
 				appId: string,
 				appPrivateKey: string,
 				commandName: string,
@@ -150,7 +149,7 @@ declare module '@coolwallet/core' {
 			>; */
 
 			export function versionCheck(
-				transport: transport,
+				transport: Transport,
 				requiredSEVersion: number
 			): Promise<
 				void
@@ -168,7 +167,7 @@ declare module '@coolwallet/core' {
 				readType: string
 			): string;
 			export function sendDataToCoolWallet(
-				transport: transport,
+				transport: Transport,
 				appId: String,
 				appPrivateKey: String,
 				txDataHex: String,
@@ -187,7 +186,7 @@ declare module '@coolwallet/core' {
 				| Buffer
 			>;
 			export function sendScriptAndDataToCard(
-				transport: transport,
+				transport: Transport,
 				appId: string,
 				appPrivateKey: string,
 				script: string,
@@ -200,7 +199,7 @@ declare module '@coolwallet/core' {
 				string
 			>;
 			export function sendBatchDataToCoolWallet(
-				transport: transport,
+				transport: Transport,
 				appId: String,
 				appPrivateKey: String,
 				preActions: Function[],
@@ -222,7 +221,7 @@ declare module '@coolwallet/core' {
 
 		export namespace util {
 			export function getEncryptedSignatures(
-				transport: transport,
+				transport: Transport,
 				TxpPrepCommands: Array<{
 					encodedData: String;
 					P1: String;
@@ -246,12 +245,12 @@ declare module '@coolwallet/core' {
         txPrepareCompleteCallback?: Function
       ): Promise<Array<string>>; */
 			export function prepareOutputData(
-				transport: transport,
+				transport: Transport,
 				txDataHex: string,
 				txDataType: string
 			): void;
 			export function prepareTx(
-				transport: transport,
+				transport: Transport,
 				txDataHex: string,
 				txDataType: string,
 				appPrivateKey: string
@@ -260,7 +259,7 @@ declare module '@coolwallet/core' {
 
 		export namespace controller {
 			export function checkSupportScripts(
-				transport: transport
+				transport: Transport
 			): Promise<
 				boolean
 			>;
@@ -282,7 +281,7 @@ declare module '@coolwallet/core' {
 
 	export namespace coin {
 		export class ECDSACoin {
-			public transport: transport;
+			public transport: Transport;
 
 			public appId: string;
 
@@ -290,7 +289,7 @@ declare module '@coolwallet/core' {
 
 			public coinType: string;
 
-			constructor(transport: transport, appPrivateKey: string, appId: string, coinType: string);
+			constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string);
 
 			getPublicKey(addressIndex: number): Promise<string>;
 
@@ -298,7 +297,7 @@ declare module '@coolwallet/core' {
 		}
 
 		export class EDDSACoin {
-			public transport: transport;
+			public transport: Transport;
 
 			public appId: string;
 
@@ -306,7 +305,7 @@ declare module '@coolwallet/core' {
 
 			public coinType: string;
 
-			constructor(transport: transport, appPrivateKey: string, appId: string, coinType: string);
+			constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string);
 
 			getPublicKey(addressIndex: number, protocol:string): Promise<string>;
 		}
@@ -330,7 +329,7 @@ declare module '@coolwallet/core' {
 
 		static listen(callback: (error: Error, device: any) => void): any;
 
-		static connect(deviceOrId: object | string): Promise<transport>;
+		static connect(deviceOrId: object | string): Promise<Transport>;
 
 		static disconnect(deviceOrId: object | string): Promise<void>;
 
