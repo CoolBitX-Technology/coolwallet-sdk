@@ -1,4 +1,4 @@
-import { ECDSACoin } from '@coolwallets/coin';
+import { core, apdu, coin as COIN, transport } from '@coolwallets/core';
 import {
 	ScriptType,
 	Input,
@@ -10,9 +10,9 @@ import {
 
 import { signTransaction } from './btc_sign';
 
-type Transport = import('@coolwallets/transport').default;
+type Transport = transport.default;
 
-export default class BTC extends ECDSACoin {
+export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 	public network: any;
 
 	public ScriptType: any;
@@ -26,7 +26,7 @@ export default class BTC extends ECDSACoin {
 		this.addressToOutScript = addressToOutScript;
 	}
 
-	async getAddressAndOutScript(scriptType: ScriptType, addressIndex: number)
+	async getAddress(scriptType: ScriptType, addressIndex: number)
 		: Promise<{ address: string, outScript: Buffer }> {
 		const publicKey = await this.getPublicKey(addressIndex);
 		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);

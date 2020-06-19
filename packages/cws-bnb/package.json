@@ -30,9 +30,7 @@
     "@types/bech32": "^1.1.1"
   },
   "dependencies": {
-    "@coolwallets/coin": "^0.1.2",
     "@coolwallets/core": "^0.0.20",
-    "@coolwallets/transport": "0.0.10",
     "bech32": "^1.1.3"
   }
 }

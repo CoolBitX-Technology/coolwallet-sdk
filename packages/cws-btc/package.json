@@ -29,12 +29,11 @@
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7"
+    "@babel/preset-typescript": "^7.7.7",
+    "jest": "^26.0.1"
   },
   "dependencies": {
-    "@coolwallets/coin": "0.2.0-beta.1",
     "@coolwallets/core": "0.2.0-beta.1",
-    "@coolwallets/transport": "0.0.10",
     "@types/bn.js": "^4.11.6",
     "bitcoinjs-lib": "^5.1.7",
     "bn.js": "^5.1.1"

@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { core, apdu } from '@coolwallets/core';
+import { core, apdu, transport } from '@coolwallets/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import * as scripts from "./scripts";
@@ -7,7 +7,7 @@ import { handleHex } from "./string_util";
 import {
 	ScriptType, Input, Output, Change, PreparedData
 } from './types';
-type Transport = import("@coolwallets/transport").default;
+type Transport = transport.default;
 
 export {
 	ScriptType,

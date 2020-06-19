@@ -6,22 +6,25 @@
   "author": "",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "babel -d lib/ src",
-    "publish-single": "npm run build && npm publish"
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "dependencies": {
-    "@coolwallets/coin": "0.2.0-beta.1",
     "@coolwallets/core": "0.2.0-beta.1",
-    "@coolwallets/errors": "0.0.7",
+    "@types/eth-sig-util": "^2.1.0",
+    "@types/node": "^14.0.13",
     "elliptic": "^6.5.1",
-    "eth-sig-util": "^2.5.0",
     "rlp": "^2.2.3",
     "web3": "^1.2.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
-    "@babel/preset-env": "^7.7.1"
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7"
   },
   "repository": {
     "type": "git",

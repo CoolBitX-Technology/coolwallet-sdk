@@ -21,10 +21,7 @@
   "author": "anton@coolbitx.com",
   "license": "ISC",
   "dependencies": {
-    "@coolwallets/errors": "0.0.6",
-    "@coolwallets/coin": "^0.1.2",
     "@coolwallets/core": "^0.0.20",
-    "@coolwallets/transport": "0.0.10",
     "@types/crc": "^3.4.0",
     "base32.js": "^0.1.0",
     "crc": "^3.8.0"

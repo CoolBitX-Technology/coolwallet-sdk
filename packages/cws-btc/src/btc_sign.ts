@@ -1,4 +1,4 @@
-import { core } from '@coolwallets/core';
+import { core, transport } from '@coolwallets/core';
 import {
 	ScriptType,
 	Input,
@@ -10,7 +10,7 @@ import {
 	getScriptAndArgument,
 	getUtxoArguments
 } from './utils';
-type Transport = import("@coolwallets/transport").default;
+type Transport = transport.default;
 
 export {
 	signTransaction

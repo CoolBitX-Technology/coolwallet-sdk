@@ -1,13 +1,13 @@
-import { core } from '@coolwallets/core';
-import * as icxUtil from './util';
+import { core, transport } from '@coolwallets/core';
+import * as icxUtil from './utils/util';
 
-type Transport = import('@coolwallets/transport').default;
+type Transport = transport.default;
 
 /**
  * Sign ICON Transaction
  */
 // eslint-disable-next-line import/prefer-default-export
-export const signTransaction = async (
+export default async function signTransaction (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
@@ -17,7 +17,7 @@ export const signTransaction = async (
   publicKey: string,
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined
-): Promise<Object> => {
+): Promise<Object> {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
   const phraseToSign = icxUtil.generateHashKey(rawTx);
   const rawPayload = Buffer.from(phraseToSign, 'utf-8');
@@ -34,6 +34,7 @@ export const signTransaction = async (
     authorizedCB,
     true
   );
+  
 
   const txObject = await icxUtil.generateRawTx(signature, rawTx, publicKey);
   return txObject;
