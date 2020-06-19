@@ -1,4 +1,4 @@
-import Transport from '@coolwallets/core';
+import { transport } from '@coolwallets/core';
 import { getBluetoothServiceUuids, getInfosForServiceUuid } from '@coolwallets/core';
 import { convertToNumberArray } from './util';
 
@@ -8,7 +8,7 @@ let dataCharacteristic;
 let statusCharacteristic;
 let responseCharacteristic;
 
-export default class WebBleTransport extends Transport {
+export default class WebBleTransport extends transport.default {
   static async isSupported() {
     const isSupported = await navigator.bluetooth.getAvailability();
     return isSupported;

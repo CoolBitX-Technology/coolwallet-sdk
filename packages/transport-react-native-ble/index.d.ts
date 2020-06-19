@@ -1,6 +1,6 @@
-import Transport from "@coolwallets/core";
+import { transport } from "@coolwallets/core";
 
-declare class RNBleTransport extends Transport {
+declare class RNBleTransport extends transport.default {
   static setLogLevel(logLevel: string): void;
 }
 
