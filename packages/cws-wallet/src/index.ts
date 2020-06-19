@@ -1,10 +1,18 @@
-import { apdu } from '@coolwallets/core';
-import * as pairing from '../pairing.js';
-import { recovery, creation} from '../create.js';
-import * as setting from '../settings.js';
+import { generateKeyPair } from './keypair';
+import { apdu, transport } from '@coolwallets/core';
+import * as pairing from './pairing.js';
+import { recovery, creation } from './create.js';
+import * as setting from './settings.js';
 
+type Transport = transport.default;
+
+export { generateKeyPair };
 export default class CoolWallet {
-  constructor(transport, appPrivateKey, appId = undefined) {
+  transport: transport.default;
+  appPrivateKey: string;
+  appId: string;
+  
+  constructor(transport: Transport, appPrivateKey: string, appId: string) {
     this.transport = transport;
     this.appPrivateKey = appPrivateKey;
     this.appId = appId;
@@ -16,7 +24,7 @@ export default class CoolWallet {
     this.getPairingPassword = this.getPairingPassword.bind(this);
   }
 
-  setAppId(appId) {
+  setAppId(appId: string) {
     this.appId = appId;
   }
 
@@ -36,7 +44,7 @@ export default class CoolWallet {
     return apdu.setting.resetCard(this.transport);
   }
 
-  async register(appPublicKey, password, deviceName) {
+  async register(appPublicKey: string, password: string, deviceName: string) {
     return pairing.register(this.transport, appPublicKey, password, deviceName);
   }
 
@@ -49,35 +57,31 @@ export default class CoolWallet {
   }
 
   // For wallet creation
-  async createWallet(strength) {
+  async createWallet(strength: number) {
     return creation.createWallet(this.transport, this.appId, this.appPrivateKey, strength);
   }
 
-  async createSeedByApp(strength, randomBytes) {
+  async createSeedByApp(strength: number, randomBytes: Buffer) {
     return creation.createSeedByApp(this.transport, strength, randomBytes);
   }
 
-  async sendCheckSum(sum) {
+  async sendCheckSum(sum: number) {
     return creation.sendCheckSum(this.transport, sum);
   }
 
-  async setSeed(seedHex) {
+  async setSeed(seedHex: string) {
     return creation.setSeed(this.transport, this.appId, this.appPrivateKey, seedHex);
   }
 
-  async setSeed(seedHex) {
-    return recovery.setSeed(this.transport, this.appId, this.appPrivateKey, seedHex);
-  }
-
-  async initSecureRecovery(strength) {
+  async initSecureRecovery(strength: number) {
     return recovery.initSecureRecovery(this.transport, strength);
   }
 
-  async setSecureRecoveryIdx(index) {
+  async setSecureRecoveryIdx(index: number) {
     return recovery.setSecureRecoveryIdx(this.transport, index);
   }
 
-  async cancelSecureRecovery(type) {
+  async cancelSecureRecovery(type: string) {
     return recovery.cancelSecureRecovery(this.transport, type);
   }
 

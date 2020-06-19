@@ -1,6 +1,8 @@
 import {
-  apdu, crypto, config, core
+  apdu, crypto, config, core, transport, error
 } from '@coolwallets/core';
+type Transport = transport.default;
+
 
 /**
  * @param {Transport} transport
@@ -9,7 +11,7 @@ import {
  * @param {String} deviceName
  * @returns {Promise}
  */
-export const register = async (transport, appPublicKey, password, deviceName) => {
+export const register = async (transport: Transport, appPublicKey: string, password: string, deviceName: string): Promise<String> => {
   let nameToUTF = Buffer.from(deviceName, 'utf8');
   const maxLen = 30;
 
@@ -23,8 +25,8 @@ export const register = async (transport, appPublicKey, password, deviceName) =>
   }
   const addedPassword = password.padStart(8, 'F');
 
-  nameToUTF = nameToUTF.toString('hex');
-  let data = addedPassword + appPublicKey + nameToUTF;
+  const hexNameToUTF = nameToUTF.toString('hex');
+  let data = addedPassword + appPublicKey + hexNameToUTF;
   let P1 = '00';
 
   const supportEncryptedRegister = true;
@@ -43,12 +45,14 @@ export const register = async (transport, appPublicKey, password, deviceName) =>
  * @param {string} appPrivKey
  * @return {Promise<Array<{appId:string, }>>}
  */
-export const getPairedApps = async (transport, appId, appPrivKey) => {
+export const getPairedApps = async (transport: Transport, appId: string, appPrivKey: string): Promise<Array<{ appId: string; }>> => {
   const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivKey,
-    'GET_PAIRED_DEVICES'
+    'GET_PAIRED_DEVICES',
+    undefined,
+    undefined
   );
   const apps = await apdu.pairing.getPairedApps(transport, signature, forceUseSC);
   return apps;
@@ -61,16 +65,19 @@ export const getPairedApps = async (transport, appId, appPrivKey) => {
  * @param {string} appPrivKey
  * @return {Promise<string>}
  */
-export const getPairingPassword = async (transport, appId, appPrivKey) => {
+export const getPairingPassword = async (transport: Transport, appId: string, appPrivKey: string): Promise<string> => {
   const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivKey,
-    'GET_PAIR_PWD'
+    'GET_PAIR_PWD',
+    undefined,
+    undefined
   );
   const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
   await apdu.control.powerOff(transport);
   let password = crypto.encryption.ECIESDec(appPrivKey, encryptedPassword);
+  if (!password) throw new error.SDKError('getPairingPassword error', 'password is undefined')
   password = password.replace(/f/gi, '');
   return password;
 };
