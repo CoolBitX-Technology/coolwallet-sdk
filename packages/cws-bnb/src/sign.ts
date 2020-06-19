@@ -1,12 +1,13 @@
-import { core, Transport } from '@coolwallet/core';
+import { core, transport } from '@coolwallet/core';
 import * as bnbUtil from './util';
 
+type Transport = transport.default;
 type BNBTx = import('./types').Transaction;
 
 /**
  * Sign Binance Tranaction
  */
-export default async function signTransaction(
+export default async function signTransfer(
   transport: Transport,
   appId: string,
   appPrivateKey:string,

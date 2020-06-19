@@ -1,10 +1,11 @@
-import { coin as COIN, Transport } from "@coolwallet/core";
+import { coin as COIN, transport } from "@coolwallet/core";
 import * as xrpSign from "./sign";
 import * as xrpUtil from "./util";
 
+type Transport = transport.default;
 type Payment = import("./types").Payment;
 
-export default class XRP extends COIN.ECDSACoin {
+export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
   constructor(transport: Transport, appPrivateKey: string, appId: string) {
     super(transport, appPrivateKey, appId, "90");
   }
@@ -21,7 +22,7 @@ export default class XRP extends COIN.ECDSACoin {
    * Sign XRP Payment.
    * @description TransactionType must be 'Payment', Flags must be 2147483648;
    */
-  async signPayment(
+  async signTransaction(
     payment: Payment,
     addressIndex: number,
     confirmCB?: Function | undefined,
