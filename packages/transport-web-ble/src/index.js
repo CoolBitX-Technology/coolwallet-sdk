@@ -1,5 +1,5 @@
 import { transport } from '@coolwallets/core';
-import { getBluetoothServiceUuids, getInfosForServiceUuid } from '@coolwallets/core';
+import { device as coreDevice  } from '@coolwallets/core';
 import { convertToNumberArray } from './util';
 
 let server;
@@ -9,6 +9,20 @@ let statusCharacteristic;
 let responseCharacteristic;
 
 export default class WebBleTransport extends transport.default {
+  constructor(device,
+    sendCommandToCard,
+    sendDataToCard,
+    checkCardStatus,
+    readCharacteristic) {
+    super(
+      device,
+      sendCommandToCard,
+      sendDataToCard,
+      checkCardStatus,
+      readCharacteristic
+    )
+  }
+  
   static async isSupported() {
     const isSupported = await navigator.bluetooth.getAvailability();
     return isSupported;
@@ -16,7 +30,7 @@ export default class WebBleTransport extends transport.default {
 
   static async listen(callback) {
     try {
-      const services = getBluetoothServiceUuids();
+      const services = coreDevice.getBluetoothServiceUuids();
       const device = await navigator.bluetooth.requestDevice({ filters: [{ services }] });
       callback(null, device);
     } catch (error) {
@@ -30,7 +44,7 @@ export default class WebBleTransport extends transport.default {
     console.debug(`${device.name} connected`);
     const services = await server.getPrimaryServices();
     const service = services[0];
-    const uuids = getInfosForServiceUuid(service.uuid);
+    const uuids = coreDevice.getInfosForServiceUuid(service.uuid);
     commandCharacteristic = await service.getCharacteristic(uuids.writeUuid);
     dataCharacteristic = await service.getCharacteristic(uuids.dataUuid);
     statusCharacteristic = await service.getCharacteristic(uuids.checkUuid);
