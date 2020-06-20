@@ -1,8 +1,8 @@
 import { generateKeyPair } from './keypair';
 import { apdu, transport } from '@coolwallet/core';
-import * as pairing from './pairing.js';
-import { recovery, creation } from './create.js';
-import * as setting from './settings.js';
+import * as pairing from './pairing';
+import { recovery, creation } from './create';
+import * as setting from './settings';
 
 type Transport = transport.default;
 
