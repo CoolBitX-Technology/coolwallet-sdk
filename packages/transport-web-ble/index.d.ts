@@ -1,6 +1,6 @@
-import Transport from "@coolwallets/core";
+import { transport } from "@coolwallets/core";
 
-declare class WebBleTransport extends Transport {
+declare class WebBleTransport extends transport.default {
 
 }
 

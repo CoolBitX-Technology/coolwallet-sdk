@@ -1,26 +1,27 @@
 export enum ScriptType {
-	P2PKH = 'P2PKH',
-	P2SH_P2WPKH = 'P2SH_P2WPKH',
-	P2WPKH = 'P2WPKH',
+	P2PKH = 0,
+	P2SH_P2WPKH = 1,
+	P2WPKH = 2,
+	P2WSH = 3,
 }
 
 export type Input = {
-  preTxHash: string,
-  preIndex: number,
-  preValue: string,
-  sequence?: number,
-  addressIndex: number,
+	preTxHash: string,
+	preIndex: number,
+	preValue: string,
+	sequence?: number,
+	addressIndex: number,
 	pubkeyBuf?: Buffer,
 };
 
 export type Output = {
-  value: string,
-  address: string,
+	value: string,
+	address: string,
 };
 
 export type Change = {
-  value: string,
-  addressIndex: number,
+	value: string,
+	addressIndex: number,
 	pubkeyBuf?: Buffer,
 };
 

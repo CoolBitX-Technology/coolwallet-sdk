@@ -11,14 +11,14 @@ import Transport from "../transport";
  * @return {String} Hex input data for 8032 txPrep
  */
 export const prepareSEData = (keyId: string, rawData: Buffer | Array<Buffer>, readType: string): string => {
-	const inputIdBuffer = Buffer.from('00', 'hex');
-	const signDataBuffer = Buffer.from('00', 'hex');
-	const readTypeBuffer = Buffer.from(readType, 'hex');
-	const keyIdBuffer = Buffer.from(keyId, 'hex');
+  const inputIdBuffer = Buffer.from('00', 'hex');
+  const signDataBuffer = Buffer.from('00', 'hex');
+  const readTypeBuffer = Buffer.from(readType, 'hex');
+  const keyIdBuffer = Buffer.from(keyId, 'hex');
 
-	const data = [inputIdBuffer, signDataBuffer, readTypeBuffer, keyIdBuffer, rawData];
-	const dataForSE = rlp.encode(data);
-	return dataForSE.toString('hex');
+  const data = [inputIdBuffer, signDataBuffer, readTypeBuffer, keyIdBuffer, rawData];
+  const dataForSE = rlp.encode(data);
+  return dataForSE.toString('hex');
 };
 
 /**
@@ -40,21 +40,59 @@ export const sendScriptAndDataToCard = async (
   script: string,
   argument: string,
   isEDDSA: boolean = false,
-  txPrepareComplteCallback: Function | undefined = undefined,
+  txPrepareCompleteCallback: Function | undefined = undefined,
   authorizedCallback: Function | undefined = undefined,
   return_canonical: boolean = true
 ) => {
-  const encryptedSignature = await txUtil.getEncryptedSignatureByScripts(
+  const encryptedSignature = await txUtil.getSingleEncryptedSignatureByScript(
     transport,
     appId,
     appPrivateKey,
     script,
     argument,
-    txPrepareComplteCallback
+    txPrepareCompleteCallback
   );
 
   const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
   return txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, isEDDSA, return_canonical);
+};
+
+/**
+ * Send Data Array to coolwallet via script command
+ */
+export const sendBatchScriptAndDataToCard = async (
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  script: string,
+  argument: string,
+  utxoArguments: string[],
+  isEDDSA: boolean = false,
+  txPrepareCompleteCallback: Function | undefined = undefined,
+  authorizedCallback: Function | undefined = undefined,
+  returnCanonical: boolean = true
+) => {
+  const encryptedSignatureArray = await txUtil.getEncryptedSignaturesByScript(
+    transport,
+    appId,
+    appPrivateKey,
+    script,
+    argument,
+    utxoArguments,
+    txPrepareCompleteCallback
+  );
+
+  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
+
+  const signatures = encryptedSignatureArray.map(
+    (encryptedSignature) => txUtil.decryptSignatureFromSE(
+      encryptedSignature,
+      signatureKey,
+      isEDDSA,
+      returnCanonical
+    )
+  );
+  return signatures;
 };
 
 /**

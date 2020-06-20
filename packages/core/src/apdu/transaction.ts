@@ -1,5 +1,6 @@
 import { executeCommand } from './execute';
 import { RESPONSE } from '../config/response';
+import { getCommandSignature } from "../core/auth";
 import Transport from '../transport';
 
 /**
@@ -18,8 +19,6 @@ export const prepTx = async (transport: Transport, payload: string, P1: string, 
 /**
  * Scriptable step 1
  * @todo append signature
- * @param {Transport} transport
- * @param {string} script
  */
 export const sendScript = async (transport: Transport, script: string) => {
   const { status } = await executeCommand(
@@ -36,16 +35,63 @@ export const sendScript = async (transport: Transport, script: string) => {
 
 /**
  * Scriptable step 2
- * @param {*} transport
- * @param {*} argument
  */
-export const executeScript = async (transport: Transport, argument: string, signature: string) => {
+export const executeScript = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  argument: string,
+) => {
+  const { signature } = await getCommandSignature(
+    transport,
+    appId,
+    appPrivKey,
+    "EXECUTE_SCRIPT",
+    argument,
+    undefined,
+    undefined
+  );
   const { outputData: encryptedSignature } = await executeCommand(
     transport,
     'EXECUTE_SCRIPT',
     'SE',
     argument + signature,
     undefined,
+    undefined,
+    true,
+    true,
+  );
+  return encryptedSignature;
+};
+
+/**
+ * Scriptable step 3
+ * @param {*} transport
+ * @param {*} argument
+ */
+export const executeUtxoScript = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  utxoArgument: string,
+  //todo
+  P1 = "11"
+) => {
+  const { signature } = await getCommandSignature(
+    transport,
+    appId,
+    appPrivKey,
+    "EXECUTE_UTXO_SCRIPT",
+    utxoArgument,
+    P1,
+    undefined
+  );
+  const { outputData: encryptedSignature } = await executeCommand(
+    transport,
+    'EXECUTE_UTXO_SCRIPT',
+    'SE',
+    utxoArgument + signature,
+    P1,
     undefined,
     true,
     true,
@@ -111,7 +157,7 @@ export const getTxDetail = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<boolean>}
  */
 export const setToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
-  const { status}  = sn === 1
+  const { status } = sn === 1
     ? await executeCommand(transport, 'SET_ERC20_TOKEN', 'SE', payload)
     : await executeCommand(transport, 'SET_SECOND_ERC20_TOKEN', 'SE', payload);
   return status === RESPONSE.SUCCESS;

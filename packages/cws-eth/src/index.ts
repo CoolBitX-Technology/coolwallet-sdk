@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { core, transport } from '@coolwallets/core';
-import { coin as COIN } from '@coolwallets/core';
+import { core, coin as COIN, transport } from '@coolwallets/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 
@@ -30,7 +29,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransaction(
-    transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number},
+    transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number },
     addressIndex: number,
     publicKey: string | undefined = undefined,
     confirmCB: Function | undefined = undefined,

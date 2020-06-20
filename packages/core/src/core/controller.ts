@@ -1,4 +1,4 @@
-import { UnkownCommand } from '../error/index';
+import { UnknownCommand } from '../error/index';
 import * as apdu from '../apdu/index';
 import Transport from '../transport';
 
@@ -12,7 +12,7 @@ export const checkSupportScripts = async (transport: Transport) => {
     await apdu.tx.getSignedHex(transport);
     return true;
   } catch (error) {
-    if (error instanceof UnkownCommand) return false;
+    if (error instanceof UnknownCommand) return false;
     return true;
   }
 };

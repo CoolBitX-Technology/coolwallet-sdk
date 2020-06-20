@@ -76,7 +76,7 @@ export const throwSDKError = (command: string, errorCode: string) => {
   // General Errors
   switch (code) {
     case '6d00':
-      throw new Errors.UnkownCommand();
+      throw new Errors.UnknownCommand();
 
     default:
   }
