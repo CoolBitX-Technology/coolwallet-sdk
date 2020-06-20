@@ -41,19 +41,19 @@ export const getCommandSignature = async (
   if (!forceUseSC) {
     await control.sayHi(transport, appId);
     return { signature, forceUseSC };
-  } // return [appId(20B)] [rightJustifiedSignature(72B)]
-
-  // v200 create wallet by card can not Secure Channel so forceUseSC = false
-  // v200 signature = [apduData(Variety)][appId(20B)[rightJustifiedSignature(72B)]
-  const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
-  if (isCreateWallet) {
-    return { signature: appIdWithSignature, forceUseSC: false };
+  } else {
+    // return [appId(20B)] [rightJustifiedSignature(72B)]
+    // v200 create wallet by card can not Secure Channel so forceUseSC = false
+    // v200 signature = [apduData(Variety)][appId(20B)[rightJustifiedSignature(72B)]
+    // Return AppId with padded signature: Dont need to call [say hi].
+    // the following operaion is forced to used Secure Channel
+    const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
+    if (isCreateWallet) {
+      return { signature: appIdWithSignature, forceUseSC: false };
+    } else {
+      return { signature: appIdWithSignature, forceUseSC };
+    }
   }
-
-  // Return AppId with padded signature: Dont need to call [say hi].
-  // the following operaion is forced to used Secure Channel
-  // const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
-  return { signature: appIdWithSignature, forceUseSC };
 };
 
 /**

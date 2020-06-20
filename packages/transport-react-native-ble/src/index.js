@@ -10,7 +10,7 @@ import {
 
 import { Buffer } from 'buffer';
 
-import Transport from "@coolwallet/core";
+import { transport } from "@coolwallet/core";
 
 import { convertToNumberArray } from "./util";
 
@@ -34,7 +34,7 @@ const retrieveInfos = services => {
   return infos;
 };
 
-export default class RNBleTransport extends Transport {
+export default class RNBleTransport extends transport.default {
 
   static isSupported = () =>
     Promise.resolve(typeof BleManager === "function");

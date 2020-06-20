@@ -10,7 +10,7 @@ export class PleaseResetHardware extends SDKError {
 }
 
 export class FirmwareVersionTooLow extends SDKError {
-  constructor(requiredVersion:number) {
+  constructor(requiredVersion: number) {
     super('FirmwareVersionTooLow', `Firmware version too low. Please update to ${requiredVersion}`);
     Object.setPrototypeOf(this, new.target.prototype);
     this.constructor = SDKError;
@@ -33,9 +33,9 @@ export class OperationCanceled extends SDKError {
   }
 }
 
-export class UnkownCommand extends SDKError {
+export class UnknownCommand extends SDKError {
   constructor() {
-    super('UnkownCommand', 'Wrong Command (May need firmware update)');
+    super('UnknownCommand', 'Wrong Command (May need firmware update)');
     Object.setPrototypeOf(this, new.target.prototype);
     this.constructor = SDKError;
   }

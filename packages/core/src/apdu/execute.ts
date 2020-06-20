@@ -1,5 +1,5 @@
 import { OperationCanceled, NoTransport } from '../error/index';
-import {COMMAND} from '../config/command';
+import { COMMAND } from '../config/command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';
 import { SHA256 } from '../crypto/hash';
@@ -13,11 +13,15 @@ import Transport from '../transport/index';
  * @param {string} commandType SE or MCU
  */
 const executeAPDU = async (commandName: string, transport: Transport, apdu: { command: string, data: string }, commandType: string): Promise<{ status: string, outputData: string }> => {
+  if (typeof transport.request !== 'function') throw new NoTransport();
+  /*console.log("{")
+  console.log(" command: " + apdu.command)
+  console.log(" data: " + apdu.data)
+  console.log("}")*/
   // TODO app transport
   if (transport.requestAPDUV2) {
     return await transport.requestAPDUV2(apdu);
   }
-  if (typeof transport.request !== 'function') throw new NoTransport();
   const response = await transport.request(apdu.command, apdu.data);
   if (commandType === 'SE') {
     const status = response.slice(-4);
@@ -43,11 +47,11 @@ const executeAPDU = async (commandName: string, transport: Transport, apdu: { co
  * @returns {Promise<{status: string, outputData: string}>}
  */
 export const executeCommand = async (
-  transport: Transport, 
-  commandName: string, 
-  commandType: string = 'SE', 
-  data: string = '', 
-  params1: string | undefined = undefined, 
+  transport: Transport,
+  commandName: string,
+  commandType: string = 'SE',
+  data: string = '',
+  params1: string | undefined = undefined,
   params2: string | undefined = undefined,
   supportSC: boolean = false,
   forceUseSC: boolean = false,
@@ -97,15 +101,16 @@ export const executeCommand = async (
  * @param {string} apduData apdu data field
  */
 export const sendWithSecureChannel = async (transport: Transport, apduHeader: string, apduData: string, forceUseSC: boolean): Promise<{ status: string, outputData: string }> => {
+  //todo
   const salt = '88888888';
   const dataToHash = apduHeader.concat(salt, apduData);
   const hash = SHA256(dataToHash).toString('hex');
   const packedData = apduHeader.concat(hash, salt, apduData);
-
+  //console.log("Before Secure channel: " + packedData)
   const channelVersion = '01';
   const useSecure = '00';
   const useSign = forceUseSC ? '01' : '00';
-
+  // cipherData = [channelVersion(1B)] [useSecure(1B)] [useSign(1B)] [packedData(Variety)]
   const cypherData = channelVersion.concat(useSecure, useSign, packedData);
 
   // Devide cypher data and send with 250 bytes each command
@@ -123,7 +128,7 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
     // eslint-disable-next-line no-await-in-loop
     result = await sendFragment(transport, chunks[i], i, totalPackages);
   }
-  if (result){
+  if (result) {
     // Uncaught error in SC_SEND_SEGMENT command. Return to parent executeCommand
     if (result.status !== RESPONSE.SUCCESS) return result;
 
@@ -138,7 +143,7 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
   } else {
     throw new Error('sendWithSecureChannel failed')
   }
-  
+
 };
 
 /**
