@@ -1,5 +1,5 @@
-import { transport } from '@coolwallets/core';
-import { device as coreDevice  } from '@coolwallets/core';
+import { transport } from '@coolwallet/core';
+import { device as coreDevice  } from '@coolwallet/core';
 import { convertToNumberArray } from './util';
 
 let server;

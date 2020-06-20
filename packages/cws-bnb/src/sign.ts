@@ -1,4 +1,4 @@
-import { core, transport } from '@coolwallets/core';
+import { core, transport } from '@coolwallet/core';
 import * as bnbUtil from './util';
 
 type Transport = transport.default;

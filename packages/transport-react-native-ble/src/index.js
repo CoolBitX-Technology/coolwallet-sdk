@@ -6,15 +6,14 @@ import {
 import {
   getBluetoothServiceUuids,
   getInfosForServiceUuid,
-} from "@coolwallets/core";
+} from "@coolwallet/core";
 
 import { Buffer } from 'buffer';
 
-import { transport } from "@coolwallets/core";
+import { transport } from "@coolwallet/core";
 
 import { convertToNumberArray } from "./util";
 
-const transportsCache = {};
 const bleManager = new BleManager();
 
 let writeCharacteristic;
@@ -86,10 +85,6 @@ export default class RNBleTransport extends transport.default {
   static async connect(deviceOrId) {
     let device;
     if (typeof deviceOrId === "string") {
-      if (transportsCache[deviceOrId]) {
-        return transportsCache[deviceOrId];
-      }
-
       if (!device) {
         // works for iOS but not Android
         const devices = await bleManager.devices([deviceOrId]);
@@ -201,11 +196,8 @@ export default class RNBleTransport extends transport.default {
     const onDisconnect = () => {
       transport.notYetDisconnected = false;
       disconnectedSub.remove();
-      delete transportsCache[transport.device.id];
     };
 
-    // eslint-disable-next-line require-atomic-updates
-    transportsCache[transport.device.id] = transport;
     const disconnectedSub = device.onDisconnected(e => {
       if (!transport.notYetDisconnected) return;
       onDisconnect(e);

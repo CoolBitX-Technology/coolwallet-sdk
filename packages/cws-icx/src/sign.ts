@@ -1,4 +1,4 @@
-import { core, transport } from '@coolwallets/core';
+import { core, transport } from '@coolwallet/core';
 import * as icxUtil from './utils/util';
 
 type Transport = transport.default;

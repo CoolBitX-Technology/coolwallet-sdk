@@ -1,17 +1,17 @@
-# CoolWalletS Ethereum App
+# CoolWallet Ethereum App
 
-Ethereum API of CoolWalletS.
+Ethereum API of CoolWallet.
 
 ## Install
 
 ```shell
-npm install @coolwallets/eth
+npm install @coolwallet/eth
 ```
 
 ## Usage
 
 ```javascript
-import cwsETH from '@coolwallets/eth'
+import cwsETH from '@coolwallet/eth'
 const ETH = new cwsETH(transport, appPrivateKey, appId)
 ```
 

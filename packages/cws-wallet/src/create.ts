@@ -1,7 +1,7 @@
 import {
   apdu, core, crypto, config
-} from '@coolwallets/core';
-import { transport } from '@coolwallets/core';
+} from '@coolwallet/core';
+import { transport } from '@coolwallet/core';
 
 const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;

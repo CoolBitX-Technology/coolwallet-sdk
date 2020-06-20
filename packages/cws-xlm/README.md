@@ -1,17 +1,17 @@
-# CoolWalletS Stellar (XLM) App
+# CoolWallet Stellar (XLM) App
 
-![version](https://img.shields.io/npm/v/@coolwallets/xlm)
+![version](https://img.shields.io/npm/v/@coolwallet/xlm)
 
 ## Install
 
 ```shell
-npm i @coolwallets/xlm
+npm i @coolwallet/xlm
 ```
 
 ## Usage
 
 ```javascript
-import cwsXLM from '@coolwallets/xlm'
+import cwsXLM from '@coolwallet/xlm'
 
 const XLM = new cwsXLM(transport, appPrivateKey, appId)
 
@@ -19,7 +19,7 @@ const XLM = new cwsXLM(transport, appPrivateKey, appId)
 
 ### getAccount
 
-CoolWalletS currently support 2 derivation path, the default one is **SLIP0010**. Notice that you can only use **accountIndex = 0** for both derivation path for now.
+CoolWallet currently support 2 derivation path, the default one is **SLIP0010**. Notice that you can only use **accountIndex = 0** for both derivation path for now.
 
 ```javascript
 const accountIndex = 0 // any number other than 0 will cause an error.
@@ -37,7 +37,7 @@ We call the second parameter **protocol**, which can only be either `'BIP44'` or
 
 ### signTransaction
 
-We expect you to build transactions with the [official stellar sdk](https://github.com/stellar/js-stellar-sdk). You can easily use the `.signatureBase()` method to get the buffer that CoolWalletS needs for signing.
+We expect you to build transactions with the [official stellar sdk](https://github.com/stellar/js-stellar-sdk). You can easily use the `.signatureBase()` method to get the buffer that CoolWallet needs for signing.
 
 ```javascript
 import * as Stellar from 'stellar-sdk';
@@ -62,7 +62,7 @@ let txBuilder = new Stellar.TransactionBuilder(fundingAccount, {
 let tx = txBuilder.build();
 const signatureBase = tx.signatureBase(); // this is what we need.
 
-// Sign with CoolWalletS
+// Sign with CoolWallet
 const signature = await XLM.signTransaction(signatureBase, accountIndex)
 
 ```

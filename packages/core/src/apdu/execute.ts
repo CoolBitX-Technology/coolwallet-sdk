@@ -19,7 +19,7 @@ const executeAPDU = async (commandName: string, transport: Transport, apdu: { co
   console.log(" data: " + apdu.data)
   console.log("}")*/
   // TODO app transport
-  if (!transport.request) {
+  if (transport.requestAPDUV2) {
     return await transport.requestAPDUV2(apdu);
   }
   const response = await transport.request(apdu.command, apdu.data);

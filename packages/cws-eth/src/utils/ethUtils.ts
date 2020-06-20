@@ -1,7 +1,6 @@
-// import elliptic from "elliptic";
-import { error, transport } from "@coolwallets/core";
+import { error, transport } from "@coolwallet/core";
 
-import { apdu } from "@coolwallets/core";
+import { apdu } from "@coolwallet/core";
 
 import { handleHex } from "./stringUtil";
 import * as scripts from "../scripts";

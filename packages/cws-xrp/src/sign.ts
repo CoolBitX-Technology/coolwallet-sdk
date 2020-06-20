@@ -1,4 +1,4 @@
-import { core, transport } from "@coolwallets/core";
+import { core, transport } from "@coolwallet/core";
 import * as coinUtil from "./util";
 import { Transaction } from "./types";
 

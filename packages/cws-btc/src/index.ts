@@ -1,4 +1,4 @@
-import { core, apdu, coin as COIN, transport } from '@coolwallets/core';
+import { core, apdu, coin as COIN, transport } from '@coolwallet/core';
 import {
 	ScriptType,
 	Input,

@@ -1,6 +1,6 @@
 import {
   apdu, crypto, config, core, transport, error
-} from '@coolwallets/core';
+} from '@coolwallet/core';
 type Transport = transport.default;
 
 const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;

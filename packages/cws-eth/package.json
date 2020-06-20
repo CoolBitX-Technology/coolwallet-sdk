@@ -1,9 +1,9 @@
 {
-  "name": "@coolwallets/eth",
-  "version": "0.2.0-beta.1",
-  "description": "",
+  "name": "@coolwallet/eth",
+  "version": "0.1.0-beta.0",
+  "description": "Coolwallet Ethereum sdk",
   "main": "lib/index.js",
-  "author": "",
+  "author": "coolwallet-team",
   "license": "Apache-2.0",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
@@ -12,7 +12,7 @@
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "dependencies": {
-    "@coolwallets/core": "0.2.0-beta.1",
+    "@coolwallet/core": "~0.1.0-beta.4",
     "@types/eth-sig-util": "^2.1.0",
     "@types/node": "^14.0.13",
     "elliptic": "^6.5.1",
@@ -28,9 +28,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-js-sdk.git"
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/CoolBitX-Technology/coolwallet-js-sdk/issues"
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }

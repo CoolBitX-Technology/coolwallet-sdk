@@ -1,4 +1,4 @@
-import { core, transport } from '@coolwallets/core';
+import { core, transport } from '@coolwallet/core';
 import crypto from 'crypto';
 import BigInteger from 'bigi';
 import base58 from 'bs58';

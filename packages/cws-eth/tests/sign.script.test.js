@@ -4,9 +4,9 @@
 import ETH from '../src';
 
 // Mock support script command
-require('@coolwallets/core').core.controller.checkSupportScripts = () => true;
+require('@coolwallet/core').core.controller.checkSupportScripts = () => true;
 
-const coreModule = require('@coolwallets/core');
+const coreModule = require('@coolwallet/core');
 
 const appId = '0533ac5f177331221642adc02f7265bc3edb84d1';
 // const appPublicKey = '04cc68637846686549886133daa6acc4dceeed546bc04b8f258211df59ba2e28bbb5d4a1384a920acf0bbd1654dbcb5431ea1629e9856551bccb425c641de9f801';

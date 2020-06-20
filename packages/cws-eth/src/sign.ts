@@ -1,4 +1,4 @@
-import { core, transport, error } from '@coolwallets/core';
+import { core, transport, error } from '@coolwallet/core';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import { isHex, keccak256 } from './lib';
 import * as ethUtil from './utils/ethUtils';

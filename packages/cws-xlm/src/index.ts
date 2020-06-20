@@ -1,4 +1,4 @@
-import { coin as COIN, error as ERROR, transport } from '@coolwallets/core';
+import { coin as COIN, error as ERROR, transport } from '@coolwallet/core';
 import { pubKeyToAddress } from './utils';
 import signTx from './sign';
 

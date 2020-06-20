@@ -1,8 +1,8 @@
-import { apdu, error as ERROR, transport } from '@coolwallets/core';
+import { apdu, error as ERROR, transport } from '@coolwallet/core';
 type Transport = transport.default;
 
 /**
- * Get Baisc information of CoolWalletS
+ * Get Baisc information of CoolWallet
  * @param {Tranpsort} transport
  * @return {Promise<{ paired:boolean, locked:boolean, walletCreated:boolean, showDetail:boolean, pairRemainTimes:number }>}
  */

@@ -1,6 +1,6 @@
 {
-  "name": "@coolwallets/wallet",
-  "version": "0.2.0-beta.1",
+  "name": "@coolwallet/wallet",
+  "version": "0.1.0-beta.3",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -10,10 +10,10 @@
     "build": "npm run build:js && npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
-  "author": "",
+  "author": "coolwallet-team",
   "license": "Apache-2.0",
   "dependencies": {
-    "@coolwallets/core": "0.2.0-beta.1",
+    "@coolwallet/core": "~0.1.0-beta.4",
     "bip39": "^3.0.2",
     "elliptic": "^6.5.1"
   },
@@ -23,5 +23,12 @@
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
     "jest": "^26.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }

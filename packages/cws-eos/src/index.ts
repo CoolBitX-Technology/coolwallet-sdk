@@ -1,4 +1,4 @@
-import { coin as COIN, transport, error } from '@coolwallets/core';
+import { coin as COIN, transport, error } from '@coolwallet/core';
 import signTransfer from './sign';
 
 type Transport = transport.default;
