@@ -3,10 +3,8 @@ import {
   BleErrorCode,
 } from "react-native-ble-plx";
 
-import {
-  getBluetoothServiceUuids,
-  getInfosForServiceUuid,
-} from "@coolwallet/core";
+
+import { device as coreDevice } from '@coolwallet/core';
 
 import { Buffer } from 'buffer';
 
@@ -25,7 +23,7 @@ const retrieveInfos = services => {
   if (!services || services.length === 0) return;
   let infos;
   services.map(service => {
-    const info = getInfosForServiceUuid(service.uuid);
+    const info = coreDevice.getInfosForServiceUuid(service.uuid);
     if (info && !infos) {
       infos = info;
     }
@@ -51,7 +49,7 @@ export default class RNBleTransport extends transport.default {
         stateSub.remove();
 
         const devices = await bleManager.connectedDevices(
-          getBluetoothServiceUuids()
+          coreDevice.getBluetoothServiceUuids()
         );
         if (unsubscribed) return;
 
@@ -61,7 +59,7 @@ export default class RNBleTransport extends transport.default {
         if (unsubscribed) return;
 
         bleManager.startDeviceScan(
-          getBluetoothServiceUuids(),
+          coreDevice.getBluetoothServiceUuids(),
           null,
           (bleError, device) => {
             if (bleError) {
@@ -93,7 +91,7 @@ export default class RNBleTransport extends transport.default {
 
       if (!device) {
         const connectedDevices = await bleManager.connectedDevices(
-          getBluetoothServiceUuids()
+          coreDevice.getBluetoothServiceUuids()
         );
         const connectedDevicesFiltered = connectedDevices.filter(
           d => d.id === deviceOrId
@@ -127,13 +125,13 @@ export default class RNBleTransport extends transport.default {
     const serviceDevice = await device.discoverAllServicesAndCharacteristics();
     const services = await serviceDevice.services();
     let res = retrieveInfos(services);
-    const serviceUuids = getBluetoothServiceUuids();
+    const serviceUuids = coreDevice.getBluetoothServiceUuids();
     let characteristics;
     if (!res) {
       for (let i = 0; i < serviceUuids.length; i++) {
         try {
           characteristics = await device.characteristicsForService(serviceUuids[i]);
-          res = getInfosForServiceUuid(serviceUuids[i]);
+          res = coreDevice.getInfosForServiceUuid(serviceUuids[i]);
           break;
         } catch (e) {
           console.log('bleTransport e', e);
