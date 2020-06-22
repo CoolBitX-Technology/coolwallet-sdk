@@ -7,7 +7,7 @@ const codec = require("ripple-binary-codec");
 type Transport = transport.default;
 type Payment = import("./types").Payment;
 
-const generateRawTx = (signature: any, payment: Payment): string => {
+const generateRawTx = (signature: string, payment: Payment): string => {
   /* eslint-disable-next-line no-param-reassign */
   payment.TxnSignature = signature.toUpperCase();
   return codec.encode(payment);
@@ -60,5 +60,5 @@ export const signPayment = async (
     );
   }
 
-  return generateRawTx(signature, payment);
+  return generateRawTx(signature.toString('hex'), payment);
 };
