@@ -1,12 +1,13 @@
-import {
-  apdu, core, crypto, config
-} from '@coolwallet/core';
-import { transport } from '@coolwallet/core';
+import * as apdu from '../apdu/index';
+import * as core from '../core/index';
+import * as crypto from '../crypto/index';
+import * as config from '../config/index';
+import  Transport  from '../transport/index';
 
 const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;
 
-type Transport = transport.default;
+const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;
 
 /**
  * Create a new seed with SE.
@@ -30,7 +31,19 @@ async function createWallet(transport: Transport, appId: string, appPrivateKey: 
     true
   );
   const strengthWithSig = strengthHex + signature;
-  return apdu.wallet.createWallet(transport, strengthWithSig, forceUseSC);
+
+  const { status } = await apdu.execute.executeCommand(
+    transport,
+    'CREATE_WALLET',
+    'SE',
+    strengthWithSig,
+    undefined,
+    undefined,
+    true,
+    forceUseSC
+  );
+
+  return status === SUCCESS;
 }
 
 /**
@@ -41,7 +54,8 @@ async function createWallet(transport: Transport, appId: string, appPrivateKey: 
  */
 async function sendCheckSum(transport: Transport, checkSum: number): Promise<boolean> {
   const sumHex = checkSum.toString(16).padStart(8, '0');
-  return apdu.wallet.submitCheckSum(transport, sumHex);
+  const { status } = await apdu.execute.executeCommand(transport, 'CHECKSUM', 'SE', sumHex);
+  return status === SUCCESS;
 }
 
 /**
@@ -62,7 +76,8 @@ async function setSeed(transport: Transport, appId: string, appPrivateKey: strin
     undefined
   );
   const signedSeed = encryptedSeed + signature;
-  return apdu.wallet.setSeed(transport, signedSeed, forceUseSC);
+  const { status } = await apdu.execute.executeCommand(transport, 'SET_SEED', 'SE', signedSeed, undefined, undefined, true, forceUseSC);
+  return status === SUCCESS;
 }
 
 /**
@@ -91,7 +106,8 @@ async function createSeedByApp(transport: Transport, strength: number, randomByt
  */
 async function initSecureRecovery(transport: Transport, strength: number) {
   const P1 = strength.toString(16).padStart(2, '0');
-  return apdu.wallet.initSecureRecovery(transport, P1);
+  const { status } = await apdu.execute.executeCommand(transport, 'MCU_SET_MNEMONIC_INFO', 'SE', undefined, P1, undefined);
+  return status === SUCCESS;
 };
 
 /**
@@ -101,7 +117,8 @@ async function initSecureRecovery(transport: Transport, strength: number) {
  */
 async function setSecureRecoveryIdx(transport: Transport, index: number) {
   const P1 = index.toString(16).padStart(2, '0'); 
-  return apdu.wallet.setSecureRecoveryIdx(transport, P1);
+  const { status } = await apdu.execute.executeCommand(transport, 'MCU_SET_CHARACTER_ID', 'SE', undefined, P1, undefined);
+  return status === SUCCESS;
 };
 
 /**
@@ -118,7 +135,8 @@ async function cancelSecureRecovery(transport: Transport, type: string) {
   } else {
     throw Error(`Type:${type} is invalid`);
   }
-  return apdu.wallet.cancelSecureRecovery(transport, P1);
+  const { status } = await apdu.execute.executeCommand(transport, 'MCU_CANCEL_RECOVERY', 'SE', undefined, P1, undefined);
+  return status === SUCCESS;
 };
 
 /**
@@ -126,7 +144,8 @@ async function cancelSecureRecovery(transport: Transport, type: string) {
  * @param {Transport} transport
  */
 async function getSecureRecoveryStatus(transport: Transport){
-  return apdu.wallet.getSecureRecoveryStatus(transport);
+  const { status, outputData } = await apdu.execute.executeCommand(transport, 'GET_MCU_STATUS', 'SE', undefined, undefined, undefined);
+  return status;
 }
 
 
