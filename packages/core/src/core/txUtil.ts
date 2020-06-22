@@ -5,6 +5,7 @@ import { COMMAND } from "../config/command";
 import * as apdu from "../apdu/index";
 import { getCommandSignature } from "./auth";
 import Transport from "../transport";
+import * as tx from '../transaction/index'
 
 /**
  * get command signature for CoolWalletS
@@ -32,8 +33,8 @@ export const getEncryptedSignaturesByScript = async (
   utxoArguments: string[],
   txPrepareCompleteCallback: Function | undefined = undefined
 ) => {
-  await apdu.tx.sendScript(transport, script);
-  await apdu.tx.executeScript(
+  await tx.sendScript(transport, script);
+  await tx.executeScript(
     transport,
     appId,
     appPrivKey,
@@ -43,7 +44,7 @@ export const getEncryptedSignaturesByScript = async (
   // eslint-disable-next-line no-await-in-loop
   for (const utxoArgument of utxoArguments) {
     encryptedSignatureArray.push(
-      await apdu.tx.executeUtxoScript(
+      await tx.executeUtxoScript(
         transport,
         appId,
         appPrivKey,
@@ -59,7 +60,7 @@ export const getEncryptedSignaturesByScript = async (
       utxoArgument
     )
   )*/
-  await apdu.tx.finishPrepare(transport);
+  await tx.finishPrepare(transport);
   if (typeof txPrepareCompleteCallback === "function")
     txPrepareCompleteCallback();
   return encryptedSignatureArray;
@@ -73,14 +74,14 @@ export const getSingleEncryptedSignatureByScript = async (
   argument: string,
   txPrepareCompleteCallback: Function | undefined = undefined
 ) => {
-  await apdu.tx.sendScript(transport, script);
-  const encryptedSignature = await apdu.tx.executeScript(
+  await tx.sendScript(transport, script);
+  const encryptedSignature = await tx.executeScript(
     transport,
     appId,
     appPrivKey,
     argument
   );
-  await apdu.tx.finishPrepare(transport);
+  await tx.finishPrepare(transport);
 
   if (typeof txPrepareCompleteCallback === "function") {
     txPrepareCompleteCallback();
@@ -95,7 +96,7 @@ export const getSingleEncryptedSignatureByScript = async (
  * @param {String} txDataType hex P1 string
  */
 export const prepareOutputData = async (transport: Transport, txDataHex: string, txDataType: string) => {
-  await apdu.tx.prepTx(transport, txDataHex, txDataType, "00");
+  await tx.prepTx(transport, txDataHex, txDataType, "00");
 };
 
 /**
@@ -120,7 +121,7 @@ export const prepareTx = async (
     const patchData = sendData.substr(i * 500, 500);
     const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
     // eslint-disable-next-line no-await-in-loop
-    encryptedSignature = await apdu.tx.prepTx(
+    encryptedSignature = await tx.prepTx(
       transport,
       patchData,
       txDataType,
@@ -156,7 +157,7 @@ export const getSingleEncryptedSignature = async (
     txDataType,
     appPrivateKey
   );
-  await apdu.tx.finishPrepare(transport);
+  await tx.finishPrepare(transport);
   if (typeof txPrepareCompleteCallback === "function")
     txPrepareCompleteCallback();
   return encryptedSignature;
@@ -185,7 +186,7 @@ export const getEncryptedSignatures = async (
   for (const action of actions) {
     encryptedSignatureArray.push(await action());
   }
-  await apdu.tx.finishPrepare(transport);
+  await tx.finishPrepare(transport);
   if (typeof txPrepareCompleteCallback === "function")
     txPrepareCompleteCallback();
   return encryptedSignatureArray;
@@ -198,14 +199,14 @@ export const getEncryptedSignatures = async (
  * @returns {Promise<String>}
  */
 export const getCWSEncryptionKey = async (transport: Transport, authorizedCallback: Function | undefined): Promise<string> => {
-  const success = await apdu.tx.getTxDetail(transport);
+  const success = await tx.getTxDetail(transport);
   if (!success) throw new Error('get tx detail status fail!!');
 
   if (typeof authorizedCallback === "function") authorizedCallback();
 
-  const signatureKey = await apdu.tx.getSignatureKey(transport);
+  const signatureKey = await tx.getSignatureKey(transport);
 
-  await apdu.tx.clearTransaction(transport);
+  await tx.clearTransaction(transport);
   await apdu.control.powerOff(transport);
   return signatureKey;
 };

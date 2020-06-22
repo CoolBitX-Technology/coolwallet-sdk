@@ -1,4 +1,4 @@
-import { executeCommand } from './execute';
+import { executeCommand } from '../apdu/execute';
 import { RESPONSE } from '../config/response';
 import { getCommandSignature } from "../core/auth";
 import Transport from '../transport';

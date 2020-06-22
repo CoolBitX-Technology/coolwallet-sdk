@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { core, apdu, transport } from '@coolwallet/core';
+import { core, apdu, transport, tx } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import * as scripts from "./scripts";
@@ -260,7 +260,7 @@ function getSigningActions(
 				transport, appId, appPrivateKey, cmd, keyId, redeemType
 			);
 			const pathWithSig = keyId + sig.signature;
-			await apdu.tx.setChangeKeyId(transport, pathWithSig, redeemType);
+			await tx.setChangeKeyId(transport, pathWithSig, redeemType);
 		};
 		preActions.push(changeAction);
 	}

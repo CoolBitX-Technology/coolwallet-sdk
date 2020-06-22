@@ -1,4 +1,4 @@
-import { core, apdu } from '@coolwallet/core';
+import { core, apdu, tx } from '@coolwallet/core';
 
 /**
  * Set change address's path to CoolWallet.
@@ -20,7 +20,7 @@ export const setChangeKeyid = async (
     redeemType
   );
   const keyData = changeKeyId + sig.signature;
-  await apdu.tx.setChangeKeyId(transport, keyData, redeemType);
+  await tx.setChangeKeyId(transport, keyData, redeemType);
 
 
   return true;

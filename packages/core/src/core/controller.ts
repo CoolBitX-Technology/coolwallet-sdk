@@ -1,6 +1,7 @@
 import { UnknownCommand } from '../error/index';
 import * as apdu from '../apdu/index';
 import Transport from '../transport';
+import * as tx from '../transaction/index'
 
 /**
  * Check if the current SE support script execution
@@ -9,7 +10,7 @@ import Transport from '../transport';
  */
 export const checkSupportScripts = async (transport: Transport) => {
   try {
-    await apdu.tx.getSignedHex(transport);
+    await tx.getSignedHex(transport);
     return true;
   } catch (error) {
     if (error instanceof UnknownCommand) return false;

@@ -7,7 +7,8 @@ import * as error from './error/index';
 import * as device from './device/index';
 import * as transport from './transport/index';
 import * as wallet from './wallet/index';
+import * as tx from './transaction/index';
 
 export {
-  config, crypto, core, apdu, coin, error, device, transport, wallet
+  config, crypto, core, apdu, coin, error, device, transport, wallet, tx
 };
