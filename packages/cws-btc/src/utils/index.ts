@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { core, apdu, transport } from '@coolwallets/core';
+import { core, apdu, transport } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import * as scripts from "./scripts";

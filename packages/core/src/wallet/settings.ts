@@ -1,5 +1,6 @@
-import { apdu, error as ERROR, transport } from '@coolwallet/core';
-type Transport = transport.default;
+import * as apdu from '../apdu/index';
+import * as ERROR from '../error/index';
+import Transport from '../transport/index';
 
 /**
  * Get Baisc information of CoolWallet

@@ -1,7 +1,9 @@
-import {
-  apdu, crypto, config, core, transport, error
-} from '@coolwallet/core';
-type Transport = transport.default;
+import * as apdu from '../apdu/index';
+import * as core from '../core/index';
+import * as crypto from '../crypto/index';
+import * as config from '../config/index';
+import * as error from '../error/index';
+import Transport from '../transport/index';
 
 const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;
 

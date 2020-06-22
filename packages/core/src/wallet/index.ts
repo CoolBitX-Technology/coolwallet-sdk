@@ -1,14 +1,15 @@
 import { generateKeyPair } from './keypair';
-import { apdu, transport } from '@coolwallet/core';
+import * as apdu  from '../apdu/index';
+import Transport from '../transport/index';
 import * as pairing from './pairing';
 import { recovery, creation } from './create';
 import * as setting from './settings';
 
-type Transport = transport.default;
+// type Transport = transport.default;
 
 export { generateKeyPair };
 export default class CoolWallet {
-  transport: transport.default;
+  transport: Transport;
   appPrivateKey: string;
   appId: string;
   

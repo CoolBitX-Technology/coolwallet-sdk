@@ -1,12 +1,11 @@
-import {
-  apdu, core, crypto, config
-} from '@coolwallet/core';
-import { transport } from '@coolwallet/core';
+import * as apdu from '../apdu/index';
+import * as core from '../core/index';
+import * as crypto from '../crypto/index';
+import * as config from '../config/index';
+import  Transport  from '../transport/index';
 
 const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;
-
-type Transport = transport.default;
 
 const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;
 
