@@ -37,12 +37,6 @@ npm link
 npm run-script build
 cd ..
 
-cd cws-wallet
-npm link @coolwallet/core
-npm link
-npm run-script build
-cd ..
-
 cd cws-xlm
 npm link @coolwallet/core
 npm install
