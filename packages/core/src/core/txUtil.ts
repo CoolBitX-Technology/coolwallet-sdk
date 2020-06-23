@@ -1,8 +1,9 @@
 import { sign } from "../crypto/sign";
 import { aes256CbcDecrypt } from "../crypto/encryptions";
 import * as signatureTools from "../crypto/signature";
-import { COMMAND } from "../config/command";
 import * as apdu from "../apdu/index";
+import { COMMAND } from "../apdu/command";
+
 import { getCommandSignature } from "./auth";
 import Transport from "../transport";
 import * as tx from '../transaction/index'

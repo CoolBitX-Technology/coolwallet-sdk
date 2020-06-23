@@ -1,5 +1,5 @@
 import { OperationCanceled, NoTransport } from '../error/index';
-import { COMMAND } from '../config/command';
+import { COMMAND } from './command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';
 import { SHA256 } from '../crypto/hash';

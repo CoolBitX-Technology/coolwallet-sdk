@@ -1,7 +1,8 @@
 import { FirmwareVersionTooLow } from '../error/index';
-import { COMMAND } from '../config/command';
 import { sign } from '../crypto/sign';
-import { control, setting } from '../apdu/index';
+import { COMMAND } from "../apdu/command";
+import * as control from '../apdu/control';
+import * as setting from '../apdu/setting';
 import { checkSupportScripts } from './controller';
 import Transport from '../transport';
 
