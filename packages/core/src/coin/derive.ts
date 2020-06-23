@@ -1,5 +1,6 @@
 import { core, apdu, crypto } from "../index";
 import Transport from "../transport";
+import { Commands } from "../apdu/command";
 
 const bip32 = require("bip32");
 
@@ -8,7 +9,7 @@ const authGetKey = async (transport: Transport, appId: string, appPrivateKey: st
     transport,
     appId,
     appPrivateKey,
-    "AUTH_EXT_KEY",
+    Commands.AUTH_EXT_KEY,
     undefined, undefined, undefined, undefined
   );
   return apdu.coin.authGetExtendedKey(transport, signature, forceUseSC);

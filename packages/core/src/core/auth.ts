@@ -1,6 +1,6 @@
 import { FirmwareVersionTooLow } from '../error/index';
 import { sign } from '../crypto/sign';
-import { COMMAND } from "../apdu/command";
+import { CommandType } from "../apdu/command";
 import * as control from '../apdu/control';
 import * as setting from '../apdu/setting';
 import { checkSupportScripts } from './controller';
@@ -21,7 +21,7 @@ export const getCommandSignature = async (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
-  commandName: string,
+  command: CommandType,
   data: string | undefined,
   params1: string | undefined,
   params2: string | undefined = undefined,
@@ -31,10 +31,9 @@ export const getCommandSignature = async (
 
   const forceUseSC = await checkSupportScripts(transport);
 
-  const commandParams = COMMAND[commandName];
-  const P1 = params1 || commandParams.P1;
-  const P2 = params2 || commandParams.P2;
-  const apduHeader = commandParams.CLA + commandParams.INS + P1 + P2;
+  const P1 = params1 || command.P1;
+  const P2 = params2 || command.P2;
+  const apduHeader = command.CLA + command.INS + P1 + P2;
   const dataPackets = data || '';
   const signatureParams = apduHeader + dataPackets + nonce;
   const signature = sign(signatureParams, appPrivateKey).toString('hex');

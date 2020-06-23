@@ -1,6 +1,7 @@
 import { executeCommand } from './execute';
 import { RESPONSE } from '../config/response';
 import Transport from '../transport';
+import { Commands } from "./command";
 
 /**
  * Response boolean (isCardRecognized)
@@ -10,7 +11,7 @@ import Transport from '../transport';
  */
 export const sayHi = async (transport: Transport, appId: string): Promise<boolean> => {
   try {
-    const { status } = await executeCommand(transport, 'SAY_HI', 'SE', appId);
+    const { status } = await executeCommand(transport, Commands.SAY_HI, 'SE', appId);
     return status === RESPONSE.SUCCESS;
   } catch (error) {
     return false;
@@ -23,7 +24,7 @@ export const sayHi = async (transport: Transport, appId: string): Promise<boolea
  * @return {Promise<string>}
  */
 export const getNonce = async (transport: Transport): Promise<string> => {
-  const { outputData: nonce } = await executeCommand(transport, 'GET_NONCE', 'SE');
+  const { outputData: nonce } = await executeCommand(transport, Commands.GET_NONCE, 'SE');
   return nonce;
 };
 
@@ -32,7 +33,7 @@ export const getNonce = async (transport: Transport): Promise<string> => {
  * @param {Transport} transport
  */
 export const cancelAPDU = async (transport: Transport) => {
-  await executeCommand(transport, 'CANCEL_APDU', 'SE');
+  await executeCommand(transport, Commands.CANCEL_APDU, 'SE');
 };
 
 /**
@@ -41,6 +42,6 @@ export const cancelAPDU = async (transport: Transport) => {
  * @return {Promise<boolean>}
  */
 export const powerOff = async (transport: Transport): Promise<boolean> => {
-  await executeCommand(transport, 'PWR_OFF', 'SE');
+  await executeCommand(transport, Commands.PWR_OFF, 'SE');
   return true;
 };

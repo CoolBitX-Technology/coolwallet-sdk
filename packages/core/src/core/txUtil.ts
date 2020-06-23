@@ -2,7 +2,7 @@ import { sign } from "../crypto/sign";
 import { aes256CbcDecrypt } from "../crypto/encryptions";
 import * as signatureTools from "../crypto/signature";
 import * as apdu from "../apdu/index";
-import { COMMAND } from "../apdu/command";
+import { Commands } from "../apdu/command";
 
 import { getCommandSignature } from "./auth";
 import Transport from "../transport";
@@ -16,7 +16,7 @@ import * as tx from '../transaction/index'
  * @return {String} signature
  */
 const signForCoolWallet = (txDataHex: string, txDataType: string, appPrivateKey: string): string => {
-  const command = COMMAND.TX_PREPARE;
+  const command = Commands.TX_PREPARE;
   const P1 = txDataType;
   const P2 = "00";
   const prefix = command.CLA + command.INS + P1 + P2;
