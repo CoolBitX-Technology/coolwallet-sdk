@@ -1,5 +1,5 @@
-interface CodeList {
-  // [key: string]: string,
+export interface CodeList {
+  [key: string]: string, // TODO
   _6E00: string,
   _6D00: string,
   _6982: string,
@@ -60,7 +60,4 @@ interface CodeList {
   _6AC2: string,
   _6AC7: string,
   _6AC5: string,
-
-  
-
 }
