@@ -28,7 +28,7 @@ export const signTransaction = async (
   appId: string,
   appPrivateKey: string,
   coinType: string,
-  transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number},
+  transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number },
   addressIndex: number,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
@@ -67,7 +67,7 @@ export const signTransaction = async (
       authorizedCB
     );
   }
-  if (!Buffer.isBuffer(canonicalSignature)){
+  if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(
       canonicalSignature,
       rlp.encode(rawPayload),
@@ -117,7 +117,7 @@ export const signMessage = async (
   }
 
   if (isHashRequired) {
-    preAction = ethUtil.apduForParsingMessage(transport, msgBuf, '07'); // send prehashed message to card
+    preAction = ethUtil.apduForParsignMessage(transport, msgBuf, '07'); // send prehashed message to card
     msgBuf = Buffer.from(keccak256(msgBuf), 'hex');
   }
 

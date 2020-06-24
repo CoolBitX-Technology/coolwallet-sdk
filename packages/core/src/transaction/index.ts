@@ -67,16 +67,16 @@ export const prepareTx = async (
   appPrivateKey: string
 ): Promise<string> => {
   if (txDataType != '00') {
-    // send output data for bitcoin family
-    const { outputData } = await executeCommand(transport, Commands.TX_PREPARE, 'SE', txDataHex, txDataType);
+    const { outputData } = await executeCommand(transport, Commands.TX_PREPARE, 'SE', txDataHex, txDataType, '00');
     return outputData;
   } else {
     const sig = await getCommandSignatureWithoutNonce(
       transport,
       appPrivateKey,
-      Commands.SET_CHANGE_KEYID,
+      Commands.TX_PREPARE,
       txDataHex,
-      txDataType
+      txDataType,
+      '00'
     );
     let encryptedSignature;
     const sendData = txDataHex + sig;
@@ -104,7 +104,7 @@ export const prepareTx = async (
  * @param {string} P2
  * @return {Promise<string>}
  */
-export const txPrep = async (
+/*export const txPrep = async (
   transport: Transport,
   payload: string,
   P1: string,
@@ -112,7 +112,7 @@ export const txPrep = async (
 ): Promise<string> => {
   const { outputData } = await executeCommand(transport, Commands.TX_PREPARE, 'SE', payload, P1, P2);
   return outputData;
-};
+};*/
 
 /**
  * Scriptable step 1

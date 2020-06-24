@@ -1,6 +1,7 @@
 import { OperationCanceled, NoTransport } from '../error/index';
 import { CommandType, Commands } from './command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
+import { error as Errors } from '../index';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';
 import { SHA256 } from '../crypto/hash';
 import Transport from '../transport/index';
@@ -22,10 +23,10 @@ const executeAPDU = async (
   outputData: string
 }> => {
   if (typeof transport.request !== 'function') throw new NoTransport();
-  /*console.log("{")
+  console.log("{")
   console.log(" command: " + apdu.command)
   console.log(" data: " + apdu.data)
-  console.log("}")*/
+  console.log("}")
   // TODO app transport
   if (transport.requestAPDUV2) {
     return await transport.requestAPDUV2(apdu);
@@ -70,6 +71,10 @@ export const executeCommand = async (
   const P1 = params1 || command.P1;
   const P2 = params2 || command.P2;
 
+  if ((typeof (P1) == undefined) || (typeof (P2) == undefined)) {
+    throw new Errors.SDKError('Unknown', command.toString())
+  }
+
   let response;
   // data too long: divide and send with SECURE CHANNEL
   if (forceUseSC || (supportSC && data.length > 500)) {
@@ -113,7 +118,7 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
   const dataToHash = apduHeader.concat(salt, apduData);
   const hash = SHA256(dataToHash).toString('hex');
   const packedData = apduHeader.concat(hash, salt, apduData);
-  //console.log("Before Secure channel: " + packedData)
+  console.log("Before Secure channel: " + packedData)
   const channelVersion = '01';
   const useSecure = '00';
   const useSign = forceUseSC ? '01' : '00';
