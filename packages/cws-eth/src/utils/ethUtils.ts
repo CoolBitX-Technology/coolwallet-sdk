@@ -1,4 +1,4 @@
-import { error, transport } from "@coolwallet/core";
+import { error, transport, tx } from "@coolwallet/core";
 
 import { apdu } from "@coolwallet/core";
 
@@ -211,7 +211,8 @@ export const apduForParsingMessage = (transport: Transport, msgBuf: Buffer, p1: 
       const patchData = rawData.substr(i * 500, 500);
       const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
       // eslint-disable-next-line no-await-in-loop
-      await apdu.tx.prepTx(transport, patchData, p1, p2);
+      // todo
+      await tx.prepareTx(transport, patchData, p1, p2);
     }
   };
 };

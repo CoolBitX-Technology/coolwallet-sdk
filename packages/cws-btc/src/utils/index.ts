@@ -249,26 +249,22 @@ function getSigningActions(
 
 ): ({ preActions: Array<Function>, actions: Array<Function> }) {
 	const preActions = [];
-
 	if (change) {
 		const changeAction = async () => {
-			const cmd = 'SET_CHANGE_KEYID';
-			if (scriptType === ScriptType.P2WPKH) throw new Error('not support P2WPKH change');
-			const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
-			const keyId = change.addressIndex.toString(16).padStart(10, '0');
-			const sig = await core.auth.getCommandSignature(
-				transport, appId, appPrivateKey, cmd, keyId, redeemType
-			);
-			const pathWithSig = keyId + sig.signature;
-			await tx.setChangeKeyId(transport, pathWithSig, redeemType);
-		};
+			if (scriptType === ScriptType.P2WPKH) {
+				throw new Error('not support P2WPKH change');
+			} else {
+				const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
+				await tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
+			}
+		}
 		preActions.push(changeAction);
 	}
 
 	const parsingOutputAction = async () => {
 		const txDataHex = preparedData.outputsBuf.toString('hex');
 		const txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0C' : '01';
-		return core.util.prepareOutputData(transport, txDataHex, txDataType);
+		return tx.prepareTx(transport, txDataHex, txDataType, appPrivateKey);
 	};
 	preActions.push(parsingOutputAction);
 
@@ -277,7 +273,7 @@ function getSigningActions(
 		const readType = '01';
 		const txDataHex = core.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
-		return core.util.prepareTx(transport, txDataHex, txDataType, appPrivateKey);
+		return tx.prepareTx(transport, txDataHex, txDataType, appPrivateKey);
 	}));
 
 	return { preActions, actions };

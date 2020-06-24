@@ -4,7 +4,6 @@ import * as signatureTools from "../crypto/signature";
 import * as apdu from "../apdu/index";
 import { Commands } from "../apdu/command";
 
-import { getCommandSignature } from "./auth";
 import Transport from "../transport";
 import * as tx from '../transaction/index'
 
@@ -15,7 +14,7 @@ import * as tx from '../transaction/index'
  * @param {String} appPrivateKey
  * @return {String} signature
  */
-const signForCoolWallet = (txDataHex: string, txDataType: string, appPrivateKey: string): string => {
+/*const signForCoolWallet = (txDataHex: string, txDataType: string, appPrivateKey: string): string => {
   const command = Commands.TX_PREPARE;
   const P1 = txDataType;
   const P2 = "00";
@@ -23,7 +22,7 @@ const signForCoolWallet = (txDataHex: string, txDataType: string, appPrivateKey:
   const payload = prefix + txDataHex;
   const signatureBuffer = sign(Buffer.from(payload, "hex").toString("hex"), appPrivateKey);
   return signatureBuffer.toString("hex");
-};
+};*/
 
 export const getEncryptedSignaturesByScript = async (
   transport: Transport,
@@ -91,52 +90,6 @@ export const getSingleEncryptedSignatureByScript = async (
 };
 
 /**
- * send output data for bitcoin family
- * @param {Transport} transport
- * @param {String} txDataHex hex string data for SE
- * @param {String} txDataType hex P1 string
- */
-export const prepareOutputData = async (transport: Transport, txDataHex: string, txDataType: string) => {
-  await tx.prepTx(transport, txDataHex, txDataType, "00");
-};
-
-/**
- * get command signature for CoolWalletS
- * @param {Transport} transport
- * @param {String} txDataHex hex string data for SE
- * @param {String} txDataType hex P1 string
- * @param {String} appPrivateKey
- * @return {String} signature
- */
-export const prepareTx = async (
-  transport: Transport,
-  txDataHex: string,
-  txDataType: string,
-  appPrivateKey: string
-): Promise<string> => {
-  let encryptedSignature;
-  const sendData =
-    txDataHex + signForCoolWallet(txDataHex, txDataType, appPrivateKey);
-  const patch = Math.ceil(sendData.length / 500);
-  for (let i = 0; i < patch; i++) {
-    const patchData = sendData.substr(i * 500, 500);
-    const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
-    // eslint-disable-next-line no-await-in-loop
-    encryptedSignature = await tx.prepTx(
-      transport,
-      patchData,
-      txDataType,
-      p2
-    );
-  }
-  if (encryptedSignature) {
-    return encryptedSignature;
-  } else {
-    throw new Error('prepareTx get encryptedSignature failed')
-  }
-};
-
-/**
  * do TX_PREP and get encrypted signature.
  * @param {Transport} transport
  * @param {String} txDataHex
@@ -152,7 +105,7 @@ export const getSingleEncryptedSignature = async (
   appPrivateKey: string,
   txPrepareCompleteCallback: Function | undefined = undefined
 ): Promise<string> => {
-  const encryptedSignature = await prepareTx(
+  const encryptedSignature = await tx.prepareTx(
     transport,
     txDataHex,
     txDataType,
