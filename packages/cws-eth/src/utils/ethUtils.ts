@@ -1,7 +1,5 @@
 import { error, transport, tx } from "@coolwallet/core";
 
-import { apdu } from "@coolwallet/core";
-
 import { handleHex } from "./stringUtil";
 import * as scripts from "../scripts";
 import * as token from "../token";

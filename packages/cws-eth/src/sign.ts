@@ -1,9 +1,11 @@
 import { core, transport, error } from '@coolwallet/core';
-import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
+// import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import { isHex, keccak256 } from './lib';
 import * as ethUtil from './utils/ethUtils';
 import { removeHex0x } from './utils/stringUtil';
 
+const ethSigUtil = require('eth-sig-util');
+const typedDataUtils = ethSigUtil.TypedDataUtils
 const rlp = require('rlp');
 type Transport = transport.default;
 
