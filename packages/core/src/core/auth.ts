@@ -3,6 +3,7 @@ import { sign } from '../crypto/sign';
 import { CommandType } from "../apdu/command";
 import * as control from '../apdu/control';
 import * as setting from '../apdu/setting';
+import * as general from '../general';
 import { checkSupportScripts } from './controller';
 import Transport from '../transport';
 
@@ -66,7 +67,7 @@ export const getCommandSignature = async (
   const signature = sign(signatureParams, appPrivateKey).toString('hex');
 
   if (!forceUseSC) {
-    await control.sayHi(transport, appId);
+    await general.hi(transport, appId);
     return { signature, forceUseSC };
   } else {
     // return [appId(20B)] [rightJustifiedSignature(72B)]

@@ -38,21 +38,6 @@ export const setChangeKeyid = async (
 };
 
 /**
- * send output data for bitcoin family
- * @param {Transport} transport
- * @param {String} txDataHex hex string data for SE
- * @param {String} txDataType hex P1 string
- */
-/*export const prepareOutputData = async (
-  transport: Transport,
-  txDataHex: string,
-  txDataType: string
-) => {
-  const { outputData } = await executeCommand(transport, Commands.TX_PREPARE, 'SE', txDataHex, txDataType);
-  return outputData;
-};*/
-
-/**
  * get command signature for CoolWalletS
  * @param {Transport} transport
  * @param {String} txDataHex hex string data for SE
@@ -60,7 +45,7 @@ export const setChangeKeyid = async (
  * @param {String} appPrivateKey
  * @return {String} signature
  */
-export const prepareTx = async (
+export const txPrep = async (
   transport: Transport,
   txDataHex: string,
   txDataType: string,
@@ -95,24 +80,6 @@ export const prepareTx = async (
     }
   }
 };
-
-/**
- * Send sign data to CoolWalletS
- * @param {Transport} transport
- * @param {string} payload
- * @param {string} P1
- * @param {string} P2
- * @return {Promise<string>}
- */
-/*export const txPrep = async (
-  transport: Transport,
-  payload: string,
-  P1: string,
-  P2: string
-): Promise<string> => {
-  const { outputData } = await executeCommand(transport, Commands.TX_PREPARE, 'SE', payload, P1, P2);
-  return outputData;
-};*/
 
 /**
  * Scriptable step 1

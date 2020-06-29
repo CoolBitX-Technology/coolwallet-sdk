@@ -7,8 +7,7 @@ import {
 	createUnsignedTransactions,
 	getSigningActions,
 	composeFinalTransaction,
-	getScriptAndArgument,
-	getUtxoArguments
+	getScriptAndArgument
 } from './utils';
 type Transport = transport.default;
 
@@ -33,27 +32,27 @@ async function signTransaction(
 		throw new Error(`Unsupport ScriptType : ${scriptType}`);
 	}
 	const useScript = await core.controller.checkSupportScripts(transport);
-	let signatures;
+	let signatures
 	if (useScript) {
-		const { preparedData, unsignedTransactions } = createUnsignedTransactions(
+		const { preparedData } = createUnsignedTransactions(
 			scriptType,
 			inputs,
 			output,
 			change
 		);
-		const { script, argument } = getScriptAndArgument(
-			inputs,
-			output,
-			change,
-		);
-		const utxoArguments = getUtxoArguments(inputs, preparedData);
-		signatures = await core.flow.sendBatchScriptAndDataToCard(
+		const { preActions, actions } = getScriptAndArgument(
 			transport,
 			appId,
 			appPrivateKey,
-			script,
-			argument,
-			utxoArguments,
+			inputs,
+			preparedData,
+			output,
+			change,
+		);
+		signatures = await core.flow.getSignaturesFromCoolWallet(
+			transport,
+			preActions,
+			actions,
 			false,
 			confirmCB,
 			authorizedCB,
@@ -68,7 +67,6 @@ async function signTransaction(
 			output,
 			change
 		);
-
 		const { preActions, actions } = getSigningActions(
 			transport,
 			scriptType,
@@ -78,10 +76,8 @@ async function signTransaction(
 			preparedData,
 			unsignedTransactions,
 		);
-		signatures = await core.flow.sendBatchDataToCoolWallet(
+		signatures = await core.flow.getSignaturesFromCoolWallet(
 			transport,
-			appId,
-			appPrivateKey,
 			preActions,
 			actions,
 			false,
@@ -93,6 +89,5 @@ async function signTransaction(
 		const transaction = composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
 		return transaction.toString('hex');
 	}
-
 }
 

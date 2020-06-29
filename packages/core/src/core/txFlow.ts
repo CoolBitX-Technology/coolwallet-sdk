@@ -1,7 +1,8 @@
 import * as rlp from 'rlp';
 import * as txUtil from './txUtil';
-import { sayHi } from '../apdu/control';
 import Transport from "../transport";
+import * as tx from '../transaction/index'
+import * as apdu from "../apdu/index";
 
 /**
  * @description Prepare RLP Data for CoolWallet
@@ -22,129 +23,7 @@ export const prepareSEData = (keyId: string, rawData: Buffer | Array<Buffer>, re
 };
 
 /**
- * sign data with coolwallet via script command
- * @param {Transport} transport
- * @param {string} appId
- * @param {string} appPrivateKey
- * @param {string} script
- * @param {string} argument
- * @param {boolean} isEDDSA
- * @param {Function} txPrepareComplteCallback
- * @param {Function} authorizedCallback
- * @param {boolean} return_canonical
- */
-export const sendScriptAndDataToCard = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  script: string,
-  argument: string,
-  isEDDSA: boolean = false,
-  txPrepareCompleteCallback: Function | undefined = undefined,
-  authorizedCallback: Function | undefined = undefined,
-  return_canonical: boolean = true
-) => {
-  const encryptedSignature = await txUtil.getSingleEncryptedSignatureByScript(
-    transport,
-    appId,
-    appPrivateKey,
-    script,
-    argument,
-    txPrepareCompleteCallback
-  );
-
-  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
-  return txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, isEDDSA, return_canonical);
-};
-
-/**
- * Send Data Array to coolwallet via script command
- */
-export const sendBatchScriptAndDataToCard = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  script: string,
-  argument: string,
-  utxoArguments: string[],
-  isEDDSA: boolean = false,
-  txPrepareCompleteCallback: Function | undefined = undefined,
-  authorizedCallback: Function | undefined = undefined,
-  returnCanonical: boolean = true
-) => {
-  const encryptedSignatureArray = await txUtil.getEncryptedSignaturesByScript(
-    transport,
-    appId,
-    appPrivateKey,
-    script,
-    argument,
-    utxoArguments,
-    txPrepareCompleteCallback
-  );
-
-  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
-
-  const signatures = encryptedSignatureArray.map(
-    (encryptedSignature) => txUtil.decryptSignatureFromSE(
-      encryptedSignature,
-      signatureKey,
-      isEDDSA,
-      returnCanonical
-    )
-  );
-  return signatures;
-};
-
-/**
- * sign data with coolwallets.
- * @param {Transport} transport
- * @param {String} appId
- * @param {String} appPrivateKey
- * @param {String} txDataHex for SE (output of prepareSEData)
- * @param {String} txDataType hex string
- * @param {Boolean} isEDDSA
- * @param {Function} preAction
- * @param {Function} txPrepareCompleteCallback notify app to show the tx info
- * @param {Function} authorizedCallback notify app to close the tx info
- * @param {Boolean} returnCanonical
- * @return {Promise< {r: string, s: string} | Buffer >}
- */
-export const sendDataToCoolWallet = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  txDataHex: string,
-  txDataType: string,
-  isEDDSA: boolean = false,
-  preAction: Function | undefined = undefined,
-  txPrepareCompleteCallback: Function | undefined = undefined,
-  authorizedCallback: Function | undefined = undefined,
-  returnCanonical: boolean = true
-): Promise<{ r: string; s: string; } | Buffer> => {
-  await sayHi(transport, appId);
-
-  if (typeof preAction === 'function') await preAction();
-
-  const encryptedSignature = await txUtil.getSingleEncryptedSignature(
-    transport,
-    txDataHex,
-    txDataType,
-    appPrivateKey,
-    txPrepareCompleteCallback
-  );
-  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
-
-  const signature = txUtil.decryptSignatureFromSE(
-    encryptedSignature,
-    signatureKey,
-    isEDDSA,
-    returnCanonical
-  );
-  return signature;
-};
-
-/**
- * @description Send Data Array to CoolWallet
+ * @description Send Signing Function to CoolWallet
  * @param {Transport} transport
  * @param {String} appId
  * @param {String} appPrivateKey
@@ -156,27 +35,105 @@ export const sendDataToCoolWallet = async (
  * @param {Boolean} returnCanonical
  * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
-export const sendBatchDataToCoolWallet = async (
+export const getSingleSignatureFromCoolWallet = async (
   transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  preActions: Array<Function>,
+  preActions: Array<Function> | undefined = undefined,
+  action: Function,
+  isEDDSA = false,
+  txPrepareCompleteCallback: Function | undefined = undefined,
+  authorizedCallback: Function | undefined = undefined,
+  returnCanonical: boolean = true
+) => {
+  // signing
+  if (preActions) {
+    // eslint-disable-next-line no-await-in-loop
+    for (const preAction of preActions) {
+      await preAction();
+    }
+  }
+  const encryptedSignature = await action();
+
+  if (typeof txPrepareCompleteCallback === "function")
+    txPrepareCompleteCallback();
+
+  // finish prepare
+  await tx.finishPrepare(transport);
+
+  // get tx detail
+  if (! await tx.getTxDetail(transport)) {
+    throw new Error('get tx detail status fail!!');
+  }
+  //authorize tx
+  const signatureKey = await tx.getSignatureKey(transport);
+  if (typeof authorizedCallback === "function") {
+    authorizedCallback();
+  }
+  // clear tx
+  await tx.clearTransaction(transport);
+  await apdu.control.powerOff(transport);
+  // decrpt signature
+  const signature = txUtil.decryptSignatureFromSE(
+    encryptedSignature,
+    signatureKey,
+    isEDDSA,
+    returnCanonical
+  );
+  return signature;
+};
+
+/**
+ * @description Send Signing Function to CoolWallet
+ * @param {Transport} transport
+ * @param {String} appId
+ * @param {String} appPrivateKey
+ * @param {Array<{Function}>} preActions
+ * @param {Array<{Function}>} actions
+ * @param {Boolean} isEDDSA
+ * @param {Function} txPrepareCompleteCallback notify app to show the tx info
+ * @param {Function} authorizedCallback notify app to close the tx info
+ * @param {Boolean} returnCanonical
+ * @return {Promise<Array<{r: string, s: string} | Buffer >>}
+ */
+export const getSignaturesFromCoolWallet = async (
+  transport: Transport,
+  preActions: Array<Function> | undefined = undefined,
   actions: Array<Function>,
   isEDDSA = false,
   txPrepareCompleteCallback: Function | undefined = undefined,
   authorizedCallback: Function | undefined = undefined,
   returnCanonical: boolean = true
 ) => {
-  await sayHi(transport, appId);
+  // signing
+  if (preActions) {
+    // eslint-disable-next-line no-await-in-loop
+    for (const preAction of preActions) {
+      await preAction();
+    }
+  }
+  const encryptedSignatureArray = [];
+  // eslint-disable-next-line no-await-in-loop
+  for (const action of actions) {
+    encryptedSignatureArray.push(await action());
+  }
+  if (typeof txPrepareCompleteCallback === "function")
+    txPrepareCompleteCallback();
 
-  const encryptedSignatureArray = await txUtil.getEncryptedSignatures(
-    transport,
-    preActions,
-    actions,
-    txPrepareCompleteCallback
-  );
-  const signatureKey = await txUtil.getCWSEncryptionKey(transport, authorizedCallback);
+  // finish prepare
+  await tx.finishPrepare(transport);
 
+  // get tx detail
+  if (! await tx.getTxDetail(transport)) {
+    throw new Error('get tx detail status fail!!');
+  }
+  //authorize tx
+  const signatureKey = await tx.getSignatureKey(transport);
+  if (typeof authorizedCallback === "function") {
+    authorizedCallback();
+  }
+  // clear tx
+  await tx.clearTransaction(transport);
+  await apdu.control.powerOff(transport);
+  // decrpt signature
   const signatures = encryptedSignatureArray.map(
     (encryptedSignature) => txUtil.decryptSignatureFromSE(
       encryptedSignature,
