@@ -37,7 +37,7 @@ export const signPayment = async (
     preActions.push(sendScript);
 
     const sendArgument = async () => {
-      await tx.executeScript(
+      return await tx.executeScript(
         transport,
         appId,
         appPrivateKey,
