@@ -1,7 +1,7 @@
 import { executeCommand } from './execute';
 import { RESPONSE } from '../config/response';
 import Transport from '../transport';
-import { Commands } from "./command";
+import { commands } from "./command";
 
 /**
  * Reset CoolWalletS (clear all data)
@@ -9,7 +9,7 @@ import { Commands } from "./command";
  * @return {Promise<boolean>}
  */
 export const resetCard = async (transport: Transport): Promise<boolean> => {
-  const { status } = await executeCommand(transport, Commands.RESET_PAIR, 'SE');
+  const { status } = await executeCommand(transport, commands.RESET_PAIR, 'SE');
   return status === RESPONSE.SUCCESS;
 };
 
@@ -18,7 +18,7 @@ export const resetCard = async (transport: Transport): Promise<boolean> => {
  * @param {Transport} transport
  */
 export const getCardInfo = async (transport: Transport): Promise<string> => {
-  const { outputData } = await executeCommand(transport, Commands.GET_CARD_INFO, 'SE');
+  const { outputData } = await executeCommand(transport, commands.GET_CARD_INFO, 'SE');
   return outputData;
 };
 
@@ -30,7 +30,7 @@ export const getCardInfo = async (transport: Transport): Promise<string> => {
  * @return {Promise<boolean>}
  */
 export const updateKeyId = async (transport: Transport, data: string, P1: string): Promise<boolean> => {
-  await executeCommand(transport, Commands.UPDATE_KEYID, 'SE', data, P1);
+  await executeCommand(transport, commands.UPDATE_KEYID, 'SE', data, P1);
   return true;
 };
 
@@ -40,7 +40,7 @@ export const updateKeyId = async (transport: Transport, data: string, P1: string
  * @param {string} P1
  */
 export const getLastKeyId = async (transport: Transport, P1: string) => {
-  const { outputData } = await executeCommand(transport, Commands.GET_KEYID, 'SE', undefined, P1);
+  const { outputData } = await executeCommand(transport, commands.GET_KEYID, 'SE', undefined, P1);
   return outputData;
 };
 
@@ -52,7 +52,7 @@ export const getLastKeyId = async (transport: Transport, P1: string) => {
  * @return {Promise<boolean>}
  */
 export const switchLockStatus = async (transport: Transport, signature: string, lock: string): Promise<boolean> => {
-  await executeCommand(transport, Commands.CHANGE_PAIR_STATUS, 'SE', signature, lock);
+  await executeCommand(transport, commands.CHANGE_PAIR_STATUS, 'SE', signature, lock);
   return true;
 };
 
@@ -64,7 +64,7 @@ export const switchLockStatus = async (transport: Transport, signature: string, 
  * @return {Promise<boolean>}
  */
 export const toggleDisplayAddress = async (transport: Transport, signature: string, detailFlag: string): Promise<boolean> => {
-  await executeCommand(transport, Commands.SHOW_FULL_ADDRESS, 'SE', signature, detailFlag);
+  await executeCommand(transport, commands.SHOW_FULL_ADDRESS, 'SE', signature, detailFlag);
   return true;
 };
 
@@ -74,6 +74,6 @@ export const toggleDisplayAddress = async (transport: Transport, signature: stri
  * @returns {Promise<Number>}
  */
 export const getSEVersion = async (transport: Transport): Promise<number> => {
-  const { outputData } = await executeCommand(transport, Commands.GET_SE_VERSION, 'SE');
+  const { outputData } = await executeCommand(transport, commands.GET_SE_VERSION, 'SE');
   return parseInt(outputData, 16);
 };

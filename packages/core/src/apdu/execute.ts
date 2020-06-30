@@ -1,5 +1,5 @@
 import { OperationCanceled, NoTransport } from '../error/index';
-import { CommandType, Commands } from './command';
+import { CommandType, commands } from './command';
 import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
 import { error as Errors } from '../index';
 import { RESPONSE, DFU_RESPONSE } from '../config/response';
@@ -23,10 +23,10 @@ const executeAPDU = async (
   outputData: string
 }> => {
   if (typeof transport.request !== 'function') throw new NoTransport();
-  console.log("{")
-  console.log(" command: " + apdu.command)
-  console.log(" data: " + apdu.data)
-  console.log("}")
+  console.debug("{")
+  console.debug(" command: " + apdu.command)
+  console.debug(" data: " + apdu.data)
+  console.debug("}")
   // TODO app transport
   if (transport.requestAPDUV2) {
     return await transport.requestAPDUV2(apdu);
@@ -118,7 +118,7 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
   const dataToHash = apduHeader.concat(salt, apduData);
   const hash = SHA256(dataToHash).toString('hex');
   const packedData = apduHeader.concat(hash, salt, apduData);
-  console.log("Before Secure channel: " + packedData)
+  console.debug("Before Secure channel: " + packedData)
   const channelVersion = '01';
   const useSecure = '00';
   const useSign = forceUseSC ? '01' : '00';
@@ -172,5 +172,5 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
 const sendFragment = async (transport: Transport, data: string, index: number, totalPackages: number): Promise<{ status: string, outputData: string }> => {
   const P1 = index.toString(16).padStart(2, '0');
   const P2 = totalPackages.toString(16).padStart(2, '0');
-  return executeCommand(transport, Commands.SC_SEND_SEGMENT, 'SE', data, P1, P2, false);
+  return executeCommand(transport, commands.SC_SEND_SEGMENT, 'SE', data, P1, P2, false);
 };

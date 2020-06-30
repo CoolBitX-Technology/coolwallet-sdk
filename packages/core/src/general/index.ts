@@ -1,7 +1,7 @@
 import { executeCommand } from '../apdu/execute';
 import { RESPONSE } from '../config/response';
 import Transport from '../transport';
-import { Commands } from "../apdu/command";
+import { commands } from "../apdu/command";
 
 
 /**
@@ -12,7 +12,7 @@ import { Commands } from "../apdu/command";
  */
 export const hi = async (transport: Transport, appId: string): Promise<boolean> => {
   try {
-    const { status } = await executeCommand(transport, Commands.SAY_HI, 'SE', appId);
+    const { status } = await executeCommand(transport, commands.SAY_HI, 'SE', appId);
     return status === RESPONSE.SUCCESS;
   } catch (error) {
     return false;

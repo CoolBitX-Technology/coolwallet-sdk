@@ -6,7 +6,7 @@ export type CommandType = {
 };
 
 
-export const Commands = {
+export const commands = {
   ECHO: {
     CLA: '80',
     INS: '68',

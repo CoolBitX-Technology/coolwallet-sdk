@@ -1,6 +1,6 @@
 import { executeCommand } from './execute';
 import Transport from '../transport';
-import { Commands } from "./command";
+import { commands } from "./command";
 
 /**
  * Display "UPDATE" on wallet display
@@ -8,7 +8,7 @@ import { Commands } from "./command";
  * @return {Promise<boolean>}
  */
 export const showUpdate = async (transport: Transport): Promise<boolean> => {
-  await executeCommand(transport, Commands.START_UPDATE, 'SE');
+  await executeCommand(transport, commands.START_UPDATE, 'SE');
   return true;
 };
 
@@ -18,7 +18,7 @@ export const showUpdate = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<boolean>}
  */
 export const hideUpdate = async (transport: Transport): Promise<boolean> => {
-  await executeCommand(transport, Commands.FINISH_UPDATE, 'SE');
+  await executeCommand(transport, commands.FINISH_UPDATE, 'SE');
   return true;
 };
 
@@ -29,6 +29,6 @@ export const hideUpdate = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<boolean>}
  */
 export const updateBalance = async (transport: Transport, data: string): Promise<boolean> => {
-  await executeCommand(transport, Commands.UPDATE_BALANCE, 'SE', data);
+  await executeCommand(transport, commands.UPDATE_BALANCE, 'SE', data);
   return true;
 };
