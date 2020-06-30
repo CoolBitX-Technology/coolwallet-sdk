@@ -1,19 +1,84 @@
-import { executeCommand } from './execute';
+import { executeCommand } from '../apdu/execute';
 import { RESPONSE } from '../config/response';
-import { getCommandSignature } from "../core/auth";
+import { getCommandSignature, getCommandSignatureWithoutNonce } from "../core/auth";
 import Transport from '../transport';
+import { addressIndexToKeyId } from '../core/txUtil'
+import { commands } from "../apdu/command";
+
 
 /**
- * Send sign data to CoolWalletS
- * @param {Transport} transport
- * @param {string} payload
- * @param {string} P1
- * @param {string} P2
- * @return {Promise<string>}
+ * Set change address's path to CoolWallet.
+ * 
+ * @param transport 
+ * @param appId 
+ * @param appPrivateKey 
+ * @param coinType 
+ * @param changeAddressIndex 
+ * @param redeemType 00=P2PKH 01=P2SH
  */
-export const prepTx = async (transport: Transport, payload: string, P1: string, P2: string): Promise<string> => {
-  const { outputData } = await executeCommand(transport, 'TX_PREPARE', 'SE', payload, P1, P2);
-  return outputData;
+export const setChangeKeyid = async (
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  coinType: string,
+  changeAddressIndex: number,
+  redeemType: string
+) => {
+  const changeKeyId = addressIndexToKeyId(coinType, changeAddressIndex);
+  const sig = await getCommandSignature(
+    transport,
+    appId,
+    appPrivateKey,
+    commands.SET_CHANGE_KEYID,
+    changeKeyId,
+    redeemType
+  );
+  const keyWithSig = changeKeyId + sig.signature;
+  return executeCommand(transport, commands.SET_CHANGE_KEYID, 'SE', keyWithSig, redeemType);
+};
+
+/**
+ * get command signature for CoolWalletS
+ * @param {Transport} transport
+ * @param {String} txDataHex hex string data for SE
+ * @param {String} txDataType hex P1 string
+ * @param {String} appPrivateKey
+ * @return {String} signature
+ */
+export const txPrep = async (
+  transport: Transport,
+  txDataHex: string,
+  txDataType: string,
+  appPrivateKey: string
+): Promise<string> => {
+  if (txDataType != '00') {
+    const { outputData } = await executeCommand(transport, commands.TX_PREPARE, 'SE', txDataHex, txDataType, '00');
+    return outputData;
+  } else {
+    const sig = await getCommandSignatureWithoutNonce(
+      transport,
+      appPrivateKey,
+      commands.TX_PREPARE,
+      txDataHex,
+      txDataType,
+      '00'
+    );
+    let encryptedSignature;
+    const sendData = txDataHex + sig;
+    const patch = Math.ceil(sendData.length / 500);
+    for (let i = 0; i < patch; i++) {
+      const patchData = sendData.substr(i * 500, 500);
+      const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
+      // eslint-disable-next-line no-await-in-loop
+      const result = await executeCommand(transport, commands.TX_PREPARE, 'SE', patchData, txDataType, p2);
+      encryptedSignature = result.outputData;
+    }
+    if (encryptedSignature) {
+      return encryptedSignature;
+    } else {
+      throw new Error('prepareTx get encryptedSignature failed')
+    }
+  }
 };
 
 /**
@@ -23,7 +88,7 @@ export const prepTx = async (transport: Transport, payload: string, P1: string, 
 export const sendScript = async (transport: Transport, script: string) => {
   const { status } = await executeCommand(
     transport,
-    'SEND_SCRIPT',
+    commands.SEND_SCRIPT,
     'SE',
     script,
     undefined,
@@ -46,14 +111,14 @@ export const executeScript = async (
     transport,
     appId,
     appPrivKey,
-    "EXECUTE_SCRIPT",
+    commands.EXECUTE_SCRIPT,
     argument,
     undefined,
     undefined
   );
   const { outputData: encryptedSignature } = await executeCommand(
     transport,
-    'EXECUTE_SCRIPT',
+    commands.EXECUTE_SCRIPT,
     'SE',
     argument + signature,
     undefined,
@@ -81,14 +146,14 @@ export const executeUtxoScript = async (
     transport,
     appId,
     appPrivKey,
-    "EXECUTE_UTXO_SCRIPT",
+    commands.EXECUTE_UTXO_SCRIPT,
     utxoArgument,
     P1,
     undefined
   );
   const { outputData: encryptedSignature } = await executeCommand(
     transport,
-    'EXECUTE_UTXO_SCRIPT',
+    commands.EXECUTE_UTXO_SCRIPT,
     'SE',
     utxoArgument + signature,
     P1,
@@ -105,7 +170,7 @@ export const executeUtxoScript = async (
  * @param {Transport} transport
  */
 export const getSignedHex = async (transport: Transport) => {
-  const { outputData: signedTx } = await executeCommand(transport, 'GET_SIGNED_HEX', 'SE');
+  const { outputData: signedTx } = await executeCommand(transport, commands.GET_SIGNED_HEX, 'SE');
   return signedTx;
 };
 
@@ -115,7 +180,7 @@ export const getSignedHex = async (transport: Transport) => {
  * @return {Promse<boolean>}
  */
 export const finishPrepare = async (transport: Transport): Promise<boolean> => {
-  await executeCommand(transport, 'FINISH_PREPARE', 'SE');
+  await executeCommand(transport, commands.FINISH_PREPARE, 'SE');
   return true;
 };
 
@@ -125,7 +190,7 @@ export const finishPrepare = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<string>}
  */
 export const getSignatureKey = async (transport: Transport): Promise<string> => {
-  const { outputData: signatureKey } = await executeCommand(transport, 'GET_TX_KEY', 'SE');
+  const { outputData: signatureKey } = await executeCommand(transport, commands.GET_TX_KEY, 'SE');
   return signatureKey;
 };
 
@@ -135,7 +200,7 @@ export const getSignatureKey = async (transport: Transport): Promise<string> => 
  * @return {Promise<boolean>}
  */
 export const clearTransaction = async (transport: Transport): Promise<boolean> => {
-  await executeCommand(transport, 'CLEAR_TX', 'SE');
+  await executeCommand(transport, commands.CLEAR_TX, 'SE');
   return true;
 };
 
@@ -145,7 +210,7 @@ export const clearTransaction = async (transport: Transport): Promise<boolean> =
  * @return {Promise<boolean>} true: success, false: canceled.
  */
 export const getTxDetail = async (transport: Transport): Promise<boolean> => {
-  const { status } = await executeCommand(transport, 'GET_TX_DETAIL', 'SE');
+  const { status } = await executeCommand(transport, commands.GET_TX_DETAIL, 'SE');
   return status === RESPONSE.SUCCESS;
 };
 
@@ -158,8 +223,8 @@ export const getTxDetail = async (transport: Transport): Promise<boolean> => {
  */
 export const setToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
   const { status } = sn === 1
-    ? await executeCommand(transport, 'SET_ERC20_TOKEN', 'SE', payload)
-    : await executeCommand(transport, 'SET_SECOND_ERC20_TOKEN', 'SE', payload);
+    ? await executeCommand(transport, commands.SET_ERC20_TOKEN, 'SE', payload)
+    : await executeCommand(transport, commands.SET_SECOND_ERC20_TOKEN, 'SE', payload);
   return status === RESPONSE.SUCCESS;
 };
 
@@ -172,19 +237,7 @@ export const setToken = async (transport: Transport, payload: string, sn: number
  */
 export const setCustomToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
   const { status } = sn === 1
-    ? await executeCommand(transport, 'SET_ERC20_TOKEN', 'SE', payload, '04', '18')
-    : await executeCommand(transport, 'SET_SECOND_ERC20_TOKEN', 'SE', payload, '04', '18');
+    ? await executeCommand(transport, commands.SET_ERC20_TOKEN, 'SE', payload, '04', '18')
+    : await executeCommand(transport, commands.SET_SECOND_ERC20_TOKEN, 'SE', payload, '04', '18');
   return status === RESPONSE.SUCCESS;
-};
-
-/**
- * Set change path
- * @param {Transport} transport
- * @param {string} pathWithSig data field
- * @param {string} redeemType P1
- * @return {Promise<boolean>}
- */
-export const setChangeKeyId = async (transport: Transport, pathWithSig: string, redeemType: string): Promise<boolean> => {
-  await executeCommand(transport, 'SET_CHANGE_KEYID', 'SE', pathWithSig, redeemType);
-  return true;
 };

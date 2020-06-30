@@ -1,9 +1,11 @@
-import { core, transport, error } from '@coolwallet/core';
-import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
+import { core, transport, error, tx, general } from '@coolwallet/core';
+// import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import { isHex, keccak256 } from './lib';
 import * as ethUtil from './utils/ethUtils';
-import { removeHex0x } from './utils/stringUtil';
+import { removeHex0x, handleHex } from './utils/stringUtil';
 
+const ethSigUtil = require('eth-sig-util');
+const typedDataUtils = ethSigUtil.TypedDataUtils
 const rlp = require('rlp');
 type Transport = transport.default;
 
@@ -26,7 +28,7 @@ export const signTransaction = async (
   appId: string,
   appPrivateKey: string,
   coinType: string,
-  transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number},
+  transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number },
   addressIndex: number,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
@@ -38,12 +40,25 @@ export const signTransaction = async (
   let canonicalSignature;
   if (useScript) {
     const { script, argument } = ethUtil.getScriptAndArguments(txType, addressIndex, transaction);
-    canonicalSignature = await core.flow.sendScriptAndDataToCard(
+    const preActions = [];
+    const sendScript = async () => {
+      await tx.sendScript(transport, script);
+    }
+    preActions.push(sendScript);
+
+    const sendArgument = async () => {
+      return tx.executeScript(
+        transport,
+        appId,
+        appPrivateKey,
+        argument
+      );
+    }
+
+    canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
       transport,
-      appId,
-      appPrivateKey,
-      script,
-      argument,
+      preActions,
+      sendArgument,
       false,
       confirmCB,
       authorizedCB,
@@ -53,19 +68,29 @@ export const signTransaction = async (
     const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
     const { readType } = ethUtil.getReadType(txType);
     const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
-    canonicalSignature = await core.flow.sendDataToCoolWallet(
+
+    const preActions = [];
+    const sayHi = async () => {
+      await general.hi(transport, appId);
+    }
+    preActions.push(sayHi)
+
+    const prepareTx = async () => {
+      return tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+    }
+
+    canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
       transport,
-      appId,
-      appPrivateKey,
-      dataForSE,
-      '00',
+      preActions,
+      prepareTx,
       false,
-      undefined,
       confirmCB,
-      authorizedCB
+      authorizedCB,
+      true
     );
   }
-  if (!Buffer.isBuffer(canonicalSignature)){
+
+  if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(
       canonicalSignature,
       rlp.encode(rawPayload),
@@ -105,9 +130,13 @@ export const signMessage = async (
 ) => {
   const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
 
-  let msgBuf;
-  let preAction;
+  const preActions = [];
+  const sayHi = async () => {
+    await general.hi(transport, appId);
+  }
+  preActions.push(sayHi);
 
+  let msgBuf;
   if (isHex(message)) {
     msgBuf = Buffer.from(removeHex0x(message), 'hex');
   } else {
@@ -115,26 +144,33 @@ export const signMessage = async (
   }
 
   if (isHashRequired) {
-    preAction = ethUtil.apduForParsingMessage(transport, msgBuf, '07'); // send prehashed message to card
+    const apduForParsignMessage = async (msgBuf: Buffer) => {
+      let rawData = msgBuf.toString("hex");
+      rawData = handleHex(rawData);
+      return async () => {
+        tx.txPrep(transport, rawData, '07', appPrivateKey);
+      }
+    }
+    preActions.push(apduForParsignMessage)
     msgBuf = Buffer.from(keccak256(msgBuf), 'hex');
   }
 
   const len = msgBuf.length.toString();
   const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${len}`);
   const payload = Buffer.concat([prefix, msgBuf]);
-
   const dataForSE = core.flow.prepareSEData(keyId, payload, 'F5');
+  const prepareTx = async () => {
+    return tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+  }
 
-  const canonicalSignature = await core.flow.sendDataToCoolWallet(
+  const canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
     transport,
-    appId,
-    appPrivateKey,
-    dataForSE,
-    '00',
+    preActions,
+    prepareTx,
     false,
-    preAction,
     confirmCB,
-    authorizedCB
+    authorizedCB,
+    true
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
@@ -189,16 +225,24 @@ export const signTypedData = async (
   const payload = Buffer.concat([prefix, domainSeparate, dataHash]);
   const dataForSE = core.flow.prepareSEData(keyId, payload, 'F3');
 
-  const canonicalSignature = await core.flow.sendDataToCoolWallet(
+  const preActions = [];
+  const sayHi = async () => {
+    await general.hi(transport, appId);
+  }
+  preActions.push(sayHi)
+
+  const prepareTx = async () => {
+    return tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+  }
+
+  const canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
     transport,
-    appId,
-    appPrivateKey,
-    dataForSE,
-    '00',
+    preActions,
+    prepareTx,
     false,
-    undefined,
     confirmCB,
-    authorizedCB
+    authorizedCB,
+    true
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {

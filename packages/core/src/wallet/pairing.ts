@@ -4,6 +4,8 @@ import * as crypto from '../crypto/index';
 import * as config from '../config/index';
 import * as error from '../error/index';
 import Transport from '../transport/index';
+import { commands } from "../apdu/command";
+
 
 const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;
 
@@ -37,7 +39,7 @@ export const register = async (transport: Transport, appPublicKey: string, passw
     data = crypto.encryption.ECIESenc(config.KEY.SEPublicKey, data);
     P1 = '01';
   }
-  const { outputData: appId } = await apdu.execute.executeCommand(transport, 'REGISTER', 'SE', data, P1);
+  const { outputData: appId } = await apdu.execute.executeCommand(transport, commands.REGISTER, 'SE', data, P1);
   return appId;
 };
 
@@ -53,13 +55,13 @@ export const getPairedApps = async (transport: Transport, appId: string, appPriv
     transport,
     appId,
     appPrivKey,
-    'GET_PAIRED_DEVICES',
+    commands.GET_PAIRED_DEVICES,
     undefined,
     undefined
   );
   const { outputData } = await apdu.execute.executeCommand(
     transport,
-    'GET_PAIRED_DEVICES',
+    commands.GET_PAIRED_DEVICES,
     'SE',
     signature, undefined, undefined,
     true, forceUseSC
@@ -91,12 +93,12 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
     transport,
     appId,
     appPrivKey,
-    'GET_PAIR_PWD',
+    commands.GET_PAIR_PWD,
     undefined,
     undefined
   );
-  const { outputData: encryptedPassword } = await apdu.execute.executeCommand(transport, 'GET_PAIR_PWD', 'SE', signature, undefined, undefined, true, forceUseSC);
-  
+  const { outputData: encryptedPassword } = await apdu.execute.executeCommand(transport, commands.GET_PAIR_PWD, 'SE', signature, undefined, undefined, true, forceUseSC);
+
   // const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
   await apdu.control.powerOff(transport);
   let password = crypto.encryption.ECIESDec(appPrivKey, encryptedPassword);
@@ -112,7 +114,7 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
  * @return {Promise<boolean>}
  */
 export const removePairedDevice = async (transport: Transport, appIdWithSig: string): Promise<boolean> => {
-  const { status } = await apdu.execute.executeCommand(transport, 'REMOVE_DEVICES', 'SE', appIdWithSig);
+  const { status } = await apdu.execute.executeCommand(transport, commands.REMOVE_DEVICES, 'SE', appIdWithSig);
   return status === SUCCESS;
 };
 
@@ -123,6 +125,6 @@ export const removePairedDevice = async (transport: Transport, appIdWithSig: str
  * @return {Promise<boolean>}
  */
 export const renameDevice = async (transport: Transport, nameWithSig: string): Promise<boolean> => {
-  const { status } = await apdu.execute.executeCommand(transport, 'RENAME_DEVICES', 'SE', nameWithSig);
+  const { status } = await apdu.execute.executeCommand(transport, commands.RENAME_DEVICES, 'SE', nameWithSig);
   return status === SUCCESS;
 };

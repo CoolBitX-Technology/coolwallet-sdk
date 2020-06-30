@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { core, transport, tx, general } from '@coolwallet/core';
+import { core, apdu, transport, tx, general } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import * as scripts from "../scripts";
@@ -19,7 +19,8 @@ export {
 	createUnsignedTransactions,
 	getSigningActions,
 	composeFinalTransaction,
-	getScriptSigningActions as getScriptAndArgument
+	getScriptAndArgument,
+	getUtxoArguments
 };
 
 function hash160(buf: Buffer): Buffer {
@@ -436,37 +437,26 @@ function getArgument(
 	]).toString('hex');
 };
 
-function getScriptSigningActions(
-	transport: Transport,
-	appId: string,
-	appPrivateKey: string,
+function getScriptAndArgument(
 	inputs: Array<Input>,
-	preparedData: PreparedData,
 	output: Output,
 	change: Change | undefined
 ): {
-	preActions: Array<Function>,
-	actions: Array<Function>
+	script: string,
+	argument: string
 } {
 	const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-	const argument = "00" + getArgument(inputs, output, change);// keylength zero
+	const argument = getArgument(inputs, output, change);
+	return {
+		script,
+		argument: "00" + argument,// keylength zero
+	};
+};
 
-	const preActions = [];
-	const sendScript = async () => {
-		await tx.sendScript(transport, script);
-	}
-	preActions.push(sendScript);
-
-	const sendArgument = async () => {
-		await tx.executeScript(
-			transport,
-			appId,
-			appPrivateKey,
-			argument
-		);
-	}
-	preActions.push(sendArgument);
-
+function getUtxoArguments(
+	inputs: Array<Input>,
+	preparedData: PreparedData,
+): Array<string> {
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
 			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
@@ -478,10 +468,5 @@ function getScriptSigningActions(
 			const inputHash = hash160(preparedInput.pubkeyBuf);
 			return Buffer.concat([Buffer.from(SEPath, 'hex'), outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
 		});
-
-	const actions = utxoArguments.map(
-		(utxoArgument) => async () => {
-			return tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument);
-		});
-	return { preActions, actions };
+	return utxoArguments;
 };

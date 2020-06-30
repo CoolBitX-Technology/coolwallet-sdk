@@ -1,4 +1,4 @@
-import {error as Errors} from '../index' ;
+import { error as Errors } from '../index';
 
 const getCheckSum = (data: any) => {
   let XORTemp = 0;
@@ -14,7 +14,13 @@ const getCheckSum = (data: any) => {
   return temp;
 };
 
-export const assemblyCommandAndData = (cla: string, ins: string, p1: string | undefined, p2: string | undefined, oriData: string) => {
+export const assemblyCommandAndData = (
+  cla: string,
+  ins: string,
+  p1: string | undefined,
+  p2: string | undefined,
+  oriData: string
+) => {
   const pid = '00';
   const cmdLen = '09';
 

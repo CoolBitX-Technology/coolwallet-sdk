@@ -1,6 +1,5 @@
-import { core, transport } from "@coolwallet/core";
+import { core, transport, tx, general } from "@coolwallet/core";
 import * as coinUtil from "./util";
-import { Transaction } from "./types";
 
 const codec = require("ripple-binary-codec");
 
@@ -31,12 +30,25 @@ export const signPayment = async (
       addressIndex,
       payment
     );
-    signature = await core.flow.sendScriptAndDataToCard(
+    const preActions = [];
+    const sendScript = async () => {
+      await tx.sendScript(transport, script);
+    }
+    preActions.push(sendScript);
+
+    const sendArgument = async () => {
+      return tx.executeScript(
+        transport,
+        appId,
+        appPrivateKey,
+        argument
+      );
+    }
+
+    signature = await core.flow.getSingleSignatureFromCoolWallet(
       transport,
-      appId,
-      appPrivateKey,
-      script,
-      argument,
+      preActions,
+      sendArgument,
       false,
       confirmCB,
       authorizedCB,
@@ -46,19 +58,26 @@ export const signPayment = async (
     const payload = Buffer.from(codec.encodeForSigning(payment), "hex");
     const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
     const dataForSE = core.flow.prepareSEData(keyId, payload, coinType);
-    signature = await core.flow.sendDataToCoolWallet(
+
+    const preActions = [];
+    const sayHi = async () => {
+      await general.hi(transport, appId);
+    }
+    preActions.push(sayHi)
+
+    const prepareTx = async () => {
+      return tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+    }
+
+    signature = await core.flow.getSingleSignatureFromCoolWallet(
       transport,
-      appId,
-      appPrivateKey,
-      dataForSE,
-      "00",
+      preActions,
+      prepareTx,
       false,
-      undefined,
       confirmCB,
       authorizedCB,
       false
     );
   }
-
   return generateRawTx(signature.toString('hex'), payment);
 };

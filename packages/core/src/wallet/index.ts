@@ -1,9 +1,10 @@
 import { generateKeyPair } from './keypair';
-import * as apdu  from '../apdu/index';
+import * as apdu from '../apdu/index';
 import Transport from '../transport/index';
 import * as pairing from './pairing';
 import { recovery, creation } from './create';
 import * as setting from './settings';
+import * as general from '../general';
 
 // type Transport = transport.default;
 
@@ -12,7 +13,7 @@ export default class CoolWallet {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  
+
   constructor(transport: Transport, appPrivateKey: string, appId: string) {
     this.transport = transport;
     this.appPrivateKey = appPrivateKey;
@@ -34,7 +35,7 @@ export default class CoolWallet {
   }
 
   async checkRegistered() {
-    return apdu.control.sayHi(this.transport, this.appId);
+    return general.hi(this.transport, this.appId);
   }
 
   async getSEVersion() {
