@@ -1,5 +1,5 @@
 import { core, transport, error } from '@coolwallet/core';
-import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
+import { TypedDataUtils as typedDataUtils, TypedData } from 'eth-sig-util';
 import { isHex, keccak256 } from './lib';
 import * as ethUtil from './utils/ethUtils';
 import { removeHex0x } from './utils/stringUtil';
@@ -74,7 +74,7 @@ export const signTransaction = async (
     const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
     return serializedTx;
   } else {
-    throw new error.SDKError('signTransaction failed', 'canonicalSignature type error');
+    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
 };
 
@@ -142,7 +142,7 @@ export const signMessage = async (
     const signature = `0x${r}${s}${v.toString(16)}`;
     return signature;
   } else {
-    throw new error.SDKError('signMessage failed', 'canonicalSignature type error');
+    throw new error.SDKError(signMessage.name, 'canonicalSignature type error');
   }
 };
 
@@ -164,7 +164,7 @@ export const signTypedData = async (
   appId: string,
   appPrivateKey: string,
   coinType: string,
-  typedData: any,
+  typedData: TypedData,
   addressIndex: number,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
@@ -207,7 +207,7 @@ export const signTypedData = async (
 
     return signature;
   } else {
-    throw new error.SDKError('signTypedData failed', 'canonicalSignature type error');
+    throw new error.SDKError(signTypedData.name, 'canonicalSignature type error');
   }
 
 

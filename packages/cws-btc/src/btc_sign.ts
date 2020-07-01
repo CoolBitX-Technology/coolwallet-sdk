@@ -1,4 +1,4 @@
-import { core, transport } from '@coolwallet/core';
+import { core, transport, error } from '@coolwallet/core';
 import {
 	ScriptType,
 	Input,
@@ -30,7 +30,7 @@ async function signTransaction(
 	if (scriptType !== ScriptType.P2PKH
 		&& scriptType !== ScriptType.P2WPKH
 		&& scriptType !== ScriptType.P2SH_P2WPKH) {
-		throw new Error(`Unsupport ScriptType : ${scriptType}`);
+		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${scriptType}'`);
 	}
 	const useScript = await core.controller.checkSupportScripts(transport);
 	let signatures;

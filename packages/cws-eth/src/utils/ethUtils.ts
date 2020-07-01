@@ -130,7 +130,7 @@ export const getScriptAndArguments = (txType: any, addressIndex: number, transac
       break;
     }
     default: {
-      throw new Error(`type ${txType} no implemented`);
+      throw new error.SDKError(getScriptAndArguments.name, `type ${txType} no implemented`);
     }
   }
 

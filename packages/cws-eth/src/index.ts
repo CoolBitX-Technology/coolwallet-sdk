@@ -2,6 +2,7 @@
 import { core, coin as COIN, transport } from '@coolwallet/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
+import { TypedData } from 'eth-sig-util';
 
 type Transport = transport.default;
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
@@ -92,7 +93,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTypedData(
-    typedData: object,
+    typedData: TypedData,
     addressIndex: number,
     publicKey: string | undefined = undefined,
     confirmCB: Function | undefined = undefined,

@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { core, apdu, transport } from '@coolwallet/core';
+import { core, apdu, transport, error } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import * as scripts from "./scripts";
@@ -52,14 +52,30 @@ function encodeDerSig(signature: Buffer, hashType: Buffer): Buffer {
 function bip66Encode(r: Buffer, s: Buffer) {
 	const lenR = r.length;
 	const lenS = s.length;
-	if (lenR === 0) throw new Error('R length is zero');
-	if (lenS === 0) throw new Error('S length is zero');
-	if (lenR > 33) throw new Error('R length is too long');
-	if (lenS > 33) throw new Error('S length is too long');
-	if (r[0] & 0x80) throw new Error('R value is negative');
-	if (s[0] & 0x80) throw new Error('S value is negative');
-	if (lenR > 1 && (r[0] === 0x00) && !(r[1] & 0x80)) throw new Error('R value excessively padded');
-	if (lenS > 1 && (s[0] === 0x00) && !(s[1] & 0x80)) throw new Error('S value excessively padded');
+	if (lenR === 0) {
+		throw new error.SDKError(bip66Encode.name, 'R length is zero');
+	}
+	if (lenS === 0) {
+		throw new error.SDKError(bip66Encode.name, 'S length is zero');
+	}
+	if (lenR > 33) {
+		throw new error.SDKError(bip66Encode.name, 'R length is too long');
+	}
+	if (lenS > 33) {
+		throw new error.SDKError(bip66Encode.name, 'S length is too long');
+	}
+	if (r[0] & 0x80) {
+		throw new error.SDKError(bip66Encode.name, 'R value is negative');
+	}
+	if (s[0] & 0x80) {
+		throw new error.SDKError(bip66Encode.name, 'S value is negative');
+	}
+	if (lenR > 1 && (r[0] === 0x00) && !(r[1] & 0x80)) {
+		throw new error.SDKError(bip66Encode.name, 'R value excessively padded');
+	}
+	if (lenS > 1 && (s[0] === 0x00) && !(s[1] & 0x80)) {
+		throw new error.SDKError(bip66Encode.name, 'S value excessively padded');
+	}
 
 	const signature = Buffer.allocUnsafe(6 + lenR + lenS);
 
@@ -105,9 +121,9 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 		scriptType = ScriptType.P2WPKH;
 		payment = bitcoin.payments.p2wpkh({ address });
 	} else {
-		throw new Error(`Unsupport Address : ${address}`);
+		throw new error.SDKError(addressToOutScript.name, `Unsupport Address '${address}'`);
 	}
-	if (!payment.output) throw new Error(`No OutScript for Address : ${address}`);
+	if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address '${address}'`);
 	const outScript = payment.output;
 	const outHash = payment.hash;
 	return { scriptType, outScript, outHash };
@@ -125,11 +141,11 @@ function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
 	} else if (scriptType === ScriptType.P2WPKH) {
 		payment = bitcoin.payments.p2wpkh({ pubkey });
 	} else {
-		throw new Error(`Unsupport ScriptType : ${scriptType}`);
+		throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
 	}
-	if (!payment.address) throw new Error(`No Address for ScriptType : ${scriptType}`);
-	if (!payment.output) throw new Error(`No OutScript for ScriptType : ${scriptType}`);
-	if (!payment.hash) throw new Error(`No OutScript for ScriptType : ${scriptType}`);
+	if (!payment.address) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No Address for ScriptType '${scriptType}'`);
+	if (!payment.output) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
+	if (!payment.hash) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
 	return { address: payment.address, outScript: payment.output, hash: payment.hash };
 }
 
@@ -151,7 +167,7 @@ function createUnsignedTransactions(
 	const preparedInputs = inputs.map(({
 		preTxHash, preIndex, preValue, sequence, addressIndex, pubkeyBuf
 	}) => {
-		if (!pubkeyBuf) throw new Error('Public Key not exists !!');
+		if (!pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
 
 		const preOutPointBuf = Buffer.concat([
 			Buffer.from(preTxHash, 'hex').reverse(),
@@ -176,7 +192,7 @@ function createUnsignedTransactions(
 		Buffer.concat([toUintBuffer(output.value, 8), outputScriptLen, outputScript])
 	];
 	if (change) {
-		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
+		if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
 		const changeValue = toUintBuffer(change.value, 8);
 		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
 		const outScriptLen = toVarUintBuffer(outScript.length);
@@ -253,7 +269,7 @@ function getSigningActions(
 	if (change) {
 		const changeAction = async () => {
 			const cmd = 'SET_CHANGE_KEYID';
-			if (scriptType === ScriptType.P2WPKH) throw new Error('not support P2WPKH change');
+			if (scriptType === ScriptType.P2WPKH) throw new error.SDKError(getSigningActions.name, 'not support P2WPKH change');
 			const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
 			const keyId = change.addressIndex.toString(16).padStart(10, '0');
 			const sig = await core.auth.getCommandSignature(
@@ -295,7 +311,7 @@ function composeFinalTransaction(
 	if (scriptType !== ScriptType.P2PKH
 		&& scriptType !== ScriptType.P2WPKH
 		&& scriptType !== ScriptType.P2SH_P2WPKH) {
-		throw new Error(`Unsupport ScriptType : ${scriptType}`);
+		throw new error.SDKError(composeFinalTransaction.name, `Unsupport ScriptType '${scriptType}'`);
 	}
 
 	if (scriptType === ScriptType.P2PKH) {
@@ -375,7 +391,7 @@ function getArgument(
 		outHash: outputHash
 	} = addressToOutScript(output.address);
 	if (!outputHash) {
-		throw new Error(`OutputHash Undefined`);
+		throw new error.SDKError(getArgument.name, `OutputHash Undefined`);
 	}
 	let outputScriptType;
 	let outputHashBuf;
@@ -390,7 +406,7 @@ function getArgument(
 		outputScriptType = toUintBuffer(2, 1);
 		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
 	} else {
-		throw new Error(`Unsupport ScriptType : ${outputType}`);
+		throw new error.SDKError(getArgument.name, `Unsupport ScriptType '${outputType}'`);
 	}
 	const outputAmount = toNonReverseUintBuffer(output.value, 8);
 	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
@@ -399,7 +415,7 @@ function getArgument(
 	let changeAmount;
 	let changePath;
 	if (change) {
-		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
+		if (!change.pubkeyBuf) throw new error.SDKError(getArgument.name, 'Public Key not exists !!');
 		haveChange = toUintBuffer(1, 1);
 		changeScriptType = toUintBuffer(outputType, 1);
 		changeAmount = toNonReverseUintBuffer(change.value, 8);
