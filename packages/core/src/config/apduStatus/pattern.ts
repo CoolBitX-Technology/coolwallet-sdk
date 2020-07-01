@@ -1,5 +1,6 @@
 export interface CodeList {
   [key: string]: string, // TODO
+  _9000: string,
   _6E00: string,
   _6D00: string,
   _6982: string,

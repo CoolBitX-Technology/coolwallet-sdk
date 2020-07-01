@@ -1,5 +1,6 @@
 import { CodeList } from './pattern'
 export const MSG: CodeList = {
+  _9000: 'success',
   _6E00: 'cls not supported',
   _6D00: 'ins not supported',
   _6982: 'security status not satisfied',

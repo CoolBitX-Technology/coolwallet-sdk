@@ -3,8 +3,8 @@ import { aes256CbcDecrypt } from "../crypto/encryptions";
 import * as signatureTools from "../crypto/signature";
 import { COMMAND } from "../config/command";
 import * as apdu from "../apdu/index";
-import { getCommandSignature } from "./auth";
 import Transport from "../transport";
+import { SDKError, APDUError } from '../error/errorHandle';
 
 /**
  * get command signature for CoolWalletS
@@ -130,7 +130,7 @@ export const prepareTx = async (
   if (encryptedSignature) {
     return encryptedSignature;
   } else {
-    throw new Error('prepareTx get encryptedSignature failed')
+    throw new SDKError(prepareTx.name, 'prepareTx get encryptedSignature failed')
   }
 };
 
@@ -199,7 +199,7 @@ export const getEncryptedSignatures = async (
  */
 export const getCWSEncryptionKey = async (transport: Transport, authorizedCallback: Function | undefined): Promise<string> => {
   const success = await apdu.tx.getTxDetail(transport);
-  if (!success) throw new Error('get tx detail status fail!!');
+  if (!success) throw new SDKError(getCWSEncryptionKey.name, 'get tx detail status fail!!');
 
   if (typeof authorizedCallback === "function") authorizedCallback();
 

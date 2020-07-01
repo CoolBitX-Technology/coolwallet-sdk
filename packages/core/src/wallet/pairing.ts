@@ -2,7 +2,7 @@ import * as apdu from '../apdu/index';
 import * as core from '../core/index';
 import * as crypto from '../crypto/index';
 import * as config from '../config/index';
-import * as error from '../error/index';
+import { SDKError, APDUError } from '../error/errorHandle';
 import Transport from '../transport/index';
 
 const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;
@@ -66,7 +66,7 @@ export const getPairedApps = async (transport: Transport, appId: string, appPriv
   );
   const appsInfo = outputData.match(/.{100}/g);
   if (!appsInfo) {
-    throw new Error('appsInfo is undefined')
+    throw new SDKError(getPairedApps.name, 'appsInfo is undefined')
   }
   const apps = appsInfo.map((appInfo) => {
     const appId = appInfo.slice(0, 40);
@@ -100,7 +100,7 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
   // const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
   await apdu.control.powerOff(transport);
   let password = crypto.encryption.ECIESDec(appPrivKey, encryptedPassword);
-  if (!password) throw new error.SDKError('getPairingPassword error', 'password is undefined')
+  if (!password) throw new SDKError(getPairingPassword.name, `password error, your password: ${password}`)
   password = password.replace(/f/gi, '');
   return password;
 };

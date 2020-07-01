@@ -1,4 +1,4 @@
-import { FirmwareVersionTooLow } from '../error/index';
+import { SDKError } from '../error/errorHandle';
 import { COMMAND } from '../config/command';
 import { sign } from '../crypto/sign';
 import { control, setting } from '../apdu/index';
@@ -64,5 +64,5 @@ export const getCommandSignature = async (
  */
 export const versionCheck = async (transport: Transport, requiredSEVersion: number) => {
   const SEVersion = await setting.getSEVersion(transport);
-  if (SEVersion < requiredSEVersion) throw new FirmwareVersionTooLow(requiredSEVersion);
+  if (SEVersion < requiredSEVersion) throw new SDKError(versionCheck.name, `Firmware version too low. Please update to ${requiredSEVersion}`);
 };

@@ -1,3 +1,10 @@
+export type CommandType = {
+  CLA: string,
+  INS: string,
+  P1: string | undefined,
+  P2: string | undefined
+};
+
 type COMMANDS = {
   [key: string]: {
     CLA: string,
