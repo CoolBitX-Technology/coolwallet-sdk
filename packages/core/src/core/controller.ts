@@ -1,5 +1,6 @@
 import { setting } from '../apdu/index';
 import Transport from '../transport';
+import * as tx from '../transaction/index'
 
 /**
  * Check if the current SE support script execution

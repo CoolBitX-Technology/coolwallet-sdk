@@ -6,7 +6,6 @@ export const getReturnMsg = (code: string): string => {
   return MSG[`_${code}`] ? MSG[`_${code}`] : "unknown command error";
 }
 
-
 const getCheckSum = (data: any) => {
   let XORTemp = 0;
   for (let i = 0; i < data.length; i++) {
@@ -21,7 +20,13 @@ const getCheckSum = (data: any) => {
   return temp;
 };
 
-export const assemblyCommandAndData = (cla: string, ins: string, p1: string | undefined, p2: string | undefined, oriData: string) => {
+export const assemblyCommandAndData = (
+  cla: string,
+  ins: string,
+  p1: string | undefined,
+  p2: string | undefined,
+  oriData: string
+) => {
   const pid = '00';
   const cmdLen = '09';
 

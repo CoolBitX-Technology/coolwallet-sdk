@@ -69,7 +69,9 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     authorizedCB: Function | undefined = undefined
   ): Promise<string> {
     await core.auth.versionCheck(this.transport, 81);
-    if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
+    if (!publicKey) {
+      publicKey = await this.getPublicKey(addressIndex);
+    }
     return ethSign.signMessage(
       this.transport,
       this.appId,

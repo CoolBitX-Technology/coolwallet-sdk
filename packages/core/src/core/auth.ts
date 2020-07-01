@@ -1,9 +1,38 @@
 import { SDKError } from '../error/errorHandle';
-import { COMMAND } from '../config/command';
 import { sign } from '../crypto/sign';
-import { control, setting } from '../apdu/index';
+import { CommandType } from "../apdu/command";
+import * as control from '../apdu/control';
+import * as setting from '../apdu/setting';
+import * as general from '../general';
 import { checkSupportScripts } from './controller';
 import Transport from '../transport';
+
+/**
+ * Get Command signature to append to some specific APDU commands.
+ * @param {Transport} transport
+ * @param {string} appPrivateKey
+ * @param {String} commandName
+ * @param {String} data
+ * @param {String} params1
+ * @param {String} params2
+ * @returns {Promise<string>}
+ */
+export const getCommandSignatureWithoutNonce = async (
+  transport: Transport,
+  appPrivateKey: string,
+  command: CommandType,
+  data: string | undefined,
+  params1: string | undefined,
+  params2: string | undefined = undefined,
+) => {
+  const P1 = params1 || command.P1;
+  const P2 = params2 || command.P2;
+  const apduHeader = command.CLA + command.INS + P1 + P2;
+  const dataPackets = data || '';
+  const signatureParams = apduHeader + dataPackets;
+  const signature = sign(signatureParams, appPrivateKey).toString('hex');
+  return signature;
+};
 
 /**
  * Get Command signature to append to some specific APDU commands.
@@ -20,7 +49,7 @@ export const getCommandSignature = async (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
-  commandName: string,
+  command: CommandType,
   data: string | undefined,
   params1: string | undefined,
   params2: string | undefined = undefined,
@@ -30,16 +59,15 @@ export const getCommandSignature = async (
 
   const forceUseSC = await checkSupportScripts(transport);
 
-  const commandParams = COMMAND[commandName];
-  const P1 = params1 || commandParams.P1;
-  const P2 = params2 || commandParams.P2;
-  const apduHeader = commandParams.CLA + commandParams.INS + P1 + P2;
+  const P1 = params1 || command.P1;
+  const P2 = params2 || command.P2;
+  const apduHeader = command.CLA + command.INS + P1 + P2;
   const dataPackets = data || '';
   const signatureParams = apduHeader + dataPackets + nonce;
   const signature = sign(signatureParams, appPrivateKey).toString('hex');
 
   if (!forceUseSC) {
-    await control.sayHi(transport, appId);
+    await general.hi(transport, appId);
     return { signature, forceUseSC };
   } else {
     // return [appId(20B)] [rightJustifiedSignature(72B)]
