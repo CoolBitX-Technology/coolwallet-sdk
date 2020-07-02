@@ -1,5 +1,5 @@
 import {error as Errors} from '../index' ;
-import { MSG } from '../config/apduStatus/msg'
+import { MSG } from '../apdu/config/status/msg'
 
 
 export const getReturnMsg = (code: string): string => {

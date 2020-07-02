@@ -4,7 +4,7 @@ import Transport from '../transport/index';
 import * as pairing from './pairing';
 import { recovery, creation } from './create';
 import * as setting from './settings';
-import * as general from '../general';
+import * as general from '../apdu/general';
 
 // type Transport = transport.default;
 
@@ -39,11 +39,11 @@ export default class CoolWallet {
   }
 
   async getSEVersion() {
-    return apdu.setting.getSEVersion(this.transport);
+    return apdu.general.getSEVersion(this.transport);
   }
 
   async resetCard() {
-    return apdu.setting.resetCard(this.transport);
+    return apdu.general.resetCard(this.transport);
   }
 
   async register(appPublicKey: string, password: string, deviceName: string) {

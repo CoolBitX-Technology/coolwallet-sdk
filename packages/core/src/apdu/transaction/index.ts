@@ -1,9 +1,11 @@
-import { executeCommand } from '../apdu/execute';
-import { RESPONSE } from '../config/response';
-import { getCommandSignature, getCommandSignatureWithoutNonce } from "../core/auth";
-import Transport from '../transport';
-import { addressIndexToKeyId } from '../core/txUtil'
-import { commands } from "../apdu/command";
+import { executeCommand } from '../execute/execute';
+import { getCommandSignature, getCommandSignatureWithoutNonce } from "../../setting/auth";
+import Transport from '../../transport';
+import { addressIndexToKeyId } from './txUtil'
+import { commands } from "../execute/command";
+import { SDKError, APDUError } from '../../error/errorHandle';
+import { CODE } from '../config/status/code';
+import { target } from '../config/target';
 
 
 /**
@@ -34,7 +36,7 @@ export const setChangeKeyid = async (
     redeemType
   );
   const keyWithSig = changeKeyId + sig.signature;
-  return executeCommand(transport, commands.SET_CHANGE_KEYID, 'SE', keyWithSig, redeemType);
+  return executeCommand(transport, commands.SET_CHANGE_KEYID, target.SE, keyWithSig, redeemType);
 };
 
 /**
@@ -52,7 +54,7 @@ export const txPrep = async (
   appPrivateKey: string
 ): Promise<string> => {
   if (txDataType != '00') {
-    const { outputData } = await executeCommand(transport, commands.TX_PREPARE, 'SE', txDataHex, txDataType, '00');
+    const { outputData } = await executeCommand(transport, commands.TX_PREPARE, target.SE, txDataHex, txDataType, '00');
     return outputData;
   } else {
     const sig = await getCommandSignatureWithoutNonce(
@@ -64,19 +66,25 @@ export const txPrep = async (
       '00'
     );
     let encryptedSignature;
+    let statusCode = CODE._9999;
     const sendData = txDataHex + sig;
     const patch = Math.ceil(sendData.length / 500);
     for (let i = 0; i < patch; i++) {
       const patchData = sendData.substr(i * 500, 500);
       const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
       // eslint-disable-next-line no-await-in-loop
-      const result = await executeCommand(transport, commands.TX_PREPARE, 'SE', patchData, txDataType, p2);
-      encryptedSignature = result.outputData;
+      const result = await executeCommand(transport, commands.TX_PREPARE, target.SE, patchData, txDataType, p2);
+      
+      if ( i == patch-1 ){
+        encryptedSignature = result.outputData;
+        statusCode = result.statusCode
+      }
     }
+    
     if (encryptedSignature) {
       return encryptedSignature;
     } else {
-      throw new Error('prepareTx get encryptedSignature failed')
+      throw new APDUError(commands.TX_PREPARE, statusCode, 'prepareTx get encryptedSignature failed')
     }
   }
 };
@@ -86,16 +94,16 @@ export const txPrep = async (
  * @todo append signature
  */
 export const sendScript = async (transport: Transport, script: string) => {
-  const { status } = await executeCommand(
+  const { statusCode } = await executeCommand(
     transport,
     commands.SEND_SCRIPT,
-    'SE',
+    target.SE,
     script,
     undefined,
     undefined,
     true
   );
-  return status === RESPONSE.SUCCESS;
+  return statusCode === RESPONSE.SUCCESS;
 };
 
 /**
@@ -119,7 +127,7 @@ export const executeScript = async (
   const { outputData: encryptedSignature } = await executeCommand(
     transport,
     commands.EXECUTE_SCRIPT,
-    'SE',
+    target.SE,
     argument + signature,
     undefined,
     undefined,
@@ -154,7 +162,7 @@ export const executeUtxoScript = async (
   const { outputData: encryptedSignature } = await executeCommand(
     transport,
     commands.EXECUTE_UTXO_SCRIPT,
-    'SE',
+    target.SE,
     utxoArgument + signature,
     P1,
     undefined,
@@ -170,7 +178,7 @@ export const executeUtxoScript = async (
  * @param {Transport} transport
  */
 export const getSignedHex = async (transport: Transport) => {
-  const { outputData: signedTx } = await executeCommand(transport, commands.GET_SIGNED_HEX, 'SE');
+  const { outputData: signedTx } = await executeCommand(transport, commands.GET_SIGNED_HEX, target.SE);
   return signedTx;
 };
 
@@ -180,7 +188,7 @@ export const getSignedHex = async (transport: Transport) => {
  * @return {Promse<boolean>}
  */
 export const finishPrepare = async (transport: Transport): Promise<boolean> => {
-  await executeCommand(transport, commands.FINISH_PREPARE, 'SE');
+  await executeCommand(transport, commands.FINISH_PREPARE, target.SE);
   return true;
 };
 
@@ -190,7 +198,7 @@ export const finishPrepare = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<string>}
  */
 export const getSignatureKey = async (transport: Transport): Promise<string> => {
-  const { outputData: signatureKey } = await executeCommand(transport, commands.GET_TX_KEY, 'SE');
+  const { outputData: signatureKey } = await executeCommand(transport, commands.GET_TX_KEY, target.SE);
   return signatureKey;
 };
 
@@ -200,7 +208,7 @@ export const getSignatureKey = async (transport: Transport): Promise<string> => 
  * @return {Promise<boolean>}
  */
 export const clearTransaction = async (transport: Transport): Promise<boolean> => {
-  await executeCommand(transport, commands.CLEAR_TX, 'SE');
+  await executeCommand(transport, commands.CLEAR_TX, target.SE);
   return true;
 };
 
@@ -210,8 +218,8 @@ export const clearTransaction = async (transport: Transport): Promise<boolean> =
  * @return {Promise<boolean>} true: success, false: canceled.
  */
 export const getTxDetail = async (transport: Transport): Promise<boolean> => {
-  const { status } = await executeCommand(transport, commands.GET_TX_DETAIL, 'SE');
-  return status === RESPONSE.SUCCESS;
+  const { statusCode } = await executeCommand(transport, commands.GET_TX_DETAIL, target.SE);
+  return statusCode === RESPONSE.SUCCESS;
 };
 
 /**
@@ -222,10 +230,10 @@ export const getTxDetail = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<boolean>}
  */
 export const setToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
-  const { status } = sn === 1
-    ? await executeCommand(transport, commands.SET_ERC20_TOKEN, 'SE', payload)
-    : await executeCommand(transport, commands.SET_SECOND_ERC20_TOKEN, 'SE', payload);
-  return status === RESPONSE.SUCCESS;
+  const { statusCode } = sn === 1
+    ? await executeCommand(transport, commands.SET_ERC20_TOKEN, target.SE, payload)
+    : await executeCommand(transport, commands.SET_SECOND_ERC20_TOKEN, target.SE, payload);
+  return statusCode === RESPONSE.SUCCESS;
 };
 
 /**
@@ -236,8 +244,8 @@ export const setToken = async (transport: Transport, payload: string, sn: number
  * @return {Promise<boolean>}
  */
 export const setCustomToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
-  const { status } = sn === 1
-    ? await executeCommand(transport, commands.SET_ERC20_TOKEN, 'SE', payload, '04', '18')
-    : await executeCommand(transport, commands.SET_SECOND_ERC20_TOKEN, 'SE', payload, '04', '18');
-  return status === RESPONSE.SUCCESS;
+  const { statusCode } = sn === 1
+    ? await executeCommand(transport, commands.SET_ERC20_TOKEN, target.SE, payload, '04', '18')
+    : await executeCommand(transport, commands.SET_SECOND_ERC20_TOKEN, target.SE, payload, '04', '18');
+  return statusCode === RESPONSE.SUCCESS;
 };

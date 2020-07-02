@@ -1,4 +1,4 @@
-import { CommandType } from '../config/command';
+import { CommandType } from '../apdu/execute/command';
 
 /**
  *  name: function name (function testFunction() => testFunction.name)
@@ -14,7 +14,7 @@ export class SDKError extends Error {
 
 /**
  *  command: command info
- *  returnCode: status code from SE
+ *  returnCode: statusCode code from SE
  *  message: error message
  */
 export class APDUError extends Error {

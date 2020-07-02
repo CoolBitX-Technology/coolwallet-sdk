@@ -1,11 +1,11 @@
 import * as setting from './setting';
-import * as control from './control';
-import * as display from './display';
-import * as dfu from './dfu';
-import * as backup from './backup';
-import * as coin from './coin';
-import * as execute from './execute';
+import * as control from './mcu/control';
+import * as display from './mcu/display';
+import * as dfu from './mcu/dfu';
+import * as info from './informational'
+import * as execute from './execute/execute';
+import * as general from './general';
 
 export {
-  display, control, setting, dfu, backup, coin, execute
+  display, control, setting, dfu, info, execute, general
 };

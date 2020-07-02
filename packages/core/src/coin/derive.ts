@@ -1,6 +1,6 @@
 import { core, apdu, crypto } from "../index";
 import Transport from "../transport";
-import { commands } from "../apdu/command";
+import { commands } from "../apdu/execute/command";
 
 const bip32 = require("bip32");
 

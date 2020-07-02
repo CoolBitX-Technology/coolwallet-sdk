@@ -71,9 +71,9 @@ const _checkCardStatus = async (checkCardStatus, readDataFromCard) => {
   clearTimeout(timeoutId);
   if (isFinish) { return; }
 
-  const status = await checkCardStatus();
-  console.debug('_checkCardStatus status', status);
-  if (status === COMMAND_FINISH_CODE) {
+  const statusCode = await checkCardStatus();
+  console.debug('_checkCardStatus statusCode', statusCode);
+  if (statusCode === COMMAND_FINISH_CODE) {
     isFinish = true;
     try {
       const resultFromCard = await _readDataFromCard(readDataFromCard);

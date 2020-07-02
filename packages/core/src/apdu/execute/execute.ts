@@ -1,10 +1,10 @@
 import { CommandType, commands } from './command';
-import * as util from './utils';
-import { error as Errors } from '../index';
-import { SHA256 } from '../crypto/hash';
-import Transport from '../transport/index';
-import { SDKError, APDUError } from '../error/errorHandle';
-import { CODE } from '../config/apduStatus/code';
+import * as util from '../../utils/utils';
+import { SHA256 } from '../../crypto/hash';
+import Transport from '../../transport/index';
+import { SDKError, APDUError } from '../../error/errorHandle';
+import { CODE } from '../config/status/code';
+import { target } from '../config/target';
 
 
 /**
@@ -19,7 +19,7 @@ const executeAPDU = async (
   apdu: { command: string, data: string },
   executedTarget: string
 ): Promise<{
-  status: string,
+  statusCode: string,
   msg: string, 
   outputData: string
 }> => {
@@ -38,16 +38,16 @@ const executeAPDU = async (
     }
     let msg = ''
     const response = await transport.request(apdu.command, apdu.data);
-    if (executedTarget === 'SE') {
-      const status = response.slice(-4);
+    if (executedTarget === target.SE) {
+      const statusCode = response.slice(-4);
       const outputData = response.slice(0, -4);
-      msg = util.getReturnMsg(status)
-      return { status, msg, outputData };
+      msg = util.getReturnMsg(statusCode)
+      return { statusCode, msg, outputData };
     } else {
-      const status = response.slice(4, 6);
+      const statusCode = response.slice(4, 6);
       const outputData = response.slice(6);
-      msg = util.getReturnMsg(status)
-      return { status, msg, outputData };
+      msg = util.getReturnMsg(statusCode)
+      return { statusCode, msg, outputData };
     }
 
   } catch (error){
@@ -65,23 +65,23 @@ const executeAPDU = async (
  * @param {string} params2
  * @param {bool} supportSC
  * @param {bool} forceUseSC
- * @returns {Promise<{status: string, outputData: string}>}
+ * @returns {Promise<{statusCode: string, outputData: string}>}
  */
 export const executeCommand = async (
   transport: Transport,
   command: CommandType,
-  executedTarget: string = 'SE',
+  executedTarget: string = target.SE,
   data: string = '',
   params1: string | undefined = undefined,
   params2: string | undefined = undefined,
   supportSC: boolean = false,
   forceUseSC: boolean = false,
-): Promise<{ status: string, msg: string, outputData: string }> => {
+): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = params1 || command.P1;
   const P2 = params2 || command.P2;
 
   if ((typeof (P1) == undefined) || (typeof (P2) == undefined)) {
-    throw new Errors.SDKError('Unknown', command.toString())
+    throw new SDKError('Unknown', command.toString())
   }
 
   let response;
@@ -106,7 +106,7 @@ export const executeCommand = async (
  * @param {string} apduHeader apdu CLS+INS+P1+P2
  * @param {string} apduData apdu data field
  */
-export const sendWithSecureChannel = async (transport: Transport, apduHeader: string, apduData: string, forceUseSC: boolean): Promise<{ status: string, msg: string, outputData: string }> => {
+export const sendWithSecureChannel = async (transport: Transport, apduHeader: string, apduData: string, forceUseSC: boolean): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   //todo
   const salt = '88888888';
   const dataToHash = apduHeader.concat(salt, apduData);
@@ -134,9 +134,9 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
     result = await sendFragment(transport, chunks[i], i, totalPackages);
   }
   if (result) {
-    const status = result.status
+    const statusCode = result.statusCode
     // Uncaught error in SC_SEND_SEGMENT command. Return to parent executeCommand
-    if (status !== CODE._9000) {
+    if (statusCode !== CODE._9000) {
       return result;
     } else {
       const confirmHash = result.outputData.slice(4, 68);
@@ -152,7 +152,7 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
         throw new SDKError(sendWithSecureChannel.name, 'SC: Returned hash check failed');
       }
 
-      return { status: status, msg: util.getReturnMsg(status), outputData: apduReturn };
+      return { statusCode: statusCode, msg: util.getReturnMsg(statusCode), outputData: apduReturn };
     }
   } else {
     throw new SDKError(sendWithSecureChannel.name, 'sendWithSecureChannel failed')
@@ -167,8 +167,8 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
  * @param {number} index
  * @param {number} totalPackages
  */
-const sendFragment = async (transport: Transport, data: string, index: number, totalPackages: number): Promise<{ status: string, msg: string, outputData: string }> => {
+const sendFragment = async (transport: Transport, data: string, index: number, totalPackages: number): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = index.toString(16).padStart(2, '0');
   const P2 = totalPackages.toString(16).padStart(2, '0');
-  return executeCommand(transport, commands.SC_SEND_SEGMENT, 'SE', data, P1, P2, false);
+  return executeCommand(transport, commands.SC_SEND_SEGMENT, target.SE, data, P1, P2, false);
 };

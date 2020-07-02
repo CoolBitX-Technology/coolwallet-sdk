@@ -1,9 +1,10 @@
 import * as apdu from '../apdu/index';
-import * as core from '../core/index';
+import * as core from '../setting/index';
 import * as crypto from '../crypto/index';
-import * as config from '../config/index';
+import * as config from '../apdu/config/index';
 import Transport from '../transport/index';
-import { commands } from "../apdu/command";
+import { commands } from "../apdu/execute/command";
+import { target } from '../apdu/config/target';
 
 const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;
@@ -33,10 +34,10 @@ async function createWallet(transport: Transport, appId: string, appPrivateKey: 
   );
   const strengthWithSig = strengthHex + signature;
 
-  const { status } = await apdu.execute.executeCommand(
+  const { statusCode } = await apdu.execute.executeCommand(
     transport,
     commands.CREATE_WALLET,
-    'SE',
+    target.SE,
     strengthWithSig,
     undefined,
     undefined,
@@ -44,7 +45,7 @@ async function createWallet(transport: Transport, appId: string, appPrivateKey: 
     forceUseSC
   );
 
-  return status === SUCCESS;
+  return statusCode === SUCCESS;
 }
 
 /**
@@ -55,8 +56,8 @@ async function createWallet(transport: Transport, appId: string, appPrivateKey: 
  */
 async function sendCheckSum(transport: Transport, checkSum: number): Promise<boolean> {
   const sumHex = checkSum.toString(16).padStart(8, '0');
-  const { status } = await apdu.execute.executeCommand(transport, commands.CHECKSUM, 'SE', sumHex);
-  return status === SUCCESS;
+  const { statusCode } = await apdu.execute.executeCommand(transport, commands.CHECKSUM, target.SE, sumHex);
+  return statusCode === SUCCESS;
 }
 
 /**
@@ -77,8 +78,8 @@ async function setSeed(transport: Transport, appId: string, appPrivateKey: strin
     undefined
   );
   const signedSeed = encryptedSeed + signature;
-  const { status } = await apdu.execute.executeCommand(transport, commands.SET_SEED, 'SE', signedSeed, undefined, undefined, true, forceUseSC);
-  return status === SUCCESS;
+  const { statusCode } = await apdu.execute.executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, true, forceUseSC);
+  return statusCode === SUCCESS;
 }
 
 /**
@@ -107,8 +108,8 @@ async function createSeedByApp(transport: Transport, strength: number, randomByt
  */
 async function initSecureRecovery(transport: Transport, strength: number) {
   const P1 = strength.toString(16).padStart(2, '0');
-  const { status } = await apdu.execute.executeCommand(transport, commands.MCU_SET_MNEMONIC_INFO, 'SE', undefined, P1, undefined);
-  return status === SUCCESS;
+  const { statusCode } = await apdu.execute.executeCommand(transport, commands.MCU_SET_MNEMONIC_INFO, target.SE, undefined, P1, undefined);
+  return statusCode === SUCCESS;
 };
 
 /**
@@ -118,8 +119,8 @@ async function initSecureRecovery(transport: Transport, strength: number) {
  */
 async function setSecureRecoveryIdx(transport: Transport, index: number) {
   const P1 = index.toString(16).padStart(2, '0');
-  const { status } = await apdu.execute.executeCommand(transport, commands.MCU_SET_CHARACTER_ID, 'SE', undefined, P1, undefined);
-  return status === SUCCESS;
+  const { statusCode } = await apdu.execute.executeCommand(transport, commands.MCU_SET_CHARACTER_ID, target.SE, undefined, P1, undefined);
+  return statusCode === SUCCESS;
 };
 
 /**
@@ -136,8 +137,8 @@ async function cancelSecureRecovery(transport: Transport, type: string) {
   } else {
     throw Error(`Type:${type} is invalid`);
   }
-  const { status } = await apdu.execute.executeCommand(transport, commands.MCU_CANCEL_RECOVERY, 'SE', undefined, P1, undefined);
-  return status === SUCCESS;
+  const { statusCode } = await apdu.execute.executeCommand(transport, commands.MCU_CANCEL_RECOVERY, target.SE, undefined, P1, undefined);
+  return statusCode === SUCCESS;
 };
 
 /**
@@ -145,8 +146,8 @@ async function cancelSecureRecovery(transport: Transport, type: string) {
  * @param {Transport} transport
  */
 async function getSecureRecoveryStatus(transport: Transport) {
-  const { status, outputData } = await apdu.execute.executeCommand(transport, commands.GET_MCU_STATUS, 'SE', undefined, undefined, undefined);
-  return status;
+  const { statusCode, outputData } = await apdu.execute.executeCommand(transport, commands.GET_MCU_STATUS, target.SE, undefined, undefined, undefined);
+  return statusCode;
 }
 
 

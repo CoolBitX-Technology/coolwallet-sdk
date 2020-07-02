@@ -2,7 +2,9 @@ import { SDKError, APDUError } from '../error/errorHandle';
 import { sign } from '../crypto/sign';
 import { CommandType } from "../apdu/execute/command";
 import * as control from '../apdu/mcu/control';
+import * as setting from '../apdu/setting';
 import * as general from '../apdu/general';
+import * as info from '../apdu/informational';
 import Transport from '../transport';
 
 /**
@@ -55,7 +57,7 @@ export const getCommandSignature = async (
 ): Promise<{ signature: string; forceUseSC: boolean; }> => {
     const nonce = await general.getNonce(transport);
 
-    const SEVersion = await general.getSEVersion(transport);
+  const SEVersion = await general.getSEVersion(transport);
   
     const forceUseSC = (SEVersion >= 200) ? true : false; 
 

@@ -1,79 +1,65 @@
 import { executeCommand } from './execute';
-import { RESPONSE } from '../config/response';
 import Transport from '../transport';
 import { commands } from "./command";
+import { target } from './target';
+import { CODE } from './config/status/code';
+import { SDKError, APDUError } from '../error/errorHandle';
+
 
 /**
- * Reset CoolWalletS (clear all data)
+ * backup seed in SE.
  * @param {Transport} transport
- * @return {Promise<boolean>}
+ * @param {string} signedCommand
+ * @return {Promise<{ status: boolean, statusCode: string, msg: string }>}
  */
-export const resetCard = async (transport: Transport): Promise<boolean> => {
-  const { status } = await executeCommand(transport, commands.RESET_PAIR, 'SE');
-  return status === RESPONSE.SUCCESS;
+export const backupSeed = async (transport: Transport, signedCommand: string): Promise<boolean> => {
+  const { statusCode, msg } = await executeCommand(transport, commands.BACKUP_REGISTER_DATA, target.SE, signedCommand);
+  if (statusCode === CODE._9000) {
+    return true;
+  } else {
+    throw new APDUError(commands.BACKUP_REGISTER_DATA, statusCode, msg)
+  }
 };
 
 /**
- * Get basic card information
+ * Recover wallet automatically with backed up seed.
  * @param {Transport} transport
+ * @return {Promise<{ status: boolean, statusCode: string, msg: string }>}
  */
-export const getCardInfo = async (transport: Transport): Promise<string> => {
-  const { outputData } = await executeCommand(transport, commands.GET_CARD_INFO, 'SE');
-  return outputData;
+export const recoverSeed = async (transport: Transport): Promise<boolean> => {
+  const { statusCode, msg } = await executeCommand(transport, commands.RECOVER_REGISER_DATA, target.SE);
+  if (statusCode === CODE._9000) {
+    return true
+  } else {
+    throw new APDUError(commands.RECOVER_REGISER_DATA, statusCode, msg)
+  }
 };
 
 /**
- * Update last used keyId to store in CWS.
+ * check if there's backed up data in SE.
  * @param {Transport} transport
- * @param {string} data
- * @param {string} P1
- * @return {Promise<boolean>}
+ * @return {Promise<{ status: boolean, statusCode: string, msg: string }>} true: may need recovery after update.
  */
-export const updateKeyId = async (transport: Transport, data: string, P1: string): Promise<boolean> => {
-  await executeCommand(transport, commands.UPDATE_KEYID, 'SE', data, P1);
-  return true;
+export const checkBackupStatus = async (transport: Transport): Promise<boolean> => {
+  const { statusCode, msg, outputData } = await executeCommand(transport, commands.CHECK_BACKUP_RECOVER, target.SE);
+  if (outputData === '01') {
+    return true
+  } else {
+    throw new APDUError(commands.CHECK_BACKUP_RECOVER, statusCode, msg)
+  }
 };
 
 /**
- * Fetch last used keyId from CWS
+ * Delete backed up seed in SE.
  * @param {Transport} transport
- * @param {string} P1
+ * @param {string} signedCommand
+ * @return {Promise<{ status: boolean, statusCode: string, msg: string }>}
  */
-export const getLastKeyId = async (transport: Transport, P1: string) => {
-  const { outputData } = await executeCommand(transport, commands.GET_KEYID, 'SE', undefined, P1);
-  return outputData;
-};
-
-/**
- * Toggle Lock card (01 to lock, 00 to unluch)
- * @param {Transport} transport
- * @param {string} signature data
- * @param {string} lock 01 to lock your card
- * @return {Promise<boolean>}
- */
-export const switchLockStatus = async (transport: Transport, signature: string, lock: string): Promise<boolean> => {
-  await executeCommand(transport, commands.CHANGE_PAIR_STATUS, 'SE', signature, lock);
-  return true;
-};
-
-/**
- *
- * @param {Transport} transport
- * @param {string} signature
- * @param {string} detailFlag 00 if want to show detail, 01 otherwise
- * @return {Promise<boolean>}
- */
-export const toggleDisplayAddress = async (transport: Transport, signature: string, detailFlag: string): Promise<boolean> => {
-  await executeCommand(transport, commands.SHOW_FULL_ADDRESS, 'SE', signature, detailFlag);
-  return true;
-};
-
-/**
- * Get SE Version from CoolWalletS
- * @param {Transport} transport
- * @returns {Promise<Number>}
- */
-export const getSEVersion = async (transport: Transport): Promise<number> => {
-  const { outputData } = await executeCommand(transport, commands.GET_SE_VERSION, 'SE');
-  return parseInt(outputData, 16);
+export const deleteSeedBackup = async (transport: Transport, signedCommand: string) => {
+  const { statusCode, msg } = await executeCommand(transport, commands.DELETE_REGISTER_BACKUP, target.SE, signedCommand);
+  if (statusCode === CODE._9000) {
+    return true
+  } else {
+    throw new APDUError(commands.DELETE_REGISTER_BACKUP, statusCode, msg)
+  }
 };

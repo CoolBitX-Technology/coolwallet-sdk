@@ -200,7 +200,7 @@ export const signTypedData = async (
   appId: string,
   appPrivateKey: string,
   coinType: string,
-  typedData: TypedData,
+  typedData: object,
   addressIndex: number,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,

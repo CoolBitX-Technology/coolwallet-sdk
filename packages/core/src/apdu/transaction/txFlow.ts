@@ -1,8 +1,8 @@
 import * as rlp from 'rlp';
 import * as txUtil from './txUtil';
-import Transport from "../transport";
-import * as tx from '../transaction/index'
-import * as apdu from "../apdu/index";
+import Transport from "../../transport";
+import * as tx from './index'
+import * as apdu from "../index";
 
 /**
  * @description Prepare RLP Data for CoolWallet
@@ -61,7 +61,7 @@ export const getSingleSignatureFromCoolWallet = async (
 
   // get tx detail
   if (! await tx.getTxDetail(transport)) {
-    throw new Error('get tx detail status fail!!');
+    throw new Error('get tx detail statusCode fail!!');
   }
   //authorize tx
   const signatureKey = await tx.getSignatureKey(transport);
@@ -123,7 +123,7 @@ export const getSignaturesFromCoolWallet = async (
 
   // get tx detail
   if (! await tx.getTxDetail(transport)) {
-    throw new Error('get tx detail status fail!!');
+    throw new Error('get tx detail statusCode fail!!');
   }
   //authorize tx
   const signatureKey = await tx.getSignatureKey(transport);
