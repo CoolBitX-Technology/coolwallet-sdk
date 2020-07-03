@@ -1,8 +1,8 @@
 import * as rlp from 'rlp';
 import * as txUtil from './txUtil';
-import Transport from "../../transport";
-import * as tx from './index'
-import * as apdu from "../index";
+import Transport from "../transport";
+import * as tx from '../apdu/transaction'
+import * as apdu from "../apdu/index";
 
 /**
  * @description Prepare RLP Data for CoolWallet

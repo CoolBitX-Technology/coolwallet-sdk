@@ -5,7 +5,8 @@ import * as dfu from './mcu/dfu';
 import * as info from './informational'
 import * as execute from './execute/execute';
 import * as general from './general';
+import * as wallet from './wallet';
 
 export {
-  display, control, setting, dfu, info, execute, general
+  display, control, setting, dfu, info, execute, general, wallet
 };

@@ -1,5 +1,5 @@
-import { aes256CbcDecrypt } from "../../crypto/encryptions";
-import * as signatureTools from "../../crypto/signature";
+import { aes256CbcDecrypt } from "../crypto/encryptions";
+import * as signatureTools from "../crypto/signature";
 
 /**
  * @description Decrypt Data from CoolWallet

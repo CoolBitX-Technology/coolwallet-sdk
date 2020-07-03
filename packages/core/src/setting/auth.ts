@@ -57,7 +57,7 @@ export const getCommandSignature = async (
 ): Promise<{ signature: string; forceUseSC: boolean; }> => {
     const nonce = await general.getNonce(transport);
 
-  const SEVersion = await general.getSEVersion(transport);
+    const SEVersion = await general.getSEVersion(transport);
   
     const forceUseSC = (SEVersion >= 200) ? true : false; 
 

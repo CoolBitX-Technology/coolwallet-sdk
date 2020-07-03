@@ -4,12 +4,12 @@ import * as crypto from '../crypto/index';
 import * as config from '../apdu/config/index';
 import Transport from '../transport/index';
 import { commands } from "../apdu/execute/command";
+import { CODE } from '../apdu/config/status/code';
 import { target } from '../apdu/config/target';
 
 const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;
 
-const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;
 
 /**
  * Create a new seed with SE.
@@ -45,7 +45,7 @@ async function createWallet(transport: Transport, appId: string, appPrivateKey: 
     forceUseSC
   );
 
-  return statusCode === SUCCESS;
+  return statusCode === CODE._9000;
 }
 
 /**
@@ -57,7 +57,7 @@ async function createWallet(transport: Transport, appId: string, appPrivateKey: 
 async function sendCheckSum(transport: Transport, checkSum: number): Promise<boolean> {
   const sumHex = checkSum.toString(16).padStart(8, '0');
   const { statusCode } = await apdu.execute.executeCommand(transport, commands.CHECKSUM, target.SE, sumHex);
-  return statusCode === SUCCESS;
+  return statusCode === CODE._9000;
 }
 
 /**
@@ -79,7 +79,7 @@ async function setSeed(transport: Transport, appId: string, appPrivateKey: strin
   );
   const signedSeed = encryptedSeed + signature;
   const { statusCode } = await apdu.execute.executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, true, forceUseSC);
-  return statusCode === SUCCESS;
+  return statusCode === CODE._9000;
 }
 
 /**
@@ -109,7 +109,7 @@ async function createSeedByApp(transport: Transport, strength: number, randomByt
 async function initSecureRecovery(transport: Transport, strength: number) {
   const P1 = strength.toString(16).padStart(2, '0');
   const { statusCode } = await apdu.execute.executeCommand(transport, commands.MCU_SET_MNEMONIC_INFO, target.SE, undefined, P1, undefined);
-  return statusCode === SUCCESS;
+  return statusCode === CODE._9000;
 };
 
 /**
@@ -120,7 +120,7 @@ async function initSecureRecovery(transport: Transport, strength: number) {
 async function setSecureRecoveryIdx(transport: Transport, index: number) {
   const P1 = index.toString(16).padStart(2, '0');
   const { statusCode } = await apdu.execute.executeCommand(transport, commands.MCU_SET_CHARACTER_ID, target.SE, undefined, P1, undefined);
-  return statusCode === SUCCESS;
+  return statusCode === CODE._9000;
 };
 
 /**
@@ -138,7 +138,7 @@ async function cancelSecureRecovery(transport: Transport, type: string) {
     throw Error(`Type:${type} is invalid`);
   }
   const { statusCode } = await apdu.execute.executeCommand(transport, commands.MCU_CANCEL_RECOVERY, target.SE, undefined, P1, undefined);
-  return statusCode === SUCCESS;
+  return statusCode === CODE._9000;
 };
 
 /**

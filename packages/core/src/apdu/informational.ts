@@ -13,7 +13,7 @@ import { SDKError, APDUError } from '../error/errorHandle';
  */
 export const getCardInfo = async (transport: Transport): Promise<string> => {
   const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_CARD_INFO, target.SE);
-  if (statusCode === CODE._9000) {
+  if (outputData) {
     return outputData;
   } else {
     throw new APDUError(commands.GET_CARD_INFO, statusCode, msg)
@@ -40,7 +40,7 @@ export const updateKeyId = async (transport: Transport, data: string, P1: string
  */
 export const getLastKeyId = async (transport: Transport, P1: string) => {
   const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_KEYID, target.SE, undefined, P1);
-  if (statusCode === CODE._9000) {
+  if (outputData) {
     return outputData;
   } else {
     throw new APDUError(commands.GET_KEYID, statusCode, msg)

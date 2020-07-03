@@ -13,7 +13,7 @@ import { SDKError, APDUError } from '../error/errorHandle';
 export const hi = async (transport: Transport, appId: string): Promise<boolean> => {
   try {
     const { statusCode } = await executeCommand(transport, commands.SAY_HI, target.SE, appId);
-    return status === CODE._9000;
+    return statusCode === CODE._9000;
   } catch (error) {
     return false;
   }
@@ -25,8 +25,12 @@ export const hi = async (transport: Transport, appId: string): Promise<boolean> 
  * @return {Promise<string>}
  */
 export const getNonce = async (transport: Transport): Promise<string> => {
-  const { outputData: nonce } = await executeCommand(transport, commands.GET_NONCE, target.SE);
-  return nonce;
+  const { outputData: nonce, statusCode, msg } = await executeCommand(transport, commands.GET_NONCE, target.SE);
+  if (nonce) {
+    return nonce;
+  } else {
+    throw new APDUError(commands.GET_NONCE, statusCode, msg)
+  }
 };
 
 /**
@@ -35,8 +39,13 @@ export const getNonce = async (transport: Transport): Promise<string> => {
  * @returns {Promise<Number>}
  */
 export const getSEVersion = async (transport: Transport): Promise<number> => {
-  const { outputData } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
-  return parseInt(outputData, 16);
+  const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
+  if (outputData){
+    return parseInt(outputData, 16);
+  }else{
+    throw new APDUError(commands.GET_SE_VERSION, statusCode, msg)
+  }
+  
 };
 
 /**

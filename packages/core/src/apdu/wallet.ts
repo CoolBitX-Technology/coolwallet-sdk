@@ -32,7 +32,7 @@ export const authGetExtendedKey = async (transport: Transport, signature: string
  */
 export const getAccountExtendedKey = async (transport: Transport, coinType: string, accIndex: string): Promise<string> => {
   const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, undefined, coinType, accIndex);
-  if (statusCode === CODE._9000) {
+  if (key) {
     return key
   } else {
     throw new APDUError(commands.GET_EXT_KEY, statusCode, msg)
@@ -59,7 +59,7 @@ export const getEd25519AccountPublicKey = async (transport: Transport, coinType:
   }
 
   const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_XLM_ACC_PUBKEY, target.SE, undefined, coinType, accIndex);
-  if (statusCode === CODE._9000) {
+  if (key) {
     return key
   } else {
     throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)

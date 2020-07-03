@@ -1,7 +1,7 @@
-import { executeCommand } from './execute';
+import { executeCommand } from './execute/execute';
 import Transport from '../transport';
-import { commands } from "./command";
-import { target } from './target';
+import { commands } from "./execute/command";
+import { target } from './config/target';
 import { CODE } from './config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 

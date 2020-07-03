@@ -5,10 +5,10 @@ import * as config from '../apdu/config/index';
 import { SDKError, APDUError } from '../error/errorHandle';
 import Transport from '../transport/index';
 import { commands } from "../apdu/execute/command";
+import { CODE } from '../apdu/config/status/code';
 import { target } from '../apdu/config/target';
 
 
-const SUCCESS = config.RESPONSE.DFU_RESPONSE.SUCCESS;
 
 /**
  * @param {Transport} transport
@@ -116,7 +116,7 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
  */
 export const removePairedDevice = async (transport: Transport, appIdWithSig: string): Promise<boolean> => {
   const { statusCode } = await apdu.execute.executeCommand(transport, commands.REMOVE_DEVICES, target.SE, appIdWithSig);
-  return statusCode === SUCCESS;
+  return statusCode === CODE._9000;
 };
 
 /**
@@ -127,5 +127,5 @@ export const removePairedDevice = async (transport: Transport, appIdWithSig: str
  */
 export const renameDevice = async (transport: Transport, nameWithSig: string): Promise<boolean> => {
   const { statusCode } = await apdu.execute.executeCommand(transport, commands.RENAME_DEVICES, target.SE, nameWithSig);
-  return statusCode === SUCCESS;
+  return statusCode === CODE._9000;
 };

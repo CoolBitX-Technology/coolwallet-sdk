@@ -12,7 +12,7 @@ const authGetKey = async (transport: Transport, appId: string, appPrivateKey: st
     commands.AUTH_EXT_KEY,
     undefined, undefined, undefined, undefined
   );
-  return apdu.coin.authGetExtendedKey(transport, signature, forceUseSC);
+  return apdu.wallet.authGetExtendedKey(transport, signature, forceUseSC);
 };
 
 /**
@@ -35,7 +35,7 @@ export const getAccountExtKey = async (
 
   let accIndexHex = accIndex.toString(16);
   if (accIndexHex.length % 2 > 0) accIndexHex = `0${accIndexHex}`;
-  const response = await apdu.coin.getAccountExtendedKey(
+  const response = await apdu.wallet.getAccountExtendedKey(
     transport,
     coinSEType,
     accIndexHex
@@ -73,7 +73,7 @@ export const getEd25519PublicKey = async (
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
   const accIndexHex = accountIndex.toString(16).padStart(2, "0");
-  const response = await apdu.coin.getEd25519AccountPublicKey(
+  const response = await apdu.wallet.getEd25519AccountPublicKey(
     transport,
     coinSEType,
     accIndexHex,
