@@ -272,7 +272,7 @@ function getSigningActions(
 	if (change) {
 		const changeAction = async () => {
 			if (scriptType === ScriptType.P2WPKH) {
-				throw new Error('not support P2WPKH change');
+				throw new error.SDKError(getSigningActions.name, 'not support P2WPKH change');
 			} else {
 				const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
 				await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
