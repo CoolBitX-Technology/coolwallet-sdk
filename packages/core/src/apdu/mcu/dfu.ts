@@ -1,7 +1,7 @@
 import { executeCommand } from '../execute/execute';
 import Transport from '../../transport';
 import { commands } from "../execute/command";
-import { target } from '../config/target';
+import { target } from '../../config/target';
 
 export const getFWStatus = async (transport: Transport) => {
   const { outputData } = await executeCommand(transport, commands.CHECK_FW_STATUS, target.MCU);

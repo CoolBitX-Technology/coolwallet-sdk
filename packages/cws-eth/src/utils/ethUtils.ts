@@ -1,4 +1,4 @@
-import { error, transport, tx } from "@coolwallet/core";
+import { error, transport, apdu } from "@coolwallet/core";
 
 import { handleHex } from "./stringUtil";
 import * as scripts from "../scripts";
@@ -209,7 +209,7 @@ export const apduForParsignMessage = (
   let rawData = msgBuf.toString("hex");
   rawData = handleHex(rawData);
   return async () => {
-    tx.txPrep(transport, rawData, p1, appPrivateKey);
+    apdu.tx.txPrep(transport, rawData, p1, appPrivateKey);
   }
 };
 

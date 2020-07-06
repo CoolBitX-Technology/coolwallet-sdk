@@ -1,11 +1,11 @@
 import * as apdu from '../apdu/index';
 import * as core from '../setting/index';
 import * as crypto from '../crypto/index';
-import * as config from '../apdu/config/index';
+import * as config from '../config/index';
 import Transport from '../transport/index';
 import { commands } from "../apdu/execute/command";
-import { CODE } from '../apdu/config/status/code';
-import { target } from '../apdu/config/target';
+import { CODE } from '../config/status/code';
+import { target } from '../config/target';
 
 const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;

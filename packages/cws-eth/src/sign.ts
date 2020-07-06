@@ -1,4 +1,4 @@
-import { core, transport, error, tx, general } from '@coolwallet/core';
+import { apdu, transport, error, tx, util } from '@coolwallet/core';
 // import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import { isHex, keccak256 } from './lib';
 import * as ethUtil from './utils/ethUtils';
@@ -35,19 +35,19 @@ export const signTransaction = async (
   authorizedCB: Function | undefined = undefined,
 ): Promise<string> => {
   const rawPayload = ethUtil.getRawHex(transaction);
-  const useScript = await core.controller.checkSupportScripts(transport);
+  const useScript = await util.checkSupportScripts(transport);
   const txType = ethUtil.getTransactionType(transaction);
   let canonicalSignature;
   if (useScript) {
     const { script, argument } = ethUtil.getScriptAndArguments(txType, addressIndex, transaction);
     const preActions = [];
     const sendScript = async () => {
-      await tx.sendScript(transport, script);
+      await apdu.tx.sendScript(transport, script);
     }
     preActions.push(sendScript);
 
     const sendArgument = async () => {
-      return tx.executeScript(
+      return apdu.tx.executeScript(
         transport,
         appId,
         appPrivateKey,
@@ -55,7 +55,7 @@ export const signTransaction = async (
       );
     }
 
-    canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
+    canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
       transport,
       preActions,
       sendArgument,
@@ -65,21 +65,21 @@ export const signTransaction = async (
       true
     );
   } else {
-    const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
+    const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
     const { readType } = ethUtil.getReadType(txType);
-    const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
+    const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
 
     const preActions = [];
     const sayHi = async () => {
-      await general.hi(transport, appId);
+      await apdu.general.hi(transport, appId);
     }
     preActions.push(sayHi)
 
     const prepareTx = async () => {
-      return tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+      return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
     }
 
-    canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
+    canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
       transport,
       preActions,
       prepareTx,
@@ -128,11 +128,11 @@ export const signMessage = async (
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined
 ) => {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
+  const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
 
   const preActions = [];
   const sayHi = async () => {
-    await general.hi(transport, appId);
+    await apdu.general.hi(transport, appId);
   }
   preActions.push(sayHi);
 
@@ -148,7 +148,7 @@ export const signMessage = async (
       let rawData = msgBuf.toString("hex");
       rawData = handleHex(rawData);
       return async () => {
-        tx.txPrep(transport, rawData, '07', appPrivateKey);
+        apdu.tx.txPrep(transport, rawData, '07', appPrivateKey);
       }
     }
     preActions.push(apduForParsignMessage)
@@ -158,12 +158,12 @@ export const signMessage = async (
   const len = msgBuf.length.toString();
   const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${len}`);
   const payload = Buffer.concat([prefix, msgBuf]);
-  const dataForSE = core.flow.prepareSEData(keyId, payload, 'F5');
+  const dataForSE = tx.flow.prepareSEData(keyId, payload, 'F5');
   const prepareTx = async () => {
-    return tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+    return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
   }
 
-  const canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
     prepareTx,
@@ -206,7 +206,7 @@ export const signTypedData = async (
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined
 ): Promise<string> => {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
+  const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
 
   const sanitizedData = typedDataUtils.sanitizeData(typedData);
   const encodedData = typedDataUtils.encodeData(
@@ -223,19 +223,19 @@ export const signTypedData = async (
   );
   const dataHash = Buffer.from(keccak256(encodedData).substr(2), 'hex');
   const payload = Buffer.concat([prefix, domainSeparate, dataHash]);
-  const dataForSE = core.flow.prepareSEData(keyId, payload, 'F3');
+  const dataForSE = tx.flow.prepareSEData(keyId, payload, 'F3');
 
   const preActions = [];
   const sayHi = async () => {
-    await general.hi(transport, appId);
+    await apdu.general.hi(transport, appId);
   }
   preActions.push(sayHi)
 
   const prepareTx = async () => {
-    return tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+    return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
   }
 
-  const canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
     prepareTx,

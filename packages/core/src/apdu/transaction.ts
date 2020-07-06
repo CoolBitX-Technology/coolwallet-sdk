@@ -4,8 +4,8 @@ import Transport from '../transport';
 import { addressIndexToKeyId } from '../transaction/txUtil'
 import { commands, CommandType } from "./execute/command";
 import { SDKError, APDUError } from '../error/errorHandle';
-import { CODE } from './config/status/code';
-import { target } from './config/target';
+import { CODE } from '../config/status/code';
+import { target } from '../config/target';
 
 
 /**
@@ -192,14 +192,16 @@ export const executeUtxoScript = async (
 };
 
 /**
+ * 9000 true  6D00 false  other error
  * Get full transactino composed by SE. Can be use to check if card supports scripts.
  * @todo append signature
  * @param {Transport} transport
+ * @return {Promse<{ signedTx: string, statusCode: string }>}
  */
-export const getSignedHex = async (transport: Transport) => {
+export const getSignedHex = async (transport: Transport): Promise<{ signedTx: string, statusCode: string }> => {
   const { outputData: signedTx, statusCode, msg } = await executeCommand(transport, commands.GET_SIGNED_HEX, target.SE);
-  if (signedTx) {
-    return signedTx;
+  if (signedTx){
+    return { signedTx, statusCode };
   } else {
     throw new APDUError(commands.GET_SIGNED_HEX, statusCode, msg)
   }

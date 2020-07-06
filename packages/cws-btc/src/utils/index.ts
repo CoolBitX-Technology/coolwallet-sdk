@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { core, apdu, transport, error, tx, general } from '@coolwallet/core';
+import { transport, error, tx, apdu } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import * as scripts from "../scripts";
@@ -264,7 +264,7 @@ function getSigningActions(
 ): ({ preActions: Array<Function>, actions: Array<Function> }) {
 	const preActions = [];
 	const sayHi = async () => {
-		await general.hi(transport, appId);
+		await apdu.general.hi(transport, appId);
 	}
 	preActions.push(sayHi)
 	if (change) {
@@ -273,7 +273,7 @@ function getSigningActions(
 				throw new Error('not support P2WPKH change');
 			} else {
 				const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
-				await tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
+				await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
 			}
 		}
 		preActions.push(changeAction);
@@ -282,16 +282,16 @@ function getSigningActions(
 	const parsingOutputAction = async () => {
 		const txDataHex = preparedData.outputsBuf.toString('hex');
 		const txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0C' : '01';
-		return tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
+		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
 	};
 	preActions.push(parsingOutputAction);
 
 	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-		const keyId = core.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
+		const keyId = tx.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
 		const readType = '01';
-		const txDataHex = core.flow.prepareSEData(keyId, unsignedTx, readType);
+		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
-		return tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
+		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
 	}));
 
 	return { preActions, actions };
@@ -469,12 +469,12 @@ function getScriptSigningActions(
 
 	const preActions = [];
 	const sendScript = async () => {
-		await tx.sendScript(transport, script);
+		await apdu.tx.sendScript(transport, script);
 	}
 	preActions.push(sendScript);
 
 	const sendArgument = async () => {
-		await tx.executeScript(
+		await apdu.tx.executeScript(
 			transport,
 			appId,
 			appPrivateKey,
@@ -497,7 +497,7 @@ function getScriptSigningActions(
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
-			return tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument);
+			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument);
 		});
 	return { preActions, actions };
 };

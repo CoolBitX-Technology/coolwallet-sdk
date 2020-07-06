@@ -1,8 +1,8 @@
 import { executeCommand } from './execute/execute';
 import Transport from '../transport';
 import { commands } from "./execute/command";
-import { target } from './config/target';
-import { CODE } from './config/status/code';
+import { target } from '../config/target';
+import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 /**
  * Response boolean (isCardRecognized)

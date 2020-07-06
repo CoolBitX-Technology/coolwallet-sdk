@@ -1,12 +1,12 @@
 import * as apdu from '../apdu/index';
 import * as core from '../setting/index';
 import * as crypto from '../crypto/index';
-import * as config from '../apdu/config/index';
+import * as config from '../config/index';
 import { SDKError, APDUError } from '../error/errorHandle';
 import Transport from '../transport/index';
 import { commands } from "../apdu/execute/command";
-import { CODE } from '../apdu/config/status/code';
-import { target } from '../apdu/config/target';
+import { CODE } from '../config/status/code';
+import { target } from '../config/target';
 
 
 

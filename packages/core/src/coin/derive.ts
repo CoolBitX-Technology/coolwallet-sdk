@@ -1,11 +1,11 @@
-import { core, apdu, crypto } from "../index";
+import { setting, apdu, crypto } from "../index";
 import Transport from "../transport";
 import { commands } from "../apdu/execute/command";
 
 const bip32 = require("bip32");
 
 const authGetKey = async (transport: Transport, appId: string, appPrivateKey: string) => {
-  const { signature, forceUseSC } = await core.auth.getCommandSignature(
+  const { signature, forceUseSC } = await setting.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,

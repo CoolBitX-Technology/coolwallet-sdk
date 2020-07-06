@@ -1,5 +1,4 @@
 import { generateKeyPair } from './keypair';
-import * as apdu from '../apdu/index';
 import Transport from '../transport/index';
 import * as pairing from './pairing';
 import { recovery, creation } from './create';
@@ -39,11 +38,11 @@ export default class CoolWallet {
   }
 
   async getSEVersion() {
-    return apdu.general.getSEVersion(this.transport);
+    return general.getSEVersion(this.transport);
   }
 
   async resetCard() {
-    return apdu.general.resetCard(this.transport);
+    return general.resetCard(this.transport);
   }
 
   async register(appPublicKey: string, password: string, deviceName: string) {

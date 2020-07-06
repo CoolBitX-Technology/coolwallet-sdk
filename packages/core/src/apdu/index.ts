@@ -6,7 +6,8 @@ import * as info from './informational'
 import * as execute from './execute/execute';
 import * as general from './general';
 import * as wallet from './wallet';
+import * as tx from './transaction';
 
 export {
-  display, control, setting, dfu, info, execute, general, wallet
+  display, control, setting, dfu, info, execute, general, wallet, tx
 };

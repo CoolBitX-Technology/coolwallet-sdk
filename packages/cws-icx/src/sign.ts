@@ -22,7 +22,7 @@ export default async function signTransaction (
   const phraseToSign = icxUtil.generateHashKey(rawTx);
   const rawPayload = Buffer.from(phraseToSign, 'utf-8');
   const dataForSE = core.flow.prepareSEData(keyId, rawPayload, coinType);
-  const signature = await core.flow.sendDataToCoolWallet(
+  const signature = await core.flow.getSingleSignatureFromCoolWallet(
     transport,
     appId,
     appPrivateKey,

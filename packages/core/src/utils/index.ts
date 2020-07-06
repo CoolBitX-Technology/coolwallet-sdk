@@ -1,5 +1,8 @@
-import {error as Errors} from '../index' ;
-import { MSG } from '../apdu/config/status/msg'
+import * as tx from '../apdu/transaction' ;
+import Transport from '../transport';
+import { MSG } from '../config/status/msg'
+import { CODE } from '../config/status/code'
+import { APDUError, SDKError } from '../error/errorHandle'
 
 
 export const getReturnMsg = (code: string): string => {
@@ -72,4 +75,16 @@ export const assemblyCommandAndData = (
 
   const command = pid + cmdLen + cla + ins + p1 + p2 + hexOriDataLength + hexXORLength + hexBataLength;
   return { command, data: packets };
+};
+
+
+export const checkSupportScripts = async (transport: Transport) => {
+  const { statusCode } = await tx.getSignedHex(transport);
+  if (statusCode === CODE._9000){
+    return true;
+  } else if (statusCode === CODE._6D00) {
+    return false;
+  } else {
+    throw new SDKError(checkSupportScripts.name, 'checkSupportScripts error')
+  }
 };

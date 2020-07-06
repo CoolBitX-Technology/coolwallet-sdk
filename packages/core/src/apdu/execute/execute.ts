@@ -1,10 +1,10 @@
 import { CommandType, commands } from './command';
-import * as util from '../../utils/utils';
+import * as util from '../../utils';
 import { SHA256 } from '../../crypto/hash';
 import Transport from '../../transport/index';
 import { SDKError, APDUError } from '../../error/errorHandle';
-import { CODE } from '../config/status/code';
-import { target } from '../config/target';
+import { CODE } from '../../config/status/code';
+import { target } from '../../config/target';
 
 
 /**
