@@ -19,7 +19,7 @@ export {
 	createUnsignedTransactions,
 	getSigningActions,
 	composeFinalTransaction,
-	getScriptSigningActions as getScriptAndArgument
+	getScriptSigningActions
 };
 
 function hash160(buf: Buffer): Buffer {
@@ -78,13 +78,13 @@ function toVarUintBuffer(int: number): Buffer {
 	return varuint.encode(int);
 }
 
-function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
+function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
 	const bn = new BN(numberOrString);
 	const buf = Buffer.from(bn.toArray()).reverse();
 	return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
 }
 
-function toNonReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
+function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
 	const bn = new BN(numberOrString);
 	const buf = Buffer.from(bn.toArray());
 	return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
@@ -138,12 +138,12 @@ function createUnsignedTransactions(
 	change: Change | undefined,
 	version: number = 1,
 	lockTime: number = 0,
-): ({
+): {
 	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>
-}) {
-	const versionBuf = toUintBuffer(version, 4);
-	const lockTimeBuf = toUintBuffer(lockTime, 4);
+} {
+	const versionBuf = toReverseUintBuffer(version, 4);
+	const lockTimeBuf = toReverseUintBuffer(lockTime, 4);
 
 	const inputsCount = toVarUintBuffer(inputs.length);
 	const preparedInputs = inputs.map(({
@@ -153,11 +153,11 @@ function createUnsignedTransactions(
 
 		const preOutPointBuf = Buffer.concat([
 			Buffer.from(preTxHash, 'hex').reverse(),
-			toUintBuffer(preIndex, 4),
+			toReverseUintBuffer(preIndex, 4),
 		]);
 
-		const preValueBuf = toUintBuffer(preValue, 8);
-		const sequenceBuf = (sequence) ? toUintBuffer(sequence, 4) : Buffer.from('ffffffff', 'hex');
+		const preValueBuf = toReverseUintBuffer(preValue, 8);
+		const sequenceBuf = (sequence) ? toReverseUintBuffer(sequence, 4) : Buffer.from('ffffffff', 'hex');
 
 		return {
 			addressIndex, pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
@@ -171,11 +171,11 @@ function createUnsignedTransactions(
 	const outputScriptLen = toVarUintBuffer(outputScript.length);
 
 	const outputArray = [
-		Buffer.concat([toUintBuffer(output.value, 8), outputScriptLen, outputScript])
+		Buffer.concat([toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])
 	];
 	if (change) {
 		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
-		const changeValue = toUintBuffer(change.value, 8);
+		const changeValue = toReverseUintBuffer(change.value, 8);
 		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
 		const outScriptLen = toVarUintBuffer(outScript.length);
 		outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
@@ -244,8 +244,10 @@ function getSigningActions(
 	change: Change | undefined,
 	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>,
-
-): ({ preActions: Array<Function>, actions: Array<Function> }) {
+): {
+	preActions: Array<Function>,
+	actions: Array<Function>
+} {
 	const preActions = [];
 	const sayHi = async () => {
 		await general.hi(transport, appId);
@@ -337,7 +339,7 @@ function composeFinalTransaction(
 			pubkeyBuf, preOutPointBuf, sequenceBuf
 		}) => {
 			if (scriptType === ScriptType.P2SH_P2WPKH) {
-				const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, scriptType);
+				const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2WPKH);
 				const inScript = Buffer.concat([
 					Buffer.from(outScript.length.toString(16), 'hex'),
 					outScript,
@@ -345,8 +347,9 @@ function composeFinalTransaction(
 				return Buffer.concat([
 					preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
 				]);
+			} else {
+				return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
 			}
-			return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
 		}));
 
 		return Buffer.concat([
@@ -369,7 +372,6 @@ function getArgument(
 ): string {
 	const {
 		scriptType: outputType,
-		outScript: outputScript,
 		outHash: outputHash
 	} = addressToOutScript(output.address);
 	if (!outputHash) {
@@ -377,48 +379,46 @@ function getArgument(
 	}
 	let outputScriptType;
 	let outputHashBuf;
-	//todo
-	if (outputType == ScriptType.P2PKH) {
-		outputScriptType = toUintBuffer(0, 1);
+	if (outputType == ScriptType.P2PKH || outputType == ScriptType.P2SH_P2WPKH || outputType == ScriptType.P2WPKH) {
+		outputScriptType = toVarUintBuffer(outputType);
 		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-	} else if (outputType == ScriptType.P2SH_P2WPKH) {
-		outputScriptType = toUintBuffer(1, 1);
-		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-	} else if (outputType == ScriptType.P2WPKH) {
-		outputScriptType = toUintBuffer(2, 1);
-		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+	} else if (outputType == ScriptType.P2WSH) {
+		outputScriptType = toVarUintBuffer(outputType);
+		outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
 	} else {
 		throw new Error(`Unsupport ScriptType : ${outputType}`);
 	}
-	const outputAmount = toNonReverseUintBuffer(output.value, 8);
+	const outputAmount = toUintBuffer(output.value, 8);
 	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
 	let haveChange;
 	let changeScriptType;
 	let changeAmount;
 	let changePath;
 	if (change) {
-		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
-		haveChange = toUintBuffer(1, 1);
-		changeScriptType = toUintBuffer(outputType, 1);
-		changeAmount = toNonReverseUintBuffer(change.value, 8);
+		if (!change.pubkeyBuf) {
+			throw new Error('Public Key not exists !!');
+		}
+		haveChange = toVarUintBuffer(1);
+		changeScriptType = toVarUintBuffer(outputType);
+		changeAmount = toUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from(`328000002C800000008000000000000000${addressIdxHex}`, 'hex');
+		changePath = Buffer.from('32' + '8000002C' + '80000000' + '80000000' + '00000000' + addressIdxHex, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
-		changeAmount = Buffer.from('0000000000000000', 'hex');
-		changePath = Buffer.from('000000000000000000000000000000000000000000', 'hex');
+		changeAmount = toUintBuffer(0, 8)//)Buffer.from('0000000000000000', 'hex');
+		changePath = toUintBuffer(0, 21)//Buffer.from('000000000000000000000000000000000000000000', 'hex');
 	}
 	const prevouts = inputs.map(input => {
 		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
-		toUintBuffer(input.preIndex, 4)])
+		toReverseUintBuffer(input.preIndex, 4)])
 	})
 	const hashPrevouts = hash256(Buffer.concat(prevouts));
 	const sequences = inputs.map(input => {
 		return Buffer.concat([
-			(input.sequence) ? toUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
+			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
 			//Buffer.from(input.sequence, 'hex').reverse(),
-			toUintBuffer(input.preIndex, 4)
+			toReverseUintBuffer(input.preIndex, 4)
 		])
 	})
 	const hashSequence = hash256(Buffer.concat(sequences));
@@ -438,6 +438,7 @@ function getArgument(
 
 function getScriptSigningActions(
 	transport: Transport,
+	scriptType: ScriptType,
 	appId: string,
 	appPrivateKey: string,
 	inputs: Array<Input>,
@@ -470,18 +471,17 @@ function getScriptSigningActions(
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
 			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
-			const SEPath = `15328000002C800000008000000000000000${addressIdxHex}`;
+			const SEPath = Buffer.from(`15328000002C800000008000000000000000${addressIdxHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
-			// todo
-			const inputScriptType = toUintBuffer(0, 1);
+			const inputScriptType = toVarUintBuffer(scriptType);
 			const inputAmount = preparedInput.preValueBuf.reverse();
 			const inputHash = hash160(preparedInput.pubkeyBuf);
-			return Buffer.concat([Buffer.from(SEPath, 'hex'), outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
+			return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
 		});
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
-			return tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument);
+			return tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (scriptType === ScriptType.P2PKH) ? "10" : "11");
 		});
 	return { preActions, actions };
 };

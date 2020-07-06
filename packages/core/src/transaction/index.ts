@@ -83,14 +83,13 @@ export const txPrep = async (
 
 /**
  * Scriptable step 1
- * @todo append signature
  */
-export const sendScript = async (transport: Transport, script: string) => {
+export const sendScript = async (transport: Transport, scriptWithSig: string) => {
   const { status } = await executeCommand(
     transport,
     commands.SEND_SCRIPT,
     'SE',
-    script,
+    scriptWithSig,
     undefined,
     undefined,
     true
@@ -139,8 +138,7 @@ export const executeUtxoScript = async (
   appId: string,
   appPrivKey: string,
   utxoArgument: string,
-  //todo
-  P1 = "11"
+  extraTransactionType: string
 ) => {
   const { signature } = await getCommandSignature(
     transport,
@@ -148,7 +146,7 @@ export const executeUtxoScript = async (
     appPrivKey,
     commands.EXECUTE_UTXO_SCRIPT,
     utxoArgument,
-    P1,
+    extraTransactionType,
     undefined
   );
   const { outputData: encryptedSignature } = await executeCommand(
@@ -156,7 +154,7 @@ export const executeUtxoScript = async (
     commands.EXECUTE_UTXO_SCRIPT,
     'SE',
     utxoArgument + signature,
-    P1,
+    extraTransactionType,
     undefined,
     true,
     true,
@@ -165,8 +163,7 @@ export const executeUtxoScript = async (
 };
 
 /**
- * Get full transactino composed by SE. Can be use to check if card supports scripts.
- * @todo append signature
+ * Get full transaction composed by SE. Can be use to check if card supports scripts.
  * @param {Transport} transport
  */
 export const getSignedHex = async (transport: Transport) => {

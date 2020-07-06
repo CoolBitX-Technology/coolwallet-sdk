@@ -1,4 +1,4 @@
-import { core, apdu, coin as COIN, transport } from '@coolwallet/core';
+import { coin as COIN, transport } from '@coolwallet/core';
 import {
 	ScriptType,
 	Input,
@@ -58,7 +58,16 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 			// eslint-disable-next-line no-param-reassign
 			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-
-		return signTransaction(this.transport, this.appId, this.appPrivateKey, scriptType, inputs, output, change);
+		return signTransaction(
+			this.transport,
+			this.appId,
+			this.appPrivateKey,
+			scriptType,
+			inputs,
+			output,
+			change,
+			confirmCB,
+			authorizedCB
+		);
 	}
 }
