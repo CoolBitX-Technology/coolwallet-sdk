@@ -1,10 +1,5 @@
-import SDKError from './SDKError';
+import { SDKError, APDUError, TransportError } from './errorHandle';
 
 export {
-  SDKError
+  SDKError, APDUError, TransportError
 };
-export * from './transport';
-export * from './transaction';
-export * from './pairing';
-export * from './general';
-export * from './wallet';

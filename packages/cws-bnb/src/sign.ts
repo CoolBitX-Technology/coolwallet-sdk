@@ -22,7 +22,7 @@ export default async function signTransfer(
   const rawPayload = bnbUtil.convertObjectToSignBytes(signObj); // .toString('hex');
 
   const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
-  const signature = await core.flow.sendDataToCoolWallet(
+  const signature = await core.flow.getSingleSignatureFromCoolWallet(
     transport,
     appId,
     appPrivateKey,

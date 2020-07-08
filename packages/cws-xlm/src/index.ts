@@ -11,9 +11,13 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
   }
 
   async getAddress(accountIndex: number, protocol: protocol = 'SLIP0010'): Promise<string> {
-    if (accountIndex !== 0) throw new ERROR.SDKError('Not Supported', 'Only support address index = 0 for now.');
+    if (accountIndex !== 0) {
+      throw new ERROR.SDKError(this.getAddress.name, 'Only support address index = 0 for now.');
+    }
     const pubKey = await this.getPublicKey(accountIndex, protocol);
-    if (!pubKey) throw new ERROR.SDKError('Get Address error', 'public key is undefined');
+    if (!pubKey){
+      throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
+    } 
     return pubKeyToAddress(pubKey);
   }
 
@@ -27,7 +31,9 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined,
   ): Promise<{ r: string; s: string; } | Buffer> {
-    if (accountIndex !== 0) throw new ERROR.SDKError('Not Supported', 'Only support account index = 0 for now.');
+    if (accountIndex !== 0) {
+      throw new ERROR.SDKError(this.signTransaction.name, 'Only support account index = 0 for now.');
+    }
     const protocolToUse = protocol || 'SLIP0010';
     const signature = signTx(
       this.transport,

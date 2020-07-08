@@ -8,7 +8,7 @@ import { device as coreDevice } from '@coolwallet/core';
 
 import { Buffer } from 'buffer';
 
-import { transport } from "@coolwallet/core";
+import { transport, error } from "@coolwallet/core";
 
 import { convertToNumberArray } from "./util";
 
@@ -112,7 +112,7 @@ export default class RNBleTransport extends transport.default {
       }
 
       if (!device) {
-        throw new Error('cant open deivce');
+        throw new error.TransportError(this.connect.name, 'cant open deivce');
       }
     } else {
       device = deviceOrId;
@@ -140,7 +140,7 @@ export default class RNBleTransport extends transport.default {
       }
     }
     if (!res) {
-      throw new Error('service not found');
+      throw new error.TransportError(this.connect.name, 'service not found');
     }
 
     const {
@@ -156,7 +156,7 @@ export default class RNBleTransport extends transport.default {
     }
 
     if (!characteristics) {
-      throw new Error('service not found');
+      throw new error.TransportError(this.connect.name, 'service not found');
     }
 
     for (const c of characteristics) {
@@ -171,16 +171,16 @@ export default class RNBleTransport extends transport.default {
       }
     }
     if (!writeCharacteristic) {
-      throw new Error('writeCharacteristic not found');
+      throw new error.TransportError(this.connect.name, 'writeCharacteristic not found');
     }
     if (!dataCharacteristic) {
-      throw new Error('dataCharacteristic not found');
+      throw new error.TransportError(this.connect.name, 'dataCharacteristic not found');
     }
     if (!checkCharacteristic) {
-      throw new Error('checkCharacteristic not found');
+      throw new error.TransportError(this.connect.name, 'checkCharacteristic not found');
     }
     if (!readCharacteristic) {
-      throw new Error('readCharacteristic not found');
+      throw new error.TransportError(this.connect.name, 'readCharacteristic not found');
     }
 
     const transport = new RNBleTransport(
@@ -230,7 +230,7 @@ export default class RNBleTransport extends transport.default {
       const base64Command = new Buffer(command).toString('base64');
       await writeCharacteristic.writeWithResponse(base64Command);
     } catch (e) {
-      throw new Error(`sendCommandToCard DisconnectedDeviceDuringOperation(${e.message})`);
+      throw new error.TransportError(this.sendCommandToCard.name, `sendCommandToCard DisconnectedDeviceDuringOperation(${e.message})`);
     }
   };
 
@@ -239,7 +239,7 @@ export default class RNBleTransport extends transport.default {
       const base64Packets = new Buffer(packets).toString('base64');
       await dataCharacteristic.writeWithResponse(base64Packets);
     } catch (e) {
-      throw new Error(`sendDataToCard DisconnectedDeviceDuringOperation(${e.message})`);
+      throw new error.TransportError(this.sendDataToCard.name, `sendDataToCard DisconnectedDeviceDuringOperation(${e.message})`);
     }
   };
 
@@ -249,7 +249,7 @@ export default class RNBleTransport extends transport.default {
       const hexStatus = Buffer.from(status.value, 'base64').toString('hex');
       return convertToNumberArray(hexStatus)[0];
     } catch (e) {
-      throw new Error(`checkCardStatus DisconnectedDeviceDuringOperation(${e.message})`);
+      throw new error.TransportError(this.checkCardStatus.name, `checkCardStatus DisconnectedDeviceDuringOperation(${e.message})`);
     }
   };
 
@@ -259,7 +259,7 @@ export default class RNBleTransport extends transport.default {
       const hexResult = Buffer.from(result.value, 'base64').toString('hex');
       return convertToNumberArray(hexResult);
     } catch (e) {
-      throw new Error(`readDataFromCard DisconnectedDeviceDuringOperation(${e.message})`);
+      throw new error.TransportError(this.readDataFromCard.name, `readDataFromCard DisconnectedDeviceDuringOperation(${e.message})`);
     }
   };
 }

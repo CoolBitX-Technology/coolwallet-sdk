@@ -1,4 +1,4 @@
-import { error, transport, tx } from "@coolwallet/core";
+import { error, transport, apdu } from "@coolwallet/core";
 
 import { handleHex } from "./stringUtil";
 import * as scripts from "../scripts";
@@ -81,7 +81,7 @@ export const getRawHex = (transaction: any): Array<Buffer> => {
   raw[8] = Buffer.allocUnsafe(0);
 
   const t = rlp.encode(raw);
-  if (t.length > 870) throw new error.DataTooLong();
+  if (t.length > 870) throw new error.SDKError(getRawHex.name, 'data too long');
   return raw;
 };
 
@@ -128,7 +128,7 @@ export const getScriptAndArguments = (txType: any, addressIndex: number, transac
       break;
     }
     default: {
-      throw new Error(`type ${txType} no implemented`);
+      throw new error.SDKError(getScriptAndArguments.name, `type ${txType} no implemented`);
     }
   }
 
@@ -209,7 +209,7 @@ export const apduForParsignMessage = (
   let rawData = msgBuf.toString("hex");
   rawData = handleHex(rawData);
   return async () => {
-    tx.txPrep(transport, rawData, p1, appPrivateKey);
+    apdu.tx.txPrep(transport, rawData, p1, appPrivateKey);
   }
 };
 

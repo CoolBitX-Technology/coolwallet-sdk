@@ -1,4 +1,4 @@
-import { core, transport, tx, general } from "@coolwallet/core";
+import { apdu, transport, tx, util as coreUtil } from "@coolwallet/core";
 import * as coinUtil from "./util";
 
 const codec = require("ripple-binary-codec");
@@ -23,7 +23,7 @@ export const signPayment = async (
   confirmCB?: Function | undefined,
   authorizedCB?: Function | undefined
 ): Promise<string> => {
-  const useScript = await core.controller.checkSupportScripts(transport);
+  const useScript = await coreUtil.checkSupportScripts(transport);
   let signature;
   if (useScript) {
     const { script, argument } = coinUtil.getScriptAndArguments(
@@ -32,12 +32,12 @@ export const signPayment = async (
     );
     const preActions = [];
     const sendScript = async () => {
-      await tx.sendScript(transport, script);
+      await apdu.tx.sendScript(transport, script);
     }
     preActions.push(sendScript);
 
     const sendArgument = async () => {
-      return tx.executeScript(
+      return apdu.tx.executeScript(
         transport,
         appId,
         appPrivateKey,
@@ -45,7 +45,7 @@ export const signPayment = async (
       );
     }
 
-    signature = await core.flow.getSingleSignatureFromCoolWallet(
+    signature = await tx.flow.getSingleSignatureFromCoolWallet(
       transport,
       preActions,
       sendArgument,
@@ -56,20 +56,20 @@ export const signPayment = async (
     );
   } else {
     const payload = Buffer.from(codec.encodeForSigning(payment), "hex");
-    const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
-    const dataForSE = core.flow.prepareSEData(keyId, payload, coinType);
+    const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
+    const dataForSE = tx.flow.prepareSEData(keyId, payload, coinType);
 
     const preActions = [];
     const sayHi = async () => {
-      await general.hi(transport, appId);
+      await apdu.general.hi(transport, appId);
     }
     preActions.push(sayHi)
 
     const prepareTx = async () => {
-      return tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+      return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
     }
 
-    signature = await core.flow.getSingleSignatureFromCoolWallet(
+    signature = await tx.flow.getSingleSignatureFromCoolWallet(
       transport,
       preActions,
       prepareTx,
