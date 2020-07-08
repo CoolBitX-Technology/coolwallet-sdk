@@ -1,5 +1,5 @@
 import * as apdu from '../apdu/index';
-import * as ERROR from '../error/index';
+import { SDKError, APDUError } from '../error/errorHandle';
 import Transport from '../transport/index';
 
 /**
@@ -8,7 +8,7 @@ import Transport from '../transport/index';
  * @return {Promise<{ paired:boolean, locked:boolean, walletCreated:boolean, showDetail:boolean, pairRemainTimes:number }>}
  */
 export const getCardInfo = async (transport: Transport): Promise<{ paired: boolean; locked: boolean; walletCreated: boolean; showDetail: boolean; pairRemainTimes: number; }> => {
-  const outputData = await apdu.setting.getCardInfo(transport);
+  const outputData = await apdu.info.getCardInfo(transport);
   const databuf = Buffer.from(outputData, 'hex');
   const pairStatus = databuf.slice(0, 1).toString('hex');
   const lockedStatus = databuf.slice(1, 2).toString('hex');
@@ -18,7 +18,7 @@ export const getCardInfo = async (transport: Transport): Promise<{ paired: boole
   const displayType = databuf.slice(9).toString('hex');
 
   if (accountDigest === '81c69f2d90' || accountDigest === '3d84ba58bf' || accountDigest === '83ccf4aab1') {
-    throw new ERROR.SDKError('PleaseResetHardware', 'Bad Firmware status. Please reset your CoolWalletS.');
+    throw new SDKError(getCardInfo.name, 'Bad Firmware statusCode. Please reset your CoolWalletS.');
   }
 
   const paired = pairStatus === '01';

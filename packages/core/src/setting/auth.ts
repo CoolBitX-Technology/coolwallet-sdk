@@ -1,10 +1,10 @@
-import { FirmwareVersionTooLow } from '../error/index';
+import { SDKError, APDUError } from '../error/errorHandle';
 import { sign } from '../crypto/sign';
-import { CommandType } from "../apdu/command";
-import * as control from '../apdu/control';
+import { CommandType } from "../apdu/execute/command";
+import * as control from '../apdu/mcu/control';
 import * as setting from '../apdu/setting';
-import * as general from '../general';
-import { checkSupportScripts } from './controller';
+import * as general from '../apdu/general';
+import * as info from '../apdu/informational';
 import Transport from '../transport';
 
 /**
@@ -24,7 +24,7 @@ export const getCommandSignatureWithoutNonce = async (
   data: string | undefined,
   params1: string | undefined,
   params2: string | undefined = undefined,
-) => {
+): Promise<string> => {
   const P1 = params1 || command.P1;
   const P2 = params2 || command.P2;
   const apduHeader = command.CLA + command.INS + P1 + P2;
@@ -54,43 +54,45 @@ export const getCommandSignature = async (
   params1: string | undefined,
   params2: string | undefined = undefined,
   isCreateWallet: boolean = false
-) => {
-  const nonce = await control.getNonce(transport);
+): Promise<{ signature: string; forceUseSC: boolean; }> => {
+    const nonce = await general.getNonce(transport);
 
-  const forceUseSC = await checkSupportScripts(transport);
+    const SEVersion = await general.getSEVersion(transport);
+  
+    const forceUseSC = (SEVersion >= 200) ? true : false; 
 
-  const P1 = params1 || command.P1;
-  const P2 = params2 || command.P2;
-  const apduHeader = command.CLA + command.INS + P1 + P2;
-  const dataPackets = data || '';
-  const signatureParams = apduHeader + dataPackets + nonce;
-  const signature = sign(signatureParams, appPrivateKey).toString('hex');
+    const P1 = params1 || command.P1;
+    const P2 = params2 || command.P2;
+    const apduHeader = command.CLA + command.INS + P1 + P2;
+    const dataPackets = data || '';
+    const signatureParams = apduHeader + dataPackets + nonce;
+    const signature = sign(signatureParams, appPrivateKey).toString('hex');
 
-  if (!forceUseSC) {
-    await general.hi(transport, appId);
-    return { signature, forceUseSC };
-  } else {
-    // return [appId(20B)] [rightJustifiedSignature(72B)]
-    // v200 create wallet by card can not Secure Channel so forceUseSC = false
-    // v200 signature = [apduData(Variety)][appId(20B)[rightJustifiedSignature(72B)]
-    // Return AppId with padded signature: Dont need to call [say hi].
-    // the following operaion is forced to used Secure Channel
-    const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
-    if (isCreateWallet) {
-      return { signature: appIdWithSignature, forceUseSC: false };
+    if (!forceUseSC) {
+      await general.hi(transport, appId);
+      return { signature, forceUseSC };
     } else {
-      return { signature: appIdWithSignature, forceUseSC };
+      // return [appId(20B)] [rightJustifiedSignature(72B)]
+      // v200 create wallet by card can not Secure Channel so forceUseSC = false
+      // v200 signature = [apduData(Variety)][appId(20B)[rightJustifiedSignature(72B)]
+      // Return AppId with padded signature: Dont need to call [say hi].
+      // the following operaion is forced to used Secure Channel
+      const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
+      if (isCreateWallet) {
+        return { signature: appIdWithSignature, forceUseSC: false };
+      } else {
+        return { signature: appIdWithSignature, forceUseSC };
+      }
     }
-  }
+  
 };
 
 /**
  * check if function is supported with current SE version.
  * @param {Transport} transport
  * @param {number} requiredSEVersion
- * @return {Promise<void>}
  */
 export const versionCheck = async (transport: Transport, requiredSEVersion: number) => {
-  const SEVersion = await setting.getSEVersion(transport);
-  if (SEVersion < requiredSEVersion) throw new FirmwareVersionTooLow(requiredSEVersion);
+  const SEVersion = await general.getSEVersion(transport);
+  if (SEVersion < requiredSEVersion) throw new SDKError(versionCheck.name, `Firmware version too low. Please update to ${requiredSEVersion}`);
 };

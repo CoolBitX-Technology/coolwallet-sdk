@@ -1,10 +1,10 @@
-import { OperationCanceled, NoTransport } from '../error/index';
 import { CommandType, commands } from './command';
-import { assemblyCommandAndData, throwSDKError, SDKUnknownWithCode } from './utils';
-import { error as Errors } from '../index';
-import { RESPONSE, DFU_RESPONSE } from '../config/response';
-import { SHA256 } from '../crypto/hash';
-import Transport from '../transport/index';
+import * as util from '../../utils';
+import { SHA256 } from '../../crypto/hash';
+import Transport from '../../transport/index';
+import { SDKError, APDUError } from '../../error/errorHandle';
+import { CODE } from '../../config/status/code';
+import { target } from '../../config/target';
 
 
 /**
@@ -19,30 +19,39 @@ const executeAPDU = async (
   apdu: { command: string, data: string },
   executedTarget: string
 ): Promise<{
-  status: string,
+  statusCode: string,
+  msg: string, 
   outputData: string
 }> => {
-  if (typeof transport.request !== 'function') throw new NoTransport();
+  if (typeof transport.request !== 'function') {
+    throw new SDKError(executeAPDU.name, `Transport not specified or no connection established.`);
+  }
   console.debug("{")
   console.debug(" command: " + apdu.command)
   console.debug(" data: " + apdu.data)
   console.debug("}")
-  // TODO app transport
-  if (transport.requestAPDUV2) {
-    return await transport.requestAPDUV2(apdu);
-  }
-  const response = await transport.request(apdu.command, apdu.data);
-  if (executedTarget === 'SE') {
-    const status = response.slice(-4);
-    const outputData = response.slice(0, -4);
-    return { status, outputData };
-  } else {
-    const status = response.slice(4, 6);
-    const outputData = response.slice(6);
-    if (status !== DFU_RESPONSE.SUCCESS) {
-      throw SDKUnknownWithCode(commandName, status);
+
+  try{
+    // TODO app transport
+    if (transport.requestAPDUV2) {
+      return await transport.requestAPDUV2(apdu);
     }
-    return { status, outputData };
+    let msg = ''
+    const response = await transport.request(apdu.command, apdu.data);
+    if (executedTarget === target.SE) {
+      const statusCode = response.slice(-4);
+      const outputData = response.slice(0, -4);
+      msg = util.getReturnMsg(statusCode)
+      return { statusCode, msg, outputData };
+    } else {
+      const statusCode = response.slice(4, 6);
+      const outputData = response.slice(6);
+      msg = util.getReturnMsg(statusCode)
+      return { statusCode, msg, outputData };
+    }
+
+  } catch (error){
+    throw new SDKError(executeAPDU.name, `executeAPDU error: ${error}`);
   }
 };
 
@@ -56,23 +65,23 @@ const executeAPDU = async (
  * @param {string} params2
  * @param {bool} supportSC
  * @param {bool} forceUseSC
- * @returns {Promise<{status: string, outputData: string}>}
+ * @returns {Promise<{statusCode: string, outputData: string}>}
  */
 export const executeCommand = async (
   transport: Transport,
   command: CommandType,
-  executedTarget: string = 'SE',
+  executedTarget: string = target.SE,
   data: string = '',
   params1: string | undefined = undefined,
   params2: string | undefined = undefined,
   supportSC: boolean = false,
   forceUseSC: boolean = false,
-): Promise<{ status: string, outputData: string }> => {
+): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = params1 || command.P1;
   const P2 = params2 || command.P2;
 
   if ((typeof (P1) == undefined) || (typeof (P2) == undefined)) {
-    throw new Errors.SDKError('Unknown', command.toString())
+    throw new SDKError('Unknown', command.toString())
   }
 
   let response;
@@ -81,28 +90,13 @@ export const executeCommand = async (
     const apduHeader = command.CLA + command.INS + P1 + P2;
     response = await sendWithSecureChannel(transport, apduHeader, data, forceUseSC);
   } else {
-    const apdu = assemblyCommandAndData(command.CLA, command.INS, P1, P2, data);
+    const apdu = util.assemblyCommandAndData(command.CLA, command.INS, P1, P2, data);
     // eslint-disable-next-line no-console
     console.debug(`Execute Command: ${command}`);
     response = await executeAPDU(command.toString(), transport, apdu, executedTarget);
   }
+  return response;
 
-  switch (response.status) {
-    case RESPONSE.SUCCESS: {
-      return response;
-    }
-    case RESPONSE.CANCELED: {
-      throw new OperationCanceled();
-    }
-    default: {
-      // In case of error
-      throwSDKError(command.toString(), response.status);
-
-      // Only command that would reach here: SC_SEND_SEGMENT
-      // Secure channel encounter command error: return status and outputdata
-      return response;
-    }
-  }
 };
 
 
@@ -112,7 +106,7 @@ export const executeCommand = async (
  * @param {string} apduHeader apdu CLS+INS+P1+P2
  * @param {string} apduData apdu data field
  */
-export const sendWithSecureChannel = async (transport: Transport, apduHeader: string, apduData: string, forceUseSC: boolean): Promise<{ status: string, outputData: string }> => {
+export const sendWithSecureChannel = async (transport: Transport, apduHeader: string, apduData: string, forceUseSC: boolean): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   //todo
   const salt = '88888888';
   const dataToHash = apduHeader.concat(salt, apduData);
@@ -129,7 +123,7 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
   const chunks = cypherData.match(/.{1,500}/g);
 
   if (!chunks) {
-    throw new Error('chunks is undifined');
+    throw new SDKError(sendWithSecureChannel.name, 'chunks is undifined');
   }
   const totalPackages = chunks.length;
 
@@ -140,24 +134,28 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
     result = await sendFragment(transport, chunks[i], i, totalPackages);
   }
   if (result) {
+    const statusCode = result.statusCode
     // Uncaught error in SC_SEND_SEGMENT command. Return to parent executeCommand
-    if (result.status !== RESPONSE.SUCCESS) {
+    if (statusCode !== CODE._9000) {
       return result;
     } else {
       const confirmHash = result.outputData.slice(4, 68);
       const confirmSalt = result.outputData.slice(68, 76);
       const apduReturn = result.outputData.slice(76);
+
       if (confirmSalt !== salt) {
-        throw new Error('SC: Returned salt check failed');
+        throw new SDKError(sendWithSecureChannel.name, 'SC: Returned salt check failed');
       }
+
       const returnedDataHash = SHA256(confirmSalt + apduReturn).toString('hex');
       if (returnedDataHash !== confirmHash) {
-        throw new Error('SC: Returned hash check failed');
+        throw new SDKError(sendWithSecureChannel.name, 'SC: Returned hash check failed');
       }
-      return { outputData: apduReturn, status: RESPONSE.SUCCESS };
+
+      return { statusCode: statusCode, msg: util.getReturnMsg(statusCode), outputData: apduReturn };
     }
   } else {
-    throw new Error('sendWithSecureChannel failed')
+    throw new SDKError(sendWithSecureChannel.name, 'sendWithSecureChannel failed')
   }
 
 };
@@ -169,8 +167,8 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
  * @param {number} index
  * @param {number} totalPackages
  */
-const sendFragment = async (transport: Transport, data: string, index: number, totalPackages: number): Promise<{ status: string, outputData: string }> => {
+const sendFragment = async (transport: Transport, data: string, index: number, totalPackages: number): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = index.toString(16).padStart(2, '0');
   const P2 = totalPackages.toString(16).padStart(2, '0');
-  return executeCommand(transport, commands.SC_SEND_SEGMENT, 'SE', data, P1, P2, false);
+  return executeCommand(transport, commands.SC_SEND_SEGMENT, target.SE, data, P1, P2, false);
 };

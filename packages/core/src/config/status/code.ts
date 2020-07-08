@@ -1,5 +1,7 @@
 import { CodeList } from './pattern'
 export const CODE: CodeList = {
+  _9000: '9000',
+  _9999: '9999',
   _6E00: '6E00',
   _6D00: '6D00',
   _6982: '6982',

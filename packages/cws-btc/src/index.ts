@@ -8,7 +8,7 @@ import {
 	pubkeyToAddressAndOutScript
 } from './utils';
 
-import { signTransaction } from './btc_sign';
+import { signTransaction } from './btcSign';
 
 type Transport = transport.default;
 
