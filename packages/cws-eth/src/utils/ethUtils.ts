@@ -1,6 +1,4 @@
-import { error, transport } from "@coolwallet/core";
-
-import { apdu } from "@coolwallet/core";
+import { error, transport, apdu } from "@coolwallet/core";
 
 import { handleHex } from "./stringUtil";
 import * as scripts from "../scripts";
@@ -83,7 +81,7 @@ export const getRawHex = (transaction: any): Array<Buffer> => {
   raw[8] = Buffer.allocUnsafe(0);
 
   const t = rlp.encode(raw);
-  if (t.length > 870) throw new error.DataTooLong();
+  if (t.length > 870) throw new error.SDKError(getRawHex.name, 'data too long');
   return raw;
 };
 
@@ -130,7 +128,7 @@ export const getScriptAndArguments = (txType: any, addressIndex: number, transac
       break;
     }
     default: {
-      throw new Error(`type ${txType} no implemented`);
+      throw new error.SDKError(getScriptAndArguments.name, `type ${txType} no implemented`);
     }
   }
 
@@ -201,19 +199,18 @@ export const genEthSigFromSESig = async (
  * @param {String} p1
  * @return {Function}
  */
-export const apduForParsingMessage = (transport: Transport, msgBuf: Buffer, p1: string): Function => {
+// todo : No test case for this function yet, should test later
+export const apduForParsignMessage = (
+  transport: Transport,
+  appPrivateKey: string,
+  msgBuf: Buffer,
+  p1: string
+): Function => {
   let rawData = msgBuf.toString("hex");
   rawData = handleHex(rawData);
-  const patch = Math.ceil(rawData.length / 500);
-  // if (patch > 1) return; // To Do : if card support patch, remove this line
   return async () => {
-    for (let i = 0; i < patch; i++) {
-      const patchData = rawData.substr(i * 500, 500);
-      const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
-      // eslint-disable-next-line no-await-in-loop
-      await apdu.tx.prepTx(transport, patchData, p1, p2);
-    }
-  };
+    apdu.tx.txPrep(transport, rawData, p1, appPrivateKey);
+  }
 };
 
 /**

@@ -4,6 +4,7 @@
   "description": "Core library for other CoolWallet SDKs.",
   "main": "lib/index.js",
   "scripts": {
+    "test": "mocha -r ts-node/register tests/**/*.test.ts",
     "build:js": "babel -d lib/ src",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",

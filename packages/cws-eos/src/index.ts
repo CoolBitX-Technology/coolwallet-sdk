@@ -22,7 +22,7 @@ export default class EOS extends COIN.ECDSACoin implements COIN.Coin {
    */
   async getAddress(addressIndex: number): Promise<string> {
     // TODO
-    throw new error.SDKError('eos get address error', 'need implement eos get address');
+    throw new error.SDKError(this.getAddress.name, 'eos get address error, need implement eos get address');
   }
 
   /**

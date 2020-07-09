@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { Payment } from "./types";
 import * as scripts from "./scripts";
-import { handleHex } from "./string_util";
+import { handleHex } from "./stringUtil";
 
 const R_B58_DICT = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 const base58 = require("base-x")(R_B58_DICT);

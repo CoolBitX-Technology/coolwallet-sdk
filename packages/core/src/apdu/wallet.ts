@@ -1,84 +1,67 @@
-import { executeCommand } from './execute';
-import { RESPONSE } from '../config/response';
+import { executeCommand } from './execute/execute';
 import Transport from '../transport';
+import { commands } from "./execute/command";
+import { target } from '../config/target';
+import { CODE } from '../config/status/code';
+import { SDKError, APDUError } from '../error/errorHandle';
+
 
 /**
- * set bip32 root seed
+ * Authorization for requesting account keys
  * @param {Transport} transport
- * @param {string} seedHexWithSig
- * @return {Promise<boolean>}
+ * @param {string} signature
+ * @return { Promise<boolean> }
  */
-export const setSeed = async (transport: Transport, seedHexWithSig: string, forceUseSC: boolean): Promise<boolean> => {
-  const { status } = await executeCommand(transport, 'SET_SEED', 'SE', seedHexWithSig, undefined, undefined, true, forceUseSC);
-  return status === RESPONSE.SUCCESS;
+export const authGetExtendedKey = async (transport: Transport, signature: string, forceUseSC: boolean
+): Promise<boolean> => {
+  const { statusCode, msg } = await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, true, forceUseSC);
+  if (statusCode === CODE._9000) {
+    return true
+  } else {
+    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+  }
 };
 
-/**
- *
- * @param {Transport} transport
- * @param {string} strengthWithSig data field
- * @return {Promise<boolean>}
- */
-export const createWallet = async (transport: Transport, strengthWithSig: string, forceUseSC: boolean): Promise<boolean> => {
-  const { status } = await executeCommand(
-    transport,
-    'CREATE_WALLET',
-    'SE',
-    strengthWithSig,
-    undefined,
-    undefined,
-    true,
-    forceUseSC
-  );
-  return status === RESPONSE.SUCCESS;
-};
 
 /**
- * Finish create wallet with checksum.
- * @param {Transport} transport
- * @param {string} hexCheckSum data field
- * @return {Promise<boolean>}
+ * Get ECDSA Account Extended public key (Encrypted)
+ * @param {*} transport
+ * @param {string} coinType P1
+ * @param {string} accIndex P2
+ * @return {Promise<string>}
  */
-export const submitCheckSum = async (transport: Transport, hexCheckSum: string): Promise<boolean> => {
-  const { status } = await executeCommand(transport, 'CHECKSUM', 'SE', hexCheckSum);
-  return status === RESPONSE.SUCCESS;
+export const getAccountExtendedKey = async (transport: Transport, coinType: string, accIndex: string): Promise<string> => {
+  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, undefined, coinType, accIndex);
+  if (key) {
+    return key
+  } else {
+    throw new APDUError(commands.GET_EXT_KEY, statusCode, msg)
+  }
 };
 
-/**
- * 
- * @param {Transport} transport
- * @param {string} P1 
- */
-export const initSecureRecovery = async (transport: Transport, P1: string) => {
-  const { status } = await executeCommand(transport, 'MCU_SET_MNEMONIC_INFO', 'SE', undefined, P1, undefined);
-  return status === RESPONSE.SUCCESS;
-};
 
 /**
- * 
+ * Get ED25519 Account Public Key (Encrypted)
  * @param {Transport} transport
- * @param {string} P1 
+ * @param {string} coinType P1
+ * @param {string} accIndex P2
+ * @param {string} protocol
+ * @return {Promise<string>}
  */
-export const setSecureRecoveryIdx = async (transport: Transport, P1: string) => {
-  const { status } = await executeCommand(transport, 'MCU_SET_CHARACTER_ID', 'SE', undefined, P1, undefined);
-  return status === RESPONSE.SUCCESS;
-};
+export const getEd25519AccountPublicKey = async (transport: Transport, coinType: string, accIndex: string, protocol: string): Promise<string> => {
+  let commandData;
+  if (protocol === 'BIP44') {
+    commandData = commands.GET_ED25519_ACC_PUBKEY
+  } else if (protocol === 'SLIP0010') {
+    commandData = commands.GET_XLM_ACC_PUBKEY
+  } else {
+    throw new SDKError(getEd25519AccountPublicKey.name, 'Unsupported protocol');
+  }
 
-/**
- *
- * @param {Transport} transport
- * @param {string} P1
- */
-export const cancelSecureRecovery = async (transport: Transport, P1: string) => {
-  const { status } = await executeCommand(transport, 'MCU_CANCEL_RECOVERY', 'SE', undefined, P1, undefined);
-  return status === RESPONSE.SUCCESS;
-};
-
-/**
- *
- * @param {Transport} transport
- */
-export const getSecureRecoveryStatus = async (transport: Transport) => {
-  const { status, outputData } = await executeCommand(transport, 'GET_MCU_STATUS', 'SE', undefined, undefined, undefined);
-  return status;
+  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_XLM_ACC_PUBKEY, target.SE, undefined, coinType, accIndex);
+  if (key) {
+    return key
+  } else {
+    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+  }
 };

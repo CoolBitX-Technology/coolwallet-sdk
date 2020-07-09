@@ -1,7 +1,8 @@
 /* eslint-disable no-param-reassign */
-import { core, coin as COIN, transport } from '@coolwallet/core';
+import { coin as COIN, transport, setting } from '@coolwallet/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
+import { TypedData } from 'eth-sig-util';
 
 type Transport = transport.default;
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
@@ -67,8 +68,10 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ): Promise<string> {
-    await core.auth.versionCheck(this.transport, 81);
-    if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
+    await setting.auth.versionCheck(this.transport, 81);
+    if (!publicKey) {
+      publicKey = await this.getPublicKey(addressIndex);
+    }
     return ethSign.signMessage(
       this.transport,
       this.appId,
@@ -98,7 +101,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ) {
-    await core.auth.versionCheck(this.transport, 84);
+    await setting.auth.versionCheck(this.transport, 84);
     if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
     return ethSign.signTypedData(
       this.transport,

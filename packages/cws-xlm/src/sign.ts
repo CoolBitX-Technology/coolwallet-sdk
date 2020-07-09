@@ -26,7 +26,7 @@ export default async function signTransaction(
     : `${coinType}10`;
   const keyId = accountIndexToKeyId(coinType, accountIndex);
   const dataForSE = core.flow.prepareSEData(keyId, signatureBase, readType);
-  const signature = await core.flow.sendDataToCoolWallet(
+  const signature = await core.flow.getSingleSignatureFromCoolWallet(
     transport,
     appId,
     appPrivateKey,
