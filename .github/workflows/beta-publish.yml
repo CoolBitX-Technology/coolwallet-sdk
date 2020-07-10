@@ -25,12 +25,9 @@ jobs:
       with:
         PREFIX_FILTER: packages/core/
 
-    - name: Check core modified
-      run: echo "Hello ${{ steps.git_diff.outputs.diff }}!"
-      if: steps.git_diff.outputs.diff
-
-    - name: Check package version
-      uses: technote-space/package-version-check-action@v1
+    - name: Check if version has been updated
+      id: check
+      uses: EndBug/version-check@v1
 
     - run: npm ci
 
