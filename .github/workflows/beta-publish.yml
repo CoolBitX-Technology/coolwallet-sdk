@@ -23,7 +23,7 @@ jobs:
     - uses: technote-space/get-diff-action@v2
       id: git_diff
       with:
-        PREFIX_FILTER: packages/code/
+        PREFIX_FILTER: packages/core/
 
     - name: Check core modified
       run: echo "Hello ${{ steps.git_diff.outputs.diff }}!"
