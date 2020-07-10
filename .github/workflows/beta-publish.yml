@@ -30,6 +30,7 @@ jobs:
       uses: EndBug/version-check@v1
       with:
         file-name: ./packages/core/package.json
+        file-url: https://unpkg.com/@coolwallet/core/package.json
 
-    - run: npm ci
+    - run: npm ci packages/core
 
