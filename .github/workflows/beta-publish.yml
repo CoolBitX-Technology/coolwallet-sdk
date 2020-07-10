@@ -21,12 +21,13 @@ jobs:
         node-version: 12.x
 
     - uses: technote-space/get-diff-action@v2
+      id: git_diff
       with:
         PREFIX_FILTER: packages/code/
 
     - name: Check core modified
-      run: echo "Hello ${{ env.GIT_DIFF }}!"
-      if: env.GIT_DIFF
+      run: echo "Hello ${{ steps.git_diff.outputs.diff }}!"
+      if: steps.git_diff.outputs.diff
 
     - run: npm ci
     - run: npm run build --if-present
