@@ -21,8 +21,8 @@ jobs:
         node-version: 12.x
 
     - uses: technote-space/get-diff-action@v2
-        with:
-          PREFIX_FILTER: packages/code/
+      with:
+        PREFIX_FILTER: packages/code/
 
     - name: Check core modified
       run: echo "Hello ${{ env.GIT_DIFF }}!"
