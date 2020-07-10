@@ -29,7 +29,8 @@ jobs:
       run: echo "Hello ${{ steps.git_diff.outputs.diff }}!"
       if: steps.git_diff.outputs.diff
 
+    - name: Check package version
+      uses: technote-space/package-version-check-action@v1
+
     - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
 
