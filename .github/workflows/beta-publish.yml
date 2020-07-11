@@ -25,12 +25,11 @@ jobs:
       with:
         PREFIX_FILTER: packages/core/
 
-    - name: Check if version has been updated
-      id: check
-      uses: EndBug/version-check@v1
+    - name: Check versoin and publish to npm
+      id: hello
+      uses: ./.github/publish-action
       with:
-        file-name: ./packages/core/package.json
-        file-url: https://unpkg.com/@coolwallet/core/package.json
+        who-to-greet: 'Mona the Octocat'
 
-    - run: npm ci packages/core
-
+    - name: Get the output time
+      run: echo "The time was ${{ steps.hello.outputs.time }}"
