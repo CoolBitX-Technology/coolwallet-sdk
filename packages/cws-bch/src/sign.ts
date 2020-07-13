@@ -1,4 +1,4 @@
-import { core, transport } from '@coolwallet/core';
+import { tx, transport, util } from '@coolwallet/core';
 import {
 	ScriptType,
 	Input,
@@ -8,8 +8,10 @@ import {
 	getSigningActions,
 	composeFinalTransaction,
 	getScriptSigningActions
-} from './utils';
+} from './util';
 type Transport = transport.default;
+const bitcore = require('bitcore-lib-cash');
+
 
 export {
 	signTransaction
@@ -27,11 +29,10 @@ async function signTransaction(
 	authorizedCB?: Function,
 ): Promise<string> {
 	if (scriptType !== ScriptType.P2PKH
-		&& scriptType !== ScriptType.P2WPKH
-		&& scriptType !== ScriptType.P2SH_P2WPKH) {
+		&& scriptType !== ScriptType.P2SH) {
 		throw new Error(`Unsupport ScriptType : ${scriptType}`);
 	}
-	const useScript = await core.controller.checkSupportScripts(transport);
+	const useScript = await util.checkSupportScripts(transport);
 	const { preparedData, unsignedTransactions } = createUnsignedTransactions(
 		scriptType,
 		inputs,
@@ -61,7 +62,7 @@ async function signTransaction(
 			unsignedTransactions,
 		));
 	}
-	const signatures = await core.flow.getSignaturesFromCoolWallet(
+	const signatures = await tx.flow.getSignaturesFromCoolWallet(
 		transport,
 		preActions,
 		actions,

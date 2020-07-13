@@ -1,8 +1,12 @@
 export enum ScriptType {
 	P2PKH = 0,
-	P2SH_P2WPKH = 1,
-	P2WPKH = 2,
-	P2WSH = 3,
+	P2SH = 1,
+}
+
+export enum AddressFormat {
+	Legacy,
+	Cashaddr,
+	Bitpay
 }
 
 export type Input = {

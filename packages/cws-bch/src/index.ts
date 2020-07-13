@@ -6,7 +6,7 @@ import {
 	Change,
 	addressToOutScript,
 	pubkeyToAddressAndOutScript
-} from './utils';
+} from './util';
 
 import { signTransaction } from './sign';
 
@@ -26,17 +26,11 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 		this.addressToOutScript = addressToOutScript;
 	}
 
-	async getAddress(scriptType: ScriptType, addressIndex: number)
+	async getAddress(addressIndex: number)
 		: Promise<string> {
 		const publicKey = await this.getPublicKey(addressIndex);
-		const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
+		const { address } = pubkeyToAddressAndOutScript(publicKey);
 		return address;
-	}
-
-	async getAddressAndOutScript(scriptType: ScriptType, addressIndex: number)
-		: Promise<{ address: string, outScript: Buffer }> {
-		const publicKey = await this.getPublicKey(addressIndex);
-		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
 	}
 
 	async signTransaction(

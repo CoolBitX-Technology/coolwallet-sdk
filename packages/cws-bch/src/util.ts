@@ -1,12 +1,14 @@
 import BN from 'bn.js';
-import { core, transport, tx, general } from '@coolwallet/core';
-import * as bitcoin from 'bitcoinjs-lib';
+import { transport, tx, apdu } from '@coolwallet/core';
+//import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
-import * as scripts from "../scripts";
+import * as scripts from "./scripts";
 import {
-	ScriptType, Input, Output, Change, PreparedData
+	ScriptType, AddressFormat, Input, Output, Change, PreparedData
 } from './types';
 type Transport = transport.default;
+const bitcore = require('bitcore-lib-cash');
+const bchaddr = require('bchaddrjs');
 
 export {
 	ScriptType,
@@ -23,11 +25,11 @@ export {
 };
 
 function hash160(buf: Buffer): Buffer {
-	return bitcoin.crypto.hash160(buf);
+	return bitcore.crypto.Hash.sha256ripemd160(buf);
 }
 
 function hash256(buf: Buffer): Buffer {
-	return bitcoin.crypto.hash256(buf);
+	return bitcore.crypto.Hash.sha256(buf);
 }
 
 const ZERO = Buffer.alloc(1, 0);
@@ -41,7 +43,7 @@ function toDER(x: Buffer): Buffer {
 	return x;
 }
 
-function encodeDerSig(signature: Buffer, hashType: Buffer): Buffer {
+/*function encodeDerSig(signature: Buffer, hashType: Buffer): Buffer {
 	const r = toDER(signature.slice(0, 32));
 	const s = toDER(signature.slice(32, 64));
 	return Buffer.concat([bip66Encode(r, s), hashType]);
@@ -72,7 +74,7 @@ function bip66Encode(r: Buffer, s: Buffer) {
 	s.copy(signature, 6 + lenR);
 
 	return signature;
-}
+}*/
 
 function toVarUintBuffer(int: number): Buffer {
 	return varuint.encode(int);
@@ -90,45 +92,49 @@ function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer
 	return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
 }
 
-function addressToOutScript(address: string): ({ scriptType: ScriptType, outScript: Buffer, outHash?: Buffer }) {
-	let scriptType;
-	let payment;
-	if (address.startsWith('1')) {
-		scriptType = ScriptType.P2PKH;
-		payment = bitcoin.payments.p2pkh({ address });
-	} else if (address.startsWith('3')) {
-		scriptType = ScriptType.P2SH_P2WPKH;
-		payment = bitcoin.payments.p2sh({ address });
-	} else if (address.startsWith('bc1')) {
-		scriptType = ScriptType.P2WPKH;
-		payment = bitcoin.payments.p2wpkh({ address });
-	} else {
+function addressToOutScript(address: string
+): {
+	scriptType: ScriptType,
+	outScript: Buffer,
+	outHash: Buffer
+} {
+	if (!bchaddr.isValidAddress(address)) {
 		throw new Error(`Unsupport Address : ${address}`);
 	}
-	if (!payment.output) throw new Error(`No OutScript for Address : ${address}`);
-	const outScript = payment.output;
-	const outHash = payment.hash;
+	let addrBuf;
+	if (bchaddr.isCashAddress(address)) {
+		addrBuf = bitcore.Address.fromString(address).toBuffer()
+	} else {
+		addrBuf = bitcore.encoding.Base58.decode(address)
+	}
+	if (addrBuf.length != 21) {
+		throw new Error(`Unsupport script hash : ${addrBuf.toString('hex')}`);
+	}
+	const outHash = addrBuf.slice(1, 21)
+	let outScript;
+	let scriptType;
+	if (bchaddr.isP2PKHAddress(address)) {
+		scriptType = ScriptType.P2PKH
+		outScript = Buffer.from(`76a914${outHash.toString('hex')}88ac`, 'hex')
+	} else {
+		scriptType = ScriptType.P2SH
+		outScript = Buffer.from(`a914${outHash.toString('hex')}87`, 'hex')
+	}
 	return { scriptType, outScript, outHash };
 }
 
-function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
-	: { address: string, outScript: Buffer, hash: Buffer } {
-	let payment;
-	if (scriptType === ScriptType.P2PKH) {
-		payment = bitcoin.payments.p2pkh({ pubkey });
-	} else if (scriptType === ScriptType.P2SH_P2WPKH) {
-		payment = bitcoin.payments.p2sh({
-			redeem: bitcoin.payments.p2wpkh({ pubkey }),
-		});
-	} else if (scriptType === ScriptType.P2WPKH) {
-		payment = bitcoin.payments.p2wpkh({ pubkey });
-	} else {
-		throw new Error(`Unsupport ScriptType : ${scriptType}`);
-	}
-	if (!payment.address) throw new Error(`No Address for ScriptType : ${scriptType}`);
-	if (!payment.output) throw new Error(`No OutScript for ScriptType : ${scriptType}`);
-	if (!payment.hash) throw new Error(`No OutScript for ScriptType : ${scriptType}`);
-	return { address: payment.address, outScript: payment.output, hash: payment.hash };
+function pubkeyToAddressAndOutScript(pubkey: Buffer)
+	: {
+		address: string,
+		outScript: Buffer
+	} {
+	const Address = bitcore.Address;
+	const PublicKey = bitcore.PublicKey
+	const pubkeyObj = new PublicKey(pubkey);
+	const addressObj = Address.fromPublicKey(pubkeyObj)
+
+	const outScript = Buffer.from(`76a914${hash160(pubkey).toString('hex')}88ac`, 'hex')
+	return { address: addressObj.toCashAddress(), outScript }
 }
 
 function createUnsignedTransactions(
@@ -176,7 +182,7 @@ function createUnsignedTransactions(
 	if (change) {
 		if (!change.pubkeyBuf) throw new Error('Public Key not exists !!');
 		const changeValue = toReverseUintBuffer(change.value, 8);
-		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
+		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf);
 		const outScriptLen = toVarUintBuffer(outScript.length);
 		outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
 	}
@@ -192,7 +198,7 @@ function createUnsignedTransactions(
 		pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
 	}) => {
 		if (scriptType === ScriptType.P2PKH) {
-			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, scriptType);
+			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf);
 			const outScriptLen = toVarUintBuffer(outScript.length);
 			return Buffer.concat([
 				versionBuf,
@@ -250,34 +256,29 @@ function getSigningActions(
 } {
 	const preActions = [];
 	const sayHi = async () => {
-		await general.hi(transport, appId);
+		await apdu.general.hi(transport, appId);
 	}
 	preActions.push(sayHi)
 	if (change) {
 		const changeAction = async () => {
-			if (scriptType === ScriptType.P2WPKH) {
-				throw new Error('not support P2WPKH change');
-			} else {
-				const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
-				await tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
-			}
+			const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
+			await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
 		}
 		preActions.push(changeAction);
 	}
 
 	const parsingOutputAction = async () => {
 		const txDataHex = preparedData.outputsBuf.toString('hex');
-		const txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0C' : '01';
-		return tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
+		return apdu.tx.txPrep(transport, txDataHex, '05', appPrivateKey);
 	};
 	preActions.push(parsingOutputAction);
 
 	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-		const keyId = core.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
+		const keyId = tx.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
 		const readType = '01';
-		const txDataHex = core.flow.prepareSEData(keyId, unsignedTx, readType);
+		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
-		return tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
+		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
 	}));
 
 	return { preActions, actions };
@@ -293,8 +294,7 @@ function composeFinalTransaction(
 	} = preparedData;
 
 	if (scriptType !== ScriptType.P2PKH
-		&& scriptType !== ScriptType.P2WPKH
-		&& scriptType !== ScriptType.P2SH_P2WPKH) {
+		&& scriptType !== ScriptType.P2SH) {
 		throw new Error(`Unsupport ScriptType : ${scriptType}`);
 	}
 
@@ -338,18 +338,18 @@ function composeFinalTransaction(
 		const inputsBuf = Buffer.concat(preparedInputs.map(({
 			pubkeyBuf, preOutPointBuf, sequenceBuf
 		}) => {
-			if (scriptType === ScriptType.P2SH_P2WPKH) {
-				const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2WPKH);
-				const inScript = Buffer.concat([
-					Buffer.from(outScript.length.toString(16), 'hex'),
-					outScript,
-				]);
-				return Buffer.concat([
-					preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
-				]);
-			} else {
+			//if (scriptType === ScriptType.P2SH_P2WPKH) {
+			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf);
+			const inScript = Buffer.concat([
+				Buffer.from(outScript.length.toString(16), 'hex'),
+				outScript,
+			]);
+			return Buffer.concat([
+				preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
+			]);
+			/*} else {
 				return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
-			}
+			}*/
 		}));
 
 		return Buffer.concat([
@@ -379,15 +379,9 @@ function getArgument(
 	}
 	let outputScriptType;
 	let outputHashBuf;
-	if (outputType == ScriptType.P2PKH || outputType == ScriptType.P2SH_P2WPKH || outputType == ScriptType.P2WPKH) {
-		outputScriptType = toVarUintBuffer(outputType);
-		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-	} else if (outputType == ScriptType.P2WSH) {
-		outputScriptType = toVarUintBuffer(outputType);
-		outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
-	} else {
-		throw new Error(`Unsupport ScriptType : ${outputType}`);
-	}
+	outputScriptType = toVarUintBuffer(outputType);
+	outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+
 	const outputAmount = toUintBuffer(output.value, 8);
 	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
 	let haveChange;
@@ -454,12 +448,12 @@ function getScriptSigningActions(
 
 	const preActions = [];
 	const sendScript = async () => {
-		await tx.sendScript(transport, script);
+		await apdu.tx.sendScript(transport, script);
 	}
 	preActions.push(sendScript);
 
 	const sendArgument = async () => {
-		await tx.executeScript(
+		await apdu.tx.executeScript(
 			transport,
 			appId,
 			appPrivateKey,
@@ -481,7 +475,7 @@ function getScriptSigningActions(
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
-			return tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (scriptType === ScriptType.P2PKH) ? "10" : "11");
+			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (scriptType === ScriptType.P2PKH) ? "10" : "11");
 		});
 	return { preActions, actions };
 };

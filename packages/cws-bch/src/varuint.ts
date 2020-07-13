@@ -20,19 +20,19 @@ export function encode(n: number, buf?: Buffer, off?: number): Buffer {
 		buffer.writeUInt8(num, offset);
 		// encode.bytes = 1;
 
-	// 16 bit
+		// 16 bit
 	} else if (num <= 0xffff) {
 		buffer.writeUInt8(0xfd, offset);
 		buffer.writeUInt16LE(num, offset + 1);
 		// encode.bytes = 3;
 
-	// 32 bit
+		// 32 bit
 	} else if (num <= 0xffffffff) {
 		buffer.writeUInt8(0xfe, offset);
 		buffer.writeUInt32LE(num, offset + 1);
 		// encode.bytes = 5;
 
-	// 64 bit
+		// 64 bit
 	} else {
 		buffer.writeUInt8(0xff, offset);
 		// eslint-disable-next-line no-bitwise
@@ -58,18 +58,18 @@ export function decode(buf: Buffer, off?: number): number {
 		// decode.bytes = 1;
 		return first;
 
-	// 16 bit
-	// eslint-disable-next-line no-else-return
+		// 16 bit
+		// eslint-disable-next-line no-else-return
 	} else if (first === 0xfd) {
 		// decode.bytes = 3;
 		return buffer.readUInt16LE(offset + 1);
 
-	// 32 bit
+		// 32 bit
 	} else if (first === 0xfe) {
 		// decode.bytes = 5;
 		return buffer.readUInt32LE(offset + 1);
 
-	// 64 bit
+		// 64 bit
 	} else {
 		// decode.bytes = 9;
 		const lo = buffer.readUInt32LE(offset + 1);
