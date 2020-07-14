@@ -71,7 +71,7 @@ export const getSingleSignatureFromCoolWallet = async (
   }
   // clear tx
   await tx.clearTransaction(transport);
-  await apdu.control.powerOff(transport);
+  await apdu.mcu.control.powerOff(transport);
   // decrpt signature
   const signature = txUtil.decryptSignatureFromSE(
     encryptedSignature,
@@ -133,7 +133,7 @@ export const getSignaturesFromCoolWallet = async (
   }
   // clear tx
   await tx.clearTransaction(transport);
-  await apdu.control.powerOff(transport);
+  await apdu.mcu.control.powerOff(transport);
   // decrpt signature
   const signatures = encryptedSignatureArray.map(
     (encryptedSignature) => txUtil.decryptSignatureFromSE(
