@@ -3,12 +3,7 @@ import Transport from '../../transport';
 import { commands } from "../execute/command";
 import { target } from '../../config/target';
 
-export const getFWStatus = async (transport: Transport) => {
-  const { outputData } = await executeCommand(transport, commands.CHECK_FW_STATUS, target.MCU);
-  const fwStatus = outputData.slice(0, 4); // 3900
-  const cardMCUVersion = outputData.slice(4, 12).toUpperCase();
-  return { fwStatus, cardMCUVersion };
-};
+
 
 export const sendFWsign = async (transport: Transport, data: string) => {
   executeCommand(transport, commands.SEND_FW_SIGN, target.MCU, data);

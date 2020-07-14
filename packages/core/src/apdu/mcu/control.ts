@@ -24,10 +24,10 @@ export const cancelAPDU = async (transport: Transport) => {
  * @return {Promise<boolean>}
  */
 export const powerOff = async (transport: Transport): Promise<boolean> => {
-  const { statusCode, msg } = await executeCommand(transport, commands.PWR_OFF, target.MCU);
-  if (statusCode === CODE._9000) {
+  try{
+    await executeCommand(transport, commands.PWR_OFF, target.MCU);
     return true
-  } else {
-    throw new APDUError(commands.PWR_OFF, statusCode, msg)
+  } catch(e) {
+    throw new SDKError(powerOff.name, 'powerOff error')
   }
 };
