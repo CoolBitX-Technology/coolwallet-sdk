@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/core",
-  "version": "0.1.0-beta.7",
+  "version": "0.1.0-beta.8",
   "description": "Core library for other CoolWallet SDKs.",
   "main": "lib/index.js",
   "scripts": {
