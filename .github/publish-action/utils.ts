@@ -1,15 +1,20 @@
 import { spawn } from 'child_process';
 
-export async function buildAndPublish(path:string) {
-	await build(path);
+export async function buildAndPublishProduction(path:string) {
+	await buildAndPublish(path, false);
 }
 
-async function build(path:string) {
+export async function buildAndPublishBeta(path:string) {
+	await buildAndPublish(path, true);
+}
+
+async function buildAndPublish(path:string, isBeta:boolean) {
 	await command('npm', ['ci'], path);
 	await command('npm', ['run-script', 'build'], path);
-}
-
-async function publish(path:string) {
+	let publishArgs = ['publish', '--access', 'public'];
+	if (isBeta) publishArgs.concat(['--tag', 'beta']);
+	const result = await command('npm', publishArgs, path);
+	console.log('npm publish :', result);
 }
 
 export async function updateVersionProduction(path:string) {
@@ -110,12 +115,12 @@ function getPackageInfo(path:string): { version:string, name:string } {
 	return { version, name };
 }
 
-export async function getDiff(base:string, head:string, path:string, ref:string): Promise<{stdout:string, stderr:string}> {
+export async function getDiff(base:string, head:string, path:string, ref:string): Promise<string> {
 	await command('git', ['fetch', '--no-tags', '--no-recurse-submodules', '--depth=10000', 'origin', ref]);
 	return command('git', ['diff', base, head, '--name-only', '--', path]);
 }
 
-export function command(cmd:string, args?:string[], cwd?:string): Promise<{stdout:string, stderr:string}> {
+export function command(cmd:string, args?:string[], cwd?:string): Promise<string> {
   return new Promise((resolve, reject) => {
     const command = spawn(cmd, args, {cwd});
     let stdout       = '';
@@ -134,7 +139,9 @@ export function command(cmd:string, args?:string[], cwd?:string): Promise<{stdou
     });
 
     command.on('close', () => {
-      resolve({stdout, stderr});
+      if (stderr) resolve(stderr);
+      if (stdout) resolve(stdout);
+      resolve('');
     });
   });
 }
