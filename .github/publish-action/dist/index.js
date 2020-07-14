@@ -1220,16 +1220,11 @@ async function checkAndPublish(context, path) {
 		head = context.payload.after;
 	}
 
-	const { stdout, stderr } = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.getDiff)(base, head, path, context.ref);
+	const diff = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.getDiff)(base, head, path, context.ref);
 
-	if (stdout) {
-		console.log('getDiff output :');
-		console.log(stdout);
-
-	} else if (stderr) {
-		console.log('getDiff error :');
-		console.log(stderr);
-		return;
+	if (diff) {
+		console.log('getDiff :');
+		console.log(diff);
 
 	} else {
 		console.log('not modified !');
@@ -1239,19 +1234,22 @@ async function checkAndPublish(context, path) {
 	let version;
 	const ref = context.ref.split('/')[2];
 	if (ref === 'master') {
-		version = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionProduction)(path);
+		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionProduction)(path);
+		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.buildAndPublishProduction)(path);
 
 	} else if (ref.startsWith('stg')) {
-		version = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionMinor)(path);
+		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionMinor)(path);
+		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.buildAndPublishBeta)(path);
 
 	} else if (ref.startsWith('hotfix')) {
-		version = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionPatch)(path);
+		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionPatch)(path);
+		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.buildAndPublishBeta)(path);
 
 	} else if (ref === 'beta') {
-		version = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionPatch)(path);
+		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionPatch)(path);
+		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.buildAndPublishBeta)(path);
 	}
 
-	await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.buildAndPublish)(path);
 	console.log(`[ ${path} ] end of process\n`);
 }
 
@@ -6315,11 +6313,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var child_process_1 = __webpack_require__(129);
-function buildAndPublish(path) {
+function buildAndPublishProduction(path) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, build(path)];
+                case 0: return [4 /*yield*/, buildAndPublish(path, false)];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -6327,9 +6325,23 @@ function buildAndPublish(path) {
         });
     });
 }
-exports.buildAndPublish = buildAndPublish;
-function build(path) {
+exports.buildAndPublishProduction = buildAndPublishProduction;
+function buildAndPublishBeta(path) {
     return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, buildAndPublish(path, true)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.buildAndPublishBeta = buildAndPublishBeta;
+function buildAndPublish(path, isBeta) {
+    return __awaiter(this, void 0, void 0, function () {
+        var publishArgs, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, command('npm', ['ci'], path)];
@@ -6338,15 +6350,15 @@ function build(path) {
                     return [4 /*yield*/, command('npm', ['run-script', 'build'], path)];
                 case 2:
                     _a.sent();
+                    publishArgs = ['publish', '--access', 'public'];
+                    if (isBeta)
+                        publishArgs.concat(['--tag', 'beta']);
+                    return [4 /*yield*/, command('npm', publishArgs, path)];
+                case 3:
+                    result = _a.sent();
+                    console.log('npm publish :', result);
                     return [2 /*return*/];
             }
-        });
-    });
-}
-function publish(path) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/];
         });
     });
 }
@@ -6547,7 +6559,11 @@ function command(cmd, args, cwd) {
             reject(err);
         });
         command.on('close', function () {
-            resolve({ stdout: stdout, stderr: stderr });
+            if (stderr)
+                resolve(stderr);
+            if (stdout)
+                resolve(stdout);
+            resolve('');
         });
     });
 }
