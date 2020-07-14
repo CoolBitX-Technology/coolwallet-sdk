@@ -1,4 +1,4 @@
-name: Beta publish to NPM
+name: Check and publish npm packages
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
     branches: [ stg*, hotfix* ]
 
 jobs:
-  build:
+  check_and_publish_npm_packages:
 
     runs-on: ubuntu-latest
 
@@ -20,16 +20,7 @@ jobs:
       with:
         node-version: 12.x
 
-    - uses: technote-space/get-diff-action@v2
-      id: git_diff
-      with:
-        PREFIX_FILTER: packages/core/
-
-    - name: Check versoin and publish to npm
-      id: hello
+    - name: Publish action
       uses: ./.github/publish-action
-      with:
-        who-to-greet: 'Mona the Octocat'
-
-    - name: Get the output time
-      run: echo "The time was ${{ steps.hello.outputs.time }}"
+      env:
+        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
