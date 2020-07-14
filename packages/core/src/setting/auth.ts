@@ -50,9 +50,9 @@ export const getCommandSignature = async (
   appId: string,
   appPrivateKey: string,
   command: CommandType,
-  data: string | undefined,
-  params1: string | undefined,
-  params2: string | undefined = undefined,
+  data: string = '',
+  params1: string = '00',
+  params2: string = '00',
   isCreateWallet: boolean = false
 ): Promise<{ signature: string; forceUseSC: boolean; }> => {
     const nonce = await general.getNonce(transport);

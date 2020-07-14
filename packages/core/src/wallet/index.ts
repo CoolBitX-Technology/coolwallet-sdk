@@ -1,13 +1,27 @@
-import { generateKeyPair } from './keypair';
 import Transport from '../transport/index';
-import * as pairing from './pairing';
-import { recovery, creation } from './create';
-import * as setting from './settings';
+import * as pairing from '../apdu/pair';
+import * as wallet from '../apdu/wallet';
 import * as general from '../apdu/general';
+import * as config from '../config/index';
+import * as apdu from '../apdu/index';
+import { SDKError, APDUError } from '../error/errorHandle';
+const bip39 = require('bip39');
+const { SEPublicKey } = config.KEY;
 
-// type Transport = transport.default;
+import crypto from 'crypto';
 
-export { generateKeyPair };
+const elliptic = require('elliptic');
+
+const ec = new elliptic.ec('secp256k1');
+
+export const generateKeyPair = () => {
+  const random = crypto.randomBytes(32);
+  const keyPair = ec.keyFromPrivate(random);
+  const publicKey = keyPair.getPublic(false, 'hex');
+  const privateKey = keyPair.getPrivate('hex');
+  return { privateKey, publicKey };
+};
+
 export default class CoolWallet {
   transport: Transport;
   appPrivateKey: string;
@@ -28,9 +42,36 @@ export default class CoolWallet {
   setAppId(appId: string) {
     this.appId = appId;
   }
+  /**
+   * Get Baisc information of CoolWallet
+   * @return {Promise<{ paired:boolean, locked:boolean, walletCreated:boolean, showDetail:boolean, pairRemainTimes:number }>}
+   */
+  async getCardInfo(): Promise<{ paired: boolean; locked: boolean; walletCreated: boolean; showDetail: boolean; pairRemainTimes: number; }> {
+    const outputData = await apdu.info.getCardInfo(this.transport);
+    const databuf = Buffer.from(outputData, 'hex');
+    const pairStatus = databuf.slice(0, 1).toString('hex');
+    const lockedStatus = databuf.slice(1, 2).toString('hex');
+    const pairRemainTimes = parseInt(databuf.slice(2, 3).toString('hex'), 16);
+    const walletStatus = databuf.slice(3, 4).toString('hex');
+    const accountDigest = databuf.slice(4, 9).toString('hex');
+    const displayType = databuf.slice(9).toString('hex');
 
-  async getCardInfo() {
-    return setting.getCardInfo(this.transport);
+    if (accountDigest === '81c69f2d90' || accountDigest === '3d84ba58bf' || accountDigest === '83ccf4aab1') {
+      throw new SDKError(this.getCardInfo.name, 'Bad Firmware statusCode. Please reset your CoolWalletS.');
+    }
+
+    const paired = pairStatus === '01';
+    const locked = lockedStatus === '01';
+    const walletCreated = walletStatus === '01';
+    const showDetail = displayType === '00';
+
+    return {
+      paired,
+      locked,
+      walletCreated,
+      showDetail,
+      pairRemainTimes,
+    };
   }
 
   async checkRegistered() {
@@ -58,36 +99,45 @@ export default class CoolWallet {
   }
 
   // For wallet creation
-  async createWallet(strength: number) {
-    return creation.createWallet(this.transport, this.appId, this.appPrivateKey, strength);
+  async createSeedByCard(strength: number) {
+    return wallet.createSeedByCard(this.transport, this.appId, this.appPrivateKey, strength);
   }
 
-  async createSeedByApp(strength: number, randomBytes: Buffer) {
-    return creation.createSeedByApp(this.transport, strength, randomBytes);
+  async createSeedByApp(strength: number, randomBytes: Buffer): Promise<string> {
+
+    const toBit = strength * 10.7;
+    const toFloor = Math.floor(toBit);
+
+    let mnemonic;
+    const word = bip39.wordlists.english;
+    mnemonic = bip39.generateMnemonic(toFloor, randomBytes, word, false);
+    console.log(typeof mnemonic)
+    return mnemonic
+    
   }
 
   async sendCheckSum(sum: number) {
-    return creation.sendCheckSum(this.transport, sum);
+    return wallet.sendCheckSum(this.transport, sum);
   }
 
-  async setSeed(seedHex: string) {
-    return creation.setSeed(this.transport, this.appId, this.appPrivateKey, seedHex);
+  async setSeed(mnemonic: string) {
+    return wallet.setSeed(this.transport, this.appId, this.appPrivateKey, mnemonic);
   }
 
   async initSecureRecovery(strength: number) {
-    return recovery.initSecureRecovery(this.transport, strength);
+    return wallet.initSecureRecovery(this.transport, strength);
   }
 
   async setSecureRecoveryIdx(index: number) {
-    return recovery.setSecureRecoveryIdx(this.transport, index);
+    return wallet.setSecureRecoveryIdx(this.transport, index);
   }
 
   async cancelSecureRecovery(type: string) {
-    return recovery.cancelSecureRecovery(this.transport, type);
+    return wallet.cancelSecureRecovery(this.transport, type);
   }
 
   async getSecureRecoveryStatus() {
-    return recovery.getSecureRecoveryStatus(this.transport);
+    return wallet.getSecureRecoveryStatus(this.transport);
   }
 }
 
