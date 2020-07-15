@@ -59,7 +59,15 @@ async function run() {
 	const context = github.context;
 	console.log('context :', context);
 	await checkAndPublish(context, 'packages/core');
+	await checkAndPublish(context, 'packages/cws-bnb');
 	await checkAndPublish(context, 'packages/cws-btc');
+	await checkAndPublish(context, 'packages/cws-eos');
+	await checkAndPublish(context, 'packages/cws-eth');
+	await checkAndPublish(context, 'packages/cws-icx');
+	await checkAndPublish(context, 'packages/cws-xlm');
+	await checkAndPublish(context, 'packages/cws-xrp');
+	await checkAndPublish(context, 'packages/transport-react-native-ble');
+	await checkAndPublish(context, 'packages/transport-web-ble');
 }
 
 try {
