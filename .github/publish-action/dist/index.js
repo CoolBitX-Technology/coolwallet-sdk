@@ -1257,7 +1257,15 @@ async function run() {
 	const context = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context;
 	console.log('context :', context);
 	await checkAndPublish(context, 'packages/core');
+	await checkAndPublish(context, 'packages/cws-bnb');
 	await checkAndPublish(context, 'packages/cws-btc');
+	await checkAndPublish(context, 'packages/cws-eos');
+	await checkAndPublish(context, 'packages/cws-eth');
+	await checkAndPublish(context, 'packages/cws-icx');
+	await checkAndPublish(context, 'packages/cws-xlm');
+	await checkAndPublish(context, 'packages/cws-xrp');
+	await checkAndPublish(context, 'packages/transport-react-native-ble');
+	await checkAndPublish(context, 'packages/transport-web-ble');
 }
 
 try {
@@ -6352,7 +6360,7 @@ function buildAndPublish(path, isBeta) {
                     _a.sent();
                     publishArgs = ['publish', '--access', 'public'];
                     if (isBeta)
-                        publishArgs.concat(['--tag', 'beta']);
+                        publishArgs = publishArgs.concat(['--tag', 'beta']);
                     return [4 /*yield*/, command('npm', publishArgs, path)];
                 case 3:
                     result = _a.sent();
@@ -6538,7 +6546,7 @@ function getDiff(base, head, path, ref) {
                 case 0: return [4 /*yield*/, command('git', ['fetch', '--no-tags', '--no-recurse-submodules', '--depth=10000', 'origin', ref])];
                 case 1:
                     _a.sent();
-                    return [2 /*return*/, command('git', ['diff', base, head, '--name-only', '--', path])];
+                    return [2 /*return*/, command('git', ['diff', base, head, '--name-only', '--', path + "/src"])];
             }
         });
     });
