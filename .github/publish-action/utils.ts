@@ -12,7 +12,7 @@ async function buildAndPublish(path:string, isBeta:boolean) {
 	await command('npm', ['ci'], path);
 	await command('npm', ['run-script', 'build'], path);
 	let publishArgs = ['publish', '--access', 'public'];
-	if (isBeta) publishArgs.concat(['--tag', 'beta']);
+	if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
 	const result = await command('npm', publishArgs, path);
 	console.log('npm publish :', result);
 }
