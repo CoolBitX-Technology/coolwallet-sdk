@@ -2,11 +2,11 @@ name: Check and publish npm packages
 
 on:
   push:
-    branches: [ beta, stg*, hotfix* ]
+    branches: [ master, stg*, hotfix*, beta ]
 
   pull_request:
     types: [ closed ]
-    branches: [ stg*, hotfix* ]
+    branches: [ master, stg*, hotfix* ]
 
 jobs:
   check_and_publish_npm_packages:
