@@ -117,7 +117,7 @@ function getPackageInfo(path:string): { version:string, name:string } {
 
 export async function getDiff(base:string, head:string, path:string, ref:string): Promise<string> {
 	await command('git', ['fetch', '--no-tags', '--no-recurse-submodules', '--depth=10000', 'origin', ref]);
-	return command('git', ['diff', base, head, '--name-only', '--', path]);
+	return command('git', ['diff', base, head, '--name-only', '--', `${path}/src`]);
 }
 
 export function command(cmd:string, args?:string[], cwd?:string): Promise<string> {
