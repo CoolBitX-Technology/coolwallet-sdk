@@ -9,8 +9,7 @@ const authGetKey = async (transport: Transport, appId: string, appPrivateKey: st
     transport,
     appId,
     appPrivateKey,
-    commands.AUTH_EXT_KEY,
-    undefined, undefined, undefined, undefined
+    commands.AUTH_EXT_KEY
   );
   return apdu.wallet.authGetExtendedKey(transport, signature, forceUseSC);
 };
