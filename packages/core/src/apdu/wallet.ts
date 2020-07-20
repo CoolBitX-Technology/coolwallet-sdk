@@ -11,7 +11,6 @@ import * as config from '../config/index';
 const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;
 
-
 /**
  * Authorization for requesting account keys
  * @param {Transport} transport
