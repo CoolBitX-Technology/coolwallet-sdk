@@ -1,0 +1,27 @@
+name: Check and publish npm packages
+
+on:
+  push:
+    branches: [ master, stg*, hotfix*, beta ]
+
+  pull_request:
+    types: [ closed ]
+    branches: [ master, stg*, hotfix* ]
+
+jobs:
+  check_and_publish_npm_packages:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Publish action
+      uses: ./.github/publish-action
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
