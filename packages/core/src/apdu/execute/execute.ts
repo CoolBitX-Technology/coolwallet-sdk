@@ -23,7 +23,7 @@ const executeAPDU = async (
   msg: string, 
   outputData: string
 }> => {
-  if (typeof transport.request !== 'function') {
+  if (typeof transport.request !== 'function' && !(transport.requestAPDUV2)) {
     throw new SDKError(executeAPDU.name, `Transport not specified or no connection established.`);
   }
   console.debug("{")
