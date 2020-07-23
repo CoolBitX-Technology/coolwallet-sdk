@@ -77,7 +77,6 @@ export const executeCommand = async (
   data: string = '',
   params1: string | undefined = undefined,
   params2: string | undefined = undefined,
-  supportSC: boolean = false,
   forceUseSC: boolean = false,
 ): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = params1 || command.P1;
@@ -89,10 +88,12 @@ export const executeCommand = async (
 
   let response;
   // data too long: divide and send with SECURE CHANNEL
-  if (forceUseSC || (supportSC && data.length > 500)) {
+  if (forceUseSC || (data.length > 500)) {
+    console.log('-200')
     const apduHeader = command.CLA + command.INS + P1 + P2;
     response = await sendWithSecureChannel(transport, apduHeader, data, forceUseSC);
   } else {
+    console.log('-100')
     const apdu = util.assemblyCommandAndData(command.CLA, command.INS, P1, P2, data);
     // eslint-disable-next-line no-console
     console.debug(`Execute Command: ${command}`);
@@ -136,6 +137,7 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
     // eslint-disable-next-line no-await-in-loop
     result = await sendFragment(transport, chunks[i], i, totalPackages);
   }
+  console.log("======: " + result)
   if (result) {
     const statusCode = result.statusCode
     // Uncaught error in SC_SEND_SEGMENT command. Return to parent executeCommand
@@ -173,5 +175,10 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
 const sendFragment = async (transport: Transport, data: string, index: number, totalPackages: number): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = index.toString(16).padStart(2, '0');
   const P2 = totalPackages.toString(16).padStart(2, '0');
-  return executeCommand(transport, commands.SC_SEND_SEGMENT, target.SE, data, P1, P2, false);
+  const response = await executeCommand(transport, commands.SC_SEND_SEGMENT, target.SE, data, P1, P2, false);
+  // if (response.statusCode === CODE._9000) {
+  return response;
+  // } else {
+  //   throw new APDUError(commands.SC_SEND_SEGMENT, response.statusCode, response.msg);
+  // }
 };

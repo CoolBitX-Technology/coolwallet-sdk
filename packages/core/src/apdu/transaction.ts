@@ -143,7 +143,6 @@ export const executeScript = async (
     undefined,
     undefined,
     true,
-    true,
   );
   if (encryptedSignature) {
     return encryptedSignature;
@@ -181,7 +180,6 @@ export const executeUtxoScript = async (
     utxoArgument + signature,
     P1,
     undefined,
-    true,
     true,
   );
   if (encryptedSignature) {

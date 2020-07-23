@@ -44,7 +44,7 @@ export const updateKeyId = async (transport: Transport, appId: string, appPrivKe
   const indexIdData = indexIdDataArr.join('');
   P1 = lengthOfData.toString(16).padStart(2, '0');
 
-  const { signature } = await getCommandSignature(
+  const { signature, forceUseSC } = await getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -54,7 +54,7 @@ export const updateKeyId = async (transport: Transport, appId: string, appPrivKe
   )
 
   const executeCommandDdata = indexIdData + signature;
-  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_KEYID, target.SE, executeCommandDdata, P1);
+  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_KEYID, target.SE, executeCommandDdata, P1, undefined, forceUseSC);
   if (statusCode !== CODE._9000) {
     throw new APDUError(commands.UPDATE_KEYID, statusCode, msg)
   }
@@ -105,7 +105,7 @@ export const toggleDisplayAddress = async (transport: Transport, appId: string, 
   // const signature = await Helper.Other.generalAuthorization(command, null, detailFlag);
   // await APDU.Other.showFullAddress(signature, detailFlag);
 
-  const { signature } = await getCommandSignature(
+  const { signature, forceUseSC } = await getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -115,7 +115,7 @@ export const toggleDisplayAddress = async (transport: Transport, appId: string, 
   )
 
 
-  const { statusCode, msg } = await executeCommand(transport, commands.SHOW_FULL_ADDRESS, target.SE, signature, detailFlag);
+  const { statusCode, msg } = await executeCommand(transport, commands.SHOW_FULL_ADDRESS, target.SE, signature, detailFlag, undefined, forceUseSC);
   if (statusCode === CODE._6A86) {
     const showDetailStatus = showDetailFlag ? "open" : "close";
     throw new APDUError(commands.SHOW_FULL_ADDRESS, statusCode, `SHOW_FULL_ADDRESS is ${showDetailStatus}, please change showDetailFlag for ${!showDetailFlag} `)

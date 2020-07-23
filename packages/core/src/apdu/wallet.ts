@@ -21,7 +21,7 @@ const { SEPublicKey } = config.KEY;
 export const authGetExtendedKey = async (transport: Transport, signature: string, forceUseSC: boolean
 ): Promise<boolean> => {
   try{
-    await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, true, forceUseSC);
+    await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, forceUseSC);
     return true;
   } catch(e) {
     throw new SDKError(authGetExtendedKey.name, 'authGetExtendedKey error')
@@ -104,7 +104,6 @@ export async function createSeedByCard(transport: Transport, appId: string, appP
     strengthWithSig,
     undefined,
     undefined,
-    true,
     forceUseSC
   );
 
@@ -142,7 +141,7 @@ export async function setSeed(transport: Transport, appId: string, appPrivateKey
     undefined
   );
   const signedSeed = encryptedSeed + signature;
-  const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, true, forceUseSC);
+  const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, forceUseSC);
   if (statusCode === CODE._9000) {
   } else if (statusCode === CODE._6881) {
     throw new APDUError(commands.AUTH_EXT_KEY, statusCode, "wallet is exist")

@@ -72,7 +72,7 @@ export const updateBalance = async (transport: Transport, appId: string, appPriv
 
   const concatBalance = allBalances.join('');
 
-  const { signature } = await getCommandSignature(
+  const { signature, forceUseSC } = await getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -86,7 +86,7 @@ export const updateBalance = async (transport: Transport, appId: string, appPriv
   const executeCommandData = concatBalance + signature;
   console.log(executeCommandData)
 
-  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_BALANCE, target.MCU, executeCommandData);
+  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_BALANCE, target.MCU, executeCommandData, undefined, undefined, forceUseSC);
   console.log("yyy");
 
   console.log(statusCode);

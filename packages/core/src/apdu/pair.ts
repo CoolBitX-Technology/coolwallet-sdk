@@ -19,7 +19,7 @@ import * as apdu from '../apdu/index';
 export const switchLockStatus = async (transport: Transport, appId: string, appPrivKey: string, freezePair: boolean) => {
   const pairLockStatus = freezePair ? '01' : '00';
   console.log(`pairLockStatus: ${pairLockStatus}`)
-  const { signature } = await core.auth.getCommandSignature(
+  const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -28,7 +28,7 @@ export const switchLockStatus = async (transport: Transport, appId: string, appP
     pairLockStatus
   );
 
-  const { statusCode, msg } = await executeCommand(transport, commands.CHANGE_PAIR_STATUS, target.SE, signature, pairLockStatus);
+  const { statusCode, msg } = await executeCommand(transport, commands.CHANGE_PAIR_STATUS, target.SE, signature, pairLockStatus, undefined, forceUseSC);
   if (statusCode !== CODE._9000) {
     throw new APDUError(commands.CHANGE_PAIR_STATUS, statusCode, msg)
   }
@@ -87,8 +87,7 @@ export const getPairedApps = async (transport: Transport, appId: string, appPriv
     transport,
     commands.GET_PAIRED_DEVICES,
     target.SE,
-    signature, undefined, undefined,
-    true, forceUseSC
+    signature, undefined, undefined, forceUseSC
   );
   const appsInfo = outputData.match(/.{100}/g);
   if (!appsInfo) {
@@ -119,7 +118,7 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
     appPrivKey,
     commands.GET_PAIR_PWD
   );
-  const { outputData: encryptedPassword } = await executeCommand(transport, commands.GET_PAIR_PWD, target.SE, signature, undefined, undefined, true, forceUseSC);
+  const { outputData: encryptedPassword } = await executeCommand(transport, commands.GET_PAIR_PWD, target.SE, signature, undefined, undefined, forceUseSC);
 
   // const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
   await apdu.mcu.control.powerOff(transport);
@@ -144,7 +143,7 @@ export const removePairedDevice = async (transport: Transport, appId: string, ap
       pairedAppId
     );
     const appIdWithSig = pairedAppId + sig.signature
-    const { statusCode, msg } = await executeCommand(transport, commands.REMOVE_DEVICES, target.SE, appIdWithSig);
+    const { statusCode, msg } = await executeCommand(transport, commands.REMOVE_DEVICES, target.SE, appIdWithSig, undefined, undefined, sig.forceUseSC);
     if (statusCode !== CODE._9000){
       throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg)    
     }
@@ -170,7 +169,7 @@ export const renameDevice = async (transport: Transport, appId: string, appPrivK
       nameToUTF = Buffer.concat([temp, nameToUTF]);
     }
     const name = nameToUTF.toString('hex');
-    const { signature } = await core.auth.getCommandSignature(
+    const { signature, forceUseSC } = await core.auth.getCommandSignature(
       transport,
       appId,
       appPrivKey,
@@ -179,7 +178,7 @@ export const renameDevice = async (transport: Transport, appId: string, appPrivK
     );
     const renameParams = name + signature;
 
-    const { statusCode, msg } = await executeCommand(transport, commands.RENAME_DEVICES, target.SE, renameParams);
+    const { statusCode, msg } = await executeCommand(transport, commands.RENAME_DEVICES, target.SE, renameParams, undefined, undefined, forceUseSC);
 
     if( statusCode !== CODE._9000 ){
       throw new APDUError(commands.RENAME_DEVICES, statusCode, msg);
