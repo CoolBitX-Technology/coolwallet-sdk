@@ -142,12 +142,12 @@ export const removePairedDevice = async (transport: Transport, appId: string, ap
       pairedAppId
     );
     const appIdWithSig = pairedAppId + sig.signature
-    const { statusCode, msg } = await executeCommand(transport, commands.REMOVE_DEVICES, target.SE, appIdWithSig, undefined, undefined, sig.forceUseSC);
+    const { statusCode, msg } = await executeCommand(transport, commands.REMOVE_DEVICES, target.SE, appIdWithSig, undefined, undefined);
     if (statusCode !== CODE._9000){
       throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg)    
     }
   } else {
-    throw new SDKError(removePairedDevice.name, `pairedAppId should not equal appIdㄐ`)
+    throw new SDKError(removePairedDevice.name, `pairedAppId should not equal appId`)
   }
   
   
