@@ -20,7 +20,7 @@ const executeAPDU = async (
   executedTarget: string
 ): Promise<{
   statusCode: string,
-  msg: string, 
+  msg: string,
   outputData: string
 }> => {
   if (typeof transport.request !== 'function' && !(transport.requestAPDUV2)) {
@@ -31,26 +31,29 @@ const executeAPDU = async (
   console.debug(" data: " + apdu.data)
   console.debug("}")
 
-  try{
+  try {
     // TODO app transport
     if (transport.requestAPDUV2) {
       return await transport.requestAPDUV2(apdu);
     }
-    let msg = ''
+    let msg;
     const response = await transport.request(apdu.command, apdu.data);
+    let statusCode;
+    let outputData;
     if (executedTarget === target.SE) {
-      const statusCode = response.slice(-4);
-      const outputData = response.slice(0, -4);
+      statusCode = response.slice(-4);
+      outputData = response.slice(0, -4);
       msg = util.getReturnMsg(statusCode)
-      return { statusCode, msg, outputData };
     } else {
-      const statusCode = response.slice(4, 6);
-      const outputData = response.slice(6);
+      statusCode = response.slice(4, 6);
+      outputData = response.slice(6);
       msg = util.getReturnMsg(statusCode)
-      return { statusCode, msg, outputData };
     }
 
-  } catch (error){
+    statusCode = statusCode.toUpperCase();
+    return { statusCode, msg, outputData };
+
+  } catch (error) {
     throw new SDKError(executeAPDU.name, `executeAPDU error: ${error}`);
   }
 };

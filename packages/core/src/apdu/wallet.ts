@@ -12,6 +12,7 @@ const bip39 = require('bip39');
 const { SEPublicKey } = config.KEY;
 
 /**
+ * TODO 
  * Authorization for requesting account keys
  * @param {Transport} transport
  * @param {string} signature
@@ -19,11 +20,11 @@ const { SEPublicKey } = config.KEY;
  */
 export const authGetExtendedKey = async (transport: Transport, signature: string, forceUseSC: boolean
 ): Promise<boolean> => {
-  const { statusCode, msg } = await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, true, forceUseSC);
-  if (statusCode === CODE._9000) {
-    return true
-  } else {
-    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+  try{
+    await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, true, forceUseSC);
+    return true;
+  } catch(e) {
+    throw new SDKError(authGetExtendedKey.name, 'authGetExtendedKey error')
   }
 };
 
