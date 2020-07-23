@@ -97,7 +97,6 @@ export default class CoolWallet {
     let mnemonic;
     const word = bip39.wordlists.english;
     mnemonic = bip39.generateMnemonic(toFloor, randomBytes, word, false);
-    console.log(typeof mnemonic)
     return mnemonic
     
   }

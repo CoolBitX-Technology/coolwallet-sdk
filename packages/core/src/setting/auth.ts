@@ -60,8 +60,6 @@ export const getCommandSignature = async (
     const SEVersion = await general.getSEVersion(transport);
   
     const forceUseSC = (SEVersion >= 200) ? true : false; 
-  console.log(`SEVersion: ${SEVersion}`)
-  console.log(`forceUseSC: ${forceUseSC}`)
 
     const P1 = params1 || command.P1;
     const P2 = params2 || command.P2;
@@ -81,10 +79,8 @@ export const getCommandSignature = async (
       // the following operaion is forced to used Secure Channel
       const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
       if (isCreateWallet) {
-        console.log('100')
         return { signature: appIdWithSignature, forceUseSC: false };
       } else {
-        console.log('200')
         return { signature: appIdWithSignature, forceUseSC };
       }
     }

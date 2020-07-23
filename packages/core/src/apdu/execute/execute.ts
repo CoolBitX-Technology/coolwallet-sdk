@@ -89,11 +89,9 @@ export const executeCommand = async (
   let response;
   // data too long: divide and send with SECURE CHANNEL
   if (forceUseSC || (data.length > 500)) {
-    console.log('-200')
     const apduHeader = command.CLA + command.INS + P1 + P2;
     response = await sendWithSecureChannel(transport, apduHeader, data, forceUseSC);
   } else {
-    console.log('-100')
     const apdu = util.assemblyCommandAndData(command.CLA, command.INS, P1, P2, data);
     // eslint-disable-next-line no-console
     console.debug(`Execute Command: ${command}`);
@@ -137,7 +135,6 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
     // eslint-disable-next-line no-await-in-loop
     result = await sendFragment(transport, chunks[i], i, totalPackages);
   }
-  console.log("======: " + result)
   if (result) {
     const statusCode = result.statusCode
     // Uncaught error in SC_SEND_SEGMENT command. Return to parent executeCommand

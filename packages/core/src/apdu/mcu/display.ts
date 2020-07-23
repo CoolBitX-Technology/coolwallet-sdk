@@ -80,16 +80,10 @@ export const updateBalance = async (transport: Transport, appId: string, appPriv
     concatBalance,
   )
 
-  console.log("sss");
-  
-
   const executeCommandData = concatBalance + signature;
-  console.log(executeCommandData)
 
   const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_BALANCE, target.MCU, executeCommandData, undefined, undefined, forceUseSC);
-  console.log("yyy");
 
-  console.log(statusCode);
   // if (statusCode !== CODE._9000) {
   //   throw new APDUError(commands.UPDATE_BALANCE, statusCode, msg)
   // }

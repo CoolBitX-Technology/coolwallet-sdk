@@ -18,7 +18,6 @@ import * as apdu from '../apdu/index';
  */
 export const switchLockStatus = async (transport: Transport, appId: string, appPrivKey: string, freezePair: boolean) => {
   const pairLockStatus = freezePair ? '01' : '00';
-  console.log(`pairLockStatus: ${pairLockStatus}`)
   const { signature, forceUseSC } = await core.auth.getCommandSignature(
     transport,
     appId,

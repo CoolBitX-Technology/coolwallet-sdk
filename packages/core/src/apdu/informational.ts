@@ -39,7 +39,6 @@ export const updateKeyId = async (transport: Transport, appId: string, appPrivKe
     }
   })
 
-  console.log("indexIdDataArr: " + indexIdDataArr)
   const lengthOfData = indexIdDataArr.length;
   const indexIdData = indexIdDataArr.join('');
   P1 = lengthOfData.toString(16).padStart(2, '0');
