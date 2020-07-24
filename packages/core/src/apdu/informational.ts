@@ -3,7 +3,7 @@ import Transport from '../transport';
 import { commands } from "./execute/command";
 import { target } from '../config/target';
 import { CODE } from '../config/status/code';
-import { APDUError } from '../error/errorHandle';
+import { APDUError, SDKError } from '../error/errorHandle';
 import { getCommandSignature } from "../setting/auth";
 
 
@@ -12,12 +12,38 @@ import { getCommandSignature } from "../setting/auth";
  * Get basic card information
  * @param {Transport} transport
  */
-export const getCardInfo = async (transport: Transport): Promise<string> => {
-  const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_CARD_INFO, target.SE);
-  if (outputData) {
-    return outputData;
-  } else {
-    throw new APDUError(commands.GET_CARD_INFO, statusCode, msg)
+export const getCardInfo = async (transport: Transport): Promise<{ paired: boolean; locked: boolean; walletCreated: boolean; showDetail: boolean; pairRemainTimes: number; databuf: Buffer; }> => {
+
+  try{
+    const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_CARD_INFO, target.SE);
+    const databuf = Buffer.from(outputData, 'hex');
+    const pairStatus = databuf.slice(0, 1).toString('hex');
+    const lockedStatus = databuf.slice(1, 2).toString('hex');
+    const pairRemainTimes = parseInt(databuf.slice(2, 3).toString('hex'), 16);
+    const walletStatus = databuf.slice(3, 4).toString('hex');
+    const accountDigest = databuf.slice(4, 9).toString('hex');
+    const displayType = databuf.slice(9).toString('hex');
+
+    if (accountDigest === '81c69f2d90' || accountDigest === '3d84ba58bf' || accountDigest === '83ccf4aab1') {
+      throw new APDUError(commands.GET_CARD_INFO, statusCode, msg);
+    }
+
+    const paired = pairStatus === '01';
+    const locked = lockedStatus === '01';
+    const walletCreated = walletStatus === '01';
+    const showDetail = displayType === '00';
+
+    return {
+      paired,
+      locked,
+      walletCreated,
+      showDetail,
+      pairRemainTimes,
+      databuf
+    };
+  
+  } catch (e) {
+    throw new SDKError(getCardInfo.name, 'Bad Firmware statusCode. Please reset your CoolWalletS.');
   }
 };
 
@@ -95,14 +121,9 @@ export const getLastKeyId = async (transport: Transport, P1: string) => {
  * @param {boolean} detailFlag 00 if want to show detail, 01 otherwise
  */
 export const toggleDisplayAddress = async (transport: Transport, appId: string, appPrivKey: string, showDetailFlag: boolean) => {
-  let outputData = await getCardInfo(transport);
-  let cardInfoBuf = Buffer.from(outputData, 'hex');
-  const displayIndex = cardInfoBuf.slice(9).toString('hex');
-  // const currentStatus = displayIndex === '00' ? true : false;
-  // if (currentStatus === isFullDetail) return true
+  let { databuf } = await getCardInfo(transport);
+  const displayIndex = databuf.slice(9).toString('hex');
   const detailFlag = showDetailFlag ? '00' : '01';
-  // const signature = await Helper.Other.generalAuthorization(command, null, detailFlag);
-  // await APDU.Other.showFullAddress(signature, detailFlag);
 
   const { signature, forceUseSC } = await getCommandSignature(
     transport,

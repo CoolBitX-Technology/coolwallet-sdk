@@ -43,13 +43,12 @@ const executeAPDU = async (
     if (executedTarget === target.SE) {
       statusCode = response.slice(-4);
       outputData = response.slice(0, -4);
-      msg = util.getReturnMsg(statusCode)
     } else {
       statusCode = response.slice(4, 6);
       outputData = response.slice(6);
-      msg = util.getReturnMsg(statusCode)
     }
 
+    msg = util.getReturnMsg(statusCode.toUpperCase())
     statusCode = statusCode.toUpperCase();
     return { statusCode, msg, outputData };
 
