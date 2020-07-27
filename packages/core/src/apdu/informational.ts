@@ -12,7 +12,7 @@ import { getCommandSignature } from "../setting/auth";
  * Get basic card information
  * @param {Transport} transport
  */
-export const getCardInfo = async (transport: Transport): Promise<{ paired: boolean; locked: boolean; walletCreated: boolean; showDetail: boolean; pairRemainTimes: number; databuf: Buffer; }> => {
+export const getCardInfo = async (transport: Transport): Promise<{ paired: boolean; locked: boolean; walletCreated: boolean; showDetail: boolean; pairRemainTimes: number; displayType: string; }> => {
 
   try{
     const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_CARD_INFO, target.SE);
@@ -39,7 +39,7 @@ export const getCardInfo = async (transport: Transport): Promise<{ paired: boole
       walletCreated,
       showDetail,
       pairRemainTimes,
-      databuf
+      displayType
     };
   
   } catch (e) {
@@ -121,9 +121,10 @@ export const getLastKeyId = async (transport: Transport, P1: string) => {
  * @param {boolean} detailFlag 00 if want to show detail, 01 otherwise
  */
 export const toggleDisplayAddress = async (transport: Transport, appId: string, appPrivKey: string, showDetailFlag: boolean) => {
-  let { databuf } = await getCardInfo(transport);
-  const displayIndex = databuf.slice(9).toString('hex');
+  let { displayType } = await getCardInfo(transport);
   const detailFlag = showDetailFlag ? '00' : '01';
+  const currentStatus = displayType === '00' ? true : false;
+  if (currentStatus === showDetailFlag) return true
 
   const { signature, forceUseSC } = await getCommandSignature(
     transport,
