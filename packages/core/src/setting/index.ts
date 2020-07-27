@@ -62,7 +62,6 @@ export const getCardInfo = async (transport: Transport, appId: string) => {
          SEVersion,
          MCUVersion
       };
-      console.log(`CardInfo Package: ${JSON.stringify(message)}`);
       return message;
    } catch (e) {
       throw new SDKError(getCardInfo.name, "SDK Get Card Info Error. ")
