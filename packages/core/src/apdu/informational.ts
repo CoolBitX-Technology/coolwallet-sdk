@@ -124,7 +124,9 @@ export const toggleDisplayAddress = async (transport: Transport, appId: string, 
   let { displayType } = await getCardInfo(transport);
   const detailFlag = showDetailFlag ? '00' : '01';
   const currentStatus = displayType === '00' ? true : false;
-  if (currentStatus === showDetailFlag) return true
+  if (currentStatus === showDetailFlag) {
+    return true;
+  }
 
   const { signature, forceUseSC } = await getCommandSignature(
     transport,
