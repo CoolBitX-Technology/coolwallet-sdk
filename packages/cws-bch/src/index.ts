@@ -33,6 +33,12 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 		return address;
 	}
 
+	async getAddressAndOutScript(addressIndex: number)
+		: Promise<{ address: string, outScript: Buffer }> {
+		const publicKey = await this.getPublicKey(addressIndex);
+		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
+	}
+
 	async signTransaction(
 		scriptType: ScriptType,
 		inputs: [Input],
