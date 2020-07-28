@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/transport-web-ble",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "web ble transport layer for coolwallet.",
   "main": "lib/index.js",
   "scripts": {
@@ -12,8 +12,7 @@
   "peerDependencies": {
     "@coolwallet/core": "~0.1.0-beta.12"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.7.2",
     "@babel/plugin-proposal-class-properties": "^7.7.0",
