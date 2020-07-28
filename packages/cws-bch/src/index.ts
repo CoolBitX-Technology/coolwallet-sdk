@@ -19,27 +19,30 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 
 	public addressToOutScript: Function;
 
-	constructor(transport: Transport, appPrivateKey: string, appId: string, network: any) {
-		super(transport, appPrivateKey, appId, '91');
+	constructor(network: any) {
+		super('91');
 		this.network = network;
 		this.ScriptType = ScriptType;
 		this.addressToOutScript = addressToOutScript;
 	}
 
-	async getAddress(addressIndex: number)
+	async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number)
 		: Promise<string> {
-		const publicKey = await this.getPublicKey(addressIndex);
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 		const { address } = pubkeyToAddressAndOutScript(publicKey);
 		return address;
 	}
 
-	async getAddressAndOutScript(addressIndex: number)
+	async getAddressAndOutScript(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number)
 		: Promise<{ address: string, outScript: Buffer }> {
-		const publicKey = await this.getPublicKey(addressIndex);
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
 	}
 
 	async signTransaction(
+		transport: Transport,
+		appPrivateKey: string,
+		appId: string,
 		scriptType: ScriptType,
 		inputs: [Input],
 		output: Output,
@@ -50,18 +53,18 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 	): Promise<string> {
 		for (const input of inputs) {
 			// eslint-disable-next-line no-await-in-loop
-			const pubkey = await this.getPublicKey(input.addressIndex);
+			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 		if (change) {
-			const pubkey = await this.getPublicKey(change.addressIndex);
+			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
 			// eslint-disable-next-line no-param-reassign
 			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 		return signTransaction(
-			this.transport,
-			this.appId,
-			this.appPrivateKey,
+			transport,
+			appId,
+			appPrivateKey,
 			scriptType,
 			inputs,
 			output,
