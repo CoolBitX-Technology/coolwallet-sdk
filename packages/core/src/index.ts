@@ -6,10 +6,9 @@ import * as coin from './coin/index';
 import * as error from './error/index';
 import * as device from './device/index';
 import * as transport from './transport/index';
-import wallet from './wallet/index';
 import * as tx from './transaction/index';
 import * as util from './utils/index';
 
 export {
-  config, crypto, setting, apdu, coin, error, device, transport, wallet, tx, util
+  config, crypto, setting, apdu, coin, error, device, transport, tx, util
 };
