@@ -108,7 +108,7 @@ export const sendScript = async (transport: Transport, script: string) => {
     script,
     undefined,
     undefined,
-    true
+    false
   );
   if (statusCode === CODE._9000) {
     return true;
@@ -198,7 +198,7 @@ export const executeUtxoScript = async (
  */
 export const getSignedHex = async (transport: Transport): Promise<{ signedTx: string, statusCode: string }> => {
   const { outputData: signedTx, statusCode, msg } = await executeCommand(transport, commands.GET_SIGNED_HEX, target.SE);
-  if (signedTx){
+  if (statusCode === CODE._9000 || statusCode === CODE._6D00) {
     return { signedTx, statusCode };
   } else {
     throw new APDUError(commands.GET_SIGNED_HEX, statusCode, msg)
