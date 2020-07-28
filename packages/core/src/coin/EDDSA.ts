@@ -3,14 +3,8 @@ import Transport from "../transport";
 
 export default class EDDSACoin {
 
-  transport: Transport;
-  appPrivateKey: string;
-  appId: string;
   coinType: string;
-  constructor(transport: Transport, appPrivateKey: string, appId: string, coinType: string) {
-    this.transport = transport;
-    this.appPrivateKey = appPrivateKey;
-    this.appId = appId;
+  constructor(coinType: string) {
     this.coinType = coinType;
 
     this.getPublicKey = this.getPublicKey.bind(this);
@@ -24,11 +18,11 @@ export default class EDDSACoin {
    * @param {string} protocol
    * @returns {Promise<string>}
    */
-  async getPublicKey(accountIndex: number, protocol = 'SLIP0010') {
+  async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, accountIndex: number, protocol = 'SLIP0010') {
     return derivation.getEd25519PublicKey(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       accountIndex,
       protocol,

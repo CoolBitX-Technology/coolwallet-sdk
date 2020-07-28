@@ -21,8 +21,10 @@
   ],
   "author": "coolwallet-team",
   "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "~0.1.0-beta.12"
+  },
   "dependencies": {
-    "@coolwallet/core": "~0.1.0-beta.4",
     "elliptic": "^6.5.1",
     "icon-sdk-js": "0.0.18",
     "js-sha3": "^0.8.0"

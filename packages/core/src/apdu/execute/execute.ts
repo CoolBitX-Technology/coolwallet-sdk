@@ -34,7 +34,11 @@ const executeAPDU = async (
   try {
     // TODO app transport
     if (transport.requestAPDUV2) {
-      return await transport.requestAPDUV2(apdu);
+      const response = await transport.requestAPDUV2(apdu);
+      const statusCode = response.status;
+      const outputData = response.outputData;
+      const msg = util.getReturnMsg(statusCode.toUpperCase());
+      return { statusCode, msg, outputData }; 
     }
     let msg;
     const response = await transport.request(apdu.command, apdu.data);
@@ -48,7 +52,7 @@ const executeAPDU = async (
       outputData = response.slice(6);
     }
 
-    msg = util.getReturnMsg(statusCode.toUpperCase())
+    msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();
     return { statusCode, msg, outputData };
 
