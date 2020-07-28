@@ -13,9 +13,9 @@ import { SDKError, APDUError } from '../../error/errorHandle';
  */
 export const cancelAPDU = async (transport: Transport) => {
   const { statusCode, msg } = await executeCommand(transport, commands.CANCEL_APDU, target.MCU);
-  if (statusCode !== CODE._9000) {
-    throw new APDUError(commands.CANCEL_APDU, statusCode, msg)
-  }
+  // if (statusCode !== CODE._9000) {
+  //   throw new APDUError(commands.CANCEL_APDU, statusCode, msg)
+  // }
 };
 
 /**

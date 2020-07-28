@@ -1,0 +1,5 @@
+name: 'Publish to NPM'
+description: 'Build package, check and change version, add tag, publish to npm'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

@@ -20,10 +20,10 @@ const executeAPDU = async (
   executedTarget: string
 ): Promise<{
   statusCode: string,
-  msg: string, 
+  msg: string,
   outputData: string
 }> => {
-  if (typeof transport.request !== 'function') {
+  if (typeof transport.request !== 'function' && !(transport.requestAPDUV2)) {
     throw new SDKError(executeAPDU.name, `Transport not specified or no connection established.`);
   }
   console.debug("{")
@@ -31,26 +31,28 @@ const executeAPDU = async (
   console.debug(" data: " + apdu.data)
   console.debug("}")
 
-  try{
+  try {
     // TODO app transport
     if (transport.requestAPDUV2) {
       return await transport.requestAPDUV2(apdu);
     }
-    let msg = ''
+    let msg;
     const response = await transport.request(apdu.command, apdu.data);
+    let statusCode;
+    let outputData;
     if (executedTarget === target.SE) {
-      const statusCode = response.slice(-4);
-      const outputData = response.slice(0, -4);
-      msg = util.getReturnMsg(statusCode)
-      return { statusCode, msg, outputData };
+      statusCode = response.slice(-4);
+      outputData = response.slice(0, -4);
     } else {
-      const statusCode = response.slice(4, 6);
-      const outputData = response.slice(6);
-      msg = util.getReturnMsg(statusCode)
-      return { statusCode, msg, outputData };
+      statusCode = response.slice(4, 6);
+      outputData = response.slice(6);
     }
 
-  } catch (error){
+    msg = util.getReturnMsg(statusCode.toUpperCase())
+    statusCode = statusCode.toUpperCase();
+    return { statusCode, msg, outputData };
+
+  } catch (error) {
     throw new SDKError(executeAPDU.name, `executeAPDU error: ${error}`);
   }
 };
@@ -74,7 +76,6 @@ export const executeCommand = async (
   data: string = '',
   params1: string | undefined = undefined,
   params2: string | undefined = undefined,
-  supportSC: boolean = false,
   forceUseSC: boolean = false,
 ): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = params1 || command.P1;
@@ -86,7 +87,7 @@ export const executeCommand = async (
 
   let response;
   // data too long: divide and send with SECURE CHANNEL
-  if (forceUseSC || (supportSC && data.length > 500)) {
+  if (forceUseSC || (data.length > 500)) {
     const apduHeader = command.CLA + command.INS + P1 + P2;
     response = await sendWithSecureChannel(transport, apduHeader, data, forceUseSC);
   } else {
@@ -170,5 +171,10 @@ export const sendWithSecureChannel = async (transport: Transport, apduHeader: st
 const sendFragment = async (transport: Transport, data: string, index: number, totalPackages: number): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = index.toString(16).padStart(2, '0');
   const P2 = totalPackages.toString(16).padStart(2, '0');
-  return executeCommand(transport, commands.SC_SEND_SEGMENT, target.SE, data, P1, P2, false);
+  const response = await executeCommand(transport, commands.SC_SEND_SEGMENT, target.SE, data, P1, P2, false);
+  // if (response.statusCode === CODE._9000) {
+  return response;
+  // } else {
+  //   throw new APDUError(commands.SC_SEND_SEGMENT, response.statusCode, response.msg);
+  // }
 };

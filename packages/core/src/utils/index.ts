@@ -3,6 +3,8 @@ import Transport from '../transport';
 import { MSG } from '../config/status/msg'
 import { CODE } from '../config/status/code'
 import { APDUError, SDKError } from '../error/errorHandle'
+const bip39 = require('bip39');
+
 
 
 export const getReturnMsg = (code: string): string => {
@@ -88,3 +90,17 @@ export const checkSupportScripts = async (transport: Transport) => {
     throw new SDKError(checkSupportScripts.name, 'checkSupportScripts error')
   }
 };
+
+
+
+export const createSeedByApp = async (strength: number, randomBytes: Buffer): Promise<string> => {
+
+  const toBit = strength * 10.7;
+  const toFloor = Math.floor(toBit);
+
+  let mnemonic;
+  const word = bip39.wordlists.english;
+  mnemonic = bip39.generateMnemonic(toFloor, randomBytes, word, false);
+  return mnemonic
+
+}
