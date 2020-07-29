@@ -8,19 +8,20 @@ export default class EOS extends COIN.ECDSACoin implements COIN.Coin {
   public chainId: string;
 
   constructor(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
     chainId: undefined | string
   ) {
-    super(transport, appPrivateKey, appId, 'C2');
+    super('C2');
     this.chainId = chainId || 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906';
   }
 
   /**
    * Get Binance address by index
    */
-  async getAddress(addressIndex: number): Promise<string> {
+  async getAddress(
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number): Promise<string> {
     // TODO
     throw new error.SDKError(this.getAddress.name, 'eos get address error, need implement eos get address');
   }
@@ -30,20 +31,22 @@ export default class EOS extends COIN.ECDSACoin implements COIN.Coin {
    * @return signature
    */
   async signTransaction(
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
     transaction: Transaction,
     addressIndex: number,
     publicKey: string | undefined = undefined,
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
-  ) : Promise<string> {
+  ): Promise<string> {
     const publicKeyToUse = publicKey === undefined
-      ? await this.getPublicKey(addressIndex)
-      : publicKey;
+      ? await this.getPublicKey(transport, appId, appPrivateKey, addressIndex) : publicKey;
 
     return signTransfer(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       transaction,
       addressIndex,

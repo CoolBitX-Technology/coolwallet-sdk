@@ -6,15 +6,15 @@ type Transport = transport.default;
 type protocol = import('./types').protocol
 
 export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
-  constructor(transport: Transport, appPrivateKey: string, appId:string) {
-    super(transport, appPrivateKey, appId, '94');
+  constructor() {
+    super('94');
   }
 
-  async getAddress(accountIndex: number, protocol: protocol = 'SLIP0010'): Promise<string> {
+  async getAddress(transport: Transport, appPrivateKey: string, appId:string, accountIndex: number, protocol: protocol = 'SLIP0010'): Promise<string> {
     if (accountIndex !== 0) {
       throw new ERROR.SDKError(this.getAddress.name, 'Only support address index = 0 for now.');
     }
-    const pubKey = await this.getPublicKey(accountIndex, protocol);
+    const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, protocol);
     if (!pubKey){
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
     } 
@@ -25,6 +25,9 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
    * sign XLM signatureBase with account 0, return signature.
    */
   async signTransaction(
+    transport: Transport, 
+    appPrivateKey: string, 
+    appId: string, 
     signatureBase: Buffer,
     accountIndex: number,
     protocol: protocol | undefined,
@@ -36,9 +39,9 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     }
     const protocolToUse = protocol || 'SLIP0010';
     const signature = signTx(
-      this.transport,
-      this.appPrivateKey,
-      this.appId,
+      transport,
+      appPrivateKey,
+      appId,
       this.coinType,
       signatureBase,
       accountIndex,
