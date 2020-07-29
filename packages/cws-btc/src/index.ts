@@ -15,7 +15,7 @@ type Transport = transport.default;
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	public ScriptType: any;
-	public addressToOutScript: Function;
+	public addressToOutScript: Function; 
 
 	constructor() {
 		super('00');
