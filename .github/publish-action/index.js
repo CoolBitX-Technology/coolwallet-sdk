@@ -2,12 +2,15 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import {
 	getDiff,
+	installCore,
 	updateVersionPatch,
 	updateVersionMinor,
 	updateVersionProduction,
 	buildAndPublishProduction,
 	buildAndPublishBeta,
 } from './utils';
+
+let isCoreInstalled = false;
 
 async function checkAndPublish(context, path) {
 	console.log(`[ ${path} ] start process`);
@@ -31,8 +34,17 @@ async function checkAndPublish(context, path) {
 		return;
 	}
 
-	let version;
 	const ref = context.ref.split('/')[2];
+
+	if (path != 'packages/core' && !isCoreInstalled) {
+		if (ref === 'master') {
+			await installCore(false);
+		} else {
+			await installCore(true);
+		}
+		isCoreInstalled = true;
+	}
+
 	if (ref === 'master') {
 		await updateVersionProduction(path);
 		await buildAndPublishProduction(path);

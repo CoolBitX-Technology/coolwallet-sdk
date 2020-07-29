@@ -1207,6 +1207,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+let isCoreInstalled = false;
+
 async function checkAndPublish(context, path) {
 	console.log(`[ ${path} ] start process`);
 
@@ -1229,8 +1231,17 @@ async function checkAndPublish(context, path) {
 		return;
 	}
 
-	let version;
 	const ref = context.ref.split('/')[2];
+
+	if (path != 'packages/core' && !isCoreInstalled) {
+		if (ref === 'master') {
+			await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.installCore)(false);
+		} else {
+			await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.installCore)(true);
+		}
+		isCoreInstalled = true;
+	}
+
 	if (ref === 'master') {
 		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionProduction)(path);
 		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.buildAndPublishProduction)(path);
@@ -6319,6 +6330,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var child_process_1 = __webpack_require__(129);
+function installCore(isBeta) {
+    if (isBeta === void 0) { isBeta = false; }
+    return __awaiter(this, void 0, void 0, function () {
+        var packageName;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    packageName = isBeta ? '@coolwallet/core@beta' : '@coolwallet/core';
+                    return [4 /*yield*/, command('npm', ['i', packageName])];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.installCore = installCore;
 function buildAndPublishProduction(path) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {

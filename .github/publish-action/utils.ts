@@ -1,5 +1,10 @@
 import { spawn } from 'child_process';
 
+export async function installCore(isBeta:boolean = false) {
+	const packageName = isBeta ? '@coolwallet/core@beta' : '@coolwallet/core';
+	await command('npm', ['i', packageName]);
+}
+
 export async function buildAndPublishProduction(path:string) {
 	await buildAndPublish(path, false);
 }
