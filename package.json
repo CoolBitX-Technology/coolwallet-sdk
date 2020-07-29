@@ -29,5 +29,8 @@
   "scripts": {
     "test": "jest"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@coolwallet/core": "0.1.0-beta.16"
+  }
 }
