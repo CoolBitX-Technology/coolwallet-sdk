@@ -9,21 +9,24 @@ type CancelOrder = import('./types').CancelOrder;
 type Transport = transport.default;
 
 export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
-  constructor(transport: Transport, appPrivateKey: string, appId: string) {
-    super(transport, appPrivateKey, appId, 'CA');
+  constructor() {
+    super('CA');
   }
 
   /**
    * Get Binance address by index
    */
-  async getAddress(addressIndex: number): Promise<string> {
-    const publicKey = await this.getPublicKey(addressIndex);
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return publicKeyToAddress(publicKey);
   }
   /**
    * Sign Binance tansfer transaction.
    */
   async signTransaction(
+    transport: Transport, 
+    appPrivateKey: string, 
+    appId: string, 
     signObj: Transfer,
     addressIndex: number,
     confirmCB: Function | undefined,
@@ -31,9 +34,9 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   ) {
     const readType = 'CA';
     return signTransfer(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       readType,
       signObj,
@@ -47,6 +50,9 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
    * Sign PlaceOrder Transaction
    */
   async placeOrder(
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string, 
     signObj: PlaceOrder,
     addressIndex: number,
     confirmCB: Function | undefined,
@@ -54,9 +60,9 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   ) {
     const readType = 'CB';
     return signTransfer(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       readType,
       signObj,
@@ -70,6 +76,9 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
    * Sign CancelOrder Transaction
    */
   async cancelOrder(
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string, 
     signObj: CancelOrder,
     addressIndex: number,
     confirmCB: Function | undefined,
@@ -77,9 +86,9 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   ) {
     const readType = 'CC';
     return signTransfer(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       readType,
       signObj,
