@@ -22,12 +22,10 @@ async function checkAndPublish(context, path) {
 		head = context.payload.after;
 	}
 
-	const diff = await getDiff(base, head, path, context.ref);
+	const isDiff = await getDiff(base, head, path, context.ref);
 
-	if (diff) {
-		console.log('getDiff :');
-		console.log(diff);
-
+	if (isDiff) {
+		console.log('found diff !');
 	} else {
 		console.log('not modified !');
 		return;
