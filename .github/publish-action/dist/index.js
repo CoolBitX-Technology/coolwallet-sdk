@@ -1220,12 +1220,10 @@ async function checkAndPublish(context, path) {
 		head = context.payload.after;
 	}
 
-	const diff = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.getDiff)(base, head, path, context.ref);
+	const isDiff = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.getDiff)(base, head, path, context.ref);
 
-	if (diff) {
-		console.log('getDiff :');
-		console.log(diff);
-
+	if (isDiff) {
+		console.log('found diff !');
 	} else {
 		console.log('not modified !');
 		return;
@@ -6541,12 +6539,19 @@ function getPackageInfo(path) {
 }
 function getDiff(base, head, path, ref) {
     return __awaiter(this, void 0, void 0, function () {
+        var diff;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, command('git', ['fetch', '--no-tags', '--no-recurse-submodules', '--depth=10000', 'origin', ref])];
                 case 1:
                     _a.sent();
-                    return [2 /*return*/, command('git', ['diff', base, head, '--name-only', '--', path + "/src"])];
+                    return [4 /*yield*/, command('git', ['diff', base, head, '--name-only', '--', path + "/src"])];
+                case 2:
+                    diff = _a.sent();
+                    console.log(diff);
+                    if (!diff || diff.includes('fatal:'))
+                        return [2 /*return*/, false];
+                    return [2 /*return*/, true];
             }
         });
     });
