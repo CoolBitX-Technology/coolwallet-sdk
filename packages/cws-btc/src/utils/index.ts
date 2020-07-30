@@ -487,7 +487,12 @@ function getScriptSigningActions(
 			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
 			const SEPath = Buffer.from(`15328000002C800000008000000000000000${addressIdxHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
-			const inputScriptType = toVarUintBuffer(scriptType);
+			let inputScriptType;
+			if ((scriptType == ScriptType.P2PKH) || (scriptType == ScriptType.P2WPKH)) {
+				inputScriptType = toVarUintBuffer(0);
+			} else {//(scriptType == ScriptType.P2SH_P2WPKH) || (scriptType == ScriptType.P2WSH)
+				inputScriptType = toVarUintBuffer(1);
+			}
 			const inputAmount = preparedInput.preValueBuf.reverse();
 			const inputHash = hash160(preparedInput.pubkeyBuf);
 			return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
