@@ -34,48 +34,6 @@ function hash256(buf: Buffer): Buffer {
 
 const ZERO = Buffer.alloc(1, 0);
 
-function toDER(x: Buffer): Buffer {
-	let i = 0;
-	while (x[i] === 0) ++i;
-	if (i === x.length) return ZERO;
-	x = x.slice(i);
-	if (x[0] & 0x80) return Buffer.concat([ZERO, x], 1 + x.length);
-	return x;
-}
-
-/*function encodeDerSig(signature: Buffer, hashType: Buffer): Buffer {
-	const r = toDER(signature.slice(0, 32));
-	const s = toDER(signature.slice(32, 64));
-	return Buffer.concat([bip66Encode(r, s), hashType]);
-}
-
-function bip66Encode(r: Buffer, s: Buffer) {
-	const lenR = r.length;
-	const lenS = s.length;
-	if (lenR === 0) throw new Error('R length is zero');
-	if (lenS === 0) throw new Error('S length is zero');
-	if (lenR > 33) throw new Error('R length is too long');
-	if (lenS > 33) throw new Error('S length is too long');
-	if (r[0] & 0x80) throw new Error('R value is negative');
-	if (s[0] & 0x80) throw new Error('S value is negative');
-	if (lenR > 1 && (r[0] === 0x00) && !(r[1] & 0x80)) throw new Error('R value excessively padded');
-	if (lenS > 1 && (s[0] === 0x00) && !(s[1] & 0x80)) throw new Error('S value excessively padded');
-
-	const signature = Buffer.allocUnsafe(6 + lenR + lenS);
-
-	// 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
-	signature[0] = 0x30;
-	signature[1] = signature.length - 2;
-	signature[2] = 0x02;
-	signature[3] = r.length;
-	r.copy(signature, 4);
-	signature[4 + lenR] = 0x02;
-	signature[5 + lenR] = s.length;
-	s.copy(signature, 6 + lenR);
-
-	return signature;
-}*/
-
 function toVarUintBuffer(int: number): Buffer {
 	return varuint.encode(int);
 }
@@ -197,35 +155,26 @@ function createUnsignedTransactions(
 	const unsignedTransactions = preparedInputs.map(({
 		pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
 	}) => {
+		let scriptCode;
 		if (scriptType === ScriptType.P2PKH) {
-			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf);
-			const outScriptLen = toVarUintBuffer(outScript.length);
-			return Buffer.concat([
-				versionBuf,
-				toVarUintBuffer(1),
-				preOutPointBuf,
-				outScriptLen, // preOutScriptBuf
-				outScript, // preOutScriptBuf
-				sequenceBuf,
-				outputsCount,
-				outputsBuf,
-				lockTimeBuf,
-				Buffer.from('81000000', 'hex'),
-			]);
-		} else {
-			return Buffer.concat([
-				versionBuf,
-				hashPrevouts,
-				hashSequence,
-				preOutPointBuf,
-				Buffer.from(`1976a914${hash160(pubkeyBuf).toString('hex')}88ac`, 'hex'), // ScriptCode
-				preValueBuf,
-				sequenceBuf,
-				hashOutputs,
-				lockTimeBuf,
-				Buffer.from('01000000', 'hex'),
-			]);
+			scriptCode = Buffer.from(`1976a914${hash160(pubkeyBuf).toString('hex')}88ac`, 'hex');
+		} else {//P2SSH
+			scriptCode = Buffer.from(`17a914${hash160(pubkeyBuf).toString('hex')}87`, 'hex');
 		}
+
+		return Buffer.concat([
+			versionBuf,
+			hashPrevouts,
+			hashSequence,
+			preOutPointBuf,
+			scriptCode,
+			preValueBuf,
+			sequenceBuf,
+			hashOutputs,
+			lockTimeBuf,
+			Buffer.from('01000000', 'hex'),
+		]);
+
 	});
 
 	return {
@@ -297,72 +246,28 @@ function composeFinalTransaction(
 		&& scriptType !== ScriptType.P2SH) {
 		throw new Error(`Unsupport ScriptType : ${scriptType}`);
 	}
-
-	if (scriptType === ScriptType.P2PKH) {
-		const inputsBuf = Buffer.concat(preparedInputs.map((data, i) => {
-			const { pubkeyBuf, preOutPointBuf, sequenceBuf } = data;
-			const signature = signatures[i];
-			const inScript = Buffer.concat([
-				Buffer.from((signature.length + 1).toString(16), 'hex'),
-				signature,
-				Buffer.from('81', 'hex'),
-				Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
-				pubkeyBuf,
-			]);
-			return Buffer.concat([
-				preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
-			]);
-		}));
-		return Buffer.concat([
-			versionBuf,
-			inputsCount,
-			inputsBuf,
-			outputsCount,
-			outputsBuf,
-			lockTimeBuf,
+	const inputsBuf = Buffer.concat(preparedInputs.map((data, i) => {
+		const { pubkeyBuf, preOutPointBuf, sequenceBuf } = data;
+		const signature = signatures[i];
+		const inScript = Buffer.concat([
+			Buffer.from((signature.length + 1).toString(16), 'hex'),
+			signature,
+			Buffer.from('41', 'hex'),
+			Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
+			pubkeyBuf,
 		]);
-	} else {
-		const flagBuf = Buffer.from('0001', 'hex');
-		const segwitBuf = Buffer.concat(preparedInputs.map(({ pubkeyBuf }, i) => {
-			const signature = signatures[i];
-			const segwitScript = Buffer.concat([
-				Buffer.from((signature.length + 1).toString(16), 'hex'),
-				signature,
-				Buffer.from('01', 'hex'),
-				Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
-				pubkeyBuf,
-			]);
-			return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
-		}));
-
-		const inputsBuf = Buffer.concat(preparedInputs.map(({
-			pubkeyBuf, preOutPointBuf, sequenceBuf
-		}) => {
-			//if (scriptType === ScriptType.P2SH_P2WPKH) {
-			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf);
-			const inScript = Buffer.concat([
-				Buffer.from(outScript.length.toString(16), 'hex'),
-				outScript,
-			]);
-			return Buffer.concat([
-				preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
-			]);
-			/*} else {
-				return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
-			}*/
-		}));
-
 		return Buffer.concat([
-			versionBuf,
-			flagBuf,
-			inputsCount,
-			inputsBuf,
-			outputsCount,
-			outputsBuf,
-			segwitBuf,
-			lockTimeBuf,
+			preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
 		]);
-	}
+	}));
+	return Buffer.concat([
+		versionBuf,
+		inputsCount,
+		inputsBuf,
+		outputsCount,
+		outputsBuf,
+		lockTimeBuf,
+	]);
 }
 
 function getArgument(
@@ -465,7 +370,7 @@ function getScriptSigningActions(
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
 			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
-			const SEPath = Buffer.from(`15328000002C800000008000000000000000${addressIdxHex}`, 'hex')
+			const SEPath = Buffer.from(`15328000002C800000918000000000000000${addressIdxHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
 			const inputScriptType = toVarUintBuffer(scriptType);
 			const inputAmount = preparedInput.preValueBuf.reverse();

@@ -13,15 +13,12 @@ import { signTransaction } from './sign';
 type Transport = transport.default;
 
 export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
-	public network: any;
 
 	public ScriptType: any;
-
 	public addressToOutScript: Function;
 
-	constructor(network: any) {
+	constructor() {
 		super('91');
-		this.network = network;
 		this.ScriptType = ScriptType;
 		this.addressToOutScript = addressToOutScript;
 	}
@@ -52,11 +49,13 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 
 	): Promise<string> {
 		for (const input of inputs) {
+			console.log("input: " + input.preValue)
 			// eslint-disable-next-line no-await-in-loop
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 		if (change) {
+			console.log("change: " + change.value)
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
 			// eslint-disable-next-line no-param-reassign
 			change.pubkeyBuf = Buffer.from(pubkey, 'hex');

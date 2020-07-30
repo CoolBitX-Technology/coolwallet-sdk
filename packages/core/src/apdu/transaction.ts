@@ -161,8 +161,7 @@ export const executeUtxoScript = async (
   appId: string,
   appPrivKey: string,
   utxoArgument: string,
-  //todo
-  P1 = "11"
+  extraTransactionType: string
 ) => {
   const { signature } = await getCommandSignature(
     transport,
@@ -170,7 +169,7 @@ export const executeUtxoScript = async (
     appPrivKey,
     commands.EXECUTE_UTXO_SCRIPT,
     utxoArgument,
-    P1,
+    extraTransactionType,
     undefined
   );
   const { outputData: encryptedSignature, statusCode, msg } = await executeCommand(
@@ -178,7 +177,7 @@ export const executeUtxoScript = async (
     commands.EXECUTE_UTXO_SCRIPT,
     target.SE,
     utxoArgument + signature,
-    P1,
+    extraTransactionType,
     undefined,
     true,
   );
