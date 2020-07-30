@@ -12,13 +12,15 @@ import { signTransaction } from './sign';
 
 type Transport = transport.default;
 
+export const coinType = '91'
+
 export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 
 	public ScriptType: any;
 	public addressToOutScript: Function;
 
 	constructor() {
-		super('91');
+		super(coinType);
 		this.ScriptType = ScriptType;
 		this.addressToOutScript = addressToOutScript;
 	}

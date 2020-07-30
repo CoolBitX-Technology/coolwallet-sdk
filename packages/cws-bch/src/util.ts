@@ -3,6 +3,7 @@ import { transport, tx, apdu } from '@coolwallet/core';
 //import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import * as scripts from "./scripts";
+import { coinType } from './index'
 import {
 	ScriptType, AddressFormat, Input, Output, Change, PreparedData
 } from './types';
@@ -29,7 +30,7 @@ function hash160(buf: Buffer): Buffer {
 }
 
 function hash256(buf: Buffer): Buffer {
-	return bitcore.crypto.Hash.sha256(buf);
+	return bitcore.crypto.Hash.sha256(bitcore.crypto.Hash.sha256(buf));
 }
 
 const ZERO = Buffer.alloc(1, 0);
@@ -158,7 +159,7 @@ function createUnsignedTransactions(
 		let scriptCode;
 		if (scriptType === ScriptType.P2PKH) {
 			scriptCode = Buffer.from(`1976a914${hash160(pubkeyBuf).toString('hex')}88ac`, 'hex');
-		} else {//P2SSH
+		} else {//P2SH
 			scriptCode = Buffer.from(`17a914${hash160(pubkeyBuf).toString('hex')}87`, 'hex');
 		}
 
@@ -172,7 +173,7 @@ function createUnsignedTransactions(
 			sequenceBuf,
 			hashOutputs,
 			lockTimeBuf,
-			Buffer.from('01000000', 'hex'),
+			Buffer.from('41000000', 'hex'),
 		]);
 
 	});
@@ -211,7 +212,7 @@ function getSigningActions(
 	if (change) {
 		const changeAction = async () => {
 			const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
-			await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
+			await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, coinType, change.addressIndex, redeemType);
 		}
 		preActions.push(changeAction);
 	}
@@ -223,8 +224,8 @@ function getSigningActions(
 	preActions.push(parsingOutputAction);
 
 	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-		const keyId = tx.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
-		const readType = '01';
+		const keyId = tx.util.addressIndexToKeyId(coinType, preparedData.preparedInputs[i].addressIndex);
+		const readType = '91';
 		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
 		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
@@ -301,7 +302,7 @@ function getArgument(
 		changeScriptType = toVarUintBuffer(outputType);
 		changeAmount = toUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from('32' + '8000002C' + '80000000' + '80000000' + '00000000' + addressIdxHex, 'hex');
+		changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdxHex, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
@@ -370,9 +371,14 @@ function getScriptSigningActions(
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
 			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
-			const SEPath = Buffer.from(`15328000002C800000918000000000000000${addressIdxHex}`, 'hex')
+			const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdxHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
-			const inputScriptType = toVarUintBuffer(scriptType);
+			let inputScriptType;
+			if (scriptType == ScriptType.P2PKH) {
+				inputScriptType = toVarUintBuffer(0);
+			} else {//scriptType == ScriptType.P2SH
+				inputScriptType = toVarUintBuffer(1);
+			}
 			const inputAmount = preparedInput.preValueBuf.reverse();
 			const inputHash = hash160(preparedInput.pubkeyBuf);
 			return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
@@ -380,7 +386,7 @@ function getScriptSigningActions(
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
-			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (scriptType === ScriptType.P2PKH) ? "10" : "11");
+			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, "12");
 		});
 	return { preActions, actions };
 };
