@@ -62,9 +62,13 @@ export const txPrep = async (
   let msg = 'prepareTx get encryptedSignature failed';
   if (txDataType != '00') {
     const result = await executeCommand(transport, commands.TX_PREPARE, target.SE, txDataHex, txDataType, '00');
-    encryptedSignature = result.outputData;
     statusCode = result.statusCode
     msg = result.msg
+    if (statusCode === CODE._9000) {
+      return statusCode;
+    } else {
+      throw new APDUError(commands.TX_PREPARE, statusCode, msg)
+    }
   } else {
     const sig = await getCommandSignatureWithoutNonce(
       transport,
@@ -88,11 +92,11 @@ export const txPrep = async (
         msg = result.msg
       }
     }
-  }
-  if (encryptedSignature) {
-    return encryptedSignature;
-  } else {
-    throw new APDUError(commands.TX_PREPARE, statusCode, msg)
+    if (encryptedSignature) {
+      return encryptedSignature;
+    } else {
+      throw new APDUError(commands.TX_PREPARE, statusCode, msg)
+    }
   }
 };
 
