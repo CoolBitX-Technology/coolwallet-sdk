@@ -191,7 +191,7 @@ function createUnsignedTransactions(
 	];
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
-		const changeValue = toUintBuffer(change.value, 8);
+		const changeValue = toReverseUintBuffer(change.value, 8);
 		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
 		const outScriptLen = toVarUintBuffer(outScript.length);
 		outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
@@ -430,11 +430,12 @@ function getArgument(
 	const hashPrevouts = doubleSha256(Buffer.concat(prevouts));
 	const sequences = inputs.map(input => {
 		return Buffer.concat([
-			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
+			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex')
 			//Buffer.from(input.sequence, 'hex').reverse(),
-			toReverseUintBuffer(input.preIndex, 4)
+			, toReverseUintBuffer(input.preIndex, 4)
 		])
 	})
+	console.log("sequences: " + Buffer.concat(sequences).toString('hex'))
 	const hashSequence = doubleSha256(Buffer.concat(sequences));
 
 	return Buffer.concat([
