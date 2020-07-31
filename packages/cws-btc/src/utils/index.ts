@@ -26,7 +26,7 @@ function hash160(buf: Buffer): Buffer {
 	return bitcoin.crypto.hash160(buf);
 }
 
-function hash256(buf: Buffer): Buffer {
+function doubleSha256(buf: Buffer): Buffer {
 	return bitcoin.crypto.hash256(buf);
 }
 
@@ -200,9 +200,9 @@ function createUnsignedTransactions(
 	const outputsCount = toVarUintBuffer((change) ? 2 : 1);
 	const outputsBuf = Buffer.concat(outputArray);
 
-	const hashPrevouts = hash256(Buffer.concat(preparedInputs.map((input) => input.preOutPointBuf)));
-	const hashSequence = hash256(Buffer.concat(preparedInputs.map((input) => input.sequenceBuf)));
-	const hashOutputs = hash256(outputsBuf);
+	const hashPrevouts = doubleSha256(Buffer.concat(preparedInputs.map((input) => input.preOutPointBuf)));
+	const hashSequence = doubleSha256(Buffer.concat(preparedInputs.map((input) => input.sequenceBuf)));
+	const hashOutputs = doubleSha256(outputsBuf);
 
 	const unsignedTransactions = preparedInputs.map(({
 		pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
@@ -427,7 +427,7 @@ function getArgument(
 		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
 		toReverseUintBuffer(input.preIndex, 4)])
 	})
-	const hashPrevouts = hash256(Buffer.concat(prevouts));
+	const hashPrevouts = doubleSha256(Buffer.concat(prevouts));
 	const sequences = inputs.map(input => {
 		return Buffer.concat([
 			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
@@ -435,7 +435,7 @@ function getArgument(
 			toReverseUintBuffer(input.preIndex, 4)
 		])
 	})
-	const hashSequence = hash256(Buffer.concat(sequences));
+	const hashSequence = doubleSha256(Buffer.concat(sequences));
 
 	return Buffer.concat([
 		outputScriptType,
