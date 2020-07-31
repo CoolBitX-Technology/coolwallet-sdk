@@ -6,8 +6,8 @@ import { TypedData } from 'eth-sig-util';
 
 type Transport = transport.default;
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
-  constructor(transport: Transport, appPrivateKey: string, appId: string) {
-    super(transport, appPrivateKey, appId, '3C');
+  constructor() {
+    super('3C');
   }
 
   /**
@@ -15,8 +15,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {number} addressIndex
    * @return {string}
    */
-  async getAddress(addressIndex: number): Promise<string> {
-    const publicKey = await this.getPublicKey(addressIndex);
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return pubKeyToAddress(publicKey);
   }
 
@@ -30,17 +30,20 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransaction(
+    transport: Transport, 
+    appPrivateKey: string, 
+    appId: string, 
     transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number },
     addressIndex: number,
     publicKey: string | undefined = undefined,
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ) {
-    if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
+    if (!publicKey) publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return ethSign.signTransaction(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       transaction,
       addressIndex,
@@ -61,6 +64,9 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @return {Promise<String>}
    */
   async signMessage(
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string, 
     message: string,
     addressIndex: number,
     publicKey: string | undefined = undefined,
@@ -68,14 +74,14 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ): Promise<string> {
-    await setting.auth.versionCheck(this.transport, 81);
+    await setting.auth.versionCheck(transport, 81);
     if (!publicKey) {
-      publicKey = await this.getPublicKey(addressIndex);
+      publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     }
     return ethSign.signMessage(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       message,
       addressIndex,
@@ -95,18 +101,21 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTypedData(
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string, 
     typedData: object,
     addressIndex: number,
     publicKey: string | undefined = undefined,
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ) {
-    await setting.auth.versionCheck(this.transport, 84);
-    if (!publicKey) publicKey = await this.getPublicKey(addressIndex);
+    await setting.auth.versionCheck(transport, 84);
+    if (!publicKey) publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return ethSign.signTypedData(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       typedData,
       addressIndex,

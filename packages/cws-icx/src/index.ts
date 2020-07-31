@@ -5,15 +5,15 @@ import { pubKeyToAddress } from './utils/util';
 type Transport = transport.default;
 
 export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
-  constructor(transport: Transport, appPrivateKey: string, appId: string) {
-    super(transport, appPrivateKey, appId, '4A');
+  constructor() {
+    super('4A');
   }
 
   /**
    * Get ICON address by index
    */
-  async getAddress(addressIndex: number): Promise<string> {
-    const publicKey = await this.getPublicKey(addressIndex);
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return pubKeyToAddress(publicKey);
   }
 
@@ -21,17 +21,20 @@ export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
    * Sign ICX Transaction.
    */
   async signTransaction(
+    transport: Transport, 
+    appPrivateKey: string, 
+    appId: string, 
     transaction: string | Object,
     addressIndex: number,
     publicKey: string,
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ) {
-    if (publicKey === undefined) publicKey = await this.getPublicKey(addressIndex);
+    if (publicKey === undefined) publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return signTransaction(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
+      transport,
+      appId,
+      appPrivateKey,
       this.coinType,
       transaction,
       addressIndex,
