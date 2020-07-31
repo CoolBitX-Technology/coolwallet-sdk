@@ -5,7 +5,6 @@ import { target } from '../config/target';
 import { CODE } from '../config/status/code';
 
 /**
- * Select Card Manager
  * @return {Promise<boolean>}
  */
 export const selectApplet = async (transport: Transport): Promise<boolean> => {
@@ -17,4 +16,17 @@ export const selectApplet = async (transport: Transport): Promise<boolean> => {
   return false;
 
 
+};
+
+
+
+/**
+ * Select Card Manager
+ */
+export const updateSE = async (progressCallback: Function) => {
+  progressCallback(10);
+  progressCallback(20);
+  progressCallback(30);
+  progressCallback(40);
+  progressCallback(50);
 };
