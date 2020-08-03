@@ -6,15 +6,15 @@ import {
 	Change,
 	addressToOutScript,
 	pubkeyToAddressAndOutScript
-} from './utils';
+} from './util';
 
-import { signTransaction } from './btcSign';
+import { signTransaction } from './sign';
 
 type Transport = transport.default;
 
-export const coinType = '00'
+export const coinType = '91'
 
-export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
+export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 
 	public ScriptType: any;
 	public addressToOutScript: Function;
@@ -25,17 +25,17 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 		this.addressToOutScript = addressToOutScript;
 	}
 
-	async getAddress(transport: Transport, appPrivateKey: string, appId: string, scriptType: ScriptType, addressIndex: number)
+	async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number)
 		: Promise<string> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
+		const { address } = pubkeyToAddressAndOutScript(publicKey);
 		return address;
 	}
 
-	async getAddressAndOutScript(transport: Transport, appPrivateKey: string, appId: string, scriptType: ScriptType, addressIndex: number)
+	async getAddressAndOutScript(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number)
 		: Promise<{ address: string, outScript: Buffer }> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
+		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
 	}
 
 	async signTransaction(
@@ -51,11 +51,13 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	): Promise<string> {
 		for (const input of inputs) {
+			console.log("input: " + input.preValue)
 			// eslint-disable-next-line no-await-in-loop
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 		if (change) {
+			console.log("change: " + change.value)
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
 			// eslint-disable-next-line no-param-reassign
 			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
@@ -73,4 +75,3 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 		);
 	}
 }
-

@@ -3,6 +3,7 @@ import { transport, error, tx, apdu } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import * as scripts from "../scripts";
+import { coinType } from '../index'
 import {
 	ScriptType, Input, Output, Change, PreparedData
 } from './types';
@@ -26,7 +27,7 @@ function hash160(buf: Buffer): Buffer {
 	return bitcoin.crypto.hash160(buf);
 }
 
-function hash256(buf: Buffer): Buffer {
+function doubleSha256(buf: Buffer): Buffer {
 	return bitcoin.crypto.hash256(buf);
 }
 
@@ -191,7 +192,7 @@ function createUnsignedTransactions(
 	];
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
-		const changeValue = toUintBuffer(change.value, 8);
+		const changeValue = toReverseUintBuffer(change.value, 8);
 		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
 		const outScriptLen = toVarUintBuffer(outScript.length);
 		outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
@@ -200,9 +201,9 @@ function createUnsignedTransactions(
 	const outputsCount = toVarUintBuffer((change) ? 2 : 1);
 	const outputsBuf = Buffer.concat(outputArray);
 
-	const hashPrevouts = hash256(Buffer.concat(preparedInputs.map((input) => input.preOutPointBuf)));
-	const hashSequence = hash256(Buffer.concat(preparedInputs.map((input) => input.sequenceBuf)));
-	const hashOutputs = hash256(outputsBuf);
+	const hashPrevouts = doubleSha256(Buffer.concat(preparedInputs.map((input) => input.preOutPointBuf)));
+	const hashSequence = doubleSha256(Buffer.concat(preparedInputs.map((input) => input.sequenceBuf)));
+	const hashOutputs = doubleSha256(outputsBuf);
 
 	const unsignedTransactions = preparedInputs.map(({
 		pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
@@ -275,7 +276,7 @@ function getSigningActions(
 				throw new error.SDKError(getSigningActions.name, 'not support P2WPKH change');
 			} else {
 				const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
-				await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
+				await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, coinType, change.addressIndex, redeemType);
 			}
 		}
 		preActions.push(changeAction);
@@ -289,7 +290,7 @@ function getSigningActions(
 	preActions.push(parsingOutputAction);
 
 	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-		const keyId = tx.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
+		const keyId = tx.util.addressIndexToKeyId(coinType, preparedData.preparedInputs[i].addressIndex);
 		const readType = '01';
 		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
@@ -416,7 +417,7 @@ function getArgument(
 		changeScriptType = toVarUintBuffer(outputType);
 		changeAmount = toUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from('32' + '8000002C' + '80000000' + '80000000' + '00000000' + addressIdxHex, 'hex');
+		changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdxHex, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
@@ -427,15 +428,13 @@ function getArgument(
 		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
 		toReverseUintBuffer(input.preIndex, 4)])
 	})
-	const hashPrevouts = hash256(Buffer.concat(prevouts));
+	const hashPrevouts = doubleSha256(Buffer.concat(prevouts));
 	const sequences = inputs.map(input => {
 		return Buffer.concat([
-			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
-			//Buffer.from(input.sequence, 'hex').reverse(),
-			toReverseUintBuffer(input.preIndex, 4)
+			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex')
 		])
 	})
-	const hashSequence = hash256(Buffer.concat(sequences));
+	const hashSequence = doubleSha256(Buffer.concat(sequences));
 
 	return Buffer.concat([
 		outputScriptType,
@@ -484,10 +483,16 @@ function getScriptSigningActions(
 
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
-			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
-			const SEPath = Buffer.from(`15328000002C800000008000000000000000${addressIdxHex}`, 'hex')
+			const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
+			const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
-			const inputScriptType = toVarUintBuffer(scriptType);
+			let inputScriptType;
+			// TODO
+			if ((scriptType == ScriptType.P2PKH) || (scriptType == ScriptType.P2WPKH) || (scriptType == ScriptType.P2SH_P2WPKH)) {
+				inputScriptType = toVarUintBuffer(0);
+			} else {//(scriptType == ScriptType.P2WSH)
+				inputScriptType = toVarUintBuffer(1);
+			}
 			const inputAmount = preparedInput.preValueBuf.reverse();
 			const inputHash = hash160(preparedInput.pubkeyBuf);
 			return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
