@@ -51,12 +51,12 @@ function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer
 	return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
 }
 
-function addressToOutScript(address: string
-): {
-	scriptType: ScriptType,
-	outScript: Buffer,
-	outHash: Buffer
-} {
+function addressToOutScript(address: string)
+	: {
+		scriptType: ScriptType,
+		outScript: Buffer,
+		outHash: Buffer
+	} {
 	if (!bchaddr.isValidAddress(address)) {
 		throw new Error(`Unsupport Address : ${address}`);
 	}
@@ -301,8 +301,8 @@ function getArgument(
 		haveChange = toVarUintBuffer(1);
 		changeScriptType = toVarUintBuffer(outputType);
 		changeAmount = toUintBuffer(change.value, 8);
-		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdxHex, 'hex');
+		const addressIdHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
+		changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdHex, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
@@ -368,8 +368,8 @@ function getScriptSigningActions(
 
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
-			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
-			const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdxHex}`, 'hex')
+			const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
+			const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
 			let inputScriptType;
 			if (scriptType == ScriptType.P2PKH) {
