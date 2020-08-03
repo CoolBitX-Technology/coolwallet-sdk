@@ -2,12 +2,13 @@
 import { coin as COIN, transport, setting } from '@coolwallet/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
+import { coinType } from './type'
 import { TypedData } from 'eth-sig-util';
 
 type Transport = transport.default;
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
-    super('3C');
+    super(coinType);
   }
 
   /**
@@ -30,9 +31,9 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransaction(
-    transport: Transport, 
-    appPrivateKey: string, 
-    appId: string, 
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
     transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number },
     addressIndex: number,
     publicKey: string | undefined = undefined,
@@ -66,7 +67,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signMessage(
     transport: Transport,
     appPrivateKey: string,
-    appId: string, 
+    appId: string,
     message: string,
     addressIndex: number,
     publicKey: string | undefined = undefined,
@@ -103,7 +104,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signTypedData(
     transport: Transport,
     appPrivateKey: string,
-    appId: string, 
+    appId: string,
     typedData: object,
     addressIndex: number,
     publicKey: string | undefined = undefined,
