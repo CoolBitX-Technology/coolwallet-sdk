@@ -12,13 +12,15 @@ import { signTransaction } from './btcSign';
 
 type Transport = transport.default;
 
+export const coinType = '00'
+
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	public ScriptType: any;
 	public addressToOutScript: Function;
 
 	constructor() {
-		super('00');
+		super(coinType);
 		this.ScriptType = ScriptType;
 		this.addressToOutScript = addressToOutScript;
 	}
@@ -37,9 +39,9 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 	}
 
 	async signTransaction(
-		transport: Transport, 
-		appPrivateKey: string, 
-		appId: string, 
+		transport: Transport,
+		appPrivateKey: string,
+		appId: string,
 		scriptType: ScriptType,
 		inputs: [Input],
 		output: Output,
