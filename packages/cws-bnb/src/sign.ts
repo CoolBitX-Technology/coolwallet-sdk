@@ -1,4 +1,4 @@
-import { apdu, transport, tx, util } from '@coolwallet/core';
+import { apdu, transport, tx, error, util } from '@coolwallet/core';
 import * as bnbUtil from './util';
 import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder } from './types'
 
@@ -13,11 +13,17 @@ export default async function sign(
   appId: string,
   appPrivateKey: string,
   transactionType: TransactionType,
+  readType: string,
   signObj: Transfer | PlaceOrder | CancelOrder,
   addressIndex: number,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
 ): Promise<string> {
+  if (transactionType !== TransactionType.TRANSFER
+    && transactionType !== TransactionType.PLACE_ORDER
+    && transactionType !== TransactionType.CANCEL_ORDER) {
+    throw new error.SDKError(sign.name, `Unsupport transactionType: '${transactionType}'`);
+  }
   const useScript = await util.checkSupportScripts(transport);
   const preActions = [];
   let action;
@@ -37,10 +43,8 @@ export default async function sign(
       );
     }
   } else {
-    const rawPayload = bnbUtil.convertObjectToSignBytes(signObj); // .toString('hex');
-
+    const rawPayload = bnbUtil.convertObjectToSignBytes(signObj);
     const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
-    const readType = 'CA';
     const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
 
     const sayHi = async () => {
