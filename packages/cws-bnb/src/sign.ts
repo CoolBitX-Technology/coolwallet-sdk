@@ -1,38 +1,67 @@
-import { core, transport } from '@coolwallet/core';
+import { apdu, transport, tx, util } from '@coolwallet/core';
 import * as bnbUtil from './util';
+import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder } from './types'
 
 type Transport = transport.default;
-type BNBTx = import('./types').Transaction;
+//type BNBTx = import('./types').Transaction;
 
 /**
  * Sign Binance Tranaction
  */
-export default async function signTransfer(
+export default async function sign(
   transport: Transport,
   appId: string,
-  appPrivateKey:string,
-  coinType:string,
-  readType:string,
-  signObj: BNBTx,
+  appPrivateKey: string,
+  transactionType: TransactionType,
+  signObj: Transfer | PlaceOrder | CancelOrder,
   addressIndex: number,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
 ): Promise<string> {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
-  const rawPayload = bnbUtil.convertObjectToSignBytes(signObj); // .toString('hex');
+  const useScript = await util.checkSupportScripts(transport);
+  const preActions = [];
+  let action;
+  if (useScript) {
+    const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, addressIndex, signObj);
+    const sendScript = async () => {
+      await apdu.tx.sendScript(transport, script);
+    }
+    preActions.push(sendScript);
 
-  const dataForSE = core.flow.prepareSEData(keyId, rawPayload, readType);
-  const signature = await core.flow.getSingleSignatureFromCoolWallet(
+    action = async () => {
+      return apdu.tx.executeScript(
+        transport,
+        appId,
+        appPrivateKey,
+        argument
+      );
+    }
+  } else {
+    const rawPayload = bnbUtil.convertObjectToSignBytes(signObj); // .toString('hex');
+
+    const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
+    const readType = 'CA';
+    const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
+
+    const sayHi = async () => {
+      await apdu.general.hi(transport, appId);
+    }
+    preActions.push(sayHi)
+
+    action = async () => {
+      return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+    }
+  }
+
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
-    appId,
-    appPrivateKey,
-    dataForSE,
-    '00',
+    preActions,
+    action,
     false,
-    undefined,
     confirmCB,
-    authorizedCB
+    authorizedCB,
+    true
   );
 
-  return bnbUtil.combineSignature(signature);
+  return bnbUtil.combineSignature(canonicalSignature);
 }

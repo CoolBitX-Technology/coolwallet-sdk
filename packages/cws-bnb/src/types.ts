@@ -1,5 +1,7 @@
 /* eslint-disable camelcase  */
 
+export const coinType = 'CA'
+
 type coin = {
   denom: string;
   amount: number;
@@ -27,13 +29,19 @@ type PlaceOrderMsg = {
 }
 
 type CancelOrderMsg = {
-    symbol: string,
-    sender: string,
-    refid: string
+  symbol: string,
+  sender: string,
+  refid: string
 }
 
+export enum TransactionType {
+  TRANSFER = "TRANSFER",
+  PLACE_ORDER = "PLACE_ORDER",
+  CANCEL_ORDER = "CANCEL_ORDER",
+};
+
 // include transfer, placeOrder and cancelOrder
-export type Transaction = {
+/*export type Transaction = {
   account_number: string,
   chain_id: string,
   data: string | null,
@@ -41,7 +49,7 @@ export type Transaction = {
   msgs: TransferMsg[] | PlaceOrderMsg[] | CancelOrderMsg[],
   sequence: string,
   source: string,
-}
+}*/
 
 export type Transfer = {
   account_number: string,
