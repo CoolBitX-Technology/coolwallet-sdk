@@ -125,3 +125,4 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     );
   }
 }
+
