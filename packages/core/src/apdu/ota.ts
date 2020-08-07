@@ -5,7 +5,7 @@ import { target } from '../config/target';
 import { CODE } from '../config/status/code';
 import * as general from './general';
 import { Promise as promise } from 'bluebird';
-import * as script from './script';
+import * as script from './script/otaScript';
 import * as setting from './setting';
 import * as informational from './informational';
 import * as util from '../utils';
@@ -15,7 +15,6 @@ import { SDKError } from '../error/errorHandle';
 
 var jwt = require('jsonwebtoken');
 
-const MCU_UPDATE_VER = '130A0909';
 const SE_UPDATE_VER = 100;
 
 const challengeUrl = `https://ota.cbx.io/api/challenge`;
