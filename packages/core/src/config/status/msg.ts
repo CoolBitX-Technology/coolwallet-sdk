@@ -5,7 +5,7 @@ export const MSG: CodeList = {
   _6E00: 'cls not supported',
   _6D00: 'ins not supported',
   _6982: 'security statusCode not satisfied',
-  _6F00: 'unknown error', 
+  _6F00: 'unknown error',
   _6700: 'wrong length',
   _6A86: 'incorrect p1 & p2',
   _6884: 'command chaining not supported',
@@ -62,4 +62,5 @@ export const MSG: CodeList = {
   _6AC2: 'p1 and script type not match',
   _6AC7: 'p1 not supported',
   _6AC5: 'script type not supported (only support P2PKH=00 P2SH=01)',
+  _6A88: 'Applet is not exits'
 }

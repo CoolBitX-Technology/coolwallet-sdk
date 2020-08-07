@@ -11,8 +11,7 @@ import * as informational from './informational';
 import * as util from '../utils';
 import * as auth from '../setting/auth';
 import * as display from './mcu/display';
-import { SDKError } from '../error';
-import { mcu } from '.';
+
 var jwt = require('jsonwebtoken');
 
 const MCU_UPDATE_VER = '130A0909';
@@ -39,17 +38,24 @@ export const selectApplet = async (transport: Transport, appletCommand: string =
 /**
  * 
  * @param transport 
- * @param cardId 
+ * @param cardId ex: CWS0123456
  * @param appId 
  * @param appPrivateKey 
- * @param progressCallback 
- * @param callAPI 
+ * @param progressCallback progressCallback(progressNum): return update progress percentage
+ * @param callAPI callAPI(url, options): Function of calling api
  * @param updateMCU 
  */
 export const updateSE = async (transport: Transport, cardId: string, appId: string, appPrivateKey: string, progressCallback: Function, callAPI: Function, updateMCU: boolean = false) => {
   const selectCardManager = 'A000000151000000';
   const selectBackUpSeedApplet = 'A1A2A3A4A5A6';
-  const cardSEVersion = await general.getSEVersion(transport);
+  let cardSEVersion;
+  try {
+    cardSEVersion = await general.getSEVersion(transport);
+  } catch (e) {
+    console.error(e);
+    cardSEVersion = 0;
+
+  }
   let progressIndex = 0;
   let progressNum = [14, 28, 36, 40, 44, 50, 87, 100];
 
@@ -63,13 +69,13 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
   progressCallback(progressNum[progressIndex++]);
   const hasBackupScriptSEVersion = 76;
   let isAppletExist;
-  try {
+  // try {
     isAppletExist = await selectApplet(transport);
-  } catch (e) {
-    console.error(e);
-    isAppletExist = false;
+  // } catch (e) {
+  //   console.error(e);
+  //   isAppletExist = false;
 
-  }
+  // }
 
 
   if (isAppletExist) {
@@ -101,7 +107,6 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
   progressCallback(progressNum[progressIndex++]);
 
   console.log(`mutual Authorization Start----`);
-  // await mutualAuthorization(transport, cardId);
   const challengeResponse = await callAPI(challengeUrl, getAPIOption(cardId));
   console.log(cardId);
   const challengeObj = await formatAPIResponse(transport, challengeResponse);
@@ -110,46 +115,46 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
   console.log(`mutual Authorization Done----`);
 
   // Install backupSeed script
-  // progressCallback(progressNum[progressIndex++]);
+  progressCallback(progressNum[progressIndex++]);
 
-  // if (cardSEVersion < hasBackupScriptSEVersion) {
-  //   console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
-  //   if (statusCode.toUpperCase() === CODE._6A82) {
-  //     await insertScript(transport, script.newLoadScript);
-  //     await insertScript(transport, script.newInstallScript);
-  //     console.log(`Install loadscript done`);
-  //   }
-  // }
+  if (cardSEVersion < hasBackupScriptSEVersion) {
+    console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
+    if (statusCode.toUpperCase() === CODE._6A82) {
+      await insertScript(transport, script.newLoadScript);
+      await insertScript(transport, script.newInstallScript);
+      console.log(`Install loadscript done`);
+    }
+  }
 
-  // progressCallback(progressNum[progressIndex++]);
-  // // await insertDeleteScript(transport, script.deleteScript);
-  // console.log('Delete Card Manager Done');
+  progressCallback(progressNum[progressIndex++]);
+  await insertDeleteScript(transport, script.deleteScript);
+  console.log('Delete Card Manager Done');
 
-  // progressCallback(progressNum[progressIndex]); // progress 50 
-  // await insertLoadScript(transport, script.loadScript, progressCallback, progressNum[progressIndex], progressNum[progressIndex + 1]);
-  // console.log('Load OTA Script Done');
-  // progressIndex += 1
+  progressCallback(progressNum[progressIndex]); // progress 50 
+  await insertLoadScript(transport, script.loadScript, progressCallback, progressNum[progressIndex], progressNum[progressIndex + 1]);
+  console.log('Load OTA Script Done');
+  progressIndex += 1
 
-  // progressCallback(progressNum[progressIndex++]);
-  // await insertScript(transport, script.installScript);
+  progressCallback(progressNum[progressIndex++]);
+  await insertScript(transport, script.installScript);
 
-  // await display.hideUpdate(transport); // Hide update from the card
+  await display.hideUpdate(transport); // Hide update from the card
 
-  // await selectApplet(transport, selectCardManager);
-  // isAppletExist = await selectApplet(transport);
-  // console.log(`isAppletExist: ${isAppletExist}`);
+  await selectApplet(transport, selectCardManager);
+  isAppletExist = await selectApplet(transport);
+  console.log(`isAppletExist: ${isAppletExist}`);
 
-  // if (isAppletExist) {
-  //   // start recover backupData
-  //   console.log(`Start checking recovery`);
-  //   let isNeedRecover = await setting.checkBackupStatus(transport);
-  //   console.log(`isNeedRecover: ${isNeedRecover}`);
-  //   if (isNeedRecover === true) {
-  //     await recoverBackupData(transport);
-  //   }
-  // }
-  // progressCallback(progressNum[progressIndex]);
-  // console.log('Install OTA Script (SE Update) Done');
+  if (isAppletExist) {
+    // start recover backupData
+    console.log(`Start checking recovery`);
+    let isNeedRecover = await setting.checkBackupStatus(transport);
+    console.log(`isNeedRecover: ${isNeedRecover}`);
+    if (isNeedRecover === true) {
+      await recoverBackupData(transport);
+    }
+  }
+  progressCallback(progressNum[progressIndex]);
+  console.log('Install OTA Script (SE Update) Done');
 
   return SE_UPDATE_VER;
   // } catch (e) {
@@ -226,6 +231,7 @@ const insertDeleteScript = async (transport: Transport, scriptHex: string) => {
       if (!deleteStatus) {
         throw 'Delete failed, status code: ' + statusCode;
       }
+      // throw 'test error';
     });
   } catch (e) {
     throw 'Delete Script Failed! ' + e;
@@ -254,7 +260,7 @@ const deleteBackupRegisterData = async (transport: Transport, appId: string, app
   } catch (e) {
     if (e.message) {
       console.error(`${deleteBackupRegisterData.name} fail: ${e.message}`);
-    } mutualAuthorization
+    } 
     throw 'backup Register data Failed ' + e;
   }
 };
@@ -349,78 +355,3 @@ export const formatAPIResponse = async (transport: Transport, result: Response) 
   return response
 }
 
-
-const mutualAuthorization = async (transport: Transport, cardId: string) => {
-  console.log(`start mutual Authorization with cbx server: cardId ${cardId}`);
-  const challengeUrl = `https://ota.cbx.io/api/challenge`;
-  const challengeData = { cwid: cardId };
-  const challengeObj = await getAuth(transport, challengeUrl, challengeData);
-  const challenge = challengeObj.outputData;
-  console.log(`Challenge : ${challenge}`);
-
-  const cryptogramUrl = `https://ota.cbx.io/api/cryptogram`;
-  const cryptogramData = { cryptogram: challenge, cwid: cardId };
-  await getAuth(transport, cryptogramUrl, cryptogramData);
-  console.log(`mutual Authorization Done`);
-};
-
-const getAuth = (transport: Transport, url: string, data: object) => {
-  const secret = 'd579bf4a2883cecf610785c49623e1';
-  // let payload = new TokenSigner('ES256K', secret).sign(data)
-  // console.log(`signed token ${payload}`)
-
-  let payload = jwt.sign(data, secret, { expiresIn: 60 * 60 * 24 });
-  console.log(`payload: ${payload}`);
-
-  const body = {
-    keyNum: '1',
-    payload,
-  };
-
-  const options = {
-    body: JSON.stringify(body),
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': 'no-cors'  // ??
-    },
-  };
-
-  return fetch(url, options)
-    .then(async result => {
-      // handle response result with
-      let bodyText;
-      try {
-        bodyText = await result.json();
-      } catch (e) {
-        bodyText = await result.text();
-      }
-      const status = result.status
-      console.log(result)
-      console.log(`Server status ${status}`);
-      if (status === 405) {
-        console.error(`Mutaul Authentication Fail: ${status}`);
-        throw `Mutaul Authentication Fail: ${status}`;
-      }
-      if (status !== 200) {
-        let { error } = bodyText;
-        let message;
-        if (error && error.message) {
-          message = bodyText.error.message;
-        } else {
-          message = bodyText;
-        }
-        console.error(`Server message ${JSON.stringify(message)}`);
-        throw JSON.stringify(message);
-      }
-      return jwt.decode(bodyText.cryptogram);
-    })
-    .then(async obj => {
-      console.log(`Server Auth Response : ${JSON.stringify(obj)}`);
-      const { CLA, INS, P1, P2, packets } = obj;
-      const apdu = util.assemblyCommandAndData(CLA, INS, P1, P2, packets);
-      const response = await executeAPDU(transport, apdu, target.SE);
-      return response
-    });
-};
