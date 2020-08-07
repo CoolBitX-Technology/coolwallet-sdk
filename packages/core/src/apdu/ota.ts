@@ -62,109 +62,109 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
   if (updateMCU) {
     progressNum = progressNum.map(num => Math.floor(num / 2));
   }
-  // try {
+  try {
 
-  await display.showUpdate(transport);
+    await display.showUpdate(transport);
 
-  progressCallback(progressNum[progressIndex++]);
-  const hasBackupScriptSEVersion = 76;
-  let isAppletExist;
-  // try {
+    progressCallback(progressNum[progressIndex++]);
+    const hasBackupScriptSEVersion = 76;
+    let isAppletExist;
+    // try {
     isAppletExist = await selectApplet(transport);
-  // } catch (e) {
-  //   console.error(e);
-  //   isAppletExist = false;
+    // } catch (e) {
+    //   console.error(e);
+    //   isAppletExist = false;
 
-  // }
+    // }
 
 
-  if (isAppletExist) {
-    if (cardSEVersion >= hasBackupScriptSEVersion) {
-      const isCardRecognized = await general.hi(transport, appId);
+    if (isAppletExist) {
+      if (cardSEVersion >= hasBackupScriptSEVersion) {
+        const isCardRecognized = await general.hi(transport, appId);
 
-      let { walletCreated } = await informational.getCardInfo(transport);
-      console.log(`isCardRecognized: ${isCardRecognized}, walletStatus: ${walletCreated}`);
+        let { walletCreated } = await informational.getCardInfo(transport);
+        console.log(`isCardRecognized: ${isCardRecognized}, walletStatus: ${walletCreated}`);
 
-      if (isCardRecognized) {
-        await deleteBackupRegisterData(transport, appId, appPrivateKey);
-        if (walletCreated) {
-          await backupRegisterData(transport, appId, appPrivateKey);
+        if (isCardRecognized) {
+          await deleteBackupRegisterData(transport, appId, appPrivateKey);
+          if (walletCreated) {
+            await backupRegisterData(transport, appId, appPrivateKey);
+          }
         }
       }
     }
-  }
 
 
-  await selectApplet(transport, selectCardManager);
-  const { statusCode } = await selectApplet(transport, selectBackUpSeedApplet);
-  progressCallback(progressNum[progressIndex++]);
-  console.log(`selectBackUpSeedApplet statusCode: ${statusCode}`);
+    await selectApplet(transport, selectCardManager);
+    const { statusCode } = await selectApplet(transport, selectBackUpSeedApplet);
+    progressCallback(progressNum[progressIndex++]);
+    console.log(`selectBackUpSeedApplet statusCode: ${statusCode}`);
 
 
-  //get ssd applet and authorize
-  await selectApplet(transport, selectCardManager);
-  await selectApplet(transport, 'A000000151535041');
-  progressCallback(progressNum[progressIndex++]);
+    //get ssd applet and authorize
+    await selectApplet(transport, selectCardManager);
+    await selectApplet(transport, 'A000000151535041');
+    progressCallback(progressNum[progressIndex++]);
 
-  console.log(`mutual Authorization Start----`);
-  const challengeResponse = await callAPI(challengeUrl, getAPIOption(cardId));
-  console.log(cardId);
-  const challengeObj = await formatAPIResponse(transport, challengeResponse);
-  const cryptogramResponse = await callAPI(cryptogramUrl, getAPIOption(cardId, challengeObj.outputData));
-  await formatAPIResponse(transport, cryptogramResponse);
-  console.log(`mutual Authorization Done----`);
+    console.log(`mutual Authorization Start----`);
+    const challengeResponse = await callAPI(challengeUrl, getAPIOption(cardId));
+    console.log(cardId);
+    const challengeObj = await formatAPIResponse(transport, challengeResponse);
+    const cryptogramResponse = await callAPI(cryptogramUrl, getAPIOption(cardId, challengeObj.outputData));
+    await formatAPIResponse(transport, cryptogramResponse);
+    console.log(`mutual Authorization Done----`);
 
-  // Install backupSeed script
-  progressCallback(progressNum[progressIndex++]);
+    // Install backupSeed script
+    progressCallback(progressNum[progressIndex++]);
 
-  if (cardSEVersion < hasBackupScriptSEVersion) {
-    console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
-    if (statusCode.toUpperCase() === CODE._6A82) {
-      await insertScript(transport, script.newLoadScript);
-      await insertScript(transport, script.newInstallScript);
-      console.log(`Install loadscript done`);
+    if (cardSEVersion < hasBackupScriptSEVersion) {
+      console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
+      if (statusCode.toUpperCase() === CODE._6A82) {
+        await insertScript(transport, script.newLoadScript);
+        await insertScript(transport, script.newInstallScript);
+        console.log(`Install loadscript done`);
+      }
     }
-  }
 
-  progressCallback(progressNum[progressIndex++]);
-  await insertDeleteScript(transport, script.deleteScript);
-  console.log('Delete Card Manager Done');
+    progressCallback(progressNum[progressIndex++]);
+    await insertDeleteScript(transport, script.deleteScript);
+    console.log('Delete Card Manager Done');
 
-  progressCallback(progressNum[progressIndex]); // progress 50 
-  await insertLoadScript(transport, script.loadScript, progressCallback, progressNum[progressIndex], progressNum[progressIndex + 1]);
-  console.log('Load OTA Script Done');
-  progressIndex += 1
+    progressCallback(progressNum[progressIndex]); // progress 50 
+    await insertLoadScript(transport, script.loadScript, progressCallback, progressNum[progressIndex], progressNum[progressIndex + 1]);
+    console.log('Load OTA Script Done');
+    progressIndex += 1
 
-  progressCallback(progressNum[progressIndex++]);
-  await insertScript(transport, script.installScript);
+    progressCallback(progressNum[progressIndex++]);
+    await insertScript(transport, script.installScript);
 
-  await display.hideUpdate(transport); // Hide update from the card
+    await display.hideUpdate(transport); // Hide update from the card
 
-  await selectApplet(transport, selectCardManager);
-  isAppletExist = await selectApplet(transport);
-  console.log(`isAppletExist: ${isAppletExist}`);
+    await selectApplet(transport, selectCardManager);
+    isAppletExist = await selectApplet(transport);
+    console.log(`isAppletExist: ${isAppletExist}`);
 
-  if (isAppletExist) {
-    // start recover backupData
-    console.log(`Start checking recovery`);
-    let isNeedRecover = await setting.checkBackupStatus(transport);
-    console.log(`isNeedRecover: ${isNeedRecover}`);
-    if (isNeedRecover === true) {
-      await recoverBackupData(transport);
+    if (isAppletExist) {
+      // start recover backupData
+      console.log(`Start checking recovery`);
+      let isNeedRecover = await setting.checkBackupStatus(transport);
+      console.log(`isNeedRecover: ${isNeedRecover}`);
+      if (isNeedRecover === true) {
+        await recoverBackupData(transport);
+      }
     }
-  }
-  progressCallback(progressNum[progressIndex]);
-  console.log('Install OTA Script (SE Update) Done');
+    progressCallback(progressNum[progressIndex]);
+    console.log('Install OTA Script (SE Update) Done');
 
-  return SE_UPDATE_VER;
-  // } catch (e) {
-  //   try {
-  //     await display.hideUpdate(transport)
-  //   } catch (ex) {
-  //     console.error('APDU.Other.finishUpdate Failed' + e);
-  //   }
-  //   throw new SDKError(updateSE.name, `${e}, 'SE Update Failed', '00000', 'SEUpdate'`);
-  // }
+    return SE_UPDATE_VER;
+  } catch (e) {
+    try {
+      await display.hideUpdate(transport)
+    } catch (ex) {
+      console.error('APDU.Other.finishUpdate Failed' + e);
+    }
+    throw new SDKError(updateSE.name, `${e}, 'SE Update Failed', '00000', 'SEUpdate'`);
+  }
 
 };
 
@@ -260,7 +260,7 @@ const deleteBackupRegisterData = async (transport: Transport, appId: string, app
   } catch (e) {
     if (e.message) {
       console.error(`${deleteBackupRegisterData.name} fail: ${e.message}`);
-    } 
+    }
     throw 'backup Register data Failed ' + e;
   }
 };
@@ -300,7 +300,7 @@ export const getAPIOption = (cardId: string, challengeData: string = '') => {
   }
 
   let payload = jwt.sign(data, secret, { expiresIn: 60 * 60 * 24 });
-  
+
   console.log(`payload: ${payload}`);
 
   const body = {
