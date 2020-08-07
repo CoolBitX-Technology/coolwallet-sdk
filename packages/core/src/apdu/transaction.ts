@@ -62,9 +62,13 @@ export const txPrep = async (
   let msg = 'prepareTx get encryptedSignature failed';
   if (txDataType != '00') {
     const result = await executeCommand(transport, commands.TX_PREPARE, target.SE, txDataHex, txDataType, '00');
-    encryptedSignature = result.outputData;
     statusCode = result.statusCode
     msg = result.msg
+    if (statusCode === CODE._9000) {
+      return statusCode;
+    } else {
+      throw new APDUError(commands.TX_PREPARE, statusCode, msg)
+    }
   } else {
     const sig = await getCommandSignatureWithoutNonce(
       transport,
@@ -88,11 +92,11 @@ export const txPrep = async (
         msg = result.msg
       }
     }
-  }
-  if (encryptedSignature) {
-    return encryptedSignature;
-  } else {
-    throw new APDUError(commands.TX_PREPARE, statusCode, msg)
+    if (encryptedSignature) {
+      return encryptedSignature;
+    } else {
+      throw new APDUError(commands.TX_PREPARE, statusCode, msg)
+    }
   }
 };
 
@@ -161,8 +165,7 @@ export const executeUtxoScript = async (
   appId: string,
   appPrivKey: string,
   utxoArgument: string,
-  //todo
-  P1 = "11"
+  extraTransactionType: string
 ) => {
   const { signature } = await getCommandSignature(
     transport,
@@ -170,7 +173,7 @@ export const executeUtxoScript = async (
     appPrivKey,
     commands.EXECUTE_UTXO_SCRIPT,
     utxoArgument,
-    P1,
+    extraTransactionType,
     undefined
   );
   const { outputData: encryptedSignature, statusCode, msg } = await executeCommand(
@@ -178,7 +181,7 @@ export const executeUtxoScript = async (
     commands.EXECUTE_UTXO_SCRIPT,
     target.SE,
     utxoArgument + signature,
-    P1,
+    extraTransactionType,
     undefined,
     true,
   );
@@ -198,7 +201,7 @@ export const executeUtxoScript = async (
  */
 export const getSignedHex = async (transport: Transport): Promise<{ signedTx: string, statusCode: string }> => {
   const { outputData: signedTx, statusCode, msg } = await executeCommand(transport, commands.GET_SIGNED_HEX, target.SE);
-  if (statusCode === CODE._9000 || statusCode === CODE._6D00 ){
+  if (statusCode === CODE._9000 || statusCode === CODE._6D00) {
     return { signedTx, statusCode };
   } else {
     throw new APDUError(commands.GET_SIGNED_HEX, statusCode, msg)

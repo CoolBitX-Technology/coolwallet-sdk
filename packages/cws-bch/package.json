@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallet/btc",
-  "version": "0.1.0-beta.7",
-  "description": "Coolwallet Bitcoin sdk",
+  "name": "@coolwallet/bch",
+  "version": "0.1.0-beta.0",
+  "description": "Coolwallet Bitcoin Cash sdk",
   "main": "lib/index.js",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
@@ -11,7 +11,9 @@
   },
   "keywords": [
     "btc",
+    "bch",
     "bitcoin",
+    "bitcoincash",
     "litecoin",
     "ltc",
     "coolwallet",
@@ -26,7 +28,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "~0.1.0"
+    "@coolwallet/core": "~0.1.0-beta.12"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -37,7 +39,8 @@
   },
   "dependencies": {
     "@types/bn.js": "^4.11.6",
-    "bitcoinjs-lib": "^5.1.7",
+    "bitcore-lib-cash": "^8.20.5",
+    "bchaddrjs": "^0.4.9",
     "bn.js": "^5.1.1"
   },
   "repository": {
