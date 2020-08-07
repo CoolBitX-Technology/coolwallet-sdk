@@ -28,6 +28,10 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     signObj: Types.Transfer,
+    signPublicKey: {
+      x: string;
+      y: string;
+    },
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
@@ -40,6 +44,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
       Types.TransactionType.TRANSFER,
       readType,
       signObj,
+      signPublicKey,
       addressIndex,
       confirmCB,
       authorizedCB
@@ -54,6 +59,10 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     signObj: Types.PlaceOrder,
+    signPublicKey: {
+      x: string;
+      y: string;
+    },
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
@@ -66,6 +75,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
       Types.TransactionType.PLACE_ORDER,
       readType,
       signObj,
+      signPublicKey,
       addressIndex,
       confirmCB,
       authorizedCB
@@ -80,6 +90,10 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     signObj: Types.CancelOrder,
+    signPublicKey: {
+      x: string;
+      y: string;
+    },
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
@@ -92,6 +106,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
       Types.TransactionType.CANCEL_ORDER,
       readType,
       signObj,
+      signPublicKey,
       addressIndex,
       confirmCB,
       authorizedCB

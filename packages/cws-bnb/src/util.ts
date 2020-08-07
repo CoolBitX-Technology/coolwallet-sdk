@@ -1,7 +1,26 @@
+import Big, { BigSource } from 'big.js'
+
 import crypto from 'crypto';
 import bech32 from 'bech32';
 import * as scripts from "./scripts";
+import * as varuint from './varuint';
+import { marshalBinary } from './encodeUtil'
+import { AminoPrefix } from "./types"
+
 import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder } from './types'
+
+const BASENUMBER = Math.pow(10, 8)
+const MAX_INT64 = Math.pow(2, 63)
+
+function checkNumber(value: BigSource, name = "input number") {
+  if (new Big(value).lte(0)) {
+    throw new Error(`${name} should be a positive number`)
+  }
+
+  if (new Big(value).gte(MAX_INT64)) {
+    throw new Error(`${name} should be less than 2^63`)
+  }
+}
 
 export function publicKeyToAddress(publicKey: string) {
   const hash = sha256ripemd160(publicKey);
@@ -12,6 +31,11 @@ function encodeAddress(value: Buffer, prefix = 'bnb') {
   const words = bech32.toWords(value);
   return bech32.encode(prefix, words);
 }
+
+function decodeAddress(value: string) {
+  const decodeAddress = bech32.decode(value);
+  return Buffer.from(bech32.fromWords(decodeAddress.words));
+};
 
 function sha256ripemd160(publicKey: string): Buffer {
   const hash = crypto.createHash('SHA256').update(Buffer.from(publicKey, 'hex')).digest();
@@ -41,6 +65,235 @@ export const convertObjectToSignBytes = (obj: any) => Buffer.from(JSON.stringify
 export function combineSignature(canonicalSignature: any): string {
   return canonicalSignature.r + canonicalSignature.s;
 }
+
+function toUintBuffer(input: string, byteSize: number): Buffer {
+  const buf = Buffer.from(input, 'hex');
+  return Buffer.alloc(byteSize).fill(buf, 40 - buf.length, byteSize);
+}
+
+function encodeBinaryByteArray(bytes: Buffer): Buffer {
+  const lenPrefix = bytes.length;
+  return Buffer.concat([varuint.encode(lenPrefix), bytes]);
+};
+
+function serializePubKey(
+  unencodedPubKey: {
+    x: string;
+    y: string;
+  }): Buffer {
+  let format = 0x2;
+  if (unencodedPubKey.y && (parseInt(unencodedPubKey.y, 16) % 2) == 1) {
+    format |= 0x1;
+  }
+  let pubBz = Buffer.concat([varuint.encode(format), toUintBuffer(unencodedPubKey.x, 32)]);
+  // prefixed with length
+  pubBz = encodeBinaryByteArray(pubBz);
+  // add the amino prefix
+  pubBz = Buffer.concat([Buffer.from("EB5AE987", "hex"), pubBz]);
+  return pubBz;
+};
+
+export const composeSignedTransacton = (
+  transactionType: TransactionType,
+  signObj: Transfer | PlaceOrder | CancelOrder,
+  canonicalSignature: {
+    r: string;
+    s: string;
+  },
+  signPublicKey: {
+    x: string;
+    y: string;
+  }
+): string => {
+  if (transactionType == TransactionType.TRANSFER) {
+    return transfer(signObj as Transfer, canonicalSignature, signPublicKey);
+  } else if (transactionType == TransactionType.PLACE_ORDER) {
+    return transfer(signObj as Transfer, canonicalSignature, signPublicKey);
+  } else {
+    return transfer(signObj as Transfer, canonicalSignature, signPublicKey);
+  }
+};
+function transfer(
+  signObj: Transfer,
+  canonicalSignature: {
+    r: string;
+    s: string;
+  },
+  signPublicKey: {
+    x: string;
+    y: string;
+  }
+) {
+  const fromAddress = signObj.msgs[0].inputs[0].address;
+  const toAddress = signObj.msgs[0].outputs[0].address;
+  const amount = signObj.msgs[0].inputs[0].coins[0].amount;
+  const memo = signObj.memo;
+  const sequence = signObj.sequence;
+
+  const accCode = decodeAddress(fromAddress)
+  const toAccCode = decodeAddress(toAddress)
+
+  checkNumber(amount, "amount")
+
+  const coin = {
+    denom: "BNB",
+    amount: amount,
+  };
+
+  const msg = {
+    inputs: [
+      {
+        address: accCode,
+        coins: [coin],
+      },
+    ],
+    outputs: [
+      {
+        address: toAccCode,
+        coins: [coin],
+      },
+    ],
+    msgType: "MsgSend",
+  };
+
+  const pubKey = serializePubKey(signPublicKey);
+  const signature = canonicalSignature.r + canonicalSignature.s;
+  const account_number = parseInt(signObj.account_number);
+
+  const signatures = [
+    {
+      pub_key: pubKey,
+      signature: Buffer.from(signature, "hex"),
+      account_number: account_number,
+      sequence: sequence,
+    },
+  ];
+
+  const stdTx = {
+    msg: [msg],
+    signatures: signatures,
+    memo: memo,
+    source: 711,
+    data: "",
+    msgType: "StdTx",
+  };
+  const bytes = marshalBinary(stdTx);
+  return bytes;
+}
+
+/*
+function placeOrder(
+  /*fromAddress: string,
+  toAddress: string,
+  symbol: string,
+  side: number,
+  price: number,
+  quantity: number,
+  sequence: number,
+  timeinforce = 1
+signObj: PlaceOrder
+) {
+  const fromAddress = signObj.msgs[0].inputs[0].address;
+  const toAddress = signObj.msgs[0].outputs[0].address;
+
+  if (!fromAddress) {
+    throw new Error("address should not be falsy")
+  }
+  if (!symbol) {
+    throw new Error("symbol should not be falsy")
+  }
+  if (side !== 1 && side !== 2) {
+    throw new Error("side can only be 1 or 2")
+  }
+  if (timeinforce !== 1 && timeinforce !== 3) {
+    throw new Error("timeinforce can only be 1 or 3")
+  }
+  //const accCode = decodeAddress(fromAddress);
+  //const toAccCode = decodeAddress(toAddress);
+
+  const bigPrice = new Big(price)
+  const bigQuantity = new Big(quantity)
+
+  const placeOrderMsg = {
+    sender: accCode,
+    id: `${accCode.toString("hex")}-${sequence! + 1}`.toUpperCase(),
+    symbol: symbol,
+    ordertype: 2,
+    side,
+    price: parseFloat(bigPrice.mul(BASENUMBER).toString()),
+    quantity: parseFloat(bigQuantity.mul(BASENUMBER).toString()),
+    timeinforce: timeinforce,
+    aminoPrefix: AminoPrefix.NewOrderMsg,
+  }
+
+  const coin = {
+    denom: "BNB",
+    amount: amount,
+  };
+
+
+  const msg = {
+    inputs: [
+      {
+        address: accCode,
+        coins: [coin],
+      },
+    ],
+    outputs: [
+      {
+        address: toAccCode,
+        coins: [coin],
+      },
+    ],
+    msgType: "MsgSend",
+  };
+
+  const stdTx = {
+    msg: [msg],
+    signatures: signatures,
+    memo: memo,
+    source: 711,
+    data: "",
+    msgType: txType.StdTx,
+  };
+  const serializedTx = convertObjectToSignBytes(signObj);
+  return `0x${serializedTx.toString("hex")}`;
+
+  /*const signMsg = {
+    id: placeOrderMsg.id,
+    ordertype: placeOrderMsg.ordertype,
+    price: placeOrderMsg.price,
+    quantity: placeOrderMsg.quantity,
+    sender: address,
+    side: placeOrderMsg.side,
+    symbol: placeOrderMsg.symbol,
+    timeinforce: timeinforce,
+  }
+
+checkNumber(placeOrderMsg.price, "price")
+checkNumber(placeOrderMsg.quantity, "quantity")
+
+const stdTx = {
+  msg: [msg],
+  signatures: signatures,
+  memo: memo,
+  source: 711,
+  data: "",
+  msgType: txType.StdTx,
+};
+
+const signedTx = await this._prepareTransaction(
+  placeOrderMsg,
+  signMsg,
+  address,
+  sequence,
+  ""
+)
+
+return this._broadcastDelegate(signedTx)
+}
+*/
+
 
 const getTransferArgument = (signObj: Transfer) => {
   const from = signObj.msgs[0].inputs[0].address.padStart(128, '0');

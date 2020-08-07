@@ -15,6 +15,10 @@ export default async function sign(
   transactionType: TransactionType,
   readType: string,
   signObj: Transfer | PlaceOrder | CancelOrder,
+  signPublicKey: {
+    x: string;
+    y: string;
+  },
   addressIndex: number,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
@@ -66,6 +70,14 @@ export default async function sign(
     authorizedCB,
     true
   );
-
-  return bnbUtil.combineSignature(canonicalSignature);
+  if (!Buffer.isBuffer(canonicalSignature)) {
+    return bnbUtil.composeSignedTransacton(
+      transactionType,
+      signObj,
+      canonicalSignature,
+      signPublicKey
+    );
+  } else {
+    throw new error.SDKError(sign.name, 'canonicalSignature type error');
+  }
 }
