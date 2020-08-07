@@ -10,7 +10,6 @@ import {
 	getScriptSigningActions
 } from './util';
 type Transport = transport.default;
-const bitcore = require('bitcore-lib-cash');
 
 
 export {
