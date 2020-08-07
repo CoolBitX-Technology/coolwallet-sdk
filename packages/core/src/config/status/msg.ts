@@ -62,5 +62,5 @@ export const MSG: CodeList = {
   _6AC2: 'p1 and script type not match',
   _6AC7: 'p1 not supported',
   _6AC5: 'script type not supported (only support P2PKH=00 P2SH=01)',
-  _6A88: 'Applet is not exits'
+  _6A88: 'applet is not exits'
 }

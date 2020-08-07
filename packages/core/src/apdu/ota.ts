@@ -11,6 +11,7 @@ import * as informational from './informational';
 import * as util from '../utils';
 import * as auth from '../setting/auth';
 import * as display from './mcu/display';
+import { SDKError } from '../error/errorHandle';
 
 var jwt = require('jsonwebtoken');
 
