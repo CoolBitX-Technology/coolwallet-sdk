@@ -5,7 +5,6 @@ import bech32 from 'bech32';
 import * as scripts from "./scripts";
 import * as varuint from './varuint';
 import { marshalBinary } from './encodeUtil'
-import { AminoPrefix } from "./types"
 
 import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder } from './types'
 
@@ -93,6 +92,25 @@ function serializePubKey(
   return pubBz;
 };
 
+export const walletConnectSignature = (
+  canonicalSignature: {
+    r: string;
+    s: string;
+  },
+  signPublicKey: {
+    x: string;
+    y: string;
+  }
+): {
+  signature: string,
+  publicKey: string
+} => {
+  const signature = canonicalSignature.r + canonicalSignature.s;
+  const publicKey = "04" + signPublicKey.x + signPublicKey.y;
+  return { signature, publicKey };
+}
+
+
 export const composeSignedTransacton = (
   transactionType: TransactionType,
   signObj: Transfer | PlaceOrder | CancelOrder,
@@ -105,14 +123,9 @@ export const composeSignedTransacton = (
     y: string;
   }
 ): string => {
-  if (transactionType == TransactionType.TRANSFER) {
-    return transfer(signObj as Transfer, canonicalSignature, signPublicKey);
-  } else if (transactionType == TransactionType.PLACE_ORDER) {
-    return transfer(signObj as Transfer, canonicalSignature, signPublicKey);
-  } else {
-    return transfer(signObj as Transfer, canonicalSignature, signPublicKey);
-  }
+  return transfer(signObj as Transfer, canonicalSignature, signPublicKey);
 };
+
 function transfer(
   signObj: Transfer,
   canonicalSignature: {
@@ -180,120 +193,6 @@ function transfer(
   const bytes = marshalBinary(stdTx);
   return bytes;
 }
-
-/*
-function placeOrder(
-  /*fromAddress: string,
-  toAddress: string,
-  symbol: string,
-  side: number,
-  price: number,
-  quantity: number,
-  sequence: number,
-  timeinforce = 1
-signObj: PlaceOrder
-) {
-  const fromAddress = signObj.msgs[0].inputs[0].address;
-  const toAddress = signObj.msgs[0].outputs[0].address;
-
-  if (!fromAddress) {
-    throw new Error("address should not be falsy")
-  }
-  if (!symbol) {
-    throw new Error("symbol should not be falsy")
-  }
-  if (side !== 1 && side !== 2) {
-    throw new Error("side can only be 1 or 2")
-  }
-  if (timeinforce !== 1 && timeinforce !== 3) {
-    throw new Error("timeinforce can only be 1 or 3")
-  }
-  //const accCode = decodeAddress(fromAddress);
-  //const toAccCode = decodeAddress(toAddress);
-
-  const bigPrice = new Big(price)
-  const bigQuantity = new Big(quantity)
-
-  const placeOrderMsg = {
-    sender: accCode,
-    id: `${accCode.toString("hex")}-${sequence! + 1}`.toUpperCase(),
-    symbol: symbol,
-    ordertype: 2,
-    side,
-    price: parseFloat(bigPrice.mul(BASENUMBER).toString()),
-    quantity: parseFloat(bigQuantity.mul(BASENUMBER).toString()),
-    timeinforce: timeinforce,
-    aminoPrefix: AminoPrefix.NewOrderMsg,
-  }
-
-  const coin = {
-    denom: "BNB",
-    amount: amount,
-  };
-
-
-  const msg = {
-    inputs: [
-      {
-        address: accCode,
-        coins: [coin],
-      },
-    ],
-    outputs: [
-      {
-        address: toAccCode,
-        coins: [coin],
-      },
-    ],
-    msgType: "MsgSend",
-  };
-
-  const stdTx = {
-    msg: [msg],
-    signatures: signatures,
-    memo: memo,
-    source: 711,
-    data: "",
-    msgType: txType.StdTx,
-  };
-  const serializedTx = convertObjectToSignBytes(signObj);
-  return `0x${serializedTx.toString("hex")}`;
-
-  /*const signMsg = {
-    id: placeOrderMsg.id,
-    ordertype: placeOrderMsg.ordertype,
-    price: placeOrderMsg.price,
-    quantity: placeOrderMsg.quantity,
-    sender: address,
-    side: placeOrderMsg.side,
-    symbol: placeOrderMsg.symbol,
-    timeinforce: timeinforce,
-  }
-
-checkNumber(placeOrderMsg.price, "price")
-checkNumber(placeOrderMsg.quantity, "quantity")
-
-const stdTx = {
-  msg: [msg],
-  signatures: signatures,
-  memo: memo,
-  source: 711,
-  data: "",
-  msgType: txType.StdTx,
-};
-
-const signedTx = await this._prepareTransaction(
-  placeOrderMsg,
-  signMsg,
-  address,
-  sequence,
-  ""
-)
-
-return this._broadcastDelegate(signedTx)
-}
-*/
-
 
 const getTransferArgument = (signObj: Transfer) => {
   const from = signObj.msgs[0].inputs[0].address.padStart(128, '0');

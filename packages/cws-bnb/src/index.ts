@@ -1,5 +1,5 @@
 import { coin as COIN, transport } from '@coolwallet/core';
-import sign from './sign';
+import { walletConnectSignature, transferSignature } from './sign';
 import { publicKeyToAddress } from './util';
 import * as Types from './types'
 
@@ -35,9 +35,9 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
-  ) {
+  ): Promise<string> {
     const readType = 'CA';
-    return sign(
+    return transferSignature(
       transport,
       appId,
       appPrivateKey,
@@ -66,9 +66,12 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
-  ) {
+  ): Promise<{
+    signature: string,
+    publicKey: string
+  }> {
     const readType = 'CB';
-    return sign(
+    return walletConnectSignature(
       transport,
       appId,
       appPrivateKey,
@@ -97,9 +100,12 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
-  ) {
+  ): Promise<{
+    signature: string,
+    publicKey: string
+  }> {
     const readType = 'CC';
-    return sign(
+    return walletConnectSignature(
       transport,
       appId,
       appPrivateKey,

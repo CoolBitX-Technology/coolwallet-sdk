@@ -3,12 +3,8 @@ import * as bnbUtil from './util';
 import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder } from './types'
 
 type Transport = transport.default;
-//type BNBTx = import('./types').Transaction;
 
-/**
- * Sign Binance Tranaction
- */
-export default async function sign(
+export async function transferSignature(
   transport: Transport,
   appId: string,
   appPrivateKey: string,
@@ -23,6 +19,69 @@ export default async function sign(
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
 ): Promise<string> {
+  const canonicalSignature = await sign(
+    transport,
+    appId,
+    appPrivateKey,
+    transactionType,
+    readType,
+    signObj,
+    addressIndex,
+    confirmCB,
+    authorizedCB
+  );
+  return bnbUtil.composeSignedTransacton(transactionType, signObj, canonicalSignature, signPublicKey)
+}
+
+export async function walletConnectSignature(
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  transactionType: TransactionType,
+  readType: string,
+  signObj: Transfer | PlaceOrder | CancelOrder,
+  signPublicKey: {
+    x: string;
+    y: string;
+  },
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined,
+): Promise<{
+  signature: string,
+  publicKey: string
+}> {
+  const canonicalSignature = await sign(
+    transport,
+    appId,
+    appPrivateKey,
+    transactionType,
+    readType,
+    signObj,
+    addressIndex,
+    confirmCB,
+    authorizedCB
+  );
+
+  const signature = canonicalSignature.r + canonicalSignature.s;
+  const publicKey = "04" + signPublicKey.x + signPublicKey.y;
+  return { signature, publicKey };
+}
+
+/**
+ * Sign Binance Tranaction
+ */
+async function sign(
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  transactionType: TransactionType,
+  readType: string,
+  signObj: Transfer | PlaceOrder | CancelOrder,
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined,
+): Promise<{ r: string; s: string; }> {
   if (transactionType !== TransactionType.TRANSFER
     && transactionType !== TransactionType.PLACE_ORDER
     && transactionType !== TransactionType.CANCEL_ORDER) {
@@ -61,7 +120,7 @@ export default async function sign(
     }
   }
 
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+  return await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
     action,
@@ -69,15 +128,5 @@ export default async function sign(
     confirmCB,
     authorizedCB,
     true
-  );
-  if (!Buffer.isBuffer(canonicalSignature)) {
-    return bnbUtil.composeSignedTransacton(
-      transactionType,
-      signObj,
-      canonicalSignature,
-      signPublicKey
-    );
-  } else {
-    throw new error.SDKError(sign.name, 'canonicalSignature type error');
-  }
+  ) as { r: string; s: string; };
 }
