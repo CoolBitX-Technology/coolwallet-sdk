@@ -62,4 +62,6 @@ export const CODE: CodeList = {
   _6AC2: '6AC2',
   _6AC7: '6AC7',
   _6AC5: '6AC5',
+  _6A88: '6A88'
+
 }
