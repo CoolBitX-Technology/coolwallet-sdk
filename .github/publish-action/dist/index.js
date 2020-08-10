@@ -1207,6 +1207,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+let isCoreInstalled = false;
+
 async function checkAndPublish(context, path) {
 	console.log(`[ ${path} ] start process`);
 
@@ -1220,19 +1222,26 @@ async function checkAndPublish(context, path) {
 		head = context.payload.after;
 	}
 
-	const diff = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.getDiff)(base, head, path, context.ref);
+	const isDiff = await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.getDiff)(base, head, path, context.ref);
 
-	if (diff) {
-		console.log('getDiff :');
-		console.log(diff);
-
+	if (isDiff) {
+		console.log('found diff !');
 	} else {
 		console.log('not modified !');
 		return;
 	}
 
-	let version;
 	const ref = context.ref.split('/')[2];
+
+	if (path != 'packages/core' && !isCoreInstalled) {
+		if (ref === 'master') {
+			await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.installCore)(false);
+		} else {
+			await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.installCore)(true);
+		}
+		isCoreInstalled = true;
+	}
+
 	if (ref === 'master') {
 		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.updateVersionProduction)(path);
 		await Object(_utils__WEBPACK_IMPORTED_MODULE_2__.buildAndPublishProduction)(path);
@@ -1259,6 +1268,7 @@ async function run() {
 	await checkAndPublish(context, 'packages/core');
 	await checkAndPublish(context, 'packages/cws-bnb');
 	await checkAndPublish(context, 'packages/cws-btc');
+	await checkAndPublish(context, 'packages/cws-bch');
 	await checkAndPublish(context, 'packages/cws-eos');
 	await checkAndPublish(context, 'packages/cws-eth');
 	await checkAndPublish(context, 'packages/cws-icx');
@@ -6321,6 +6331,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var child_process_1 = __webpack_require__(129);
+function installCore(isBeta) {
+    if (isBeta === void 0) { isBeta = false; }
+    return __awaiter(this, void 0, void 0, function () {
+        var packageName;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    packageName = isBeta ? '@coolwallet/core@beta' : '@coolwallet/core';
+                    return [4 /*yield*/, command('npm', ['i', packageName])];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.installCore = installCore;
 function buildAndPublishProduction(path) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -6541,12 +6568,19 @@ function getPackageInfo(path) {
 }
 function getDiff(base, head, path, ref) {
     return __awaiter(this, void 0, void 0, function () {
+        var diff;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, command('git', ['fetch', '--no-tags', '--no-recurse-submodules', '--depth=10000', 'origin', ref])];
                 case 1:
                     _a.sent();
-                    return [2 /*return*/, command('git', ['diff', base, head, '--name-only', '--', path + "/src"])];
+                    return [4 /*yield*/, command('git', ['diff', base, head, '--name-only', '--', path + "/src"])];
+                case 2:
+                    diff = _a.sent();
+                    console.log(diff);
+                    if (!diff || diff.includes('fatal:'))
+                        return [2 /*return*/, false];
+                    return [2 /*return*/, true];
             }
         });
     });

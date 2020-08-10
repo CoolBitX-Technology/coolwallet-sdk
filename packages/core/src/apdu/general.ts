@@ -26,7 +26,7 @@ export const hi = async (transport: Transport, appId: string): Promise<boolean> 
  */
 export const getNonce = async (transport: Transport): Promise<string> => {
   const { outputData: nonce, statusCode, msg } = await executeCommand(transport, commands.GET_NONCE, target.SE);
-  if (nonce) {
+  if (statusCode === CODE._9000) {
     return nonce;
   } else {
     throw new APDUError(commands.GET_NONCE, statusCode, msg)
