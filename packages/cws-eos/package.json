@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/eos",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "description": "CoolWallet EOS sdk",
   "main": "lib/index.js",
   "scripts": {

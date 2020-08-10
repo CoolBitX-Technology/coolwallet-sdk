@@ -97,7 +97,7 @@ export async function createSeedByCard(transport: Transport, appId: string, appP
   );
   const strengthWithSig = strengthHex + signature;
 
-  const { statusCode } = await executeCommand(
+  const { statusCode, msg } = await executeCommand(
     transport,
     commands.CREATE_WALLET,
     target.SE,
@@ -106,8 +106,11 @@ export async function createSeedByCard(transport: Transport, appId: string, appP
     undefined,
     forceUseSC
   );
-
-  return statusCode === CODE._9000;
+  if (statusCode === CODE._9000) {
+    return true;
+  } else {
+    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg);
+  }
 }
 
 /**

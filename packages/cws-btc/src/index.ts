@@ -17,7 +17,7 @@ export const coinType = '00'
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	public ScriptType: any;
-	public addressToOutScript: Function;
+	public addressToOutScript: Function; 
 
 	constructor() {
 		super(coinType);
@@ -73,4 +73,3 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 		);
 	}
 }
-
