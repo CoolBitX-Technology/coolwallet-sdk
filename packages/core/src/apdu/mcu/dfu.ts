@@ -20,6 +20,14 @@ export const getMCUVersion = async (transport: Transport) => {
   return { fwStatus, cardMCUVersion };
 };
 
+export const getFWStatus = async (transport: Transport) => {
+  const { outputData } = await executeCommand(transport, commands.CHECK_FW_STATUS, target.MCU);
+  const fwStatus = outputData.slice(0, 4); // 3900
+  const cardMCUVersion = outputData.slice(4, 12).toUpperCase();
+  console.log(`getFWStatus: ${outputData}`);
+  return { fwStatus, cardMCUVersion };
+};
+
 export const sendFWsign = async (transport: Transport, data: string) => {
   await executeCommand(transport, commands.SEND_FW_SIGN, target.MCU, data);
 }
@@ -127,15 +135,24 @@ const executeDFU = async (
   const interval = Math.floor((100 - progressNum) / packetNums);
   const mcuLatestVersion = apduCmd[0].packets.slice(0, 8);
   progressCallback(progressNum);
-  await promise.each(apduCmd, async (batch: { p1: string, p2: string, packets: string }) => {
-    const { p1, p2, packets } = batch;
-    console.log('updateFW start');
-    const { outputData, statusCode } = await updateFW(transport, p1, p2, packets)
-    console.log('updateFW end');
-    console.log(`FW Update result: ${statusCode} - ${outputData}`);
-    progressNum += interval;
-    progressCallback(progressNum);
-  });
+  try {
+    await promise.each(apduCmd, async (batch: { p1: string, p2: string, packets: string }) => {
+      const { p1, p2, packets } = batch;
+      console.log('updateFW start');
+      const { outputData, statusCode } = await updateFW(transport, p1, p2, packets)
+      console.log('updateFW end');
+      console.log(`FW Update result: ${statusCode} - ${outputData}`);
+      if (statusCode == '046A') {
+        throw new SDKError(executeDFU.name, 'MCU is already the latest version')
+      }
+      progressNum += interval;
+      progressCallback(progressNum);
+    });
+  } catch (e) {
+    console.log('MCU is already the latest version');
+  }
+
+  console.log('mcu ver: ' + mcuLatestVersion)
   return mcuLatestVersion;
 };
 

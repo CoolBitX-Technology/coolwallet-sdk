@@ -47,11 +47,12 @@ export const executeAPDU = async (
       outputData = response.slice(0, -4);
     } else {
 
-      statusCode = response.slice(-4);
-      outputData = response.slice(0, -4);
-      // statusCode = response.slice(4, 6);
-      // outputData = response.slice(6);
+      // statusCode = response.slice(-4);
+      // outputData = response.slice(0, -4);
+      statusCode = response.slice(4, 6);
+      outputData = response.slice(6);
     }
+    console.log(response)
 
     msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();
