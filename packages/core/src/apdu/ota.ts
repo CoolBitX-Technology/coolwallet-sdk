@@ -292,11 +292,8 @@ export const getAPIOption = (cardId: string, challengeData: string = '') => {
   let data;
   if (challengeData === '') {
     data = { cwid: cardId };
-    console.log('ssss')
-    console.log(data)
   } else {
     data = { cryptogram: challengeData, cwid: cardId };
-    console.log('yyyy')
   }
 
   let payload = jwt.sign(data, secret, { expiresIn: 60 * 60 * 24 });
