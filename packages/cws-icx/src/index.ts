@@ -4,9 +4,11 @@ import { pubKeyToAddress } from './utils/util';
 
 type Transport = transport.default;
 
+export const coinType = '4A'
+
 export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
-    super('4A');
+    super(coinType);
   }
 
   /**
@@ -24,7 +26,7 @@ export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
     transport: Transport, 
     appPrivateKey: string, 
     appId: string, 
-    transaction: string | Object,
+    transaction: Object,
     addressIndex: number,
     publicKey: string,
     confirmCB: Function | undefined = undefined,

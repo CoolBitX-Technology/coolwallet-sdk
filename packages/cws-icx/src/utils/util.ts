@@ -1,3 +1,5 @@
+import * as scripts from "../scripts";
+import { coinType } from '../index'
 const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
 
@@ -10,6 +12,39 @@ export const pubKeyToAddress = (compressedPubkey: string): string => {
 
   const address = `hx${sha3_256(publicKey).slice(-40)}`;
   return address;
+};
+
+
+/**
+ * TODO
+ * @param {number} addressIndex
+ * @param {*} transaction
+ */
+export const getScriptAndArguments = (addressIndex: number, transaction: object) => {
+  const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
+  const SEPath = `15328000002C800000${coinType}8000000000000000${addressIdxHex}`;
+  let script;
+  let argument;
+  script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+  argument = getTransferArgument(transaction);
+
+  // console.debug(`sciprt:\t${script}`);
+  // console.debug(`argument:\t${SEPath}+${argument}`);
+  return {
+    script,
+    argument: SEPath + argument,
+  };
+};
+
+const getTransferArgument = (transaction: any) => {
+  const tx = JSON.parse(transaction);
+  const argument =
+    handleHex(tx.from).slice(2) + // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
+    handleHex(tx.to).slice(2) + // 000000b1a2bc2ec50000
+    handleHex(tx.value).padStart(20, "0") + // 0000000000020c855800
+    handleHex(tx.timestamp).padStart(20, "0") + // 0000000000000000520c
+    handleHex(tx.nid.toString(16)).padStart(4, "0"); // 0001
+  return argument;
 };
 
 export const generateRawTx = async (
