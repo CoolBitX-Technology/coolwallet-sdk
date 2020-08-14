@@ -3,7 +3,7 @@ import Big, { BigSource } from 'big.js'
 import crypto from 'crypto';
 import bech32 from 'bech32';
 import * as scripts from "./scripts";
-import * as varuint from './varuint';
+import * as UVarInt from './varuint';
 import { marshalBinary } from './encodeUtil'
 
 import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder } from './types'
@@ -72,11 +72,14 @@ function toUintBuffer(input: string, byteSize: number): Buffer {
 
 function encodeBinaryByteArray(bytes: Buffer): Buffer {
   const lenPrefix = bytes.length;
-  return Buffer.concat([varuint.encode(lenPrefix), bytes]);
+  return Buffer.concat([UVarInt.encode(lenPrefix), bytes]);
 };
 
 function serializePubKey(unencodedPubKey: Buffer): Buffer {
-  let pubBz = encodeBinaryByteArray(unencodedPubKey);
+  const format = unencodedPubKey.readInt8(0)
+  let pubBz = Buffer.concat([UVarInt.encode(format), unencodedPubKey.slice(1)]);
+  // prefixed with length
+  pubBz = encodeBinaryByteArray(unencodedPubKey);
   // add the amino prefix
   pubBz = Buffer.concat([Buffer.from("EB5AE987", "hex"), pubBz]);
   return pubBz;
@@ -162,13 +165,16 @@ export const composeSignedTransacton = (
     data: "",
     msgType: "StdTx",
   };
+  console.log("stdTx: " + JSON.stringify(stdTx))
   const bytes = marshalBinary(stdTx);
   return bytes;
 }
 
 const getTransferArgument = (signObj: Transfer) => {
-  const from = signObj.msgs[0].inputs[0].address.padStart(128, '0');
-  const to = signObj.msgs[0].outputs[0].address.padStart(128, '0');
+  const fromAddress = signObj.msgs[0].inputs[0].address;
+  const from = Buffer.from(fromAddress, 'ascii').toString('hex').padStart(128, '0');
+  const toAddress = signObj.msgs[0].outputs[0].address;
+  const to = Buffer.from(toAddress, 'ascii').toString('hex').padStart(128, '0');
   const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
   const accountNumber = signObj.account_number.padStart(16, '0');
   const sequence = signObj.sequence.padStart(16, '0');
