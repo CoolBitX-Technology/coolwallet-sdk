@@ -75,18 +75,8 @@ function encodeBinaryByteArray(bytes: Buffer): Buffer {
   return Buffer.concat([varuint.encode(lenPrefix), bytes]);
 };
 
-function serializePubKey(
-  unencodedPubKey: {
-    x: string;
-    y: string;
-  }): Buffer {
-  let format = 0x2;
-  if (unencodedPubKey.y && (parseInt(unencodedPubKey.y, 16) % 2) == 1) {
-    format |= 0x1;
-  }
-  let pubBz = Buffer.concat([varuint.encode(format), toUintBuffer(unencodedPubKey.x, 32)]);
-  // prefixed with length
-  pubBz = encodeBinaryByteArray(pubBz);
+function serializePubKey(unencodedPubKey: Buffer): Buffer {
+  let pubBz = encodeBinaryByteArray(unencodedPubKey);
   // add the amino prefix
   pubBz = Buffer.concat([Buffer.from("EB5AE987", "hex"), pubBz]);
   return pubBz;
@@ -112,31 +102,13 @@ export const walletConnectSignature = (
 
 
 export const composeSignedTransacton = (
-  transactionType: TransactionType,
-  signObj: Transfer | PlaceOrder | CancelOrder,
-  canonicalSignature: {
-    r: string;
-    s: string;
-  },
-  signPublicKey: {
-    x: string;
-    y: string;
-  }
-): string => {
-  return transfer(signObj as Transfer, canonicalSignature, signPublicKey);
-};
-
-function transfer(
   signObj: Transfer,
   canonicalSignature: {
     r: string;
     s: string;
   },
-  signPublicKey: {
-    x: string;
-    y: string;
-  }
-) {
+  signPublicKey: Buffer
+): string => {
   const fromAddress = signObj.msgs[0].inputs[0].address;
   const toAddress = signObj.msgs[0].outputs[0].address;
   const amount = signObj.msgs[0].inputs[0].coins[0].amount;

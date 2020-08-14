@@ -11,14 +11,15 @@ export async function transferSignature(
   transactionType: TransactionType,
   readType: string,
   signObj: Transfer | PlaceOrder | CancelOrder,
-  signPublicKey: {
-    x: string;
-    y: string;
-  },
+  signPublicKey: Buffer,
   addressIndex: number,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
 ): Promise<string> {
+  if (transactionType !== TransactionType.TRANSFER) {
+    throw new error.SDKError(transferSignature.name, `Unsupport transactionType: '${transactionType}'`);
+  }
+
   const canonicalSignature = await sign(
     transport,
     appId,
@@ -30,7 +31,7 @@ export async function transferSignature(
     confirmCB,
     authorizedCB
   );
-  return bnbUtil.composeSignedTransacton(transactionType, signObj, canonicalSignature, signPublicKey)
+  return bnbUtil.composeSignedTransacton(signObj as Transfer, canonicalSignature, signPublicKey)
 }
 
 export async function walletConnectSignature(
@@ -51,6 +52,11 @@ export async function walletConnectSignature(
   signature: string,
   publicKey: string
 }> {
+  if (transactionType !== TransactionType.PLACE_ORDER
+    && transactionType !== TransactionType.CANCEL_ORDER) {
+    throw new error.SDKError(walletConnectSignature.name, `Unsupport transactionType: '${transactionType}'`);
+  }
+
   const canonicalSignature = await sign(
     transport,
     appId,
@@ -82,11 +88,6 @@ async function sign(
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
 ): Promise<{ r: string; s: string; }> {
-  if (transactionType !== TransactionType.TRANSFER
-    && transactionType !== TransactionType.PLACE_ORDER
-    && transactionType !== TransactionType.CANCEL_ORDER) {
-    throw new error.SDKError(sign.name, `Unsupport transactionType: '${transactionType}'`);
-  }
   const useScript = await util.checkSupportScripts(transport);
   const preActions = [];
   let action;

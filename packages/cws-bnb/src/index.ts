@@ -28,10 +28,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     signObj: Types.Transfer,
-    signPublicKey: {
-      x: string;
-      y: string;
-    },
+    signPublicKey: Buffer,
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
