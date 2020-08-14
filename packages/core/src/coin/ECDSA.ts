@@ -1,16 +1,23 @@
 import * as derivation from './derive';
 import Transport from "../transport";
+const elliptic = require('elliptic');
 
 export default class ECDSACoin {
   coinType: string;
   accPublicKey: string;
   accChainCode: string;
   publicKeys: any;
-  constructor(coinType: string) {
+  ec: any;
+  constructor(coinType: string, curvePara?: string) {
     this.coinType = coinType;
     this.accPublicKey = '';
     this.accChainCode = '';
     this.publicKeys = {};
+    if (!curvePara) {
+      this.ec = new elliptic.ec("secp256k1");
+    } else {
+      this.ec = new elliptic.ec(curvePara);
+    }
 
     this.getPublicKey = this.getPublicKey.bind(this);
   }
@@ -57,5 +64,14 @@ export default class ECDSACoin {
       0
     );
     return { parentPublicKey, parentChainCode };
+  }
+
+  /**
+ * For ECDSA based coins
+ * @returns {fullPublicKey: string}
+ */
+  async getFullPubKey(compressPubKey: string) {
+    const keyPair = this.ec.keyFromPublic(compressPubKey, "hex");
+    return keyPair.getPublic(false, "hex");;
   }
 }
