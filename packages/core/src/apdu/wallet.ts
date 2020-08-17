@@ -63,12 +63,12 @@ export const getEd25519AccountPublicKey = async (transport: Transport, coinType:
   } else {
     throw new SDKError(getEd25519AccountPublicKey.name, 'Unsupported protocol');
   }
-
-  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_XLM_ACC_PUBKEY, target.SE, undefined, coinType, accIndex);
+  console.log(commandData)
+  const { outputData: key, statusCode, msg } = await executeCommand(transport, commandData, target.SE, undefined, coinType, accIndex);
   if (key) {
     return key
   } else {
-    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+    throw new APDUError(commandData, statusCode, msg)
   }
 };
 
@@ -109,7 +109,7 @@ export async function createSeedByCard(transport: Transport, appId: string, appP
   if (statusCode === CODE._9000) {
     return true;
   } else {
-    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg);
+    throw new APDUError(commands.CREATE_WALLET, statusCode, msg);
   }
 }
 
@@ -147,9 +147,9 @@ export async function setSeed(transport: Transport, appId: string, appPrivateKey
   const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, forceUseSC);
   if (statusCode === CODE._9000) {
   } else if (statusCode === CODE._6881) {
-    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, "wallet is exist")
+    throw new APDUError(commands.SET_SEED, statusCode, "wallet is exist")
   } else {
-    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+    throw new APDUError(commands.SET_SEED, statusCode, msg)
   }
 }
 

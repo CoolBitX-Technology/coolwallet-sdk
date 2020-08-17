@@ -1,4 +1,4 @@
-import { core, transport } from '@coolwallet/core';
+import { transport, tx, apdu } from '@coolwallet/core';
 
 type Transport = transport.default;
 type protocol = import('./types').protocol
@@ -21,16 +21,29 @@ export default async function signTransaction(
   authorizedCB: Function | undefined
 ): Promise<{ r: string; s: string; } | Buffer> {
   const readType = protocol === 'BIP44' ? coinType : `${coinType}10`;
+  const preActions = [];
+
+
+  // 100 flow
   const keyId = accountIndexToKeyId(coinType, accountIndex);
-  const dataForSE = core.flow.prepareSEData(keyId, signatureBase, readType);
-  const signature = await core.flow.getSingleSignatureFromCoolWallet(
+  const dataForSE = tx.flow.prepareSEData(keyId, signatureBase, readType);
+
+
+  const sayHi = async () => {
+    await apdu.general.hi(transport, appId);
+  }
+  preActions.push(sayHi)
+
+  const prepareTx = async () => {
+    return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
+  }
+
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
-    appId,
-    appPrivateKey,
-    dataForSE,
-    '00',
-    true,
-    undefined,
+    preActions,
+    prepareTx,
+    false,
     confirmCB,
     authorizedCB,
     false,
