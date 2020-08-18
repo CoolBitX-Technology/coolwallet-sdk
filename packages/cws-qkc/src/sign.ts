@@ -16,7 +16,7 @@ type Transport = transport.default;
  * @param {String} appPrivateKey
  * @param {coinType} coinType
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
- * value:string, data:string, chainId: number}} transaction
+ * value:string, data:string}} transaction
  * @param {Number} addressIndex
  * @param {String} publicKey
  * @param {Function} confirmCB
@@ -28,7 +28,15 @@ export const signTransaction = async (
   appId: string,
   appPrivateKey: string,
   coinType: string,
-  transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number },
+	transaction: {
+		nonce: string,
+		gasPrice: string,
+		gasLimit: string,
+		to: string,
+		value: string,
+		data: string,
+		fromFullShardKey: string,
+		toFullShardKey: string },
   addressIndex: number,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
@@ -96,7 +104,7 @@ export const signTransaction = async (
       rlp.encode(rawPayload),
       publicKey
     );
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');

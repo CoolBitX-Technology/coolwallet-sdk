@@ -76,9 +76,11 @@ export const getRawHex = (transaction: any): Array<Buffer> => {
     }
     return Buffer.from(hex, "hex");
   });
-  raw[6] = Buffer.from([transaction.chainId]);
-  raw[7] = Buffer.allocUnsafe(0);
-  raw[8] = Buffer.allocUnsafe(0);
+  raw[6] = Buffer.from('01', 'hex');
+  raw[7] = Buffer.from(handleHex(transaction['fromFullShardKey']), 'hex');
+  raw[8] = Buffer.from(handleHex(transaction['toFullShardKey']), 'hex');
+  raw[9] = Buffer.from('8bb0', 'hex');
+  raw[10] = Buffer.from('8bb0', 'hex');
 
   const t = rlp.encode(raw);
   if (t.length > 870) throw new error.SDKError(getRawHex.name, 'data too long');
@@ -94,7 +96,7 @@ export const getRawHex = (transaction: any): Array<Buffer> => {
 export const getReadType = (txType: string) => {
   switch (txType) {
     case transactionType.TRANSFER: {
-      return { readType: "3C" };
+      return { readType: "FF" };
     }
     // Todo: Old transfer Add erc20
     // case transactionType.ERC20: {
@@ -145,16 +147,15 @@ export const getScriptAndArguments = (txType: any, addressIndex: number, transac
  * @param {Number} v
  * @param {String} r
  * @param {String} s
- * @param {number} chainId
  * @return {String}
  */
-export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: string, s: string, chainId: number): string => {
-  const vValue = v + chainId * 2 + 8;
+export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: string, s: string): string => {
 
-  const transaction = payload.slice(0, 6);
+	const transaction = payload;
 
   transaction.push(
-    Buffer.from([vValue]),
+		Buffer.allocUnsafe(0),
+    Buffer.from(v.toString(16), "hex"),
     Buffer.from(r, "hex"),
     Buffer.from(s, "hex")
   );

@@ -1,14 +1,22 @@
 export default class cwsETH {
-  constructor(transport: Transport, appPrivateKey: string, appId: string);
+  constructor();
   /**
    * Get Ethereum address by index
    */
-  getAddress(addressIndex: string): Promise<string>;
+	getAddress(
+		transport: Transport,
+		appPrivateKey: string,
+		appId: string,
+		addressIndex: string
+	): Promise<string>;
 
   /**
    * Sign Ethereum Transaction.
    */
   signTransaction(
+		transport: Transport,
+		appPrivateKey: string,
+		appId: string,
     transaction: {
       nonce: string;
       gasPrice: string;
@@ -28,6 +36,9 @@ export default class cwsETH {
    * Sign Arbitrary Message.
    */
   signMessage(
+		transport: Transport,
+		appPrivateKey: string,
+		appId: string,
     message: string,
     addressIndex: number,
     publicKey?: string,
@@ -40,6 +51,9 @@ export default class cwsETH {
    * Sign EIP712 typed data
    */
   signTypedData(
+		transport: Transport,
+		appPrivateKey: string,
+		appId: string,
     typedData: Object,
     addressIndex: number,
     publicKey?: string,
