@@ -167,15 +167,16 @@ export const composeSignedTransacton = (
 }
 
 const getTransferArgument = (signObj: Transfer) => {
+  console.log("signObj: " + JSON.stringify(signObj))
   const fromAddress = signObj.msgs[0].inputs[0].address;
   const from = Buffer.from(fromAddress, 'ascii').toString('hex').padStart(128, '0');
   const toAddress = signObj.msgs[0].outputs[0].address;
   const to = Buffer.from(toAddress, 'ascii').toString('hex').padStart(128, '0');
   const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
-  const accountNumber = signObj.account_number.padStart(16, '0');
-  const sequence = signObj.sequence.padStart(16, '0');
-  const source = signObj.source.padStart(16, '0');
-  const memo = signObj.memo;
+  const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
+  const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
+  const source = parseInt(signObj.source).toString(16).padStart(16, '0');
+  const memo = Buffer.from(signObj.memo, 'ascii').toString('hex');
   return from + to + value + accountNumber + sequence + source + memo;
 };
 

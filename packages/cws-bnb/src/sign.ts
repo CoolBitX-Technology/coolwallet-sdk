@@ -93,6 +93,8 @@ async function sign(
   let action;
   if (useScript) {
     const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, addressIndex, signObj);
+    console.log("script: " + script)
+    console.log("argument: " + argument)
     const sendScript = async () => {
       await apdu.tx.sendScript(transport, script);
     }
