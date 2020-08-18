@@ -2,6 +2,7 @@ import is from 'is_js';
 import { string as VarString } from "protocol-buffers-encodings"
 import typeToTyp3 from "./encoderHelper";
 import * as UVarInt from './varuint';
+import { typePrefix } from './types'
 
 
 export const encodeNumber = (num: number) => UVarInt.encode(num)
@@ -60,9 +61,9 @@ export const encodeObjectBinary = (obj: any, isByteLenPrefix?: boolean) => {
   const bufferArr: any[] = []
 
   Object.keys(obj).forEach((key, index) => {
-    if (key === "aminoPrefix" || key === "version") return
+    if (key === "msgType" || key === "version") return;
 
-    if (isDefaultValue(obj[key])) return
+    if (isDefaultValue(obj[key])) return;
 
     if (is.array(obj[key]) && obj[key].length > 0) {
       bufferArr.push(encodeArrayBinary(index, obj[key]))
@@ -73,10 +74,9 @@ export const encodeObjectBinary = (obj: any, isByteLenPrefix?: boolean) => {
   })
 
   let bytes = Buffer.concat(bufferArr)
-
   // add prefix
-  if (obj.aminoPrefix) {
-    const prefix = Buffer.from(obj.aminoPrefix, "hex")
+  if (obj.msgType) {
+    const prefix = Buffer.from(obj.msgType, "hex")
     bytes = Buffer.concat([prefix, bytes])
   }
 
