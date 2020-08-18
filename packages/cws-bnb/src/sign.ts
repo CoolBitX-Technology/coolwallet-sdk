@@ -108,6 +108,8 @@ async function sign(
     }
   } else {
     const rawPayload = bnbUtil.convertObjectToSignBytes(signObj);
+    console.log("rawPayload: " + typeof (rawPayload))
+    console.log("rawPayload: " + rawPayload)
     const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
     const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
 

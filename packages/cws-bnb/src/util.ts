@@ -3,10 +3,9 @@ import Big, { BigSource } from 'big.js'
 import crypto from 'crypto';
 import bech32 from 'bech32';
 import * as scripts from "./scripts";
-import * as UVarInt from './varuint';
+import { UVarInt } from './varint';
 import { marshalBinary } from './encodeUtil'
-
-import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder } from './types'
+import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder, typePrefix } from './types'
 
 const BASENUMBER = Math.pow(10, 8)
 const MAX_INT64 = Math.pow(2, 63)
@@ -141,19 +140,17 @@ export const composeSignedTransacton = (
         coins: [coin],
       },
     ],
-    msgType: "MsgSend",
+    msgType: typePrefix.MsgSend,
   };
 
   const pubKey = serializePubKey(signPublicKey);
   const signature = canonicalSignature.r + canonicalSignature.s;
-  const account_number = parseInt(signObj.account_number);
-
   const signatures = [
     {
       pub_key: pubKey,
       signature: Buffer.from(signature, "hex"),
-      account_number: account_number,
-      sequence: sequence,
+      account_number: parseInt(signObj.account_number),
+      sequence: parseInt(sequence),
     },
   ];
 
@@ -163,9 +160,8 @@ export const composeSignedTransacton = (
     memo: memo,
     source: 711,
     data: "",
-    msgType: "StdTx",
+    msgType: typePrefix.StdTx,
   };
-  console.log("stdTx: " + JSON.stringify(stdTx))
   const bytes = marshalBinary(stdTx);
   return bytes;
 }
