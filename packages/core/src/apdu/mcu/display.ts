@@ -11,7 +11,7 @@ import { getCommandSignature, getCommandSignatureWithoutNonce } from "../../sett
  * @param {Transport} transport
  */
 export const showUpdate = async (transport: Transport) => {
-  const {statusCode, msg} = await executeCommand(transport, commands.START_UPDATE, target.MCU);
+  const {statusCode, msg} = await executeCommand(transport, commands.START_UPDATE, target.SE); // TODO 
   if (statusCode !== CODE._9000){
     throw new APDUError(commands.START_UPDATE, statusCode, msg)
   }
@@ -22,7 +22,7 @@ export const showUpdate = async (transport: Transport) => {
  * @param {Transport}
  */
 export const hideUpdate = async (transport: Transport) => {
-  const { statusCode, msg } = await executeCommand(transport, commands.FINISH_UPDATE, target.MCU);
+  const { statusCode, msg } = await executeCommand(transport, commands.FINISH_UPDATE, target.SE);
   if (statusCode !== CODE._9000) {
     throw new APDUError(commands.FINISH_UPDATE, statusCode, msg)
   }
