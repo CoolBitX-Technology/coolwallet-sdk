@@ -1,3 +1,4 @@
+import { error } from '@coolwallet/core';
 import Big, { BigSource } from 'big.js'
 
 import crypto from 'crypto';
@@ -167,11 +168,8 @@ export const composeSignedTransacton = (
 }
 
 const getTransferArgument = (signObj: Transfer) => {
-  console.log("signObj: " + JSON.stringify(signObj))
-  const fromAddress = signObj.msgs[0].inputs[0].address;
-  const from = Buffer.from(fromAddress, 'ascii').toString('hex').padStart(128, '0');
-  const toAddress = signObj.msgs[0].outputs[0].address;
-  const to = Buffer.from(toAddress, 'ascii').toString('hex').padStart(128, '0');
+  const from = Buffer.from(signObj.msgs[0].inputs[0].address, 'ascii').toString('hex').padStart(128, '0');
+  const to = Buffer.from(signObj.msgs[0].outputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
   const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
   const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
@@ -181,18 +179,29 @@ const getTransferArgument = (signObj: Transfer) => {
 };
 
 const getPlaceOrderArgument = (signObj: PlaceOrder) => {
-  const orderAddress = signObj.msgs[0].sender.padStart(40, '0');
-  const orderSequence = signObj.sequence.padStart(16, '0');
-  const senderAddress = signObj.msgs[0].sender.padStart(128, '0');
-  const side = signObj.msgs[0].side.toString().padStart(2, '0');
-  const quoteTokenName = signObj.msgs[0].symbol.padStart(40, '0');
-  const baseTokenName = signObj.msgs[0].symbol.padStart(40, '0');
+  const id = signObj.msgs[0].id;
+  const sideNum = signObj.msgs[0].side;
+  if (sideNum != 1 && sideNum != 2) { //1:BUY 2:SELL
+    throw new error.SDKError(getPlaceOrderArgument.name, `Unsupport side '${sideNum}'`);
+  }
+  const symbol = signObj.msgs[0].symbol;
+  const timeinforce = signObj.msgs[0].timeinforce;
+  if (timeinforce != 1 && timeinforce != 3) { //1:GoodTillExpire 3:ImmediateOrCancel
+    throw new error.SDKError(getPlaceOrderArgument.name, `Unsupport timeinforce '${timeinforce}'`);
+  }
+
+  const orderAddress = id.split("-")[0].padStart(40, '0');
+  const orderSequence = parseInt(id.split("-")[1]).toString(16).padStart(16, '0');
+  const senderAddress = Buffer.from(signObj.msgs[0].sender, 'ascii').toString('hex').padStart(128, '0');
+  const side = sideNum.toString(16).padStart(2, '0');
+  const quoteTokenName = Buffer.from(symbol.split("_")[0], 'ascii').toString('hex').padStart(40, '0');
+  const baseTokenName = Buffer.from(symbol.split("_")[1], 'ascii').toString('hex').padStart(40, '0');
   const quantity = signObj.msgs[0].quantity.toString(16).padStart(16, '0');
   const price = signObj.msgs[0].price.toString(16).padStart(16, '0');
-  const isImmediate = signObj.msgs[0].timeinforce.toString(16).padStart(2, '0');
-  const accountNumber = signObj.account_number.padStart(16, '0');
-  const sequence = signObj.sequence.padStart(16, '0');
-  const source = signObj.source.padStart(16, '0');
+  const isImmediate = timeinforce == 1 ? "00" : "01";
+  const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
+  const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
+  const source = parseInt(signObj.source).toString(16).padStart(16, '0');
   return orderAddress +
     orderSequence +
     senderAddress +
@@ -208,14 +217,17 @@ const getPlaceOrderArgument = (signObj: PlaceOrder) => {
 };
 
 const getCancelOrderArgument = (signObj: CancelOrder) => {
-  const orderAddress = signObj.msgs[0].sender.padStart(40, '0');
-  const orderSequence = signObj.sequence.padStart(16, '0');
-  const senderAddress = signObj.msgs[0].sender.padStart(128, '0');
-  const quoteTokenName = signObj.msgs[0].symbol.padStart(40, '0');
-  const baseTokenName = signObj.msgs[0].symbol.padStart(40, '0');
-  const accountNumber = signObj.account_number.padStart(16, '0');
-  const sequence = signObj.sequence.padStart(16, '0');
-  const source = signObj.source.padStart(16, '0');
+  const refid = signObj.msgs[0].refid;
+  const symbol = signObj.msgs[0].symbol;
+
+  const orderAddress = refid.split("-")[0].padStart(40, '0');
+  const orderSequence = parseInt(refid.split("-")[1]).toString(16).padStart(16, '0');
+  const senderAddress = Buffer.from(signObj.msgs[0].sender, 'ascii').toString('hex').padStart(128, '0');
+  const quoteTokenName = Buffer.from(symbol.split("_")[0], 'ascii').toString('hex').padStart(40, '0');
+  const baseTokenName = Buffer.from(symbol.split("_")[1], 'ascii').toString('hex').padStart(40, '0');
+  const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
+  const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
+  const source = parseInt(signObj.source).toString(16).padStart(16, '0');
   return orderAddress +
     orderSequence +
     senderAddress +

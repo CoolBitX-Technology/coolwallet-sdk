@@ -41,17 +41,10 @@ export async function walletConnectSignature(
   transactionType: TransactionType,
   readType: string,
   signObj: Transfer | PlaceOrder | CancelOrder,
-  signPublicKey: {
-    x: string;
-    y: string;
-  },
   addressIndex: number,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
-): Promise<{
-  signature: string,
-  publicKey: string
-}> {
+): Promise<string> {
   if (transactionType !== TransactionType.PLACE_ORDER
     && transactionType !== TransactionType.CANCEL_ORDER) {
     throw new error.SDKError(walletConnectSignature.name, `Unsupport transactionType: '${transactionType}'`);
@@ -69,9 +62,7 @@ export async function walletConnectSignature(
     authorizedCB
   );
 
-  const signature = canonicalSignature.r + canonicalSignature.s;
-  const publicKey = "04" + signPublicKey.x + signPublicKey.y;
-  return { signature, publicKey };
+  return canonicalSignature.r + canonicalSignature.s;
 }
 
 /**

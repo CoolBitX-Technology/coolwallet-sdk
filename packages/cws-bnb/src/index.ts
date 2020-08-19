@@ -56,10 +56,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     signObj: Types.PlaceOrder,
-    signPublicKey: {
-      x: string;
-      y: string;
-    },
+    signPublicKey: Buffer,
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
@@ -68,18 +65,19 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     publicKey: string
   }> {
     const readType = 'CB';
-    return walletConnectSignature(
+    const signature = await walletConnectSignature(
       transport,
       appId,
       appPrivateKey,
       Types.TransactionType.PLACE_ORDER,
       readType,
       signObj,
-      signPublicKey,
       addressIndex,
       confirmCB,
       authorizedCB
     );
+    const publicKey = await this.getFullPubKey(signPublicKey.toString('hex'));
+    return { signature, publicKey }
   }
 
   /**
@@ -90,10 +88,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     signObj: Types.CancelOrder,
-    signPublicKey: {
-      x: string;
-      y: string;
-    },
+    signPublicKey: Buffer,
     addressIndex: number,
     confirmCB: Function | undefined,
     authorizedCB: Function | undefined
@@ -102,17 +97,18 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     publicKey: string
   }> {
     const readType = 'CC';
-    return walletConnectSignature(
+    const signature = await walletConnectSignature(
       transport,
       appId,
       appPrivateKey,
       Types.TransactionType.CANCEL_ORDER,
       readType,
       signObj,
-      signPublicKey,
       addressIndex,
       confirmCB,
       authorizedCB
     );
+    const publicKey = await this.getFullPubKey(signPublicKey.toString('hex'));
+    return { signature, publicKey }
   }
 }

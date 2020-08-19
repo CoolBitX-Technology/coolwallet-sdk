@@ -72,6 +72,6 @@ export default class ECDSACoin {
  */
   async getFullPubKey(compressPubKey: string) {
     const keyPair = this.ec.keyFromPublic(compressPubKey, "hex");
-    return keyPair.getPublic(false, "hex");;
+    return keyPair.getPublic(false, "hex");
   }
 }
