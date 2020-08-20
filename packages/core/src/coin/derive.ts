@@ -68,7 +68,7 @@ export const getEd25519PublicKey = async (
   accountIndex: number,
   protocol: string,
   authFirst: boolean = true
-): Promise<string | undefined> => {
+): Promise<string> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
   const accIndexHex = accountIndex.toString(16).padStart(2, "0");
