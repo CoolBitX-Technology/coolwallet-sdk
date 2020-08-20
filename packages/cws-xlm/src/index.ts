@@ -18,6 +18,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     console.log("protocol: " + protocol)
     console.log("accountIndex: " + accountIndex)
     const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, protocol);
+    console.log(pubKey)
     if (!pubKey){
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
     } 
@@ -32,6 +33,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     appPrivateKey: string, 
     appId: string, 
     signatureBase: Buffer,
+    transaction: object, 
     accountIndex: number,
     protocol: protocol | undefined,
     confirmCB: Function | undefined,
@@ -41,12 +43,16 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
       throw new ERROR.SDKError(this.signTransaction.name, accountIndexErrorMsg);
     }
     const protocolToUse = protocol || 'SLIP0010';
+    const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, protocol);
+    const apppublicKeys = { from: pubKey, to: "4422506012a4f72db85c41fb92823c79171738b980e68c14dc56565faef99b86"}
     const signature = signTransaction(
       transport,
       appPrivateKey,
+      apppublicKeys,
       appId,
       this.coinType,
       signatureBase,
+      transaction,
       accountIndex,
       protocolToUse,
       confirmCB,
