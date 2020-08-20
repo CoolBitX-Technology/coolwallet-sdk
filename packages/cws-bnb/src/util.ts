@@ -85,25 +85,6 @@ function serializePubKey(unencodedPubKey: Buffer): Buffer {
   return pubBz;
 };
 
-export const walletConnectSignature = (
-  canonicalSignature: {
-    r: string;
-    s: string;
-  },
-  signPublicKey: {
-    x: string;
-    y: string;
-  }
-): {
-  signature: string,
-  publicKey: string
-} => {
-  const signature = canonicalSignature.r + canonicalSignature.s;
-  const publicKey = "04" + signPublicKey.x + signPublicKey.y;
-  return { signature, publicKey };
-}
-
-
 export const composeSignedTransacton = (
   signObj: Transfer,
   canonicalSignature: {
