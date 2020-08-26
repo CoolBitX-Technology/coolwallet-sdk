@@ -132,9 +132,8 @@ export async function sendCheckSum(transport: Transport, checkSum: number): Prom
  * @param {string} mnemonic
  * @return {Promise<boolean>}
  */
-export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, mnemonic: string){
+export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string){
   try{
-    const seedHex = bip39.mnemonicToSeedSync(mnemonic).toString('hex');
     const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
     const { signature, forceUseSC } = await setting.auth.getCommandSignature(
       transport,
