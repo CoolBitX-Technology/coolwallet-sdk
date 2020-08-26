@@ -133,23 +133,28 @@ export async function sendCheckSum(transport: Transport, checkSum: number): Prom
  * @return {Promise<boolean>}
  */
 export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, mnemonic: string){
-  const seedHex = bip39.mnemonicToSeedSync(mnemonic).toString('hex');
-  const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
-  const { signature, forceUseSC } = await setting.auth.getCommandSignature(
-    transport,
-    appId,
-    appPrivateKey,
-    commands.SET_SEED,
-    encryptedSeed,
-    undefined
-  );
-  const signedSeed = encryptedSeed + signature;
-  const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, forceUseSC);
-  if (statusCode === CODE._9000) {
-  } else if (statusCode === CODE._6881) {
-    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, "wallet is exist")
-  } else {
-    throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+  try{
+    const seedHex = bip39.mnemonicToSeedSync(mnemonic).toString('hex');
+    const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
+    const { signature, forceUseSC } = await setting.auth.getCommandSignature(
+      transport,
+      appId,
+      appPrivateKey,
+      commands.SET_SEED,
+      encryptedSeed,
+      undefined
+    );
+    const signedSeed = encryptedSeed + signature;
+    const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, forceUseSC);
+    if (statusCode === CODE._9000) {
+    } else if (statusCode === CODE._6881) {
+      throw new APDUError(commands.AUTH_EXT_KEY, statusCode, "wallet is exist")
+    } else {
+      throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+    }
+  } catch (e) {
+    console.error(e);
+    throw e
   }
 }
 
