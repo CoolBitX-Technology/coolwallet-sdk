@@ -1,6 +1,7 @@
 import { error, transport, apdu } from "@coolwallet/core";
 
 import { handleHex } from "./stringUtil";
+import { coinType } from '../type'
 import * as scripts from "../scripts";
 import * as token from "../token";
 
@@ -113,7 +114,7 @@ export const getReadType = (txType: string) => {
  */
 export const getScriptAndArguments = (txType: any, addressIndex: number, transaction: any) => {
   const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
-  const SEPath = `15328000002C8000003C8000000000000000${addressIdxHex}`;
+  const SEPath = `15328000002C800000${coinType}8000000000000000${addressIdxHex}`;
   let script;
   let argument;
   switch (txType) {

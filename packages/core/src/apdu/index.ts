@@ -6,7 +6,8 @@ import * as general from './general';
 import * as wallet from './wallet';
 import * as tx from './transaction';
 import * as pair from './pair';
+import * as ota from './ota';
 
 export {
-  mcu, setting, info, execute, general, wallet, pair, tx
+  mcu, setting, info, execute, general, wallet, pair, tx, ota
 };

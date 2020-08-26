@@ -8,13 +8,11 @@ import { target } from '../../config/target';
 
 
 /**
- * @param {string} commandName
  * @param {Transport} transport
  * @param {{command:string, data:string}} apdu
  * @param {string} commandType SE or MCU
  */
-const executeAPDU = async (
-  commandName: string,
+export const executeAPDU = async (
   transport: Transport,
   apdu: { command: string, data: string },
   executedTarget: string
@@ -48,9 +46,13 @@ const executeAPDU = async (
       statusCode = response.slice(-4);
       outputData = response.slice(0, -4);
     } else {
+
+      // statusCode = response.slice(-4);
+      // outputData = response.slice(0, -4);
       statusCode = response.slice(4, 6);
       outputData = response.slice(6);
     }
+    console.log(response)
 
     msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();
@@ -98,7 +100,7 @@ export const executeCommand = async (
     const apdu = util.assemblyCommandAndData(command.CLA, command.INS, P1, P2, data);
     // eslint-disable-next-line no-console
     console.debug(`Execute Command: ${command}`);
-    response = await executeAPDU(command.toString(), transport, apdu, executedTarget);
+    response = await executeAPDU(transport, apdu, executedTarget);
   }
   return response;
 
