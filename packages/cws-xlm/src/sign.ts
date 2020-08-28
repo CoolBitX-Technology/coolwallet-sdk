@@ -13,7 +13,6 @@ const accountIndexToKeyId = (coinType: string, accountIndex: number) => {
 export default async function signTransaction(
   transport: Transport,
   appPrivateKey: string,
-  apppublicKeys: {from: string , to: string} ,
   appId: string,
   coinType: string,
   signatureBase: Buffer,
@@ -34,7 +33,7 @@ export default async function signTransaction(
   if (useScript) {
 
 
-    const { script, argument } = xlmUtil.getScriptAndArguments(apppublicKeys, accountIndex, transaction, coinType);
+    const { script, argument } = xlmUtil.getScriptAndArguments(accountIndex, transaction, coinType);
 
     const sendScript = async () => {
       await apdu.tx.sendScript(transport, script);
