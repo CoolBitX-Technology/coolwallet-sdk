@@ -23,7 +23,6 @@ const versionBytes = {
  */
 export const getScriptAndArguments = (addressIndex: number, transaction: object, coinType: string) => {
   console.log("getScriptAndArguments start")
-  const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
   const SEPath = `0D${path}`;
   let script;
   let argument;

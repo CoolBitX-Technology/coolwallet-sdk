@@ -31,7 +31,7 @@ export default async function signTransaction(
   console.log("useScript: " + useScript)
 
   if (useScript) {
-
+ 
 
     const { script, argument } = xlmUtil.getScriptAndArguments(accountIndex, transaction, coinType);
 
