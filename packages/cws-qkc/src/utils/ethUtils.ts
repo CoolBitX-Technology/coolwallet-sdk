@@ -96,7 +96,7 @@ export const getRawHex = (transaction: any): Array<Buffer> => {
 export const getReadType = (txType: string) => {
   switch (txType) {
     case transactionType.TRANSFER: {
-      return { readType: "FF" };
+      return { readType: "3C" };
     }
     // Todo: Old transfer Add erc20
     // case transactionType.ERC20: {

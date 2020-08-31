@@ -7,7 +7,7 @@ import { TypedData } from 'eth-sig-util';
 type Transport = transport.default;
 export default class QKC extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
-    super('3C');
+    super('FF');
   }
 
   /**
