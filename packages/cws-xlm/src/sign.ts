@@ -58,6 +58,8 @@ export default async function signTransaction(
       authorizedCB,
       false,
     );
+
+    
   }else{
     // 100 flow
     const keyId = accountIndexToKeyId(coinType, accountIndex);

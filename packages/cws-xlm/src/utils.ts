@@ -2,6 +2,7 @@
 import crc from 'crc';
 import * as scripts from "./scripts";
 import * as Stellar from 'stellar-sdk';
+import { path } from './types';
 
 const base32 = require('base32.js');
 
@@ -23,7 +24,7 @@ const versionBytes = {
 export const getScriptAndArguments = (addressIndex: number, transaction: object, coinType: string) => {
   console.log("getScriptAndArguments start")
   const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
-  const SEPath = `0D108000002C8000009480000000`;
+  const SEPath = `0D${path}`;
   let script;
   let argument;
   script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
