@@ -105,7 +105,7 @@ declare module '@coolwallets/core' {
   export namespace crypto {
     export namespace encryption {
       export function ECIESenc(recipientPubKey: string, msg: string): string;
-      export function ECIESDec(recipientPrivKey: string, encryptionName: string): Buffer;
+      export function ECIESDec(recipientPrivKey: string, encryptionName: string): string;
     }
   }
 }
