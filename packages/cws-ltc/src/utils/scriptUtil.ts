@@ -106,6 +106,7 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 	} else {
 		throw new error.SDKError(addressToOutScript.name, `Unsupport Address : ${address}`);
 	}
+	console.log()
 	if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address : ${address}`);
 	const outScript = payment.output;
 	const outHash = payment.hash;
@@ -126,6 +127,7 @@ function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
 	} else {
 		throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType : ${scriptType}`);
 	}
+	console.log(payment)
 	if (!payment.address) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No Address for ScriptType : ${scriptType}`);
 	if (!payment.output) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType : ${scriptType}`);
 	if (!payment.hash) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType : ${scriptType}`);

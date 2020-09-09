@@ -8,7 +8,7 @@ import {
 	pubkeyToAddressAndOutScript
 } from './utils';
 
-import { signTransaction } from './sign';
+// import { signTransaction } from './sign';
 
 type Transport = transport.default;
 
@@ -33,43 +33,43 @@ export default class LTC extends COIN.ECDSACoin implements COIN.Coin {
 	}
 
 	async getAddressAndOutScript(transport: Transport, appPrivateKey: string, appId: string, scriptType: ScriptType, addressIndex: number)
-		: Promise<{ address: string, outScript: Buffer }> {
+		: Promise<{ address: string }> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
 	}
 
 	async signTransaction(
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		scriptType: ScriptType,
-		inputs: [Input],
-		output: Output,
-		change?: Change,
-		confirmCB?: Function,
-		authorizedCB?: Function,
+	// 	transport: Transport,
+	// 	appPrivateKey: string,
+	// 	appId: string,
+	// 	scriptType: ScriptType,
+	// 	inputs: [Input],
+	// 	output: Output,
+	// 	change?: Change,
+	// 	confirmCB?: Function,
+	// 	authorizedCB?: Function,
 
-	): Promise<string> {
-		for (const input of inputs) {
-			// eslint-disable-next-line no-await-in-loop
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
-			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
-		}
-		if (change) {
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
-			// eslint-disable-next-line no-param-reassign
-			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
-		}
-		return signTransaction(
-			transport,
-			appId,
-			appPrivateKey,
-			scriptType,
-			inputs,
-			output,
-			change,
-			confirmCB,
-			authorizedCB
-		);
+	)  {
+	// 	for (const input of inputs) {
+	// 		// eslint-disable-next-line no-await-in-loop
+	// 		const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
+	// 		input.pubkeyBuf = Buffer.from(pubkey, 'hex');
+	// 	}
+	// 	if (change) {
+	// 		const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
+	// 		// eslint-disable-next-line no-param-reassign
+	// 		change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+	// 	}
+	// 	return signTransaction(
+	// 		transport,
+	// 		appId,
+	// 		appPrivateKey,
+	// 		scriptType,
+	// 		inputs,
+	// 		output,
+	// 		change,
+	// 		confirmCB,
+	// 		authorizedCB
+	// 	);
 	}
 }

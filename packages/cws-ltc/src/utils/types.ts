@@ -1,8 +1,8 @@
 export enum ScriptType {
-	P2PKH = 0,
-	P2SH_P2WPKH = 1,
-	P2WPKH = 2,
-	P2WSH = 3,
+	P2PKH = 0, // 1xxx
+	P2SH_P2WPKH = 1, // 3xxx
+	P2WPKH = 2, // bc1 長度不同
+	P2WSH = 3, // bc1
 }
 
 export type Input = {
