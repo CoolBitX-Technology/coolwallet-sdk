@@ -28,7 +28,7 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 	async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number)
 		: Promise<string> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		const { address } = pubkeyToAddressAndOutScript(publicKey);
+		const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
 		return address;
 	}
 
