@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import { transport, apdu, tx, error } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
-import * as scripts from "../scripts";
+import * as scripts from "./scripts";
 import {
 	ScriptType, Input, Output, Change, PreparedData
 } from './types';

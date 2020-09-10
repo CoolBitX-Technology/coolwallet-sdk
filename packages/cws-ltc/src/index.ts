@@ -6,7 +6,7 @@ import {
 	Change,
 	addressToOutScript,
 	pubkeyToAddressAndOutScript
-} from './utils';
+} from './util';
 
 // import { signTransaction } from './sign';
 
@@ -28,14 +28,14 @@ export default class LTC extends COIN.ECDSACoin implements COIN.Coin {
 	async getAddress(transport: Transport, appPrivateKey: string, appId: string, scriptType: ScriptType, addressIndex: number)
 		: Promise<string> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
+		const { address } = pubkeyToAddressAndOutScript(publicKey, scriptType);
 		return address;
 	}
 
 	async getAddressAndOutScript(transport: Transport, appPrivateKey: string, appId: string, scriptType: ScriptType, addressIndex: number)
 		: Promise<{ address: string }> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
+		return pubkeyToAddressAndOutScript(publicKey, scriptType);
 	}
 
 	async signTransaction(
