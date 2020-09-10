@@ -1,18 +1,18 @@
-# CoolWallet Ethereum App
+# CoolWallet QuarkChain App
 
-Ethereum API of CoolWallet.
+QuarkChain API of CoolWallet.
 
 ## Install
 
 ```shell
-npm install @coolwallet/eth
+npm install @coolwallet/qkc
 ```
 
 ## Usage
 
 ```javascript
-import cwsETH from '@coolwallet/eth'
-const ETH = new cwsETH(transport, appPrivateKey, appId)
+import QKC from '@coolwallet/qkc'
+const qkc = new QKC()
 ```
 
 ### getAddress
@@ -20,7 +20,7 @@ const ETH = new cwsETH(transport, appPrivateKey, appId)
 Get address by address index.
 
 ```javascript
-const address = await ETH.getAddress(0)
+const address = await qkc.getAddress(0)
 ```
 
 The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of folllowing BIP44 path:
@@ -33,7 +33,7 @@ In the design of current hardware, we only support path `m/44'/60'/0'/0/{i}` for
 
 ### signTransaction
 
-Sign Ethereum Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
+Sign QuarkChain Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
 
 ```javascript
 const tx = {
@@ -43,18 +43,12 @@ const tx = {
     to: "0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C",
     value: "0x5af3107a4000",
     data: "0x00",
-    chainId: 1
+		fromFullShardKey: "0x0000",
+		toFullShardKey: "0x0000",
 }
 // sign with address index 0
-const signedTx = await ETH.signTransaction(tx, 0)
+const signedTx = await qkc.signTransaction(transport, appPrivateKey, appId, tx, 0)
 ```
 
-### signMessage
+...
 
-Perform ethereum `personal_sign`.
-
-```javascript
-const message = 'custom message';
-const signature = await ETH.signMessage(message, 0)
-
-```
