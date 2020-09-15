@@ -28,11 +28,10 @@ export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
     appId: string, 
     transaction: Object,
     addressIndex: number,
-    publicKey: string,
     confirmCB: Function | undefined = undefined,
     authorizedCB: Function | undefined = undefined
   ) {
-    if (publicKey === undefined) publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return signTransaction(
       transport,
       appId,
