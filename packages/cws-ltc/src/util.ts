@@ -2,7 +2,6 @@ import BN from 'bn.js';
 import { transport, error, tx, apdu } from '@coolwallet/core';
 import * as varuint from './varuint';
 import * as scripts from "./scripts";
-import { coinType } from './index'
 import * as bitcoin from 'bitcoinjs-lib';
 import {
 	ScriptType, Input, Output, Change, PreparedData
@@ -10,6 +9,19 @@ import {
 type Transport = transport.default;
 const litecore = require("litecore-lib");
 const base58 = require("bs58");
+
+const activeNet = {
+	"messagePrefix": "\x19Litecoin Signed Message:\n",
+	"bech32": 'ltc',
+	"bip32": {
+		"public": 0x019da462,
+		"private": 0x019d9cfe
+	},
+	"pubKeyHash": 0x30, // L
+	"scriptHash": 0x32, // M
+	"scripthash2": 0x05, // old '3' prefix. available for backward compatibility.
+	"wif": 0xb0
+}
 
 export {
 	ScriptType,
@@ -97,20 +109,26 @@ function toNonReverseUintBuffer(numberOrString: number | string, byteSize: numbe
 
 
 function addressToOutScript(address: string): ({ scriptType: ScriptType, outScript: Buffer, outHash?: Buffer }) {
+
+	const input = {
+		address: address,
+		network: activeNet,
+	}
 	let scriptType;
 	let payment;
-	if (address.startsWith('1')) {
+	if (address.startsWith('L')) {
 		scriptType = ScriptType.P2PKH;
-		payment = litecore.payments.p2pkh({ address });
-	} else if (address.startsWith('3')) {
+		payment = bitcoin.payments.p2pkh(input);
+	} else if (address.startsWith('M')) {
 		scriptType = ScriptType.P2SH_P2WPKH;
-		payment = litecore.payments.p2sh({ address });
-	} else if (address.startsWith('bc1')) {
+		payment = bitcoin.payments.p2sh(input);
+	} else if (address.startsWith('3M')) {
 		scriptType = ScriptType.P2WPKH;
-		payment = litecore.payments.p2wpkh({ address });
+		payment = bitcoin.payments.p2wpkh(input);
 	} else {
 		throw new error.SDKError(addressToOutScript.name, `Unsupport Address '${address}'`);
 	}
+
 	if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address '${address}'`);
 	const outScript = payment.output;
 	const outHash = payment.hash;
@@ -119,19 +137,6 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 
 function pubkeyToAddressAndOutScript(burPublicKey: Buffer, scriptType: ScriptType)
 	: { address: string, outScript: Buffer, hash: Buffer } {
-
-	const activeNet = {
-		"messagePrefix": "\x19Litecoin Signed Message:\n",
-		"bech32": 'ltc',
-		"bip32": {
-			"public": 0x019da462,
-			"private": 0x019d9cfe
-		},
-		"pubKeyHash": 0x30, // L
-		"scriptHash": 0x32, // M
-		"scripthash2": 0x05, // old '3' prefix. available for backward compatibility.
-		"wif": 0xb0
-	}
 
 	const input = {
 		pubkey: burPublicKey,
@@ -151,6 +156,8 @@ function pubkeyToAddressAndOutScript(burPublicKey: Buffer, scriptType: ScriptTyp
 		throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
 	}
 
+	console.log('payment')
+	console.log(payment)
 	if (!payment.address) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No Address for ScriptType '${scriptType}'`);
 	if (!payment.output) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
 	if (!payment.hash) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
@@ -195,11 +202,13 @@ function createUnsignedTransactions(
 		scriptType: outputType,
 		outScript: outputScript
 	} = addressToOutScript(output.address);
+
 	const outputScriptLen = toVarUintBuffer(outputScript.length);
 
 	const outputArray = [
 		Buffer.concat([toUintBuffer(output.value, 8), outputScriptLen, outputScript])
 	];
+
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
 		const changeValue = toUintBuffer(change.value, 8);
@@ -269,6 +278,7 @@ function getSigningActions(
 	appId: string,
 	appPrivateKey: string,
 	change: Change | undefined,
+	coinType: string,
 	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>,
 
@@ -284,7 +294,7 @@ function getSigningActions(
 				throw new error.SDKError(getSigningActions.name, 'not support P2WPKH change');
 			} else {
 				const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
-				await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
+				await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, coinType, change.addressIndex, redeemType);
 			}
 		}
 		preActions.push(changeAction);
@@ -292,14 +302,14 @@ function getSigningActions(
 
 	const parsingOutputAction = async () => {
 		const txDataHex = preparedData.outputsBuf.toString('hex');
-		const txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0C' : '01';
+		const txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0D' : '06';
 		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
 	};
 	preActions.push(parsingOutputAction);
 
 	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-		const keyId = tx.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
-		const readType = '01';
+		const keyId = tx.util.addressIndexToKeyId(coinType, preparedData.preparedInputs[i].addressIndex);
+		const readType = '02';
 		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
 		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
@@ -364,7 +374,7 @@ function composeFinalTransaction(
 			pubkeyBuf, preOutPointBuf, sequenceBuf
 		}) => {
 			if (scriptType === ScriptType.P2SH_P2WPKH) {
-				const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, scriptType);
+				const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, ScriptType.P2WPKH);
 				const inScript = Buffer.concat([
 					Buffer.from(outScript.length.toString(16), 'hex'),
 					outScript,
@@ -506,7 +516,8 @@ function getScriptSigningActions(
 	inputs: Array<Input>,
 	preparedData: PreparedData,
 	output: Output,
-	change: Change | undefined
+	change: Change | undefined,
+	coinType: string
 ): {
 	preActions: Array<Function>,
 	actions: Array<Function>

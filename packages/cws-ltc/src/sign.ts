@@ -20,6 +20,7 @@ async function signTransaction(
 	appId: string,
 	appPrivateKey: string,
 	scriptType: ScriptType,
+	coinType: string,
 	inputs: [Input],
 	output: Output,
 	change?: Change,
@@ -32,6 +33,7 @@ async function signTransaction(
 		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${scriptType}'`);
 	}
 	const useScript = await util.checkSupportScripts(transport);
+	console.log("useScript: " + useScript)
 	const { preparedData, unsignedTransactions } = createUnsignedTransactions(
 		scriptType,
 		inputs,
@@ -39,6 +41,7 @@ async function signTransaction(
 		change
 	);
 	let preActions, actions;
+
 	if (useScript) {
 		({ preActions, actions } = getScriptSigningActions(
 			transport,
@@ -49,6 +52,7 @@ async function signTransaction(
 			preparedData,
 			output,
 			change,
+			coinType
 		));
 	} else {
 		({ preActions, actions } = getSigningActions(
@@ -57,6 +61,7 @@ async function signTransaction(
 			appId,
 			appPrivateKey,
 			change,
+			coinType,
 			preparedData,
 			unsignedTransactions,
 		));
