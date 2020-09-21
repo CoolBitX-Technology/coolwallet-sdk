@@ -414,7 +414,7 @@ function getArgument(
 	}
 	let outputScriptType;
 	let outputHashBuf;
-	//todo
+	
 	if (outputType == ScriptType.P2PKH) {
 		outputScriptType = toUintBuffer(0, 1);
 		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
@@ -423,7 +423,7 @@ function getArgument(
 		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
 	} else if (outputType == ScriptType.P2WPKH) {
 		outputScriptType = toUintBuffer(2, 1);
-		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+		outputHashBuf = Buffer.from(`${outputHash.toString('hex')}`, 'hex');
 	} else {
 		throw new error.SDKError(getArgument.name, `Unsupport ScriptType : ${outputType}`);
 	}
@@ -439,7 +439,7 @@ function getArgument(
 		changeScriptType = toUintBuffer(outputType, 1);
 		changeAmount = toNonReverseUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from(`328000002C800000008000000000000000${addressIdxHex}`, 'hex');
+		changePath = Buffer.from(`328000002C800000028000000000000000${addressIdxHex}`, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
@@ -460,6 +460,25 @@ function getArgument(
 	})
 	const hashSequence = hash256(Buffer.concat(sequences));
 
+	const address = output.address
+	let Maddress;
+	if (address.startsWith('M')) {
+		Maddress = Buffer.from('01', 'hex');
+	} else {
+		Maddress = Buffer.from('00', 'hex');
+	}
+	console.log(Buffer.concat([
+		outputScriptType,
+		outputAmount,
+		outputHashBuf,
+		haveChange,
+		changeScriptType,
+		changeAmount,
+		changePath,
+		hashPrevouts,
+		hashSequence,
+		Maddress
+	]).toString('hex'))
 	return Buffer.concat([
 		outputScriptType,
 		outputAmount,
@@ -470,41 +489,8 @@ function getArgument(
 		changePath,
 		hashPrevouts,
 		hashSequence,
+		Maddress
 	]).toString('hex');
-};
-
-function getScriptAndArgument(
-	inputs: Array<Input>,
-	output: Output,
-	change: Change | undefined
-): {
-	script: string,
-	argument: string
-} {
-	const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-	const argument = getArgument(inputs, output, change);
-	return {
-		script,
-		argument: "00" + argument,// keylength zero
-	};
-};
-
-function getUtxoArguments(
-	inputs: Array<Input>,
-	preparedData: PreparedData,
-): Array<string> {
-	const utxoArguments = preparedData.preparedInputs.map(
-		(preparedInput) => {
-			const addressIdxHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
-			const SEPath = `15328000002C800000008000000000000000${addressIdxHex}`;
-			const outPoint = preparedInput.preOutPointBuf;
-			// todo
-			const inputScriptType = toUintBuffer(0, 1);
-			const inputAmount = preparedInput.preValueBuf.reverse();
-			const inputHash = hash160(preparedInput.pubkeyBuf);
-			return Buffer.concat([Buffer.from(SEPath, 'hex'), outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
-		});
-	return utxoArguments;
 };
 
 
@@ -547,7 +533,7 @@ function getScriptSigningActions(
 			const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
 			let inputScriptType;
-			// TODO
+			
 			if ((scriptType == ScriptType.P2PKH) || (scriptType == ScriptType.P2WPKH) || (scriptType == ScriptType.P2SH_P2WPKH)) {
 				inputScriptType = toVarUintBuffer(0);
 			} else {//(scriptType == ScriptType.P2WSH)
@@ -560,7 +546,10 @@ function getScriptSigningActions(
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
-			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (scriptType === ScriptType.P2PKH) ? "10" : "11");
+			console.log("utxoArgument: " + utxoArgument)
+			console.log("scriptType: " + scriptType)
+			console.log("executeUtxoScript: " + (scriptType === ScriptType.P2PKH) ? "10" : "11")
+			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, "11");
 		});
 	return { preActions, actions };
 };
