@@ -1,7 +1,6 @@
 import { error, transport, apdu } from "@coolwallet/core";
 
 import { handleHex } from "./stringUtil";
-import { coinType } from '../type'
 import * as scripts from "../scripts";
 import * as token from "../token";
 
@@ -77,9 +76,11 @@ export const getRawHex = (transaction: any): Array<Buffer> => {
     }
     return Buffer.from(hex, "hex");
   });
-  raw[6] = Buffer.from([transaction.chainId]);
-  raw[7] = Buffer.allocUnsafe(0);
-  raw[8] = Buffer.allocUnsafe(0);
+  raw[6] = Buffer.from('01', 'hex');
+  raw[7] = Buffer.from(handleHex(transaction['fromFullShardKey']), 'hex');
+  raw[8] = Buffer.from(handleHex(transaction['toFullShardKey']), 'hex');
+  raw[9] = Buffer.from('8bb0', 'hex');
+  raw[10] = Buffer.from('8bb0', 'hex');
 
   const t = rlp.encode(raw);
   if (t.length > 870) throw new error.SDKError(getRawHex.name, 'data too long');
@@ -114,7 +115,7 @@ export const getReadType = (txType: string) => {
  */
 export const getScriptAndArguments = (txType: any, addressIndex: number, transaction: any) => {
   const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
-  const SEPath = `15328000002C800000${coinType}8000000000000000${addressIdxHex}`;
+  const SEPath = `15328000002C8000003C8000000000000000${addressIdxHex}`;
   let script;
   let argument;
   switch (txType) {
@@ -146,16 +147,15 @@ export const getScriptAndArguments = (txType: any, addressIndex: number, transac
  * @param {Number} v
  * @param {String} r
  * @param {String} s
- * @param {number} chainId
  * @return {String}
  */
-export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: string, s: string, chainId: number): string => {
-  const vValue = v + chainId * 2 + 8;
+export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: string, s: string): string => {
 
-  const transaction = payload.slice(0, 6);
+	const transaction = payload;
 
   transaction.push(
-    Buffer.from([vValue]),
+		Buffer.allocUnsafe(0),
+    Buffer.from(v.toString(16), "hex"),
     Buffer.from(r, "hex"),
     Buffer.from(s, "hex")
   );

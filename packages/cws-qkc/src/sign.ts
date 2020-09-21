@@ -16,7 +16,7 @@ type Transport = transport.default;
  * @param {String} appPrivateKey
  * @param {coinType} coinType
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
- * value:string, data:string, chainId: number}} transaction
+ * value:string, data:string}} transaction
  * @param {Number} addressIndex
  * @param {String} publicKey
  * @param {Function} confirmCB
@@ -28,7 +28,15 @@ export const signTransaction = async (
   appId: string,
   appPrivateKey: string,
   coinType: string,
-  transaction: { nonce: string, gasPrice: string, gasLimit: string, to: string, value: string, data: string, chainId: number },
+	transaction: {
+		nonce: string,
+		gasPrice: string,
+		gasLimit: string,
+		to: string,
+		value: string,
+		data: string,
+		fromFullShardKey: string,
+		toFullShardKey: string },
   addressIndex: number,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
@@ -37,16 +45,16 @@ export const signTransaction = async (
   const rawPayload = ethUtil.getRawHex(transaction);
   const useScript = await util.checkSupportScripts(transport);
   const txType = ethUtil.getTransactionType(transaction);
-  const preActions = [];
-  let action;
+  let canonicalSignature;
   if (useScript) {
     const { script, argument } = ethUtil.getScriptAndArguments(txType, addressIndex, transaction);
+    const preActions = [];
     const sendScript = async () => {
       await apdu.tx.sendScript(transport, script);
     }
     preActions.push(sendScript);
 
-    action = async () => {
+    const sendArgument = async () => {
       return apdu.tx.executeScript(
         transport,
         appId,
@@ -54,35 +62,49 @@ export const signTransaction = async (
         argument
       );
     }
+
+    canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+      transport,
+      preActions,
+      sendArgument,
+      false,
+      confirmCB,
+      authorizedCB,
+      true
+    );
   } else {
     const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
     const { readType } = ethUtil.getReadType(txType);
     const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
+
+    const preActions = [];
     const sayHi = async () => {
       await apdu.general.hi(transport, appId);
     }
     preActions.push(sayHi)
 
-    action = async () => {
+    const prepareTx = async () => {
       return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
     }
+
+    canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+      transport,
+      preActions,
+      prepareTx,
+      false,
+      confirmCB,
+      authorizedCB,
+      true
+    );
   }
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
-    transport,
-    preActions,
-    action,
-    false,
-    confirmCB,
-    authorizedCB,
-    true
-  );
+
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(
       canonicalSignature,
       rlp.encode(rawPayload),
       publicKey
     );
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
