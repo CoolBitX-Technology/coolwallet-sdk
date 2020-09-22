@@ -132,6 +132,8 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 	if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address '${address}'`);
 	const outScript = payment.output;
 	const outHash = payment.hash;
+	console.log("addressToOutScript")
+	console.log(payment)
 	return { scriptType, outScript, outHash };
 }
 
@@ -400,6 +402,7 @@ function composeFinalTransaction(
 }
 
 function getArgument(
+	coinType: string,
 	inputs: Array<Input>,
 	output: Output,
 	change?: Change,
@@ -415,6 +418,8 @@ function getArgument(
 	let outputScriptType;
 	let outputHashBuf;
 	
+	console.log("outputScript: " + outputScript)
+
 	if (outputType == ScriptType.P2PKH) {
 		outputScriptType = toUintBuffer(0, 1);
 		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
@@ -440,11 +445,12 @@ function getArgument(
 		changeAmount = toNonReverseUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
 		changePath = Buffer.from(`328000002C800000028000000000000000${addressIdxHex}`, 'hex');
+		changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdxHex, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
-		changeAmount = Buffer.from('0000000000000000', 'hex');
-		changePath = Buffer.from('000000000000000000000000000000000000000000', 'hex');
+		changeAmount = toUintBuffer(0, 8)//)Buffer.from('0000000000000000', 'hex');
+		changePath = toUintBuffer(0, 21)//Buffer.from('000000000000000000000000000000000000000000', 'hex');
 	}
 	const prevouts = inputs.map(input => {
 		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
@@ -455,7 +461,7 @@ function getArgument(
 		return Buffer.concat([
 			(input.sequence) ? toUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
 			//Buffer.from(input.sequence, 'hex').reverse(),
-			toUintBuffer(input.preIndex, 4)
+			// toUintBuffer(input.preIndex, 4)
 		])
 	})
 	const hashSequence = hash256(Buffer.concat(sequences));
@@ -509,7 +515,7 @@ function getScriptSigningActions(
 	actions: Array<Function>
 } {
 	const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-	const argument = "00" + getArgument(inputs, output, change);// keylength zero
+	const argument = "00" + getArgument(coinType, inputs, output, change);// keylength zero
 
 	const preActions = [];
 	const sendScript = async () => {
@@ -532,13 +538,15 @@ function getScriptSigningActions(
 			const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
 			const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
-			let inputScriptType;
-			
-			if ((scriptType == ScriptType.P2PKH) || (scriptType == ScriptType.P2WPKH) || (scriptType == ScriptType.P2SH_P2WPKH)) {
-				inputScriptType = toVarUintBuffer(0);
-			} else {//(scriptType == ScriptType.P2WSH)
-				inputScriptType = toVarUintBuffer(1);
-			}
+			// let inputScriptType;
+			// if ((scriptType == ScriptType.P2PKH) || (scriptType == ScriptType.P2WPKH) || (scriptType == ScriptType.P2SH_P2WPKH)) {
+			// 	inputScriptType = toVarUintBuffer(0);
+			// } else {//(scriptType == ScriptType.P2WSH)
+			// 	inputScriptType = toVarUintBuffer(1);
+			// }
+
+
+			const inputScriptType = toUintBuffer(0, 1);
 			const inputAmount = preparedInput.preValueBuf.reverse();
 			const inputHash = hash160(preparedInput.pubkeyBuf);
 			return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
@@ -547,9 +555,7 @@ function getScriptSigningActions(
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
 			console.log("utxoArgument: " + utxoArgument)
-			console.log("scriptType: " + scriptType)
-			console.log("executeUtxoScript: " + (scriptType === ScriptType.P2PKH) ? "10" : "11")
-			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, "11");
+			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (scriptType === ScriptType.P2PKH) ? "10" : "11");
 		});
 	return { preActions, actions };
 };
