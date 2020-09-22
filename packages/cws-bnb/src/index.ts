@@ -112,3 +112,4 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     return { signature, publicKey }
   }
 }
+
