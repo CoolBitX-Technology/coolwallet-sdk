@@ -122,7 +122,7 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 	} else if (address.startsWith('M')) {
 		scriptType = ScriptType.P2SH_P2WPKH;
 		payment = bitcoin.payments.p2sh(input);
-	} else if (address.startsWith('3M')) {
+	} else if (address.startsWith('ltc')) {
 		scriptType = ScriptType.P2WPKH;
 		payment = bitcoin.payments.p2wpkh(input);
 	} else {
@@ -538,6 +538,7 @@ function getScriptSigningActions(
 			const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
 			const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdHex}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
+
 			// let inputScriptType;
 			// if ((scriptType == ScriptType.P2PKH) || (scriptType == ScriptType.P2WPKH) || (scriptType == ScriptType.P2SH_P2WPKH)) {
 			// 	inputScriptType = toVarUintBuffer(0);
