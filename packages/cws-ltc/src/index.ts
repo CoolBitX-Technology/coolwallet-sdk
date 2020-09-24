@@ -52,20 +52,13 @@ export default class LTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	): Promise<string> {
 		for (const input of inputs) {
-			console.log("input: " + input.preValue)
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 		if (change) {
-			console.log("change: " + change.value)
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
 			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-		console.log("SDK - scriptType: " + scriptType)
-		console.log("SDK - coinType: " + this.coinType)
-		console.log("SDK - inputs: " + JSON.stringify(inputs))
-		console.log("SDK - output: " + JSON.stringify(output))
-		console.log("SDK - change: " + JSON.stringify(change))
 		return signTransaction(
 			transport,
 			appId,

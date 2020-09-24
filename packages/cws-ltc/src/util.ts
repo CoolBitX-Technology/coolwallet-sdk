@@ -132,8 +132,7 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 	if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address '${address}'`);
 	const outScript = payment.output;
 	const outHash = payment.hash;
-	console.log("addressToOutScript")
-	console.log(payment)
+	console.debug(payment)
 	return { scriptType, outScript, outHash };
 }
 
@@ -158,8 +157,7 @@ function pubkeyToAddressAndOutScript(burPublicKey: Buffer, scriptType: ScriptTyp
 		throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
 	}
 
-	console.log('payment')
-	console.log(payment)
+	console.debug(payment)
 	if (!payment.address) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No Address for ScriptType '${scriptType}'`);
 	if (!payment.output) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
 	if (!payment.hash) throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
@@ -402,6 +400,7 @@ function composeFinalTransaction(
 }
 
 function getArgument(
+	scriptType: ScriptType,
 	coinType: string,
 	inputs: Array<Input>,
 	output: Output,
@@ -417,8 +416,6 @@ function getArgument(
 	}
 	let outputScriptType;
 	let outputHashBuf;
-	
-	console.log("outputScript: " + outputScript)
 
 	if (outputType == ScriptType.P2PKH) {
 		outputScriptType = toUintBuffer(0, 1);
@@ -428,8 +425,8 @@ function getArgument(
 		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
 	} else if (outputType == ScriptType.P2WPKH) {
 		outputScriptType = toUintBuffer(2, 1);
-		outputHashBuf = Buffer.from(`${outputHash.toString('hex')}`, 'hex');
-	} else {
+		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+	}  else {
 		throw new error.SDKError(getArgument.name, `Unsupport ScriptType : ${outputType}`);
 	}
 	const outputAmount = toNonReverseUintBuffer(output.value, 8);
@@ -441,10 +438,11 @@ function getArgument(
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(getArgument.name, 'Public Key not exists !!');
 		haveChange = toUintBuffer(1, 1);
-		changeScriptType = toUintBuffer(outputType, 1);
+		changeScriptType = toUintBuffer(scriptType, 1);
+
 		changeAmount = toNonReverseUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from(`328000002C800000028000000000000000${addressIdxHex}`, 'hex');
+		// changePath = Buffer.from(`328000002C800000028000000000000000${addressIdxHex}`, 'hex');
 		changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdxHex, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
@@ -473,18 +471,8 @@ function getArgument(
 	} else {
 		Maddress = Buffer.from('00', 'hex');
 	}
-	console.log(Buffer.concat([
-		outputScriptType,
-		outputAmount,
-		outputHashBuf,
-		haveChange,
-		changeScriptType,
-		changeAmount,
-		changePath,
-		hashPrevouts,
-		hashSequence,
-		Maddress
-	]).toString('hex'))
+	
+
 	return Buffer.concat([
 		outputScriptType,
 		outputAmount,
@@ -515,7 +503,7 @@ function getScriptSigningActions(
 	actions: Array<Function>
 } {
 	const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-	const argument = "00" + getArgument(coinType, inputs, output, change);// keylength zero
+	const argument = "00" + getArgument(scriptType, coinType, inputs, output, change);// keylength zero
 
 	const preActions = [];
 	const sendScript = async () => {
@@ -555,7 +543,6 @@ function getScriptSigningActions(
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
-			console.log("utxoArgument: " + utxoArgument)
 			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (scriptType === ScriptType.P2PKH) ? "10" : "11");
 		});
 	return { preActions, actions };

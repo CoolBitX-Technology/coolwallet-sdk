@@ -383,6 +383,7 @@ function composeFinalTransaction(
 }
 
 function getArgument(
+	scriptType: ScriptType,
 	inputs: Array<Input>,
 	output: Output,
 	change?: Change,
@@ -414,7 +415,7 @@ function getArgument(
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(getArgument.name, 'Public Key not exists !!');
 		haveChange = toVarUintBuffer(1);
-		changeScriptType = toVarUintBuffer(outputType);
+		changeScriptType = toUintBuffer(scriptType, 1);
 		changeAmount = toUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
 		changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdxHex, 'hex');
@@ -463,7 +464,7 @@ function getScriptSigningActions(
 	actions: Array<Function>
 } {
 	const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-	const argument = "00" + getArgument(inputs, output, change);// keylength zero
+	const argument = "00" + getArgument(scriptType, inputs, output, change);// keylength zero
 
 	const preActions = [];
 	const sendScript = async () => {

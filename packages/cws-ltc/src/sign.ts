@@ -33,7 +33,6 @@ async function signTransaction(
 		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${scriptType}'`);
 	}
 	const useScript = await util.checkSupportScripts(transport);
-	console.log("useScript: " + useScript)
 	const { preparedData, unsignedTransactions } = createUnsignedTransactions(
 		scriptType,
 		inputs,
