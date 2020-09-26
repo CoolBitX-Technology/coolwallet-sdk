@@ -79,8 +79,9 @@ function bip66Encode(r: Buffer, s: Buffer) {
 	return signature;
 }
 
-function toVarUintBuffer(int: number): Buffer {
-	return varuint.encode(int);
+function toVarUintBuffer(value: number): Buffer {
+	const hex = value.toString(16);
+	return Buffer.from(hex.length % 2 !== 0 ? `0${hex}` : hex, 'hex')
 }
 
 function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
@@ -147,23 +148,32 @@ function createUnsignedTransactions(
 } {
 	const versionBuf = toReverseUintBuffer(version, 4);
 	const lockTimeBuf = toReverseUintBuffer(lockTime, 4);
-
 	const inputsCount = toVarUintBuffer(inputs.length);
 	const preparedInputs = inputs.map(({
-		preTxHash, preIndex, preValue, sequence, addressIndex, pubkeyBuf
+		preTxHash, preIndex, sequence, addressIndex, pubkeyBuf, scriptPubKey
 	}) => {
-		if (!pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
-
+		if (!pubkeyBuf) {
+			throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
+		}
 		const preOutPointBuf = Buffer.concat([
 			Buffer.from(preTxHash, 'hex').reverse(),
 			toReverseUintBuffer(preIndex, 4),
 		]);
-
-		const preValueBuf = toReverseUintBuffer(preValue, 8);
 		const sequenceBuf = (sequence) ? toReverseUintBuffer(sequence, 4) : Buffer.from('ffffffff', 'hex');
+		let scriptLen
+		const scriptPubKeyBuf = Buffer.from(scriptPubKey, 'hex')
+		if (scriptType == ScriptType.P2PKH) {
+			scriptLen = 25;
+		} else {
+			scriptLen = 23;
+		}
 
+		const blockHashLen = parseInt(scriptPubKeyBuf[scriptLen].toString());
+		const blockHashBuf = scriptPubKeyBuf.slice(scriptLen + 1, scriptLen + 1 + blockHashLen)
+		const blockHeightLen = parseInt(scriptPubKeyBuf[scriptLen + 1 + blockHashLen].toString());
+		const blockHeightBuf = scriptPubKeyBuf.slice(scriptLen + 1 + blockHeightLen + 1, scriptLen + 1 + blockHeightLen + 1 + blockHeightLen)
 		return {
-			addressIndex, pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
+			addressIndex, pubkeyBuf, preOutPointBuf, sequenceBuf, blockHashBuf, blockHeightBuf
 		};
 	});
 
@@ -171,33 +181,63 @@ function createUnsignedTransactions(
 		scriptType: outputType,
 		outScript: outputScript
 	} = addressToOutScript(output.address);
-	const outputScriptLen = toVarUintBuffer(outputScript.length);
 
+	const outValue = toReverseUintBuffer(output.value, 8);
+	const outBlockHashBuf = Buffer.from(output.blockHash, 'hex').reverse();
+	const outBlockHeightBuf = toVarUintBuffer(output.blockHeight).reverse();
+	const outScriptPubKey = Buffer.concat([
+		outputScript,
+		toVarUintBuffer(outBlockHashBuf.length),
+		outBlockHashBuf,
+		toVarUintBuffer(outBlockHeightBuf.length),
+		outBlockHeightBuf,
+		Buffer.from('b4', 'hex')
+	]);
+	const outScriptPubKeyLen = toVarUintBuffer(outScriptPubKey.length);
 	const outputArray = [
-		Buffer.concat([toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])
+		Buffer.concat([outValue, outScriptPubKeyLen, outScriptPubKey])
 	];
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
+
+		const { outScript: changeScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
 		const changeValue = toReverseUintBuffer(change.value, 8);
-		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
-		const outScriptLen = toVarUintBuffer(outScript.length);
-		outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
+		const changeBlockHashBuf = Buffer.from(change.blockHash, 'hex').reverse();
+		const changeBlockHeightBuf = toVarUintBuffer(change.blockHeight).reverse();
+		const changeScriptPubKey = Buffer.concat([
+			changeScript,
+			toVarUintBuffer(changeBlockHashBuf.length),
+			changeBlockHashBuf,
+			toVarUintBuffer(changeBlockHeightBuf.length),
+			changeBlockHeightBuf,
+			Buffer.from('b4', 'hex')
+		]);
+		const changeScriptPubKeyLen = toVarUintBuffer(changeScriptPubKey.length);
+		outputArray.push(Buffer.concat([changeValue, changeScriptPubKeyLen, changeScriptPubKey]));
 	}
 
 	const outputsCount = toVarUintBuffer((change) ? 2 : 1);
 	const outputsBuf = Buffer.concat(outputArray);
 
 	const unsignedTransactions = preparedInputs.map(({
-		pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
+		pubkeyBuf, preOutPointBuf, sequenceBuf, blockHashBuf, blockHeightBuf
 	}) => {
-		const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, scriptType);
-		const outScriptLen = toVarUintBuffer(outScript.length);
+		const { outScript: preOutScriptBuf } = pubkeyToAddressAndOutScript(pubkeyBuf, scriptType);
+		const fullInput = Buffer.concat([
+			preOutScriptBuf,
+			toVarUintBuffer(blockHashBuf.length),
+			blockHashBuf,
+			toVarUintBuffer(blockHeightBuf.length),
+			blockHeightBuf,
+			Buffer.from('b4', 'hex')
+		]);
+		//const fullInputLen = 
 		return Buffer.concat([
 			versionBuf,
 			toVarUintBuffer(1),
 			preOutPointBuf,
-			outScriptLen, // preOutScriptBuf
-			outScript, // preOutScriptBuf
+			toVarUintBuffer(fullInput.length),
+			fullInput,
 			sequenceBuf,
 			outputsCount,
 			outputsBuf,

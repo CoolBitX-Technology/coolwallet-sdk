@@ -18,7 +18,6 @@ export {
 	getSigningActions,
 	getScriptSigningActions,
 	getScriptAndArgument,
-	getUtxoArguments
 };
 
 function hash160(buf: Buffer): Buffer {
@@ -108,7 +107,7 @@ function getSigningActions(
 	if (change) {
 		const changeAction = async () => {
 			const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
-			await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, '00', change.addressIndex, redeemType);
+			await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, coinType, change.addressIndex, redeemType);
 		}
 		preActions.push(changeAction);
 	}
@@ -121,13 +120,12 @@ function getSigningActions(
 	preActions.push(parsingOutputAction);
 
 	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-		const keyId = tx.util.addressIndexToKeyId('00', preparedData.preparedInputs[i].addressIndex);
-		const readType = '01';
+		const keyId = tx.util.addressIndexToKeyId(coinType, preparedData.preparedInputs[i].addressIndex);
+		const readType = '79';
 		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
 		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
 	}));
-
 	return { preActions, actions };
 }
 
@@ -218,7 +216,7 @@ function getScriptAndArgument(
 	};
 };
 
-function getUtxoArguments(
+/*function getUtxoArguments(
 	inputs: Array<Input>,
 	preparedData: PreparedData,
 ): Array<string> {
@@ -228,13 +226,13 @@ function getUtxoArguments(
 			const SEPath = `15328000002C800000008000000000000000${addressIdxHex}`;
 			const outPoint = preparedInput.preOutPointBuf;
 			// todo
-			const inputScriptType = toUintBuffer(0, 1);
-			const inputAmount = preparedInput.preValueBuf.reverse();
+			const inputScriptType = toVarUintBuffer(0);
+			const inputAmount = Buffer.from('0000000000000000', 'hex');
 			const inputHash = hash160(preparedInput.pubkeyBuf);
 			return Buffer.concat([Buffer.from(SEPath, 'hex'), outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
 		});
 	return utxoArguments;
-};
+};*/
 
 function getScriptSigningActions(
 	transport: Transport,
@@ -280,10 +278,11 @@ function getScriptSigningActions(
 			} else {//(scriptType == ScriptType.P2SH)
 				inputScriptType = toVarUintBuffer(1);
 			}
-			const inputAmount = preparedInput.preValueBuf.reverse();
+			const inputAmount = Buffer.from('0000000000000000', 'hex');
 			const inputHash = hash160(preparedInput.pubkeyBuf);
 			return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
 		});
+
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {

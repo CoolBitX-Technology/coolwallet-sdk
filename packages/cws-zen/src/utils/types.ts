@@ -6,8 +6,8 @@ export enum ScriptType {
 export type Input = {
 	preTxHash: string,
 	preIndex: number,
-	preValue: string,
 	sequence?: number,
+	scriptPubKey: string,
 	addressIndex: number,
 	pubkeyBuf?: Buffer,
 };
@@ -15,12 +15,16 @@ export type Input = {
 export type Output = {
 	value: string,
 	address: string,
+	blockHash: string,
+	blockHeight: number,
 };
 
 export type Change = {
 	value: string,
 	addressIndex: number,
 	pubkeyBuf?: Buffer,
+	blockHash: string,
+	blockHeight: number,
 };
 
 export type PreparedData = {
@@ -30,8 +34,9 @@ export type PreparedData = {
 		addressIndex: number,
 		pubkeyBuf: Buffer,
 		preOutPointBuf: Buffer,
-		preValueBuf: Buffer,
 		sequenceBuf: Buffer,
+		blockHashBuf: Buffer,
+		blockHeightBuf: Buffer,
 	}[],
 	outputType: ScriptType,
 	outputsCount: Buffer,
