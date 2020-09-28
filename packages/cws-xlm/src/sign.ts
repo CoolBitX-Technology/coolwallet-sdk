@@ -58,7 +58,7 @@ export default async function signTransaction(
       authorizedCB,
       false,
     );
-
+    await util.checkSupportScripts(transport);
     
   }else{
     // 100 flow

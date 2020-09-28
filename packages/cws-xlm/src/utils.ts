@@ -4,6 +4,7 @@ import * as scripts from "./scripts";
 import * as Stellar from 'stellar-sdk';
 import { path } from './types';
 
+const BN = require('bn.js');
 const base32 = require('base32.js');
 
 type versionByteNames = import('./types').versionByteNames;
@@ -59,18 +60,18 @@ const getTransferArgument = (transaction: any) => {
       memoType = "00"
       break;
   }
-
+  
   const argument =
     transaction.from +
-    transaction.to + // TODO
+    transaction.to + 
     parseInt(parseInt(transaction.amount).toString().padEnd(8, "0")).toString(16).padStart(16, "0") +
     parseInt(transaction.fee).toString(16).padStart(16, "0") +
-    parseInt(transaction.sequence).toString(16).padStart(16, "0") +
-    transaction.minTime.padStart(16, "0") +
-    transaction.maxTime.padStart(16, "0") +
-    memoType.padStart(2, "0") + //memoType // TODO
+    BigInt(transaction.sequence).toString(16).padStart(16, "0") + 
+    parseInt(transaction.minTime).toString(16).padStart(16, "0") +
+    parseInt(transaction.maxTime).toString(16).padStart(16, "0") +
+    memoType.padStart(2, "0") + //memoType 
     transaction.memo.padStart(64, "0") + //memo
-    isCreate.padStart(2, "0");  //isCreate// TODO
+    isCreate.padStart(2, "0");  //isCreate 
 
   console.log("argument: " + argument)
   return argument;

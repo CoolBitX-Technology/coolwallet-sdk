@@ -19,7 +19,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     }
     console.log("protocol: " + protocol)
     console.log("accountIndex: " + accountIndex)
-    const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, path, protocol);
+    const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, path);
     console.log(pubKey)
     if (!pubKey) {
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
