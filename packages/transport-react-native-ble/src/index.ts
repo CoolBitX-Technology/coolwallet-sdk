@@ -263,3 +263,4 @@ export default class RNBleTransport extends transport.default {
     }
   };
 }
+
