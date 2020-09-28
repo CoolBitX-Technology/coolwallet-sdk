@@ -1,6 +1,5 @@
 import BN from 'bn.js';
 import { error } from '@coolwallet/core';
-import * as varuint from './varuint';
 import {
 	ScriptType, Input, Output, Change, PreparedData
 } from './types';
@@ -202,14 +201,14 @@ function createUnsignedTransactions(
 
 		const { outScript: changeScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, scriptType);
 		const changeValue = toReverseUintBuffer(change.value, 8);
-		const changeBlockHashBuf = Buffer.from(change.blockHash, 'hex').reverse();
-		const changeBlockHeightBuf = toVarUintBuffer(change.blockHeight).reverse();
+		const changeBlockHashBuf = Buffer.from(change.blockHash, 'hex');
+		const changeBlockHeightBuf = toVarUintBuffer(change.blockHeight);
 		const changeScriptPubKey = Buffer.concat([
 			changeScript,
 			toVarUintBuffer(changeBlockHashBuf.length),
-			changeBlockHashBuf,
+			changeBlockHashBuf.reverse(),
 			toVarUintBuffer(changeBlockHeightBuf.length),
-			changeBlockHeightBuf,
+			changeBlockHeightBuf.reverse(),
 			Buffer.from('b4', 'hex')
 		]);
 		const changeScriptPubKeyLen = toVarUintBuffer(changeScriptPubKey.length);
@@ -226,9 +225,9 @@ function createUnsignedTransactions(
 		const fullInput = Buffer.concat([
 			preOutScriptBuf,
 			toVarUintBuffer(blockHashBuf.length),
-			blockHashBuf,
+			blockHashBuf.reverse(),
 			toVarUintBuffer(blockHeightBuf.length),
-			blockHeightBuf,
+			blockHeightBuf.reverse(),
 			Buffer.from('b4', 'hex')
 		]);
 		//const fullInputLen = 
@@ -274,59 +273,27 @@ function composeFinalTransaction(
 		throw new error.SDKError(composeFinalTransaction.name, `Unsupport ScriptType '${scriptType}'`);
 	}
 
-	if (scriptType === ScriptType.P2PKH) {
-		const inputsBuf = Buffer.concat(preparedInputs.map((data, i) => {
-			const { pubkeyBuf, preOutPointBuf, sequenceBuf } = data;
-			const signature = signatures[i];
-			const inScript = Buffer.concat([
-				Buffer.from((signature.length + 1).toString(16), 'hex'),
-				signature,
-				Buffer.from('81', 'hex'),
-				Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
-				pubkeyBuf,
-			]);
-			return Buffer.concat([
-				preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
-			]);
-		}));
-		return Buffer.concat([
-			versionBuf,
-			inputsCount,
-			inputsBuf,
-			outputsCount,
-			outputsBuf,
-			lockTimeBuf,
+	const inputsBuf = Buffer.concat(preparedInputs.map((data, i) => {
+		const { pubkeyBuf, preOutPointBuf, sequenceBuf } = data;
+		const signature = signatures[i];
+		const inScript = Buffer.concat([
+			Buffer.from((signature.length + 1).toString(16), 'hex'),
+			signature,
+			Buffer.from('81', 'hex'),
+			Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
+			pubkeyBuf,
 		]);
-	} else {
-		const flagBuf = Buffer.from('0001', 'hex');
-		const segwitBuf = Buffer.concat(preparedInputs.map(({ pubkeyBuf }, i) => {
-			const signature = signatures[i];
-			const segwitScript = Buffer.concat([
-				Buffer.from((signature.length + 1).toString(16), 'hex'),
-				signature,
-				Buffer.from('01', 'hex'),
-				Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
-				pubkeyBuf,
-			]);
-			return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
-		}));
-
-		const inputsBuf = Buffer.concat(preparedInputs.map(({
-			pubkeyBuf, preOutPointBuf, sequenceBuf
-		}) => {
-			return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
-		}));
-
 		return Buffer.concat([
-			versionBuf,
-			flagBuf,
-			inputsCount,
-			inputsBuf,
-			outputsCount,
-			outputsBuf,
-			segwitBuf,
-			lockTimeBuf,
+			preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
 		]);
-	}
+	}));
+	return Buffer.concat([
+		versionBuf,
+		inputsCount,
+		inputsBuf,
+		outputsCount,
+		outputsBuf,
+		lockTimeBuf,
+	]);
 }
 
