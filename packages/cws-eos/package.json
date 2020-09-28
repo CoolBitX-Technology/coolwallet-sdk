@@ -22,7 +22,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.12"
+    "@coolwallet/core": "~0.1.0-beta.26"
   },
   "dependencies": {
     "bigi": "^1.4.2",
@@ -37,6 +37,7 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "~0.1.0-beta.26",
     "@types/bigi": "^1.4.2",
     "@types/bs58": "^4.0.1",
     "@types/bytebuffer": "^5.0.40"

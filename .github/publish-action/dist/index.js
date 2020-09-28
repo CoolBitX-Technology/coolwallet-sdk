@@ -6386,8 +6386,6 @@ function buildAndPublish(path, isBeta) {
                 case 2:
                     _a.sent();
                     publishArgs = ['publish', '--access', 'public'];
-                    if (isBeta)
-                        publishArgs = publishArgs.concat(['--tag', 'beta']);
                     return [4 /*yield*/, command('npm', publishArgs, path)];
                 case 3:
                     result = _a.sent();

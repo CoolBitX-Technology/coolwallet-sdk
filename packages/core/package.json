@@ -18,7 +18,7 @@
     "bip39": "^3.0.2",
     "bip66": "^1.1.5",
     "bn.js": "^5.1.1",
-    "elliptic": "^4.0.0",
+    "elliptic": "^6.5.3",
     "jsonwebtoken": "^8.5.1",
     "key-encoder": "^2.0.3",
     "rlp": "^2.2.3"

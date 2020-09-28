@@ -12,4 +12,3 @@ import * as util from './utils/index';
 export {
   config, crypto, setting, apdu, coin, error, device, transport, tx, util
 };
-
