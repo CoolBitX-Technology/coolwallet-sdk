@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/transport-react-native-ble",
-  "version": "0.1.0-beta.4",
+  "version": "0.1.0-beta.5",
   "description": "react-native ble transport layer for coolwallet.",
   "main": "lib/transport-react-native-ble.min.js",
   "scripts": {
