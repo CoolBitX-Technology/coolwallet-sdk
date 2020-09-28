@@ -58,7 +58,7 @@ const getTransferArgument = (transaction: any) => {
       break;
     default:
       memoType = "00"
-      break;
+      break; 
   }
   
   const argument =
