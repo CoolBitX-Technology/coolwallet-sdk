@@ -171,7 +171,7 @@ function createUnsignedTransactions(
 		const blockHashLen = parseInt(scriptPubKeyBuf[scriptLen].toString());
 		const blockHashBuf = scriptPubKeyBuf.slice(scriptLen + 1, scriptLen + 1 + blockHashLen)
 		const blockHeightLen = parseInt(scriptPubKeyBuf[scriptLen + 1 + blockHashLen].toString());
-		const blockHeightBuf = scriptPubKeyBuf.slice(scriptLen + 1 + blockHeightLen + 1, scriptLen + 1 + blockHeightLen + 1 + blockHeightLen)
+		const blockHeightBuf = scriptPubKeyBuf.slice(scriptLen + 1 + blockHashLen + 1, scriptLen + 1 + blockHashLen + 1 + blockHeightLen)
 		return {
 			addressIndex, pubkeyBuf, preOutPointBuf, sequenceBuf, blockHashBuf, blockHeightBuf
 		};
