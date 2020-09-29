@@ -37,16 +37,16 @@ export const signTransaction = async (
   const rawPayload = ethUtil.getRawHex(transaction);
   const useScript = await util.checkSupportScripts(transport);
   const txType = ethUtil.getTransactionType(transaction);
-  let canonicalSignature;
+  const preActions = [];
+  let action;
   if (useScript) {
     const { script, argument } = ethUtil.getScriptAndArguments(txType, addressIndex, transaction);
-    const preActions = [];
     const sendScript = async () => {
       await apdu.tx.sendScript(transport, script);
     }
     preActions.push(sendScript);
 
-    const sendArgument = async () => {
+    action = async () => {
       return apdu.tx.executeScript(
         transport,
         appId,
@@ -54,42 +54,28 @@ export const signTransaction = async (
         argument
       );
     }
-
-    canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
-      transport,
-      preActions,
-      sendArgument,
-      false,
-      confirmCB,
-      authorizedCB,
-      true
-    );
   } else {
     const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
     const { readType } = ethUtil.getReadType(txType);
     const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
-
-    const preActions = [];
     const sayHi = async () => {
       await apdu.general.hi(transport, appId);
     }
     preActions.push(sayHi)
 
-    const prepareTx = async () => {
+    action = async () => {
       return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
     }
-
-    canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
-      transport,
-      preActions,
-      prepareTx,
-      false,
-      confirmCB,
-      authorizedCB,
-      true
-    );
   }
-
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    action,
+    false,
+    confirmCB,
+    authorizedCB,
+    true
+  );
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(
       canonicalSignature,
