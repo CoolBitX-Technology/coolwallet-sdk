@@ -1,7 +1,10 @@
 import { coin as COIN, error as ERROR, transport } from '@coolwallet/core';
 import { pubKeyToAddress } from './utils';
 import signTransaction from './sign';
-import { coinType, path } from './types';
+import { coinType, path, COIN_SPECIES } from './types';
+import * as scripts from "./scripts";
+
+export { COIN_SPECIES };
 
 type Transport = transport.default;
 type protocol = import('./types').protocol
@@ -9,8 +12,21 @@ const accountIndexErrorMsg = 'Only support account index = 0 for now.';
 
 
 export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
-  constructor() {
+  transfer: { script: string, signature: string};
+  constructor(type: String) {
     super(coinType);
+
+    switch (type) {
+      case COIN_SPECIES.KAU:
+        this.transfer = scripts.TRANSFER.KAU;
+        break;
+      case COIN_SPECIES.KAG:
+        this.transfer = scripts.TRANSFER.KAG;
+        break;
+      case COIN_SPECIES.XLM:
+      default:
+        this.transfer = scripts.TRANSFER.XLM;
+    } 
   }
 
   async getAddress(transport: Transport, appPrivateKey: string, appId: string, accountIndex: number, protocol: protocol = 'SLIP0010'): Promise<string> {
@@ -19,7 +35,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     }
     console.log("protocol: " + protocol)
     console.log("accountIndex: " + accountIndex)
-    const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, path);
+    const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, path, protocol);
     console.log(pubKey)
     if (!pubKey) {
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
@@ -50,6 +66,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
       appPrivateKey,
       appId,
       this.coinType,
+      this.transfer,
       signatureBase,
       transaction,
       accountIndex,

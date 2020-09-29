@@ -22,12 +22,12 @@ const versionBytes = {
  * @param {number} addressIndex
  * @param {*} transaction
  */
-export const getScriptAndArguments = (addressIndex: number, transaction: object, coinType: string) => {
+export const getScriptAndArguments = (transaction: object, transfer: { script: string, signature: string }) => {
   console.log("getScriptAndArguments start")
   const SEPath = `0D${path}`;
   let script;
   let argument;
-  script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+  script = transfer.script + transfer.signature;
   argument = getTransferArgument(transaction);
 
   return {
@@ -64,7 +64,7 @@ const getTransferArgument = (transaction: any) => {
   const argument =
     transaction.from +
     transaction.to + 
-    parseInt(parseInt(transaction.amount).toString().padEnd(8, "0")).toString(16).padStart(16, "0") +
+    parseInt(transaction.amount).toString(16).padStart(16, "0") +
     parseInt(transaction.fee).toString(16).padStart(16, "0") +
     BigInt(transaction.sequence).toString(16).padStart(16, "0") + 
     parseInt(transaction.minTime).toString(16).padStart(16, "0") +

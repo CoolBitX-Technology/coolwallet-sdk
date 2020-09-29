@@ -15,6 +15,7 @@ export default async function signTransaction(
   appPrivateKey: string,
   appId: string,
   coinType: string,
+  transfer: { script: string, signature: string },
   signatureBase: Buffer,
   transaction: object,
   accountIndex: number,
@@ -33,7 +34,7 @@ export default async function signTransaction(
   if (useScript) {
  
 
-    const { script, argument } = xlmUtil.getScriptAndArguments(accountIndex, transaction, coinType);
+    const { script, argument } = xlmUtil.getScriptAndArguments(transaction, transfer);
 
     const sendScript = async () => {
       await apdu.tx.sendScript(transport, script);
