@@ -72,6 +72,7 @@ async function run() {
 	await checkAndPublish(context, 'packages/cws-bnb');
 	await checkAndPublish(context, 'packages/cws-btc');
 	await checkAndPublish(context, 'packages/cws-bch');
+	await checkAndPublish(context, 'packages/cws-ltc');
 	await checkAndPublish(context, 'packages/cws-eos');
 	await checkAndPublish(context, 'packages/cws-eth');
 	await checkAndPublish(context, 'packages/cws-icx');
