@@ -1,13 +1,9 @@
 import { coin as COIN, transport } from '@coolwallet/core';
+import { ScriptType, Input, Output, Change } from './utils/types'
 import {
-	ScriptType,
-	Input,
-	Output,
-	Change,
 	addressToOutScript,
 	pubkeyToAddressAndOutScript
-} from './utils';
-
+} from './utils/transactionUtil';
 import { signTransaction } from './btcSign';
 
 type Transport = transport.default;
@@ -17,7 +13,7 @@ export const coinType = '00'
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	public ScriptType: any;
-	public addressToOutScript: Function; 
+	public addressToOutScript: Function;
 
 	constructor() {
 		super(coinType);
@@ -42,7 +38,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 		transport: Transport,
 		appPrivateKey: string,
 		appId: string,
-		scriptType: ScriptType,
+		redeemScriptType: ScriptType,
 		inputs: [Input],
 		output: Output,
 		change?: Change,
@@ -64,7 +60,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 			transport,
 			appId,
 			appPrivateKey,
-			scriptType,
+			redeemScriptType,
 			inputs,
 			output,
 			change,
