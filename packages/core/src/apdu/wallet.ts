@@ -71,10 +71,7 @@ export const getEd25519AccountPublicKey = async (transport: Transport, coinType:
   } else {
     throw new SDKError(getEd25519AccountPublicKey.name, 'Unsupported protocol');
   }
-  console.log(commandData)
-  console.log(P2)
   const { outputData: key, statusCode, msg } = await executeCommand(transport, commandData, target.SE, data, P1, P2);
-  console.log(key)
   if (key) {
     return key
   } else {
