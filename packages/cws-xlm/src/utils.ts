@@ -60,6 +60,9 @@ const getTransferArgument = (transaction: any) => {
       memoType = "00"
       break; 
   }
+
+  const minTime = transaction.minTime ? transaction.minTime : "0"
+  const maxTime = transaction.maxTime ? transaction.maxTime : "0"
   
   const argument =
     transaction.from +
@@ -67,8 +70,8 @@ const getTransferArgument = (transaction: any) => {
     parseInt(transaction.amount).toString(16).padStart(16, "0") +
     parseInt(transaction.fee).toString(16).padStart(16, "0") +
     BigInt(transaction.sequence).toString(16).padStart(16, "0") + 
-    parseInt(transaction.minTime).toString(16).padStart(16, "0") +
-    parseInt(transaction.maxTime).toString(16).padStart(16, "0") +
+    parseInt(minTime).toString(16).padStart(16, "0") +
+    parseInt(maxTime).toString(16).padStart(16, "0") +
     memoType.padStart(2, "0") + //memoType 
     transaction.memo.padStart(64, "0") + //memo
     isCreate.padStart(2, "0");  //isCreate 
