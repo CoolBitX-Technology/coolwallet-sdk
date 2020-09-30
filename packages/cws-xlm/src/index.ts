@@ -78,4 +78,3 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     return signature;
   }
 }
-
