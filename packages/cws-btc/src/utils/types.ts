@@ -5,6 +5,10 @@ export enum ScriptType {
 	P2WSH = 3,
 }
 
+export enum OmniType {
+	USDT = 31,
+}
+
 export type Input = {
 	preTxHash: string,
 	preIndex: number,

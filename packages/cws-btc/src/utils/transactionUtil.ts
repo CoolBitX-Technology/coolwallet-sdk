@@ -3,7 +3,7 @@ import { error } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuint';
 import {
-	ScriptType, Input, Output, Change, PreparedData
+	ScriptType, OmniType, Input, Output, Change, PreparedData
 } from './types';
 
 export {
@@ -143,6 +143,7 @@ function createUnsignedTransactions(
 	inputs: Array<Input>,
 	output: Output,
 	change: Change | undefined,
+	omniType?: OmniType,
 	version: number = 1,
 	lockTime: number = 0,
 ): {
@@ -151,13 +152,13 @@ function createUnsignedTransactions(
 } {
 	const versionBuf = toReverseUintBuffer(version, 4);
 	const lockTimeBuf = toReverseUintBuffer(lockTime, 4);
-
 	const inputsCount = toVarUintBuffer(inputs.length);
 	const preparedInputs = inputs.map(({
 		preTxHash, preIndex, preValue, sequence, addressIndex, pubkeyBuf
 	}) => {
-		if (!pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
-
+		if (!pubkeyBuf) {
+			throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
+		}
 		const preOutPointBuf = Buffer.concat([
 			Buffer.from(preTxHash, 'hex').reverse(),
 			toReverseUintBuffer(preIndex, 4),
@@ -177,9 +178,35 @@ function createUnsignedTransactions(
 	} = addressToOutScript(output.address);
 	const outputScriptLen = toVarUintBuffer(outputScript.length);
 
-	const outputArray = [
+
+	/*const outputArray = [
 		Buffer.concat([toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])
-	];
+	];*/
+	let outputArray;
+	if (!omniType) {
+		outputArray = [
+			Buffer.concat([toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])
+		];
+	} else {
+		const omni = Buffer.concat([
+			Buffer.from('omni', 'ascii'),
+			toUintBuffer(0, 2), // Transaction version
+			toUintBuffer(0, 2), // Transaction type	
+			toUintBuffer(omniType, 4), // Currency identifier
+			toUintBuffer(output.value, 8)
+		]);
+		const omniLen = toVarUintBuffer(omni.length);
+		const omniScript = Buffer.concat([
+			Buffer.from('6a', 'hex'), // OP_RETURN
+			omniLen,
+			omni
+		]);
+		const omniScriptLen = toVarUintBuffer(omniScript.length);
+		outputArray = [
+			Buffer.concat([toReverseUintBuffer(546, 8), outputScriptLen, outputScript,
+			toUintBuffer(0, 8), omniScriptLen, omniScript])
+		];
+	}
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
 		const changeValue = toReverseUintBuffer(change.value, 8);

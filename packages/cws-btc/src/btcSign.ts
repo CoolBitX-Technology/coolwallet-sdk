@@ -1,5 +1,5 @@
-import { tx, transport, error, util } from '@coolwallet/core';
-import { ScriptType, Input, Output, Change } from './utils/types'
+import { tx, transport, util } from '@coolwallet/core';
+import { ScriptType, OmniType, Input, Output, Change } from './utils/types'
 import {
 	createUnsignedTransactions,
 	composeFinalTransaction,
@@ -24,18 +24,15 @@ async function signTransaction(
 	change?: Change,
 	confirmCB?: Function,
 	authorizedCB?: Function,
+	omniType?: OmniType
 ): Promise<string> {
-	if (redeemScriptType !== ScriptType.P2PKH
-		&& redeemScriptType !== ScriptType.P2WPKH
-		&& redeemScriptType !== ScriptType.P2SH_P2WPKH) {
-		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
-	}
 	const useScript = await util.checkSupportScripts(transport);
 	const { preparedData, unsignedTransactions } = createUnsignedTransactions(
 		redeemScriptType,
 		inputs,
 		output,
-		change
+		change,
+		omniType
 	);
 	let preActions, actions;
 	if (useScript) {
@@ -58,6 +55,7 @@ async function signTransaction(
 			change,
 			preparedData,
 			unsignedTransactions,
+			omniType
 		));
 	}
 	const signatures = await tx.flow.getSignaturesFromCoolWallet(

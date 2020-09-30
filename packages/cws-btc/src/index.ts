@@ -1,5 +1,5 @@
-import { coin as COIN, transport } from '@coolwallet/core';
-import { ScriptType, Input, Output, Change } from './utils/types'
+import { coin as COIN, transport, error } from '@coolwallet/core';
+import { ScriptType, OmniType, Input, Output, Change } from './utils/types'
 import {
 	addressToOutScript,
 	pubkeyToAddressAndOutScript
@@ -44,8 +44,12 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 		change?: Change,
 		confirmCB?: Function,
 		authorizedCB?: Function,
-
 	): Promise<string> {
+		if (redeemScriptType !== ScriptType.P2PKH
+			&& redeemScriptType !== ScriptType.P2WPKH
+			&& redeemScriptType !== ScriptType.P2SH_P2WPKH) {
+			throw new error.SDKError(this.signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
+		}
 		for (const input of inputs) {
 			// eslint-disable-next-line no-await-in-loop
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
@@ -66,6 +70,45 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 			change,
 			confirmCB,
 			authorizedCB
+		);
+	}
+
+	async signUSDTTransaction(
+		transport: Transport,
+		appPrivateKey: string,
+		appId: string,
+		redeemScriptType: ScriptType,
+		inputs: [Input],
+		output: Output,
+		change?: Change,
+		confirmCB?: Function,
+		authorizedCB?: Function,
+	): Promise<string> {
+		/*if (redeemScriptType !== ScriptType.P2PKH
+			&& redeemScriptType !== ScriptType.P2WPKH) {
+			throw new error.SDKError(this.signUSDTTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
+		}*/
+		for (const input of inputs) {
+			// eslint-disable-next-line no-await-in-loop
+			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
+			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
+		}
+		if (change) {
+			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
+			// eslint-disable-next-line no-param-reassign
+			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+		}
+		return signTransaction(
+			transport,
+			appId,
+			appPrivateKey,
+			redeemScriptType,
+			inputs,
+			output,
+			change,
+			confirmCB,
+			authorizedCB,
+			OmniType.USDT
 		);
 	}
 }

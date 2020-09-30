@@ -5,7 +5,7 @@ import * as varuint from './varuint';
 import * as scripts from "../scripts";
 import { coinType } from '../index'
 import {
-	ScriptType, Input, Output, Change, PreparedData
+	ScriptType, OmniType, Input, Output, Change, PreparedData
 } from './types';
 type Transport = transport.default;
 
@@ -67,6 +67,7 @@ function getSigningActions(
 	change: Change | undefined,
 	preparedData: PreparedData,
 	unsignedTransactions: Array<Buffer>,
+	omniType?: OmniType
 ): {
 	preActions: Array<Function>,
 	actions: Array<Function>
@@ -81,6 +82,7 @@ function getSigningActions(
 			if (redeemScriptType === ScriptType.P2WPKH) {
 				throw new error.SDKError(getSigningActions.name, 'not support P2WPKH change');
 			} else {
+				// TODO
 				const redeemType = (redeemScriptType === ScriptType.P2PKH) ? '00' : '01';
 				await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, coinType, change.addressIndex, redeemType);
 			}
@@ -90,14 +92,36 @@ function getSigningActions(
 
 	const parsingOutputAction = async () => {
 		const txDataHex = preparedData.outputsBuf.toString('hex');
-		const txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0C' : '01';
+		let txDataType
+		if (!omniType) {
+			txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0C' : '01';
+		} else {
+			if (omniType === OmniType.USDT) {
+				txDataType = '0A';
+			} else {
+				throw new error.SDKError(getSigningActions.name, `Unsupport omniType : ${omniType}`);
+			}
+		}
 		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
 	};
 	preActions.push(parsingOutputAction);
 
 	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
 		const keyId = tx.util.addressIndexToKeyId(coinType, preparedData.preparedInputs[i].addressIndex);
-		const readType = '01';
+		let readType
+		if (!omniType) {
+			if (redeemScriptType === ScriptType.P2PKH) {
+				readType = '00';
+			} else {
+				readType = '01';
+			}
+		} else {
+			if (omniType === OmniType.USDT) {
+				readType = 'C8';
+			} else {
+				throw new error.SDKError(getSigningActions.name, `Unsupport omniType : ${omniType}`);
+			}
+		}
 		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
 		const txDataType = '00';
 		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
