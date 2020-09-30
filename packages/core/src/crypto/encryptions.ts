@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { SDKError } from '../error';
 
 const sha512 = (msg: string | Buffer) => crypto
   .createHash('sha512')
@@ -77,7 +78,7 @@ export const ECIESenc = (recipientPubKey: string, msg: string): string => {
  * @param {string} encryption
  * @returns {Buffer}
  */
-export const ECIESDec = (recipientPrivKey: string, encryption: string): string | undefined => {
+export const ECIESDec = (recipientPrivKey: string, encryption: string): string => {
   const encryptionBuf = Buffer.from(encryption, 'hex');
   const ephemeralPubKey = encryptionBuf.slice(0, 65);
   const mac = encryptionBuf.slice(65, 85);
@@ -95,6 +96,8 @@ export const ECIESDec = (recipientPrivKey: string, encryption: string): string |
   const realMac = hmacSha1(macKey, dataToMac);
   if (equalConstTime(mac, realMac)) {
     return aes256CbcDecrypt(iv, encryptionKey, ciphertext).toString('hex');
+  } else {
+    throw new SDKError(ECIESDec.name, "equalConstTime error")
   }
-  return undefined;
+  
 };

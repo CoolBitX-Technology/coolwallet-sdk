@@ -33,7 +33,7 @@ export const decryptSignatureFromSE = (
 };
 
 /**
- * @param {String} coinType
+ * @param {String}addressIndexToKeyId coinType
  * @param {String} addressIndex
  */
 export const addressIndexToKeyId = (
