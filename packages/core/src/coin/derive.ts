@@ -67,8 +67,9 @@ export const getEd25519PublicKey = async (
   coinSEType: string,
   accountIndex: number,
   protocol: string,
+  path: string | undefined,
   authFirst: boolean = true
-): Promise<string | undefined> => {
+): Promise<string> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
   const accIndexHex = accountIndex.toString(16).padStart(2, "0");
@@ -76,9 +77,11 @@ export const getEd25519PublicKey = async (
     transport,
     coinSEType,
     accIndexHex,
-    protocol
+    protocol,
+    path
   );
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
+  console.log("decryptedData: " + decryptedData)
   return decryptedData;
 };
 
