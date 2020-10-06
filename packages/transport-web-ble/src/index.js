@@ -96,4 +96,3 @@ export default class WebBleTransport extends transport.default {
     return convertToNumberArray(response);
   }
 }
-
