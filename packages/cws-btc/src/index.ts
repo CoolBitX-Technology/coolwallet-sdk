@@ -79,6 +79,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 		appId: string,
 		redeemScriptType: ScriptType,
 		inputs: [Input],
+		value: string,
 		output: Output,
 		change?: Change,
 		confirmCB?: Function,
@@ -108,6 +109,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 			change,
 			confirmCB,
 			authorizedCB,
+			value,
 			OmniType.USDT
 		);
 	}

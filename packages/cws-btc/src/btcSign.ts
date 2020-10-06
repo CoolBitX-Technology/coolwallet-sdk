@@ -24,6 +24,7 @@ async function signTransaction(
 	change?: Change,
 	confirmCB?: Function,
 	authorizedCB?: Function,
+	value?: string,
 	omniType?: OmniType
 ): Promise<string> {
 	const useScript = await util.checkSupportScripts(transport);
@@ -32,6 +33,7 @@ async function signTransaction(
 		inputs,
 		output,
 		change,
+		value,
 		omniType
 	);
 	let preActions, actions;

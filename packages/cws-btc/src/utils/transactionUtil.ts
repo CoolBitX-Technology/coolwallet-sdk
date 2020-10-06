@@ -143,6 +143,7 @@ function createUnsignedTransactions(
 	inputs: Array<Input>,
 	output: Output,
 	change: Change | undefined,
+	value?: string,
 	omniType?: OmniType,
 	version: number = 1,
 	lockTime: number = 0,
@@ -193,7 +194,7 @@ function createUnsignedTransactions(
 			toUintBuffer(0, 2), // Transaction version
 			toUintBuffer(0, 2), // Transaction type	
 			toUintBuffer(omniType, 4), // Currency identifier
-			toUintBuffer(output.value, 8)
+			toUintBuffer(value as string, 8)
 		]);
 		const omniLen = toVarUintBuffer(omni.length);
 		const omniScript = Buffer.concat([
