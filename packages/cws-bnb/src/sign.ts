@@ -79,41 +79,67 @@ async function sign(
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined,
 ): Promise<{ r: string; s: string; }> {
-  const useScript = await util.checkSupportScripts(transport);
   const preActions = [];
   let action;
-  if (useScript) {
-    const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, addressIndex, signObj);
-    console.log("script: " + script)
-    console.log("argument: " + argument)
-    const sendScript = async () => {
-      await apdu.tx.sendScript(transport, script);
-    }
-    preActions.push(sendScript);
+  const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, addressIndex, signObj);
+  console.log("script: " + script)
+  console.log("argument: " + argument)
+  const sendScript = async () => {
+    await apdu.tx.sendScript(transport, script);
+  }
+  preActions.push(sendScript);
 
-    action = async () => {
-      return apdu.tx.executeScript(
-        transport,
-        appId,
-        appPrivateKey,
-        argument
-      );
-    }
-  } else {
-    const rawPayload = bnbUtil.convertObjectToSignBytes(signObj);
-    console.log("rawPayload: " + typeof (rawPayload))
-    console.log("rawPayload: " + rawPayload)
-    const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
-    const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
+  action = async () => {
+    return apdu.tx.executeScript(
+      transport,
+      appId,
+      appPrivateKey,
+      argument
+    );
+  }
 
-    const sayHi = async () => {
-      await apdu.general.hi(transport, appId);
-    }
-    preActions.push(sayHi)
+  return await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    action,
+    false,
+    confirmCB,
+    authorizedCB,
+    true
+  ) as { r: string; s: string; };
+}
 
-    action = async () => {
-      return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
-    }
+
+/**
+ * Sign Binance Tranaction
+ */
+async function sign100(
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  transactionType: TransactionType,
+  readType: string,
+  signObj: Transfer | PlaceOrder | CancelOrder,
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined,
+): Promise<{ r: string; s: string; }> {
+  const preActions = [];
+  let action;
+
+  const rawPayload = bnbUtil.convertObjectToSignBytes(signObj);
+  console.log("rawPayload: " + typeof (rawPayload))
+  console.log("rawPayload: " + rawPayload)
+  const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
+  const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
+
+  const sayHi = async () => {
+    await apdu.general.hi(transport, appId);
+  }
+  preActions.push(sayHi)
+
+  action = async () => {
+    return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
   }
 
   return await tx.flow.getSingleSignatureFromCoolWallet(
