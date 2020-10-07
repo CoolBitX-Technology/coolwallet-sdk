@@ -20,7 +20,8 @@ export type Transaction = {
     decimals: string,
     rateId: string,
     setTokenPayload: string,
-    isBuiltIn: boolean
+    isBuiltIn: boolean,
+    amount: number
   }
 }
 

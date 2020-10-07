@@ -53,6 +53,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
       appId,
       appPrivateKey,
       transaction,
+      '',
       script,
       argument,
       publicKey,
@@ -82,17 +83,25 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     authorizedCB: Function | undefined = undefined
   ) {
     if (!publicKey) publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
     const getArg = async () => {
       return ethUtil.getERC20Argument(transaction);
     }
+    
     const script = scripts.ERC20.script + scripts.ERC20.signature;
 
     const argument = await ethUtil.getArgument(addressIndex, getArg);
+
+    const data = "0xa9059cbb" + transaction.to.padStart(64, "0") + "000000b1a2bc2ec50000".padStart(64, "0");
+
+    console.log("data: " + data)
+
     return ethSign.signTransaction(
       transport,
       appId,
       appPrivateKey,
       transaction,
+      data,
       script,
       argument,
       publicKey,

@@ -91,13 +91,14 @@ export const signTransaction = async (
   appId: string,
   appPrivateKey: string,
   transaction: Transaction,
+  data: string,
   script: string,
   argument: string,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined,
 ): Promise<string> => {
-  const rawPayload = ethUtil.getRawHex(transaction);
+  const rawPayload = ethUtil.getRawHex(transaction, data);
   const preActions = [];
   let action;
   const sendScript = async () => {
