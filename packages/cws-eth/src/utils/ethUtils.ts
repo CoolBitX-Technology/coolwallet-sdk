@@ -1,8 +1,6 @@
 import { error, transport, apdu } from "@coolwallet/core";
-
 import { handleHex } from "./stringUtil";
-import { coinType } from '../type'
-import * as scripts from "../scripts";
+import { coinType, Option } from '../type'
 import * as token from "../token";
 import { Transaction } from '../type';
 
@@ -27,11 +25,11 @@ const transactionType = {
  * @param {*} transaction
  */
 export const getTransactionType = (transaction: Transaction) => {
-  const data = transaction.tokenInfo;
+  const data = transaction.data;
   if (data) {
     return transactionType.TRANSFER;
   }
-  if (token.isSupportedERC20Method(data) && transaction.tokenInfo) {
+  if (token.isSupportedERC20Method(data) && transaction.option) {
     return transactionType.ERC20;
   }
   return transactionType.SMART_CONTRACT;
@@ -48,14 +46,17 @@ export const getTransferArgument = (transaction: Transaction) => {
   return argument;
 };
 
-export const getERC20Argument = (transaction: Transaction) => {
+export const getERC20Argument = (transaction: Transaction, tokenSignature: string) => {
+  console.log("tokenSignature: " + tokenSignature)
 
-  const txTokenInfo = transaction.tokenInfo;
-  const tokenInfo = token.getSetTokenPayload(txTokenInfo.contractAddress, txTokenInfo.symbol, parseInt(txTokenInfo.decimals));
-  const signature = txTokenInfo.setTokenPayload.slice(58).padStart(144, "0");
+  const txTokenInfo: Option = transaction.option;
+  const tokenInfo = token.getSetTokenPayload(transaction.to, txTokenInfo.info.symbol, parseInt(txTokenInfo.info.decimals));
+  const signature = tokenSignature.slice(58).padStart(144, "0");
+  const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, "");;
+  const amount = transaction.data.slice(74).replace(/\b(0+)/gi, "");;
   const argument =
-    handleHex(transaction.to) +
-    handleHex("000000b1a2bc2ec50000").padStart(24, "0") + // 000000b1a2bc2ec50000
+    handleHex(toAddress) + // toAddress
+    handleHex(amount).padStart(24, "0") + // 000000b1a2bc2ec50000
     handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
@@ -73,14 +74,14 @@ export const getERC20Argument = (transaction: Transaction) => {
  * value:string, data:string, chainId: number}} transaction
  * @return {Array<Buffer>}
  */
-export const getRawHex = (transaction: Transaction, data: string = ""): Array<Buffer> => {
+export const getRawHex = (transaction: Transaction): Array<Buffer> => {
   const rawData = [];
   rawData.push(transaction.nonce);
   rawData.push(transaction.gasPrice);
   rawData.push(transaction.gasLimit);
-  rawData.push(transaction.to);
+  rawData.push(transaction.to); 
   rawData.push(transaction.value);
-  rawData.push(data);
+  rawData.push(transaction.data);
   const raw = rawData.map((d) => {
     const hex = handleHex(d);
     if (hex === "00" || hex === "") {

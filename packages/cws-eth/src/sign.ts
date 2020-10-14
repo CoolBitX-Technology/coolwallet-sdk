@@ -91,14 +91,14 @@ export const signTransaction = async (
   appId: string,
   appPrivateKey: string,
   transaction: Transaction,
-  data: string,
+  rawPayload: Buffer[],
   script: string,
   argument: string,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined,
 ): Promise<string> => {
-  const rawPayload = ethUtil.getRawHex(transaction, data);
+  // const rawPayload = ethUtil.getRawHex(transaction, data);
   const preActions = [];
   let action;
   const sendScript = async () => {
@@ -123,6 +123,10 @@ export const signTransaction = async (
     authorizedCB,
     true
   );
+
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
+  console.log(signedTx)
+
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(
       canonicalSignature,
