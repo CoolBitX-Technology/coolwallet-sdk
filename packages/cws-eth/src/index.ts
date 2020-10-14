@@ -71,7 +71,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
       }
     }
 
-    // TODO SMART_CONTRACT
+    // smart contract
+    return await this.signSmartContractTransaction(signTxData);
 
 
   }
@@ -113,7 +114,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
 
   /**
-   * Sign Ethereum Transaction.
+   * Sign ERC20 Transaction.
    * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
    * value:string, data:string, chainId: number}} transaction
    * @param {Number} addressIndex
@@ -125,7 +126,6 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     signTxData: signTxType, tokenSignature: string = ''
   ) {
 
-    console.log("tokenSignature: " + tokenSignature)
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
 
     const getArg = async () => {
@@ -133,6 +133,46 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     }
 
     const script = scripts.ERC20.script + scripts.ERC20.signature;
+
+    const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
+
+    const rawPayload = ethUtil.getRawHex(signTxData.transaction);
+
+    return ethSign.signTransaction(
+      signTxData.transport,
+      signTxData.appId,
+      signTxData.appPrivateKey,
+      signTxData.transaction,
+      rawPayload,
+      script,
+      argument,
+      publicKey,
+      signTxData.confirmCB,
+      signTxData.authorizedCB
+    );
+  }
+
+
+  /**
+   * Sign SmartContract Transaction.
+   * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
+   * value:string, data:string, chainId: number}} transaction
+   * @param {Number} addressIndex
+   * @param {String} publicKey
+   * @param {Function} confirmCB
+   * @param {Function} authorizedCB
+   */
+  async signSmartContractTransaction(
+    signTxData: signTxType
+  ) {
+
+    const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
+
+    const getArg = async () => {
+      return ethUtil.getSmartContractArgument(signTxData.transaction);
+    }
+
+    const script = scripts.ETHSmartContract.script + scripts.ETHSmartContract.signature;
 
     const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
 

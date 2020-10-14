@@ -35,6 +35,10 @@ export const getTransactionType = (transaction: Transaction) => {
   return transactionType.SMART_CONTRACT;
 };
 
+/**
+ * [toAddress(20B)] [amount(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)]
+ * @param transaction 
+ */
 export const getTransferArgument = (transaction: Transaction) => {
   const argument =
     handleHex(transaction.to) + // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
@@ -46,8 +50,12 @@ export const getTransferArgument = (transaction: Transaction) => {
   return argument;
 };
 
+/**
+ * [toAddress(20B)] [amount(12B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)] [tokenDecimal(1B)] [tokenNameLength(1B)] [tokenName(7B,leftJustified)] [tokenContractAddress(20B)] [tokenSignature(72B)]
+ * @param transaction 
+ * @param tokenSignature 
+ */
 export const getERC20Argument = (transaction: Transaction, tokenSignature: string) => {
-  console.log("tokenSignature: " + tokenSignature)
 
   const txTokenInfo: Option = transaction.option;
   const tokenInfo = token.getSetTokenPayload(transaction.to, txTokenInfo.info.symbol, parseInt(txTokenInfo.info.decimals));
@@ -65,6 +73,23 @@ export const getERC20Argument = (transaction: Transaction, tokenSignature: strin
     signature;
 
   console.log("getERC20Argument: " + argument)
+  return argument;
+};
+
+
+/**
+ * [contractAddress(20B)] [value(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)] [contractData(Variety)]
+ * @param transaction 
+ */
+export const getSmartContractArgument = (transaction: Transaction) => {
+  const argument =
+    handleHex(transaction.to) + // contractAddress : 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
+    handleHex(transaction.value).padStart(20, "0") + // 000000b1a2bc2ec50000
+    handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
+    handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
+    handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
+    handleHex(transaction.chainId.toString(16)).padStart(4, "0") + // 0001
+    handleHex(transaction.data) // limit of data length : 1208Byte
   return argument;
 };
 
