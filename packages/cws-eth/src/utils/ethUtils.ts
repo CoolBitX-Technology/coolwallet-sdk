@@ -52,8 +52,8 @@ export const getERC20Argument = (transaction: Transaction, tokenSignature: strin
   const txTokenInfo: Option = transaction.option;
   const tokenInfo = token.getSetTokenPayload(transaction.to, txTokenInfo.info.symbol, parseInt(txTokenInfo.info.decimals));
   const signature = tokenSignature.slice(58).padStart(144, "0");
-  const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, "");;
-  const amount = transaction.data.slice(74).replace(/\b(0+)/gi, "");;
+  const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, "");
+  const amount = transaction.data.slice(74).replace(/\b(0+)/gi, "");
   const argument =
     handleHex(toAddress) + // toAddress
     handleHex(amount).padStart(24, "0") + // 000000b1a2bc2ec50000
