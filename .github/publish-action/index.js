@@ -77,6 +77,7 @@ async function run() {
 	await checkAndPublish(context, 'packages/cws-eos');
 	await checkAndPublish(context, 'packages/cws-eth');
 	await checkAndPublish(context, 'packages/cws-icx');
+	await checkAndPublish(context, 'packages/cws-qkc');
 	await checkAndPublish(context, 'packages/cws-xlm');
 	await checkAndPublish(context, 'packages/cws-xrp');
 	await checkAndPublish(context, 'packages/transport-react-native-ble');
