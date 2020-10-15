@@ -82,8 +82,6 @@ async function sign(
   const preActions = [];
   let action;
   const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, addressIndex, signObj);
-  console.log("script: " + script)
-  console.log("argument: " + argument)
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
   }
@@ -128,8 +126,6 @@ async function sign100(
   let action;
 
   const rawPayload = bnbUtil.convertObjectToSignBytes(signObj);
-  console.log("rawPayload: " + typeof (rawPayload))
-  console.log("rawPayload: " + rawPayload)
   const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
   const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
 
