@@ -7,13 +7,23 @@ export type Output = {
 
 type Transport = transport.default;
 
-export type signTxType = {
+export type signTx = {
   transport: Transport,
   appPrivateKey: string,
   appId: string,
   transaction: Transaction,
   addressIndex: number,
   publicKey: string | undefined,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined
+}
+
+export type signMsg = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  message: string,
+  addressIndex: number,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined
 }

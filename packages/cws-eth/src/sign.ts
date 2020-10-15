@@ -2,8 +2,10 @@ import { apdu, transport, error, tx, util } from '@coolwallet/core';
 // import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import { isHex, keccak256 } from './lib';
 import * as ethUtil from './utils/ethUtils';
+import * as ethUtil100 from './utils/ethUtils100';
 import { removeHex0x, handleHex } from './utils/stringUtil';
-import { Transaction } from './type'
+import * as scripts from "./scripts";
+import { Transaction, signMsg } from './type'
 
 const ethSigUtil = require('eth-sig-util');
 const typedDataUtils = ethSigUtil.TypedDataUtils
@@ -36,11 +38,11 @@ export const signTransaction100 = async (
   authorizedCB: Function | undefined = undefined,
 ): Promise<string> => {
   const rawPayload = ethUtil.getRawHex(transaction);
-  const txType = ethUtil.getTransactionType(transaction);
+  const txType = ethUtil100.getTransactionType(transaction);
   const preActions = [];
   let action;
   const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
-  const { readType } = ethUtil.getReadType(txType);
+  const { readType } = ethUtil100.getReadType(txType);
   const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
   const sayHi = async () => {
     await apdu.general.hi(transport, appId);
@@ -91,14 +93,15 @@ export const signTransaction = async (
   appId: string,
   appPrivateKey: string,
   transaction: Transaction,
-  rawPayload: Buffer[],
   script: string,
   argument: string,
   publicKey: string | undefined = undefined,
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined,
 ): Promise<string> => {
-  // const rawPayload = ethUtil.getRawHex(transaction, data);
+
+  const rawPayload = ethUtil.getRawHex(transaction);
+
   const preActions = [];
   let action;
   const sendScript = async () => {
@@ -153,7 +156,7 @@ export const signTransaction = async (
  * @param {Function} authorizedCB
  * @return {Promise<String>}
  */
-export const signMessage = async (
+export const signMessage100 = async (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
@@ -209,6 +212,90 @@ export const signMessage = async (
     authorizedCB,
     true
   );
+
+  if (!Buffer.isBuffer(canonicalSignature)) {
+    const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
+    const signature = `0x${r}${s}${v.toString(16)}`;
+    return signature;
+  } else {
+    throw new error.SDKError(signMessage.name, 'canonicalSignature type error');
+  }
+};
+
+
+/**
+ * Sign Message.
+ * @param {Transport} transport
+ * @param {String} appId
+ * @param {String} appPrivateKey
+ * @param {String} message hex or utf-8
+ * @param {Number} addressIndex
+ * @param {String} publicKey
+ * @param {Boolean} isHashRequired used by joyso
+ * @param {Function} confirmCB
+ * @param {Function} authorizedCB
+ * @return {Promise<String>}
+ */
+export const signMessage = async (
+  signMsgData: signMsg,
+  publicKey: string | undefined = undefined
+) => {
+
+  const message = signMsgData.message;
+  const transport = signMsgData.transport;
+
+  const getArg = async () => {
+    return ethUtil.getSignMessageArgument(message);
+  }
+
+  const script = scripts.SIGN_MESSAGE.script + scripts.SIGN_MESSAGE.signature;
+
+  const argument = await ethUtil.getArgument(signMsgData.addressIndex, getArg);
+
+  const preActions = [];
+
+  const sendScript = async () => {
+    await apdu.tx.sendScript(transport, script);
+  }
+  preActions.push(sendScript);
+
+  const action = async () => {
+    return apdu.tx.executeScript(
+      transport,
+      signMsgData.appId,
+      signMsgData.appPrivateKey,
+      argument
+    );
+  }
+
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    action,
+    false,
+    signMsgData.confirmCB,
+    signMsgData.authorizedCB,
+    true
+  );
+
+  const keccak256Msg = keccak256(message)
+
+  let msgBuf;
+  if (isHex(keccak256Msg)) {
+    msgBuf = Buffer.from(removeHex0x(keccak256Msg), 'hex');
+  } else {
+    msgBuf = Buffer.from(keccak256Msg, 'utf8');
+  }
+
+
+  const _19Buf = Buffer.from("19", 'hex');
+  const prefix = "Ethereum Signed Message:";
+  const lfBuf = Buffer.from("0A", 'hex')
+  const len = msgBuf.length.toString();
+
+  const prefixBuf = Buffer.from(prefix, 'ascii');
+  const lenBuf = Buffer.from(len, 'ascii');
+  const payload = Buffer.concat([_19Buf, prefixBuf, lfBuf, lenBuf, msgBuf]);
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);

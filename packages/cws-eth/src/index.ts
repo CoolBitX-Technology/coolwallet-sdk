@@ -2,7 +2,7 @@
 import { coin as COIN, transport, setting } from '@coolwallet/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
-import { coinType, signTxType, transactionType } from './type'
+import { coinType, signTx, transactionType, signMsg } from './type'
 import * as ethUtil from './utils/ethUtils';
 import * as scripts from "./scripts";
 import { TOKENTYPE } from "./tokenType";
@@ -39,7 +39,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransaction(
-    signTxData: signTxType
+    signTxData: signTx
   ) {
     const txData = signTxData.transaction;
 
@@ -88,7 +88,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransferTransaction(
-    signTxData: signTxType
+    signTxData: signTx
   ) {
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
     const getArg = async () => {
@@ -97,13 +97,12 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
 
     const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
-    const rawPayload = ethUtil.getRawHex(signTxData.transaction);
+    
     return ethSign.signTransaction(
       signTxData.transport,
       signTxData.appId,
       signTxData.appPrivateKey,
       signTxData.transaction,
-      rawPayload,
       script,
       argument,
       publicKey,
@@ -123,7 +122,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signERC20Transaction(
-    signTxData: signTxType, tokenSignature: string = ''
+    signTxData: signTx, tokenSignature: string = ''
   ) {
 
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
@@ -136,14 +135,11 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
 
-    const rawPayload = ethUtil.getRawHex(signTxData.transaction);
-
     return ethSign.signTransaction(
       signTxData.transport,
       signTxData.appId,
       signTxData.appPrivateKey,
       signTxData.transaction,
-      rawPayload,
       script,
       argument,
       publicKey,
@@ -163,7 +159,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signSmartContractTransaction(
-    signTxData: signTxType
+    signTxData: signTx
   ) {
 
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
@@ -176,14 +172,11 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
 
-    const rawPayload = ethUtil.getRawHex(signTxData.transaction);
-
     return ethSign.signTransaction(
       signTxData.transport,
       signTxData.appId,
       signTxData.appPrivateKey,
       signTxData.transaction,
-      rawPayload,
       script,
       argument,
       publicKey,
@@ -203,31 +196,15 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @return {Promise<String>}
    */
   async signMessage(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    message: string,
-    addressIndex: number,
-    publicKey: string | undefined = undefined,
-    isHashRequired: boolean = false,
-    confirmCB: Function | undefined = undefined,
-    authorizedCB: Function | undefined = undefined
+    signMsgData: signMsg
   ): Promise<string> {
-    await setting.auth.versionCheck(transport, 81);
-    if (!publicKey) {
-      publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    }
+    await setting.auth.versionCheck(signMsgData.transport, 81);
+
+    const publicKey = await this.getPublicKey(signMsgData.transport, signMsgData.appPrivateKey, signMsgData.appId, signMsgData.addressIndex);
+
     return ethSign.signMessage(
-      transport,
-      appId,
-      appPrivateKey,
-      this.coinType,
-      message,
-      addressIndex,
-      publicKey,
-      isHashRequired,
-      confirmCB,
-      authorizedCB
+      signMsgData,
+      publicKey
     );
   }
 
