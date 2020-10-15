@@ -133,3 +133,4 @@ export default class QKC extends COIN.ECDSACoin implements COIN.Coin {
     );
   }
 }
+
