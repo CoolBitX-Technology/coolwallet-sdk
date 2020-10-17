@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/transport-react-native-ble",
-  "version": "0.1.0-beta.4",
+  "version": "0.1.0-beta.5",
   "description": "react-native ble transport layer for coolwallet.",
   "main": "lib/transport-react-native-ble.min.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "react": "^16.6.3",
     "react-native": "^0.58.0",
     "react-native-ble-plx": "^1.1.0",
-    "@coolwallet/core": "~0.1.0-beta.12"
+    "@coolwallet/core": "~0.1.0-beta.26"
   },
   "dependencies": {
     "buffer": "^5.4.3"
@@ -22,6 +22,7 @@
   "devDependencies": {
     "@babel/core": "7.7.2",
     "@babel/runtime": "7.7.2",
+    "@coolwallet/core": "~0.1.0-beta.26",
     "@react-native-community/eslint-config": "0.0.3",
     "babel-jest": "24.9.0",
     "eslint": "6.6.0",

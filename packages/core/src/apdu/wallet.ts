@@ -215,5 +215,14 @@ export async function getSecureRecoveryStatus(transport: Transport) {
   return statusCode;
 }
 
+/**
+ *
+ * @param {Transport} transport
+ */
+export async function initMcuSetSeed(transport: Transport) {
+  const { statusCode, outputData } = await executeCommand(transport, commands.MCU_START_SET_SEED, target.SE, undefined, undefined, undefined);
+  return statusCode;
+}
+
 export let creation = { createSeedByCard, sendCheckSum, setSeed };
-export let recovery = { setSeed, initSecureRecovery, setSecureRecoveryIdx, cancelSecureRecovery, getSecureRecoveryStatus };
+export let recovery = { setSeed, initSecureRecovery, setSecureRecoveryIdx, cancelSecureRecovery, getSecureRecoveryStatus, initMcuSetSeed };

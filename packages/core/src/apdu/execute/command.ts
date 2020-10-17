@@ -349,5 +349,11 @@ export const commands = {
     INS: "13",
     P1: "00",
     P2: "00"
+	},
+  MCU_START_SET_SEED: {
+    CLA: "7F",
+    INS: "14",
+    P1: "00",
+    P2: "00"
   }
 };
