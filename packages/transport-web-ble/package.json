@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/transport-web-ble",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.4",
   "description": "web ble transport layer for coolwallet.",
   "main": "lib/index.js",
   "scripts": {
@@ -10,13 +10,14 @@
   "author": "coolwallet-team",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.12"
+    "@coolwallet/core": "~0.1.0-beta.28"
   },
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.7.2",
     "@babel/plugin-proposal-class-properties": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
+    "@coolwallet/core": "0.1.0-beta.28",
     "babel-loader": "^8.0.6",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"

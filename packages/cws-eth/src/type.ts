@@ -63,7 +63,7 @@ export enum transactionType  {
   TRANSFER = "TRANSFER",
   ERC20 = "ERC20",
   SMART_CONTRACT = "SMART_CONTRACT",
-};
+}
 
 export const coinType = '3C'
 

@@ -32,7 +32,7 @@ export const executeAPDU = async (
   try {
     // TODO app transport
     if (transport.requestAPDUV2) {
-      const response = await transport.requestAPDUV2(apdu);
+      const response = await transport.requestAPDUV2(apdu, (executedTarget === target.SE) ? 'BLE_CMD' : 'MCU_CMD');
       const statusCode = response.status;
       const outputData = response.outputData;
       const msg = util.getReturnMsg(statusCode.toUpperCase());

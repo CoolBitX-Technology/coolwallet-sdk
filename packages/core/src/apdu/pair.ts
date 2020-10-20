@@ -41,7 +41,7 @@ export const switchLockStatus = async (transport: Transport, appId: string, appP
  * @param {String} deviceName
  * @returns {Promise}
  */
-export const register = async (transport: Transport, appPublicKey: string, password: string, deviceName: string): Promise<String> => {
+export const register = async (transport: Transport, appPublicKey: string, password: string, deviceName: string): Promise<string> => {
   let nameToUTF = Buffer.from(deviceName, 'utf8');
   const maxLen = 30;
 

@@ -12,6 +12,12 @@ import { sig_B } from '../script/dfuScript/sig_B';
 
 const MCU_UPDATE_VER = '130A0909';
 
+export const checkUpdate = async (transport: Transport) => {
+	const { cardMCUVersion } = await getMCUVersion(transport);
+	const isNeedUpdate = parseInt(MCU_UPDATE_VER, 16) > parseInt(cardMCUVersion, 16);
+	return { isNeedUpdate, curVersion: cardMCUVersion, newVersion: MCU_UPDATE_VER };
+};
+
 export const getMCUVersion = async (transport: Transport) => {
   const { outputData } = await executeCommand(transport, commands.GET_MCU_VERSION, target.MCU);
   const fwStatus = outputData.slice(0, 4); // 3900
