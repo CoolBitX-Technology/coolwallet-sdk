@@ -1,9 +1,8 @@
 import { error, transport, apdu } from "@coolwallet/core";
-
 import { handleHex } from "./stringUtil";
-import { coinType } from '../type'
-import * as scripts from "../scripts";
+import { coinType, Option } from '../type'
 import * as token from "../token";
+import { Transaction } from '../type';
 
 import { keccak256, toChecksumAddress } from "../lib";
 
@@ -25,15 +24,18 @@ const transactionType = {
  * Decide Transaction Type
  * @param {*} transaction
  */
-export const getTransactionType = (transaction: any) => {
-  const data = handleHex(transaction.data.toString("hex"));
-  if (data === "" || data === "00") return transactionType.TRANSFER;
-  if (token.isSupportedERC20Method(data) && transaction.tokenInfo)
+export const getTransactionType = (transaction: Transaction) => {
+  const data = transaction.data;
+  if (data) {
+    return transactionType.TRANSFER;
+  }
+  if (token.isSupportedERC20Method(data) && transaction.option) {
     return transactionType.ERC20;
+  }
   return transactionType.SMART_CONTRACT;
 };
 
-const getTransferArgument = (transaction: any) => {
+export const getTransferArgument = (transaction: Transaction) => {
   const argument =
     handleHex(transaction.to) + // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
     handleHex(transaction.value).padStart(20, "0") + // 000000b1a2bc2ec50000
@@ -44,14 +46,16 @@ const getTransferArgument = (transaction: any) => {
   return argument;
 };
 
-const getERC20Argument = (transaction: any) => {
-  const data = handleHex(transaction.data.toString("hex"));
-  const { to, amount } = token.parseToAndAmount(data);
-  const { symbol, decimals } = transaction.tokenInfo;
-  const tokenInfo = token.getSetTokenPayload(transaction.to, symbol, decimals);
-  const signature = "00".repeat(72);
+export const getERC20Argument = (transaction: Transaction, tokenSignature: string) => {
+  console.log("tokenSignature: " + tokenSignature)
+
+  const txTokenInfo: Option = transaction.option;
+  const tokenInfo = token.getSetTokenPayload(transaction.to, txTokenInfo.info.symbol, parseInt(txTokenInfo.info.decimals));
+  const signature = tokenSignature.slice(58).padStart(144, "0");
+  const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, "");
+  const amount = transaction.data.slice(74).replace(/\b(0+)/gi, "");
   const argument =
-    handleHex(to) +
+    handleHex(toAddress) + // toAddress
     handleHex(amount).padStart(24, "0") + // 000000b1a2bc2ec50000
     handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
@@ -59,6 +63,8 @@ const getERC20Argument = (transaction: any) => {
     handleHex(transaction.chainId.toString(16)).padStart(4, "0") + // 0001
     tokenInfo +
     signature;
+
+  console.log("getERC20Argument: " + argument)
   return argument;
 };
 
@@ -68,10 +74,16 @@ const getERC20Argument = (transaction: any) => {
  * value:string, data:string, chainId: number}} transaction
  * @return {Array<Buffer>}
  */
-export const getRawHex = (transaction: any): Array<Buffer> => {
-  const fields = ["nonce", "gasPrice", "gasLimit", "to", "value", "data"];
-  const raw = fields.map((field) => {
-    const hex = handleHex(transaction[field]);
+export const getRawHex = (transaction: Transaction): Array<Buffer> => {
+  const rawData = [];
+  rawData.push(transaction.nonce);
+  rawData.push(transaction.gasPrice);
+  rawData.push(transaction.gasLimit);
+  rawData.push(transaction.to); 
+  rawData.push(transaction.value);
+  rawData.push(transaction.data);
+  const raw = rawData.map((d) => {
+    const hex = handleHex(d);
     if (hex === "00" || hex === "") {
       return Buffer.allocUnsafe(0);
     }
@@ -80,6 +92,8 @@ export const getRawHex = (transaction: any): Array<Buffer> => {
   raw[6] = Buffer.from([transaction.chainId]);
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
+
+  console.log(raw)
 
   const t = rlp.encode(raw);
   if (t.length > 870) throw new error.SDKError(getRawHex.name, 'data too long');
@@ -107,39 +121,42 @@ export const getReadType = (txType: string) => {
   }
 };
 
-/**
- *
- * @param {number} addressIndex
- * @param {*} transaction
- */
-export const getScriptAndArguments = (txType: any, addressIndex: number, transaction: any) => {
+
+export const getArgument = async (addressIndex: number, getArg: CallableFunction) => {
   const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
   const SEPath = `15328000002C800000${coinType}8000000000000000${addressIdxHex}`;
-  let script;
-  let argument;
-  switch (txType) {
-    case transactionType.TRANSFER: {
-      script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-      argument = getTransferArgument(transaction);
-      break;
-    }
-    case transactionType.ERC20: {
-      script = scripts.ERC20.script + scripts.ERC20.signature;
-      argument = getERC20Argument(transaction);
-      break;
-    }
-    default: {
-      throw new error.SDKError(getScriptAndArguments.name, `type ${txType} no implemented`);
-    }
-  }
-
-  // console.debug(`sciprt:\t${script}`);
-  // console.debug(`argument:\t${SEPath}+${argument}`);
-  return {
-    script,
-    argument: SEPath + argument,
-  };
+  const argument = await getArg();
+  return SEPath + argument
 };
+
+// export const getScriptAndArguments = (addressIndex: number, transaction: any) => {
+//   const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
+//   const SEPath = `15328000002C800000${coinType}8000000000000000${addressIdxHex}`;
+//   let script;
+//   let argument;
+//   switch (txType) {
+//     case transactionType.TRANSFER: {
+//       script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+//       argument = getTransferArgument(transaction);
+//       break;
+//     }
+//     case transactionType.ERC20: {
+//       script = scripts.ERC20.script + scripts.ERC20.signature;
+//       argument = getERC20Argument(transaction);
+//       break;
+//     }
+//     default: {
+//       throw new error.SDKError(getScriptAndArguments.name, `type ${txType} no implemented`);
+//     }
+//   }
+
+//   // console.debug(`sciprt:\t${script}`);
+//   // console.debug(`argument:\t${SEPath}+${argument}`);
+//   return {
+//     script,
+//     argument: SEPath + argument,
+//   };
+// };
 /**
  * @description Compose Signed Transaction
  * @param {Array<Buffer>} payload
