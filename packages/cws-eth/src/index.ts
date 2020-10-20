@@ -2,7 +2,7 @@
 import { coin as COIN, transport, setting } from '@coolwallet/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
-import { coinType, signTx, transactionType, signMsg } from './type'
+import { coinType, signTx, transactionType, signMsg, signTyped } from './type'
 import * as ethUtil from './utils/ethUtils';
 import * as scripts from "./scripts";
 import { TOKENTYPE } from "./tokenType";
@@ -217,27 +217,14 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTypedData(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    typedData: object,
-    addressIndex: number,
-    publicKey: string | undefined = undefined,
-    confirmCB: Function | undefined = undefined,
-    authorizedCB: Function | undefined = undefined
+    typedData: signTyped
   ) {
-    await setting.auth.versionCheck(transport, 84);
-    if (!publicKey) publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    console.log('111111111111')
+    await setting.auth.versionCheck(typedData.transport, 84);
+    const publicKey = await this.getPublicKey(typedData.transport, typedData.appPrivateKey, typedData.appId, typedData.addressIndex);
     return ethSign.signTypedData(
-      transport,
-      appId,
-      appPrivateKey,
-      this.coinType,
       typedData,
-      addressIndex,
       publicKey,
-      confirmCB,
-      authorizedCB
     );
   }
 }

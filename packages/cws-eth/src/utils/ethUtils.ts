@@ -96,10 +96,11 @@ export const getSignMessageArgument = (message: string) => {
  * [domainSeparator(32B)] [data(Variety)]
  * @param transaction 
  */
-export const getTypedDataArgument = (transaction: Transaction) => {
+export const getSignTypedDataArgument = (domainSeparator: string, data: string) => {
   const argument =
-    handleHex("domainSeparator").padStart(64, "0") + 
-    handleHex("data") 
+    handleHex(domainSeparator).padStart(64, "0") + 
+    handleHex(data) 
+  console.log("getSignTypedDataArgument: " + argument)
   return argument;
 };
 
