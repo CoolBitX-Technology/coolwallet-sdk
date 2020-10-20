@@ -35,6 +35,12 @@ export const selectApplet = async (transport: Transport, appletCommand: string =
 
 };
 
+export const checkUpdate = async (transport: Transport) => {
+	const cardSEVersion = await general.getSEVersion(transport);
+	const isNeedUpdate = SE_UPDATE_VER > cardSEVersion;
+	return { isNeedUpdate, curVersion: cardSEVersion, newVersion: SE_UPDATE_VER };
+};
+
 /**
  * 
  * @param transport 

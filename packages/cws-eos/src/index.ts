@@ -57,3 +57,4 @@ export default class EOS extends COIN.ECDSACoin implements COIN.Coin {
     );
   }
 }
+

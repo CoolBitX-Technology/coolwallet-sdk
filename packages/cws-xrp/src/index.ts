@@ -52,4 +52,3 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
     );
   }
 }
-
