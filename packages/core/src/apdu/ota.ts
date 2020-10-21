@@ -27,8 +27,12 @@ const cryptogramUrl = `https://ota.cbx.io/api/cryptogram`;
  */
 export const selectApplet = async (transport: Transport, appletCommand: string = 'C1C2C3C4C5') => {
   const { statusCode } = await executeCommand(transport, commands.SELECT_APPLET, target.SE, appletCommand);
+  if (statusCode === CODE._9000) {
+    return { status: true, statusCode };
+  }
+  return { status: false, statusCode };
 
-  return statusCode === CODE._9000
+
 };
 
 export const checkUpdate = async (transport: Transport) => {
