@@ -1,49 +1,30 @@
 import { apdu, transport, tx, error, util } from '@coolwallet/core';
 import * as bnbUtil from './util';
-import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder } from './types'
+import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder, signType } from './types'
 
 type Transport = transport.default;
 
 export async function transferSignature(
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
+  signData: signType,
   transactionType: TransactionType,
   readType: string,
-  signObj: Transfer | PlaceOrder | CancelOrder,
-  signPublicKey: Buffer,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined,
 ): Promise<string> {
   if (transactionType !== TransactionType.TRANSFER) {
     throw new error.SDKError(transferSignature.name, `Unsupport transactionType: '${transactionType}'`);
   }
 
   const canonicalSignature = await sign(
-    transport,
-    appId,
-    appPrivateKey,
+    signData,
     transactionType,
-    readType,
-    signObj,
-    addressIndex,
-    confirmCB,
-    authorizedCB
+    readType
   );
-  return bnbUtil.composeSignedTransacton(signObj as Transfer, canonicalSignature, signPublicKey)
+  return bnbUtil.composeSignedTransacton(signData.signObj as Transfer, canonicalSignature, signData.signPublicKey)
 }
 
 export async function walletConnectSignature(
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
+  signData: signType,
   transactionType: TransactionType,
   readType: string,
-  signObj: Transfer | PlaceOrder | CancelOrder,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined,
 ): Promise<string> {
   if (transactionType !== TransactionType.PLACE_ORDER
     && transactionType !== TransactionType.CANCEL_ORDER) {
@@ -51,15 +32,9 @@ export async function walletConnectSignature(
   }
 
   const canonicalSignature = await sign(
-    transport,
-    appId,
-    appPrivateKey,
+    signData,
     transactionType,
-    readType,
-    signObj,
-    addressIndex,
-    confirmCB,
-    authorizedCB
+    readType
   );
 
   return canonicalSignature.r + canonicalSignature.s;
@@ -69,19 +44,16 @@ export async function walletConnectSignature(
  * Sign Binance Tranaction
  */
 async function sign(
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
+  signData: signType,
   transactionType: TransactionType,
   readType: string,
-  signObj: Transfer | PlaceOrder | CancelOrder,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined,
 ): Promise<{ r: string; s: string; }> {
+
+  const transport = signData.transport;
+
   const preActions = [];
   let action;
-  const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, addressIndex, signObj);
+  const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, signData.addressIndex, signData.signObj);
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
   }
@@ -90,8 +62,8 @@ async function sign(
   action = async () => {
     return apdu.tx.executeScript(
       transport,
-      appId,
-      appPrivateKey,
+      signData.appId,
+      signData.appPrivateKey,
       argument
     );
   }
@@ -101,8 +73,8 @@ async function sign(
     preActions,
     action,
     false,
-    confirmCB,
-    authorizedCB,
+    signData.confirmCB,
+    signData.authorizedCB,
     true
   ) as { r: string; s: string; };
 }

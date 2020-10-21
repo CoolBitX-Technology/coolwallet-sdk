@@ -1,6 +1,19 @@
 /* eslint-disable camelcase  */
+import { transport } from '@coolwallet/core';
+type Transport = transport.default;
 
 export const coinType = 'CA'
+
+export type signType = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  signObj: Transfer,
+  signPublicKey: Buffer,
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined
+}
 
 type coin = {
   denom: string;
@@ -11,6 +24,7 @@ type inputsOutputs = {
   address: string;
   coins: coin[];
 }[];
+
 
 export enum TransactionType {
   TRANSFER = "TRANSFER",
