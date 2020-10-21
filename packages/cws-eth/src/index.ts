@@ -99,15 +99,10 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
     
     return ethSign.signTransaction(
-      signTxData.transport,
-      signTxData.appId,
-      signTxData.appPrivateKey,
-      signTxData.transaction,
+      signTxData,
       script,
       argument,
       publicKey,
-      signTxData.confirmCB,
-      signTxData.authorizedCB
     );
   }
 
@@ -136,15 +131,10 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
 
     return ethSign.signTransaction(
-      signTxData.transport,
-      signTxData.appId,
-      signTxData.appPrivateKey,
-      signTxData.transaction,
+      signTxData,
       script,
       argument,
       publicKey,
-      signTxData.confirmCB,
-      signTxData.authorizedCB
     );
   }
 
@@ -173,15 +163,10 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
 
     return ethSign.signTransaction(
-      signTxData.transport,
-      signTxData.appId,
-      signTxData.appPrivateKey,
-      signTxData.transaction,
+      signTxData,
       script,
       argument,
       publicKey,
-      signTxData.confirmCB,
-      signTxData.authorizedCB
     );
   }
 
@@ -219,7 +204,6 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signTypedData(
     typedData: signTyped
   ) {
-    console.log('111111111111')
     await setting.auth.versionCheck(typedData.transport, 84);
     const publicKey = await this.getPublicKey(typedData.transport, typedData.appPrivateKey, typedData.appId, typedData.addressIndex);
     return ethSign.signTypedData(
