@@ -1,4 +1,6 @@
 import { transport } from '@coolwallet/core';
+type Transport = transport.default;
+
 export enum ScriptType {
 	P2PKH = 0,
 	P2SH = 1,
@@ -10,7 +12,6 @@ export enum AddressFormat {
 	Bitpay
 }
 
-type Transport = transport.default;
 
 export type signTxType = {
 	transport: Transport,
