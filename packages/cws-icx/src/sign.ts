@@ -1,23 +1,25 @@
 import { apdu, transport, error, tx, util } from '@coolwallet/core';
-import * as icxUtil from './utils/util';
+import * as icxUtil from './util';
 
-type Transport = transport.default;
-
+import { Transport, signTxType } from './types'
 /**
  * Sign ICON Transaction
  */
 // eslint-disable-next-line import/prefer-default-export
 export default async function signTransaction(
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
+  signTxData: signTxType,
   coinType: string,
-  transaction: object,
-  addressIndex: number,
   publicKey: string,
-  confirmCB: Function | undefined = undefined,
-  authorizedCB: Function | undefined = undefined
 ): Promise<Object> {
+  
+  const transaction = signTxData.transaction
+  const transport = signTxData.transport
+  const addressIndex = signTxData.addressIndex
+  const appPrivateKey = signTxData.appPrivateKey
+  const appId = signTxData.appId
+  const confirmCB = signTxData.confirmCB
+  const authorizedCB = signTxData.authorizedCB
+  
   const phraseToSign = icxUtil.generateHashKey(transaction);
   const rawPayload = Buffer.from(phraseToSign, 'utf-8');
   const useScript = await util.checkSupportScripts(transport);

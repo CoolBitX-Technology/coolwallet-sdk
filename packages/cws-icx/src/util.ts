@@ -1,5 +1,6 @@
-import * as scripts from "../scripts";
-import { coinType } from '../index'
+import * as scripts from "./scripts";
+import { coinType } from './index'
+import { Transport, signTxType } from './types'
 const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
 
@@ -42,6 +43,7 @@ const getTransferArgument = (transaction: any) => {
     handleHex(tx.value).padStart(20, "0") + 
     handleHex(tx.timestamp).padStart(20, "0") + 
     handleHex(tx.nid.toString(16)).padStart(4, "0"); 
+  console.log(argument)
   return argument;
 };
 

@@ -1,8 +1,8 @@
 import { coin as COIN, transport } from '@coolwallet/core';
 import signTransaction from './sign';
-import { pubKeyToAddress } from './utils/util';
+import { pubKeyToAddress } from './util';
 
-type Transport = transport.default;
+import { Transport, signTxType } from './types'
 
 export const coinType = '4A'
 
@@ -23,25 +23,15 @@ export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
    * Sign ICX Transaction.
    */
   async signTransaction(
-    transport: Transport, 
-    appPrivateKey: string, 
-    appId: string, 
-    transaction: Object,
-    addressIndex: number,
-    confirmCB: Function | undefined = undefined,
-    authorizedCB: Function | undefined = undefined
+    signTxData: signTxType
   ) {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    console.log("11")
+    const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
+    console.log("22")
     return signTransaction(
-      transport,
-      appId,
-      appPrivateKey,
+      signTxData,
       this.coinType,
-      transaction,
-      addressIndex,
-      publicKey,
-      confirmCB,
-      authorizedCB
+      publicKey
     );
   }
 }
