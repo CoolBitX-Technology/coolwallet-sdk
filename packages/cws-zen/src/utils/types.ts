@@ -6,7 +6,7 @@ export type signTxType = {
 	appPrivateKey: string,
 	appId: string,
 	scriptType: ScriptType,
-	inputs: [Input],
+	inputs: Array<Input>,
 	output: Output,
 	change?: Change,
 	confirmCB?: Function,
