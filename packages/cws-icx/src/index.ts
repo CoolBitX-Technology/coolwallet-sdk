@@ -25,9 +25,8 @@ export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
   async signTransaction(
     signTxData: signTxType
   ) {
-    console.log("11")
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
-    console.log("22")
+
     return signTransaction(
       signTxData,
       this.coinType,
