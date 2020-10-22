@@ -1,10 +1,9 @@
 import { apdu, transport, tx, util as coreUtil } from "@coolwallet/core";
 import * as coinUtil from "./util";
+import { Transport, signTxType, Payment } from "./types";
 
 const codec = require("ripple-binary-codec");
 
-type Transport = transport.default;
-type Payment = import("./types").Payment;
 
 const generateRawTx = (signature: string, payment: Payment): string => {
   /* eslint-disable-next-line no-param-reassign */
@@ -14,15 +13,18 @@ const generateRawTx = (signature: string, payment: Payment): string => {
 
 // eslint-disable-next-line import/prefer-default-export
 export const signPayment = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
+  signTxData: signTxType,
   coinType: string,
-  payment: Payment,
-  addressIndex: number,
-  confirmCB?: Function | undefined,
-  authorizedCB?: Function | undefined
+  payment: Payment
 ): Promise<string> => {
+
+  const transport = signTxData.transport;
+  const addressIndex = signTxData.addressIndex;
+  const appId = signTxData.appId;
+  const appPrivateKey = signTxData.appPrivateKey;
+  const confirmCB = signTxData.confirmCB;
+  const authorizedCB = signTxData.authorizedCB;
+
   const useScript = await coreUtil.checkSupportScripts(transport);
   let signature;
   if (useScript) {

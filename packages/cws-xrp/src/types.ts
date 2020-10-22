@@ -1,3 +1,17 @@
+import { transport } from '@coolwallet/core';
+export type Transport = transport.default;
+
+export type signTxType = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  payment: Payment,
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined
+}
+
+
 export type Payment = {
   TransactionType: string | "Payment";
   Flags: number | 2147483648;
