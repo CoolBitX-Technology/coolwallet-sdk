@@ -10,4 +10,6 @@ export const {
   toChecksumAddress,
   asciiToHex,
   padRight,
+  toHex,
+  sha3
 } = Web3.utils;

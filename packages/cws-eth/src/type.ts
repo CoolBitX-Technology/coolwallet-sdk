@@ -7,7 +7,7 @@ export type Output = {
 
 type Transport = transport.default;
 
-export type signTxType = {
+export type signTx = {
   transport: Transport,
   appPrivateKey: string,
   appId: string,
@@ -17,6 +17,27 @@ export type signTxType = {
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined
 }
+
+export type signMsg = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  message: string,
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined
+}
+
+export type signTyped = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  typedData: any,
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined
+}
+
 
 export type Transaction = {
   // [key: string]: any,
@@ -45,3 +66,31 @@ export enum transactionType  {
 }
 
 export const coinType = '3C'
+
+export const EIP712Schema = {
+  type: 'object',
+  properties: {
+    types: {
+      type: 'object',
+      properties: {
+        EIP712Domain: { type: 'array' },
+      },
+      additionalProperties: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            type: { type: 'string' }
+          },
+          required: ['name', 'type']
+        }
+      },
+      required: ['EIP712Domain']
+    },
+    primaryType: { type: 'string' },
+    domain: { type: 'object' },
+    message: { type: 'object' }
+  },
+  required: ['types', 'primaryType', 'domain', 'message']
+}
