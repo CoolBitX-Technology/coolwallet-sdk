@@ -9,24 +9,25 @@ import {
   composeFinalTransaction,
   getScriptSigningActions
 } from './util';
-type Transport = transport.default;
+
+import { Transport, signTxType } from './types';
 
 export {
 	signTransaction
 };
 
 async function signTransaction(
-	transport: Transport,
-	appId: string,
-	appPrivateKey: string,
-	scriptType: ScriptType,
+	signTxData: signTxType,
 	coinType: string,
-	inputs: [Input],
-	output: Output,
-	change?: Change,
-	confirmCB?: Function,
-	authorizedCB?: Function,
 ): Promise<string> {
+	const scriptType = signTxData.scriptType
+	const transport = signTxData.transport
+	const inputs = signTxData.inputs
+	const output = signTxData.output
+	const change = signTxData.change
+	const appId = signTxData.appId
+	const appPrivateKey = signTxData.appPrivateKey
+	
 	if (scriptType !== ScriptType.P2PKH
 		&& scriptType !== ScriptType.P2WPKH
 		&& scriptType !== ScriptType.P2SH_P2WPKH) {
@@ -70,8 +71,8 @@ async function signTransaction(
 		preActions,
 		actions,
 		false,
-		confirmCB,
-		authorizedCB,
+		signTxData.confirmCB,
+		signTxData.authorizedCB,
 		false
 	);
 	const transaction = composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);

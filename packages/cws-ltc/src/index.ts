@@ -9,8 +9,7 @@ import {
 } from './util';
 
 import { signTransaction } from './sign';
-
-type Transport = transport.default;
+import { Transport, signTxType } from './types';
 
 const coinType = '02'
 
@@ -40,36 +39,19 @@ export default class LTC extends COIN.ECDSACoin implements COIN.Coin {
 
 
 	async signTransaction(
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		scriptType: ScriptType,
-		inputs: [Input],
-		output: Output,
-		change?: Change,
-		confirmCB?: Function,
-		authorizedCB?: Function,
-
+		signTxData: signTxType
 	): Promise<string> {
-		for (const input of inputs) {
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
+		for (const input of signTxData.inputs) {
+			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-		if (change) {
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
-			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+		if (signTxData.change) {
+			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.change.addressIndex);
+			signTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 		return signTransaction(
-			transport,
-			appId,
-			appPrivateKey,
-			scriptType,
-			this.coinType,
-			inputs,
-			output,
-			change,
-			confirmCB,
-			authorizedCB
+			signTxData,
+			this.coinType
 		);
 	}
 }
