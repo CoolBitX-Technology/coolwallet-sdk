@@ -1,7 +1,7 @@
 import { coin as COIN, transport } from "@coolwallet/core";
 import * as xrpSign from "./sign";
 import * as xrpUtil from "./util";
-import { Transport, signTxType} from "./types";
+import { Transport, signTxType, Payment } from "./types";
 export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
   constructor() {
     super("90");
@@ -23,6 +23,9 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
     signTxData: signTxType
   ) {
     const payment = signTxData.payment;
+
+    console.log(payment)
+    console.log(signTxData.payment)
 
     payment.TransactionType = "Payment";
     payment.Flags = 2147483648;

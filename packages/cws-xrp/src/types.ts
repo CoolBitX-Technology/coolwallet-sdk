@@ -13,8 +13,8 @@ export type signTxType = {
 
 
 export type Payment = {
-  TransactionType: string | "Payment";
-  Flags: number | 2147483648;
+  TransactionType: string;
+  Flags: number;
   Sequence: number;
   DestinationTag: number;
   LastLedgerSequence: number;
