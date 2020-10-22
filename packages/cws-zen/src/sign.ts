@@ -8,23 +8,25 @@ import {
 	composeFinalTransaction,
 } from './utils/transactionUtil';
 import { getSigningActions, getScriptSigningActions } from './utils/actionUtil'
-type Transport = transport.default;
+
+import { Transport, signTxType } from "./utils/types";
 
 export {
 	signTransaction
 };
 
 async function signTransaction(
-	transport: Transport,
-	appId: string,
-	appPrivateKey: string,
-	scriptType: ScriptType,
-	inputs: [Input],
-	output: Output,
-	change?: Change,
-	confirmCB?: Function,
-	authorizedCB?: Function,
+	signTxData: signTxType
 ): Promise<string> {
+
+	const scriptType = signTxData.scriptType;
+	const transport = signTxData.transport;
+	const inputs = signTxData.inputs;
+	const output = signTxData.output;
+	const change = signTxData.change;
+	const appId = signTxData.appId;
+	const appPrivateKey = signTxData.appPrivateKey;
+
 	if (scriptType !== ScriptType.P2PKH
 		&& scriptType !== ScriptType.P2SH) {
 		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${scriptType}'`);
@@ -64,8 +66,8 @@ async function signTransaction(
 		preActions,
 		actions,
 		false,
-		confirmCB,
-		authorizedCB,
+		signTxData.confirmCB,
+		signTxData.authorizedCB,
 		false
 	);
 	const transaction = composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
