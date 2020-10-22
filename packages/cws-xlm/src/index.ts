@@ -1,7 +1,7 @@
 import { coin as COIN, error as ERROR, transport } from '@coolwallet/core';
 import { pubKeyToAddress } from './utils';
 import signTransaction from './sign';
-import { coinType, path, COIN_SPECIES } from './types';
+import { coinType, path, COIN_SPECIES, signTxType } from './types';
 import * as scripts from "./scripts";
 
 export { COIN_SPECIES };
@@ -33,8 +33,6 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     if (accountIndex !== 0) {
       throw new ERROR.SDKError(this.getAddress.name, accountIndexErrorMsg);
     }
-    console.log("protocol: " + protocol)
-    console.log("accountIndex: " + accountIndex)
     const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, path, protocol);
     console.log(pubKey)
     if (!pubKey) {
@@ -47,32 +45,17 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
    * sign XLM signatureBase with account 0, return signature.
    */
   async signTransaction(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    signatureBase: Buffer,
-    transaction: object,
-    accountIndex: number,
-    protocol: protocol | undefined,
-    confirmCB: Function | undefined,
-    authorizedCB: Function | undefined,
+    signTxData: signTxType
   ): Promise<{ r: string; s: string; } | Buffer> {
-    if (accountIndex !== 0) {
+    if (signTxData.accountIndex !== 0) {
       throw new ERROR.SDKError(this.signTransaction.name, accountIndexErrorMsg);
     }
-    const protocolToUse = protocol || 'SLIP0010';
+    const protocolToUse = signTxData.protocol || 'SLIP0010';
     const signature = signTransaction(
-      transport,
-      appPrivateKey,
-      appId,
+      signTxData,
       this.coinType,
       this.transfer,
-      signatureBase,
-      transaction,
-      accountIndex,
       protocolToUse,
-      confirmCB,
-      authorizedCB,
     );
 
     return signature;
