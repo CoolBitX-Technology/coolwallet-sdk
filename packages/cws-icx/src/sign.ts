@@ -11,14 +11,8 @@ export default async function signTransaction(
   coinType: string,
   publicKey: string,
 ): Promise<Object> {
-  
-  const transaction = signTxData.transaction
-  const transport = signTxData.transport
-  const addressIndex = signTxData.addressIndex
-  const appPrivateKey = signTxData.appPrivateKey
-  const appId = signTxData.appId
-  const confirmCB = signTxData.confirmCB
-  const authorizedCB = signTxData.authorizedCB
+
+  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData
   
   const phraseToSign = icxUtil.generateHashKey(transaction);
   const rawPayload = Buffer.from(phraseToSign, 'utf-8');

@@ -19,13 +19,7 @@ async function signTransaction(
 	signTxData: signTxType
 ): Promise<string> {
 
-	const scriptType = signTxData.scriptType;
-	const transport = signTxData.transport;
-	const inputs = signTxData.inputs;
-	const output = signTxData.output;
-	const change = signTxData.change;
-	const appId = signTxData.appId;
-	const appPrivateKey = signTxData.appPrivateKey;
+	const {scriptType, transport, inputs, output, change, appPrivateKey, appId} = signTxData
 
 	if (scriptType !== ScriptType.P2PKH
 		&& scriptType !== ScriptType.P2SH) {

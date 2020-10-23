@@ -18,12 +18,7 @@ export const signPayment = async (
   payment: Payment
 ): Promise<string> => {
 
-  const transport = signTxData.transport;
-  const addressIndex = signTxData.addressIndex;
-  const appId = signTxData.appId;
-  const appPrivateKey = signTxData.appPrivateKey;
-  const confirmCB = signTxData.confirmCB;
-  const authorizedCB = signTxData.authorizedCB;
+  const { transport, addressIndex, appId, appPrivateKey, confirmCB, authorizedCB } = signTxData
 
   const useScript = await coreUtil.checkSupportScripts(transport);
   let signature;

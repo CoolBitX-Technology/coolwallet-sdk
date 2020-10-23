@@ -96,8 +96,7 @@ export const signTransaction = async (
   publicKey: string | undefined = undefined,
 ): Promise<string> => {
 
-  const transport = signTxData.transport
-  const transaction = signTxData.transaction
+  const { transport, transaction } = signTxData
 
   const rawPayload = ethUtil.getRawHex(transaction);
 
@@ -230,8 +229,7 @@ export const signMessage = async (
   publicKey: string | undefined = undefined
 ) => {
 
-  const message = signMsgData.message;
-  const transport = signMsgData.transport;
+  const { transport, message } = signMsgData
 
   const getArg = async () => {
     return ethUtil.getSignMessageArgument(message);
@@ -307,7 +305,7 @@ export const signTypedData = async (
   if (!ajv.validate(EIP712Schema, typedData.typedData))
     throw new error.SDKError(signTypedData.name, ajv.errorsText());
 
-  const transport = typedData.transport;
+  const { transport } = typedData;
 
   const preActions = [];
 

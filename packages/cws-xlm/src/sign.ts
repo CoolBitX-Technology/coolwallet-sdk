@@ -17,14 +17,7 @@ export default async function signTransaction(
   protocol: protocol,
 ): Promise<{ r: string; s: string; } | Buffer> {
 
-  const transport = signTxData.transport;
-  const transaction = signTxData.transaction;
-  const appId = signTxData.appId;
-  const appPrivateKey = signTxData.appPrivateKey;
-  const accountIndex = signTxData.accountIndex;
-  const signatureBase = signTxData.signatureBase;
-  const confirmCB = signTxData.confirmCB;
-  const authorizedCB = signTxData.authorizedCB;
+  const { transaction,transport, appPrivateKey, appId, accountIndex, signatureBase, confirmCB, authorizedCB } = signTxData
 
   const readType = protocol === 'BIP44' ? coinType : `${coinType}10`;
   const preActions = [];

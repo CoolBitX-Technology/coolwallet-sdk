@@ -4,10 +4,10 @@ import {
 	Input,
 	Output,
 	Change,
-  createUnsignedTransactions,
-  getSigningActions,
-  composeFinalTransaction,
-  getScriptSigningActions
+	createUnsignedTransactions,
+	getSigningActions,
+	composeFinalTransaction,
+	getScriptSigningActions
 } from './util';
 
 import { Transport, signTxType } from './types';
@@ -20,14 +20,9 @@ async function signTransaction(
 	signTxData: signTxType,
 	coinType: string,
 ): Promise<string> {
-	const scriptType = signTxData.scriptType
-	const transport = signTxData.transport
-	const inputs = signTxData.inputs
-	const output = signTxData.output
-	const change = signTxData.change
-	const appId = signTxData.appId
-	const appPrivateKey = signTxData.appPrivateKey
-	
+
+	const { scriptType, transport, inputs, output, change, appId, appPrivateKey } = signTxData
+
 	if (scriptType !== ScriptType.P2PKH
 		&& scriptType !== ScriptType.P2WPKH
 		&& scriptType !== ScriptType.P2SH_P2WPKH) {
