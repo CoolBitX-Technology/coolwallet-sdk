@@ -23,7 +23,7 @@ const versionBytes = {
  * @param {*} transaction
  */
 export const getScriptAndArguments = (transaction: object, transfer: { script: string, signature: string }) => {
-  console.log("getScriptAndArguments start")
+  
   const SEPath = `0D${path}`;
   let script;
   let argument;
@@ -37,7 +37,7 @@ export const getScriptAndArguments = (transaction: object, transfer: { script: s
 };
 
 const getTransferArgument = (transaction: any) => {
-  console.log("getTransferArgument start +++++" + transaction)
+
   const isCreate = transaction.isCreate ? "00" : "01";
   let memoType;
   switch (transaction.memoType) {
@@ -76,7 +76,6 @@ const getTransferArgument = (transaction: any) => {
     transaction.memo.padStart(64, "0") + //memo
     isCreate.padStart(2, "0");  //isCreate 
 
-  console.log("argument: " + argument)
   return argument;
 };
 
@@ -105,7 +104,7 @@ export function encodeEd25519PublicKey(data: Buffer) {
 
 export function pubKeyToAddress(publicKey: string): string {
   const pubKey = publicKey.length === 66 ? publicKey.slice(2) : publicKey;
-  console.log("pubKey: " + pubKey)
+  
   const pubKeyBuf = Buffer.from(pubKey, 'hex');
   return encodeEd25519PublicKey(pubKeyBuf);
 }

@@ -180,9 +180,6 @@ function createUnsignedTransactions(
 	const outputScriptLen = toVarUintBuffer(outputScript.length);
 
 
-	/*const outputArray = [
-		Buffer.concat([toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])
-	];*/
 	let outputArray;
 	if (!omniType) {
 		outputArray = [

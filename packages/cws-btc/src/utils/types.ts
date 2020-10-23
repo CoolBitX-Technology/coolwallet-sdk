@@ -1,3 +1,31 @@
+import { transport } from '@coolwallet/core';
+export type Transport = transport.default;
+
+export type signUSDTTxType = {
+	transport: Transport,
+	appPrivateKey: string,
+	appId: string,
+	redeemScriptType: ScriptType,
+	inputs: [Input],
+	output: Output,
+	value: string, 
+	change?: Change,
+	confirmCB?: Function,
+	authorizedCB?: Function,
+}
+
+export type signTxType = {
+	transport: Transport,
+	appPrivateKey: string,
+	appId: string,
+	redeemScriptType: ScriptType,
+	inputs: [Input],
+	output: Output,
+	change?: Change,
+	confirmCB?: Function,
+	authorizedCB?: Function,
+}
+
 export enum ScriptType {
 	P2PKH = 0,
 	P2SH_P2WPKH = 1,

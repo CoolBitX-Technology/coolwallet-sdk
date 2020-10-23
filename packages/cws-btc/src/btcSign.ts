@@ -1,4 +1,4 @@
-import { tx, transport, util } from '@coolwallet/core';
+import { tx, transport, util, error } from '@coolwallet/core';
 import { ScriptType, OmniType, Input, Output, Change } from './utils/types'
 import {
 	createUnsignedTransactions,
@@ -8,11 +8,41 @@ import {
 	getSigningActions,
 	getScriptSigningActions
 } from './utils/scriptUtil';
-type Transport = transport.default;
+import { signTxType, signUSDTTxType, Transport } from './utils/types';
 
-export {
-	signTransaction
-};
+export async function signBTCTransaction(
+	signTxData: signTxType,
+): Promise<string> {
+	const { redeemScriptType, transport, inputs, output, change, appId, appPrivateKey, confirmCB, authorizedCB } = signTxData
+	return await signTransaction(
+		transport,
+		appId,
+		appPrivateKey,
+		redeemScriptType,
+		inputs,
+		output,
+		change,
+		confirmCB,
+		authorizedCB)
+}
+
+export async function signUSDTransaction(
+	signUSDTTxData: signUSDTTxType
+): Promise<string> {
+	const { redeemScriptType, transport, inputs, output, change, appId, appPrivateKey, confirmCB, authorizedCB, value } = signUSDTTxData
+	return await signTransaction(
+		transport,
+		appId,
+		appPrivateKey,
+		redeemScriptType,
+		inputs,
+		output,
+		change,
+		confirmCB,
+		authorizedCB,
+		value,
+		OmniType.USDT)
+}
 
 async function signTransaction(
 	transport: Transport,
@@ -27,6 +57,14 @@ async function signTransaction(
 	value?: string,
 	omniType?: OmniType
 ): Promise<string> {
+
+	// const { redeemScriptType, transport, inputs, output, change, appId, appPrivateKey } = signTxData
+
+	if (redeemScriptType !== ScriptType.P2PKH
+		&& redeemScriptType !== ScriptType.P2WPKH
+		&& redeemScriptType !== ScriptType.P2SH_P2WPKH) {
+		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
+	}
 	const useScript = await util.checkSupportScripts(transport);
 	const { preparedData, unsignedTransactions } = createUnsignedTransactions(
 		redeemScriptType,

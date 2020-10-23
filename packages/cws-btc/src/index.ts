@@ -4,9 +4,9 @@ import {
 	addressToOutScript,
 	pubkeyToAddressAndOutScript
 } from './utils/transactionUtil';
-import { signTransaction } from './btcSign';
+import { signBTCTransaction, signUSDTransaction } from './btcSign';
+import { signTxType, signUSDTTxType, Transport } from './utils/types';
 
-type Transport = transport.default;
 
 export const coinType = '00'
 
@@ -35,82 +35,47 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 	}
 
 	async signTransaction(
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		redeemScriptType: ScriptType,
-		inputs: [Input],
-		output: Output,
-		change?: Change,
-		confirmCB?: Function,
-		authorizedCB?: Function,
+		signTxData: signTxType
+
 	): Promise<string> {
-		if (redeemScriptType !== ScriptType.P2PKH
-			&& redeemScriptType !== ScriptType.P2WPKH
-			&& redeemScriptType !== ScriptType.P2SH_P2WPKH) {
-			throw new error.SDKError(this.signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
-		}
-		for (const input of inputs) {
+		for (const input of signTxData.inputs) {
 			// eslint-disable-next-line no-await-in-loop
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
+			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-		if (change) {
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
+		if (signTxData.change) {
+			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.change.addressIndex);
 			// eslint-disable-next-line no-param-reassign
-			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+			signTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-		return signTransaction(
-			transport,
-			appId,
-			appPrivateKey,
-			redeemScriptType,
-			inputs,
-			output,
-			change,
-			confirmCB,
-			authorizedCB
+		return signBTCTransaction(
+			signTxData
 		);
 	}
 
 	async signUSDTTransaction(
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		redeemScriptType: ScriptType,
-		inputs: [Input],
-		value: string,
-		output: Output,
-		change?: Change,
-		confirmCB?: Function,
-		authorizedCB?: Function,
+		signUSDTTxData: signUSDTTxType
 	): Promise<string> {
-		/*if (redeemScriptType !== ScriptType.P2PKH
+
+		const { transport, appId, appPrivateKey, redeemScriptType } = signUSDTTxData
+
+		if (redeemScriptType !== ScriptType.P2PKH
 			&& redeemScriptType !== ScriptType.P2WPKH) {
 			throw new error.SDKError(this.signUSDTTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
-		}*/
-		for (const input of inputs) {
+		}
+
+		for (const input of signUSDTTxData.inputs) {
 			// eslint-disable-next-line no-await-in-loop
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-		if (change) {
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
-			// eslint-disable-next-line no-param-reassign
-			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+		
+		if (signUSDTTxData.change) {
+			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, signUSDTTxData.change.addressIndex);
+			signUSDTTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-		return signTransaction(
-			transport,
-			appId,
-			appPrivateKey,
-			redeemScriptType,
-			inputs,
-			output,
-			change,
-			confirmCB,
-			authorizedCB,
-			value,
-			OmniType.USDT
+		return signUSDTransaction(
+			signUSDTTxData
 		);
 	}
 }
