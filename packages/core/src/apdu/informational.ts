@@ -12,7 +12,7 @@ import { getCommandSignature } from "../setting/auth";
  * Get basic card information
  * @param {Transport} transport
  */
-export const getCardInfo = async (transport: Transport): Promise<{ paired: boolean; locked: boolean; walletCreated: boolean; showDetail: boolean; pairRemainTimes: number;}> => {
+export const getCardInfo = async (transport: Transport): Promise<{ paired: boolean; locked: boolean; walletCreated: boolean; showDetail: boolean; pairRemainTimes: number; accountDigest: string;}> => {
 
   try{
     const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_CARD_INFO, target.SE);
@@ -38,7 +38,8 @@ export const getCardInfo = async (transport: Transport): Promise<{ paired: boole
       locked,
       walletCreated,
       showDetail,
-      pairRemainTimes
+      pairRemainTimes,
+      accountDigest
     };
   
   } catch (e) {

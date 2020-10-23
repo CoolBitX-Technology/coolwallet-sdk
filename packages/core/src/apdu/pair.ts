@@ -94,11 +94,11 @@ export const getPairedApps = async (transport: Transport, appId: string, appPriv
   }
   const apps = appsInfo.map((appInfo) => {
     const appId = appInfo.slice(0, 40);
-    const appName = Buffer.from(appInfo.slice(40), 'hex')
+    const deviceName = Buffer.from(appInfo.slice(40), 'hex')
       .toString()
       // eslint-disable-next-line no-control-regex
       .replace(/\u0000/gi, '');
-    return { appId, appName };
+    return { appId, deviceName };
   });
   return apps;
 };

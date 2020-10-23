@@ -1,10 +1,7 @@
 import { coin as COIN, transport } from "@coolwallet/core";
 import * as xrpSign from "./sign";
 import * as xrpUtil from "./util";
-
-type Transport = transport.default;
-type Payment = import("./types").Payment;
-
+import { Transport, signTxType, Payment } from "./types";
 export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
   constructor() {
     super("90");
@@ -23,32 +20,24 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
    * @description TransactionType must be 'Payment', Flags must be 2147483648;
    */
   async signTransaction(
-    transport: Transport, 
-    appPrivateKey: string, 
-    appId: string,
-    payment: Payment,
-    addressIndex: number,
-    confirmCB?: Function | undefined,
-    authorizedCB?: Function | undefined
+    signTxData: signTxType
   ) {
+    const payment = signTxData.payment;
+
     payment.TransactionType = "Payment";
     payment.Flags = 2147483648;
     if (!payment.SigningPubKey) {
-      payment.SigningPubKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+      payment.SigningPubKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
       payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
     }
     if (!payment.Account) {
       payment.Account = xrpUtil.pubKeyToAddress(payment.SigningPubKey);
     }
+
     return xrpSign.signPayment(
-      transport,
-      appId,
-      appPrivateKey,
+      signTxData,
       this.coinType,
       payment,
-      addressIndex,
-      confirmCB,
-      authorizedCB
     );
   }
 }

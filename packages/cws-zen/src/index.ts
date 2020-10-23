@@ -10,7 +10,7 @@ import {
 
 import { signTransaction } from './sign';
 
-type Transport = transport.default;
+import { Transport, signTxType } from "./utils/types";
 
 export const coinType = '79'
 
@@ -39,37 +39,21 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 	}
 
 	async signTransaction(
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		scriptType: ScriptType,
-		inputs: [Input],
-		output: Output,
-		change?: Change,
-		confirmCB?: Function,
-		authorizedCB?: Function,
+		signTxData: signTxType
 
 	): Promise<string> {
-		for (const input of inputs) {
+		for (const input of signTxData.inputs) {
 			// eslint-disable-next-line no-await-in-loop
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
+			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-		if (change) {
-			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex);
+		if (signTxData.change) {
+			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.change.addressIndex);
 			// eslint-disable-next-line no-param-reassign
-			change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+			signTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 		return signTransaction(
-			transport,
-			appId,
-			appPrivateKey,
-			scriptType,
-			inputs,
-			output,
-			change,
-			confirmCB,
-			authorizedCB
+			signTxData
 		);
 	}
 }

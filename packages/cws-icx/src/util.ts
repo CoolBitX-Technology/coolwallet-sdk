@@ -1,5 +1,6 @@
-import * as scripts from "../scripts";
-import { coinType } from '../index'
+import * as scripts from "./scripts";
+import { coinType } from './index'
+import { Transport, signTxType } from './types'
 const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
 

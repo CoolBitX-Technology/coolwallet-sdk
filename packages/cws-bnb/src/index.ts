@@ -1,7 +1,8 @@
 import { coin as COIN, transport } from '@coolwallet/core';
 import { walletConnectSignature, transferSignature } from './sign';
 import { publicKeyToAddress } from './util';
-import * as Types from './types'
+import { signType } from './types'
+import  * as Types from './types'
 
 type Transport = transport.default;
 
@@ -24,27 +25,13 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
    * Sign Binance tansfer transaction.
    */
   async signTransaction(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    signObj: Types.Transfer,
-    signPublicKey: Buffer,
-    addressIndex: number,
-    confirmCB: Function | undefined,
-    authorizedCB: Function | undefined
+    signData: signType
   ): Promise<string> {
     const readType = 'CA';
     return transferSignature(
-      transport,
-      appId,
-      appPrivateKey,
+      signData,
       Types.TransactionType.TRANSFER,
       readType,
-      signObj,
-      signPublicKey,
-      addressIndex,
-      confirmCB,
-      authorizedCB
     );
   }
 
@@ -52,31 +39,18 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
    * Sign PlaceOrder Transaction
    */
   async signPlaceOrder(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    signObj: Types.PlaceOrder,
-    signPublicKey: Buffer,
-    addressIndex: number,
-    confirmCB: Function | undefined,
-    authorizedCB: Function | undefined
+    signData: signType
   ): Promise<{
     signature: string,
     publicKey: string
   }> {
     const readType = 'CB';
     const signature = await walletConnectSignature(
-      transport,
-      appId,
-      appPrivateKey,
+      signData,
       Types.TransactionType.PLACE_ORDER,
-      readType,
-      signObj,
-      addressIndex,
-      confirmCB,
-      authorizedCB
+      readType
     );
-    const publicKey = await this.getFullPubKey(signPublicKey.toString('hex'));
+    const publicKey = await this.getFullPubKey(signData.signPublicKey.toString('hex'));
     return { signature, publicKey }
   }
 
@@ -84,31 +58,18 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
    * Sign CancelOrder Transaction
    */
   async signCancelOrder(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    signObj: Types.CancelOrder,
-    signPublicKey: Buffer,
-    addressIndex: number,
-    confirmCB: Function | undefined,
-    authorizedCB: Function | undefined
+    signData: signType
   ): Promise<{
     signature: string,
     publicKey: string
   }> {
     const readType = 'CC';
     const signature = await walletConnectSignature(
-      transport,
-      appId,
-      appPrivateKey,
-      Types.TransactionType.CANCEL_ORDER,
-      readType,
-      signObj,
-      addressIndex,
-      confirmCB,
-      authorizedCB
+      signData,
+      Types.TransactionType.PLACE_ORDER,
+      readType
     );
-    const publicKey = await this.getFullPubKey(signPublicKey.toString('hex'));
+    const publicKey = await this.getFullPubKey(signData.signPublicKey.toString('hex'));
     return { signature, publicKey }
   }
 }

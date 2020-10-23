@@ -9,6 +9,7 @@ import {
 	composeFinalTransaction,
 	getScriptSigningActions
 } from './utils';
+import { signTxType } from './utils/types';
 type Transport = transport.default;
 
 export {
@@ -16,16 +17,11 @@ export {
 };
 
 async function signTransaction(
-	transport: Transport,
-	appId: string,
-	appPrivateKey: string,
-	scriptType: ScriptType,
-	inputs: [Input],
-	output: Output,
-	change?: Change,
-	confirmCB?: Function,
-	authorizedCB?: Function,
+	signTxData: signTxType
 ): Promise<string> {
+
+	const { scriptType, transport, inputs, output, change, appId, appPrivateKey } = signTxData
+
 	if (scriptType !== ScriptType.P2PKH
 		&& scriptType !== ScriptType.P2WPKH
 		&& scriptType !== ScriptType.P2SH_P2WPKH) {
@@ -66,8 +62,8 @@ async function signTransaction(
 		preActions,
 		actions,
 		false,
-		confirmCB,
-		authorizedCB,
+		signTxData.confirmCB,
+		signTxData.authorizedCB,
 		false
 	);
 	const transaction = composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
