@@ -45,13 +45,12 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     // eth
     if (txData.value && !txData.data) {
-      console.log("eth signTransaction")
       return await this.signTransferTransaction(signTxData);
     }
 
     // erc20
     const functionHash = txData.data.slice(2, 10);
-    console.log(functionHash)
+    
     if (txData.data && functionHash === 'a9059cbb') {
 
       const upperCaseAddress = txData.to.toUpperCase(); // contractAddr

@@ -43,7 +43,6 @@ const getTransferArgument = (transaction: any) => {
     handleHex(tx.value).padStart(20, "0") + 
     handleHex(tx.timestamp).padStart(20, "0") + 
     handleHex(tx.nid.toString(16)).padStart(4, "0"); 
-  console.log(argument)
   return argument;
 };
 

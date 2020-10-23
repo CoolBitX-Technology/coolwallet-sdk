@@ -127,7 +127,6 @@ export const signTransaction = async (
   );
 
   const { signedTx } = await apdu.tx.getSignedHex(transport);
-  console.log(signedTx)
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(
@@ -305,7 +304,6 @@ export const signTypedData = async (
   publicKey: string | undefined = undefined,
 ): Promise<string> => {
 
-  console.log(typedData)
   if (!ajv.validate(EIP712Schema, typedData.typedData))
     throw new error.SDKError(signTypedData.name, ajv.errorsText());
 

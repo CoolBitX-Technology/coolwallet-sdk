@@ -59,7 +59,6 @@ export const getERC20Argument = (transaction: Transaction, tokenSignature: strin
     tokenInfo +
     signature;
 
-  console.log("getERC20Argument: " + argument)
   return argument;
 };
 
@@ -88,7 +87,6 @@ export const getSmartContractArgument = (transaction: Transaction) => {
 export const getSignMessageArgument = (message: string) => {
   const argument =
     handleHex(toHex(message))
-  console.log("getSignMessageArgument: " + handleHex(toHex(message)))
   return argument;
 };
 
@@ -100,7 +98,6 @@ export const getSignTypedDataArgument = (domainSeparator: string, data: string) 
   const argument =
     handleHex(domainSeparator).padStart(64, "0") + 
     handleHex(data) 
-  console.log("getSignTypedDataArgument: " + argument)
   return argument;
 };
 
@@ -128,8 +125,6 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
   raw[6] = Buffer.from([transaction.chainId]);
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
-
-  console.log(raw)
 
   const t = rlp.encode(raw);
   if (t.length > 870) throw new error.SDKError(getRawHex.name, 'data too long');

@@ -32,7 +32,6 @@ export default async function signTransaction(
 
   let signature;
 
-  console.log("useScript: " + useScript)
 
   if (useScript) {
  

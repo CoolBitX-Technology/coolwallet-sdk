@@ -42,9 +42,9 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 	async signTransaction(
 		signTxData: signTxType
 	): Promise<string> {
-		console.log(signTxData)
+		
 		const inputs = signTxData.inputs;
-		console.log(inputs)
+		
 		for (const input of inputs) {
 			console.log("input: " + input.preValue)
 			// eslint-disable-next-line no-await-in-loop

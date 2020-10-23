@@ -24,9 +24,6 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
   ) {
     const payment = signTxData.payment;
 
-    console.log(payment)
-    console.log(signTxData.payment)
-
     payment.TransactionType = "Payment";
     payment.Flags = 2147483648;
     if (!payment.SigningPubKey) {
