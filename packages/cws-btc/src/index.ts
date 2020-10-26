@@ -56,13 +56,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 	async signUSDTTransaction(
 		signUSDTTxData: signUSDTTxType
 	): Promise<string> {
-
-		const { transport, appId, appPrivateKey, redeemScriptType } = signUSDTTxData
-
-		if (redeemScriptType !== ScriptType.P2PKH
-			&& redeemScriptType !== ScriptType.P2WPKH) {
-			throw new error.SDKError(this.signUSDTTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
-		}
+		const { transport, appId, appPrivateKey } = signUSDTTxData
 
 		for (const input of signUSDTTxData.inputs) {
 			// eslint-disable-next-line no-await-in-loop

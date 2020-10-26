@@ -12,6 +12,9 @@ type Transport = transport.default;
 export {
 	getSigningActions,
 	getScriptSigningActions,
+	getScriptSigningPreActions,
+	getBTCArgument,
+	getUSDTArgument
 };
 
 function hash160(buf: Buffer): Buffer {
@@ -135,32 +138,10 @@ function getScriptSigningActions(
 	redeemScriptType: ScriptType,
 	appId: string,
 	appPrivateKey: string,
-	inputs: Array<Input>,
-	preparedData: PreparedData,
-	output: Output,
-	change: Change | undefined
+	preparedData: PreparedData
 ): {
-	preActions: Array<Function>,
 	actions: Array<Function>
 } {
-	const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-	const argument = "00" + getArgument(redeemScriptType, inputs, output, change);// keylength zero
-
-	const preActions = [];
-	const sendScript = async () => {
-		await apdu.tx.sendScript(transport, script);
-	}
-	preActions.push(sendScript);
-
-	const sendArgument = async () => {
-		await apdu.tx.executeScript(
-			transport,
-			appId,
-			appPrivateKey,
-			argument
-		);
-	}
-	preActions.push(sendArgument);
 
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
@@ -183,12 +164,45 @@ function getScriptSigningActions(
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
+			console.log("utxoArgument: " + utxoArgument)
 			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (redeemScriptType === ScriptType.P2PKH) ? "10" : "11");
 		});
-	return { preActions, actions };
+	return { actions };
 };
 
-function getArgument(
+function getScriptSigningPreActions(
+	transport: Transport,
+	appId: string,
+	appPrivateKey: string,
+	script: string,
+	inputArgument: string
+): {
+	preActions: Array<Function>
+} {
+	// const argument = "00" + getBTCArgument(redeemScriptType, inputs, output, change);// keylength zero
+	const argument = "00" + inputArgument;// keylength zero
+	console.log(argument)
+
+	const preActions = [];
+	const sendScript = async () => {
+		await apdu.tx.sendScript(transport, script);
+	}
+	preActions.push(sendScript);
+
+	const sendArgument = async () => {
+		await apdu.tx.executeScript(
+			transport,
+			appId,
+			appPrivateKey,
+			argument
+		);
+	}
+	preActions.push(sendArgument);
+
+	return { preActions };
+};
+
+function getBTCArgument(
 	scriptType: ScriptType,
 	inputs: Array<Input>,
 	output: Output,
@@ -199,7 +213,7 @@ function getArgument(
 		outHash: outputHash
 	} = addressToOutScript(output.address);
 	if (!outputHash) {
-		throw new error.SDKError(getArgument.name, `OutputHash Undefined`);
+		throw new error.SDKError(getBTCArgument.name, `OutputHash Undefined`);
 	}
 	let outputScriptType;
 	let outputHashBuf;
@@ -210,7 +224,7 @@ function getArgument(
 		outputScriptType = toVarUintBuffer(outputType);
 		outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
 	} else {
-		throw new error.SDKError(getArgument.name, `Unsupport ScriptType '${outputType}'`);
+		throw new error.SDKError(getBTCArgument.name, `Unsupport ScriptType '${outputType}'`);
 	}
 	const outputAmount = toUintBuffer(output.value, 8);
 	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
@@ -219,7 +233,7 @@ function getArgument(
 	let changeAmount;
 	let changePath;
 	if (change) {
-		if (!change.pubkeyBuf) throw new error.SDKError(getArgument.name, 'Public Key not exists !!');
+		if (!change.pubkeyBuf) throw new error.SDKError(getBTCArgument.name, 'Public Key not exists !!');
 		haveChange = toVarUintBuffer(1);
 		changeScriptType = toUintBuffer(scriptType, 1);
 		changeAmount = toUintBuffer(change.value, 8);
@@ -253,5 +267,79 @@ function getArgument(
 		changePath,
 		hashPrevouts,
 		hashSequence,
+	]).toString('hex');
+};
+
+
+
+async function getUSDTArgument(
+	scriptType: ScriptType,
+	inputs: Array<Input>,
+	output: Output,
+	value: string,
+	change?: Change,
+) {
+	const {
+		scriptType: outputType,
+		outHash: outputHash
+	} = addressToOutScript(output.address);
+	if (!outputHash) {
+		throw new error.SDKError(getBTCArgument.name, `OutputHash Undefined`);
+	}
+	let outputScriptType;
+	let outputHashBuf;
+	if (outputType == ScriptType.P2PKH || outputType == ScriptType.P2SH_P2WPKH || outputType == ScriptType.P2WPKH) {
+		outputScriptType = toVarUintBuffer(outputType);
+		outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+	} else if (outputType == ScriptType.P2WSH) {
+		outputScriptType = toVarUintBuffer(outputType);
+		outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
+	} else {
+		throw new error.SDKError(getBTCArgument.name, `Unsupport ScriptType '${outputType}'`);
+	}
+	const outputAmount = toUintBuffer(output.value, 8);
+	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
+	let haveChange;
+	let changeScriptType;
+	let changeAmount;
+	let changePath;
+	if (change) {
+		if (!change.pubkeyBuf) throw new error.SDKError(getBTCArgument.name, 'Public Key not exists !!');
+		haveChange = toVarUintBuffer(1);
+		changeScriptType = toUintBuffer(scriptType, 1);
+		changeAmount = toUintBuffer(change.value, 8);
+		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
+		changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdxHex, 'hex');
+	} else {
+		haveChange = Buffer.from('00', 'hex');
+		changeScriptType = Buffer.from('00', 'hex');
+		changeAmount = toUintBuffer(0, 8)//)Buffer.from('0000000000000000', 'hex');
+		changePath = toUintBuffer(0, 21)//Buffer.from('000000000000000000000000000000000000000000', 'hex');
+	}
+	const prevouts = inputs.map(input => {
+		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
+		toReverseUintBuffer(input.preIndex, 4)])
+	})
+	const hashPrevouts = doubleSha256(Buffer.concat(prevouts));
+	const sequences = inputs.map(input => {
+		return Buffer.concat([
+			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex')
+		])
+	})
+	const hashSequence = doubleSha256(Buffer.concat(sequences));
+
+	const usdtAmount = toUintBuffer(value, 8);
+
+	return Buffer.concat([
+		outputScriptType,
+		outputAmount,
+		outputHashBuf,
+		haveChange,
+		changeScriptType,
+		changeAmount,
+		changePath,
+		hashPrevouts,
+		hashSequence,
+		usdtAmount
 	]).toString('hex');
 };

@@ -213,7 +213,9 @@ function createUnsignedTransactions(
 		outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
 	}
 
-	const outputsCount = toVarUintBuffer((change) ? 2 : 1);
+	let outputsCountNum = omniType ? 2 : 1;
+	outputsCountNum = change ? outputsCountNum + 1 : outputsCountNum;
+	const outputsCount = toVarUintBuffer(outputsCountNum)
 	const outputsBuf = Buffer.concat(outputArray);
 
 	const hashPrevouts = doubleSha256(Buffer.concat(preparedInputs.map((input) => input.preOutPointBuf)));
