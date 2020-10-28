@@ -246,20 +246,6 @@ export const getArguments = (
 ) => {
   const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
   const SEPath = `15328000002C800002${coinType}8000000000000000${addressIdxHex}`;
-  // let script;
-  // let argument;
-  // if (transactionType == TransactionType.TRANSFER) {
-  //   script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-  //   argument = getTransferArgument(signObj as Transfer);
-  // } else if (transactionType == TransactionType.TOKEN) {
-  //   script = scripts.BEP2Token.script + scripts.BEP2Token.signature;
-  //   argument = getBUSDArgument(signObj as Transfer);
-  // } else if (transactionType == TransactionType.PLACE_ORDER) {
-  //   script = scripts.PlaceOrder.script + scripts.PlaceOrder.signature;
-  //   argument = getPlaceOrderArgument(signObj as PlaceOrder);
-  // } else {//transactionType == TransactionType.CANCEL_ORDER
-  //   script = scripts.CancelOrder.script + scripts.CancelOrder.signature;
-  //   argument = getCancelOrderArgument(signObj as CancelOrder);
-  // }
+
   return SEPath + argument;
 }
