@@ -1,5 +1,5 @@
 import { transport } from '@coolwallet/core';
-import { device as coreDevice  } from '@coolwallet/core';
+import { device as coreDevice } from '@coolwallet/core';
 import { convertToNumberArray } from './util';
 
 let server;
@@ -22,7 +22,7 @@ export default class WebBleTransport extends transport.default {
       readCharacteristic
     )
   }
-  
+
   static async isSupported() {
     const isSupported = await navigator.bluetooth.getAvailability();
     return isSupported;
@@ -41,7 +41,7 @@ export default class WebBleTransport extends transport.default {
   static async connect(device) {
     device.addEventListener('gattserverdisconnected', this.onDeviceDisconnect);
     server = await device.gatt.connect();
-    console.debug(`${device.name} connected`);
+    console.info(`${device.name} connected`);
     const services = await server.getPrimaryServices();
     const service = services[0];
     const uuids = coreDevice.getInfosForServiceUuid(service.uuid);
