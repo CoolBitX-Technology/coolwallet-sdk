@@ -1,8 +1,9 @@
 import { coin as COIN, transport } from '@coolwallet/core';
 import { walletConnectSignature, transferSignature } from './sign';
-import { publicKeyToAddress } from './util';
-import { signType } from './types'
-import  * as Types from './types'
+import { publicKeyToAddress, getTransferArgument, getCancelOrderArgument, getPlaceOrderArgument, getTokenArgument } from './util';
+import { signType, signTokenType, signCancelOrderType, signPlaceOrderType } from './types'
+import * as scripts from "./scripts";
+import * as Types from './types'
 
 type Transport = transport.default;
 
@@ -21,6 +22,8 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return publicKeyToAddress(publicKey);
   }
+
+
   /**
    * Sign Binance tansfer transaction.
    */
@@ -28,48 +31,69 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     signData: signType
   ): Promise<string> {
     const readType = 'CA';
+    const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+    const argument = getTransferArgument(signData.signObj);
     return transferSignature(
       signData,
-      Types.TransactionType.TRANSFER,
-      readType,
+      script,
+      argument
     );
   }
 
   /**
-   * Sign PlaceOrder Transaction
-   */
-  async signPlaceOrder(
-    signData: signType
-  ): Promise<{
-    signature: string,
-    publicKey: string
-  }> {
-    const readType = 'CB';
-    const signature = await walletConnectSignature(
+ * Sign Binance token transaction.
+ */
+  async signTokenTransaction(
+    signData: signTokenType
+  ): Promise<string> {
+    const script = scripts.BEP2Token.script + scripts.BEP2Token.signature;
+    const argument = getTokenArgument(signData.signObj);
+    return transferSignature(
       signData,
-      Types.TransactionType.PLACE_ORDER,
-      readType
+      script,
+      argument
     );
-    const publicKey = await this.getFullPubKey(signData.signPublicKey.toString('hex'));
-    return { signature, publicKey }
   }
 
-  /**
-   * Sign CancelOrder Transaction
-   */
-  async signCancelOrder(
-    signData: signType
-  ): Promise<{
-    signature: string,
-    publicKey: string
-  }> {
-    const readType = 'CC';
-    const signature = await walletConnectSignature(
-      signData,
-      Types.TransactionType.PLACE_ORDER,
-      readType
-    );
-    const publicKey = await this.getFullPubKey(signData.signPublicKey.toString('hex'));
-    return { signature, publicKey }
-  }
+  // /**
+  //  * Sign PlaceOrder Transaction
+  //  */
+  // async signPlaceOrder(
+  //   signData: signPlaceOrderType
+  // ): Promise<{
+  //   signature: string,
+  //   publicKey: string
+  // }> {
+  //   const readType = 'CB';
+  //   const script = scripts.PlaceOrder.script + scripts.PlaceOrder.signature;
+  //   const argument = getPlaceOrderArgument(signData.signObj);
+  //   const signature = await walletConnectSignature(
+  //     signData,
+  //     script,
+  //     argument
+  //   );
+  //   const publicKey = await this.getFullPubKey(signData.signPublicKey.toString('hex'));
+  //   return { signature, publicKey }
+  // }
+
+  // /**
+  //  * Sign CancelOrder Transaction
+  //  */
+  // async signCancelOrder(
+  //   signData: signCancelOrderType
+  // ): Promise<{
+  //   signature: string,
+  //   publicKey: string
+  // }> {
+  //   const readType = 'CC';
+  //   const script = scripts.CancelOrder.script + scripts.CancelOrder.signature;
+  //   const argument = getCancelOrderArgument(signData.signObj);
+  //   const signature = await walletConnectSignature(
+  //     signData,
+  //     script,
+  //     argument
+  //   );
+  //   const publicKey = await this.getFullPubKey(signData.signPublicKey.toString('hex'));
+  //   return { signature, publicKey }
+  // }
 }

@@ -102,7 +102,7 @@ export const composeSignedTransacton = (
   const accCode = decodeAddress(fromAddress)
   const toAccCode = decodeAddress(toAddress)
 
-  checkNumber(amount, "amount")
+  // checkNumber(amount, "amount")
 
   const coin = {
     denom: "BNB",
@@ -148,7 +148,7 @@ export const composeSignedTransacton = (
   return bytes;
 }
 
-const getTransferArgument = (signObj: Transfer) => {
+export const getTransferArgument = (signObj: Transfer) => {
   const from = Buffer.from(signObj.msgs[0].inputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const to = Buffer.from(signObj.msgs[0].outputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
@@ -159,7 +159,7 @@ const getTransferArgument = (signObj: Transfer) => {
   return from + to + value + accountNumber + sequence + source + memo;
 };
 
-const getPlaceOrderArgument = (signObj: PlaceOrder) => {
+export const getPlaceOrderArgument = (signObj: PlaceOrder) => {
   const id = signObj.msgs[0].id;
   const sideNum = signObj.msgs[0].side;
   if (sideNum != 1 && sideNum != 2) { //1:BUY 2:SELL
@@ -197,7 +197,7 @@ const getPlaceOrderArgument = (signObj: PlaceOrder) => {
     source;
 };
 
-const getCancelOrderArgument = (signObj: CancelOrder) => {
+export const getCancelOrderArgument = (signObj: CancelOrder) => {
   const refid = signObj.msgs[0].refid;
   const symbol = signObj.msgs[0].symbol;
 
@@ -219,27 +219,39 @@ const getCancelOrderArgument = (signObj: CancelOrder) => {
     source;
 };
 
+export const getTokenArgument = (signObj: Transfer) => {
+  const from = Buffer.from(signObj.msgs[0].inputs[0].address, 'ascii').toString('hex').padStart(128, '0');
+  const to = Buffer.from(signObj.msgs[0].outputs[0].address, 'ascii').toString('hex').padStart(128, '0');
+  const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
+  const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
+  const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
+  const source = parseInt(signObj.source).toString(16).padStart(16, '0');
+  const tokenName = '';
+  const tokenCheck = '';
+  const memo = Buffer.from(signObj.memo, 'ascii').toString('hex');
+  return from + to + value + accountNumber + sequence + source + tokenName + tokenCheck + memo;
+};
+
 export const getScriptAndArguments = (
-  transactionType: TransactionType,
-  addressIndex: number,
-  signObj: Transfer | PlaceOrder | CancelOrder
+  argument: string,
+  addressIndex: number
 ) => {
   const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
   const SEPath = `15328000002C800002${coinType}8000000000000000${addressIdxHex}`;
-  let script;
-  let argument;
-  if (transactionType == TransactionType.TRANSFER) {
-    script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-    argument = getTransferArgument(signObj as Transfer);
-  } else if (transactionType == TransactionType.PLACE_ORDER) {
-    script = scripts.PlaceOrder.script + scripts.PlaceOrder.signature;
-    argument = getPlaceOrderArgument(signObj as PlaceOrder);
-  } else {//transactionType == TransactionType.CANCEL_ORDER
-    script = scripts.CancelOrder.script + scripts.CancelOrder.signature;
-    argument = getCancelOrderArgument(signObj as CancelOrder);
-  }
-  return {
-    script,
-    argument: SEPath + argument,
-  };
+  // let script;
+  // let argument;
+  // if (transactionType == TransactionType.TRANSFER) {
+  //   script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+  //   argument = getTransferArgument(signObj as Transfer);
+  // } else if (transactionType == TransactionType.TOKEN) {
+  //   script = scripts.BEP2Token.script + scripts.BEP2Token.signature;
+  //   argument = getBUSDArgument(signObj as Transfer);
+  // } else if (transactionType == TransactionType.PLACE_ORDER) {
+  //   script = scripts.PlaceOrder.script + scripts.PlaceOrder.signature;
+  //   argument = getPlaceOrderArgument(signObj as PlaceOrder);
+  // } else {//transactionType == TransactionType.CANCEL_ORDER
+  //   script = scripts.CancelOrder.script + scripts.CancelOrder.signature;
+  //   argument = getCancelOrderArgument(signObj as CancelOrder);
+  // }
+  return SEPath + argument;
 }

@@ -6,35 +6,35 @@ type Transport = transport.default;
 
 export async function transferSignature(
   signData: signType,
-  transactionType: TransactionType,
-  readType: string,
+  script: string,
+  inputArgument: string
 ): Promise<string> {
-  if (transactionType !== TransactionType.TRANSFER) {
-    throw new error.SDKError(transferSignature.name, `Unsupport transactionType: '${transactionType}'`);
-  }
+  // if (transactionType !== TransactionType.TRANSFER) {
+  //   throw new error.SDKError(transferSignature.name, `Unsupport transactionType: '${transactionType}'`);
+  // }
 
   const canonicalSignature = await sign(
     signData,
-    transactionType,
-    readType
+    script,
+    inputArgument
   );
   return bnbUtil.composeSignedTransacton(signData.signObj as Transfer, canonicalSignature, signData.signPublicKey)
 }
 
 export async function walletConnectSignature(
   signData: signType,
-  transactionType: TransactionType,
-  readType: string,
+  script: string,
+  inputArgument: string
 ): Promise<string> {
-  if (transactionType !== TransactionType.PLACE_ORDER
-    && transactionType !== TransactionType.CANCEL_ORDER) {
-    throw new error.SDKError(walletConnectSignature.name, `Unsupport transactionType: '${transactionType}'`);
-  }
+  // if (transactionType !== TransactionType.PLACE_ORDER
+  //   && transactionType !== TransactionType.CANCEL_ORDER) {
+  //   throw new error.SDKError(walletConnectSignature.name, `Unsupport transactionType: '${transactionType}'`);
+  // }
 
   const canonicalSignature = await sign(
     signData,
-    transactionType,
-    readType
+    script,
+    inputArgument
   );
 
   return canonicalSignature.r + canonicalSignature.s;
@@ -45,15 +45,15 @@ export async function walletConnectSignature(
  */
 async function sign(
   signData: signType,
-  transactionType: TransactionType,
-  readType: string,
+  script: string,
+  inputArgument: string
 ): Promise<{ r: string; s: string; }> {
 
   const transport = signData.transport;
 
   const preActions = [];
   let action;
-  const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, signData.addressIndex, signData.signObj);
+  const argument = bnbUtil.getScriptAndArguments(inputArgument, signData.addressIndex);
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
   }
