@@ -87,6 +87,7 @@ function serializePubKey(unencodedPubKey: Buffer): Buffer {
 
 export const composeSignedTransacton = (
   signObj: Transfer,
+  denom: string,
   canonicalSignature: {
     r: string;
     s: string;
@@ -105,7 +106,7 @@ export const composeSignedTransacton = (
   // checkNumber(amount, "amount")
 
   const coin = {
-    denom: "BNB",
+    denom: denom,
     amount: amount,
   };
 
@@ -219,20 +220,27 @@ export const getCancelOrderArgument = (signObj: CancelOrder) => {
     source;
 };
 
-export const getTokenArgument = (signObj: Transfer) => {
+export const getTokenArgument = (signObj: Transfer, tokenSignature: string) => {
   const from = Buffer.from(signObj.msgs[0].inputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const to = Buffer.from(signObj.msgs[0].outputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
   const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
   const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
   const source = parseInt(signObj.source).toString(16).padStart(16, '0');
-  const tokenName = '';
-  const tokenCheck = '';
+  const tokenName = Buffer.from('CAS', 'ascii').toString('hex').padStart(40, '0');
+  const tokenCheck = Buffer.from('167', 'ascii').toString('hex').padStart(40, '0');
+  const signature = tokenSignature.slice(10).padStart(144, "0").toLowerCase();
   const memo = Buffer.from(signObj.memo, 'ascii').toString('hex');
-  return from + to + value + accountNumber + sequence + source + tokenName + tokenCheck + memo;
+  const argument = from + to + value + accountNumber + sequence + source + tokenName + tokenCheck + signature + memo
+  
+  console.log("tokenName: " + tokenName)
+  console.log("tokenCheck: " + tokenCheck)
+  console.log("signature: " + signature)
+  console.log("arg: " + argument)
+  return argument;
 };
 
-export const getScriptAndArguments = (
+export const getArguments = (
   argument: string,
   addressIndex: number
 ) => {
