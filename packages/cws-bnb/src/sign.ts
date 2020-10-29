@@ -6,35 +6,51 @@ type Transport = transport.default;
 
 export async function transferSignature(
   signData: signType,
-  transactionType: TransactionType,
-  readType: string,
+  denom: string,
+  script: string,
+  inputArgument: string,
 ): Promise<string> {
-  if (transactionType !== TransactionType.TRANSFER) {
-    throw new error.SDKError(transferSignature.name, `Unsupport transactionType: '${transactionType}'`);
-  }
+  // if (transactionType !== TransactionType.TRANSFER) {
+  //   throw new error.SDKError(transferSignature.name, `Unsupport transactionType: '${transactionType}'`);
+  // }
 
   const canonicalSignature = await sign(
-    signData,
-    transactionType,
-    readType
+    signData.transport,
+    signData.appId,
+    signData.appPrivateKey,
+    signData.addressIndex,
+    script,
+    inputArgument,
+    signData.confirmCB,
+    signData.authorizedCB,
   );
-  return bnbUtil.composeSignedTransacton(signData.signObj as Transfer, canonicalSignature, signData.signPublicKey)
+  return bnbUtil.composeSignedTransacton(signData.signObj as Transfer, denom, canonicalSignature, signData.signPublicKey)
 }
 
 export async function walletConnectSignature(
-  signData: signType,
-  transactionType: TransactionType,
-  readType: string,
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  addressIndex: number,
+  script: string,
+  inputArgument: string,
+  confirmCB?: Function,
+  authorizedCB?: Function
 ): Promise<string> {
-  if (transactionType !== TransactionType.PLACE_ORDER
-    && transactionType !== TransactionType.CANCEL_ORDER) {
-    throw new error.SDKError(walletConnectSignature.name, `Unsupport transactionType: '${transactionType}'`);
-  }
+  // if (transactionType !== TransactionType.PLACE_ORDER
+  //   && transactionType !== TransactionType.CANCEL_ORDER) {
+  //   throw new error.SDKError(walletConnectSignature.name, `Unsupport transactionType: '${transactionType}'`);
+  // }
 
   const canonicalSignature = await sign(
-    signData,
-    transactionType,
-    readType
+    transport,
+    appId,
+    appPrivateKey,
+    addressIndex,
+    script,
+    inputArgument,
+    confirmCB,
+    authorizedCB
   );
 
   return canonicalSignature.r + canonicalSignature.s;
@@ -44,16 +60,22 @@ export async function walletConnectSignature(
  * Sign Binance Tranaction
  */
 async function sign(
-  signData: signType,
-  transactionType: TransactionType,
-  readType: string,
+  // signData: signType,
+  transport: Transport,
+  appId: string, 
+  appPrivateKey: string,
+  addressIndex: number,
+  script: string,
+  inputArgument: string,
+  confirmCB?: Function,
+  authorizedCB?: Function
 ): Promise<{ r: string; s: string; }> {
 
-  const transport = signData.transport;
+  // const transport = signData.transport;
 
   const preActions = [];
   let action;
-  const { script, argument } = bnbUtil.getScriptAndArguments(transactionType, signData.addressIndex, signData.signObj);
+  const argument = bnbUtil.getArguments(inputArgument, addressIndex);
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
   }
@@ -62,8 +84,8 @@ async function sign(
   action = async () => {
     return apdu.tx.executeScript(
       transport,
-      signData.appId,
-      signData.appPrivateKey,
+      appId,
+      appPrivateKey,
       argument
     );
   }
@@ -73,8 +95,8 @@ async function sign(
     preActions,
     action,
     false,
-    signData.confirmCB,
-    signData.authorizedCB,
+    confirmCB,
+    authorizedCB,
     true
   ) as { r: string; s: string; };
 }
