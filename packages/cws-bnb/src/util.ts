@@ -103,8 +103,6 @@ export const composeSignedTransacton = (
   const accCode = decodeAddress(fromAddress)
   const toAccCode = decodeAddress(toAddress)
 
-  checkNumber(amount, "amount")
-
   const coin = {
     denom: denom,
     amount: amount,
