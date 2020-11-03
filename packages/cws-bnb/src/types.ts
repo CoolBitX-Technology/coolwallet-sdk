@@ -15,6 +15,40 @@ export type signType = {
   authorizedCB: Function | undefined
 }
 
+export type signPlaceOrderType = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  signObj: PlaceOrder,
+  signPublicKey: Buffer,
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined
+}
+
+export type signCancelOrderType = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  signObj: CancelOrder,
+  signPublicKey: Buffer,
+  addressIndex: number,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined
+}
+
+export type signTokenType = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  signObj: Transfer,
+  signPublicKey: Buffer,
+  addressIndex: number,
+  symbol: string,
+  confirmCB: Function | undefined,
+  authorizedCB: Function | undefined
+}
+
 type coin = {
   denom: string;
   amount: number;
@@ -30,6 +64,7 @@ export enum TransactionType {
   TRANSFER = "TRANSFER",
   PLACE_ORDER = "PLACE_ORDER",
   CANCEL_ORDER = "CANCEL_ORDER",
+  TOKEN = "TOKEN",
 };
 
 export type Transfer = {
