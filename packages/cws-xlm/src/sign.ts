@@ -1,8 +1,7 @@
 import { transport, tx, apdu, util } from '@coolwallet/core';
 import * as xlmUtil from './utils';
-import { coinType, path, COIN_SPECIES, signTxType, Transport } from './types';
+import { coinType, path, COIN_SPECIES, signTxType, Transport, PROTOCOL } from './types';
 
-type protocol = import('./types').protocol
 
 const accountIndexToKeyId = (coinType: string, accountIndex: number) => {
   const accountIndexHex = accountIndex.toString(16).padStart(2, '0');
@@ -14,12 +13,13 @@ export default async function signTransaction(
   signTxData: signTxType,
   coinType: string,
   transfer: { script: string, signature: string },
-  protocol: protocol,
+  protocol: PROTOCOL,
 ): Promise<{ r: string; s: string; } | Buffer> {
+  
+  const accountIndex = 0;
+  const { transaction,transport, appPrivateKey, appId, signatureBase, confirmCB, authorizedCB } = signTxData
 
-  const { transaction,transport, appPrivateKey, appId, accountIndex, signatureBase, confirmCB, authorizedCB } = signTxData
-
-  const readType = protocol === 'BIP44' ? coinType : `${coinType}10`;
+  const readType = protocol === PROTOCOL.BIP44 ? coinType : `${coinType}10`;
   const preActions = [];
   const useScript = await util.checkSupportScripts(transport);
 
