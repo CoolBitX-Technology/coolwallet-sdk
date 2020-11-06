@@ -4,7 +4,7 @@ import signTransaction from './sign';
 import { coinType, path, COIN_SPECIES, signTxType, PROTOCOL } from './types';
 import * as scripts from "./scripts";
 
-export { COIN_SPECIES };
+export { COIN_SPECIES, PROTOCOL };
 
 type Transport = transport.default;
 const accountIndexErrorMsg = 'Only support account index = 0 for now.';
