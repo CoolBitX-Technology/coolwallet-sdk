@@ -25,7 +25,8 @@ const cryptogramUrl = `https://ota.cbx.io/api/cryptogram`;
  * @param transport 
  * @param appletCommand 
  */
-export const selectApplet = async (transport: Transport, appletCommand: string = 'C1C2C3C4C5') => {
+export const selectApplet = async (transport: Transport, appletCommand: string) => {
+
   const { statusCode } = await executeCommand(transport, commands.SELECT_APPLET, target.SE, appletCommand);
   if (statusCode === CODE._9000) {
     return { status: true, statusCode };
@@ -53,7 +54,8 @@ export const checkUpdate = async (transport: Transport) => {
  */
 export const updateSE = async (transport: Transport, cardId: string, appId: string, appPrivateKey: string, progressCallback: Function, callAPI: Function, updateMCU: boolean = false) => {
   const selectCardManager = 'A000000151000000';
-  const selectBackUpSeedApplet = 'A1A2A3A4A5A6';
+  // BackupApplet
+  const selectBackUpSeedApplet = Buffer.from('BackupApplet', 'ascii').toString('hex');
   let cardSEVersion;
   try {
     cardSEVersion = await general.getSEVersion(transport);
@@ -76,7 +78,8 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     const hasBackupScriptSEVersion = 76;
     let isAppletExist;
     // try {
-    isAppletExist = await selectApplet(transport);
+    const CoolWalletPROCommand = Buffer.from('CoolWalletPRO', 'ascii').toString('hex')
+    isAppletExist = await selectApplet(transport, CoolWalletPROCommand);
     // } catch (e) {
     //   console.error(e);
     //   isAppletExist = false;
@@ -123,14 +126,14 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     // Install backupSeed script
     progressCallback(progressNum[progressIndex++]);
 
-    if (cardSEVersion < hasBackupScriptSEVersion) {
-      console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
-      if (statusCode.toUpperCase() === CODE._6A82) {
-        await insertScript(transport, script.newLoadScript);
-        await insertScript(transport, script.newInstallScript);
-        console.log(`Install loadscript done`);
-      }
-    }
+    // if (cardSEVersion < hasBackupScriptSEVersion) {
+    //   console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
+    //   if (statusCode.toUpperCase() === CODE._6A82) {
+    //     await insertScript(transport, script.newLoadScript);
+    //     await insertScript(transport, script.newInstallScript);
+    //     console.log(`Install loadscript done`);
+    //   }
+    // }
 
     progressCallback(progressNum[progressIndex++]);
     await insertDeleteScript(transport, script.deleteScript);
@@ -147,7 +150,7 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     await display.hideUpdate(transport); // Hide update from the card
 
     await selectApplet(transport, selectCardManager);
-    isAppletExist = await selectApplet(transport);
+    isAppletExist = await selectApplet(transport, CoolWalletPROCommand);
     console.log(`isAppletExist: ${isAppletExist}`);
 
     if (isAppletExist) {
@@ -302,6 +305,8 @@ export const getAPIOption = (cardId: string, challengeData: string = '') => {
     data = { cryptogram: challengeData, cwid: cardId };
   }
 
+  console.log(data)
+
   let payload = jwt.sign(data, secret, { expiresIn: 60 * 60 * 24 });
 
   console.log(`payload: ${payload}`);
@@ -317,7 +322,7 @@ export const getAPIOption = (cardId: string, challengeData: string = '') => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': 'no-cors'  // ??
+      // 'Access-Control-Allow-Origin': 'no-cors'  // ??
     },
   };
 
