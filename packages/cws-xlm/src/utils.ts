@@ -1,5 +1,6 @@
 /* eslint-disable no-bitwise */
 import crc from 'crc';
+import BigNumber from 'bignumber.js';
 import * as scripts from "./scripts";
 import * as Stellar from 'stellar-sdk';
 import { path } from './types';
@@ -69,7 +70,7 @@ const getTransferArgument = (transaction: any) => {
     transaction.to + 
     parseInt(transaction.amount).toString(16).padStart(16, "0") +
     parseInt(transaction.fee).toString(16).padStart(16, "0") +
-    BigInt(transaction.sequence).toString(16).padStart(16, "0") + 
+    new BigNumber(transaction.sequence).toString(16).padStart(16, "0") + 
     parseInt(minTime).toString(16).padStart(16, "0") +
     parseInt(maxTime).toString(16).padStart(16, "0") +
     memoType.padStart(2, "0") + //memoType 
