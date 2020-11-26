@@ -42,9 +42,6 @@ const getTransferArgument = (transaction: any) => {
   const isCreate = transaction.isCreate ? "00" : "01";
   let memoType;
   switch (transaction.memoType) {
-    case Stellar.MemoNone:
-      memoType = "00"
-      break;
     case Stellar.MemoHash:
       memoType = "03"
       break;
@@ -57,6 +54,7 @@ const getTransferArgument = (transaction: any) => {
     case Stellar.MemoID:
       memoType = "02"
       break;
+    case Stellar.MemoNone:
     default:
       memoType = "00"
       break; 
@@ -74,9 +72,12 @@ const getTransferArgument = (transaction: any) => {
     parseInt(minTime).toString(16).padStart(16, "0") +
     parseInt(maxTime).toString(16).padStart(16, "0") +
     memoType.padStart(2, "0") + //memoType 
-    transaction.memo.padStart(64, "0") + //memo
+    // transaction.memo.padEnd(64, "0") +
+    "0000000f" + "616161616161616161616161616161".padStart(56, "0")+
     isCreate.padStart(2, "0");  //isCreate 
-
+  console.log("input memoType:" + transaction.memoType)
+  console.log("memoType:" + memoType)
+  console.log("argument:" + argument)
   return argument;
 };
 
