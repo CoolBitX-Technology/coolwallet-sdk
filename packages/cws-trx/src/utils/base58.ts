@@ -1,6 +1,8 @@
 var ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-var ALPHABET_MAP = {};
+type data = { [key: string ]: number}
+var ALPHABET_MAP: data = {};
 for (var i = 0; i < ALPHABET.length; i++) {
+  const a = ALPHABET.charAt(i)
   ALPHABET_MAP[ALPHABET.charAt(i)] = i;
 }
 var BASE = 58;
@@ -10,7 +12,7 @@ var BASE = 58;
  * @param buffer
  * @returns {string}
  */
-export function encode58(buffer: Buffer) {
+export function encode58(buffer: any) {
   if (buffer.length === 0) return "";
 
   var i,

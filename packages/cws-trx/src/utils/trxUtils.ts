@@ -163,17 +163,28 @@ function pubKeyToAddress(compressedPubkey: string): string {
   let addressHex = hash.substring(26);
   addressHex = '41' + addressHex;
   console.log("addressHex: " + addressHex)
-  const addressBuffer = Buffer.from(addressHex)
+  // const addressBuffer = Buffer.from(addressHex)
   const addressByteArray = hexStr2byteArray(addressHex)
   console.log(addressByteArray)
 
-  // let msgHex = byteArray2hexStr(addressByteArray);
-  // const addressHash = sha256(sha256(addressHex)).slice(0, 4);
+  let msgHex = byteArray2hexStr(addressByteArray);
+  const addressHash = sha256(sha256(addressByteArray)).slice(0, 4);
+  console.log(sha256(sha256(addressByteArray)))
   // const address = bs58check.encode(Buffer.concat([addressBuffer, addressHash]));
-  // console.log(addressBuffer)
-  const address = bs58.encode58(addressBuffer)
+  console.log(addressHash)
+  const address = encode58(addressByteArray.concat(addressHash))
   return address
 }
-function sha256(data: Buffer): Buffer {
-  return crypto.createHash("sha256").update(data).digest();
+// function sha256(data: Buffer): Buffer {
+//   return crypto.createHash("sha256").update(data).digest();
+// }
+
+export function sha256(dataByte: any): any {
+
+  let dataHex = byteArray2hexStr(dataByte);
+  console.log("dataHex: " + dataHex)
+  let hashHex = crypto.createHash("sha256").update(Buffer.from(dataHex, 'hex')).digest();
+  console.log('hashHex: ' + hashHex)
+  console.log('hashHex2: ' + hashHex.toString('hex'))
+  return hexStr2byteArray(hashHex.toString('hex'))
 }
