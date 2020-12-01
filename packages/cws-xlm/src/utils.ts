@@ -24,7 +24,7 @@ const versionBytes = {
  * @param {*} transaction
  */
 export const getScriptAndArguments = (transaction: object, transfer: { script: string, signature: string }) => {
-  
+
   const SEPath = `0D${path}`;
   let script;
   let argument;
@@ -41,6 +41,7 @@ const getTransferArgument = (transaction: any) => {
 
   const isCreate = transaction.isCreate ? "00" : "01";
   let memoType;
+  let memo = transaction.memo;
   switch (transaction.memoType) {
     case Stellar.MemoHash:
       memoType = "03"
@@ -50,6 +51,7 @@ const getTransferArgument = (transaction: any) => {
       break;
     case Stellar.MemoText:
       memoType = "01"
+      memo = Buffer.from(memo, 'ascii').toString('hex')
       break;
     case Stellar.MemoID:
       memoType = "02"
@@ -57,26 +59,24 @@ const getTransferArgument = (transaction: any) => {
     case Stellar.MemoNone:
     default:
       memoType = "00"
-      break; 
+      break;
   }
 
   const minTime = transaction.minTime ? transaction.minTime : "0"
   const maxTime = transaction.maxTime ? transaction.maxTime : "0"
-  
+
   const argument =
     transaction.from +
-    transaction.to + 
+    transaction.to +
     parseInt(transaction.amount).toString(16).padStart(16, "0") +
     parseInt(transaction.fee).toString(16).padStart(16, "0") +
-    new BigNumber(transaction.sequence).toString(16).padStart(16, "0") + 
+    new BigNumber(transaction.sequence).toString(16).padStart(16, "0") +
     parseInt(minTime).toString(16).padStart(16, "0") +
     parseInt(maxTime).toString(16).padStart(16, "0") +
     memoType.padStart(2, "0") + //memoType 
-    // transaction.memo.padEnd(64, "0") +
-    "0000000f" + "616161616161616161616161616161".padStart(56, "0")+
+    memo.padStart(64, "0") + //memo
     isCreate.padStart(2, "0");  //isCreate 
-  console.log("input memoType:" + transaction.memoType)
-  console.log("memoType:" + memoType)
+
   console.log("argument:" + argument)
   return argument;
 };
@@ -106,7 +106,7 @@ export function encodeEd25519PublicKey(data: Buffer) {
 
 export function pubKeyToAddress(publicKey: string): string {
   const pubKey = publicKey.length === 66 ? publicKey.slice(2) : publicKey;
-  
+
   const pubKeyBuf = Buffer.from(pubKey, 'hex');
   return encodeEd25519PublicKey(pubKeyBuf);
 }
