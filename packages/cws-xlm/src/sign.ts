@@ -29,7 +29,7 @@ export default async function signTransaction(
   if (useScript) {
  
 
-    const { script, argument } = xlmUtil.getScriptAndArguments(transaction, transfer);
+    const { script, argument } = xlmUtil.getScriptAndArguments(transaction, transfer, protocol);
 
     const sendScript = async () => {
       await apdu.tx.sendScript(transport, script);

@@ -3,7 +3,7 @@ import crc from 'crc';
 import BigNumber from 'bignumber.js';
 import * as scripts from "./scripts";
 import * as Stellar from 'stellar-sdk';
-import { path } from './types';
+import { path_bip44, path_slip0010, PROTOCOL } from './types';
 
 const BN = require('bn.js');
 const base32 = require('base32.js');
@@ -23,7 +23,9 @@ const versionBytes = {
  * @param {number} addressIndex
  * @param {*} transaction
  */
-export const getScriptAndArguments = (transaction: object, transfer: { script: string, signature: string }) => {
+export const getScriptAndArguments = (transaction: object, transfer: { script: string, signature: string }, protocol: PROTOCOL) => {
+
+  const path = protocol === PROTOCOL.BIP44 ? path_bip44 : path_slip0010;
 
   const SEPath = `0D${path}`;
   let script;
