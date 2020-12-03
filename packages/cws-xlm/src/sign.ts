@@ -1,6 +1,6 @@
 import { transport, tx, apdu, util } from '@coolwallet/core';
 import * as xlmUtil from './utils';
-import { coinType, path, COIN_SPECIES, signTxType, Transport, PROTOCOL } from './types';
+import { coinType, COIN_SPECIES, signTxType, Transport, PROTOCOL } from './types';
 
 
 const accountIndexToKeyId = (coinType: string, accountIndex: number) => {
