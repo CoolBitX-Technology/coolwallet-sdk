@@ -57,6 +57,7 @@ const getTransferArgument = (transaction: any) => {
       break;
     case Stellar.MemoID:
       memoType = "02"
+      memo = parseInt(memo).toString(16)
       break;
     case Stellar.MemoNone:
     default:
