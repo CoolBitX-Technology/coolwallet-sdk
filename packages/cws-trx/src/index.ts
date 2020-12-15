@@ -3,7 +3,7 @@ import { coin as COIN, transport, setting } from '@coolwallet/core';
 import * as trxSign from './sign';
 import * as scriptUtil from './utils/scriptUtils';
 import * as trxUtil from './utils/trxUtils';
-import * as scripts from "./config/scripts";
+import * as scripts from './config/scripts';
 
 type Transport = transport.default;
 export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
