@@ -95,6 +95,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     }
     const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
 
+
     const argument = await ethUtil.getArgument(signTxData.addressIndex, getArg);
     
     return ethSign.signTransaction(
