@@ -4,7 +4,7 @@ import signTransaction from './sign';
 import { coinType, path, COIN_SPECIES, signTxType, PROTOCOL } from './types';
 import * as scripts from "./scripts";
 
-export { COIN_SPECIES };
+export { COIN_SPECIES, PROTOCOL };
 
 type Transport = transport.default;
 const accountIndexErrorMsg = 'Only support account index = 0 for now.';
@@ -33,6 +33,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
       throw new ERROR.SDKError(this.getAddress.name, accountIndexErrorMsg);
     }
     const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, path, protocol);
+    console.log("pubkey: " + pubKey)
    
     if (!pubKey) {
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');

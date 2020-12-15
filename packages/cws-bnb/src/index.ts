@@ -77,7 +77,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     signData: signType, denom: string, tokenSignature: string = ''
   ): Promise<string> {
     const script = scripts.BEP2Token.script + scripts.BEP2Token.signature;
-    const argument = getTokenArgument(signData.signObj, tokenSignature);
+    const argument = getTokenArgument(signData.signObj, denom, tokenSignature);
     return transferSignature(
       signData,
       denom,

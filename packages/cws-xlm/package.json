@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/xlm",
-  "version": "0.1.0-beta.8",
+  "version": "0.1.0-beta.12",
   "description": "Coolwallet Stella sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -26,6 +26,7 @@
   "dependencies": {
     "@types/crc": "^3.4.0",
     "base32.js": "^0.1.0",
+    "bignumber.js": "^9.0.1",
     "bn.js": "^5.1.3",
     "crc": "^3.8.0",
     "stellar-sdk": "^5.0.4"
