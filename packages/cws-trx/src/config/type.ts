@@ -7,7 +7,7 @@ export type Output = {
 
 type Transport = transport.default;
 
-export type SignTx = {
+export type SignTransactionData = {
   transport: Transport,
   appPrivateKey: string,
   appId: string,
