@@ -1,8 +1,9 @@
 /* eslint-disable no-bitwise */
 import crc from 'crc';
+import BigNumber from 'bignumber.js';
 import * as scripts from "./scripts";
 import * as Stellar from 'stellar-sdk';
-import { path } from './types';
+import { path_bip44, path_slip0010, PROTOCOL } from './types';
 
 const BN = require('bn.js');
 const base32 = require('base32.js');
@@ -22,8 +23,10 @@ const versionBytes = {
  * @param {number} addressIndex
  * @param {*} transaction
  */
-export const getScriptAndArguments = (transaction: object, transfer: { script: string, signature: string }) => {
-  
+export const getScriptAndArguments = (transaction: object, transfer: { script: string, signature: string }, protocol: PROTOCOL) => {
+
+  const path = protocol === PROTOCOL.BIP44 ? path_bip44 : path_slip0010;
+
   const SEPath = `0D${path}`;
   let script;
   let argument;
@@ -40,10 +43,8 @@ const getTransferArgument = (transaction: any) => {
 
   const isCreate = transaction.isCreate ? "00" : "01";
   let memoType;
+  let memo = transaction.memo;
   switch (transaction.memoType) {
-    case Stellar.MemoNone:
-      memoType = "00"
-      break;
     case Stellar.MemoHash:
       memoType = "03"
       break;
@@ -52,30 +53,34 @@ const getTransferArgument = (transaction: any) => {
       break;
     case Stellar.MemoText:
       memoType = "01"
+      memo = Buffer.from(memo, 'ascii').toString('hex')
       break;
     case Stellar.MemoID:
       memoType = "02"
+      memo = parseInt(memo).toString(16)
       break;
+    case Stellar.MemoNone:
     default:
       memoType = "00"
-      break; 
+      break;
   }
 
   const minTime = transaction.minTime ? transaction.minTime : "0"
   const maxTime = transaction.maxTime ? transaction.maxTime : "0"
-  
+
   const argument =
     transaction.from +
-    transaction.to + 
+    transaction.to +
     parseInt(transaction.amount).toString(16).padStart(16, "0") +
     parseInt(transaction.fee).toString(16).padStart(16, "0") +
-    BigInt(transaction.sequence).toString(16).padStart(16, "0") + 
+    new BigNumber(transaction.sequence).toString(16).padStart(16, "0") +
     parseInt(minTime).toString(16).padStart(16, "0") +
     parseInt(maxTime).toString(16).padStart(16, "0") +
     memoType.padStart(2, "0") + //memoType 
-    transaction.memo.padStart(64, "0") + //memo
+    memo.padStart(64, "0") + //memo
     isCreate.padStart(2, "0");  //isCreate 
 
+  console.log("argument:" + argument)
   return argument;
 };
 
@@ -104,7 +109,7 @@ export function encodeEd25519PublicKey(data: Buffer) {
 
 export function pubKeyToAddress(publicKey: string): string {
   const pubKey = publicKey.length === 66 ? publicKey.slice(2) : publicKey;
-  
+
   const pubKeyBuf = Buffer.from(pubKey, 'hex');
   return encodeEd25519PublicKey(pubKeyBuf);
 }

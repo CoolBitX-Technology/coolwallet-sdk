@@ -53,6 +53,9 @@ export const register = async (transport: Transport, appPublicKey: string, passw
   } else {
     nameToUTF = nameToUTF.slice(0, maxLen);
   }
+  if (password.length % 2 == 1 && password.length > 8) {
+    password = '0' + password;
+  }
   const addedPassword = password.padStart(8, 'F');
 
   const hexNameToUTF = nameToUTF.toString('hex');
@@ -64,8 +67,13 @@ export const register = async (transport: Transport, appPublicKey: string, passw
     data = crypto.encryption.ECIESenc(config.KEY.SEPublicKey, data);
     P1 = '01';
   }
-  const { outputData: appId } = await executeCommand(transport, commands.REGISTER, target.SE, data, P1);
-  return appId;
+  const { statusCode, outputData: appId, msg } = await executeCommand(transport, commands.REGISTER, target.SE, data, P1);
+  if (statusCode === CODE._9000){
+    return appId;
+  } else {
+    throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg)
+  }
+  
 };
 
 /**

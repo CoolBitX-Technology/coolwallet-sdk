@@ -218,15 +218,15 @@ export const getCancelOrderArgument = (signObj: CancelOrder) => {
     source;
 };
 
-export const getTokenArgument = (signObj: Transfer, tokenSignature: string) => {
+export const getTokenArgument = (signObj: Transfer, denom: string, tokenSignature: string) => {
   const from = Buffer.from(signObj.msgs[0].inputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const to = Buffer.from(signObj.msgs[0].outputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
   const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
   const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
   const source = parseInt(signObj.source).toString(16).padStart(16, '0');
-  const tokenName = Buffer.from('CAS', 'ascii').toString('hex').padStart(40, '0');
-  const tokenCheck = Buffer.from('167', 'ascii').toString('hex').padStart(40, '0');
+  const tokenName = Buffer.from(denom.split("-")[0], 'ascii').toString('hex').padStart(40, '0');
+  const tokenCheck = Buffer.from(denom.split("-")[1], 'ascii').toString('hex').padStart(40, '0');
   const signature = tokenSignature.slice(10).padStart(144, "0").toLowerCase();
   const memo = Buffer.from(signObj.memo, 'ascii').toString('hex');
   const argument = from + to + value + accountNumber + sequence + source + tokenName + tokenCheck + signature + memo
