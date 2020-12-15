@@ -1,18 +1,11 @@
 import { apdu, transport, error, tx, util } from '@coolwallet/core';
-// import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
-import * as ethUtil from './utils/trxUtils';
+import * as trxUtil from './utils/trxUtils';
 import * as scripts from "./config/scripts";
-import { signTx } from './config/type'
 
-const Ajv = require('ajv');
-const ajv = new Ajv();
-const typedDataUtils = require('eth-sig-util').TypedDataUtils;
-const rlp = require('rlp');
 type Transport = transport.default;
 
-
 /**
- * sign ETH Transaction
+ * sign TRX Transaction
  * @param {Transport} transport
  * @param {string} appId
  * @param {String} appPrivateKey
@@ -26,7 +19,7 @@ type Transport = transport.default;
  * @return {Promise<string>}
  */
 export const signTransaction = async (
-  signTxData: signTx,
+  signTxData: any,
   script: string,
   argument: string,
   publicKey: string | undefined = undefined,
@@ -34,7 +27,7 @@ export const signTransaction = async (
 
   const { transport, transaction } = signTxData
 
-  const rawPayload = ethUtil.getRawHex(transaction);
+  const rawPayload = trxUtil.getRawHex(transaction);
 
   const preActions = [];
   let action;
@@ -48,7 +41,7 @@ export const signTransaction = async (
       transport,
       signTxData.appId,
       signTxData.appPrivateKey,
-      argument
+      trxUtil.getArgument(signTxData)
     );
   }
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
@@ -64,12 +57,12 @@ export const signTransaction = async (
   const { signedTx } = await apdu.tx.getSignedHex(transport);
 
   if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtil.genEthSigFromSESig(
+    const { v, r, s } = await trxUtil.genTrxSigFromSESig(
       canonicalSignature,
-      rlp.encode(rawPayload),
+      rawPayload,
       publicKey
     );
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    const serializedTx = trxUtil.composeSignedTransacton(signTxData, v, r, s);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');

@@ -1,15 +1,18 @@
-import { coinType, Transaction } from '../config/type'
 import { handleHex } from "./stringUtil";
 
-export {
-  getArgument, getTransferArgument
-};
+type Transaction = {
+  // [key: string]: any,
+  chainId: number,
+  nonce: string,
+  gasPrice: string,
+  gasLimit: string,
+  to: string,
+  value: string,
+  data: string,
+}
 
-const getArgument = async (addressIndex: number, getArg: CallableFunction) => {
-  const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
-  const SEPath = `15328000002C800000${coinType}8000000000000000${addressIdxHex}`;
-  const argument = await getArg();
-  return SEPath + argument
+export {
+  getTransferArgument
 };
 
 /**

@@ -5,9 +5,9 @@ export type Output = {
   value: number
 }
 
-export type Transport = transport.default;
+type Transport = transport.default;
 
-export type signTx = {
+export type SignTx = {
   transport: Transport,
   appPrivateKey: string,
   appId: string,
@@ -17,7 +17,6 @@ export type signTx = {
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined
 }
-
 
 export type Transaction = {
   // [key: string]: any,
@@ -32,45 +31,19 @@ export type Transaction = {
 }
 
 export type Option = {
-  transactionType: transactionType,
+  transactionType: TransactionType,
   info : {
     symbol: string,
     decimals: string
   }
 };
 
-export enum transactionType  {
-  TRANSFER = "TRANSFER",
-  ERC20 = "ERC20",
-  SMART_CONTRACT = "SMART_CONTRACT",
+export enum TransactionType {
+  TRANSFER_CONTRACT = 'TRANSFER_CONTRACT',
+  FREEZE_BALANCE_CONTRACT = 'FREEZE_BALANCE_CONTRACT',
+  UNFREEZE_BALANCE_CONTRACT = 'UNFREEZE_BALANCE_CONTRACT',
+  VOTE_WITNESS_CONTRACT = 'VOTE_WITNESS_CONTRACT',
+  WITHDRAW_BALANCE_CONTRACT = 'WITHDRAW_BALANCE_CONTRACT',
 }
 
-export const coinType = 'C3'
-
-export const EIP712Schema = {
-  type: 'object',
-  properties: {
-    types: {
-      type: 'object',
-      properties: {
-        EIP712Domain: { type: 'array' },
-      },
-      additionalProperties: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            type: { type: 'string' }
-          },
-          required: ['name', 'type']
-        }
-      },
-      required: ['EIP712Domain']
-    },
-    primaryType: { type: 'string' },
-    domain: { type: 'object' },
-    message: { type: 'object' }
-  },
-  required: ['types', 'primaryType', 'domain', 'message']
-}
+export const CoinType = 'C3';
