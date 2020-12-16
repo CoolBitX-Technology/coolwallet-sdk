@@ -15,18 +15,21 @@ import { SDKError } from '../error/errorHandle';
 
 var jwt = require('jsonwebtoken');
 
-const SE_UPDATE_VER = 101;
+const SE_UPDATE_VER = 300;
 
 const challengeUrl = `https://ota.cbx.io/api/challenge`;
 const cryptogramUrl = `https://ota.cbx.io/api/cryptogram`;
+const MAIN_AID = '436f6f6c57616c6c657450524f';
+const BACKUP_AID = '4261636b75704170706c6574';
+const CARDMANAGER_AID = 'A000000151000000';
+const SSD_AID = 'A000000151535041';
 
 /**
  * 
  * @param transport 
  * @param appletCommand 
  */
-export const selectApplet = async (transport: Transport, appletCommand: string) => {
-
+export const selectApplet = async (transport: Transport, appletCommand?: string = MAIN_AID) => {
   const { statusCode } = await executeCommand(transport, commands.SELECT_APPLET, target.SE, appletCommand);
   if (statusCode === CODE._9000) {
     return { status: true, statusCode };
@@ -53,9 +56,7 @@ export const checkUpdate = async (transport: Transport) => {
  * @param updateMCU 
  */
 export const updateSE = async (transport: Transport, cardId: string, appId: string, appPrivateKey: string, progressCallback: Function, callAPI: Function, updateMCU: boolean = false) => {
-  const selectCardManager = 'A000000151000000';
   // BackupApplet
-  const selectBackUpSeedApplet = Buffer.from('BackupApplet', 'ascii').toString('hex');
   let cardSEVersion;
   try {
     cardSEVersion = await general.getSEVersion(transport);
@@ -78,8 +79,7 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     const hasBackupScriptSEVersion = 76;
     let isAppletExist;
     // try {
-    const CoolWalletPROCommand = Buffer.from('CoolWalletPRO', 'ascii').toString('hex')
-    isAppletExist = await selectApplet(transport, CoolWalletPROCommand);
+    isAppletExist = await selectApplet(transport);
     // } catch (e) {
     //   console.error(e);
     //   isAppletExist = false;
@@ -104,15 +104,15 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     }
 
 
-    await selectApplet(transport, selectCardManager);
-    const { statusCode } = await selectApplet(transport, selectBackUpSeedApplet);
+    await selectApplet(transport, CARDMANAGER_AID);
+    const { statusCode } = await selectApplet(transport, BACKUP_AID);
     progressCallback(progressNum[progressIndex++]);
     console.log(`selectBackUpSeedApplet statusCode: ${statusCode}`);
 
 
     //get ssd applet and authorize
-    await selectApplet(transport, selectCardManager);
-    await selectApplet(transport, 'A000000151535041');
+    await selectApplet(transport, CARDMANAGER_AID);
+    await selectApplet(transport, SSD_AID);
     progressCallback(progressNum[progressIndex++]);
 
     console.log(`mutual Authorization Start----`);
@@ -149,8 +149,8 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
 
     await display.hideUpdate(transport); // Hide update from the card
 
-    await selectApplet(transport, selectCardManager);
-    isAppletExist = await selectApplet(transport, CoolWalletPROCommand);
+    await selectApplet(transport, CARDMANAGER_AID);
+    isAppletExist = await selectApplet(transport);
     console.log(`isAppletExist: ${isAppletExist}`);
 
     if (isAppletExist) {
