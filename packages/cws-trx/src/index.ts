@@ -1,12 +1,17 @@
-/* eslint-disable no-param-reassign */
-import { coin as COIN, transport } from '@coolwallet/core';
+import {
+	apdu,
+	coin as COIN,
+	transport as tp,
+	error,
+	tx,
+} from '@coolwallet/core';
 import * as trxSign from './sign';
 import { SignTransactionData } from './config/type';
 import * as scriptUtil from './utils/scriptUtils';
 import * as trxUtil from './utils/trxUtils';
 import * as scripts from './config/scripts';
 
-type Transport = transport.default;
+type Transport = tp.default;
 
 export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 	constructor() {
@@ -31,11 +36,49 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 	 */
 	async signTransaction(signTxData: SignTransactionData): Promise<string> {
 		const {
-			transport, appPrivateKey, appId, addressIndex
+			transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
 		} = signTxData;
-		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 		const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+		const rawPayload = trxUtil.getRawHex(transaction);
+
+		const preActions = [];
+		const sendScript = async () => {
+			await apdu.tx.sendScript(transport, script);
+		};
+		preActions.push(sendScript);
+
+		const action = async () => apdu.tx.executeScript(
+			transport,
+			appId,
+			appPrivateKey,
+			trxUtil.getArgument(signTxData)
+		);
+
+		const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+			transport,
+			preActions,
+			action,
+			false,
+			confirmCB,
+			authorizedCB,
+			true
+		);
+
+		const { signedTx } = await apdu.tx.getSignedHex(transport);
+
+		if (Buffer.isBuffer(canonicalSignature)) {
+			throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
+		}
+
+		const { v, r, s } = await trxUtil.genTrxSigFromSESig(
+			canonicalSignature,
+			rawPayload,
+			publicKey
+		);
+		const serializedTx = trxUtil.composeSignedTransacton(signTxData, v, r, s);
+		return serializedTx;
 
 		return trxSign.signTransaction(
 			signTxData,

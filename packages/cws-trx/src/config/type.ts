@@ -14,8 +14,8 @@ export type SignTransactionData = {
   transaction: Transaction,
   addressIndex: number,
   publicKey: string | undefined,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
+  confirmCB: ()=>void | undefined,
+  authorizedCB: ()=>void | undefined
 }
 
 export type Transaction = {
@@ -38,7 +38,7 @@ export type Option = {
   }
 };
 
-export enum TransactionType {
+enum TransactionType {
   TRANSFER_CONTRACT = 'TRANSFER_CONTRACT',
   FREEZE_BALANCE_CONTRACT = 'FREEZE_BALANCE_CONTRACT',
   UNFREEZE_BALANCE_CONTRACT = 'UNFREEZE_BALANCE_CONTRACT',
