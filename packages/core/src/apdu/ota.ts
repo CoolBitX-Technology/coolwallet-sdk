@@ -29,7 +29,7 @@ const SSD_AID = 'A000000151535041';
  * @param transport 
  * @param appletCommand 
  */
-export const selectApplet = async (transport: Transport, appletCommand?: string = MAIN_AID) => {
+export const selectApplet = async (transport: Transport, appletCommand: string = MAIN_AID) => {
   const { statusCode } = await executeCommand(transport, commands.SELECT_APPLET, target.SE, appletCommand);
   if (statusCode === CODE._9000) {
     return { status: true, statusCode };
