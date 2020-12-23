@@ -69,7 +69,7 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 		const { signedTx } = await apdu.tx.getSignedHex(transport);
 
 		if (Buffer.isBuffer(canonicalSignature)) {
-			throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
+			throw new error.SDKError(this.signTransaction.name, 'canonicalSignature type error');
 		}
 
 		const { v, r, s } = await trxUtil.genTrxSigFromSESig(
