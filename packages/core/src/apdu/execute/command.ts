@@ -123,7 +123,7 @@ export const commands = {
   },
   GET_TX_DETAIL: {
     CLA: '80',
-    INS: '36',
+    INS: '46',
     P1: '00',
     P2: '00'
   },
