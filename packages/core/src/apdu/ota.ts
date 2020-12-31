@@ -15,17 +15,21 @@ import { SDKError } from '../error/errorHandle';
 
 var jwt = require('jsonwebtoken');
 
-const SE_UPDATE_VER = 101;
+const SE_UPDATE_VER = 300;
 
 const challengeUrl = `https://ota.cbx.io/api/challenge`;
 const cryptogramUrl = `https://ota.cbx.io/api/cryptogram`;
+const MAIN_AID = '436f6f6c57616c6c657450524f';
+const BACKUP_AID = '4261636b75704170706c6574';
+const CARDMANAGER_AID = 'A000000151000000';
+const SSD_AID = 'A000000151535041';
 
 /**
  * 
  * @param transport 
  * @param appletCommand 
  */
-export const selectApplet = async (transport: Transport, appletCommand: string = 'C1C2C3C4C5') => {
+export const selectApplet = async (transport: Transport, appletCommand: string = MAIN_AID) => {
   const { statusCode } = await executeCommand(transport, commands.SELECT_APPLET, target.SE, appletCommand);
   if (statusCode === CODE._9000) {
     return { status: true, statusCode };
@@ -52,8 +56,7 @@ export const checkUpdate = async (transport: Transport) => {
  * @param updateMCU 
  */
 export const updateSE = async (transport: Transport, cardId: string, appId: string, appPrivateKey: string, progressCallback: Function, callAPI: Function, updateMCU: boolean = false) => {
-  const selectCardManager = 'A000000151000000';
-  const selectBackUpSeedApplet = 'A1A2A3A4A5A6';
+  // BackupApplet
   let cardSEVersion;
   try {
     cardSEVersion = await general.getSEVersion(transport);
@@ -101,15 +104,15 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     }
 
 
-    await selectApplet(transport, selectCardManager);
-    const { statusCode } = await selectApplet(transport, selectBackUpSeedApplet);
+    await selectApplet(transport, CARDMANAGER_AID);
+    const { statusCode } = await selectApplet(transport, BACKUP_AID);
     progressCallback(progressNum[progressIndex++]);
     console.log(`selectBackUpSeedApplet statusCode: ${statusCode}`);
 
 
     //get ssd applet and authorize
-    await selectApplet(transport, selectCardManager);
-    await selectApplet(transport, 'A000000151535041');
+    await selectApplet(transport, CARDMANAGER_AID);
+    await selectApplet(transport, SSD_AID);
     progressCallback(progressNum[progressIndex++]);
 
     console.log(`mutual Authorization Start----`);
@@ -123,14 +126,14 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     // Install backupSeed script
     progressCallback(progressNum[progressIndex++]);
 
-    if (cardSEVersion < hasBackupScriptSEVersion) {
-      console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
-      if (statusCode.toUpperCase() === CODE._6A82) {
-        await insertScript(transport, script.newLoadScript);
-        await insertScript(transport, script.newInstallScript);
-        console.log(`Install loadscript done`);
-      }
-    }
+    // if (cardSEVersion < hasBackupScriptSEVersion) {
+    //   console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
+    //   if (statusCode.toUpperCase() === CODE._6A82) {
+    //     await insertScript(transport, script.newLoadScript);
+    //     await insertScript(transport, script.newInstallScript);
+    //     console.log(`Install loadscript done`);
+    //   }
+    // }
 
     progressCallback(progressNum[progressIndex++]);
     await insertDeleteScript(transport, script.deleteScript);
@@ -146,7 +149,7 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
 
     await display.hideUpdate(transport); // Hide update from the card
 
-    await selectApplet(transport, selectCardManager);
+    await selectApplet(transport, CARDMANAGER_AID);
     isAppletExist = await selectApplet(transport);
     console.log(`isAppletExist: ${isAppletExist}`);
 
@@ -302,6 +305,8 @@ export const getAPIOption = (cardId: string, challengeData: string = '') => {
     data = { cryptogram: challengeData, cwid: cardId };
   }
 
+  console.log(data)
+
   let payload = jwt.sign(data, secret, { expiresIn: 60 * 60 * 24 });
 
   console.log(`payload: ${payload}`);
@@ -317,7 +322,7 @@ export const getAPIOption = (cardId: string, challengeData: string = '') => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': 'no-cors'  // ??
+      // 'Access-Control-Allow-Origin': 'no-cors'  // ??
     },
   };
 

@@ -6,7 +6,7 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  extends: ["airbnb"],
+  extends: ["airbnb", "plugin:@typescript-eslint/recommended"],
   parserOptions: {
     ecmaFeatures: {
       experimentalObjectRestSpread: true,
@@ -39,9 +39,11 @@ module.exports = {
       },
     ],
     "no-use-before-define": "off",
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
     "no-unreachable": "warn",
     "no-case-declarations": "warn",
+		"no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error", { "ignoreTypeValueShadow": true }],
     "key-spacing": "warn",
     "jsx-quotes": [2, "prefer-single"],
     "object-curly-spacing": ["warn", "always"],
