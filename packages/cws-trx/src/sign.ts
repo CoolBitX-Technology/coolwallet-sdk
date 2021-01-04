@@ -22,49 +22,34 @@ export const signTransaction = async (
   signTxData: any,
   script: string,
   argument: string,
-  publicKey: string | undefined = undefined,
-): Promise<string> => {
-
-  const { transport, transaction } = signTxData
-
-  const rawPayload = trxUtil.getRawHex(transaction);
+): Promise<{ r: string; s: string; } | Buffer> => {
+  const {
+    transport, appPrivateKey, appId, confirmCB, authorizedCB
+  } = signTxData;
 
   const preActions = [];
-  let action;
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
-  }
+  };
+
   preActions.push(sendScript);
 
-  action = async () => {
-    return apdu.tx.executeScript(
-      transport,
-      signTxData.appId,
-      signTxData.appPrivateKey,
-      trxUtil.getArgument(signTxData)
-    );
-  }
+  const action = async () => apdu.tx.executeScript(
+    transport,
+    appId,
+    appPrivateKey,
+    argument
+  );
+
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
     action,
     false,
-    signTxData.confirmCB,
-    signTxData.authorizedCB,
+    confirmCB,
+    authorizedCB,
     true
   );
 
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-
-  if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await trxUtil.genTrxSigFromSESig(
-      canonicalSignature,
-      rawPayload,
-      publicKey
-    );
-    const serializedTx = trxUtil.composeSignedTransacton(signTxData, v, r, s);
-    return serializedTx;
-  } else {
-    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
-  }
+  return canonicalSignature;
 };
