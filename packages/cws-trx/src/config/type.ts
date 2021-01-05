@@ -7,30 +7,82 @@ export type Output = {
 
 export type Transport = transport.default;
 
-export type SignTxData = {
+type SignTxData = {
   transport: Transport,
   appPrivateKey: string,
   appId: string,
-  transaction: Transaction,
   addressIndex: number,
   publicKey: string | undefined,
-  confirmCB: ()=>void | undefined,
-  authorizedCB: ()=>void | undefined
+  confirmCB: () => void | undefined,
+  authorizedCB: () => void | undefined
 }
 
-export type Transaction = {
+type Transaction = {
   // [key: string]: any,
   refBlockBytes: string,
   refBlockHash: string,
   expiration: number,
   timestamp: number
-  contract: NormalTrade
 }
 
-export type NormalTrade = {
-  ownerAddress: string,
-  toAddress: string,
-  amount: number,
+export interface NormalTradeData extends SignTxData {
+  transaction: NormalContract
+}
+
+export interface NormalContract extends Transaction {
+  contract: {
+    ownerAddress: string,
+    toAddress: string,
+    amount: number,
+  }
+}
+
+export interface FreezeData extends SignTxData {
+  transaction: FreezeContract
+}
+
+export interface FreezeContract extends Transaction {
+  contract: {
+    resource: string,
+    frozenDuration: number,
+    frozenBalance: number,
+    receiverAddress: string,
+    ownerAddress: string,
+  }
+}
+
+export interface UnfreezeData extends SignTxData {
+  transaction: UnfreezeContract
+}
+
+export interface UnfreezeContract extends Transaction {
+  contract: {
+    resource: string,
+    receiverAddress: string,
+    ownerAddress: string,
+  }
+}
+
+export interface VoteWitnessData extends SignTxData {
+  transaction: VoteWitnessContract
+}
+
+export interface VoteWitnessContract extends Transaction {
+  contract: {
+    voteAddress: string,
+    ownerAddress: string,
+    voteCount: string,
+  }
+}
+
+export interface WithdrawBalanceData extends SignTxData {
+  transaction: WithdrawBalanceContract
+}
+
+export interface WithdrawBalanceContract extends Transaction {
+  contract: {
+    ownerAddress: string,
+  }
 }
 
 /*
@@ -45,7 +97,7 @@ export type NormalTrade = {
 
 export type Option = {
   transactionType: TX_TYPE,
-  info : {
+  info: {
     symbol: string,
     decimals: string
   }

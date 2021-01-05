@@ -36,10 +36,59 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 	/**
 	 * Sign Tron Transaction.
 	 */
-	async signTransaction(signTxData: type.SignTxData): Promise<{ r: string; s: string; } | Buffer>{
-		
+	async signTransaction(signTxData: type.NormalTradeData): Promise<{ r: string; s: string; } | Buffer> {
+
 		const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-		const argement = trxUtil.getArgument(signTxData.transaction, signTxData.addressIndex)
+		const argement = trxUtil.getNormalTradeArgument(signTxData.transaction, signTxData.addressIndex)
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argement
+		);
+	}
+
+	async signFreeze(signTxData: type.FreezeData): Promise<{ r: string; s: string; } | Buffer> {
+
+		const script = scripts.FREEZE.script + scripts.FREEZE.signature;
+		const argement = trxUtil.getFreezeArgement(signTxData.transaction, signTxData.addressIndex)
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argement
+		);
+	}
+
+	async signUnfreeze(signTxData: type.UnfreezeData): Promise<{ r: string; s: string; } | Buffer> {
+
+		const script = scripts.UNFREEZE.script + scripts.UNFREEZE.signature;
+		const argement = trxUtil.getUnfreezeArgement(signTxData.transaction, signTxData.addressIndex)
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argement
+		);
+	}
+
+
+	async signVoteWitness(signTxData: type.VoteWitnessData): Promise<{ r: string; s: string; } | Buffer> {
+
+		const script = scripts.VOTE.script + scripts.VOTE.signature;
+		const argement = trxUtil.getVoteWitnessArgement(signTxData.transaction, signTxData.addressIndex)
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argement
+		);
+	}
+
+	async signWithdrawBalance(signTxData: type.WithdrawBalanceData): Promise<{ r: string; s: string; } | Buffer> {
+
+		const script = scripts.VOTE.script + scripts.VOTE.signature;
+		const argement = trxUtil.getWithdrawBalanceArgement(signTxData.transaction, signTxData.addressIndex)
 
 		return trxSign.signTransaction(
 			signTxData,
