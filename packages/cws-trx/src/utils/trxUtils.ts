@@ -1,7 +1,5 @@
 import { error, transport, apdu } from "@coolwallet/core";
-import { handleHex } from "./stringUtil";
 import { hexStr2byteArray, byteArray2hexStr, sha256 } from './cryptoUtils';
-import crypto from "crypto";
 import { encode58 } from "./base58";
 import * as param from '../config/param';
 import * as type from '../config/type';

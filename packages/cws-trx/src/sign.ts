@@ -48,7 +48,7 @@ export const signTransaction = async (
     false,
     confirmCB,
     authorizedCB,
-    true
+    false
   );
 
   return canonicalSignature;
