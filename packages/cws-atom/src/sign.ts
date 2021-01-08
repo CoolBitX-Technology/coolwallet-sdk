@@ -4,7 +4,7 @@ import * as types from './config/types'
 
 
 export const signTransaction = async (
-  signData: types.signType,
+  signData: types.SignType,
   script: string,
   argument: string,
 ): Promise<{ r: string; s: string; } | Buffer> => {
@@ -17,8 +17,6 @@ export const signTransaction = async (
     await core.apdu.tx.sendScript(transport, script);
   }
   preActions.push(sendScript);
-
-  console.log("aaaaa: " + argument)
 
   action = async () => {
     return core.apdu.tx.executeScript(

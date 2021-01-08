@@ -3,10 +3,11 @@ import * as atomUtil from './util/atomUtil';
 import * as scripts from "./config/script";
 import * as types from './config/types'
 import * as param from './config/param';
+import { TX_TYPE } from './config/param';
 import * as sign from './sign';
 import { SDKError } from '@coolwallet/core/lib/error';
 
-
+export { TX_TYPE };
 
 type Transport = transport.default;
 
@@ -73,6 +74,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
       case param.TX_TYPE.WITHDRAW:
         script = scripts.WITHDRAW.script + scripts.WITHDRAW.signature;
         argument = atomUtil.getCosmosWithdrawArgement(transaction, addressIndex)
+        break;
       default:
         throw new SDKError(this.signCosmosTransaction.name, `not support input tx type ${txType}`);
     } 
