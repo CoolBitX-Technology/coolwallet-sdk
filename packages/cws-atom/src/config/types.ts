@@ -9,18 +9,15 @@ export type SignType = {
   appPrivateKey: string,
   appId: string,
   addressIndex: number,
-  transaction: CosmosSend,
+  transaction: MsgSend | MsgDelegate,
   confirmCB: Function | undefined,
   authorizedCB: Function | undefined
 }
 
 
-export type CosmosSend = {
+type Cosmos = {
   chainId: param.CHAIN_ID,
   txType: param.TX_TYPE,
-  fromAddress: string,
-  toAddress: string,
-  amount: number,
   feeAmount: number,
   gas: number,
   accountNumber: string,
@@ -28,16 +25,23 @@ export type CosmosSend = {
   memo: string,
 }
 
-export type CosmosDelegate = {
-  chainId: param.CHAIN_ID,
-  txType: param.TX_TYPE,
+export interface MsgSend extends Cosmos {
   fromAddress: string,
   toAddress: string,
   amount: number,
-  feeAmount: number,
-  gas: number,
-  accountNumber: string,
-  sequence: string,
-  memo: string,
 }
 
+export interface MsgDelegate extends Cosmos {
+  delegatorAddress: string,
+  validatorAddress: string,
+  amount: number,
+}
+
+export interface MsgUndelegate extends MsgDelegate {
+}
+
+
+export interface MsgWithdrawDelegationReward extends Cosmos {
+  delegatorAddress: string,
+  validatorAddress: string,
+}

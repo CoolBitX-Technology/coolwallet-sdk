@@ -31,7 +31,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
    * Sign transaction.
    */
   async signTransaction(
-    signData: types.signType,
+    signData: types.SignType,
   ): Promise<string> {
     const chainId = signData.transaction.chainId
     // const chain_id = 'cosmoshub-3'
@@ -63,8 +63,16 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
         argument = atomUtil.getCosmosSendArgement(transaction, addressIndex)
         break;
       case param.TX_TYPE.DELEGATE:
+        script = scripts.DELEGATE.script + scripts.DELEGATE.signature;
+        argument = atomUtil.getCosmosDelgtOrUnDelArgement(transaction, addressIndex)
+        break;
       case param.TX_TYPE.UNDELEGATE:
+        script = scripts.UNDELEGATE.script + scripts.UNDELEGATE.signature;
+        argument = atomUtil.getCosmosDelgtOrUnDelArgement(transaction, addressIndex)
+        break;
       case param.TX_TYPE.WITHDRAW:
+        script = scripts.WITHDRAW.script + scripts.WITHDRAW.signature;
+        argument = atomUtil.getCosmosWithdrawArgement(transaction, addressIndex)
       default:
         throw new SDKError(this.signCosmosTransaction.name, `not support input tx type ${txType}`);
     } 
