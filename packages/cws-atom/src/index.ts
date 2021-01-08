@@ -4,6 +4,7 @@ import * as scripts from "./config/script";
 import * as types from './config/types'
 import * as param from './config/param';
 import * as sign from './sign';
+import { SDKError } from '@coolwallet/core/lib/error';
 
 
 
@@ -32,9 +33,9 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
   async signTransaction(
     signData: types.signType,
   ): Promise<string> {
-    // const chain_id = signData.signObj.chain_id
-    const chain_id = 'cosmoshub-3'
-    switch (chain_id) {
+    const chainId = signData.transaction.chainId
+    // const chain_id = 'cosmoshub-3'
+    switch (chainId) {
       case param.CHAIN_ID.ATOM:
         this.signCosmosTransaction(signData);
         return 'case'
@@ -48,10 +49,26 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
  * Sign Cosmos tansfer transaction.
  */
   async signCosmosTransaction(
-    signData: types.signType,
+    signData: types.SignType,
   ): Promise<{ r: string; s: string; } | Buffer> {
-    const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-    const argument = atomUtil.getCosmosArgement(signData.signObj, signData.addressIndex)
+
+    const { transaction, addressIndex } = signData
+    const txType = signData.transaction.txType
+
+    let script;
+    let argument;
+    switch (txType) {
+      case param.TX_TYPE.SEND:
+        script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+        argument = atomUtil.getCosmosSendArgement(transaction, addressIndex)
+        break;
+      case param.TX_TYPE.DELEGATE:
+      case param.TX_TYPE.UNDELEGATE:
+      case param.TX_TYPE.WITHDRAW:
+      default:
+        throw new SDKError(this.signCosmosTransaction.name, `not support input tx type ${txType}`);
+    } 
+
     const signature = sign.signTransaction(signData, script, argument )
     return signature;
   }
