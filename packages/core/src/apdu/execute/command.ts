@@ -326,6 +326,12 @@ export const commands = {
     P1: undefined,
     P2: undefined
   },
+  GET_CARD_ID: {
+    CLA: '80',
+    INS: 'CA',
+    P1: '00',
+    P2: '00'
+  },
   MCU_SET_MNEMONIC_INFO: {
     CLA: "7F",
     INS: "10",

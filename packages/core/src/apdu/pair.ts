@@ -1,7 +1,7 @@
 import { executeCommand } from './execute/execute';
 import Transport from '../transport';
 import { commands } from "./execute/command";
-import { target } from '../config/target';
+import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 import { getCommandSignature, getCommandSignatureWithoutNonce } from "../setting/auth";
@@ -41,7 +41,10 @@ export const switchLockStatus = async (transport: Transport, appId: string, appP
  * @param {String} deviceName
  * @returns {Promise}
  */
-export const register = async (transport: Transport, appPublicKey: string, password: string, deviceName: string): Promise<string> => {
+export const register = async (transport: Transport, appPublicKey: string, password: string, deviceName: string, SEPublicKey: string): Promise<string> => {
+  if (!SEPublicKey){
+    throw new SDKError(register.name, 'SEPublicKey can not be undifined')
+  }
   let nameToUTF = Buffer.from(deviceName, 'utf8');
   const maxLen = 30;
 
@@ -64,7 +67,7 @@ export const register = async (transport: Transport, appPublicKey: string, passw
 
   const supportEncryptedRegister = true;
   if (supportEncryptedRegister) {
-    data = crypto.encryption.ECIESenc(config.KEY.SEPublicKey, data);
+    data = crypto.encryption.ECIESenc(SEPublicKey, data);
     P1 = '01';
   }
   const { statusCode, outputData: appId, msg } = await executeCommand(transport, commands.REGISTER, target.SE, data, P1);

@@ -5,7 +5,7 @@ import { addressIndexToKeyId } from '../transaction/txUtil'
 import { commands, CommandType } from "./execute/command";
 import { SDKError, APDUError } from '../error/errorHandle';
 import { CODE } from '../config/status/code';
-import { target } from '../config/target';
+import { target } from '../config/param';
 
 
 /**

@@ -1,7 +1,7 @@
 import { executeCommand } from './execute/execute';
 import Transport from '../transport';
 import { commands } from "./execute/command";
-import { target } from '../config/target';
+import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 import * as setting from '../setting/index';
@@ -9,7 +9,6 @@ import * as crypto from '../crypto/index';
 import * as config from '../config/index';
 
 const bip39 = require('bip39');
-const { SEPublicKey } = config.KEY;
 
 /**
  * TODO 
@@ -139,8 +138,11 @@ export async function sendCheckSum(transport: Transport, checkSum: number): Prom
  * @param {string} mnemonic
  * @return {Promise<boolean>}
  */
-export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string){
+export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string, SEPublicKey: string){
   try{
+    if (!SEPublicKey) {
+      throw new SDKError(setSeed.name, 'SEPublicKey can not be undifined')
+    }
     const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
     const { signature, forceUseSC } = await setting.auth.getCommandSignature(
       transport,
