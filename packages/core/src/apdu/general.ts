@@ -72,6 +72,6 @@ export const getCardId = async (transport: Transport): Promise<string> => {
   if (statusCode === CODE._9000) {
     return outputData
   } else {
-    throw new APDUError(commands.GET_NONCE, statusCode, msg)
+    throw new APDUError(commands.GET_CARD_ID, statusCode, msg)
   }
 };
