@@ -1,14 +1,10 @@
 import { coin as COIN, transport, error } from '@coolwallet/core';
-import { ScriptType, OmniType, Input, Output, Change } from './utils/types'
-import {
-	addressToOutScript,
-	pubkeyToAddressAndOutScript
-} from './utils/transactionUtil';
-import { signBTCTransaction, signUSDTransaction } from './btcSign';
-import { signTxType, signUSDTTxType, Transport } from './utils/types';
+import { addressToOutScript, pubkeyToAddressAndOutScript } from './utils/transactionUtil';
+import { signBTCTransaction, signUSDTransaction } from './sign';
+import { ScriptType, signTxType, signUSDTTxType, Transport } from './config/types';
+import { COIN_TYPE } from './config/param'
 
 
-export const coinType = '00'
 
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 
@@ -16,7 +12,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 	public addressToOutScript: Function;
 
 	constructor() {
-		super(coinType);
+		super(COIN_TYPE);
 		this.ScriptType = ScriptType;
 		this.addressToOutScript = addressToOutScript;
 	}
