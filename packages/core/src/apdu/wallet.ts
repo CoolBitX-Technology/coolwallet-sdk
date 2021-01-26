@@ -6,9 +6,6 @@ import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 import * as setting from '../setting/index';
 import * as crypto from '../crypto/index';
-import * as config from '../config/index';
-
-const bip39 = require('bip39');
 
 /**
  * TODO 
@@ -19,10 +16,14 @@ const bip39 = require('bip39');
  */
 export const authGetExtendedKey = async (transport: Transport, signature: string, forceUseSC: boolean
 ): Promise<boolean> => {
-  try{
-    await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, forceUseSC);
-    return true;
-  } catch(e) {
+  try {
+    const { statusCode } = await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, forceUseSC);
+    if (statusCode === CODE._9000) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
     throw new SDKError(authGetExtendedKey.name, 'authGetExtendedKey error')
   }
 };
@@ -155,8 +156,8 @@ export async function sendCheckSum(transport: Transport, checkSum: number): Prom
  * @param {string} mnemonic
  * @return {Promise<boolean>}
  */
-export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string, SEPublicKey: string){
-  try{
+export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string, SEPublicKey: string) {
+  try {
     if (!SEPublicKey) {
       throw new SDKError(setSeed.name, 'SEPublicKey can not be undifined')
     }
