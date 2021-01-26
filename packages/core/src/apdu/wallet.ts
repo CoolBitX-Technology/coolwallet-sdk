@@ -35,7 +35,23 @@ export const authGetExtendedKey = async (transport: Transport, signature: string
  * @param {string} accIndex P2
  * @return {Promise<string>}
  */
-export const getAccountExtendedKey = async (transport: Transport, coinType: string, accIndex: string): Promise<string> => {
+export const getAccountExtendedKey = async (transport: Transport, path: string): Promise<string> => {
+  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, path, undefined, undefined, false, false);
+  if (key) {
+    return key
+  } else {
+    throw new APDUError(commands.GET_EXT_KEY, statusCode, msg)
+  }
+};
+
+/**
+ * Get ECDSA Account Extended public key (Encrypted)
+ * @param {*} transport
+ * @param {string} coinType P1
+ * @param {string} accIndex P2
+ * @return {Promise<string>}
+ */
+export const getECDSAAccountExtendedKey = async (transport: Transport, coinType: string, accIndex: string): Promise<string> => {
   const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, undefined, coinType, accIndex);
   if (key) {
     return key
@@ -43,6 +59,7 @@ export const getAccountExtendedKey = async (transport: Transport, coinType: stri
     throw new APDUError(commands.GET_EXT_KEY, statusCode, msg)
   }
 };
+
 
 
 /**
@@ -156,9 +173,9 @@ export async function setSeed(transport: Transport, appId: string, appPrivateKey
     const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, forceUseSC);
     if (statusCode === CODE._9000) {
     } else if (statusCode === CODE._6881) {
-      throw new APDUError(commands.AUTH_EXT_KEY, statusCode, "wallet is exist")
+      throw new APDUError(commands.SET_SEED, statusCode, "wallet is exist")
     } else {
-      throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+      throw new APDUError(commands.SET_SEED, statusCode, msg)
     }
   } catch (e) {
     console.error(e);

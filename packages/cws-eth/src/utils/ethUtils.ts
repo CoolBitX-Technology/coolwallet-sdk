@@ -1,12 +1,8 @@
 import { error, transport, apdu } from "@coolwallet/core";
 import { handleHex } from "./stringUtil";
-import { coinType, Option } from '../type'
-import * as token from "../token";
-import { Transaction } from '../type';
-import { toHex } from '../lib';
+import { Transaction } from '../config/type';
 
-import { keccak256, toChecksumAddress } from "../lib";
-
+const Web3 = require('web3');
 const rlp = require("rlp");
 
 type Transport = transport.default;
@@ -15,91 +11,6 @@ const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
 const ec = new elliptic.ec("secp256k1");
 
-export const getArgument = async (addressIndex: number, getArg: CallableFunction) => {
-  const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
-  const SEPath = `15328000002C800000${coinType}8000000000000000${addressIdxHex}`;
-  const argument = await getArg();
-  return SEPath + argument
-};
-
-/**
- * [toAddress(20B)] [amount(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)]
- * @param transaction 
- */
-export const getTransferArgument = (transaction: Transaction) => {
-  const argument =
-    handleHex(transaction.to) + // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
-    handleHex(transaction.value).padStart(20, "0") + // 000000b1a2bc2ec50000
-    handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
-    handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
-    handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
-    handleHex(transaction.chainId.toString(16)).padStart(4, "0"); // 0001
-  return argument;
-};
-
-/**
- * [toAddress(20B)] [amount(12B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)] [tokenDecimal(1B)] [tokenNameLength(1B)] [tokenName(7B,leftJustified)] [tokenContractAddress(20B)] [tokenSignature(72B)]
- * @param transaction 
- * @param tokenSignature 
- */
-export const getERC20Argument = (transaction: Transaction, tokenSignature: string) => {
-
-  const txTokenInfo: Option = transaction.option;
-  const tokenInfo = token.getSetTokenPayload(transaction.to, txTokenInfo.info.symbol, parseInt(txTokenInfo.info.decimals));
-  const signature = tokenSignature.slice(58).padStart(144, "0");
-  const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, "");
-  const amount = transaction.data.slice(74).replace(/\b(0+)/gi, "");
-  const argument =
-    handleHex(toAddress) + // toAddress
-    handleHex(amount).padStart(24, "0") + // 000000b1a2bc2ec50000
-    handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
-    handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
-    handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
-    handleHex(transaction.chainId.toString(16)).padStart(4, "0") + // 0001
-    tokenInfo +
-    signature;
-
-  return argument;
-};
-
-
-/**
- * [contractAddress(20B)] [value(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)] [contractData(Variety)]
- * @param transaction 
- */
-export const getSmartContractArgument = (transaction: Transaction) => {
-  const argument =
-    handleHex(transaction.to) + // contractAddress : 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
-    handleHex(transaction.value).padStart(20, "0") + // 000000b1a2bc2ec50000
-    handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
-    handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
-    handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
-    handleHex(transaction.chainId.toString(16)).padStart(4, "0") + // 0001
-    handleHex(transaction.data) // limit of data length : 1208Byte
-  return argument;
-};
-
-
-/**
- * [message(Variety)]
- * @param transaction 
- */
-export const getSignMessageArgument = (message: string) => {
-  const argument =
-    handleHex(toHex(message))
-  return argument;
-};
-
-/**
- * [domainSeparator(32B)] [data(Variety)]
- * @param transaction 
- */
-export const getSignTypedDataArgument = (domainSeparator: string, data: string) => {
-  const argument =
-    handleHex(domainSeparator).padStart(64, "0") + 
-    handleHex(data) 
-  return argument;
-};
 
 /**
  * Get raw payload
@@ -167,7 +78,7 @@ export const genEthSigFromSESig = async (
   payload: Buffer,
   compressedPubkey: string | undefined = undefined
 ): Promise<{ v: number; r: string; s: string; }> => {
-  const hash = keccak256(payload);
+  const hash = Web3.utils.keccak256(payload);
   const data = Buffer.from(handleHex(hash), "hex");
   const keyPair = ec.keyFromPublic(compressedPubkey, "hex");
 
@@ -232,6 +143,6 @@ function trimFirst12Bytes(hexString: string): string {
 export function pubKeyToAddress(compressedPubkey: string): string {
   const keyPair = ec.keyFromPublic(compressedPubkey, "hex");
   const pubkey = `0x${keyPair.getPublic(false, "hex").substr(2)}`;
-  const address = trimFirst12Bytes(keccak256(pubkey));
-  return toChecksumAddress(address);
+  const address = trimFirst12Bytes(Web3.utils.keccak256(pubkey));
+  return Web3.utils.toChecksumAddress(address);
 }

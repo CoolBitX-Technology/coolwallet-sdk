@@ -65,8 +65,6 @@ export enum transactionType  {
   SMART_CONTRACT = "SMART_CONTRACT",
 }
 
-export const coinType = '3C'
-
 export const EIP712Schema = {
   type: 'object',
   properties: {

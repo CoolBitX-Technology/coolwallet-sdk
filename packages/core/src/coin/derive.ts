@@ -26,19 +26,22 @@ export const getAccountExtKey = async (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
-  coinSEType: string,
-  accIndex: number,
+  path: string,
   authFirst: boolean = true
-): Promise<{ accountIndex: string; accountPublicKey: string; accountChainCode: string; }> => {
+): Promise<{ accountPublicKey: string; accountChainCode: string; }> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
-  let accIndexHex = accIndex.toString(16);
-  if (accIndexHex.length % 2 > 0) accIndexHex = `0${accIndexHex}`;
+  // let accIndexHex = accIndex.toString(16);
+  // if (accIndexHex.length % 2 > 0) accIndexHex = `0${accIndexHex}`;
   const response = await apdu.wallet.getAccountExtendedKey(
     transport,
-    coinSEType,
-    accIndexHex
+    path
   );
+  // const response = await apdu.wallet.getAccountExtendedKey(
+  //   transport,
+  //   coinSEType,
+  //   accIndexHex
+  // );
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
   if (!decryptedData) throw Error("Decryption Failed");
 
@@ -47,7 +50,6 @@ export const getAccountExtKey = async (
   const chainCode = accBuf.slice(33);
 
   return {
-    accountIndex: accIndexHex,
     accountPublicKey: publicKey.toString("hex"),
     accountChainCode: chainCode.toString("hex"),
   };
