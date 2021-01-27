@@ -1,15 +1,7 @@
 import { coin as COIN, transport } from '@coolwallet/core';
-import {
-	ScriptType,
-	Input,
-	Output,
-	Change,
-	addressToOutScript,
-	pubkeyToAddressAndOutScript
-} from './util';
-
 import { signTransaction } from './sign';
-import { Transport, signTxType } from './types';
+import * as types from './config/types';
+import * as txUtil from './utils/transactionUtil';
 
 const coinType = '02'
 
@@ -20,26 +12,26 @@ export default class LTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	constructor() {
 		super(coinType);
-		this.ScriptType = ScriptType;
-		this.addressToOutScript = addressToOutScript;
+		this.ScriptType = types.ScriptType;
+		this.addressToOutScript = txUtil.addressToOutScript;
 	}
 
-	async getAddress(transport: Transport, appPrivateKey: string, appId: string, scriptType: ScriptType, addressIndex: number)
+	async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, scriptType: types.ScriptType, addressIndex: number)
 		: Promise<string> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
+		const { address } = txUtil.pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
 		return address;
 	}
 
-	async getAddressAndOutScript(transport: Transport, appPrivateKey: string, appId: string, scriptType: ScriptType, addressIndex: number)
+	async getAddressAndOutScript(transport: types.Transport, appPrivateKey: string, appId: string, scriptType: types.ScriptType, addressIndex: number)
 		: Promise<{ address: string }> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
+		return txUtil.pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
 	}
 
 
 	async signTransaction(
-		signTxData: signTxType
+		signTxData: types.signTxType
 	): Promise<string> {
 		for (const input of signTxData.inputs) {
 			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, input.addressIndex);

@@ -1,4 +1,5 @@
 import { transport } from '@coolwallet/core';
+
 export type Transport = transport.default;
 
 export type signTxType = {
