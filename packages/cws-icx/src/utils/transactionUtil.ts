@@ -1,10 +1,8 @@
-import * as scripts from "./scripts";
-import { coinType } from './index'
-import { Transport, signTxType } from './types'
+import * as stringUtil from "./stringUtil";
 const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
-
 const ec = new elliptic.ec('secp256k1');
+
 
 export const pubKeyToAddress = (compressedPubkey: string): string => {
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
@@ -15,36 +13,6 @@ export const pubKeyToAddress = (compressedPubkey: string): string => {
   return address;
 };
 
-
-/**
- * TODO
- * @param {number} addressIndex
- * @param {*} transaction
- */
-export const getScriptAndArguments = (addressIndex: number, transaction: object) => {
-  const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
-  const SEPath = `15328000002C800000${coinType}8000000000000000${addressIdxHex}`;
-  let script;
-  let argument;
-  script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-  argument = getTransferArgument(transaction);
-
-  return {
-    script,
-    argument: SEPath + argument,
-  };
-};
-
-const getTransferArgument = (transaction: any) => {
-  const tx = JSON.parse(transaction);
-  const argument =
-    handleHex(tx.from).slice(2) + 
-    handleHex(tx.to).slice(2) + 
-    handleHex(tx.value).padStart(20, "0") + 
-    handleHex(tx.timestamp).padStart(20, "0") + 
-    handleHex(tx.nid.toString(16)).padStart(4, "0"); 
-  return argument;
-};
 
 export const generateRawTx = async (
   canonicalSignature: any,
@@ -76,6 +44,7 @@ export function generateHashKey(obj: any): string {
   const result = `icx_sendTransaction.${resultStrReplaced}`;
   return result;
 }
+
 
 function objTraverse(obj: any) {
   let result = '';
@@ -168,7 +137,7 @@ const generateFullCanonicalSig = (
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
 
   const hashcode = sha3_256.update(phraseToSign).hex();
-  const data = Buffer.from(handleHex(hashcode), 'hex');
+  const data = Buffer.from(stringUtil.handleHex(hashcode), 'hex');
 
   // get v
   const recoveryParam = ec.getKeyRecoveryParam(data, canonicalSignature, keyPair.pub);
@@ -187,7 +156,3 @@ const generateFullCanonicalSig = (
   return r + s + v;
 };
 
-export const handleHex = (hex: string) => {
-  const prefixRemoved = hex.slice(0, 2) === '0x' ? hex.slice(2) : hex;
-  return prefixRemoved.length % 2 !== 0 ? `0${prefixRemoved}` : prefixRemoved;
-};
