@@ -1,19 +1,8 @@
 import { coin as COIN, transport } from '@coolwallet/core';
-import {
-	ScriptType,
-	Input,
-	Output,
-	Change,
-	addressToOutScript,
-	pubkeyToAddressAndOutScript
-} from './util';
-
 import { signTransaction } from './sign';
-import { signTxType } from './types';
-
-type Transport = transport.default;
-
-export const coinType = '91'
+import * as types from './config/types';
+import * as params from './config/params';
+import * as txUtil from './utils/transactionUtil';
 
 export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 
@@ -21,26 +10,26 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 	public addressToOutScript: Function;
 
 	constructor() {
-		super(coinType);
-		this.ScriptType = ScriptType;
-		this.addressToOutScript = addressToOutScript;
+		super(params.COIN_TYPE);
+		this.ScriptType = types.ScriptType;
+		this.addressToOutScript = txUtil.addressToOutScript;
 	}
 
-	async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number)
+	async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number)
 		: Promise<string> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
+		const { address } = txUtil.pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
 		return address;
 	}
 
-	async getAddressAndOutScript(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number)
+	async getAddressAndOutScript(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number)
 		: Promise<{ address: string, outScript: Buffer }> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
+		return txUtil.pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
 	}
 
 	async signTransaction(
-		signTxData: signTxType
+		signTxData: types.signTxType
 	): Promise<string> {
 		
 		const inputs = signTxData.inputs;

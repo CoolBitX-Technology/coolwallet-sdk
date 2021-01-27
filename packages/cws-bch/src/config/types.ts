@@ -1,5 +1,5 @@
 import { transport } from '@coolwallet/core';
-type Transport = transport.default;
+export type Transport = transport.default;
 
 export enum ScriptType {
 	P2PKH = 0,
