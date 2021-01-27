@@ -2,7 +2,7 @@
 import { transport } from '@coolwallet/core';
 type Transport = transport.default;
 
-export const coinType = 'CA'
+
 
 export type signType = {
   transport: Transport,

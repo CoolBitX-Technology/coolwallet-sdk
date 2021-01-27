@@ -3,7 +3,7 @@ import { string as VarString } from "protocol-buffers-encodings"
 import typeToTyp3 from "./encoderHelper";
 import { UVarInt } from './varint';
 
-const sortObject = (obj: any): any => {
+export const sortObject = (obj: any): any => {
   if (obj === null) return null
   if (typeof obj !== "object") return obj
   // arrays have typeof "object" in js!
@@ -106,7 +106,7 @@ export const encodeBinary = (
   val: any,
   fieldNum?: number,
   isByteLenPrefix?: boolean
-) => {
+): Buffer => {
   if (val === null || val === undefined) throw new TypeError("unsupported type")
 
   if (Buffer.isBuffer(val)) {
@@ -145,7 +145,7 @@ export const encodeBinary = (
  * @param {Buffer} bytes
  * @return {Buffer} with bytes length prefixed
  */
-export const encodeBinaryByteArray = (bytes: Buffer) => {
+export const encodeBinaryByteArray = (bytes: Buffer): Buffer => {
   const lenPrefix = bytes.length
   return Buffer.concat([UVarInt.encode(lenPrefix), bytes])
 }
@@ -155,7 +155,7 @@ export const encodeBinaryByteArray = (bytes: Buffer) => {
  * @param {Object} obj
  * @return {Buffer} with bytes length prefixed
  */
-export const encodeObjectBinary = (obj: any, isByteLenPrefix?: boolean) => {
+export const encodeObjectBinary = (obj: any, isByteLenPrefix?: boolean): Buffer => {
   const bufferArr: any[] = []
 
   Object.keys(obj).forEach((key, index) => {
@@ -199,7 +199,7 @@ export const encodeArrayBinary = (
   fieldNum: number | undefined,
   arr: any[],
   isByteLenPrefix?: boolean
-) => {
+): Buffer => {
   const result: any[] = []
 
   arr.forEach((item) => {
@@ -239,3 +239,4 @@ const isDefaultValue = (obj: any) => {
     (is.boolean(obj) && !obj)
   )
 }
+
