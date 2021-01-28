@@ -1,6 +1,6 @@
 import { error, transport, apdu } from "@coolwallet/core";
 import { handleHex } from "./stringUtil";
-import { Transaction } from '../config/type';
+import { Transaction } from '../config/types';
 
 const Web3 = require('web3');
 const rlp = require("rlp");

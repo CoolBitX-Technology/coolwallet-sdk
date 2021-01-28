@@ -5,13 +5,13 @@ import { COIN_TYPE } from '../config/param'
 
 
 const getPath = async (addressIndex: number) => {
-  let path = utils.getPath(COIN_TYPE, addressIndex)
+  let path = await utils.getPath(COIN_TYPE, addressIndex)
   path = path.length.toString(16) + path
   return path
 };
 
 
-export const getTransferArgument = (signObj: Transfer, addressIndex: number) => {
+export const getTransferArgument = async (signObj: Transfer, addressIndex: number) => {
   const from = Buffer.from(signObj.msgs[0].inputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const to = Buffer.from(signObj.msgs[0].outputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
@@ -19,7 +19,7 @@ export const getTransferArgument = (signObj: Transfer, addressIndex: number) => 
   const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
   const source = parseInt(signObj.source).toString(16).padStart(16, '0');
   const memo = Buffer.from(signObj.memo, 'ascii').toString('hex');
-  return getPath(addressIndex) + from + to + value + accountNumber + sequence + source + memo;
+  return await getPath(addressIndex) + from + to + value + accountNumber + sequence + source + memo;
 };
 
 export const getPlaceOrderArgument = (signObj: PlaceOrder, addressIndex: number) => {

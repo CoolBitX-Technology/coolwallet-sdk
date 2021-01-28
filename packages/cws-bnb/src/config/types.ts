@@ -1,8 +1,7 @@
 /* eslint-disable camelcase  */
 import { transport } from '@coolwallet/core';
-type Transport = transport.default;
 
-
+export type Transport = transport.default;
 
 export type signType = {
   transport: Transport,

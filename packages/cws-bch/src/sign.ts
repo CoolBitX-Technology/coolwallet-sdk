@@ -1,16 +1,9 @@
-import { tx, transport, utils } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 import * as types from './config/types';
-import * as params from './config/params';
 import * as txUtil from './utils/transactionUtil';
 import * as scriptUtil from './utils/scriptUtil';
-type Transport = transport.default;
 
-
-export {
-	signTransaction
-};
-
-async function signTransaction(
+export async function signTransaction(
 	signTxData: types.signTxType
 ): Promise<string> {
 

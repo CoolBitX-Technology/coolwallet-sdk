@@ -1,5 +1,4 @@
 import { apdu, transport, tx } from '@coolwallet/core';
-import * as bnbUtil from './utils/scriptUtil';
 import * as txUtil from './utils/transactionUtil';
 import * as types from './config/types'
 

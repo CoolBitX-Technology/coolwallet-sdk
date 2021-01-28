@@ -24,82 +24,10 @@ function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer
 }
 
 const getPath = async (addressIndex: number) => {
-	let path = utils.getPath(COIN_TYPE, addressIndex)
+	let path = await utils.getPath(COIN_TYPE, addressIndex)
 	path = path.length.toString(16) + path
 	return path
 };
-
-
-export function getSigningActions(
-	transport: Transport,
-	redeemScriptType: ScriptType,
-	appId: string,
-	appPrivateKey: string,
-	change: Change | undefined,
-	preparedData: PreparedData,
-	unsignedTransactions: Array<Buffer>,
-	omniType?: OmniType
-): {
-	preActions: Array<Function>,
-	actions: Array<Function>
-} {
-	const preActions = [];
-	const sayHi = async () => {
-		await apdu.general.hi(transport, appId);
-	}
-	preActions.push(sayHi)
-	if (change) {
-		const changeAction = async () => {
-			if (redeemScriptType === ScriptType.P2WPKH) {
-				throw new error.SDKError(getSigningActions.name, 'not support P2WPKH change');
-			} else {
-				// TODO
-				const redeemType = (redeemScriptType === ScriptType.P2PKH) ? '00' : '01';
-				await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, COIN_TYPE, change.addressIndex, redeemType);
-			}
-		}
-		preActions.push(changeAction);
-	}
-
-	const parsingOutputAction = async () => {
-		const txDataHex = preparedData.outputsBuf.toString('hex');
-		let txDataType
-		if (!omniType) {
-			txDataType = (preparedData.outputType === ScriptType.P2WPKH) ? '0C' : '01';
-		} else {
-			if (omniType === OmniType.USDT) {
-				txDataType = '0A';
-			} else {
-				throw new error.SDKError(getSigningActions.name, `Unsupport omniType : ${omniType}`);
-			}
-		}
-		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
-	};
-	preActions.push(parsingOutputAction);
-
-	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-		const keyId = tx.util.addressIndexToKeyId(COIN_TYPE, preparedData.preparedInputs[i].addressIndex);
-		let readType
-		if (!omniType) {
-			if (redeemScriptType === ScriptType.P2PKH) {
-				readType = '00';
-			} else {
-				readType = '01';
-			}
-		} else {
-			if (omniType === OmniType.USDT) {
-				readType = 'C8';
-			} else {
-				throw new error.SDKError(getSigningActions.name, `Unsupport omniType : ${omniType}`);
-			}
-		}
-		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
-		const txDataType = '00';
-		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
-	}));
-
-	return { preActions, actions };
-}
 
 export function getScriptSigningActions(
 	transport: Transport,

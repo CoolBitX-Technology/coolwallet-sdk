@@ -1,5 +1,5 @@
 import { tx, transport, error, util } from '@coolwallet/core';
-import { ScriptType } from './utils/types'
+import { ScriptType } from './config/types'
 import {
 	Input,
 	Output,
@@ -7,9 +7,9 @@ import {
 	createUnsignedTransactions,
 	composeFinalTransaction,
 } from './utils/transactionUtil';
-import { getSigningActions, getScriptSigningActions } from './utils/actionUtil'
+import { getScriptSigningActions } from './utils/actionUtil'
 
-import { Transport, signTxType } from "./utils/types";
+import { Transport, signTxType } from "./config/types";
 
 export {
 	signTransaction
@@ -19,42 +19,30 @@ async function signTransaction(
 	signTxData: signTxType
 ): Promise<string> {
 
-	const {scriptType, transport, inputs, output, change, appPrivateKey, appId} = signTxData
+	const { scriptType, transport, inputs, output, change, appPrivateKey, appId } = signTxData
 
 	if (scriptType !== ScriptType.P2PKH
 		&& scriptType !== ScriptType.P2SH) {
 		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${scriptType}'`);
 	}
-	const useScript = await util.checkSupportScripts(transport);
-	const { preparedData, unsignedTransactions } = createUnsignedTransactions(
+	
+	const { preparedData } = createUnsignedTransactions(
 		scriptType,
 		inputs,
 		output,
 		change
 	);
 	let preActions, actions;
-	if (useScript) {
-		({ preActions, actions } = getScriptSigningActions(
-			transport,
-			scriptType,
-			appId,
-			appPrivateKey,
-			inputs,
-			preparedData,
-			output,
-			change,
-		));
-	} else {
-		({ preActions, actions } = getSigningActions(
-			transport,
-			scriptType,
-			appId,
-			appPrivateKey,
-			change,
-			preparedData,
-			unsignedTransactions,
-		));
-	}
+	({ preActions, actions } = getScriptSigningActions(
+		transport,
+		scriptType,
+		appId,
+		appPrivateKey,
+		inputs,
+		preparedData,
+		output,
+		change,
+	));
 	const signatures = await tx.flow.getSignaturesFromCoolWallet(
 		transport,
 		preActions,

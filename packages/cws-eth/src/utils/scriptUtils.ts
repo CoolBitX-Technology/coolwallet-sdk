@@ -1,22 +1,16 @@
-import { Option } from '../config/type'
-import { COIN_TYPE } from '../config/param'
+import { Option } from '../config/types'
+import { COIN_TYPE } from '../config/params'
 import * as token from "./tokenUtils";
 import { utils } from '@coolwallet/core';
 import { handleHex } from "./stringUtil";
-import { Transaction } from '../config/type';
+import { Transaction } from '../config/types';
 const Web3 = require('web3');
-
-export const getPath = async (addressIndex: number) => {
-  let path = utils.getPath(COIN_TYPE, addressIndex)
-  path = path.length.toString(16) + path
-  return path
-};
 
 /**
  * [toAddress(20B)] [amount(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)]
  * @param transaction 
  */
-export const getTransferArgument = (transaction: Transaction, addressIndex: number) => {
+export const getTransferArgument = async (transaction: Transaction, addressIndex: number) => {
   const argument =
     handleHex(transaction.to) + // 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
     handleHex(transaction.value).padStart(20, "0") + // 000000b1a2bc2ec50000
@@ -25,8 +19,11 @@ export const getTransferArgument = (transaction: Transaction, addressIndex: numb
     handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
     handleHex(transaction.chainId.toString(16)).padStart(4, "0"); // 0001
 
-  console.log('path: ' + getPath(addressIndex))
-  return getPath(addressIndex) + argument;
+  const path = await utils.getPath(COIN_TYPE, addressIndex)
+  console.log("argument:" + argument)
+  console.log("path:" + path)
+
+  return '15' + path + argument;
 };
 
 /**
@@ -51,7 +48,7 @@ export const getERC20Argument = (transaction: Transaction, tokenSignature: strin
     tokenInfo +
     signature;
 
-  return getPath(addressIndex) + argument;
+  return '15' + utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
 
 
@@ -69,7 +66,7 @@ export const getSmartContractArgument = (transaction: Transaction, addressIndex:
     handleHex(transaction.chainId.toString(16)).padStart(4, "0") + // 0001
     handleHex(transaction.data) // limit of data length : 1208Byte
 
-  return getPath(addressIndex) + argument;
+  return '15' + utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
 
 
@@ -80,7 +77,7 @@ export const getSmartContractArgument = (transaction: Transaction, addressIndex:
 export const getSignMessageArgument = (message: string, addressIndex: number) => {
   const argument =
     handleHex(Web3.utils.toHex(message))
-  return getPath(addressIndex) + argument;
+  return '15' + utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
 
 /**
@@ -92,5 +89,5 @@ export const getSignTypedDataArgument = (domainSeparator: string, data: string, 
   const argument =
     handleHex(domainSeparator).padStart(64, "0") +
     handleHex(data)
-  return getPath(addressIndex) + argument;
+  return '15' + utils.getPath(COIN_TYPE, addressIndex) + argument;
 };

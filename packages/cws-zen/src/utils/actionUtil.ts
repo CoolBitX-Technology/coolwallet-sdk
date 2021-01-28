@@ -1,11 +1,10 @@
 import BN from 'bn.js';
 import { transport, apdu, tx, error } from '@coolwallet/core';
-import * as scripts from "./scripts";
+import * as params from "../config/params";
 import {
 	ScriptType, Input, Output, Change, PreparedData
-} from './types';
+} from '../config/types';
 import { addressToOutScript } from './transactionUtil';
-import { coinType } from '../index'
 const zencashjs = require('zencashjs')
 type Transport = transport.default;
 
@@ -14,7 +13,6 @@ export {
 	Output,
 	Change,
 	PreparedData,
-	getSigningActions,
 	getScriptSigningActions,
 	//getScriptAndArgument,
 };
@@ -49,46 +47,6 @@ function hexStringToUintBuffer(string: string, byteSize: number, encode?: string
 	const bn = new BN(string, 'hex');
 	const buf = Buffer.from(bn.toArray());
 	return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
-}
-
-function getSigningActions(
-	transport: Transport,
-	scriptType: ScriptType,
-	appId: string,
-	appPrivateKey: string,
-	change: Change | undefined,
-	preparedData: PreparedData,
-	unsignedTransactions: Array<Buffer>,
-
-): ({ preActions: Array<Function>, actions: Array<Function> }) {
-	const preActions = [];
-	const sayHi = async () => {
-		await apdu.general.hi(transport, appId);
-	}
-	preActions.push(sayHi)
-	if (change) {
-		const changeAction = async () => {
-			const redeemType = (scriptType === ScriptType.P2PKH) ? '00' : '01';
-			await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, coinType, change.addressIndex, redeemType);
-		}
-		preActions.push(changeAction);
-	}
-
-	const parsingOutputAction = async () => {
-		const txDataHex = preparedData.outputsBuf.toString('hex');
-		const txDataType = '08';
-		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
-	};
-	preActions.push(parsingOutputAction);
-
-	const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-		const keyId = tx.util.addressIndexToKeyId(coinType, preparedData.preparedInputs[i].addressIndex);
-		const readType = '79';
-		const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
-		const txDataType = '00';
-		return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
-	}));
-	return { preActions, actions };
 }
 
 function getArgument(
@@ -132,7 +90,7 @@ function getArgument(
 		changeScriptType = toVarUintBuffer(scriptType);
 		changeAmount = toUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from(`328000002C800000${coinType}8000000000000000${addressIdxHex}`, 'hex');
+		changePath = Buffer.from(`328000002C800000${params.COIN_TYPE}8000000000000000${addressIdxHex}`, 'hex');
 		changeBlockHash = hexStringToUintBuffer(change.blockHash, 32).reverse();
 		changeBlockHeight = toReverseUintBuffer(change.blockHeight, 3);
 	} else {
@@ -188,7 +146,7 @@ function getScriptSigningActions(
 	preActions: Array<Function>,
 	actions: Array<Function>
 } {
-	const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
+	const script = params.TRANSFER.script + params.TRANSFER.signature;
 	const argument = "00" + getArgument(scriptType, inputs, output, change);// keylength zero
 
 	const preActions = [];
@@ -210,7 +168,7 @@ function getScriptSigningActions(
 	const utxoArguments = preparedData.preparedInputs.map(
 		(preparedInput) => {
 			const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
-			const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdHex}`, 'hex')
+			const SEPath = Buffer.from(`15328000002C800000${params.COIN_TYPE}8000000000000000${addressIdHex}`, 'hex')
 			//[outPoint(32+4B)] [inputScriptType(1B)] [inputAmount(8B)] [inputHash(20B)] [inputBlockHash(32B)] [inputBlockHeight(3B)]
 			const outPoint = preparedInput.preOutPointBuf;
 			let inputScriptType;

@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import { error } from '@coolwallet/core';
 import {
 	ScriptType, Input, Output, Change, PreparedData
-} from './types';
+} from '../config/types';
 const bs58check = require('bs58check')
 const zencashjs = require('zencashjs')
 

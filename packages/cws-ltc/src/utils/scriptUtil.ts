@@ -6,51 +6,6 @@ import * as bufferUtil from "./bufferUtil";
 import * as types from '../config/types';
 
 
-export function getSigningActions(
-  transport: types.Transport,
-  scriptType: types.ScriptType,
-  appId: string,
-  appPrivateKey: string,
-  change: types.Change | undefined,
-  coinType: string,
-  preparedData: types.PreparedData,
-  unsignedTransactions: Array<Buffer>,
-
-): ({ preActions: Array<Function>, actions: Array<Function> }) {
-  const preActions = [];
-  const sayHi = async () => {
-    await apdu.general.hi(transport, appId);
-  }
-  preActions.push(sayHi)
-  if (change) {
-    const changeAction = async () => {
-      if (scriptType === types.ScriptType.P2WPKH) {
-        throw new error.SDKError(getSigningActions.name, 'not support P2WPKH change');
-      } else {
-        const redeemType = (scriptType === types.ScriptType.P2PKH) ? '00' : '01';
-        await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, coinType, change.addressIndex, redeemType);
-      }
-    }
-    preActions.push(changeAction);
-  }
-
-  const parsingOutputAction = async () => {
-    const txDataHex = preparedData.outputsBuf.toString('hex');
-    const txDataType = (preparedData.outputType === types.ScriptType.P2WPKH) ? '0D' : '06';
-    return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
-  };
-  preActions.push(parsingOutputAction);
-
-  const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-    const keyId = tx.util.addressIndexToKeyId(coinType, preparedData.preparedInputs[i].addressIndex);
-    const readType = '02';
-    const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
-    const txDataType = '00';
-    return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
-  }));
-
-  return { preActions, actions };
-}
 
 export function getArgument(
   scriptType: types.ScriptType,

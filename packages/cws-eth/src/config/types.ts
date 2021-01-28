@@ -5,7 +5,7 @@ export type Output = {
   value: number
 }
 
-type Transport = transport.default;
+export type Transport = transport.default;
 
 export type signTx = {
   transport: Transport,

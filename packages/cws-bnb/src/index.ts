@@ -1,4 +1,4 @@
-import { coin as COIN, transport } from '@coolwallet/core';
+import { coin as COIN } from '@coolwallet/core';
 import { walletConnectSignature, transferSignature } from './sign';
 import { getTransferArgument, getCancelOrderArgument, getPlaceOrderArgument, getTokenArgument } from './utils/scriptUtil';
 import { signType, signCancelOrderType, signPlaceOrderType } from './config/types'
@@ -6,10 +6,6 @@ import * as param from './config/param'
 import * as txUtil from "./utils/transactionUtil";
 import * as Types from './config/types'
 import { TOKEN_SIGS } from './config/tokenType'
-
-
-type Transport = transport.default;
-
 export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   public Types: any;
 
@@ -21,7 +17,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   /**
    * Get Binance address by index
    */
-  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+  async getAddress(transport: Types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return txUtil.publicKeyToAddress(publicKey);
   }
@@ -61,7 +57,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     signData: signType
   ): Promise<string> {
     const script = param.TRANSFER.script + param.TRANSFER.signature;
-    const argument = getTransferArgument(signData.signObj, signData.addressIndex);
+    const argument = await getTransferArgument(signData.signObj, signData.addressIndex);
     return transferSignature(
       signData,
       'BNB',

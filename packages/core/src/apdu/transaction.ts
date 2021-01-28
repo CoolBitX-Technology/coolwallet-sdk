@@ -7,41 +7,6 @@ import { SDKError, APDUError } from '../error/errorHandle';
 import { CODE } from '../config/status/code';
 import { target } from '../config/param';
 
-
-/**
- * Set change address's path to CoolWallet.
- * 
- * @param transport 
- * @param appId 
- * @param appPrivateKey 
- * @param coinType 
- * @param changeAddressIndex 
- * @param redeemType 00=P2PKH 01=P2SH
- */
-export const setChangeKeyid = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  coinType: string,
-  changeAddressIndex: number,
-  redeemType: string
-) => {
-  const changeKeyId = addressIndexToKeyId(coinType, changeAddressIndex);
-  const sig = await getCommandSignature(
-    transport,
-    appId,
-    appPrivateKey,
-    commands.SET_CHANGE_KEYID,
-    changeKeyId,
-    redeemType
-  );
-  const keyWithSig = changeKeyId + sig.signature;
-  const { statusCode, msg } = await executeCommand(transport, commands.SET_CHANGE_KEYID, target.SE, keyWithSig, redeemType);
-  if (statusCode !== CODE._9000) {
-    throw new APDUError(commands.SET_CHANGE_KEYID, statusCode, msg)
-  }
-};
-
 /**
  * get command signature for CoolWalletS
  * @param {Transport} transport

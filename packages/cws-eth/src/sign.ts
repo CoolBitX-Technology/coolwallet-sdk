@@ -2,8 +2,8 @@ import { apdu, error, tx } from '@coolwallet/core';
 import * as ethUtil from './utils/ethUtils';
 import * as scriptUtils from './utils/scriptUtils';
 import { removeHex0x } from './utils/stringUtil';
-import * as scripts from "./config/param";
-import { signMsg, signTyped, EIP712Schema, signTx } from './config/type'
+import * as scripts from "./config/params";
+import { signMsg, signTyped, EIP712Schema, signTx } from './config/types'
 
 const Web3 = require('web3');
 const Ajv = require('ajv');

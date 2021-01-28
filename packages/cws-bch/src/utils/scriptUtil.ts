@@ -5,54 +5,11 @@ import * as bufferUtil from "./bufferUtil";
 import * as types from '../config/types';
 import * as params from '../config/params';
 
-export function getSigningActions(
-  transport: types.Transport,
-  scriptType: types.ScriptType,
-  appId: string,
-  appPrivateKey: string,
-  change: types.Change | undefined,
-  preparedData: types.PreparedData,
-  unsignedTransactions: Array<Buffer>,
-): {
-  preActions: Array<Function>,
-  actions: Array<Function>
-} {
-  const preActions = [];
-  const sayHi = async () => {
-    await apdu.general.hi(transport, appId);
-  }
-  preActions.push(sayHi)
-  if (change) {
-    const changeAction = async () => {
-      const redeemType = (scriptType === types.ScriptType.P2PKH) ? '00' : '01';
-      await apdu.tx.setChangeKeyid(transport, appId, appPrivateKey, params.COIN_TYPE, change.addressIndex, redeemType);
-    }
-    preActions.push(changeAction);
-  }
-
-  const parsingOutputAction = async () => {
-    const txDataHex = preparedData.outputsBuf.toString('hex');
-    return apdu.tx.txPrep(transport, txDataHex, '05', appPrivateKey);
-  };
-  preActions.push(parsingOutputAction);
-
-  const actions = unsignedTransactions.map((unsignedTx, i) => (async () => {
-    const keyId = tx.util.addressIndexToKeyId(params.COIN_TYPE, preparedData.preparedInputs[i].addressIndex);
-    const readType = '91';
-    const txDataHex = tx.flow.prepareSEData(keyId, unsignedTx, readType);
-    const txDataType = '00';
-    return apdu.tx.txPrep(transport, txDataHex, txDataType, appPrivateKey);
-  }));
-
-  return { preActions, actions };
-}
-
-
-export function getArgument(
+export async function getArgument(
   inputs: Array<types.Input>,
   output: types.Output,
   change?: types.Change,
-): string {
+): Promise<string> {
   const {
     scriptType: outputType,
     outHash: outputHash
@@ -79,7 +36,7 @@ export function getArgument(
     changeScriptType = bufferUtil.toVarUintBuffer(outputType);
     changeAmount = bufferUtil.toUintBuffer(change.value, 8);
     // const addressIdHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-    changePath = Buffer.from(utils.getPath(params.COIN_TYPE, change.addressIndex), 'hex');
+    changePath = Buffer.from(await utils.getPath(params.COIN_TYPE, change.addressIndex), 'hex');
   } else {
     haveChange = Buffer.from('00', 'hex');
     changeScriptType = Buffer.from('00', 'hex');

@@ -2,17 +2,12 @@
 import { coin as COIN, transport, setting } from '@coolwallet/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
-import { signTx, transactionType, signMsg, signTyped } from './config/type'
+import * as types from './config/types'
 import * as scriptUtils from './utils/scriptUtils';
-import * as param from "./config/param";
+import * as param from "./config/params";
 import { TOKENTYPE } from "./config/tokenType";
 import { removeHex0x } from "./utils/stringUtil";
 
-export {
-  transactionType, TOKENTYPE
-};
-
-type Transport = transport.default;
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
     super(param.COIN_TYPE);
@@ -23,7 +18,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {number} addressIndex
    * @return {string}
    */
-  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return pubKeyToAddress(publicKey);
   }
@@ -39,7 +34,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransaction(
-    signTxData: signTx
+    signTxData: types.signTx
   ) {
     const txData = signTxData.transaction;
 
@@ -65,7 +60,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
         return await this.signERC20Transaction(signTxData, tokenSignature); // 內建
       }
 
-      if (txData.option.transactionType == transactionType.ERC20 && txData.option.info.decimals && txData.option.info.decimals) { // 自建
+      if (txData.option.transactionType == types.transactionType.ERC20 && txData.option.info.decimals && txData.option.info.decimals) { // 自建
         return await this.signERC20Transaction(signTxData);
       }
     }
@@ -87,10 +82,11 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransferTransaction(
-    signTxData: signTx
+    signTxData: types.signTx
   ) {
+    console.log("signTransferTransaction")
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
-    const argument = scriptUtils.getTransferArgument(signTxData.transaction, signTxData.addressIndex);
+    const argument = await scriptUtils.getTransferArgument(signTxData.transaction, signTxData.addressIndex);
     const script = param.TRANSFER.script + param.TRANSFER.signature;
     
     return ethSign.signTransaction(
@@ -112,8 +108,9 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signERC20Transaction(
-    signTxData: signTx, tokenSignature: string = ''
+    signTxData: types.signTx, tokenSignature: string = ''
   ) {
+    console.log("signERC20Transaction")
 
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
     const script = param.ERC20.script + param.ERC20.signature;
@@ -138,8 +135,9 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signSmartContractTransaction(
-    signTxData: signTx
+    signTxData: types.signTx
   ) {
+    console.log("signSmartContractTransaction")
 
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
     const script = param.ETHSmartContract.script + param.ETHSmartContract.signature;
@@ -164,7 +162,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @return {Promise<String>}
    */
   async signMessage(
-    signMsgData: signMsg
+    signMsgData: types.signMsg
   ): Promise<string> {
     await setting.auth.versionCheck(signMsgData.transport, 81);
 
@@ -190,7 +188,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTypedData(
-    typedData: signTyped
+    typedData: types.signTyped
   ) {
     await setting.auth.versionCheck(typedData.transport, 84);
     const publicKey = await this.getPublicKey(typedData.transport, typedData.appPrivateKey, typedData.appId, typedData.addressIndex);
