@@ -6,7 +6,7 @@ import { APDUError, SDKError } from '../error/errorHandle'
 const bip39 = require('bip39');
 
 
-export const getPath = (coinType: string, keyIndex: number, depth: number = 5, isBIP32: boolean = true): string => {
+export const getPath = async (coinType: string, keyIndex: number, depth: number = 5, isBIP32: boolean = true): Promise<string> => {
   let path = '32'
   if (!isBIP32) {
     depth = 3;
@@ -26,7 +26,7 @@ export const getPath = (coinType: string, keyIndex: number, depth: number = 5, i
     path += "00000000";
   }
   if (depth >= 5) {
-    path += (keyIndex.toString(16)).padStart(16, "0");
+    path += (keyIndex.toString(16)).padStart(8, "0");
   }
   return path;
 }

@@ -34,7 +34,7 @@ export default class ECDSACoin {
         transport,
         appId,
         appPrivateKey,
-        utils.getPath(this.coinType, 0, 3)
+        await utils.getPath(this.coinType, 0, 3)
       );
       this.accPublicKey = accountPublicKey;
       this.accChainCode = accountChainCode;
