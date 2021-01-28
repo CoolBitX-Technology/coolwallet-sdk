@@ -1,22 +1,11 @@
-import { tx, transport, error, util } from '@coolwallet/core';
+import { tx, error } from '@coolwallet/core';
 import { ScriptType } from './config/types'
-import {
-	Input,
-	Output,
-	Change,
-	createUnsignedTransactions,
-	composeFinalTransaction,
-} from './utils/transactionUtil';
-import { getScriptSigningActions } from './utils/actionUtil'
+import * as txUtil from './utils/transactionUtil';
+import { getScriptSigningActions } from './utils/scriptUtil'
+import * as types from "./config/types";
 
-import { Transport, signTxType } from "./config/types";
-
-export {
-	signTransaction
-};
-
-async function signTransaction(
-	signTxData: signTxType
+export async function signTransaction(
+	signTxData: types.signTxType
 ): Promise<string> {
 
 	const { scriptType, transport, inputs, output, change, appPrivateKey, appId } = signTxData
@@ -26,14 +15,14 @@ async function signTransaction(
 		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${scriptType}'`);
 	}
 	
-	const { preparedData } = createUnsignedTransactions(
+	const { preparedData } = txUtil.createUnsignedTransactions(
 		scriptType,
 		inputs,
 		output,
 		change
 	);
 	let preActions, actions;
-	({ preActions, actions } = getScriptSigningActions(
+	({ preActions, actions } = await getScriptSigningActions(
 		transport,
 		scriptType,
 		appId,
@@ -52,7 +41,7 @@ async function signTransaction(
 		signTxData.authorizedCB,
 		false
 	);
-	const transaction = composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
+	const transaction = txUtil.composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
 	return transaction.toString('hex');
 }
 
