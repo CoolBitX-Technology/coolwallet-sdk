@@ -21,3 +21,6 @@ export const activeNet = {
   "scripthash2": 0x05, // old '3' prefix. available for backward compatibility.
   "wif": 0xb0
 }
+
+
+export const COIN_TYPE = '80000002'

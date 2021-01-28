@@ -68,7 +68,7 @@ export async function getArgument(
   ]).toString('hex');
 };
 
-export function getScriptSigningActions(
+export async function getScriptSigningActions(
   transport: types.Transport,
   scriptType: types.ScriptType,
   appId: string,
@@ -77,12 +77,12 @@ export function getScriptSigningActions(
   preparedData: types.PreparedData,
   output: types.Output,
   change: types.Change | undefined
-): {
+): Promise<{
   preActions: Array<Function>,
   actions: Array<Function>
-} {
+}> {
   const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = "00" + getArgument(inputs, output, change);// keylength zero
+  const argument = "00" + await getArgument(inputs, output, change);// keylength zero
 
   const preActions = [];
   const sendScript = async () => {
@@ -101,10 +101,10 @@ export function getScriptSigningActions(
   preActions.push(sendArgument);
 
   const utxoArguments = preparedData.preparedInputs.map(
-    (preparedInput) => {
+    async (preparedInput) => {
       // const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
       // const SEPath = Buffer.from(`15328000002C${params.COIN_TYPE}8000000000000000${addressIdHex}`, 'hex')
-      const SEPath = Buffer.from(`15${utils.getPath(params.COIN_TYPE, preparedInput.addressIndex)}`, 'hex')
+      const SEPath = Buffer.from(`15${await utils.getPath(params.COIN_TYPE, preparedInput.addressIndex)}`, 'hex')
       const outPoint = preparedInput.preOutPointBuf;
       let inputScriptType;
       if (scriptType == types.ScriptType.P2PKH) {
@@ -119,7 +119,7 @@ export function getScriptSigningActions(
 
   const actions = utxoArguments.map(
     (utxoArgument) => async () => {
-      return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, "12");
+      return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, await utxoArgument, "12");
     });
   return { preActions, actions };
 };

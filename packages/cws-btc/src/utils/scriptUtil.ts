@@ -1,31 +1,20 @@
-import BN from 'bn.js';
-import { transport, apdu, tx, error } from '@coolwallet/core';
-import * as bitcoin from 'bitcoinjs-lib';
+
+import { transport, apdu, error } from '@coolwallet/core';
 import * as cryptoUtil from './cryptoUtil';
+import * as bufferUtil from './bufferUtil';
 import * as txUtil from './transactionUtil';
 import * as varuint from './varuintUtil';
 import { COIN_TYPE } from '../config/param'
 import { utils } from '@coolwallet/core';
-import { ScriptType, OmniType, Input, Output, Change, PreparedData } from '../config/types';
+import { ScriptType, Input, Output, Change, PreparedData } from '../config/types';
 
 type Transport = transport.default;
 
 
-function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
-	const bn = new BN(numberOrString);
-	const buf = Buffer.from(bn.toArray()).reverse();
-	return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
-}
-
-function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
-	const bn = new BN(numberOrString);
-	const buf = Buffer.from(bn.toArray());
-	return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
-}
 
 const getPath = async (addressIndex: number) => {
 	let path = await utils.getPath(COIN_TYPE, addressIndex)
-	path = path.length.toString(16) + path
+	path = '15' + path
 	return path
 };
 
@@ -43,7 +32,7 @@ export function getScriptSigningActions(
 		async (preparedInput) => {
 			// const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
 			const path = await getPath(preparedInput.addressIndex)
-			const SEPath = Buffer.from(path , 'hex')
+			const SEPath = Buffer.from(`15${path}` , 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
 			let inputScriptType;
 			// TODO
@@ -123,7 +112,7 @@ export function getBTCArgument(
 	} else {
 		throw new error.SDKError(getBTCArgument.name, `Unsupport ScriptType '${outputType}'`);
 	}
-	const outputAmount = toUintBuffer(output.value, 8);
+	const outputAmount = bufferUtil.toUintBuffer(output.value, 8);
 	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
 	let haveChange;
 	let changeScriptType;
@@ -132,24 +121,24 @@ export function getBTCArgument(
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(getBTCArgument.name, 'Public Key not exists !!');
 		haveChange = varuint.encode(1);
-		changeScriptType = toUintBuffer(scriptType, 1);
-		changeAmount = toUintBuffer(change.value, 8);
+		changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
+		changeAmount = bufferUtil.toUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from('32' + '8000002C' + '800000' + COIN_TYPE + '80000000' + '00000000' + addressIdxHex, 'hex');
+		changePath = Buffer.from('32' + '8000002C' + COIN_TYPE + '80000000' + '00000000' + addressIdxHex, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
-		changeAmount = toUintBuffer(0, 8)//)Buffer.from('0000000000000000', 'hex');
-		changePath = toUintBuffer(0, 21)//Buffer.from('000000000000000000000000000000000000000000', 'hex');
+		changeAmount = bufferUtil.toUintBuffer(0, 8)//)Buffer.from('0000000000000000', 'hex');
+		changePath = bufferUtil.toUintBuffer(0, 21)//Buffer.from('000000000000000000000000000000000000000000', 'hex');
 	}
 	const prevouts = inputs.map(input => {
 		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
-		toReverseUintBuffer(input.preIndex, 4)])
+			bufferUtil.toReverseUintBuffer(input.preIndex, 4)])
 	})
 	const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
 	const sequences = inputs.map(input => {
 		return Buffer.concat([
-			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex')
+			(input.sequence) ? bufferUtil.toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex')
 		])
 	})
 	const hashSequence = cryptoUtil.doubleSha256(Buffer.concat(sequences));
@@ -192,7 +181,7 @@ export async function getUSDTArgument(
 	} else {
 		throw new error.SDKError(getBTCArgument.name, `Unsupport ScriptType '${outputType}'`);
 	}
-	const outputAmount = toUintBuffer(output.value, 8);
+	const outputAmount = bufferUtil.toUintBuffer(output.value, 8);
 	//[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
 	let haveChange;
 	let changeScriptType;
@@ -201,29 +190,29 @@ export async function getUSDTArgument(
 	if (change) {
 		if (!change.pubkeyBuf) throw new error.SDKError(getBTCArgument.name, 'Public Key not exists !!');
 		haveChange = varuint.encode(1);
-		changeScriptType = toUintBuffer(scriptType, 1);
-		changeAmount = toUintBuffer(change.value, 8);
+		changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
+		changeAmount = bufferUtil.toUintBuffer(change.value, 8);
 		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
 		changePath = Buffer.from('32' + '8000002C' + '800000' + COIN_TYPE + '80000000' + '00000000' + addressIdxHex, 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
-		changeAmount = toUintBuffer(0, 8)//)Buffer.from('0000000000000000', 'hex');
-		changePath = toUintBuffer(0, 21)//Buffer.from('000000000000000000000000000000000000000000', 'hex');
+		changeAmount = bufferUtil.toUintBuffer(0, 8)//)Buffer.from('0000000000000000', 'hex');
+		changePath = bufferUtil.toUintBuffer(0, 21)//Buffer.from('000000000000000000000000000000000000000000', 'hex');
 	}
 	const prevouts = inputs.map(input => {
 		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
-		toReverseUintBuffer(input.preIndex, 4)])
+			bufferUtil.toReverseUintBuffer(input.preIndex, 4)])
 	})
 	const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
 	const sequences = inputs.map(input => {
 		return Buffer.concat([
-			(input.sequence) ? toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex')
+			(input.sequence) ? bufferUtil.toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex')
 		])
 	})
 	const hashSequence = cryptoUtil.doubleSha256(Buffer.concat(sequences));
 
-	const usdtAmount = toUintBuffer(value, 8);
+	const usdtAmount = bufferUtil.toUintBuffer(value, 8);
 
 	return Buffer.concat([
 		outputScriptType,

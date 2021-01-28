@@ -1,9 +1,9 @@
 import { coin as COIN, transport } from '@coolwallet/core';
 import { signTransaction } from './sign';
 import * as types from './config/types';
+import * as params from './config/params';
 import * as txUtil from './utils/transactionUtil';
 
-const coinType = '02'
 
 export default class LTC extends COIN.ECDSACoin implements COIN.Coin {
 
@@ -11,7 +11,7 @@ export default class LTC extends COIN.ECDSACoin implements COIN.Coin {
 	public addressToOutScript: Function; 
 
 	constructor() {
-		super(coinType);
+		super(params.COIN_TYPE);
 		this.ScriptType = types.ScriptType;
 		this.addressToOutScript = txUtil.addressToOutScript;
 	}

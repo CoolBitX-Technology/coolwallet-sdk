@@ -20,7 +20,7 @@ export async function signTransaction(
 		change
 	);
 	let preActions, actions;
-	({ preActions, actions } = scriptUtil.getScriptSigningActions(
+	({ preActions, actions } = await scriptUtil.getScriptSigningActions(
 		transport,
 		scriptType,
 		appId,

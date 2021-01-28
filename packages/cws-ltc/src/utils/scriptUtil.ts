@@ -1,4 +1,4 @@
-import { error, tx, apdu, utils } from '@coolwallet/core';
+import { error, apdu, utils } from '@coolwallet/core';
 import * as params from "../config/params";
 import * as cryptoUtil from "./cryptoUtil";
 import * as txUtil from "./transactionUtil";
@@ -9,7 +9,6 @@ import * as types from '../config/types';
 
 export function getArgument(
   scriptType: types.ScriptType,
-  coinType: string,
   inputs: Array<types.Input>,
   output: types.Output,
   change?: types.Change,
@@ -51,7 +50,7 @@ export function getArgument(
     changeAmount = bufferUtil.toNonReverseUintBuffer(change.value, 8);
     const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
     // changePath = Buffer.from(`328000002C800000028000000000000000${addressIdxHex}`, 'hex');
-    changePath = Buffer.from('32' + '8000002C' + '800000' + coinType + '80000000' + '00000000' + addressIdxHex, 'hex');
+    changePath = Buffer.from('32' + '8000002C' + params.COIN_TYPE + '80000000' + '00000000' + addressIdxHex, 'hex');
   } else {
     haveChange = Buffer.from('00', 'hex');
     changeScriptType = Buffer.from('00', 'hex');
@@ -111,7 +110,7 @@ export function getScriptSigningActions(
   actions: Array<Function>
 } {
   const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = "00" + getArgument(scriptType, coinType, inputs, output, change);// keylength zero
+  const argument = "00" + getArgument(scriptType, inputs, output, change);// keylength zero
 
   const preActions = [];
   const sendScript = async () => {
@@ -130,9 +129,9 @@ export function getScriptSigningActions(
   preActions.push(sendArgument);
 
   const utxoArguments = preparedData.preparedInputs.map(
-    (preparedInput) => {
-      const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
-      const SEPath = Buffer.from(`15328000002C800000${coinType}8000000000000000${addressIdHex}`, 'hex')
+    async (preparedInput) => {
+      // const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
+      const SEPath = Buffer.from(`15${await utils.getPath(params.COIN_TYPE, preparedInput.addressIndex)}`, 'hex')
       const outPoint = preparedInput.preOutPointBuf;
 
       // let inputScriptType;
@@ -151,7 +150,7 @@ export function getScriptSigningActions(
 
   const actions = utxoArguments.map(
     (utxoArgument) => async () => {
-      return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, utxoArgument, (scriptType === types.ScriptType.P2PKH) ? "10" : "11");
+      return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, await utxoArgument, (scriptType === types.ScriptType.P2PKH) ? "10" : "11");
     });
   return { preActions, actions };
 };

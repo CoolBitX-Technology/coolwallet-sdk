@@ -6,7 +6,7 @@ import { COIN_TYPE } from '../config/param'
 
 const getPath = async (addressIndex: number) => {
   let path = await utils.getPath(COIN_TYPE, addressIndex)
-  path = path.length.toString(16) + path
+  path = '15' + path
   return path
 };
 
