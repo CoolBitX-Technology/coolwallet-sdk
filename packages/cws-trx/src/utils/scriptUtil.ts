@@ -1,8 +1,8 @@
-import { error, transport, apdu } from "@coolwallet/core";
-import { hexStr2byteArray, byteArray2hexStr, sha256 } from './cryptoUtils';
+import { utils } from '@coolwallet/core';
+import { hexStr2byteArray, byteArray2hexStr, sha256 } from './cryptoUtil';
 import { encode58 } from "./base58";
-import * as param from '../config/param';
-import * as type from '../config/type';
+import * as param from '../config/params';
+import * as type from '../config/types';
 
 const Web3 = require('web3');
 const {
@@ -144,38 +144,7 @@ export const getWithdrawBalanceArgement = (rawData: type.WithdrawBalanceContract
 
 
 
-function addPath(argument: string, addressIndex: number) {
-  const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
-  const SEPath = `15328000002C800000${param.coinType}8000000000000000${addressIdxHex}`;
-  console.log("SEPath: " + SEPath)
+async function addPath(argument: string, addressIndex: number) {
+  const SEPath = `15${await utils.getPath(param.COIN_TYPE, addressIndex)}`;
   return SEPath + argument;
-}
-/**
- * Convert public key to address
- * @param {string} compressedPubkey
- * @return {string}
- */
-export function pubKeyToAddress(compressedPubkey: string): string {
-  const keyPair = ec.keyFromPublic(compressedPubkey, "hex");
-  const pubkey = `04${keyPair.getPublic(false, "hex").substr(2)}`;
-  console.log("pubkey: " + pubkey)
-  let pubBytes = hexStr2byteArray(pubkey)
-
-  if (pubBytes.length === 65) {
-    pubBytes = pubBytes.slice(1);
-  }
-
-  const hash = keccak256(pubBytes).toString('hex');
-  let addressHex = hash.substring(26);
-  addressHex = '41' + addressHex;
-  console.log("addressHex: " + addressHex)
-  // const addressBuffer = Buffer.from(addressHex)
-  const addressByteArray = hexStr2byteArray(addressHex)
-  console.log(addressByteArray)
-
-  let msgHex = byteArray2hexStr(addressByteArray);
-  const addressHash = sha256(sha256(addressByteArray)).slice(0, 4);
-  console.log(addressHash)
-  const address = encode58(addressByteArray.concat(addressHash))
-  return address
 }

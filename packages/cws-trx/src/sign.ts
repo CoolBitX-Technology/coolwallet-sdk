@@ -1,6 +1,4 @@
-import { apdu, transport, error, tx, util } from '@coolwallet/core';
-import * as trxUtil from './utils/trxUtils';
-import * as scripts from "./config/scripts";
+import { apdu, transport, tx } from '@coolwallet/core';
 
 type Transport = transport.default;
 
