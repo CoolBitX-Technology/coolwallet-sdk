@@ -7,10 +7,10 @@ import * as stringUtil from "./stringUtil";
  * @param {number} addressIndex
  * @param {*} transaction
  */
-export const getScriptAndArguments = (addressIndex: number, transaction: object) => {
+export const getScriptAndArguments = async (addressIndex: number, transaction: object) => {
   // const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
   // const SEPath = `15328000002C${params.COIN_TYPE}8000000000000000${addressIdxHex}`;
-  const SEPath = `15${utils.getPath(params.COIN_TYPE, addressIndex)}`;
+  const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
   let script;
   let argument;
   script = params.TRANSFER.script + params.TRANSFER.signature;

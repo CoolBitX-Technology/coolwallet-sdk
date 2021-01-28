@@ -16,7 +16,7 @@ export default async function signTransaction(
   let canonicalSignature;
   const preActions = [];
 
-  const { script, argument } = scriptUtil.getScriptAndArguments(addressIndex, transaction);
+  const { script, argument } = await scriptUtil.getScriptAndArguments(addressIndex, transaction);
 
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
