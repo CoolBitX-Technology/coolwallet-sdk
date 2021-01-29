@@ -45,58 +45,6 @@ export const getAccountExtendedKey = async (transport: Transport, path: string):
   }
 };
 
-/**
- * Get ECDSA Account Extended public key (Encrypted)
- * @param {*} transport
- * @param {string} coinType P1
- * @param {string} accIndex P2
- * @return {Promise<string>}
- */
-export const getECDSAAccountExtendedKey = async (transport: Transport, coinType: string, accIndex: string): Promise<string> => {
-  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, undefined, coinType, accIndex);
-  if (key) {
-    return key
-  } else {
-    throw new APDUError(commands.GET_EXT_KEY, statusCode, msg)
-  }
-};
-
-
-
-/**
- * Get ED25519 Account Public Key (Encrypted)
- * @param {Transport} transport
- * @param {string} coinType P1
- * @param {string} accIndex P2
- * @param {string} protocol
- * @return {Promise<string>}
- */
-export const getEd25519AccountPublicKey = async (transport: Transport, coinType: string, accIndex: string, protocol: string, path: string | undefined): Promise<string> => {
-  let commandData;
-  let P1;
-  let P2;
-  let data = undefined;
-  if (protocol === 'BIP44') {
-    commandData = commands.GET_ED25519_ACC_PUBKEY
-    P1 = coinType;
-    P2 = accIndex;
-  } else if (protocol === 'SLIP0010') {
-    commandData = commands.GET_XLM_ACC_PUBKEY
-    P1 = coinType
-    P2 = "01"
-    data = path
-  } else {
-    throw new SDKError(getEd25519AccountPublicKey.name, 'Unsupported protocol');
-  }
-  const { outputData: key, statusCode, msg } = await executeCommand(transport, commandData, target.SE, data, P1, P2);
-  if (key) {
-    return key
-  } else {
-    throw new APDUError(commandData, statusCode, msg)
-  }
-};
-
-
 
 /**
  * Create a new seed with SE.

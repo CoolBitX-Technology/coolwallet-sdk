@@ -14,9 +14,6 @@ export type signTxType = {
 
 export type versionByteNames = 'ed25519PublicKey' | 'ed25519SecretSeed' | 'preAuthTx' | 'sha256Hash';
 
-export const path_bip44 = '328000002C8000009480000000'
-export const path_slip0010 = '108000002C8000009480000000'
-export const coinType = '94'
 
 export enum COIN_SPECIES{
   XLM = 'XLM', KAU = 'KAU', KAG = 'KAG', 

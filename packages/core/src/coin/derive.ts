@@ -66,20 +66,15 @@ export const getEd25519PublicKey = async (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
-  coinSEType: string,
   accountIndex: number,
-  protocol: string,
-  path: string | undefined,
+  path: string,
   authFirst: boolean = true
 ): Promise<string> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
   const accIndexHex = accountIndex.toString(16).padStart(2, "0");
-  const response = await apdu.wallet.getEd25519AccountPublicKey(
+  const response = await apdu.wallet.getAccountExtendedKey(
     transport,
-    coinSEType,
-    accIndexHex,
-    protocol,
     path
   );
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
