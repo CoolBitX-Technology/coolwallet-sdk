@@ -73,7 +73,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     signData: signType, denom: string, tokenSignature: string = ''
   ): Promise<string> {
     const script = param.BEP2Token.script + param.BEP2Token.signature;
-    const argument = getTokenArgument(signData.signObj, denom, tokenSignature, signData.addressIndex);
+    const argument = await getTokenArgument(signData.signObj, denom, tokenSignature, signData.addressIndex);
     return transferSignature(
       signData,
       denom,
@@ -89,7 +89,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     signData: signPlaceOrderType
   ): Promise<string> {
     const script = param.PlaceOrder.script + param.PlaceOrder.signature;
-    const argument = getPlaceOrderArgument(signData.signObj, signData.addressIndex);
+    const argument = await getPlaceOrderArgument(signData.signObj, signData.addressIndex);
     const signature = await walletConnectSignature(
       signData.transport,
       signData.appId,
@@ -109,7 +109,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     signData: signCancelOrderType
   ): Promise<string> {
     const script = param.CancelOrder.script + param.CancelOrder.signature;
-    const argument = getCancelOrderArgument(signData.signObj, signData.addressIndex);
+    const argument = await getCancelOrderArgument(signData.signObj, signData.addressIndex);
     const signature = await walletConnectSignature(
       signData.transport,
       signData.appId,
