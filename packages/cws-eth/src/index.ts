@@ -4,13 +4,16 @@ import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types'
 import * as scriptUtils from './utils/scriptUtils';
-import * as param from "./config/params";
+import * as params from "./config/params"; 
+import { transactionType }  from "./config/types";
 import { TOKENTYPE } from "./config/tokenType";
 import { removeHex0x } from "./utils/stringUtil";
 
+export { transactionType } 
+
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
-    super(param.COIN_TYPE);
+    super(params.COIN_TYPE);
   }
 
   /**
@@ -87,7 +90,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     console.log("signTransferTransaction")
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
     const argument = await scriptUtils.getTransferArgument(signTxData.transaction, signTxData.addressIndex);
-    const script = param.TRANSFER.script + param.TRANSFER.signature;
+    const script = params.TRANSFER.script + params.TRANSFER.signature;
     
     return ethSign.signTransaction(
       signTxData,
@@ -113,8 +116,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     console.log("signERC20Transaction")
 
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
-    const script = param.ERC20.script + param.ERC20.signature;
-    const argument = scriptUtils.getERC20Argument(signTxData.transaction, tokenSignature, signTxData.addressIndex);
+    const script = params.ERC20.script + params.ERC20.signature;
+    const argument = await scriptUtils.getERC20Argument(signTxData.transaction, tokenSignature, signTxData.addressIndex);
 
     return ethSign.signTransaction(
       signTxData,
@@ -140,8 +143,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     console.log("signSmartContractTransaction")
 
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
-    const script = param.ETHSmartContract.script + param.ETHSmartContract.signature;
-    const argument = scriptUtils.getSmartContractArgument(signTxData.transaction, signTxData.addressIndex);
+    const script = params.ETHSmartContract.script + params.ETHSmartContract.signature;
+    const argument = await scriptUtils.getSmartContractArgument(signTxData.transaction, signTxData.addressIndex);
 
     return ethSign.signTransaction(
       signTxData,
@@ -167,8 +170,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     await setting.auth.versionCheck(signMsgData.transport, 81);
 
     const publicKey = await this.getPublicKey(signMsgData.transport, signMsgData.appPrivateKey, signMsgData.appId, signMsgData.addressIndex);
-    const script = param.SIGN_MESSAGE.script + param.SIGN_MESSAGE.signature;
-    const argument = scriptUtils.getSignMessageArgument(signMsgData.message, signMsgData.addressIndex);
+    const script = params.SIGN_MESSAGE.script + params.SIGN_MESSAGE.signature;
+    const argument = await scriptUtils.getSignMessageArgument(signMsgData.message, signMsgData.addressIndex);
 
 
     return ethSign.signMessage(
@@ -192,7 +195,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   ) {
     await setting.auth.versionCheck(typedData.transport, 84);
     const publicKey = await this.getPublicKey(typedData.transport, typedData.appPrivateKey, typedData.appId, typedData.addressIndex);
-    const script = param.SIGN_TYPED_DATA.script + param.SIGN_TYPED_DATA.signature;
+    const script = params.SIGN_TYPED_DATA.script + params.SIGN_TYPED_DATA.signature;
 
     return ethSign.signTypedData(
       typedData,

@@ -31,7 +31,7 @@ export const getTransferArgument = async (transaction: Transaction, addressIndex
  * @param transaction 
  * @param tokenSignature 
  */
-export const getERC20Argument = (transaction: Transaction, tokenSignature: string, addressIndex: number) => {
+export const getERC20Argument = async (transaction: Transaction, tokenSignature: string, addressIndex: number) => {
 
   const txTokenInfo: Option = transaction.option;
   const tokenInfo = token.getSetTokenPayload(transaction.to, txTokenInfo.info.symbol, parseInt(txTokenInfo.info.decimals));
@@ -48,7 +48,7 @@ export const getERC20Argument = (transaction: Transaction, tokenSignature: strin
     tokenInfo +
     signature;
 
-  return '15' + utils.getPath(COIN_TYPE, addressIndex) + argument;
+  return '15' + await utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
 
 
@@ -56,7 +56,7 @@ export const getERC20Argument = (transaction: Transaction, tokenSignature: strin
  * [contractAddress(20B)] [value(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)] [contractData(Variety)]
  * @param transaction 
  */
-export const getSmartContractArgument = (transaction: Transaction, addressIndex: number) => {
+export const getSmartContractArgument = async (transaction: Transaction, addressIndex: number) => {
   const argument =
     handleHex(transaction.to) + // contractAddress : 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
     handleHex(transaction.value).padStart(20, "0") + // 000000b1a2bc2ec50000
@@ -66,7 +66,7 @@ export const getSmartContractArgument = (transaction: Transaction, addressIndex:
     handleHex(transaction.chainId.toString(16)).padStart(4, "0") + // 0001
     handleHex(transaction.data) // limit of data length : 1208Byte
 
-  return '15' + utils.getPath(COIN_TYPE, addressIndex) + argument;
+  return '15' + await utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
 
 
@@ -74,20 +74,20 @@ export const getSmartContractArgument = (transaction: Transaction, addressIndex:
  * [message(Variety)]
  * @param transaction 
  */
-export const getSignMessageArgument = (message: string, addressIndex: number) => {
+export const getSignMessageArgument = async (message: string, addressIndex: number) => {
   const argument =
     handleHex(Web3.utils.toHex(message))
-  return '15' + utils.getPath(COIN_TYPE, addressIndex) + argument;
+  return '15' + await utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
 
 /**
  * [domainSeparator(32B)] [data(Variety)]
  * @param transaction 
  */
-export const getSignTypedDataArgument = (domainSeparator: string, data: string, addressIndex: number) => {
+export const getSignTypedDataArgument = async (domainSeparator: string, data: string, addressIndex: number) => {
   
   const argument =
     handleHex(domainSeparator).padStart(64, "0") +
     handleHex(data)
-  return '15' + utils.getPath(COIN_TYPE, addressIndex) + argument;
+  return '15' + await utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
