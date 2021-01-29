@@ -7,12 +7,12 @@ import * as types from '../config/types';
 
 
 
-export function getArgument(
+export async function getArgument(
   scriptType: types.ScriptType,
   inputs: Array<types.Input>,
   output: types.Output,
   change?: types.Change,
-): string {
+): Promise<string> {
   const {
     scriptType: outputType,
     outScript: outputScript,
@@ -48,9 +48,7 @@ export function getArgument(
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
 
     changeAmount = bufferUtil.toNonReverseUintBuffer(change.value, 8);
-    const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-    // changePath = Buffer.from(`328000002C800000028000000000000000${addressIdxHex}`, 'hex');
-    changePath = Buffer.from('32' + '8000002C' + params.COIN_TYPE + '80000000' + '00000000' + addressIdxHex, 'hex');
+    changePath = Buffer.from(await utils.getPath(params.COIN_TYPE, change.addressIndex), 'hex');
   } else {
     haveChange = Buffer.from('00', 'hex');
     changeScriptType = Buffer.from('00', 'hex');

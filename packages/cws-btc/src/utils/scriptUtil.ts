@@ -32,7 +32,7 @@ export function getScriptSigningActions(
 		async (preparedInput) => {
 			// const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
 			const path = await getPath(preparedInput.addressIndex)
-			const SEPath = Buffer.from(`15${path}` , 'hex')
+			const SEPath = Buffer.from(`15${path}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
 			let inputScriptType;
 			// TODO
@@ -88,12 +88,12 @@ export function getScriptSigningPreActions(
 	return { preActions };
 };
 
-export function getBTCArgument(
+export async function getBTCArgument(
 	scriptType: ScriptType,
 	inputs: Array<Input>,
 	output: Output,
 	change?: Change,
-): string {
+): Promise<string> {
 	const {
 		scriptType: outputType,
 		outHash: outputHash
@@ -123,8 +123,7 @@ export function getBTCArgument(
 		haveChange = varuint.encode(1);
 		changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
 		changeAmount = bufferUtil.toUintBuffer(change.value, 8);
-		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from('32' + '8000002C' + COIN_TYPE + '80000000' + '00000000' + addressIdxHex, 'hex');
+		changePath = Buffer.from(await utils.getPath(COIN_TYPE, change.addressIndex), 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
@@ -133,7 +132,7 @@ export function getBTCArgument(
 	}
 	const prevouts = inputs.map(input => {
 		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
-			bufferUtil.toReverseUintBuffer(input.preIndex, 4)])
+		bufferUtil.toReverseUintBuffer(input.preIndex, 4)])
 	})
 	const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
 	const sequences = inputs.map(input => {
@@ -192,8 +191,7 @@ export async function getUSDTArgument(
 		haveChange = varuint.encode(1);
 		changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
 		changeAmount = bufferUtil.toUintBuffer(change.value, 8);
-		const addressIdxHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
-		changePath = Buffer.from('32' + '8000002C' + '800000' + COIN_TYPE + '80000000' + '00000000' + addressIdxHex, 'hex');
+		changePath = Buffer.from(await utils.getPath(COIN_TYPE, change.addressIndex), 'hex');
 	} else {
 		haveChange = Buffer.from('00', 'hex');
 		changeScriptType = Buffer.from('00', 'hex');
@@ -202,7 +200,7 @@ export async function getUSDTArgument(
 	}
 	const prevouts = inputs.map(input => {
 		return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(),
-			bufferUtil.toReverseUintBuffer(input.preIndex, 4)])
+		bufferUtil.toReverseUintBuffer(input.preIndex, 4)])
 	})
 	const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
 	const sequences = inputs.map(input => {
