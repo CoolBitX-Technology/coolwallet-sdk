@@ -1,7 +1,7 @@
 import { executeCommand, executeAPDU } from '../execute/execute';
 import Transport from '../../transport';
 import { commands } from "../execute/command";
-import { target } from '../../config/target';
+import { target } from '../../config/param';
 import { Promise as promise } from 'bluebird';
 import { SDKError } from '../../error/errorHandle';
 import * as util from '../../utils';

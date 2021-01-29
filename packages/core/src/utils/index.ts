@@ -6,6 +6,30 @@ import { APDUError, SDKError } from '../error/errorHandle'
 const bip39 = require('bip39');
 
 
+export const getPath = async (coinType: string, keyIndex: number, depth: number = 5, isBIP32: boolean = true): Promise<string> => {
+  let path = '32'
+  if (!isBIP32) {
+    depth = 3;
+    path = '10'
+  }
+
+  if (depth >= 1) {
+    path += "8000002C";
+  }
+  if (depth >= 2) {
+    path += coinType;
+  }
+  if (depth >= 3) {
+    path += "80000000";
+  }
+  if (depth >= 4) {
+    path += "00000000";
+  }
+  if (depth >= 5) {
+    path += (keyIndex.toString(16)).padStart(8, "0");
+  }
+  return path;
+}
 
 export const getReturnMsg = (code: string): string => {
   return MSG[`_${code}`] ? MSG[`_${code}`] : "unknown command error";

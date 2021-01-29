@@ -1,18 +1,19 @@
 import { coin as COIN, transport } from "@coolwallet/core";
 import * as xrpSign from "./sign";
-import * as xrpUtil from "./util";
-import { Transport, signTxType, Payment } from "./types";
+import * as txUtil from "./utils/tracsactionUtil";
+import * as types from "./config/types";
+import * as params from "./config/params";
 export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
   constructor() {
-    super("90");
+    super(params.COIN_TYPE);
   }
 
   /**
    * Get XRP address by index
    */
-  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    return xrpUtil.pubKeyToAddress(publicKey);
+    return txUtil.pubKeyToAddress(publicKey);
   }
 
   /**
@@ -20,7 +21,7 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
    * @description TransactionType must be 'Payment', Flags must be 2147483648;
    */
   async signTransaction(
-    signTxData: signTxType
+    signTxData: types.signTxType
   ) {
     const payment = signTxData.payment;
 
@@ -31,12 +32,11 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
       payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
     }
     if (!payment.Account) {
-      payment.Account = xrpUtil.pubKeyToAddress(payment.SigningPubKey);
+      payment.Account = txUtil.pubKeyToAddress(payment.SigningPubKey);
     }
 
     return xrpSign.signPayment(
       signTxData,
-      this.coinType,
       payment,
     );
   }

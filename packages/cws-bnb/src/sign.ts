@@ -1,14 +1,14 @@
-import { apdu, transport, tx, error, util } from '@coolwallet/core';
-import * as bnbUtil from './util';
-import { coinType, TransactionType, Transfer, PlaceOrder, CancelOrder, signType } from './types'
+import { apdu, transport, tx } from '@coolwallet/core';
+import * as txUtil from './utils/transactionUtil';
+import * as types from './config/types'
 
 type Transport = transport.default;
 
 export async function transferSignature(
-  signData: signType,
+  signData: types.signType,
   denom: string,
   script: string,
-  inputArgument: string,
+  argument: string,
 ): Promise<string> {
   // if (transactionType !== TransactionType.TRANSFER) {
   //   throw new error.SDKError(transferSignature.name, `Unsupport transactionType: '${transactionType}'`);
@@ -18,22 +18,20 @@ export async function transferSignature(
     signData.transport,
     signData.appId,
     signData.appPrivateKey,
-    signData.addressIndex,
     script,
-    inputArgument,
+    argument,
     signData.confirmCB,
     signData.authorizedCB,
   );
-  return bnbUtil.composeSignedTransacton(signData.signObj as Transfer, denom, canonicalSignature, signData.signPublicKey)
+  return txUtil.composeSignedTransacton(signData.signObj as types.Transfer, denom, canonicalSignature, signData.signPublicKey)
 }
 
 export async function walletConnectSignature(
   transport: Transport,
   appId: string,
   appPrivateKey: string,
-  addressIndex: number,
   script: string,
-  inputArgument: string,
+  argument: string,
   confirmCB?: Function,
   authorizedCB?: Function
 ): Promise<string> {
@@ -46,9 +44,8 @@ export async function walletConnectSignature(
     transport,
     appId,
     appPrivateKey,
-    addressIndex,
     script,
-    inputArgument,
+    argument,
     confirmCB,
     authorizedCB
   );
@@ -64,9 +61,8 @@ async function sign(
   transport: Transport,
   appId: string, 
   appPrivateKey: string,
-  addressIndex: number,
   script: string,
-  inputArgument: string,
+  argument: string,
   confirmCB?: Function,
   authorizedCB?: Function
 ): Promise<{ r: string; s: string; }> {
@@ -75,7 +71,6 @@ async function sign(
 
   const preActions = [];
   let action;
-  const argument = bnbUtil.getArguments(inputArgument, addressIndex);
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
   }
@@ -101,44 +96,3 @@ async function sign(
   ) as { r: string; s: string; };
 }
 
-
-/**
- * Sign Binance Tranaction
- */
-async function sign100(
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  transactionType: TransactionType,
-  readType: string,
-  signObj: Transfer | PlaceOrder | CancelOrder,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined,
-): Promise<{ r: string; s: string; }> {
-  const preActions = [];
-  let action;
-
-  const rawPayload = bnbUtil.convertObjectToSignBytes(signObj);
-  const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
-  const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
-
-  const sayHi = async () => {
-    await apdu.general.hi(transport, appId);
-  }
-  preActions.push(sayHi)
-
-  action = async () => {
-    return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
-  }
-
-  return await tx.flow.getSingleSignatureFromCoolWallet(
-    transport,
-    preActions,
-    action,
-    false,
-    confirmCB,
-    authorizedCB,
-    true
-  ) as { r: string; s: string; };
-}

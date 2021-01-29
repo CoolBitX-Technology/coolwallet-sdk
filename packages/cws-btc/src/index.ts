@@ -1,22 +1,15 @@
-import { coin as COIN, transport, error } from '@coolwallet/core';
-import { ScriptType, OmniType, Input, Output, Change } from './utils/types'
-import {
-	addressToOutScript,
-	pubkeyToAddressAndOutScript
-} from './utils/transactionUtil';
-import { signBTCTransaction, signUSDTransaction } from './btcSign';
-import { signTxType, signUSDTTxType, Transport } from './utils/types';
-
-
-export const coinType = '00'
-
+import { coin as COIN } from '@coolwallet/core';
+import { addressToOutScript, pubkeyToAddressAndOutScript } from './utils/transactionUtil';
+import { signBTCTransaction, signUSDTransaction } from './sign';
+import { ScriptType, signTxType, signUSDTTxType, Transport } from './config/types';
+import { COIN_TYPE } from './config/param'
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	public ScriptType: any;
 	public addressToOutScript: Function;
 
 	constructor() {
-		super(coinType);
+		super(COIN_TYPE);
 		this.ScriptType = ScriptType;
 		this.addressToOutScript = addressToOutScript;
 	}
@@ -63,7 +56,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
-		
+
 		if (signUSDTTxData.change) {
 			const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, signUSDTTxData.change.addressIndex);
 			signUSDTTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');

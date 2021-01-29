@@ -1,80 +1,43 @@
-import { apdu, transport, tx, util as coreUtil } from "@coolwallet/core";
-import * as coinUtil from "./util";
-import { Transport, signTxType, Payment } from "./types";
-
-const codec = require("ripple-binary-codec");
-
-
-const generateRawTx = (signature: string, payment: Payment): string => {
-  /* eslint-disable-next-line no-param-reassign */
-  payment.TxnSignature = signature.toUpperCase();
-  return codec.encode(payment);
-};
+import { apdu, tx } from "@coolwallet/core";
+import * as scriptUtil from "./utils/scriptUtil";
+import * as txUtil from "./utils/tracsactionUtil";
+import * as types from "./config/types";
+import * as params from "./config/params";
 
 // eslint-disable-next-line import/prefer-default-export
 export const signPayment = async (
-  signTxData: signTxType,
-  coinType: string,
-  payment: Payment
+  signTxData: types.signTxType,
+  payment: types.Payment
 ): Promise<string> => {
 
   const { transport, addressIndex, appId, appPrivateKey, confirmCB, authorizedCB } = signTxData
 
-  const useScript = await coreUtil.checkSupportScripts(transport);
-  let signature;
-  if (useScript) {
-    const { script, argument } = coinUtil.getScriptAndArguments(
-      addressIndex,
-      payment
-    );
-    const preActions = [];
-    const sendScript = async () => {
-      await apdu.tx.sendScript(transport, script);
-    }
-    preActions.push(sendScript);
+  const script = params.TRANSFER.script + params.TRANSFER.signature;
+  const argument = await scriptUtil.getPaymentArgument(addressIndex, payment);
 
-    const sendArgument = async () => {
-      return apdu.tx.executeScript(
-        transport,
-        appId,
-        appPrivateKey,
-        argument
-      );
-    }
+  const preActions = [];
+  const sendScript = async () => {
+    await apdu.tx.sendScript(transport, script);
+  }
+  preActions.push(sendScript);
 
-    signature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const sendArgument = async () => {
+    return apdu.tx.executeScript(
       transport,
-      preActions,
-      sendArgument,
-      false,
-      confirmCB,
-      authorizedCB,
-      false
-    );
-  } else {
-    const payload = Buffer.from(codec.encodeForSigning(payment), "hex");
-    const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
-    const dataForSE = tx.flow.prepareSEData(keyId, payload, coinType);
-
-    const preActions = [];
-    const sayHi = async () => {
-      await apdu.general.hi(transport, appId);
-    }
-    preActions.push(sayHi)
-
-    const prepareTx = async () => {
-      return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
-    }
-
-    signature = await tx.flow.getSingleSignatureFromCoolWallet(
-      transport,
-      preActions,
-      prepareTx,
-      false,
-      confirmCB,
-      authorizedCB,
-      false
+      appId,
+      appPrivateKey,
+      argument
     );
   }
-  return generateRawTx(signature.toString('hex'), payment);
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    sendArgument,
+    false,
+    confirmCB,
+    authorizedCB,
+    false
+  );
+  return txUtil.generateRawTx(signature.toString('hex'), payment);
 };

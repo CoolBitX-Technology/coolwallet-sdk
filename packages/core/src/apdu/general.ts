@@ -1,7 +1,7 @@
 import { executeCommand } from './execute/execute';
 import Transport from '../transport';
 import { commands } from "./execute/command";
-import { target } from '../config/target';
+import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 /**
@@ -59,5 +59,19 @@ export const resetCard = async (transport: Transport): Promise<boolean> => {
     return true
   } else {
     throw new APDUError(commands.GET_NONCE, statusCode, msg)
+  }
+};
+
+
+/**
+ * @param {Transport} transport
+ * @return {Promise<boolean>}
+ */
+export const getCardId = async (transport: Transport): Promise<string> => {
+  const { statusCode, msg, outputData } = await executeCommand(transport, commands.GET_CARD_ID, target.SE);
+  if (statusCode === CODE._9000) {
+    return outputData
+  } else {
+    throw new APDUError(commands.GET_CARD_ID, statusCode, msg)
   }
 };

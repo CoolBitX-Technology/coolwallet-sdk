@@ -18,14 +18,13 @@ export default class EDDSACoin {
    * @param {string} protocol
    * @returns {Promise<string>}
    */
-  async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, accountIndex: number, path: string | undefined, protocol = 'SLIP0010') {
+  async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, accountIndex: number, path: string) {
+    
     return derivation.getEd25519PublicKey(
       transport,
       appId,
       appPrivateKey,
-      this.coinType,
       accountIndex,
-      protocol,
       path
     );
   }

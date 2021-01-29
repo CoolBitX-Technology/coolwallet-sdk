@@ -1,79 +1,15 @@
-import { apdu, transport, error, tx, util } from '@coolwallet/core';
-// import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
-import { isHex, keccak256, sha3 } from './lib';
+import { apdu, error, tx } from '@coolwallet/core';
 import * as ethUtil from './utils/ethUtils';
-import * as ethUtil100 from './utils/ethUtils100';
-import { removeHex0x, handleHex } from './utils/stringUtil';
-import * as scripts from "./scripts";
-import { Transaction, signMsg, signTyped, EIP712Schema, signTx } from './type'
+import * as scriptUtils from './utils/scriptUtils';
+import { removeHex0x } from './utils/stringUtil';
+import * as scripts from "./config/params";
+import { signMsg, signTyped, EIP712Schema, signTx } from './config/types'
 
+const Web3 = require('web3');
 const Ajv = require('ajv');
 const ajv = new Ajv();
 const typedDataUtils = require('eth-sig-util').TypedDataUtils;
 const rlp = require('rlp');
-type Transport = transport.default;
-
-/**
- * sign ETH Transaction
- * @param {Transport} transport
- * @param {string} appId
- * @param {String} appPrivateKey
- * @param {coinType} coinType
- * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
- * value:string, data:string, chainId: number}} transaction
- * @param {Number} addressIndex
- * @param {String} publicKey
- * @param {Function} confirmCB
- * @param {Function} authorizedCB
- * @return {Promise<string>}
- */
-export const signTransaction100 = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  coinType: string,
-  transaction: Transaction,
-  addressIndex: number,
-  publicKey: string | undefined = undefined,
-  confirmCB: Function | undefined = undefined,
-  authorizedCB: Function | undefined = undefined,
-): Promise<string> => {
-  const rawPayload = ethUtil.getRawHex(transaction);
-  const txType = ethUtil100.getTransactionType(transaction);
-  const preActions = [];
-  let action;
-  const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
-  const { readType } = ethUtil100.getReadType(txType);
-  const dataForSE = tx.flow.prepareSEData(keyId, rawPayload, readType);
-  const sayHi = async () => {
-    await apdu.general.hi(transport, appId);
-  }
-  preActions.push(sayHi)
-
-  action = async () => {
-    return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
-  }
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
-    transport,
-    preActions,
-    action,
-    false,
-    confirmCB,
-    authorizedCB,
-    true
-  );
-  if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtil.genEthSigFromSESig(
-      canonicalSignature,
-      rlp.encode(rawPayload),
-      publicKey
-    );
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
-    return serializedTx;
-  } else {
-    throw new error.SDKError(signTransaction100.name, 'canonicalSignature type error');
-  }
-};
 
 /**
  * sign ETH Transaction
@@ -125,8 +61,6 @@ export const signTransaction = async (
     true
   );
 
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(
       canonicalSignature,
@@ -142,102 +76,17 @@ export const signTransaction = async (
 
 /**
  * Sign Message.
- * @param {Transport} transport
- * @param {String} appId
- * @param {String} appPrivateKey
- * @param {String} message hex or utf-8
- * @param {Number} addressIndex
- * @param {String} publicKey
- * @param {Boolean} isHashRequired used by joyso
- * @param {Function} confirmCB
- * @param {Function} authorizedCB
- * @return {Promise<String>}
- */
-export const signMessage100 = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  coinType: string,
-  message: string,
-  addressIndex: number,
-  publicKey: string | undefined = undefined,
-  isHashRequired: boolean = false,
-  confirmCB: Function | undefined = undefined,
-  authorizedCB: Function | undefined = undefined
-) => {
-  const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
-
-  const preActions = [];
-  const sayHi = async () => {
-    await apdu.general.hi(transport, appId);
-  }
-  preActions.push(sayHi);
-
-  let msgBuf;
-  if (isHex(message)) {
-    msgBuf = Buffer.from(removeHex0x(message), 'hex');
-  } else {
-    msgBuf = Buffer.from(message, 'utf8');
-  }
-
-  if (isHashRequired) {
-    const apduForParsignMessage = async (msgBuf: Buffer) => {
-      let rawData = msgBuf.toString("hex");
-      rawData = handleHex(rawData);
-      return async () => {
-        apdu.tx.txPrep(transport, rawData, '07', appPrivateKey);
-      }
-    }
-    preActions.push(apduForParsignMessage)
-    msgBuf = Buffer.from(keccak256(msgBuf), 'hex');
-  }
-
-  const len = msgBuf.length.toString();
-  const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${len}`);
-  const payload = Buffer.concat([prefix, msgBuf]);
-  const dataForSE = tx.flow.prepareSEData(keyId, payload, 'F5');
-  const prepareTx = async () => {
-    return apdu.tx.txPrep(transport, dataForSE, "00", appPrivateKey);
-  }
-
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
-    transport,
-    preActions,
-    prepareTx,
-    false,
-    confirmCB,
-    authorizedCB,
-    true
-  );
-
-  if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
-    const signature = `0x${r}${s}${v.toString(16)}`;
-    return signature;
-  } else {
-    throw new error.SDKError(signMessage.name, 'canonicalSignature type error');
-  }
-};
-
-
-/**
- * Sign Message.
  * @return {Promise<String>}
  */
 export const signMessage = async (
   signMsgData: signMsg,
+  script: string,
+  argument: string,
   publicKey: string | undefined = undefined
 ) => {
 
   const { transport, message } = signMsgData
 
-  const getArg = async () => {
-    return ethUtil.getSignMessageArgument(message);
-  }
-
-  const script = scripts.SIGN_MESSAGE.script + scripts.SIGN_MESSAGE.signature;
-
-  const argument = await ethUtil.getArgument(signMsgData.addressIndex, getArg);
 
   const preActions = [];
 
@@ -265,10 +114,10 @@ export const signMessage = async (
     true
   );
 
-  const keccak256Msg = keccak256(message)
+  const keccak256Msg = Web3.utils.keccak256(message)
 
   let msgBuf;
-  if (isHex(keccak256Msg)) {
+  if (Web3.utils.isHex(keccak256Msg)) {
     msgBuf = Buffer.from(removeHex0x(keccak256Msg), 'hex');
   } else {
     msgBuf = Buffer.from(keccak256Msg, 'utf8');
@@ -299,6 +148,7 @@ export const signMessage = async (
  */
 export const signTypedData = async (
   typedData: signTyped,
+  script: string,
   publicKey: string | undefined = undefined,
 ): Promise<string> => {
 
@@ -322,14 +172,9 @@ export const signTypedData = async (
     sanitizedData.domain,
     sanitizedData.types
   );
-  
-  const getArg = async () => {
-    return ethUtil.getSignTypedDataArgument(domainSeparate.toString('hex'), encodedData.toString('hex')); // TODO
-  }
 
-  const script = scripts.SIGN_TYPED_DATA.script + scripts.SIGN_TYPED_DATA.signature;
+  const argument = scriptUtils.getSignTypedDataArgument(domainSeparate.toString('hex'), encodedData.toString('hex'), typedData.addressIndex);
 
-  const argument = await ethUtil.getArgument(typedData.addressIndex, getArg);
 
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
@@ -356,7 +201,7 @@ export const signTypedData = async (
   );
   const prefix = Buffer.from('1901', 'hex');
 
-  const dataBuf = Buffer.from(sha3(encodedData).substr(2), 'hex');
+  const dataBuf = Buffer.from(Web3.utils.sha3(encodedData).substr(2), 'hex');
 
   const payload = Buffer.concat([prefix, domainSeparate, dataBuf]);
 

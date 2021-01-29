@@ -1,5 +1,6 @@
 import * as derivation from './derive';
 import Transport from "../transport";
+import * as utils from "../utils/index";
 const elliptic = require('elliptic');
 
 export default class ECDSACoin {
@@ -33,8 +34,7 @@ export default class ECDSACoin {
         transport,
         appId,
         appPrivateKey,
-        this.coinType,
-        0
+        await utils.getPath(this.coinType, 0, 3)
       );
       this.accPublicKey = accountPublicKey;
       this.accChainCode = accountChainCode;
@@ -46,25 +46,6 @@ export default class ECDSACoin {
     return this.publicKeys[addressIndex];
   }
 
-  /**
-   * For ECDSA based coins
-   * @returns {Promise < { publicKey: string, parentPublicKey: string, parentChainCode: string } >}
-   */
-  async getBIP32NodeInfo(transport: Transport, appPrivateKey: string, appId: string) {
-    const { accountPublicKey, accountChainCode } = await derivation.getAccountExtKey(
-      transport,
-      appId,
-      appPrivateKey,
-      this.coinType,
-      0
-    );
-    const { parentPublicKey, parentChainCode } = derivation.derivePubKey(
-      accountPublicKey,
-      accountChainCode,
-      0
-    );
-    return { parentPublicKey, parentChainCode };
-  }
 
   /**
  * For ECDSA based coins
