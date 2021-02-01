@@ -1,62 +1,35 @@
-import { tx, transport, util } from '@coolwallet/core';
-import {
-	ScriptType,
-	Input,
-	Output,
-	Change,
-	createUnsignedTransactions,
-	getSigningActions,
-	composeFinalTransaction,
-	getScriptSigningActions
-} from './util';
-import { signTxType } from './types';
-type Transport = transport.default;
+import { tx } from '@coolwallet/core';
+import * as types from './config/types';
+import * as txUtil from './utils/transactionUtil';
+import * as scriptUtil from './utils/scriptUtil';
 
-
-export {
-	signTransaction
-};
-
-async function signTransaction(
-	signTxData: signTxType
+export async function signTransaction(
+	signTxData: types.signTxType
 ): Promise<string> {
 
 	const { scriptType, transport, appId, appPrivateKey, inputs, output, change } = signTxData;
 
-	if (scriptType !== ScriptType.P2PKH
-		&& scriptType !== ScriptType.P2SH) {
+	if (scriptType !== types.ScriptType.P2PKH
+		&& scriptType !== types.ScriptType.P2SH) {
 		throw new Error(`Unsupport ScriptType : ${scriptType}`);
 	}
-	const useScript = await util.checkSupportScripts(transport);
-	const { preparedData, unsignedTransactions } = createUnsignedTransactions(
+	const { preparedData } = txUtil.createUnsignedTransactions(
 		scriptType,
 		inputs,
 		output,
 		change
 	);
 	let preActions, actions;
-	if (useScript) {
-		({ preActions, actions } = getScriptSigningActions(
-			transport,
-			scriptType,
-			appId,
-			appPrivateKey,
-			inputs,
-			preparedData,
-			output,
-			change,
-		));
-	} else {
-		({ preActions, actions } = getSigningActions(
-			transport,
-			scriptType,
-			appId,
-			appPrivateKey,
-			change,
-			preparedData,
-			unsignedTransactions,
-		));
-	}
+	({ preActions, actions } = await scriptUtil.getScriptSigningActions(
+		transport,
+		scriptType,
+		appId,
+		appPrivateKey,
+		inputs,
+		preparedData,
+		output,
+		change,
+	));
 	const signatures = await tx.flow.getSignaturesFromCoolWallet(
 		transport,
 		preActions,
@@ -66,7 +39,7 @@ async function signTransaction(
 		signTxData.authorizedCB,
 		false
 	);
-	const transaction = composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
+	const transaction = txUtil.composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
 	return transaction.toString('hex');
 }
 

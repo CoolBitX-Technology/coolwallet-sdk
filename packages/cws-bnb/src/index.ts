@@ -1,28 +1,25 @@
-import { coin as COIN, transport } from '@coolwallet/core';
+import { coin as COIN } from '@coolwallet/core';
 import { walletConnectSignature, transferSignature } from './sign';
-import { publicKeyToAddress, getTransferArgument, getCancelOrderArgument, getPlaceOrderArgument, getTokenArgument } from './util';
-import { signType, signTokenType, signCancelOrderType, signPlaceOrderType } from './types'
-import * as scripts from "./scripts";
-import * as Types from './types'
-import { TOKEN_SIGS } from './tokenType'
-
-
-type Transport = transport.default;
-
+import { getTransferArgument, getCancelOrderArgument, getPlaceOrderArgument, getTokenArgument } from './utils/scriptUtil';
+import { signType, signCancelOrderType, signPlaceOrderType } from './config/types'
+import * as param from './config/param'
+import * as txUtil from "./utils/transactionUtil";
+import * as Types from './config/types'
+import { TOKEN_SIGS } from './config/tokenType'
 export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   public Types: any;
 
   constructor() {
-    super(Types.coinType);
+    super(param.COIN_TYPE);
     this.Types = Types;
   }
 
   /**
    * Get Binance address by index
    */
-  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+  async getAddress(transport: Types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    return publicKeyToAddress(publicKey);
+    return txUtil.publicKeyToAddress(publicKey);
   }
 
 
@@ -59,9 +56,8 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   async signTansferTransaction(
     signData: signType
   ): Promise<string> {
-    const readType = 'CA';
-    const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-    const argument = getTransferArgument(signData.signObj);
+    const script = param.TRANSFER.script + param.TRANSFER.signature;
+    const argument = await getTransferArgument(signData.signObj, signData.addressIndex);
     return transferSignature(
       signData,
       'BNB',
@@ -76,8 +72,8 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   async signTokenTransaction(
     signData: signType, denom: string, tokenSignature: string = ''
   ): Promise<string> {
-    const script = scripts.BEP2Token.script + scripts.BEP2Token.signature;
-    const argument = getTokenArgument(signData.signObj, denom, tokenSignature);
+    const script = param.BEP2Token.script + param.BEP2Token.signature;
+    const argument = await getTokenArgument(signData.signObj, denom, tokenSignature, signData.addressIndex);
     return transferSignature(
       signData,
       denom,
@@ -91,25 +87,19 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
    */
   async signPlaceOrder(
     signData: signPlaceOrderType
-  ): Promise<{
-    signature: string,
-    publicKey: string
-  }> {
-    const readType = 'CB';
-    const script = scripts.PlaceOrder.script + scripts.PlaceOrder.signature;
-    const argument = getPlaceOrderArgument(signData.signObj);
+  ): Promise<string> {
+    const script = param.PlaceOrder.script + param.PlaceOrder.signature;
+    const argument = await getPlaceOrderArgument(signData.signObj, signData.addressIndex);
     const signature = await walletConnectSignature(
       signData.transport,
       signData.appId,
       signData.appPrivateKey,
-      signData.addressIndex,
       script,
       argument,
       signData.confirmCB,
       signData.authorizedCB
     );
-    const publicKey = await this.getFullPubKey(signData.signPublicKey.toString('hex'));
-    return { signature, publicKey }
+    return signature
   }
 
   /**
@@ -117,24 +107,19 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
    */
   async signCancelOrder(
     signData: signCancelOrderType
-  ): Promise<{
-    signature: string,
-    publicKey: string
-  }> {
-    const readType = 'CC';
-    const script = scripts.CancelOrder.script + scripts.CancelOrder.signature;
-    const argument = getCancelOrderArgument(signData.signObj);
+  ): Promise<string> {
+    const script = param.CancelOrder.script + param.CancelOrder.signature;
+    const argument = await getCancelOrderArgument(signData.signObj, signData.addressIndex);
     const signature = await walletConnectSignature(
       signData.transport,
       signData.appId,
       signData.appPrivateKey,
-      signData.addressIndex,
       script,
       argument,
       signData.confirmCB,
       signData.authorizedCB
     );
-    const publicKey = await this.getFullPubKey(signData.signPublicKey.toString('hex'));
-    return { signature, publicKey }
+    return signature
   }
+
 }

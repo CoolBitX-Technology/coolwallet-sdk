@@ -147,10 +147,16 @@ export const commands = {
   },
   GET_EXT_KEY: {
     CLA: '80',
-    INS: '28',
-    P1: undefined,
-    P2: undefined
-  },
+    INS: '98',
+    P1: '00',
+    P2: '00'
+  }, 
+  // GET_EXT_KEY: {
+  //   CLA: '80',
+  //   INS: '28',
+  //   P1: undefined,
+  //   P2: undefined
+  // },
   GET_ED25519_ACC_PUBKEY: {
     CLA: '80',
     INS: '94',

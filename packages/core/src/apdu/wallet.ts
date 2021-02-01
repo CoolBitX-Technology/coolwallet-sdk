@@ -6,9 +6,6 @@ import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 import * as setting from '../setting/index';
 import * as crypto from '../crypto/index';
-import * as config from '../config/index';
-
-const bip39 = require('bip39');
 
 /**
  * TODO 
@@ -19,10 +16,14 @@ const bip39 = require('bip39');
  */
 export const authGetExtendedKey = async (transport: Transport, signature: string, forceUseSC: boolean
 ): Promise<boolean> => {
-  try{
-    await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, forceUseSC);
-    return true;
-  } catch(e) {
+  try {
+    const { statusCode } = await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, forceUseSC);
+    if (statusCode === CODE._9000) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
     throw new SDKError(authGetExtendedKey.name, 'authGetExtendedKey error')
   }
 };
@@ -35,49 +36,14 @@ export const authGetExtendedKey = async (transport: Transport, signature: string
  * @param {string} accIndex P2
  * @return {Promise<string>}
  */
-export const getAccountExtendedKey = async (transport: Transport, coinType: string, accIndex: string): Promise<string> => {
-  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, undefined, coinType, accIndex);
+export const getAccountExtendedKey = async (transport: Transport, path: string): Promise<string> => {
+  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, path, undefined, undefined, false);
   if (key) {
     return key
   } else {
     throw new APDUError(commands.GET_EXT_KEY, statusCode, msg)
   }
 };
-
-
-/**
- * Get ED25519 Account Public Key (Encrypted)
- * @param {Transport} transport
- * @param {string} coinType P1
- * @param {string} accIndex P2
- * @param {string} protocol
- * @return {Promise<string>}
- */
-export const getEd25519AccountPublicKey = async (transport: Transport, coinType: string, accIndex: string, protocol: string, path: string | undefined): Promise<string> => {
-  let commandData;
-  let P1;
-  let P2;
-  let data = undefined;
-  if (protocol === 'BIP44') {
-    commandData = commands.GET_ED25519_ACC_PUBKEY
-    P1 = coinType;
-    P2 = accIndex;
-  } else if (protocol === 'SLIP0010') {
-    commandData = commands.GET_XLM_ACC_PUBKEY
-    P1 = coinType
-    P2 = "01"
-    data = path
-  } else {
-    throw new SDKError(getEd25519AccountPublicKey.name, 'Unsupported protocol');
-  }
-  const { outputData: key, statusCode, msg } = await executeCommand(transport, commandData, target.SE, data, P1, P2);
-  if (key) {
-    return key
-  } else {
-    throw new APDUError(commandData, statusCode, msg)
-  }
-};
-
 
 
 /**
@@ -138,8 +104,8 @@ export async function sendCheckSum(transport: Transport, checkSum: number): Prom
  * @param {string} mnemonic
  * @return {Promise<boolean>}
  */
-export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string, SEPublicKey: string){
-  try{
+export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string, SEPublicKey: string) {
+  try {
     if (!SEPublicKey) {
       throw new SDKError(setSeed.name, 'SEPublicKey can not be undifined')
     }
@@ -156,9 +122,9 @@ export async function setSeed(transport: Transport, appId: string, appPrivateKey
     const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, forceUseSC);
     if (statusCode === CODE._9000) {
     } else if (statusCode === CODE._6881) {
-      throw new APDUError(commands.AUTH_EXT_KEY, statusCode, "wallet is exist")
+      throw new APDUError(commands.SET_SEED, statusCode, "wallet is exist")
     } else {
-      throw new APDUError(commands.AUTH_EXT_KEY, statusCode, msg)
+      throw new APDUError(commands.SET_SEED, statusCode, msg)
     }
   } catch (e) {
     console.error(e);

@@ -1,35 +1,25 @@
-import { tx, transport, error, util } from '@coolwallet/core';
-import {
-	ScriptType,
-	Input,
-	Output,
-	Change,
-	createUnsignedTransactions,
-	getSigningActions,
-	composeFinalTransaction,
-	getScriptSigningActions
-} from './util';
-
-import { Transport, signTxType } from './types';
+import { tx, error } from '@coolwallet/core';
+import * as txUtil from './utils/transactionUtil';
+import * as scriptUtil from './utils/scriptUtil';
+import * as types from './config/types';
 
 export {
 	signTransaction
 };
 
 async function signTransaction(
-	signTxData: signTxType,
+	signTxData: types.signTxType,
 	coinType: string,
 ): Promise<string> {
 
 	const { scriptType, transport, inputs, output, change, appId, appPrivateKey } = signTxData
 
-	if (scriptType !== ScriptType.P2PKH
-		&& scriptType !== ScriptType.P2WPKH
-		&& scriptType !== ScriptType.P2SH_P2WPKH) {
+	if (scriptType !== types.ScriptType.P2PKH
+		&& scriptType !== types.ScriptType.P2WPKH
+		&& scriptType !== types.ScriptType.P2SH_P2WPKH) {
 		throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${scriptType}'`);
 	}
-	const useScript = await util.checkSupportScripts(transport);
-	const { preparedData, unsignedTransactions } = createUnsignedTransactions(
+	const { preparedData } = txUtil.createUnsignedTransactions(
 		scriptType,
 		inputs,
 		output,
@@ -37,30 +27,17 @@ async function signTransaction(
 	);
 	let preActions, actions;
 
-	if (useScript) {
-		({ preActions, actions } = getScriptSigningActions(
-			transport,
-			scriptType,
-			appId,
-			appPrivateKey,
-			inputs,
-			preparedData,
-			output,
-			change,
-			coinType
-		));
-	} else {
-		({ preActions, actions } = getSigningActions(
-			transport,
-			scriptType,
-			appId,
-			appPrivateKey,
-			change,
-			coinType,
-			preparedData,
-			unsignedTransactions,
-		));
-	}
+	({ preActions, actions } = scriptUtil.getScriptSigningActions(
+		transport,
+		scriptType,
+		appId,
+		appPrivateKey,
+		inputs,
+		preparedData,
+		output,
+		change,
+		coinType
+	));
 	const signatures = await tx.flow.getSignaturesFromCoolWallet(
 		transport,
 		preActions,
@@ -70,7 +47,7 @@ async function signTransaction(
 		signTxData.authorizedCB,
 		false
 	);
-	const transaction = composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
+	const transaction = txUtil.composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
 	return transaction.toString('hex');
 }
 

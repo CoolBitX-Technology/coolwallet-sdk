@@ -1,25 +1,10 @@
 import BN from 'bn.js';
 import { error } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
-import * as varuint from './varuint';
-import {
-	ScriptType, OmniType, Input, Output, Change, PreparedData
-} from './types';
+import * as varuint from './varuintUtil';
+import * as cryptoUtil from './cryptoUtil';
+import { ScriptType, OmniType, Input, Output, Change, PreparedData } from '../config/types';
 
-export {
-	pubkeyToAddressAndOutScript,
-	addressToOutScript,
-	createUnsignedTransactions,
-	composeFinalTransaction,
-};
-
-function hash160(buf: Buffer): Buffer {
-	return bitcoin.crypto.hash160(buf);
-}
-
-function doubleSha256(buf: Buffer): Buffer {
-	return bitcoin.crypto.hash256(buf);
-}
 
 const ZERO = Buffer.alloc(1, 0);
 
@@ -81,9 +66,6 @@ function bip66Encode(r: Buffer, s: Buffer) {
 	return signature;
 }
 
-function toVarUintBuffer(int: number): Buffer {
-	return varuint.encode(int);
-}
 
 function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
 	const bn = new BN(numberOrString);
@@ -97,7 +79,7 @@ function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer
 	return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
 }
 
-function addressToOutScript(address: string): ({ scriptType: ScriptType, outScript: Buffer, outHash?: Buffer }) {
+export function addressToOutScript(address: string): ({ scriptType: ScriptType, outScript: Buffer, outHash?: Buffer }) {
 	let scriptType;
 	let payment;
 	if (address.startsWith('1')) {
@@ -110,15 +92,15 @@ function addressToOutScript(address: string): ({ scriptType: ScriptType, outScri
 		scriptType = ScriptType.P2WPKH;
 		payment = bitcoin.payments.p2wpkh({ address });
 	} else {
-		throw new error.SDKError(addressToOutScript.name, `Unsupport Address '${address}'`);
+		throw new error.SDKError(addressToOutScript.name, `Unsupport Address : ${address}`);
 	}
-	if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address '${address}'`);
+	if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address : ${address}`);
 	const outScript = payment.output;
 	const outHash = payment.hash;
 	return { scriptType, outScript, outHash };
 }
 
-function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
+export function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
 	: { address: string, outScript: Buffer, hash: Buffer } {
 	let payment;
 	if (scriptType === ScriptType.P2PKH) {
@@ -138,7 +120,7 @@ function pubkeyToAddressAndOutScript(pubkey: Buffer, scriptType: ScriptType)
 	return { address: payment.address, outScript: payment.output, hash: payment.hash };
 }
 
-function createUnsignedTransactions(
+export function createUnsignedTransactions(
 	redeemScriptType: ScriptType,
 	inputs: Array<Input>,
 	output: Output,
@@ -153,7 +135,7 @@ function createUnsignedTransactions(
 } {
 	const versionBuf = toReverseUintBuffer(version, 4);
 	const lockTimeBuf = toReverseUintBuffer(lockTime, 4);
-	const inputsCount = toVarUintBuffer(inputs.length);
+	const inputsCount = varuint.encode(inputs.length);
 	const preparedInputs = inputs.map(({
 		preTxHash, preIndex, preValue, sequence, addressIndex, pubkeyBuf
 	}) => {
@@ -177,7 +159,7 @@ function createUnsignedTransactions(
 		scriptType: outputType,
 		outScript: outputScript
 	} = addressToOutScript(output.address);
-	const outputScriptLen = toVarUintBuffer(outputScript.length);
+	const outputScriptLen = varuint.encode(outputScript.length);
 
 
 	let outputArray;
@@ -193,13 +175,13 @@ function createUnsignedTransactions(
 			toUintBuffer(omniType, 4), // Currency identifier
 			toUintBuffer(value as string, 8)
 		]);
-		const omniLen = toVarUintBuffer(omni.length);
+		const omniLen = varuint.encode(omni.length);
 		const omniScript = Buffer.concat([
 			Buffer.from('6a', 'hex'), // OP_RETURN
 			omniLen,
 			omni
 		]);
-		const omniScriptLen = toVarUintBuffer(omniScript.length);
+		const omniScriptLen = varuint.encode(omniScript.length);
 		outputArray = [
 			Buffer.concat([toReverseUintBuffer(546, 8), outputScriptLen, outputScript,
 			toUintBuffer(0, 8), omniScriptLen, omniScript])
@@ -209,28 +191,28 @@ function createUnsignedTransactions(
 		if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
 		const changeValue = toReverseUintBuffer(change.value, 8);
 		const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, redeemScriptType);
-		const outScriptLen = toVarUintBuffer(outScript.length);
+		const outScriptLen = varuint.encode(outScript.length);
 		outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
 	}
 
 	let outputsCountNum = omniType ? 2 : 1;
 	outputsCountNum = change ? outputsCountNum + 1 : outputsCountNum;
-	const outputsCount = toVarUintBuffer(outputsCountNum)
+	const outputsCount = varuint.encode(outputsCountNum)
 	const outputsBuf = Buffer.concat(outputArray);
 
-	const hashPrevouts = doubleSha256(Buffer.concat(preparedInputs.map((input) => input.preOutPointBuf)));
-	const hashSequence = doubleSha256(Buffer.concat(preparedInputs.map((input) => input.sequenceBuf)));
-	const hashOutputs = doubleSha256(outputsBuf);
+	const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(preparedInputs.map((input) => input.preOutPointBuf)));
+	const hashSequence = cryptoUtil.doubleSha256(Buffer.concat(preparedInputs.map((input) => input.sequenceBuf)));
+	const hashOutputs = cryptoUtil.doubleSha256(outputsBuf);
 
 	const unsignedTransactions = preparedInputs.map(({
 		pubkeyBuf, preOutPointBuf, preValueBuf, sequenceBuf
 	}) => {
 		if (redeemScriptType === ScriptType.P2PKH) {
 			const { outScript } = pubkeyToAddressAndOutScript(pubkeyBuf, redeemScriptType);
-			const outScriptLen = toVarUintBuffer(outScript.length);
+			const outScriptLen = varuint.encode(outScript.length);
 			return Buffer.concat([
 				versionBuf,
-				toVarUintBuffer(1),
+				varuint.encode(1),
 				preOutPointBuf,
 				outScriptLen, // preOutScriptBuf
 				outScript, // preOutScriptBuf
@@ -246,7 +228,7 @@ function createUnsignedTransactions(
 				hashPrevouts,
 				hashSequence,
 				preOutPointBuf,
-				Buffer.from(`1976a914${hash160(pubkeyBuf).toString('hex')}88ac`, 'hex'), // ScriptCode
+				Buffer.from(`1976a914${cryptoUtil.hash160(pubkeyBuf).toString('hex')}88ac`, 'hex'), // ScriptCode
 				preValueBuf,
 				sequenceBuf,
 				hashOutputs,
@@ -270,7 +252,7 @@ function createUnsignedTransactions(
 	};
 }
 
-function composeFinalTransaction(
+export function composeFinalTransaction(
 	redeemScriptType: ScriptType,
 	preparedData: PreparedData,
 	signatures: Array<Buffer>
@@ -297,7 +279,7 @@ function composeFinalTransaction(
 				pubkeyBuf,
 			]);
 			return Buffer.concat([
-				preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
+				preOutPointBuf, varuint.encode(inScript.length), inScript, sequenceBuf
 			]);
 		}));
 		return Buffer.concat([
@@ -332,7 +314,7 @@ function composeFinalTransaction(
 					outScript,
 				]);
 				return Buffer.concat([
-					preOutPointBuf, toVarUintBuffer(inScript.length), inScript, sequenceBuf
+					preOutPointBuf, varuint.encode(inScript.length), inScript, sequenceBuf
 				]);
 			} else {
 				return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
