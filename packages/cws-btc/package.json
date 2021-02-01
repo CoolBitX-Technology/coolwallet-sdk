@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/btc",
-  "version": "0.1.0-beta.13",
+  "version": "0.1.0-beta.14",
   "description": "Coolwallet Bitcoin sdk",
   "main": "lib/index.js",
   "scripts": {
