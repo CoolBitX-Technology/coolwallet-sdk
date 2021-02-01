@@ -4,7 +4,7 @@ import * as types from './config/types'
 
 
 export const signTransaction = async (
-  signData: types.SignType,
+  signData: types.SignDataType,
   script: string,
   argument: string,
 ): Promise<{ r: string; s: string; } | Buffer> => {

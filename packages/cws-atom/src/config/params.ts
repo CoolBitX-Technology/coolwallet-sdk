@@ -29,3 +29,6 @@ export const WITHDRAW = {
 };
 
 
+export const COIN_TYPE = '80000076'
+
+
