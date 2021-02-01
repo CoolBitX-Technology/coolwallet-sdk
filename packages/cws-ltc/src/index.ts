@@ -47,4 +47,3 @@ export default class LTC extends COIN.ECDSACoin implements COIN.Coin {
 		);
 	}
 }
-

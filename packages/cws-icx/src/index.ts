@@ -32,4 +32,3 @@ export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
     );
   }
 }
-
