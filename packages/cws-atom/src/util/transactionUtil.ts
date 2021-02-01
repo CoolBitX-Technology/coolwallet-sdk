@@ -9,3 +9,12 @@ export function publicKeyToAddress(publicKey: string, prefix = "cosmos") {
   const words = bech32.toWords(ripemd160hash);
   return bech32.encode(prefix, words);
 }
+
+export const genAtomSigFromSESig = async (
+  canonicalSignature: { r: string; s: string }
+): Promise<string> => {
+  const { r } = canonicalSignature;
+  const { s } = canonicalSignature;
+
+  return Buffer.from(r + s, 'hex').toString('base64');
+};

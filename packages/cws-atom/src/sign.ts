@@ -1,13 +1,14 @@
 /* eslint-disable no-param-reassign */
 import * as core from '@coolwallet/core';
 import * as types from './config/types'
+import * as txUtil from './util/transactionUtil'
 
 
 export const signTransaction = async (
   signData: types.SignDataType,
   script: string,
   argument: string,
-): Promise<{ r: string; s: string; } | Buffer> => {
+): Promise<string> => {
 
   const { transport, appId, appPrivateKey, confirmCB, authorizedCB } = signData
 
@@ -36,6 +37,12 @@ export const signTransaction = async (
     true
   );
 
-  return canonicalSignature;
+  if (!Buffer.isBuffer(canonicalSignature)) {
+    const atomSignature = await txUtil.genAtomSigFromSESig(canonicalSignature);
+    return atomSignature;
+  } else {
+    throw new core.error.SDKError(signTransaction.name, 'canonicalSignature type error');
+  }
 
 };
+

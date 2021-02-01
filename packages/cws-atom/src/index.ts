@@ -33,7 +33,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
    */
   async signTransaction(
     signData: types.SignDataType
-  ): Promise<{ r: string; s: string; } | Buffer> {
+  ): Promise<string> {
     const chainId = signData.transaction.chainId
     // const chain_id = 'cosmoshub-3'
     switch (chainId) {
@@ -50,7 +50,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
  */
   async signCosmosTransaction(
     signData: types.SignDataType
-  ): Promise<{ r: string; s: string; } | Buffer> {
+  ): Promise<string> {
 
     let { addressIndex } = signData
 
