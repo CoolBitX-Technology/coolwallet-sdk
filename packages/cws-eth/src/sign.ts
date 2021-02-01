@@ -173,7 +173,7 @@ export const signTypedData = async (
     sanitizedData.types
   );
 
-  const argument = scriptUtils.getSignTypedDataArgument(domainSeparate.toString('hex'), encodedData.toString('hex'), typedData.addressIndex);
+  const argument = await scriptUtils.getSignTypedDataArgument(domainSeparate.toString('hex'), encodedData.toString('hex'), typedData.addressIndex);
 
 
   const sendScript = async () => {

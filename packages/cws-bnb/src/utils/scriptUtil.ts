@@ -22,7 +22,7 @@ export const getTransferArgument = async (signObj: Transfer, addressIndex: numbe
   return await getPath(addressIndex) + from + to + value + accountNumber + sequence + source + memo;
 };
 
-export const getPlaceOrderArgument = (signObj: PlaceOrder, addressIndex: number) => {
+export const getPlaceOrderArgument = async (signObj: PlaceOrder, addressIndex: number) => {
   const id = signObj.msgs[0].id;
   const sideNum = signObj.msgs[0].side;
   if (sideNum != 1 && sideNum != 2) { //1:BUY 2:SELL
@@ -46,7 +46,7 @@ export const getPlaceOrderArgument = (signObj: PlaceOrder, addressIndex: number)
   const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
   const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
   const source = parseInt(signObj.source).toString(16).padStart(16, '0');
-  return getPath(addressIndex) + 
+  return await getPath(addressIndex) + 
     orderAddress +
     orderSequence +
     senderAddress +
@@ -61,7 +61,7 @@ export const getPlaceOrderArgument = (signObj: PlaceOrder, addressIndex: number)
     source;
 };
 
-export const getCancelOrderArgument = (signObj: CancelOrder, addressIndex: number) => {
+export const getCancelOrderArgument = async (signObj: CancelOrder, addressIndex: number) => {
   const refid = signObj.msgs[0].refid;
   const symbol = signObj.msgs[0].symbol;
 
@@ -73,7 +73,7 @@ export const getCancelOrderArgument = (signObj: CancelOrder, addressIndex: numbe
   const accountNumber = parseInt(signObj.account_number).toString(16).padStart(16, '0');
   const sequence = parseInt(signObj.sequence).toString(16).padStart(16, '0');
   const source = parseInt(signObj.source).toString(16).padStart(16, '0');
-  return getPath(addressIndex) + 
+  return await getPath(addressIndex) + 
     orderAddress +
     orderSequence +
     senderAddress +
@@ -84,7 +84,7 @@ export const getCancelOrderArgument = (signObj: CancelOrder, addressIndex: numbe
     source;
 };
 
-export const getTokenArgument = (signObj: Transfer, denom: string, tokenSignature: string, addressIndex: number) => {
+export const getTokenArgument = async (signObj: Transfer, denom: string, tokenSignature: string, addressIndex: number) => {
   const from = Buffer.from(signObj.msgs[0].inputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const to = Buffer.from(signObj.msgs[0].outputs[0].address, 'ascii').toString('hex').padStart(128, '0');
   const value = signObj.msgs[0].outputs[0].coins[0].amount.toString(16).padStart(16, '0');
@@ -101,5 +101,5 @@ export const getTokenArgument = (signObj: Transfer, denom: string, tokenSignatur
   console.log("tokenCheck: " + tokenCheck)
   console.log("signature: " + signature)
   console.log("arg: " + argument)
-  return getPath(addressIndex) + argument;
+  return await getPath(addressIndex) + argument;
 };
