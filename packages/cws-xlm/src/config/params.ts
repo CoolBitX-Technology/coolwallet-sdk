@@ -25,7 +25,7 @@ export const TRANSFER = {
 
 export const PATH_BIP44 = '32'
 export const PATH_SLIP0010 = '10'
-export const CION_TYPE = '80000094'
+export const COIN_TYPE = '80000094'
 export const VERSION_BYTES = {
   ed25519PublicKey: 6 << 3, // G
   ed25519SecretSeed: 18 << 3, // S
