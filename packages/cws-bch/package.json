@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/bch",
-  "version": "0.1.0-beta.4",
+  "version": "0.1.0-beta.5",
   "description": "Coolwallet Bitcoin Cash sdk",
   "main": "lib/index.js",
   "scripts": {

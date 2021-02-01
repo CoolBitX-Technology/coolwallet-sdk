@@ -3,7 +3,7 @@ import * as txUtil from './utils/transactionUtil';
 import signTransaction from './sign';
 import * as types from './config/types';
 import * as params from './config/params';
-import { COIN_SPECIES, PROTOCOL } from './config/types';
+import { COIN_SPECIES, PROTOCOL } from './config/types'; 
 export { COIN_SPECIES, PROTOCOL };
 
 

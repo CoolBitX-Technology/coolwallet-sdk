@@ -1,8 +1,8 @@
-import { coin as COIN, transport } from "@coolwallet/core";
+import { coin as COIN } from "@coolwallet/core";
 import * as xrpSign from "./sign";
 import * as txUtil from "./utils/tracsactionUtil";
 import * as types from "./config/types";
-import * as params from "./config/params";
+import * as params from "./config/params"; 
 export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
   constructor() {
     super(params.COIN_TYPE);
