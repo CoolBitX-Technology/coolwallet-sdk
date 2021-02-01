@@ -46,4 +46,3 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 		);
 	}
 }
-
