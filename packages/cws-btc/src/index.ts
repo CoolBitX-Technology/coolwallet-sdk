@@ -1,4 +1,4 @@
-import { coin as COIN } from '@coolwallet/core';
+import { coin as COIN } from '@coolwallet/core'; 
 import { addressToOutScript, pubkeyToAddressAndOutScript } from './utils/transactionUtil';
 import { signBTCTransaction, signUSDTransaction } from './sign';
 import { ScriptType, signTxType, signUSDTTxType, Transport } from './config/types';

@@ -2,7 +2,7 @@ import { coin as COIN } from '@coolwallet/core';
 import signTransaction from './sign';
 import * as txUtil from './utils/transactionUtil'
 import * as params from './config/params';
-import * as types from './config/types'
+import * as types from './config/types' 
 
 
 export default class ICX extends COIN.ECDSACoin implements COIN.Coin {

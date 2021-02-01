@@ -1,4 +1,4 @@
-import { coin as COIN, transport } from '@coolwallet/core';
+import { coin as COIN } from '@coolwallet/core';
 import { signTransaction } from './sign';
 import * as types from './config/types';
 import * as params from './config/params';

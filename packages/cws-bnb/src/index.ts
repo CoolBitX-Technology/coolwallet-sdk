@@ -1,4 +1,4 @@
-import { coin as COIN } from '@coolwallet/core';
+import { coin as COIN } from '@coolwallet/core'; 
 import { walletConnectSignature, transferSignature } from './sign';
 import { getTransferArgument, getCancelOrderArgument, getPlaceOrderArgument, getTokenArgument } from './utils/scriptUtil';
 import { signType, signCancelOrderType, signPlaceOrderType } from './config/types'
