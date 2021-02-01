@@ -2,7 +2,7 @@ import { coin as COIN } from '@coolwallet/core';
 import { signTransaction } from './sign';
 import * as types from './config/types'
 import * as params from './config/params'
-import * as  txUtil from './utils/transactionUtil'; 
+import * as  txUtil from './utils/transactionUtil';
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
 
 	public ScriptType: any;
