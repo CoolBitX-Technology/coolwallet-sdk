@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/bnb",
-  "version": "0.1.0-beta.12",
+  "version": "0.1.0-beta.13",
   "description": "Binance API for CoolWalletS",
   "main": "lib/index.js",
   "scripts": {
