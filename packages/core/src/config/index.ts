@@ -19,13 +19,13 @@ const sha512 = (key: Buffer, data: Buffer): Buffer => crypto
  */
 export async function getSEPublicKey(transport: Transport): Promise<string> {
   const cardId = await general.getCardId(transport);
-  console.log("cardId: " + cardId)
+  console.debug("cardId: " + cardId)
   const cardIdHash = SHA256(cardId).toString('hex');
   const parseCardIdHash = parseInt((cardIdHash.slice(0, 2)), 16) & 0x7f
   const index = parseCardIdHash.toString(16).padStart(2, '0') + cardIdHash.slice(2, 8)
 
   const compressedPublicKey = getCompressedPublicKey(SE_KEY_PARAM.chipMasterPublicKey)
-  console.log(Buffer.from(SE_KEY_PARAM.chipMasterChainCode, 'hex'))
+  
   const addend = sha512(Buffer.from(SE_KEY_PARAM.chipMasterChainCode, 'hex'), Buffer.from(compressedPublicKey + index, 'hex')).toString('hex')
   const privateKey = Buffer.from(addend.slice(0, 64), 'hex')
 
