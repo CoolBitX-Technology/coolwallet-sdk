@@ -51,4 +51,3 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 		);
 	}
 }
-
