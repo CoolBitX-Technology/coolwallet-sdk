@@ -19,7 +19,7 @@ export async function signBTCTransaction(
 		change
 	);
 
-	const argument = scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
+	const argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
 
 	const script = param.TRANSFER.script + param.TRANSFER.signature;
 
