@@ -83,7 +83,6 @@ export const executeCommand = async (
   params1: string | undefined = undefined,
   params2: string | undefined = undefined,
   forceUseSC: boolean = false,
-  SC: boolean = false,
 ): Promise<{ statusCode: string, msg: string, outputData: string }> => {
   const P1 = params1 || command.P1;
   const P2 = params2 || command.P2;
@@ -94,7 +93,7 @@ export const executeCommand = async (
 
   let response;
   // data too long: divide and send with SECURE CHANNEL
-  if (forceUseSC || (data.length > 500) || SC) {
+  if (forceUseSC || (data.length > 500)) {
     const apduHeader = command.CLA + command.INS + P1 + P2;
     response = await sendWithSecureChannel(transport, apduHeader, data, forceUseSC);
   } else {

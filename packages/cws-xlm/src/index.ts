@@ -3,14 +3,14 @@ import * as txUtil from './utils/transactionUtil';
 import signTransaction from './sign';
 import * as types from './config/types';
 import * as params from './config/params';
-import { COIN_SPECIES, PROTOCOL } from './config/types';
+import { COIN_SPECIES, PROTOCOL } from './config/types'; 
 export { COIN_SPECIES, PROTOCOL };
 
 
 export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
   transfer: { script: string, signature: string};
   constructor(type: String) {
-    super(params.CION_TYPE);
+    super(params.COIN_TYPE);
 
     switch (type) {
       case COIN_SPECIES.KAU:
@@ -31,7 +31,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     }
 
     const keyType = protocol === PROTOCOL.BIP44 ? true : false;
-    const path = await utils.getPath(params.CION_TYPE, accountIndex, 3, keyType)
+    const path = await utils.getPath(params.COIN_TYPE, accountIndex, 3, keyType)
     console.log("path: " + path)
 
     const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, path);

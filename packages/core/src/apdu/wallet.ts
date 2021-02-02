@@ -37,7 +37,7 @@ export const authGetExtendedKey = async (transport: Transport, signature: string
  * @return {Promise<string>}
  */
 export const getAccountExtendedKey = async (transport: Transport, path: string): Promise<string> => {
-  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, path, undefined, undefined, false, false);
+  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, path, undefined, undefined, false);
   if (key) {
     return key
   } else {

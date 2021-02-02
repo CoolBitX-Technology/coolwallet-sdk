@@ -13,7 +13,7 @@ import { PROTOCOL } from '../config/types';
 export const getScriptAndArguments = async (transaction: object, transfer: { script: string, signature: string }, protocol: PROTOCOL) => {
 
   const keyType = protocol === PROTOCOL.BIP44 ? params.PATH_BIP44 : params.PATH_SLIP0010;
-  const path = await utils.getPath(params.CION_TYPE, 0, 3)
+  const path = await utils.getPath(params.COIN_TYPE, 0, 3)
   const SEPath = `0D${path}`;
   let script;
   let argument;
