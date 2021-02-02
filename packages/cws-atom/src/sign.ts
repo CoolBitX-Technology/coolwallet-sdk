@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import * as core from '@coolwallet/core';
 import * as types from './config/types'
-import * as txUtil from './util/transactionUtil'
+import * as txUtil from './util/transactionUtil' 
 
 
 export const signTransaction = async (
