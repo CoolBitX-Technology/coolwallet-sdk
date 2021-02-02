@@ -23,10 +23,10 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.26"
+    "@coolwallet/core": "~0.1.0-beta.33"
   },
   "devDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.26",
+    "@coolwallet/core": "~0.1.0-beta.33",
     "@types/big.js": "^4.0.5",
     "@types/bn.js": "^4.11.6",
     "@babel/cli": "^7.7.0",
