@@ -1,6 +1,11 @@
 import { apdu, transport, tx } from '@coolwallet/core';
+import { sha256 } from './utils/cryptoUtil';
 
 type Transport = transport.default;
+
+const elliptic = require('elliptic');
+// eslint-disable-next-line new-cap
+const ec = new elliptic.ec("secp256k1");
 
 /**
  * sign TRX Transaction
@@ -20,7 +25,8 @@ export const signTransaction = async (
   signTxData: any,
   script: string,
   argument: string,
-): Promise<{ r: string; s: string; } | Buffer> => {
+  publicKey: string
+): Promise<string> => {
   const {
     transport, appPrivateKey, appId, confirmCB, authorizedCB
   } = signTxData;
@@ -46,8 +52,39 @@ export const signTransaction = async (
     false,
     confirmCB,
     authorizedCB,
-    false
+    true
   );
 
-  return canonicalSignature;
+  if (Buffer.isBuffer(canonicalSignature)) return '';
+	const {r, s} = canonicalSignature;
+
+  const {signedTx} = await apdu.tx.getSignedHex(transport);
+	console.log('signedTx :', signedTx);
+
+  const keyPair = ec.keyFromPublic(publicKey, "hex");
+  const v = ec.getKeyRecoveryParam(
+    sha256(Buffer.from(signedTx, 'hex')),
+    canonicalSignature,
+    keyPair.pub
+  );
+
+  const sig = r + s + v.toString().padStart(2, '0');
+
+	return '0a' + toVarint(signedTx.length/2) + signedTx + '12' + toVarint(sig.length/2) + sig;
 };
+
+/**
+ * @description convert int to varint
+ * @param {number} int
+ * @return {string}
+ */
+function toVarint(int: number) {
+	const bytes = [];
+	while (int > 0) {
+		let out = int & 127;
+		int = int >> 7;
+		if (int > 0) out += 128;
+		bytes.push([out]);
+	}
+	return Buffer.from(bytes).toString('hex');
+}

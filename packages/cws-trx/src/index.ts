@@ -28,64 +28,88 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 	/**
 	 * Sign Tron Transaction.
 	 */
-	async signTransaction(signTxData: type.NormalTradeData): Promise<{ r: string; s: string; } | Buffer> {
+	async signTransaction(signTxData: type.NormalTradeData): Promise<string> {
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
 
 		const script = params.TRANSFER.script + params.TRANSFER.signature;
-		const argement = await scriptUtil.getNormalTradeArgument(signTxData.transaction, signTxData.addressIndex)
+		const argement = await scriptUtil.getNormalTradeArgument(transaction, addressIndex);
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
 		return trxSign.signTransaction(
 			signTxData,
 			script,
-			argement
+			argement,
+			publicKey
 		);
 	}
 
-	async signFreeze(signTxData: type.FreezeData): Promise<{ r: string; s: string; } | Buffer> {
+	async signFreeze(signTxData: type.FreezeData): Promise<string> {
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
 
 		const script = params.FREEZE.script + params.FREEZE.signature;
-		const argement = await scriptUtil.getFreezeArgement(signTxData.transaction, signTxData.addressIndex)
+		const argement = await scriptUtil.getFreezeArgement(transaction, addressIndex)
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
 		return trxSign.signTransaction(
 			signTxData,
 			script,
-			argement
+			argement,
+			publicKey
 		);
 	}
 
-	async signUnfreeze(signTxData: type.UnfreezeData): Promise<{ r: string; s: string; } | Buffer> {
+	async signUnfreeze(signTxData: type.UnfreezeData): Promise<string> {
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
 
 		const script = params.UNFREEZE.script + params.UNFREEZE.signature;
-		const argement = await scriptUtil.getUnfreezeArgement(signTxData.transaction, signTxData.addressIndex)
+		const argement = await scriptUtil.getUnfreezeArgement(transaction, addressIndex)
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
 		return trxSign.signTransaction(
 			signTxData,
 			script,
-			argement
+			argement,
+			publicKey
 		);
 	}
 
-
-	async signVoteWitness(signTxData: type.VoteWitnessData): Promise<{ r: string; s: string; } | Buffer> {
+	async signVoteWitness(signTxData: type.VoteWitnessData): Promise<string>{
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
 
 		const script = params.VOTE.script + params.VOTE.signature;
-		const argement = await scriptUtil.getVoteWitnessArgement(signTxData.transaction, signTxData.addressIndex)
+		const argement = await scriptUtil.getVoteWitnessArgement(transaction, addressIndex)
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
 		return trxSign.signTransaction(
 			signTxData,
 			script,
-			argement
+			argement,
+			publicKey
 		);
 	}
 
-	async signWithdrawBalance(signTxData: type.WithdrawBalanceData): Promise<{ r: string; s: string; } | Buffer> {
+	async signWithdrawBalance(signTxData: type.WithdrawBalanceData): Promise<string> {
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
 
 		const script = params.VOTE.script + params.VOTE.signature;
-		const argement = await scriptUtil.getWithdrawBalanceArgement(signTxData.transaction, signTxData.addressIndex)
+		const argement = await scriptUtil.getWithdrawBalanceArgement(transaction, addressIndex)
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
 		return trxSign.signTransaction(
 			signTxData,
 			script,
-			argement
+			argement,
+			publicKey
 		);
 	}
 }
