@@ -24,6 +24,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
    */
   async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    console.log("publicKey: " + Buffer.from(publicKey, 'hex').toString('base64'))
     return txUtil.publicKeyToAddress(publicKey);
   }
 
@@ -33,7 +34,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
    */
   async signTransaction(
     signData: types.SignDataType
-  ): Promise<string> {
+  ): Promise<object> {
     const chainId = signData.transaction.chainId
     // const chain_id = 'cosmoshub-3'
     switch (chainId) {
@@ -50,34 +51,51 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
  */
   async signCosmosTransaction(
     signData: types.SignDataType
-  ): Promise<string> {
+  ): Promise<object> {
+
 
     let { addressIndex } = signData
 
+    const publicKey = await this.getPublicKey(signData.transport, signData.appPrivateKey, signData.appId, addressIndex);
+    const publicKeyBase46 = Buffer.from(publicKey, 'hex').toString('base64')
+
     let script;
     let argument;
+    let genTx;
     switch (signData.txType) {
       case types.TX_TYPE.SEND:
         script = params.TRANSFER.script + params.TRANSFER.signature;
         argument = scriptUtil.getCosmosSendArgement(signData.transaction, addressIndex)
+        genTx = async (signature: string) => {
+          return await txUtil.genSendTx(signData.transaction, signature, publicKeyBase46);
+        }
         break;
       case types.TX_TYPE.DELEGATE:
         script = params.DELEGATE.script + params.DELEGATE.signature;
         argument = scriptUtil.getCosmosDelgtOrUnDelArgement(signData.transaction, addressIndex)
+        genTx = async (signature: string) => {
+          return await txUtil.genDelgtOrUnDelTx(signData.transaction, signature, publicKeyBase46, types.TX_TYPE.DELEGATE);
+        }
         break;
       case types.TX_TYPE.UNDELEGATE:
         script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
         argument = scriptUtil.getCosmosDelgtOrUnDelArgement(signData.transaction, addressIndex)
+        genTx = async (signature: string) => {
+          return await txUtil.genDelgtOrUnDelTx(signData.transaction, signature, publicKeyBase46, types.TX_TYPE.UNDELEGATE);
+        }
         break;
       case types.TX_TYPE.WITHDRAW:
         script = params.WITHDRAW.script + params.WITHDRAW.signature;
         argument = scriptUtil.getCosmosWithdrawArgement(signData.transaction, addressIndex)
+        genTx = async (signature: string) => {
+          return await txUtil.genWithdrawTx(signData.transaction, signature, publicKeyBase46);
+        }
         break;
       default:
         throw new SDKError(this.signCosmosTransaction.name, `not support input tx type`);
     }
-
-    const signature = sign.signTransaction(signData, script, argument)
-    return signature;
+    const signature = await sign.signTransaction(signData, script, argument)
+    const signTx = await genTx(signature)
+    return signTx;
   }
 }

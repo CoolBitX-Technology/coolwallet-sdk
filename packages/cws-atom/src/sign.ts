@@ -7,7 +7,7 @@ import * as txUtil from './util/transactionUtil'
 export const signTransaction = async (
   signData: types.SignDataType,
   script: string,
-  argument: string,
+  argument: string
 ): Promise<string> => {
 
   const { transport, appId, appPrivateKey, confirmCB, authorizedCB } = signData
@@ -37,6 +37,7 @@ export const signTransaction = async (
     true
   );
 
+  
   if (!Buffer.isBuffer(canonicalSignature)) {
     const atomSignature = await txUtil.genAtomSigFromSESig(canonicalSignature);
     return atomSignature;
