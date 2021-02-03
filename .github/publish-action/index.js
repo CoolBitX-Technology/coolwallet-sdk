@@ -81,6 +81,7 @@ async function run() {
 	await checkAndPublish(context, 'packages/cws-xlm');
 	await checkAndPublish(context, 'packages/cws-xrp');
 	await checkAndPublish(context, 'packages/cws-trx');
+	await checkAndPublish(context, 'packages/cws-atom');
 	await checkAndPublish(context, 'packages/transport-react-native-ble');
 	await checkAndPublish(context, 'packages/transport-web-ble');
 }

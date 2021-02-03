@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallet/xrp",
-  "version": "0.1.0-beta.9",
-  "description": "Coolwallet Ripple App",
+  "name": "@coolwallet/atom",
+  "version": "0.1.0-beta.5",
+  "description": "Cosmos API for CoolWalletS",
   "main": "lib/index.js",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
@@ -10,16 +10,15 @@
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "keywords": [
-    "XRP",
-    "xrp",
-    "ripple",
+    "atom",
+    "cosmos",
+    "coolwallets",
     "coolwallet",
-    "xrp",
-    "javascript",
-    "hardwarewallet",
-    "cryptocurrency",
     "coolbitx",
-    "transaction"
+    "dex",
+    "cryptocurrency",
+    "hardwarewallet",
+    "sdk"
   ],
   "author": "coolwallet-team",
   "license": "ISC",
@@ -27,17 +26,22 @@
     "@coolwallet/core": "~0.1.0-beta.33"
   },
   "devDependencies": {
+    "@coolwallet/core": "~0.1.0-beta.33",
+    "@types/big.js": "^4.0.5",
+    "@types/bn.js": "^4.11.6",
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "~0.1.0-beta.33"
+    "@types/bech32": "^1.1.1"
   },
   "dependencies": {
-    "@types/node": "^13.11.1",
-    "base-x": "^3.0.7",
-    "ripple-binary-codec": "^0.2.6",
-    "typescript": "^3.8.3"
+    "bech32": "^1.1.3",
+    "big.js": "^5.2.2",
+    "bn.js": "^4.11.8",
+    "is_js": "^0.9.0",
+    "protocol-buffers-encodings": "^1.1.0",
+    "varstruct": "^6.1.2"
   },
   "repository": {
     "type": "git",
