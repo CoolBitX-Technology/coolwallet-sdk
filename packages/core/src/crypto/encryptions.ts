@@ -97,7 +97,7 @@ export const ECIESDec = (recipientPrivKey: string, encryption: string): string =
   if (equalConstTime(mac, realMac)) {
     return aes256CbcDecrypt(iv, encryptionKey, ciphertext).toString('hex');
   } else {
-    throw new SDKError(ECIESDec.name, "equalConstTime error")
+    throw new SDKError(ECIESDec.name, `equalConstTime error, mac: ${mac.toString('hex')}, realMac: ${realMac.toString('hex')}`)
   }
   
 };

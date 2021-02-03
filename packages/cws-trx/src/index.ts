@@ -1,89 +1,115 @@
-import {
-	apdu,
-	coin as COIN,
-	transport as tp,
-	error,
-	tx,
-} from '@coolwallet/core';
+import { coin as COIN, } from '@coolwallet/core';
 import * as trxSign from './sign';
-import { SignTransactionData } from './config/type';
-import * as scriptUtil from './utils/scriptUtils';
-import * as trxUtil from './utils/trxUtils';
-import * as scripts from './config/scripts';
+import * as scriptUtil from './utils/scriptUtil';
+import * as txUtil from './utils/transactionUtil';
+import * as type from './config/types';
+import { TX_TYPE } from './config/types';
+import * as params from './config/params';
 
-type Transport = tp.default;
-
+export { TX_TYPE };
 export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 	constructor() {
-		super('C3');
+		super(params.COIN_TYPE);
 	}
 
 	/**
 	 * Get Tron address by index
 	 */
 	async getAddress(
-		transport: Transport,
+		transport: type.Transport,
 		appPrivateKey: string,
 		appId: string,
 		addressIndex: number
 	): Promise<string> {
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		return trxUtil.pubKeyToAddress(publicKey);
+		return txUtil.pubKeyToAddress(publicKey);
 	}
 
 	/**
 	 * Sign Tron Transaction.
 	 */
-	async signTransaction(signTxData: SignTransactionData): Promise<string> {
+	async signTransaction(signTxData: type.NormalTradeData): Promise<string> {
 		const {
-			transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
 		} = signTxData;
 
+		const script = params.TRANSFER.script + params.TRANSFER.signature;
+		const argement = await scriptUtil.getNormalTradeArgument(transaction, addressIndex);
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-		const script = scripts.TRANSFER.script + scripts.TRANSFER.signature;
-		const rawPayload = trxUtil.getRawHex(transaction);
-
-		const preActions = [];
-		const sendScript = async () => {
-			await apdu.tx.sendScript(transport, script);
-		};
-		preActions.push(sendScript);
-
-		const action = async () => apdu.tx.executeScript(
-			transport,
-			appId,
-			appPrivateKey,
-			trxUtil.getArgument(signTxData)
-		);
-
-		const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
-			transport,
-			preActions,
-			action,
-			false,
-			confirmCB,
-			authorizedCB,
-			true
-		);
-
-		const { signedTx } = await apdu.tx.getSignedHex(transport);
-
-		if (Buffer.isBuffer(canonicalSignature)) {
-			throw new error.SDKError(this.signTransaction.name, 'canonicalSignature type error');
-		}
-
-		const { v, r, s } = await trxUtil.genTrxSigFromSESig(
-			canonicalSignature,
-			rawPayload,
-			publicKey
-		);
-		const serializedTx = trxUtil.composeSignedTransacton(signTxData, v, r, s);
-		return serializedTx;
 
 		return trxSign.signTransaction(
 			signTxData,
 			script,
-			publicKey,
+			argement,
+			publicKey
+		);
+	}
+
+	async signFreeze(signTxData: type.FreezeData): Promise<string> {
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
+
+		const script = params.FREEZE.script + params.FREEZE.signature;
+		const argement = await scriptUtil.getFreezeArgement(transaction, addressIndex)
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argement,
+			publicKey
+		);
+	}
+
+	async signUnfreeze(signTxData: type.UnfreezeData): Promise<string> {
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
+
+		const script = params.UNFREEZE.script + params.UNFREEZE.signature;
+		const argement = await scriptUtil.getUnfreezeArgement(transaction, addressIndex)
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argement,
+			publicKey
+		);
+	}
+
+	async signVoteWitness(signTxData: type.VoteWitnessData): Promise<string>{
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
+
+		const script = params.VOTE.script + params.VOTE.signature;
+		const argement = await scriptUtil.getVoteWitnessArgement(transaction, addressIndex)
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argement,
+			publicKey
+		);
+	}
+
+	async signWithdrawBalance(signTxData: type.WithdrawBalanceData): Promise<string> {
+		const {
+		  transport, transaction, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB
+		} = signTxData;
+
+		const script = params.VOTE.script + params.VOTE.signature;
+		const argement = await scriptUtil.getWithdrawBalanceArgement(transaction, addressIndex)
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argement,
+			publicKey
 		);
 	}
 }

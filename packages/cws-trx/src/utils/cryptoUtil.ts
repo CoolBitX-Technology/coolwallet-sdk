@@ -74,11 +74,22 @@ export function byteArray2hexStr(byteArray: any) {
 // }
 
 
+// export function sha256(dataByte: any): any {
+
+//   let dataHex = byteArray2hexStr(dataByte);
+//   let hashHex = crypto.createHash("sha256").update(dataHex).digest();
+//   console.log('hashHex: ' + hashHex)
+//   console.log('hashHex2: ' + hashHex.toString('hex'))
+//   return hexStr2byteArray(hashHex.toString('hex'))
+// }
+
+
 export function sha256(dataByte: any): any {
 
   let dataHex = byteArray2hexStr(dataByte);
-  let hashHex = crypto.createHash("sha256").update(dataHex).digest();
+  console.log("dataHex: " + dataHex)
+  let hashHex = crypto.createHash("sha256").update(Buffer.from(dataHex, 'hex')).digest();
   console.log('hashHex: ' + hashHex)
-  console.log('hashHex2: ' + hashHex.toString('hex'))
   return hexStr2byteArray(hashHex.toString('hex'))
 }
+
