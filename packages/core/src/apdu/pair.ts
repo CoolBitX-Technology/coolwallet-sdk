@@ -4,7 +4,7 @@ import { commands } from "./execute/command";
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
-import { getCommandSignature, getCommandSignatureWithoutNonce } from "../setting/auth";
+import { getCommandSignature } from "../setting/auth";
 import * as core from '../setting/index';
 import * as crypto from '../crypto/index';
 import * as config from '../config/index';
@@ -18,7 +18,7 @@ import * as apdu from '../apdu/index';
  */
 export const switchLockStatus = async (transport: Transport, appId: string, appPrivKey: string, freezePair: boolean) => {
   const pairLockStatus = freezePair ? '01' : '00';
-  const { signature, forceUseSC } = await core.auth.getCommandSignature(
+  const signature = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -27,7 +27,7 @@ export const switchLockStatus = async (transport: Transport, appId: string, appP
     pairLockStatus
   );
 
-  const { statusCode, msg } = await executeCommand(transport, commands.CHANGE_PAIR_STATUS, target.SE, signature, pairLockStatus, undefined, forceUseSC);
+  const { statusCode, msg } = await executeCommand(transport, commands.CHANGE_PAIR_STATUS, target.SE, signature, pairLockStatus, undefined);
   if (statusCode !== CODE._9000) {
     throw new APDUError(commands.CHANGE_PAIR_STATUS, statusCode, msg)
   }
@@ -42,7 +42,7 @@ export const switchLockStatus = async (transport: Transport, appId: string, appP
  * @returns {Promise}
  */
 export const register = async (transport: Transport, appPublicKey: string, password: string, deviceName: string, SEPublicKey: string): Promise<string> => {
-  if (!SEPublicKey){
+  if (!SEPublicKey) {
     throw new SDKError(register.name, 'SEPublicKey can not be undifined')
   }
   let nameToUTF = Buffer.from(deviceName, 'utf8');
@@ -71,12 +71,12 @@ export const register = async (transport: Transport, appPublicKey: string, passw
     P1 = '01';
   }
   const { statusCode, outputData: appId, msg } = await executeCommand(transport, commands.REGISTER, target.SE, data, P1);
-  if (statusCode === CODE._9000){
+  if (statusCode === CODE._9000) {
     return appId;
   } else {
     throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg)
   }
-  
+
 };
 
 /**
@@ -87,7 +87,7 @@ export const register = async (transport: Transport, appPublicKey: string, passw
  * @return {Promise<Array<{appId:string, }>>}
  */
 export const getPairedApps = async (transport: Transport, appId: string, appPrivKey: string): Promise<Array<{ appId: string; }>> => {
-  const { signature, forceUseSC } = await core.auth.getCommandSignature(
+  const signature = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -97,7 +97,7 @@ export const getPairedApps = async (transport: Transport, appId: string, appPriv
     transport,
     commands.GET_PAIRED_DEVICES,
     target.SE,
-    signature, undefined, undefined, forceUseSC
+    signature, undefined, undefined
   );
   const appsInfo = outputData.match(/.{100}/g);
   if (!appsInfo) {
@@ -122,13 +122,13 @@ export const getPairedApps = async (transport: Transport, appId: string, appPriv
  * @return {Promise<string>}
  */
 export const getPairingPassword = async (transport: Transport, appId: string, appPrivKey: string): Promise<string> => {
-  const { signature, forceUseSC } = await core.auth.getCommandSignature(
+  const signature = await core.auth.getCommandSignature(
     transport,
     appId,
     appPrivKey,
     commands.GET_PAIR_PWD
   );
-  const { outputData: encryptedPassword } = await executeCommand(transport, commands.GET_PAIR_PWD, target.SE, signature, undefined, undefined, forceUseSC);
+  const { outputData: encryptedPassword } = await executeCommand(transport, commands.GET_PAIR_PWD, target.SE, signature, undefined, undefined);
 
   // const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
   await apdu.mcu.control.powerOff(transport);
@@ -144,24 +144,24 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
  * @param {string} appIdWithSig
  */
 export const removePairedDevice = async (transport: Transport, appId: string, appPrivateKey: string, pairedAppId: string) => {
-  if (appId !== pairedAppId){
-    const sig = await getCommandSignature(
+  if (appId !== pairedAppId) {
+    const signature = await getCommandSignature(
       transport,
       appId,
       appPrivateKey,
       commands.REMOVE_DEVICES,
       pairedAppId
     );
-    const appIdWithSig = pairedAppId + sig.signature
+    const appIdWithSig = pairedAppId + signature
     const { statusCode, msg } = await executeCommand(transport, commands.REMOVE_DEVICES, target.SE, appIdWithSig, undefined, undefined);
-    if (statusCode !== CODE._9000){
-      throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg)    
+    if (statusCode !== CODE._9000) {
+      throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg)
     }
   } else {
     throw new SDKError(removePairedDevice.name, `pairedAppId should not equal appId`)
   }
-  
-  
+
+
 };
 
 /**
@@ -179,7 +179,7 @@ export const renameDevice = async (transport: Transport, appId: string, appPrivK
       nameToUTF = Buffer.concat([temp, nameToUTF]);
     }
     const name = nameToUTF.toString('hex');
-    const { signature, forceUseSC } = await core.auth.getCommandSignature(
+    const signature = await core.auth.getCommandSignature(
       transport,
       appId,
       appPrivKey,
@@ -188,9 +188,9 @@ export const renameDevice = async (transport: Transport, appId: string, appPrivK
     );
     const renameParams = name + signature;
 
-    const { statusCode, msg } = await executeCommand(transport, commands.RENAME_DEVICES, target.SE, renameParams, undefined, undefined, forceUseSC);
+    const { statusCode, msg } = await executeCommand(transport, commands.RENAME_DEVICES, target.SE, renameParams, undefined, undefined);
 
-    if( statusCode !== CODE._9000 ){
+    if (statusCode !== CODE._9000) {
       throw new APDUError(commands.RENAME_DEVICES, statusCode, msg);
     }
   } catch (e) {

@@ -40,9 +40,9 @@ export const selectApplet = async (transport: Transport, appletCommand: string =
 };
 
 export const checkUpdate = async (transport: Transport) => {
-	const cardSEVersion = await general.getSEVersion(transport);
-	const isNeedUpdate = SE_UPDATE_VER > cardSEVersion;
-	return { isNeedUpdate, curVersion: cardSEVersion, newVersion: SE_UPDATE_VER };
+  const cardSEVersion = await general.getSEVersion(transport);
+  const isNeedUpdate = SE_UPDATE_VER > cardSEVersion;
+  return { isNeedUpdate, curVersion: cardSEVersion, newVersion: SE_UPDATE_VER };
 };
 
 /**
@@ -277,9 +277,9 @@ const deleteBackupRegisterData = async (transport: Transport, appId: string, app
 const backupRegisterData = async (transport: Transport, appId: string, appPrivateKey: string) => {
   try {
     const command = commands.BACKUP_REGISTER_DATA;
-    let signedData = await auth.getCommandSignature(transport, appId, appPrivateKey, command)
-    console.log(`backupRegisterData: ${signedData.signature}`)
-    let status = await setting.backupSeed(transport, signedData);
+    let signature = await auth.getCommandSignature(transport, appId, appPrivateKey, command)
+    console.log(`backupRegisterData: ${signature}`)
+    let status = await setting.backupSeed(transport, signature);
     console.log(`${backupRegisterData.name} status: ${status}`);
   } catch (e) {
     if (e.message) {
@@ -322,7 +322,6 @@ export const getAPIOption = (cardId: string, challengeData: string = '') => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      // 'Access-Control-Allow-Origin': 'no-cors'  // ??
     },
   };
 

@@ -14,10 +14,10 @@ import * as crypto from '../crypto/index';
  * @param {string} signature
  * @return { Promise<boolean> }
  */
-export const authGetExtendedKey = async (transport: Transport, signature: string, forceUseSC: boolean
+export const authGetExtendedKey = async (transport: Transport, signature: string
 ): Promise<boolean> => {
   try {
-    const { statusCode } = await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, forceUseSC);
+    const { statusCode } = await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined);
     if (statusCode === CODE._9000) {
       return true;
     } else {
@@ -37,7 +37,7 @@ export const authGetExtendedKey = async (transport: Transport, signature: string
  * @return {Promise<string>}
  */
 export const getAccountExtendedKey = async (transport: Transport, path: string): Promise<string> => {
-  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, path, undefined, undefined, false);
+  const { outputData: key, statusCode, msg } = await executeCommand(transport, commands.GET_EXT_KEY, target.SE, path, undefined, undefined);
   if (key) {
     return key
   } else {
@@ -57,7 +57,7 @@ export const getAccountExtendedKey = async (transport: Transport, path: string):
 export async function createSeedByCard(transport: Transport, appId: string, appPrivateKey: string, strength: number): Promise<boolean> {
   let strengthHex = strength.toString(16);
   if (strengthHex.length % 2 > 0) strengthHex = `0${strengthHex}`;
-  const { signature, forceUseSC } = await setting.auth.getCommandSignature(
+  const signature = await setting.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
@@ -65,7 +65,7 @@ export async function createSeedByCard(transport: Transport, appId: string, appP
     strengthHex,
     undefined,
     undefined,
-    true
+    
   );
   const strengthWithSig = strengthHex + signature;
 
@@ -76,7 +76,7 @@ export async function createSeedByCard(transport: Transport, appId: string, appP
     strengthWithSig,
     undefined,
     undefined,
-    forceUseSC
+    
   );
   if (statusCode === CODE._9000) {
     return true;
@@ -110,7 +110,7 @@ export async function setSeed(transport: Transport, appId: string, appPrivateKey
       throw new SDKError(setSeed.name, 'SEPublicKey can not be undifined')
     }
     const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
-    const { signature, forceUseSC } = await setting.auth.getCommandSignature(
+    const signature = await setting.auth.getCommandSignature(
       transport,
       appId,
       appPrivateKey,
@@ -119,7 +119,7 @@ export async function setSeed(transport: Transport, appId: string, appPrivateKey
       undefined
     );
     const signedSeed = encryptedSeed + signature;
-    const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined, forceUseSC);
+    const { statusCode, msg } = await executeCommand(transport, commands.SET_SEED, target.SE, signedSeed, undefined, undefined);
     if (statusCode === CODE._9000) {
     } else if (statusCode === CODE._6881) {
       throw new APDUError(commands.SET_SEED, statusCode, "wallet is exist")

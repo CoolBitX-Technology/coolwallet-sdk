@@ -1,5 +1,5 @@
 import { executeCommand } from './execute/execute';
-import { getCommandSignature, getCommandSignatureWithoutNonce } from "../setting/auth";
+import { getCommandSignature } from "../setting/auth";
 import Transport from '../transport';
 import { addressIndexToKeyId } from '../transaction/txUtil'
 import { commands, CommandType } from "./execute/command";
@@ -7,63 +7,63 @@ import { SDKError, APDUError } from '../error/errorHandle';
 import { CODE } from '../config/status/code';
 import { target } from '../config/param';
 
-/**
- * get command signature for CoolWalletS
- * @param {Transport} transport
- * @param {String} txDataHex hex string data for SE
- * @param {String} txDataType hex P1 string
- * @param {String} appPrivateKey
- * @return {String} signature
- */
-export const txPrep = async (
-  transport: Transport,
-  txDataHex: string,
-  txDataType: string,
-  appPrivateKey: string
-): Promise<string> => {
+// /**
+//  * get command signature for CoolWalletS
+//  * @param {Transport} transport
+//  * @param {String} txDataHex hex string data for SE
+//  * @param {String} txDataType hex P1 string
+//  * @param {String} appPrivateKey
+//  * @return {String} signature
+//  */
+// export const txPrep = async (
+//   transport: Transport,
+//   txDataHex: string,
+//   txDataType: string,
+//   appPrivateKey: string
+// ): Promise<string> => {
 
-  let encryptedSignature;
-  let statusCode = CODE._9999;
-  let msg = 'prepareTx get encryptedSignature failed';
-  if (txDataType != '00') {
-    const result = await executeCommand(transport, commands.TX_PREPARE, target.SE, txDataHex, txDataType, '00');
-    statusCode = result.statusCode
-    msg = result.msg
-    if (statusCode === CODE._9000) {
-      return statusCode;
-    } else {
-      throw new APDUError(commands.TX_PREPARE, statusCode, msg)
-    }
-  } else {
-    const sig = await getCommandSignatureWithoutNonce(
-      transport,
-      appPrivateKey,
-      commands.TX_PREPARE,
-      txDataHex,
-      txDataType,
-      '00'
-    );
-    const sendData = txDataHex + sig;
-    const patch = Math.ceil(sendData.length / 500);
-    for (let i = 0; i < patch; i++) {
-      const patchData = sendData.substr(i * 500, 500);
-      const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
-      // eslint-disable-next-line no-await-in-loop
-      const result = await executeCommand(transport, commands.TX_PREPARE, target.SE, patchData, txDataType, p2);
+//   let encryptedSignature;
+//   let statusCode = CODE._9999;
+//   let msg = 'prepareTx get encryptedSignature failed';
+//   if (txDataType != '00') {
+//     const result = await executeCommand(transport, commands.TX_PREPARE, target.SE, txDataHex, txDataType, '00');
+//     statusCode = result.statusCode
+//     msg = result.msg
+//     if (statusCode === CODE._9000) {
+//       return statusCode;
+//     } else {
+//       throw new APDUError(commands.TX_PREPARE, statusCode, msg)
+//     }
+//   } else {
+//     const sig = await getCommandSignatureWithoutNonce(
+//       transport,
+//       appPrivateKey,
+//       commands.TX_PREPARE,
+//       txDataHex,
+//       txDataType,
+//       '00'
+//     );
+//     const sendData = txDataHex + sig;
+//     const patch = Math.ceil(sendData.length / 500);
+//     for (let i = 0; i < patch; i++) {
+//       const patchData = sendData.substr(i * 500, 500);
+//       const p2 = patch === 1 ? "00" : (i === patch - 1 ? "8" : "0") + (i + 1);
+//       // eslint-disable-next-line no-await-in-loop
+//       const result = await executeCommand(transport, commands.TX_PREPARE, target.SE, patchData, txDataType, p2);
 
-      if (i == patch - 1) {
-        encryptedSignature = result.outputData;
-        statusCode = result.statusCode
-        msg = result.msg
-      }
-    }
-    if (encryptedSignature) {
-      return encryptedSignature;
-    } else {
-      throw new APDUError(commands.TX_PREPARE, statusCode, msg)
-    }
-  }
-};
+//       if (i == patch - 1) {
+//         encryptedSignature = result.outputData;
+//         statusCode = result.statusCode
+//         msg = result.msg
+//       }
+//     }
+//     if (encryptedSignature) {
+//       return encryptedSignature;
+//     } else {
+//       throw new APDUError(commands.TX_PREPARE, statusCode, msg)
+//     }
+//   }
+// };
 
 /**
  * Scriptable step 1
@@ -76,8 +76,7 @@ export const sendScript = async (transport: Transport, script: string) => {
     target.SE,
     script,
     undefined,
-    undefined,
-    false
+    undefined
   );
   if (statusCode === CODE._9000) {
     return true;
@@ -95,7 +94,7 @@ export const executeScript = async (
   appPrivKey: string,
   argument: string,
 ) => {
-  const { signature } = await getCommandSignature(
+  const signature = await getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -111,7 +110,6 @@ export const executeScript = async (
     argument + signature,
     undefined,
     undefined,
-    true,
   );
   if (encryptedSignature) {
     return encryptedSignature;
@@ -132,7 +130,7 @@ export const executeUtxoScript = async (
   utxoArgument: string,
   extraTransactionType: string
 ) => {
-  const { signature } = await getCommandSignature(
+  const signature = await getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -147,8 +145,7 @@ export const executeUtxoScript = async (
     target.SE,
     utxoArgument + signature,
     extraTransactionType,
-    undefined,
-    true,
+    undefined
   );
   if (encryptedSignature) {
     return encryptedSignature;

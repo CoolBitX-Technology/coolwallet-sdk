@@ -2,8 +2,7 @@ import { executeCommand } from '../execute/execute';
 import Transport from '../../transport';
 import { commands } from "../execute/command";
 import { target } from '../../config/param';
-import { CODE } from '../../config/status/code';
-import { SDKError, APDUError } from '../../error/errorHandle';
+import { SDKError } from '../../error/errorHandle';
 
 
 
