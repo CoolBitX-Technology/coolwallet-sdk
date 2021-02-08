@@ -7,7 +7,6 @@ type SignTxData = {
   appPrivateKey: string,
   appId: string,
   addressIndex: number,
-  publicKey: string | undefined,
   confirmCB: () => void | undefined,
   authorizedCB: () => void | undefined
 }
