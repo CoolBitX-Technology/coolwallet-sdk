@@ -38,7 +38,7 @@ export interface FreezeData extends SignTxData {
 
 export interface FreezeContract extends Transaction {
   contract: {
-    resource: string,
+    resource: number,
     frozenDuration: number,
     frozenBalance: number|string,
     receiverAddress?: string,
@@ -52,7 +52,7 @@ export interface UnfreezeData extends SignTxData {
 
 export interface UnfreezeContract extends Transaction {
   contract: {
-    resource: string,
+    resource: number,
     receiverAddress?: string,
     ownerAddress: string,
   }
