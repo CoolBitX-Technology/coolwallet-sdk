@@ -1,10 +1,5 @@
 import { transport } from '@coolwallet/core';
 
-export type Output = {
-  address: string,
-  value: number
-}
-
 export type Transport = transport.default;
 
 type SignTxData = {
@@ -33,7 +28,7 @@ export interface NormalContract extends Transaction {
   contract: {
     ownerAddress: string,
     toAddress: string,
-    amount: number,
+    amount: number|string,
   }
 }
 
@@ -45,8 +40,8 @@ export interface FreezeContract extends Transaction {
   contract: {
     resource: string,
     frozenDuration: number,
-    frozenBalance: number,
-    receiverAddress: string,
+    frozenBalance: number|string,
+    receiverAddress?: string,
     ownerAddress: string,
   }
 }
@@ -58,7 +53,7 @@ export interface UnfreezeData extends SignTxData {
 export interface UnfreezeContract extends Transaction {
   contract: {
     resource: string,
-    receiverAddress: string,
+    receiverAddress?: string,
     ownerAddress: string,
   }
 }
@@ -71,7 +66,7 @@ export interface VoteWitnessContract extends Transaction {
   contract: {
     voteAddress: string,
     ownerAddress: string,
-    voteCount: string,
+    voteCount: number|string,
   }
 }
 
@@ -110,4 +105,3 @@ export enum TX_TYPE {
   VOTE_WITNESS_CONTRACT = 'VOTE_WITNESS_CONTRACT',
   WITHDRAW_BALANCE_CONTRACT = 'WITHDRAW_BALANCE_CONTRACT',
 }
-
