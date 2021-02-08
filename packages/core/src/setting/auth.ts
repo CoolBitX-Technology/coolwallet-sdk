@@ -53,13 +53,9 @@ export const getCommandSignature = async (
   data: string = '',
   params1: string = '00',
   params2: string = '00',
-  // isCreateWallet: boolean = false
 ): Promise<string> => {
   const nonce = await general.getNonce(transport);
 
-  // const SEVersion = await general.getSEVersion(transport);
-
-  // const forceUseSC = (SEVersion >= 200) ? true : false; 
 
   const P1 = params1 || command.P1;
   const P2 = params2 || command.P2;
@@ -68,15 +64,6 @@ export const getCommandSignature = async (
   const signatureParams = apduHeader + dataPackets + nonce;
   const signature = sign(signatureParams, appPrivateKey).toString('hex');
 
-  // if (!forceUseSC) {
-  //   await general.hi(transport, appId);
-  //   return { signature, forceUseSC };
-  // } else {
-  // return [appId(20B)] [rightJustifiedSignature(72B)]
-  // v200 create wallet by card can not Secure Channel so forceUseSC = false
-  // v200 signature = [apduData(Variety)][appId(20B)[rightJustifiedSignature(72B)]
-  // Return AppId with padded signature: Dont need to call [say hi].
-  // the following operaion is forced to used Secure Channel
   const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
   console.log("appIdWithSignature: " + appIdWithSignature)
   return appIdWithSignature;
