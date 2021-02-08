@@ -56,11 +56,8 @@ export const signTransaction = async (
   );
 
   if (Buffer.isBuffer(canonicalSignature)) return '';
-	const {r, s} = canonicalSignature;
-
-  const {signedTx} = await apdu.tx.getSignedHex(transport);
-	console.log('signedTx :', signedTx);
-
+	const { r, s } = canonicalSignature;
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, "hex");
   const v = ec.getKeyRecoveryParam(
     sha256(Buffer.from(signedTx, 'hex')),

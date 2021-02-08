@@ -64,26 +64,6 @@ export function byteArray2hexStr(byteArray: any) {
   return str;
 }
 
-// //return 32 bytes
-// function SHA256(msgBytes:) {
-//   let shaObj = new jsSHA("SHA-256", "HEX");
-//   let msgHex = byteArray2hexStr(msgBytes);
-//   shaObj.update(msgHex);
-//   let hashHex = shaObj.getHash("HEX");
-//   return hexStr2byteArray(hashHex);
-// }
-
-
-// export function sha256(dataByte: any): any {
-
-//   let dataHex = byteArray2hexStr(dataByte);
-//   let hashHex = crypto.createHash("sha256").update(dataHex).digest();
-//   console.log('hashHex: ' + hashHex)
-//   console.log('hashHex2: ' + hashHex.toString('hex'))
-//   return hexStr2byteArray(hashHex.toString('hex'))
-// }
-
-
 export function sha256(dataByte: any): any {
 
   let dataHex = byteArray2hexStr(dataByte);
