@@ -25,9 +25,7 @@ async function signTransaction(
 		output,
 		change
 	);
-	let preActions, actions;
-
-	({ preActions, actions } = scriptUtil.getScriptSigningActions(
+	const { preActions, actions } = await scriptUtil.getScriptSigningActions(
 		transport,
 		scriptType,
 		appId,
@@ -37,7 +35,7 @@ async function signTransaction(
 		output,
 		change,
 		coinType
-	));
+	);
 	const signatures = await tx.flow.getSignaturesFromCoolWallet(
 		transport,
 		preActions,
