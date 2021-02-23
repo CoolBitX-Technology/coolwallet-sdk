@@ -17,7 +17,7 @@ import * as crypto from '../crypto/index';
 export const authGetExtendedKey = async (transport: Transport, signature: string, forceUseSC: boolean
 ): Promise<boolean> => {
   try {
-    const { statusCode } = await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, forceUseSC);
+    const { statusCode } = await executeCommand(transport, commands.AUTH_EXT_KEY, target.SE, signature, undefined, undefined, true);
     if (statusCode === CODE._9000) {
       return true;
     } else {
