@@ -116,7 +116,7 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 			transport, transaction, appPrivateKey, appId, addressIndex
 		} = signTxData;
 
-		const script = params.VOTE.script + params.VOTE.signature;
+		const script = params.WITHDRAW.script + params.WITHDRAW.signature;
 		const argument = await scriptUtil.getWithdrawBalanceArgument(transaction, addressIndex);
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
