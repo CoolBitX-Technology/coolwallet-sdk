@@ -1,8 +1,11 @@
-import { apdu, transport, error, tx, util } from '@coolwallet/core';
-import * as trxUtil from './utils/trxUtils';
-import * as scripts from "./config/scripts";
+import { apdu, transport, tx } from '@coolwallet/core';
+import { sha256 } from './utils/cryptoUtil';
 
 type Transport = transport.default;
+
+const elliptic = require('elliptic');
+// eslint-disable-next-line new-cap
+const ec = new elliptic.ec("secp256k1");
 
 /**
  * sign TRX Transaction
@@ -22,49 +25,63 @@ export const signTransaction = async (
   signTxData: any,
   script: string,
   argument: string,
-  publicKey: string | undefined = undefined,
+  publicKey: string
 ): Promise<string> => {
-
-  const { transport, transaction } = signTxData
-
-  const rawPayload = trxUtil.getRawHex(transaction);
+  const {
+    transport, appPrivateKey, appId, confirmCB, authorizedCB
+  } = signTxData;
 
   const preActions = [];
-  let action;
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
-  }
+  };
+
   preActions.push(sendScript);
 
-  action = async () => {
-    return apdu.tx.executeScript(
-      transport,
-      signTxData.appId,
-      signTxData.appPrivateKey,
-      trxUtil.getArgument(signTxData)
-    );
-  }
+  const action = async () => apdu.tx.executeScript(
+    transport,
+    appId,
+    appPrivateKey,
+    argument
+  );
+
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
     action,
     false,
-    signTxData.confirmCB,
-    signTxData.authorizedCB,
+    confirmCB,
+    authorizedCB,
     true
   );
 
+  if (Buffer.isBuffer(canonicalSignature)) return '';
+	const { r, s } = canonicalSignature;
   const { signedTx } = await apdu.tx.getSignedHex(transport);
+  const keyPair = ec.keyFromPublic(publicKey, "hex");
+  const v = ec.getKeyRecoveryParam(
+    sha256(Buffer.from(signedTx, 'hex')),
+    canonicalSignature,
+    keyPair.pub
+  );
 
-  if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await trxUtil.genTrxSigFromSESig(
-      canonicalSignature,
-      rawPayload,
-      publicKey
-    );
-    const serializedTx = trxUtil.composeSignedTransacton(signTxData, v, r, s);
-    return serializedTx;
-  } else {
-    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
-  }
+  const sig = r + s + v.toString().padStart(2, '0');
+
+	return '0a' + toVarint(signedTx.length/2) + signedTx + '12' + toVarint(sig.length/2) + sig;
 };
+
+/**
+ * @description convert int to varint
+ * @param {number} int
+ * @return {string}
+ */
+function toVarint(int: number) {
+	const bytes = [];
+	while (int > 0) {
+		let out = int & 127;
+		int = int >> 7;
+		if (int > 0) out += 128;
+		bytes.push([out]);
+	}
+	return Buffer.from(bytes).toString('hex');
+}

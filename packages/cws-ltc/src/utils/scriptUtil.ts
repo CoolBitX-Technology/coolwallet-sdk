@@ -93,7 +93,7 @@ export async function getArgument(
 };
 
 
-export function getScriptSigningActions(
+export async function getScriptSigningActions(
   transport: types.Transport,
   scriptType: types.ScriptType,
   appId: string,
@@ -103,12 +103,12 @@ export function getScriptSigningActions(
   output: types.Output,
   change: types.Change | undefined,
   coinType: string
-): {
+): Promise<{
   preActions: Array<Function>,
   actions: Array<Function>
-} {
+}> {
   const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = "00" + getArgument(scriptType, inputs, output, change);// keylength zero
+  const argument = "00" + await getArgument(scriptType, inputs, output, change);// keylength zero
 
   const preActions = [];
   const sendScript = async () => {
