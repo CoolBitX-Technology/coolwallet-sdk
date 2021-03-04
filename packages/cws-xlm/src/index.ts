@@ -43,6 +43,10 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     return txUtil.pubKeyToAddress(pubKey);
   }
 
+  async getAddressByAccountKey(publicKey: string): Promise<string> {
+    return txUtil.pubKeyToAddress(publicKey);
+  }
+
   /**
    * sign XLM signatureBase with account 0, return signature.
    */
