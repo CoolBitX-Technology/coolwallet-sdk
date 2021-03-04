@@ -31,7 +31,6 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     return pubKeyToAddress(publicKey);
   }
 
-
   /**
    * Sign Ethereum Transaction.
    * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
