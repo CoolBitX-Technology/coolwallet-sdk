@@ -95,26 +95,6 @@ export const genEthSigFromSESig = async (
   return { v, r, s };
 };
 
-/**
- * @description APDU Send Raw Data for Segregated Signature
- * @param {Transport} transport
- * @param {Buffer} msgBuf
- * @param {String} p1
- * @return {Function}
- */
-// todo : No test case for this function yet, should test later
-export const apduForParsignMessage = (
-  transport: Transport,
-  appPrivateKey: string,
-  msgBuf: Buffer,
-  p1: string
-): Function => {
-  let rawData = msgBuf.toString("hex");
-  rawData = handleHex(rawData);
-  return async () => {
-    apdu.tx.txPrep(transport, rawData, p1, appPrivateKey);
-  }
-};
 
 /**
  * @description get APDU set token function
