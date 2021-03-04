@@ -12,8 +12,8 @@ import { SDKError, APDUError } from '../error/errorHandle';
  * @param {string} signedCommand
  * @return {Promise<{ status: boolean, statusCode: string, msg: string }>}
  */
-export const backupSeed = async (transport: Transport, sign: { signature: string, forceUseSC: boolean}): Promise<boolean> => {
-  const { statusCode, msg } = await executeCommand(transport, commands.BACKUP_REGISTER_DATA, target.SE, sign.signature, undefined, undefined, sign.forceUseSC);
+export const backupSeed = async (transport: Transport, signature: string): Promise<boolean> => {
+  const { statusCode, msg } = await executeCommand(transport, commands.BACKUP_REGISTER_DATA, target.SE, signature, undefined, undefined);
   if (statusCode === CODE._9000) {
     return true;
   } else {
@@ -55,8 +55,8 @@ export const checkBackupStatus = async (transport: Transport): Promise<boolean> 
  * @param {string} signedCommand
  * @return {Promise<{ status: boolean, statusCode: string, msg: string }>}
  */
-export const deleteSeedBackup = async (transport: Transport, sign: { signature: string, forceUseSC: boolean }) => {
-  const { statusCode, msg } = await executeCommand(transport, commands.DELETE_REGISTER_BACKUP, target.SE, sign.signature, undefined, undefined, sign.forceUseSC);
+export const deleteSeedBackup = async (transport: Transport, signature: string) => {
+  const { statusCode, msg } = await executeCommand(transport, commands.DELETE_REGISTER_BACKUP, target.SE, signature, undefined, undefined);
   if (statusCode === CODE._9000) {
     return true
   } else {

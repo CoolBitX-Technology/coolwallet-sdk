@@ -5,13 +5,13 @@ import { commands } from "../apdu/execute/command";
 const bip32 = require("bip32");
 
 const authGetKey = async (transport: Transport, appId: string, appPrivateKey: string) => {
-  const { signature, forceUseSC } = await setting.auth.getCommandSignature(
+  const signature = await setting.auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
     commands.AUTH_EXT_KEY
   );
-  return apdu.wallet.authGetExtendedKey(transport, signature, forceUseSC);
+  return apdu.wallet.authGetExtendedKey(transport, signature);
 };
 
 /**

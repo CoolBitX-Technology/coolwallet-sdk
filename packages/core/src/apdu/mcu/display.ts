@@ -3,16 +3,16 @@ import Transport from '../../transport';
 import { commands } from "../execute/command";
 import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
-import { SDKError, APDUError } from '../../error/errorHandle';
-import { getCommandSignature, getCommandSignatureWithoutNonce } from "../../setting/auth";
+import { APDUError } from '../../error/errorHandle';
+import { getCommandSignature } from "../../setting/auth";
 
 /**
  * Display "UPDATE" on wallet display
  * @param {Transport} transport
  */
 export const showUpdate = async (transport: Transport) => {
-  const {statusCode, msg} = await executeCommand(transport, commands.START_UPDATE, target.SE); // TODO 
-  if (statusCode !== CODE._9000){
+  const { statusCode, msg } = await executeCommand(transport, commands.START_UPDATE, target.SE); // TODO 
+  if (statusCode !== CODE._9000) {
     throw new APDUError(commands.START_UPDATE, statusCode, msg)
   }
 };
@@ -72,7 +72,7 @@ export const updateBalance = async (transport: Transport, appId: string, appPriv
 
   const concatBalance = allBalances.join('');
 
-  const { signature, forceUseSC } = await getCommandSignature(
+  const signature = await getCommandSignature(
     transport,
     appId,
     appPrivKey,
@@ -82,7 +82,7 @@ export const updateBalance = async (transport: Transport, appId: string, appPriv
 
   const executeCommandData = concatBalance + signature;
 
-  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_BALANCE, target.MCU, executeCommandData, undefined, undefined, forceUseSC);
+  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_BALANCE, target.MCU, executeCommandData, undefined, undefined);
 
   // if (statusCode !== CODE._9000) {
   //   throw new APDUError(commands.UPDATE_BALANCE, statusCode, msg)
