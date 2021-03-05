@@ -25,6 +25,12 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 		return txUtil.pubKeyToAddress(publicKey);
 	}
 
+	async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+		const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+		return txUtil.pubKeyToAddress(publicKey);
+	}
+
+
 	/**
 	 * Sign Tron Transaction.
 	 */
