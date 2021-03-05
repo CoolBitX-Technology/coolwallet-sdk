@@ -22,6 +22,10 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     return txUtil.publicKeyToAddress(publicKey);
   }
 
+  async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    return txUtil.publicKeyToAddress(publicKey);
+  }
 
   /**
    * Sign Binance tansfer transaction.
