@@ -6,7 +6,6 @@ import * as params from './config/params';
 import { COIN_SPECIES, PROTOCOL } from './config/types'; 
 export { COIN_SPECIES, PROTOCOL };
 
-
 export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
   transfer: { script: string, signature: string};
   constructor(type: String) {
