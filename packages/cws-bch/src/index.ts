@@ -28,6 +28,12 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 		return txUtil.pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
 	}
 
+	async getAddressAndOutScriptByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<{ address: string, outScript: Buffer }> {
+		const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+		return txUtil.pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'));
+	}
+
+
 	async signTransaction(
 		signTxData: types.signTxType
 	): Promise<string> {
