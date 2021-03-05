@@ -66,13 +66,11 @@ export const getEd25519PublicKey = async (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
-  accountIndex: number,
   path: string,
   authFirst: boolean = true
 ): Promise<string> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
 
-  const accIndexHex = accountIndex.toString(16).padStart(2, "0");
   const response = await apdu.wallet.getAccountExtendedKey(
     transport,
     path

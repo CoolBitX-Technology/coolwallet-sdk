@@ -25,27 +25,21 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     } 
   }
 
-  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, accountIndex: number, protocol: PROTOCOL = PROTOCOL.SLIP0010): Promise<string> {
-    if (accountIndex !== 0) {
-      throw new ERROR.SDKError(this.getAddress.name, 'Only support account index = 0 for now.');
-    }
+  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, protocol: PROTOCOL = PROTOCOL.SLIP0010): Promise<string> {
 
-    const keyType = protocol === PROTOCOL.BIP44 ? true : false;
-    const path = await utils.getPath(params.COIN_TYPE, accountIndex, 3, keyType)
-    console.log("path: " + path)
-
-    const pubKey = await this.getPublicKey(transport, appPrivateKey, appId, accountIndex, path);
-    console.log("pubkey: " + pubKey)
+    const isSLIP0010 = protocol === PROTOCOL.BIP44 ? true : false;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, isSLIP0010);
    
-    if (!pubKey) {
+    if (!publicKey) {
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
     }
-    return txUtil.pubKeyToAddress(pubKey);
+    return txUtil.pubKeyToAddress(publicKey);
   }
 
   async getAddressByAccountKey(publicKey: string): Promise<string> {
     return txUtil.pubKeyToAddress(publicKey);
   }
+
 
   /**
    * sign XLM signatureBase with account 0, return signature.
