@@ -20,8 +20,8 @@ export default class EDDSACoin {
    * @returns {Promise<string>}
    */
   async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, isSLIP0010: boolean = true) {
-
-    const path = await utils.getPath(this.coinType, 0, 3, isSLIP0010)
+    const isBIP32 = isSLIP0010 ? false : true;
+    const path = await utils.getPath(this.coinType, 0, 3, isBIP32)
   
     return derivation.getEd25519PublicKey(
       transport,
