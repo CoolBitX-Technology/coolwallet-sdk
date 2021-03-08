@@ -21,7 +21,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
       case COIN_SPECIES.XLM:
       default:
         this.transfer = params.TRANSFER.XLM;
-    } 
+    }
   }
 
   async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, protocol: PROTOCOL = PROTOCOL.SLIP0010): Promise<string> {
