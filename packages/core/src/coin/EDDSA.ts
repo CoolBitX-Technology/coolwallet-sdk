@@ -1,5 +1,6 @@
 import * as derivation from './derive';
 import Transport from "../transport";
+import * as utils from "../utils/index";
 
 export default class EDDSACoin {
 
@@ -18,13 +19,14 @@ export default class EDDSACoin {
    * @param {string} protocol
    * @returns {Promise<string>}
    */
-  async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, accountIndex: number, path: string) {
+  async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, isSLIP0010: boolean = true) {
     
+    const path = await utils.getPath(this.coinType, 0, 3, !isSLIP0010)
+  
     return derivation.getEd25519PublicKey(
       transport,
       appId,
       appPrivateKey,
-      accountIndex,
       path
     );
   }

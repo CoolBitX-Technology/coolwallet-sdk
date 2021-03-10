@@ -13,7 +13,7 @@ export { transactionType }
 
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
-    super(params.COIN_TYPE);
+    super(params.COIN_TYPE); 
   }
 
   /**
@@ -25,7 +25,11 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return pubKeyToAddress(publicKey);
   }
-
+ 
+  async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    return pubKeyToAddress(publicKey);
+  }
 
   /**
    * Sign Ethereum Transaction.

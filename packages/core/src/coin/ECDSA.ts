@@ -28,7 +28,18 @@ export default class ECDSACoin {
    * @param {Number} addressIndex address index in BIP44 pointing to the target public key.
    * @returns {Promise < string >}
    */
-  async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number) {
+  async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    if (this.accPublicKey === '' || this.accChainCode === '') {
+      await this.getAccountPubKeyAndChainCode(transport, appPrivateKey, appId)
+    }
+    if (!this.publicKeys[addressIndex]) {
+      const node = derivation.derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
+      this.publicKeys[addressIndex] = node.publicKey;
+    }
+    return this.publicKeys[addressIndex];
+  }
+
+  async getAccountPubKeyAndChainCode(transport: Transport, appPrivateKey: string, appId: string) {
     if (this.accPublicKey === '' || this.accChainCode === '') {
       const { accountPublicKey, accountChainCode } = await derivation.getAccountExtKey(
         transport,
@@ -39,12 +50,15 @@ export default class ECDSACoin {
       this.accPublicKey = accountPublicKey;
       this.accChainCode = accountChainCode;
     }
-    if (!this.publicKeys[addressIndex]) {
-      const node = derivation.derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
-      this.publicKeys[addressIndex] = node.publicKey;
-    }
-    return this.publicKeys[addressIndex];
+    return { accountPublicKey: this.accPublicKey, accountChainCode: this.accChainCode }
   }
+
+  async getAddressPublicKey(accPublicKey: string, accChainCode: string, addressIndex: number, ){
+    const node = derivation.derivePubKey(accPublicKey, accChainCode, 0, addressIndex);
+    return node.publicKey;
+  }
+
+  
 
 
   /**
