@@ -67,9 +67,9 @@ export function byteArray2hexStr(byteArray: any) {
 export function sha256(dataByte: any): any {
 
   let dataHex = byteArray2hexStr(dataByte);
-  console.log("dataHex: " + dataHex)
+  console.debug("dataHex: " + dataHex)
   let hashHex = crypto.createHash("sha256").update(Buffer.from(dataHex, 'hex')).digest();
-  console.log('hashHex: ' + hashHex)
+  console.debug('hashHex: ' + hashHex)
   return hexStr2byteArray(hashHex.toString('hex'))
 }
 

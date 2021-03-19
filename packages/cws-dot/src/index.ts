@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { coin as COIN, setting } from '@coolwallet/core';
-import { pubKeyToAddress } from './utils/transactionUtils';
+import * as txUtil from './utils/transactionUtil';
 import * as types from './config/types'
 import * as params from "./config/params"; 
-import * as scriptUtil from "./utils/scriptUtils";
+import * as scriptUtil from "./utils/scriptUtil";
 import * as dotSign from "./sign";
 
 
@@ -15,12 +15,12 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
 
   async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    return pubKeyToAddress(publicKey);
+    return txUtil.pubKeyToAddress(publicKey);
   }
  
   async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
-    return pubKeyToAddress(publicKey);
+    return txUtil.pubKeyToAddress(publicKey);
   }
 
 
@@ -31,15 +31,22 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
       transport, transaction, appPrivateKey, appId, addressIndex
     } = signTxData;
     const script = params.TRANSFER.script + params.TRANSFER.signature;
-    const argument = await scriptUtil.getNormalTradeArgument(transaction, addressIndex);
+    const formatNormalTxData = txUtil.getFormatNormalTxData(transaction);
+    const argument = await scriptUtil.getNormalTradeArgument(formatNormalTxData, addressIndex);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-    return dotSign.signTransaction(
+    const signature = await dotSign.signTransaction(
       signTxData,
       script,
       argument,
-      publicKey
+      publicKey,
+      formatNormalTxData
     );
+
+
+    return txUtil.getSumitTransaction(transaction.fromAddress, formatNormalTxData, signature, 4)
+
+    
 
   }
 }

@@ -1,6 +1,13 @@
 import { transport } from '@coolwallet/core';
+import * as BN from 'bn.js';
 
 export type Transport = transport.default;
+
+export enum Method {
+  transfer = '0500',
+  bond = '0700',
+  unbond = '0702',
+}
 
 type SignTxData = {
   transport: Transport,
@@ -13,13 +20,16 @@ type SignTxData = {
 
 type Transaction = {
   // [key: string]: any,
+  fromAddress: string,
   blockHash: string,
-  eraPeriod: number,
-  genesisHash: number,
-  nonce: number,
-  specVersion: number,
-  tip: number,
-  transactionVersion: number
+  blockNumber: string
+  era: string,
+  genesisHash: string,
+  nonce: string,
+  specVersion: string,
+  tip: string,
+  transactionVersion: string,
+  version: number
 }
 
 export interface NormalTransferData extends SignTxData {
@@ -28,35 +38,34 @@ export interface NormalTransferData extends SignTxData {
 
 export interface NormalMethod extends Transaction {
   method: {
-    dest: string,
+    destAddress: string,
     value: string,
     name: string,
     pallet: string
   }
 }
 
-/*
-  const refBlockBytes = '';
-  const refBlockHash = '';
-  const Expiration = '';
-  const ownerAddress = '';
-  const toAddress = '';
-  const amount = '';
-  const timestamp = '';
-*/
-
-export type Option = {
-  transactionType: TX_TYPE,
-  info: {
-    symbol: string,
-    decimals: string
-  }
-};
-
-export enum TX_TYPE {
-  TRANSFER_CONTRACT = 'TRANSFER_CONTRACT',
-  FREEZE_BALANCE_CONTRACT = 'FREEZE_BALANCE_CONTRACT',
-  UNFREEZE_BALANCE_CONTRACT = 'UNFREEZE_BALANCE_CONTRACT',
-  VOTE_WITNESS_CONTRACT = 'VOTE_WITNESS_CONTRACT',
-  WITHDRAW_BALANCE_CONTRACT = 'WITHDRAW_BALANCE_CONTRACT',
+export interface FormatNormalTransferData {
+  callIndex: string,
+  destAddress: string,
+  value: string,
+  mortalEra: string,
+  nonce: string,
+  tip: string,
+  specVer: string,
+  txVer: string,
+  blockHash: string,
+  genesisHash: string
 }
+
+export interface ToBn {
+  toBn: () => BN;
+}
+
+
+export interface ToBnOptions {
+  isLe?: boolean;
+  isNegative?: boolean;
+}
+
+export type FnType = Function;

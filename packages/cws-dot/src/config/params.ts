@@ -1,6 +1,7 @@
 
 export const COIN_TYPE = '80000162'
 
+
 export const TRANSFER = {
   script:
     '',

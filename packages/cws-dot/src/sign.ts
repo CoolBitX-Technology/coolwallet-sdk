@@ -1,5 +1,7 @@
 import { apdu, transport, tx } from '@coolwallet/core';
 import { sha256 } from './utils/cryptoUtil';
+import * as types from './config/types';
+import * as txUtil from './utils/transactionUtil';
 
 type Transport = transport.default;
 
@@ -24,10 +26,11 @@ export const signTransaction = async (
   signTxData: any,
   script: string,
   argument: string,
-  publicKey: string
+  publicKey: string,
+  formatNormalTransferData: types.FormatNormalTransferData
 ): Promise<string> => {
   const {
-    transport, appPrivateKey, appId, confirmCB, authorizedCB
+    transport, appPrivateKey, appId, confirmCB, authorizedCB, transaction
   } = signTxData;
 
   const preActions = [];
@@ -53,17 +56,10 @@ export const signTransaction = async (
     authorizedCB,
     true
   );
+  
+  const signature = await txUtil.getCompleteSignature(transport, publicKey, canonicalSignature)
 
-  if (Buffer.isBuffer(canonicalSignature)) return '';
-  const { r, s } = canonicalSignature;
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-  const keyPair = ec.keyFromPublic(publicKey, "hex");
-  const v = ec.getKeyRecoveryParam(
-    sha256(Buffer.from(signedTx, 'hex')),
-    canonicalSignature,
-    keyPair.pub
-  );
 
-  const sig = r + s + v.toString().padStart(2, '0');
-  return ''
+  return signature
 };
+
