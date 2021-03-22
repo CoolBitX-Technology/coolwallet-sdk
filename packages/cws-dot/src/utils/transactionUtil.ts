@@ -1,4 +1,4 @@
-import { error, transport, apdu } from "@coolwallet/core";
+// import { error, transport, apdu } from "@coolwallet/core";
 import * as stringUtil from "./stringUtil";
 import { assert, bnToU8a, u8aConcat, u8aToBn } from '@polkadot/util';
 import BN from 'bn.js';
@@ -20,29 +20,31 @@ const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
  * @return {string}
  */
 export function pubKeyToAddress(compressedPubkey: string): string {
-  const zero = '0x' + compressedPubkey;
+
+  const zero = '0x' + compressedPubkey.substring(2)
   const address = encodeAddress(zero, 0);
   return address;
 }
 
 
 
-export async function getCompleteSignature(transport: types.Transport, publicKey: string, canonicalSignature: { r: string; s: string; } | Buffer): Promise<string> {
-  if (Buffer.isBuffer(canonicalSignature)) {
-    return '';
-  }
-  const { r, s } = canonicalSignature;
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-  const keyPair = ec.keyFromPublic(publicKey, "hex");
-  const v = ec.getKeyRecoveryParam(
-    sha256(Buffer.from(signedTx, 'hex')),
-    canonicalSignature,
-    keyPair.pub
-  );
 
-  const sig = r + s + v.toString().padStart(2, '0');
-  return sig
-}
+// export async function getCompleteSignature(transport: types.Transport, publicKey: string, canonicalSignature: { r: string; s: string; } | Buffer): Promise<string> {
+//   if (Buffer.isBuffer(canonicalSignature)) {
+//     return '';
+//   }
+//   const { r, s } = canonicalSignature;
+//   const { signedTx } = await apdu.tx.getSignedHex(transport);
+//   const keyPair = ec.keyFromPublic(publicKey, "hex");
+//   const v = ec.getKeyRecoveryParam(
+//     sha256(Buffer.from(signedTx, 'hex')),
+//     canonicalSignature,
+//     keyPair.pub
+//   );
+
+//   const sig = r + s + v.toString().padStart(2, '0');
+//   return sig
+// }
 
 /**
                 0x
