@@ -3,7 +3,7 @@ import { coin as COIN, setting } from '@coolwallet/core';
 import * as txUtil from './utils/transactionUtil';
 import * as types from './config/types'
 import * as params from "./config/params"; 
-import * as scriptUtil from "./utils/scriptUtil";
+import * as scriptUtil from "./utils/scriptUtil"; 
 import * as dotSign from "./sign";
 
 
