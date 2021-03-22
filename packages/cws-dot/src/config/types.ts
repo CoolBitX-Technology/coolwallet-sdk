@@ -70,6 +70,17 @@ export interface UnbondMethod {
   value: string,
 }
 
+export interface NominateData extends SignTxData {
+  transaction: NominateTx
+}
+
+export interface NominateTx extends dotTransaction {
+  method: NominateMethod
+}
+export interface NominateMethod {
+  targetAddress: string,
+}
+
 export interface FormatTransfer {
   mortalEra: string,
   nonce: string,
@@ -97,6 +108,9 @@ export interface FormatUnbondMethod {
   value: string
 }
 
+export interface FormatNominateMethod {
+  targetAddress: string
+}
 
 
 export interface ToBn {

@@ -78,21 +78,3 @@ export function getSubmitTransaction(fromAddress: string, formatTxData: types.Fo
 
   return '0x' + resultTx
 }
-
-// export function getSubmitTransaction2(fromAddress: string, formatTxData: types.FormatNormalTransfer, signature: string, version: number): string {
-//   const sumitTx =
-//     '00' +
-//     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
-//     signature +
-//     formatTxData.mortalEra +
-//     formatTxData.nonce +
-//     formatTxData.tip +
-//     formatTxData.callIndex +
-//     '00' +
-//     formatTxData.destAddress +
-//     formatTxData.value
-
-//   const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version))
-
-//   return resultTx
-// }

@@ -72,7 +72,7 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
   }
 }
 
-export function getUnbondMethod(rawData: types.BondMethod): { method: types.FormatUnbondMethod, methodString: string } {
+export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
   const value = formatValue(rawData.value)
 
   return {
@@ -83,14 +83,42 @@ export function getUnbondMethod(rawData: types.BondMethod): { method: types.Form
   }
 }
 
+// TODO
+export function getNominateMethod(rawData: types.NominateMethod): { method: types.FormatNominateMethod, methodString: string } {
+  const targetAddress = formatValue(rawData.targetAddress)
 
+  return {
+    method: {
+      targetAddress
+    },
+    methodString: targetAddress
+  }
+}
+
+export function getMethodLength(methodString: string): string{
+  const len = methodString.length
+  let lenStr = ''
+  if (len < 128){
+    lenStr = len.toString(2) + '0'
+  }else{
+    lenStr = len.toString(2) + '1'
+  }
+  lenStr = parseInt(lenStr, 2).toString(16)
+  if (lenStr.length % 2 != 0) {
+    lenStr = '0' + lenStr
+  }
+  lenStr = stringUtil.reverse(lenStr)
+
+  return lenStr
+
+}
 
 export function getMortalEra(blockNumber: string, era: string): string {
   const binaryValue = parseInt(blockNumber).toString(2)
   const power = Math.ceil(Math.log2(parseInt(era)))
 
   let binaryPower = (power - 1).toString(2)
-  if (binaryPower.length / 2 != 0) {
+  if (binaryPower.length % 2 != 0) {
     binaryPower = '0' + binaryPower
   }
 
