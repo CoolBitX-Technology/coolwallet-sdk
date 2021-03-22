@@ -23,14 +23,14 @@ export const UNBOND = {
     ''
 };
 
-export const WITHDRAW = {
+export const NOMINATE = {
   script:
     '',
   signature:
     ''
 };
 
-export const UNBONDED = {
+export const WITHDRAW = {
   script:
     '',
   signature:

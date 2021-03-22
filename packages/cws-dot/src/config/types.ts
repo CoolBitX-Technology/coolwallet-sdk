@@ -18,7 +18,7 @@ type SignTxData = {
   authorizedCB: () => void | undefined
 }
 
-type Transaction = {
+export type dotTransaction = {
   // [key: string]: any,
   fromAddress: string,
   blockHash: string,
@@ -33,22 +33,55 @@ type Transaction = {
 }
 
 export interface NormalTransferData extends SignTxData {
-  transaction: NormalMethod
+  transaction: NormalTx
 }
 
-export interface NormalMethod extends Transaction {
-  method: {
-    destAddress: string,
-    value: string,
-    name: string,
-    pallet: string
-  }
+export interface NormalTx extends dotTransaction {
+  method: NormalMethod
 }
-
-export interface FormatNormalTransferData {
-  callIndex: string,
+export interface NormalMethod {
   destAddress: string,
   value: string,
+  name: string,
+  pallet: string
+}
+
+export interface BondData extends SignTxData {
+  transaction: BondTx
+}
+
+export interface BondTx extends dotTransaction {
+  method: BondMethod
+}
+export interface BondMethod {
+  controllerAddress: string,
+  value: string,
+  // payee: string
+}
+
+export interface UnbondData extends SignTxData {
+  transaction: UnbondTx
+}
+
+export interface UnbondTx extends dotTransaction {
+  method: UnbondMethod
+}
+export interface UnbondMethod {
+  value: string,
+}
+
+export interface NominateData extends SignTxData {
+  transaction: NominateTx
+}
+
+export interface NominateTx extends dotTransaction {
+  method: NominateMethod
+}
+export interface NominateMethod {
+  targetAddress: string,
+}
+
+export interface FormatTransfer {
   mortalEra: string,
   nonce: string,
   tip: string,
@@ -57,6 +90,28 @@ export interface FormatNormalTransferData {
   blockHash: string,
   genesisHash: string
 }
+
+export interface FormatNormalMethod {
+  callIndex: string,
+  destAddress: string,
+  value: string
+}
+
+
+export interface FormatBondMethod {
+  callIndex: string,
+  controllerAddress: string,
+  value: string
+}
+
+export interface FormatUnbondMethod {
+  value: string
+}
+
+export interface FormatNominateMethod {
+  targetAddress: string
+}
+
 
 export interface ToBn {
   toBn: () => BN;

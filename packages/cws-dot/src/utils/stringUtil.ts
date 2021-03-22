@@ -77,8 +77,6 @@ export function reverse(value: string): string {
     .join('');
 }
 
-
-
 export function numberToBn<ExtToBn extends types.ToBn>(value: number | ExtToBn | BN): BN {
   return BN.isBN(value)
     ? value
@@ -86,7 +84,3 @@ export function numberToBn<ExtToBn extends types.ToBn>(value: number | ExtToBn |
       ? value.toBn()
       : new BN(value);
 }
-
-
-// const value = '029A'
-// console.log(hexToBn(value.toString()).toNumber())

@@ -1,7 +1,7 @@
 import * as types from '../config/types'
 import { utils } from '@coolwallet/core';
 import * as params from '../config/params'
-import * as txUtil from './transactionUtil'
+import * as dotUtil from './dotUtil'
 const { decodeAddress } = require('@polkadot/keyring');
 
 
@@ -9,6 +9,20 @@ async function addPath(argument: string, addressIndex: number) {
   const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
   return SEPath + argument;
 }
+
+export const getTradeArgument = async (rawData: types.FormatTransfer)
+  : Promise<string> => {
+  const mortalEra = rawData.mortalEra.padStart(10, '0')
+  const nonce = rawData.nonce.padStart(10, '0')
+  const tip = rawData.tip.padStart(10, '0')
+  const specVer = rawData.specVer.padStart(8, '0')
+  const txVer = rawData.txVer.padStart(8, '0')
+  const blockHash = rawData.blockHash.padStart(64, '0')
+  const genesisHash = rawData.genesisHash.padStart(64, '0')
+
+  const argument = mortalEra + nonce + tip + specVer + txVer + blockHash + genesisHash
+  return argument;
+};
 
 
 /**
@@ -29,20 +43,52 @@ payload:
  * @param addressIndex 
  * @returns 
  */
-export const getNormalTradeArgument = async (rawData: types.FormatNormalTransferData, addressIndex: number)
+export const getNormalTradeArgument = async (rawData: types.FormatTransfer, method: types.FormatNormalMethod, methodString: string, addressIndex: number)
   : Promise<string> => {
-  const callIndex = rawData.callIndex
-  const destAddress = rawData.destAddress
-  const value = rawData.value
-  const mortalEra = rawData.mortalEra
-  const nonce = rawData.nonce
-  const tip = rawData.tip
-  const specVer = rawData.specVer
-  const txVer = rawData.txVer
-  const blockHash = rawData.blockHash
-  const genesisHash = rawData.genesisHash
+    
+  const methodLen = dotUtil.getMethodLength(methodString).padStart(4, '0')
+  const callIndex = method.callIndex.padStart(4, '0')
+  const destAddress = method.destAddress.padStart(64, '0')
+  const value = method.value.padStart(20, '0')
+  const tradeArgument = getTradeArgument(rawData)
 
-  const argument = callIndex + destAddress + value + mortalEra + nonce + tip + specVer + txVer + blockHash + genesisHash
+  const argument = methodLen + callIndex + destAddress + value + tradeArgument
   return addPath(argument, addressIndex);
 };
 
+// TODO
+export const getBondArgument = async (rawData: types.FormatTransfer, method: types.FormatBondMethod, methodString: string, addressIndex: number)
+  : Promise<string> => {
+
+  const methodLen = dotUtil.getMethodLength(methodString)
+  const callIndex = method.callIndex
+  const controllerAddress = method.controllerAddress
+  const value = method.value
+  const tradeArgument = getTradeArgument(rawData)
+
+  const argument = methodLen + callIndex + controllerAddress + value + tradeArgument
+  return addPath(argument, addressIndex);
+};
+
+// TODO
+export const getUnbondArgument = async (rawData: types.FormatTransfer, method: types.FormatUnbondMethod, methodString: string, addressIndex: number)
+  : Promise<string> => {
+
+  const methodLen = dotUtil.getMethodLength(methodString)
+  const value = method.value
+  const tradeArgument = getTradeArgument(rawData)
+  const argument = methodLen + value + tradeArgument
+  return addPath(argument, addressIndex);
+};
+
+//  TODO
+export const getNominateArgument = async (rawData: types.FormatTransfer, method: types.FormatNominateMethod, methodString: string, addressIndex: number)
+  : Promise<string> => {
+
+  const methodLen = dotUtil.getMethodLength(methodString)
+  const target = method.targetAddress
+  const tradeArgument = getTradeArgument(rawData)
+
+  const argument = methodLen + target + tradeArgument
+  return addPath(argument, addressIndex);
+};
