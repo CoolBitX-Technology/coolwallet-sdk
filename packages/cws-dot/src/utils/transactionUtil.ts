@@ -63,7 +63,7 @@ method
  * 
  * @returns 
  */
-export function getSubmitTransaction(fromAddress: string, formatTxData: types.FormatNormalTransfer, methodString: string, signature: string, version: number): string {
+export function getSubmitTransaction(fromAddress: string, formatTxData: types.FormatTransfer, methodString: string, signature: string, version: number): string {
 
   const sumitTx =
     '00' +
@@ -76,7 +76,7 @@ export function getSubmitTransaction(fromAddress: string, formatTxData: types.Fo
 
   const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version))
 
-  return resultTx
+  return '0x' + resultTx
 }
 
 // export function getSubmitTransaction2(fromAddress: string, formatTxData: types.FormatNormalTransfer, signature: string, version: number): string {

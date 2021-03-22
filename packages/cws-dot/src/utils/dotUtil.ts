@@ -20,7 +20,7 @@ const MAX_U32 = new BN(2).pow(new BN(32 - 2)).subn(1);
 const BIT_SIGNED = 128;
 const BIT_UNSIGNED = 0;
 
-export function getFormatNormalTxData(rawData: types.NormalTx, method: types.FormatNormalMethod): types.FormatNormalTransfer {
+export function getFormatTxData(rawData: types.dotTransaction): types.FormatTransfer {
   
   const mortalEra = getMortalEra(rawData.blockNumber, rawData.era)
   const nonce = formatValue(rawData.nonce)
@@ -31,7 +31,6 @@ export function getFormatNormalTxData(rawData: types.NormalTx, method: types.For
   const genesisHash = rawData.genesisHash
 
   return {
-    method,
     mortalEra,
     nonce,
     tip,
@@ -58,8 +57,8 @@ export function getNormalMethod(rawData: types.NormalMethod): {method: types.For
   }
 }
 
-export function getBondMethod(rawData: types.BondMethod): { method: types.FormaBondMethod, methodString: string } {
-  const callIndex = types.Method.transfer
+export function getBondMethod(rawData: types.BondMethod): { method: types.FormatBondMethod, methodString: string } {
+  const callIndex = types.Method.bond
   const controllerAddress = Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
   const value = formatValue(rawData.value)
 
@@ -73,8 +72,16 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.FormaB
   }
 }
 
+export function getUnbondMethod(rawData: types.BondMethod): { method: types.FormatUnbondMethod, methodString: string } {
+  const value = formatValue(rawData.value)
 
-
+  return {
+    method: {
+      value
+    },
+    methodString: value
+  }
+}
 
 
 

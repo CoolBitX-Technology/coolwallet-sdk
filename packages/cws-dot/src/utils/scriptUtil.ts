@@ -29,11 +29,11 @@ payload:
  * @param addressIndex 
  * @returns 
  */
-export const getNormalTradeArgument = async (rawData: types.FormatNormalTransfer, addressIndex: number)
+export const getNormalTradeArgument = async (rawData: types.FormatTransfer, method: types.FormatNormalMethod, addressIndex: number)
   : Promise<string> => {
-  const callIndex = rawData.method.callIndex
-  const destAddress = rawData.method.destAddress
-  const value = rawData.method.value
+  const callIndex = method.callIndex
+  const destAddress = method.destAddress
+  const value = method.value
   const mortalEra = rawData.mortalEra
   const nonce = rawData.nonce
   const tip = rawData.tip
@@ -46,3 +46,36 @@ export const getNormalTradeArgument = async (rawData: types.FormatNormalTransfer
   return addPath(argument, addressIndex);
 };
 
+// TODO
+export const getBondArgument = async (rawData: types.FormatTransfer, method: types.FormatBondMethod, addressIndex: number)
+  : Promise<string> => {
+  const callIndex = method.callIndex
+  const controllerAddress = method.controllerAddress
+  const value = method.value
+  const mortalEra = rawData.mortalEra
+  const nonce = rawData.nonce
+  const tip = rawData.tip
+  const specVer = rawData.specVer
+  const txVer = rawData.txVer
+  const blockHash = rawData.blockHash
+  const genesisHash = rawData.genesisHash
+
+  const argument = callIndex + controllerAddress + value + mortalEra + nonce + tip + specVer + txVer + blockHash + genesisHash
+  return addPath(argument, addressIndex);
+};
+
+// TODO
+export const getUnbondArgument = async (rawData: types.FormatTransfer, method: types.FormatUnbondMethod, addressIndex: number)
+  : Promise<string> => {
+  const value = method.value
+  const mortalEra = rawData.mortalEra
+  const nonce = rawData.nonce
+  const tip = rawData.tip
+  const specVer = rawData.specVer
+  const txVer = rawData.txVer
+  const blockHash = rawData.blockHash
+  const genesisHash = rawData.genesisHash
+
+  const argument = value + mortalEra + nonce + tip + specVer + txVer + blockHash + genesisHash
+  return addPath(argument, addressIndex);
+};

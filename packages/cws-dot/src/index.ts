@@ -33,20 +33,20 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
     } = signTxData;
     const script = params.TRANSFER.script + params.TRANSFER.signature;
     const { method, methodString } = dotUtil.getNormalMethod(transaction.method)
-    const formatTxData = dotUtil.getFormatNormalTxData(transaction, method);
-    const argument = await scriptUtil.getNormalTradeArgument(formatTxData, addressIndex);
+    const formatTxData = dotUtil.getFormatTxData(transaction);
+    const argument = await scriptUtil.getNormalTradeArgument(formatTxData, method, addressIndex);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
     const signature = await dotSign.signTransaction(
       signTxData,
       script,
       argument,
-      publicKey,
-      formatTxData
+      publicKey
     );
 
     return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
+
   async signBondTransaction(
     signTxData: types.BondData
   ) {
@@ -54,19 +54,42 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
       transport, transaction, appPrivateKey, appId, addressIndex
     } = signTxData;
     const script = params.BOND.script + params.BOND.signature;
-    const { method, methodString } = dotUtil.getNormalMethod(transaction.method)
-    const formatTxData = dotUtil.getFormatNormalTxData(transaction, method);
-    const argument = await scriptUtil.getNormalTradeArgument(formatTxData, addressIndex);
+    const { method, methodString } = dotUtil.getBondMethod(transaction.method)
+    const formatTxData = dotUtil.getFormatTxData(transaction);
+    const argument = await scriptUtil.getBondArgument(formatTxData, method, addressIndex);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
     const signature = await dotSign.signTransaction(
       signTxData,
       script,
       argument,
-      publicKey,
-      formatTxData
+      publicKey
     );
 
     return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
+
+  async signUnondTransaction(
+    signTxData: types.BondData
+  ) {
+    const {
+      transport, transaction, appPrivateKey, appId, addressIndex
+    } = signTxData;
+    const script = params.BOND.script + params.BOND.signature;
+    const { method, methodString } = dotUtil.getUnbondMethod(transaction.method)
+    const formatTxData = dotUtil.getFormatTxData(transaction);
+    const argument = await scriptUtil.getUnbondArgument(formatTxData, method, addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+    const signature = await dotSign.signTransaction(
+      signTxData,
+      script,
+      argument,
+      publicKey
+    );
+
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
+  }
+
+
 }

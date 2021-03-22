@@ -18,7 +18,7 @@ type SignTxData = {
   authorizedCB: () => void | undefined
 }
 
-type Transaction = {
+export type dotTransaction = {
   // [key: string]: any,
   fromAddress: string,
   blockHash: string,
@@ -36,7 +36,7 @@ export interface NormalTransferData extends SignTxData {
   transaction: NormalTx
 }
 
-export interface NormalTx extends Transaction {
+export interface NormalTx extends dotTransaction {
   method: NormalMethod
 }
 export interface NormalMethod {
@@ -47,16 +47,27 @@ export interface NormalMethod {
 }
 
 export interface BondData extends SignTxData {
-  transaction: NormalTx
+  transaction: BondTx
 }
 
-export interface BondTx extends Transaction {
-  method: NormalMethod
+export interface BondTx extends dotTransaction {
+  method: BondMethod
 }
 export interface BondMethod {
   controllerAddress: string,
   value: string,
   // payee: string
+}
+
+export interface UnbondData extends SignTxData {
+  transaction: UnbondTx
+}
+
+export interface UnbondTx extends dotTransaction {
+  method: UnbondMethod
+}
+export interface UnbondMethod {
+  value: string,
 }
 
 export interface FormatTransfer {
@@ -69,23 +80,20 @@ export interface FormatTransfer {
   genesisHash: string
 }
 
-export interface FormatNormalTransfer extends FormatTransfer {
-  method: FormatNormalMethod
-}
-
 export interface FormatNormalMethod {
   callIndex: string,
   destAddress: string,
   value: string
 }
 
-export interface FormatBondTransfer extends FormatTransfer {
-  method: FormaBondMethod
-}
 
-export interface FormaBondMethod {
+export interface FormatBondMethod {
   callIndex: string,
   controllerAddress: string,
+  value: string
+}
+
+export interface FormatUnbondMethod {
   value: string
 }
 

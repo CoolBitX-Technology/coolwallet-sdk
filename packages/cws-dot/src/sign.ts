@@ -26,8 +26,7 @@ export const signTransaction = async (
   signTxData: any,
   script: string,
   argument: string,
-  publicKey: string,
-  formatNormalTransferData: types.FormatNormalTransfer
+  publicKey: string
 ): Promise<string> => {
   const {
     transport, appPrivateKey, appId, confirmCB, authorizedCB, transaction
@@ -58,7 +57,6 @@ export const signTransaction = async (
   );
   
   const signature = await txUtil.getCompleteSignature(transport, publicKey, canonicalSignature)
-
 
   return signature
 };
