@@ -4,7 +4,7 @@ import * as txUtil from './utils/transactionUtil';
 import * as types from './config/types'
 import * as params from "./config/params"; 
 import * as scriptUtil from "./utils/scriptUtil"; 
-import * as dotSign from "./sign";
+import * as dotSign from "./sign"; 
 
 
 export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
