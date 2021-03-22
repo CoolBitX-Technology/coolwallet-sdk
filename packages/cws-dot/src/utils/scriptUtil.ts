@@ -29,11 +29,11 @@ payload:
  * @param addressIndex 
  * @returns 
  */
-export const getNormalTradeArgument = async (rawData: types.FormatNormalTransferData, addressIndex: number)
+export const getNormalTradeArgument = async (rawData: types.FormatNormalTransfer, addressIndex: number)
   : Promise<string> => {
-  const callIndex = rawData.callIndex
-  const destAddress = rawData.destAddress
-  const value = rawData.value
+  const callIndex = rawData.method.callIndex
+  const destAddress = rawData.method.destAddress
+  const value = rawData.method.value
   const mortalEra = rawData.mortalEra
   const nonce = rawData.nonce
   const tip = rawData.tip

@@ -27,7 +27,7 @@ export const signTransaction = async (
   script: string,
   argument: string,
   publicKey: string,
-  formatNormalTransferData: types.FormatNormalTransferData
+  formatNormalTransferData: types.FormatNormalTransfer
 ): Promise<string> => {
   const {
     transport, appPrivateKey, appId, confirmCB, authorizedCB, transaction

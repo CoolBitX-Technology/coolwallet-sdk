@@ -33,22 +33,33 @@ type Transaction = {
 }
 
 export interface NormalTransferData extends SignTxData {
-  transaction: NormalMethod
+  transaction: NormalTx
 }
 
-export interface NormalMethod extends Transaction {
-  method: {
-    destAddress: string,
-    value: string,
-    name: string,
-    pallet: string
-  }
+export interface NormalTx extends Transaction {
+  method: NormalMethod
 }
-
-export interface FormatNormalTransferData {
-  callIndex: string,
+export interface NormalMethod {
   destAddress: string,
   value: string,
+  name: string,
+  pallet: string
+}
+
+export interface BondData extends SignTxData {
+  transaction: NormalTx
+}
+
+export interface BondTx extends Transaction {
+  method: NormalMethod
+}
+export interface BondMethod {
+  controllerAddress: string,
+  value: string,
+  // payee: string
+}
+
+export interface FormatTransfer {
   mortalEra: string,
   nonce: string,
   tip: string,
@@ -57,6 +68,28 @@ export interface FormatNormalTransferData {
   blockHash: string,
   genesisHash: string
 }
+
+export interface FormatNormalTransfer extends FormatTransfer {
+  method: FormatNormalMethod
+}
+
+export interface FormatNormalMethod {
+  callIndex: string,
+  destAddress: string,
+  value: string
+}
+
+export interface FormatBondTransfer extends FormatTransfer {
+  method: FormaBondMethod
+}
+
+export interface FormaBondMethod {
+  callIndex: string,
+  controllerAddress: string,
+  value: string
+}
+
+
 
 export interface ToBn {
   toBn: () => BN;
