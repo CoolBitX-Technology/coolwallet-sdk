@@ -112,4 +112,26 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
 
     return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
+
+  async signWithdrawUnbondedTransaction(
+    signTxData: types.WithdrawUnbondedData
+  ) {
+    const {
+      transport, transaction, appPrivateKey, appId, addressIndex
+    } = signTxData;
+    const script = params.WITHDRAW.script + params.WITHDRAW.signature;
+    const { method, methodString } = dotUtil.getWithdrawUnbondedMethod(transaction.method)
+    const formatTxData = dotUtil.getFormatTxData(transaction);
+    const argument = await scriptUtil.getWithdrawUnbondedArgument(formatTxData, method, methodString, addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+    const signature = await dotSign.signTransaction(
+      signTxData,
+      script,
+      argument,
+      publicKey
+    );
+
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
+  }
 }

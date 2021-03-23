@@ -75,9 +75,10 @@ export const getUnbondArgument = async (rawData: types.FormatTransfer, method: t
   : Promise<string> => {
 
   const methodLen = dotUtil.getMethodLength(methodString)
+  const callIndex = method.callIndex
   const value = method.value
   const tradeArgument = getTradeArgument(rawData)
-  const argument = methodLen + value + tradeArgument
+  const argument = methodLen + callIndex + value + tradeArgument
   return addPath(argument, addressIndex);
 };
 
@@ -86,9 +87,24 @@ export const getNominateArgument = async (rawData: types.FormatTransfer, method:
   : Promise<string> => {
 
   const methodLen = dotUtil.getMethodLength(methodString)
+  const callIndex = method.callIndex
+  const addressCount = method.addressCount
   const target = method.targetAddress
   const tradeArgument = getTradeArgument(rawData)
 
-  const argument = methodLen + target + tradeArgument
+  const argument = methodLen + callIndex + addressCount + target + tradeArgument
+  return addPath(argument, addressIndex);
+};
+
+//  TODO
+export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer, method: types.FormatWithdrawUnbondedTxMethod, methodString: string, addressIndex: number)
+  : Promise<string> => {
+
+  const methodLen = dotUtil.getMethodLength(methodString)
+  const callIndex = method.callIndex
+  const numSlashingSpans = method.numSlashingSpans.padEnd(8, '0')
+  const tradeArgument = getTradeArgument(rawData)
+
+  const argument = methodLen + callIndex + numSlashingSpans + tradeArgument
   return addPath(argument, addressIndex);
 };

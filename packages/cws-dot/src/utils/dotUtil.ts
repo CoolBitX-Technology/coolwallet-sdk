@@ -21,7 +21,7 @@ const BIT_SIGNED = 128;
 const BIT_UNSIGNED = 0;
 
 export function getFormatTxData(rawData: types.dotTransaction): types.FormatTransfer {
-  
+
   const mortalEra = getMortalEra(rawData.blockNumber, rawData.era)
   const nonce = formatValue(rawData.nonce)
   const tip = formatValue(rawData.tip)
@@ -42,13 +42,13 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 
 }
 
-export function getNormalMethod(rawData: types.NormalMethod): {method: types.FormatNormalMethod, methodString: string} {
+export function getNormalMethod(rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
   const callIndex = types.Method.transfer
   const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
   const value = formatValue(rawData.value)
 
   return {
-    method:{
+    method: {
       callIndex,
       destAddress,
       value
@@ -73,34 +73,54 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
 }
 
 export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
+  const callIndex = types.Method.transfer
   const value = formatValue(rawData.value)
 
   return {
     method: {
+      callIndex,
       value
     },
-    methodString: value
+    methodString: callIndex + value
   }
 }
 
 // TODO
 export function getNominateMethod(rawData: types.NominateMethod): { method: types.FormatNominateMethod, methodString: string } {
+  const callIndex = types.Method.transfer
+  const addressCount = '04'
   const targetAddress = formatValue(rawData.targetAddress)
 
   return {
     method: {
+      callIndex,
+      addressCount,
       targetAddress
     },
-    methodString: targetAddress
+    methodString: callIndex + addressCount + '00' + targetAddress
   }
 }
 
-export function getMethodLength(methodString: string): string{
+// TODO
+export function getWithdrawUnbondedMethod(rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
+  const callIndex = types.Method.transfer
+  const numSlashingSpans = formatValue(rawData.numSlashingSpans)
+
+  return {
+    method: {
+      callIndex,
+      numSlashingSpans
+    },
+    methodString: callIndex + numSlashingSpans
+  }
+}
+
+export function getMethodLength(methodString: string): string {
   const len = methodString.length
   let lenStr = ''
-  if (len < 128){
+  if (len < 128) {
     lenStr = len.toString(2) + '0'
-  }else{
+  } else {
     lenStr = len.toString(2) + '1'
   }
   lenStr = parseInt(lenStr, 2).toString(16)

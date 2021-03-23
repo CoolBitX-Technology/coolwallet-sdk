@@ -81,6 +81,18 @@ export interface NominateMethod {
   targetAddress: string,
 }
 
+
+export interface WithdrawUnbondedData extends SignTxData {
+  transaction: WithdrawUnbondedTx
+}
+
+export interface WithdrawUnbondedTx extends dotTransaction {
+  method: WithdrawUnbondedMethod
+}
+export interface WithdrawUnbondedMethod {
+  numSlashingSpans: string,
+}
+
 export interface FormatTransfer {
   mortalEra: string,
   nonce: string,
@@ -105,13 +117,20 @@ export interface FormatBondMethod {
 }
 
 export interface FormatUnbondMethod {
+  callIndex: string,
   value: string
 }
 
 export interface FormatNominateMethod {
+  callIndex: string,
+  addressCount: string,
   targetAddress: string
 }
 
+export interface FormatWithdrawUnbondedTxMethod {
+  callIndex: string,
+  numSlashingSpans: string
+}
 
 export interface ToBn {
   toBn: () => BN;
