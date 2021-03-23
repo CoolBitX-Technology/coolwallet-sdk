@@ -3,11 +3,7 @@ import * as BN from 'bn.js';
 
 export type Transport = transport.default;
 
-export enum Method {
-  transfer = '0500',
-  bond = '0700',
-  unbond = '0702',
-}
+
 
 type SignTxData = {
   transport: Transport,

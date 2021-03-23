@@ -4,6 +4,7 @@ import { assert, bnToU8a, u8aConcat, u8aToBn } from '@polkadot/util';
 import BN from 'bn.js';
 import { sha256 } from './cryptoUtil';
 import * as types from '../config/types';
+import * as params from '../config/params';
 
 
 // type Transport = transport.default;
@@ -43,7 +44,7 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 }
 
 export function getNormalMethod(rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
-  const callIndex = types.Method.transfer
+  const callIndex = params.Method.transfer
   const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
   const value = formatValue(rawData.value)
 
@@ -58,7 +59,7 @@ export function getNormalMethod(rawData: types.NormalMethod): { method: types.Fo
 }
 
 export function getBondMethod(rawData: types.BondMethod): { method: types.FormatBondMethod, methodString: string } {
-  const callIndex = types.Method.bond
+  const callIndex = params.Method.bond
   const controllerAddress = Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
   const value = formatValue(rawData.value)
 
@@ -73,7 +74,7 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
 }
 
 export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
-  const callIndex = types.Method.transfer
+  const callIndex = params.Method.unbond
   const value = formatValue(rawData.value)
 
   return {
@@ -87,7 +88,7 @@ export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.Fo
 
 // TODO
 export function getNominateMethod(rawData: types.NominateMethod): { method: types.FormatNominateMethod, methodString: string } {
-  const callIndex = types.Method.transfer
+  const callIndex = params.Method.nominate
   const addressCount = '04'
   const targetAddress = formatValue(rawData.targetAddress)
 
@@ -103,7 +104,7 @@ export function getNominateMethod(rawData: types.NominateMethod): { method: type
 
 // TODO
 export function getWithdrawUnbondedMethod(rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
-  const callIndex = types.Method.transfer
+  const callIndex = params.Method.withdraw
   const numSlashingSpans = formatValue(rawData.numSlashingSpans)
 
   return {
