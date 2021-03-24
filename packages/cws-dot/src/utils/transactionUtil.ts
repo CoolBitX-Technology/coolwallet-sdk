@@ -2,7 +2,7 @@ import { error, transport, apdu } from "@coolwallet/core";
 import * as stringUtil from "./stringUtil";
 import { assert, bnToU8a, u8aConcat, u8aToBn } from '@polkadot/util';
 import BN from 'bn.js';
-import { sha256 } from './cryptoUtil';
+import { sha256, blake2b } from './cryptoUtil';
 import * as types from '../config/types';
 import * as dotUtil from './dotUtil';
 
@@ -34,12 +34,20 @@ export async function getCompleteSignature(transport: types.Transport, publicKey
   const { r, s } = canonicalSignature;
   const { signedTx } = await apdu.tx.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, "hex");
+  console.log('signedTx: ', signedTx)
+  console.log("canonicalSignature: ", canonicalSignature)
+  console.log("keyPair.pub: ", keyPair.pub)
+
+  const blake2bHash = blake2b(signedTx)
+  console.log(" blake2b(signedTx): ", blake2bHash)
+  console.log(" blake2b(signedTx): ", Buffer.from(blake2bHash))
   const v = ec.getKeyRecoveryParam(
-    sha256(Buffer.from(signedTx, 'hex')),
+    Buffer.from(blake2bHash),
     canonicalSignature,
     keyPair.pub
   );
-
+  console.log("v: ", v)
+  
   const sig = r + s + v.toString().padStart(2, '0');
   return sig
 }

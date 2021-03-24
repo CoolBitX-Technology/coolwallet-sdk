@@ -18,7 +18,7 @@ export type dotTransaction = {
   // [key: string]: any,
   fromAddress: string,
   blockHash: string,
-  blockNumber: string
+  blockNumber: string,
   era: string,
   genesisHash: string,
   nonce: string,
@@ -37,9 +37,7 @@ export interface NormalTx extends dotTransaction {
 }
 export interface NormalMethod {
   destAddress: string,
-  value: string,
-  name: string,
-  pallet: string
+  value: string
 }
 
 export interface BondData extends SignTxData {
