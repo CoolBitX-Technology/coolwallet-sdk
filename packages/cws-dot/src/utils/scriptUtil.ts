@@ -56,27 +56,27 @@ export const getNormalTradeArgument = async (rawData: types.FormatTransfer, meth
   return addPath(argument, addressIndex);
 };
 
-// TODO
+
 export const getBondArgument = async (rawData: types.FormatTransfer, method: types.FormatBondMethod, methodString: string, addressIndex: number)
   : Promise<string> => {
 
   const methodLen = dotUtil.getMethodLength(methodString)
-  const callIndex = method.callIndex
-  const controllerAddress = method.controllerAddress
-  const value = method.value
+  const callIndex = method.callIndex.padStart(4, '0')
+  const controllerAddress = method.controllerAddress.padStart(64, '0')
+  const value = method.value.padStart(20, '0')
   const tradeArgument = getTradeArgument(rawData)
 
   const argument = methodLen + callIndex + controllerAddress + value + tradeArgument
   return addPath(argument, addressIndex);
 };
 
-// TODO
+
 export const getUnbondArgument = async (rawData: types.FormatTransfer, method: types.FormatUnbondMethod, methodString: string, addressIndex: number)
   : Promise<string> => {
 
   const methodLen = dotUtil.getMethodLength(methodString)
-  const callIndex = method.callIndex
-  const value = method.value
+  const callIndex = method.callIndex.padStart(4, '0')
+  const value = method.value.padStart(20, '0')
   const tradeArgument = getTradeArgument(rawData)
   const argument = methodLen + callIndex + value + tradeArgument
   return addPath(argument, addressIndex);

@@ -69,7 +69,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
     return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
 
-  async signUnondTransaction(
+  async signUnbondTransaction(
     signTxData: types.UnbondData
   ) {
     const {
