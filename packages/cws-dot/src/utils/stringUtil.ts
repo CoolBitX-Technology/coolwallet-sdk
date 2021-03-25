@@ -84,3 +84,10 @@ export function numberToBn<ExtToBn extends types.ToBn>(value: number | ExtToBn |
       ? value.toBn()
       : new BN(value);
 }
+
+export function formatBinaryString(binaryString: string): string {
+  if (binaryString.length % 2 != 0) {
+    return '0' + binaryString
+  }
+  return binaryString;
+}

@@ -5,6 +5,7 @@ import BN from 'bn.js';
 import { sha256 } from './cryptoUtil';
 import * as types from '../config/types';
 import * as params from '../config/params';
+import { SDKError } from "@coolwallet/core/lib/error";
 
 
 // type Transport = transport.default;
@@ -28,8 +29,8 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
   const tip = formatValue(rawData.tip)
   const specVer = formatVersion(rawData.specVersion)
   const txVer = formatVersion(rawData.transactionVersion)
-  const blockHash = rawData.blockHash
   const genesisHash = rawData.genesisHash
+  const blockHash = rawData.blockHash
 
   return {
     mortalEra,
@@ -125,10 +126,8 @@ export function getMethodLength(methodString: string): string {
     lenStr = len.toString(2) + '1'
   }
   lenStr = parseInt(lenStr, 2).toString(16)
-  if (lenStr.length % 2 != 0) {
-    lenStr = '0' + lenStr
-  }
-  lenStr = stringUtil.reverse(lenStr)
+  lenStr = stringUtil.formatBinaryString(lenStr)
+  lenStr = stringUtil.reverse(stringUtil.formatBinaryString(lenStr))
 
   return lenStr
 
@@ -139,54 +138,77 @@ export function getMortalEra(blockNumber: string, era: string): string {
   const power = Math.ceil(Math.log2(parseInt(era)))
 
   let binaryPower = (power - 1).toString(2)
-  if (binaryPower.length % 2 != 0) {
-    binaryPower = '0' + binaryPower
-  }
+  binaryPower = stringUtil.formatBinaryString(binaryPower)
 
   let result = binaryValue.substr(binaryValue.length - power) + binaryPower
 
   result = parseInt(result, 2).toString(16)
-  if (result.length % 2 != 0) {
-    result = '0' + result
-  }
+  result = stringUtil.formatBinaryString(result)
 
   const mortalEra = stringUtil.reverse(result)
 
   return mortalEra
 }
 
+console.log(getMortalEra('4335260', '64'))
+
 export function formatValue(value: string): string {
 
   const bigValue = BigInt(value)
   let binaryValue = bigValue.toString(2)
-
-  if (bigValue < 64) {
-    binaryValue += '00'
-  } else if (64 < bigValue && bigValue < (2 ** 14 - 1)) {
-    binaryValue += '01'
-  } else if ((2 ** 14) < bigValue && bigValue < (2 ** 30 - 1)) {
-    binaryValue += '10'
-  } else if ((2 ** 30) < bigValue && bigValue < (2 ** 536 - 1)) {
-    const length = Math.ceil(bigValue.toString(16).length / 2)
-    const addCode = (length - 4).toString(2).padStart(6, '0') + '11'
-    binaryValue = binaryValue + addCode
-  } else {
-
+  const mode = getValueMode(value)
+  switch (mode){
+    case params.ValueMode.singleByteMode:
+      binaryValue += '00'
+      break;
+    case params.ValueMode.twoByteMode:
+      binaryValue += '01'
+      break;
+    case params.ValueMode.foreByteMode:
+      binaryValue += '10'
+      break;
+    case params.ValueMode.bigIntegerMode:
+      const length = Math.ceil(bigValue.toString(16).length / 2)
+      const addCode = (length - 4).toString(2).padStart(6, '0') + '11'
+      binaryValue = binaryValue + addCode
+      break;
+    default:
+      throw new SDKError(formatValue.name, "input value should be less than 2 ** 536 - 1")
   }
 
   let result = BigInt('0b' + binaryValue).toString(16)
-  if (result.length % 2 != 0) {
-    result = '0' + result
-  }
+  result = stringUtil.formatBinaryString(result)
   const output = stringUtil.reverse(result)
+
+  if (mode == params.ValueMode.foreByteMode) {
+    return  output.padEnd(8, '0')
+  }
+
   return output
 }
+console.log(formatValue('1000'))
+
+export function getValueMode(value: string): string {
+  let mode;
+  const bigValue = BigInt(value)
+  if (bigValue < 64) {
+    mode = params.ValueMode.singleByteMode
+  } else if (64 < bigValue && bigValue < (2 ** 14 - 1)) {
+    mode = params.ValueMode.twoByteMode
+  } else if ((2 ** 14) < bigValue && bigValue < (2 ** 30 - 1)) {
+    mode = params.ValueMode.foreByteMode
+  } else if ((2 ** 30) < bigValue && bigValue < (2 ** 536 - 1)) {
+    mode = params.ValueMode.bigIntegerMode
+  } else {
+    throw new SDKError(formatValue.name, "input value should be less than 2 ** 536 - 1")
+  }
+  return mode;
+}
+
 
 export function formatVersion(value: string): string {
   let hexValue = parseInt(value).toString(16)
-  if (hexValue.length % 2 != 0) {
-    hexValue = '0' + hexValue
-  }
+  hexValue = stringUtil.formatBinaryString(hexValue)
   return stringUtil.reverse(hexValue).padEnd(8, '0')
 }
 

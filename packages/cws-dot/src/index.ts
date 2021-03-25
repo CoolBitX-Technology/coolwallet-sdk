@@ -34,7 +34,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
     const script = params.TRANSFER.script + params.TRANSFER.signature;
     const { method, methodString } = dotUtil.getNormalMethod(transaction.method)
     const formatTxData = dotUtil.getFormatTxData(transaction);
-    const argument = await scriptUtil.getNormalTradeArgument(formatTxData, method, methodString, addressIndex);
+    const argument = await scriptUtil.getNormalArgument(formatTxData, method, methodString, addressIndex);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
     const signature = await dotSign.signTransaction(
