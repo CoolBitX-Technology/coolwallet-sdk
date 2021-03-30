@@ -90,7 +90,9 @@ export interface WithdrawUnbondedMethod {
 export interface FormatTransfer {
   mortalEra: string,
   nonce: string,
+  encodeNonce: string
   tip: string,
+  encodeTip: string,
   specVer: string,
   txVer: string,
   blockHash: string,

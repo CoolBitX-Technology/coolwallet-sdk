@@ -14,7 +14,7 @@ async function addPath(argument: string, addressIndex: number) {
 export const getTradeArgument = async (rawData: types.FormatTransfer)
   : Promise<string> => {
   const mortalEra = rawData.mortalEra.padStart(10, '0')
-  const nonce = stringUtil.removeHex0x(rawData.nonce.padStart(10, '0'))
+  const nonce = stringUtil.removeHex0x(rawData.nonce).padStart(10, '0')
   const tip = rawData.tip.padStart(10, '0')
   const specVer = rawData.specVer.padStart(8, '0')
   const txVer = rawData.txVer.padStart(8, '0')

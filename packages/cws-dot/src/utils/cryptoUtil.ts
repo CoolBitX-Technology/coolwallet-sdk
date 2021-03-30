@@ -76,10 +76,8 @@ export function sha256(dataByte: any): any {
 
 
 
-export function blake2b(data: any): any {
-
-
-  var output = new Uint8Array(32)
+export function blake2b(data: any, length: number = 32): any {
+  var output = new Uint8Array(length)
   const hashHex = blake2(output.length).update(Buffer.from(data, 'hex')).digest('hex')
   console.log("hashHex: ", hashHex)
   return hexStr2byteArray(hashHex.toString('hex'))

@@ -21,7 +21,8 @@ const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
  */
 export function pubKeyToAddress(compressedPubkey: string): string {
 
-  const zero = '0x' + compressedPubkey.substring(2)
+  const zero = '0x' + Buffer.from(blake2b(compressedPubkey)).toString('hex')
+  console.debug("public key blake2b: ", zero)
   const address = encodeAddress(zero, 0);
   return address;
 }
@@ -34,15 +35,9 @@ export async function getCompleteSignature(transport: types.Transport, publicKey
   const { r, s } = canonicalSignature;
   const { signedTx } = await apdu.tx.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, "hex");
-  console.log('signedTx: ', signedTx)
-  console.log("canonicalSignature: ", canonicalSignature)
-  console.log("keyPair.pub: ", keyPair.pub)
-
-  const blake2bHash = blake2b(signedTx)
-  console.log(" blake2b(signedTx): ", blake2bHash)
-  console.log(" blake2b(signedTx): ", Buffer.from(blake2bHash))
+  const payloaBlake2bHash = blake2b(signedTx)
   const v = ec.getKeyRecoveryParam(
-    Buffer.from(blake2bHash),
+    payloaBlake2bHash,
     canonicalSignature,
     keyPair.pub
   );
@@ -78,8 +73,8 @@ export function getSubmitTransaction(fromAddress: string, formatTxData: types.Fo
     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
     signature +
     formatTxData.mortalEra +
-    formatTxData.nonce +
-    formatTxData.tip +
+    formatTxData.encodeNonce +
+    formatTxData.encodeTip +
     methodString
 
   const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version))

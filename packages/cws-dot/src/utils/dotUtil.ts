@@ -25,8 +25,10 @@ const BIT_UNSIGNED = 0;
 export function getFormatTxData(rawData: types.dotTransaction): types.FormatTransfer {
 
   const mortalEra = getMortalEra(rawData.blockNumber, rawData.era)
-  const nonce = formatValue(rawData.nonce)
-  const tip = formatValue(rawData.tip)
+  const nonce = parseInt(rawData.nonce).toString(16)
+  const encodeNonce = formatValue(rawData.nonce)
+  const tip = parseInt(rawData.tip).toString(16)
+  const encodeTip = formatValue(rawData.tip)
   const specVer = formatVersion(rawData.specVersion)
   const txVer = formatVersion(rawData.transactionVersion)
   const genesisHash = rawData.genesisHash
@@ -35,7 +37,9 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
   return {
     mortalEra,
     nonce,
+    encodeNonce,
     tip,
+    encodeTip,
     specVer,
     txVer,
     blockHash,
@@ -47,7 +51,7 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 export function getNormalMethod(rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
   const callIndex = params.Method.transfer
   const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
-  const value = formatValue(rawData.value)
+  const value = stringUtil.paddingString(BigInt(rawData.value).toString(16))
 
   return {
     method: {
@@ -55,7 +59,7 @@ export function getNormalMethod(rawData: types.NormalMethod): { method: types.Fo
       destAddress,
       value
     },
-    methodString: callIndex + '00' + destAddress + value
+    methodString: callIndex + '00' + destAddress + formatValue(rawData.value)
   }
 }
 
@@ -126,8 +130,8 @@ export function getMethodLength(methodString: string): string {
     lenStr = len.toString(2) + '1'
   }
   lenStr = parseInt(lenStr, 2).toString(16)
-  lenStr = stringUtil.formatBinaryString(lenStr)
-  lenStr = stringUtil.reverse(stringUtil.formatBinaryString(lenStr))
+  lenStr = stringUtil.paddingString(lenStr)
+  lenStr = stringUtil.reverse(stringUtil.paddingString(lenStr))
 
   return lenStr
 
@@ -138,19 +142,18 @@ export function getMortalEra(blockNumber: string, era: string): string {
   const power = Math.ceil(Math.log2(parseInt(era)))
 
   let binaryPower = (power - 1).toString(2)
-  binaryPower = stringUtil.formatBinaryString(binaryPower)
+  binaryPower = stringUtil.paddingString(binaryPower)
 
   let result = binaryValue.substr(binaryValue.length - power) + binaryPower
 
   result = parseInt(result, 2).toString(16)
-  result = stringUtil.formatBinaryString(result)
+  result = stringUtil.paddingString(result)
 
   const mortalEra = stringUtil.reverse(result)
 
   return mortalEra
 }
 
-console.log(getMortalEra('4335260', '64'))
 
 export function formatValue(value: string): string {
 
@@ -177,7 +180,7 @@ export function formatValue(value: string): string {
   }
 
   let result = BigInt('0b' + binaryValue).toString(16)
-  result = stringUtil.formatBinaryString(result)
+  result = stringUtil.paddingString(result)
   const output = stringUtil.reverse(result)
 
   if (mode == params.ValueMode.foreByteMode) {
@@ -186,7 +189,6 @@ export function formatValue(value: string): string {
 
   return output
 }
-console.log(formatValue('1000'))
 
 export function getValueMode(value: string): string {
   let mode;
@@ -208,7 +210,7 @@ export function getValueMode(value: string): string {
 
 export function formatVersion(value: string): string {
   let hexValue = parseInt(value).toString(16)
-  hexValue = stringUtil.formatBinaryString(hexValue)
+  hexValue = stringUtil.paddingString(hexValue)
   return stringUtil.reverse(hexValue).padEnd(8, '0')
 }
 
@@ -225,6 +227,7 @@ export function addVersion(signedTx: string, version: number, isSigned: boolean 
  * @returns 
  */
 export function addSignedTxLength(signedTx: string): string {
+  console.log("signedTx:")
 
   const signedTxU8a = Uint8Array.from(Buffer.from(signedTx, 'hex'));
   const _value = signedTxU8a.length
