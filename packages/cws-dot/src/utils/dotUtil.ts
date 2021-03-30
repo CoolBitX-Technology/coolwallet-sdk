@@ -5,6 +5,7 @@ import BN from 'bn.js';
 import { sha256 } from './cryptoUtil';
 import * as types from '../config/types';
 import * as params from '../config/params';
+import { SDKError } from "@coolwallet/core/lib/error";
 
 
 // type Transport = transport.default;
@@ -24,17 +25,21 @@ const BIT_UNSIGNED = 0;
 export function getFormatTxData(rawData: types.dotTransaction): types.FormatTransfer {
 
   const mortalEra = getMortalEra(rawData.blockNumber, rawData.era)
-  const nonce = formatValue(rawData.nonce)
-  const tip = formatValue(rawData.tip)
+  const nonce = parseInt(rawData.nonce).toString(16)
+  const encodeNonce = formatValue(rawData.nonce)
+  const tip = parseInt(rawData.tip).toString(16)
+  const encodeTip = formatValue(rawData.tip)
   const specVer = formatVersion(rawData.specVersion)
   const txVer = formatVersion(rawData.transactionVersion)
-  const blockHash = rawData.blockHash
   const genesisHash = rawData.genesisHash
+  const blockHash = rawData.blockHash
 
   return {
     mortalEra,
     nonce,
+    encodeNonce,
     tip,
+    encodeTip,
     specVer,
     txVer,
     blockHash,
@@ -46,7 +51,7 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 export function getNormalMethod(rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
   const callIndex = params.Method.transfer
   const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
-  const value = formatValue(rawData.value)
+  const value = stringUtil.paddingString(BigInt(rawData.value).toString(16))
 
   return {
     method: {
@@ -54,7 +59,7 @@ export function getNormalMethod(rawData: types.NormalMethod): { method: types.Fo
       destAddress,
       value
     },
-    methodString: callIndex + '00' + destAddress + value
+    methodString: callIndex + '00' + destAddress + formatValue(rawData.value)
   }
 }
 
@@ -125,10 +130,8 @@ export function getMethodLength(methodString: string): string {
     lenStr = len.toString(2) + '1'
   }
   lenStr = parseInt(lenStr, 2).toString(16)
-  if (lenStr.length % 2 != 0) {
-    lenStr = '0' + lenStr
-  }
-  lenStr = stringUtil.reverse(lenStr)
+  lenStr = stringUtil.paddingString(lenStr)
+  lenStr = stringUtil.reverse(stringUtil.paddingString(lenStr))
 
   return lenStr
 
@@ -139,54 +142,75 @@ export function getMortalEra(blockNumber: string, era: string): string {
   const power = Math.ceil(Math.log2(parseInt(era)))
 
   let binaryPower = (power - 1).toString(2)
-  if (binaryPower.length % 2 != 0) {
-    binaryPower = '0' + binaryPower
-  }
+  binaryPower = stringUtil.paddingString(binaryPower)
 
   let result = binaryValue.substr(binaryValue.length - power) + binaryPower
 
   result = parseInt(result, 2).toString(16)
-  if (result.length % 2 != 0) {
-    result = '0' + result
-  }
+  result = stringUtil.paddingString(result)
 
   const mortalEra = stringUtil.reverse(result)
 
   return mortalEra
 }
 
+
 export function formatValue(value: string): string {
 
   const bigValue = BigInt(value)
   let binaryValue = bigValue.toString(2)
-
-  if (bigValue < 64) {
-    binaryValue += '00'
-  } else if (64 < bigValue && bigValue < (2 ** 14 - 1)) {
-    binaryValue += '01'
-  } else if ((2 ** 14) < bigValue && bigValue < (2 ** 30 - 1)) {
-    binaryValue += '10'
-  } else if ((2 ** 30) < bigValue && bigValue < (2 ** 536 - 1)) {
-    const length = Math.ceil(bigValue.toString(16).length / 2)
-    const addCode = (length - 4).toString(2).padStart(6, '0') + '11'
-    binaryValue = binaryValue + addCode
-  } else {
-
+  const mode = getValueMode(value)
+  switch (mode){
+    case params.ValueMode.singleByteMode:
+      binaryValue += '00'
+      break;
+    case params.ValueMode.twoByteMode:
+      binaryValue += '01'
+      break;
+    case params.ValueMode.foreByteMode:
+      binaryValue += '10'
+      break;
+    case params.ValueMode.bigIntegerMode:
+      const length = Math.ceil(bigValue.toString(16).length / 2)
+      const addCode = (length - 4).toString(2).padStart(6, '0') + '11'
+      binaryValue = binaryValue + addCode
+      break;
+    default:
+      throw new SDKError(formatValue.name, "input value should be less than 2 ** 536 - 1")
   }
 
   let result = BigInt('0b' + binaryValue).toString(16)
-  if (result.length % 2 != 0) {
-    result = '0' + result
-  }
+  result = stringUtil.paddingString(result)
   const output = stringUtil.reverse(result)
+
+  if (mode == params.ValueMode.foreByteMode) {
+    return  output.padEnd(8, '0')
+  }
+
   return output
 }
 
+export function getValueMode(value: string): string {
+  let mode;
+  const bigValue = BigInt(value)
+  if (bigValue < 64) {
+    mode = params.ValueMode.singleByteMode
+  } else if (64 < bigValue && bigValue < (2 ** 14 - 1)) {
+    mode = params.ValueMode.twoByteMode
+  } else if ((2 ** 14) < bigValue && bigValue < (2 ** 30 - 1)) {
+    mode = params.ValueMode.foreByteMode
+  } else if ((2 ** 30) < bigValue && bigValue < (2 ** 536 - 1)) {
+    mode = params.ValueMode.bigIntegerMode
+  } else {
+    throw new SDKError(formatValue.name, "input value should be less than 2 ** 536 - 1")
+  }
+  return mode;
+}
+
+
 export function formatVersion(value: string): string {
   let hexValue = parseInt(value).toString(16)
-  if (hexValue.length % 2 != 0) {
-    hexValue = '0' + hexValue
-  }
+  hexValue = stringUtil.paddingString(hexValue)
   return stringUtil.reverse(hexValue).padEnd(8, '0')
 }
 
@@ -203,6 +227,7 @@ export function addVersion(signedTx: string, version: number, isSigned: boolean 
  * @returns 
  */
 export function addSignedTxLength(signedTx: string): string {
+  console.log("signedTx:")
 
   const signedTxU8a = Uint8Array.from(Buffer.from(signedTx, 'hex'));
   const _value = signedTxU8a.length

@@ -2,6 +2,7 @@ import * as types from '../config/types'
 import { utils } from '@coolwallet/core';
 import * as params from '../config/params'
 import * as dotUtil from './dotUtil'
+import * as stringUtil from './stringUtil'
 const { decodeAddress } = require('@polkadot/keyring');
 
 
@@ -13,14 +14,14 @@ async function addPath(argument: string, addressIndex: number) {
 export const getTradeArgument = async (rawData: types.FormatTransfer)
   : Promise<string> => {
   const mortalEra = rawData.mortalEra.padStart(10, '0')
-  const nonce = rawData.nonce.padStart(10, '0')
+  const nonce = stringUtil.removeHex0x(rawData.nonce).padStart(10, '0')
   const tip = rawData.tip.padStart(10, '0')
   const specVer = rawData.specVer.padStart(8, '0')
   const txVer = rawData.txVer.padStart(8, '0')
-  const blockHash = rawData.blockHash.padStart(64, '0')
-  const genesisHash = rawData.genesisHash.padStart(64, '0')
+  const blockHash = stringUtil.removeHex0x(rawData.blockHash).padStart(64, '0')
+  const genesisHash = stringUtil.removeHex0x(rawData.genesisHash).padStart(64, '0')
 
-  const argument = mortalEra + nonce + tip + specVer + txVer + blockHash + genesisHash
+  const argument = mortalEra + nonce + tip + specVer + txVer + genesisHash + blockHash
   return argument;
 };
 
@@ -43,16 +44,18 @@ payload:
  * @param addressIndex 
  * @returns 
  */
-export const getNormalTradeArgument = async (rawData: types.FormatTransfer, method: types.FormatNormalMethod, methodString: string, addressIndex: number)
+export const getNormalArgument = async (rawData: types.FormatTransfer, method: types.FormatNormalMethod, methodString: string, addressIndex: number)
   : Promise<string> => {
     
-  const methodLen = dotUtil.getMethodLength(methodString).padStart(4, '0')
+  // const methodLen = dotUtil.getMethodLength(methodString).padStart(4, '0')
   const callIndex = method.callIndex.padStart(4, '0')
   const destAddress = method.destAddress.padStart(64, '0')
   const value = method.value.padStart(20, '0')
-  const tradeArgument = getTradeArgument(rawData)
+  const tradeArgument = await getTradeArgument(rawData)
 
-  const argument = methodLen + callIndex + destAddress + value + tradeArgument
+  // const argument = methodLen + callIndex + destAddress + value + tradeArgument
+  const argument = callIndex + destAddress + value + tradeArgument
+  console.debug('NormalTradeArgument: ', argument)
   return addPath(argument, addressIndex);
 };
 
@@ -64,9 +67,10 @@ export const getBondArgument = async (rawData: types.FormatTransfer, method: typ
   const callIndex = method.callIndex.padStart(4, '0')
   const controllerAddress = method.controllerAddress.padStart(64, '0')
   const value = method.value.padStart(20, '0')
-  const tradeArgument = getTradeArgument(rawData)
+  const tradeArgument = await getTradeArgument(rawData)
 
   const argument = methodLen + callIndex + controllerAddress + value + tradeArgument
+  console.debug('BondArgument: ', argument)
   return addPath(argument, addressIndex);
 };
 
@@ -77,8 +81,9 @@ export const getUnbondArgument = async (rawData: types.FormatTransfer, method: t
   const methodLen = dotUtil.getMethodLength(methodString)
   const callIndex = method.callIndex.padStart(4, '0')
   const value = method.value.padStart(20, '0')
-  const tradeArgument = getTradeArgument(rawData)
+  const tradeArgument = await getTradeArgument(rawData)
   const argument = methodLen + callIndex + value + tradeArgument
+  console.debug('UnbondArgument: ', argument)
   return addPath(argument, addressIndex);
 };
 
@@ -87,12 +92,13 @@ export const getNominateArgument = async (rawData: types.FormatTransfer, method:
   : Promise<string> => {
 
   const methodLen = dotUtil.getMethodLength(methodString)
-  const callIndex = method.callIndex
-  const addressCount = method.addressCount
-  const target = method.targetAddress
-  const tradeArgument = getTradeArgument(rawData)
+  const callIndex = method.callIndex.padStart(4, '0')
+  const targetCount = method.addressCount.padStart(2, '0')
+  const target = method.targetAddress.padStart(64, '0')
+  const tradeArgument = await getTradeArgument(rawData)
 
-  const argument = methodLen + callIndex + addressCount + target + tradeArgument
+  const argument = methodLen + callIndex + targetCount + target + tradeArgument
+  console.debug('NominateArgument: ', argument)
   return addPath(argument, addressIndex);
 };
 
@@ -101,10 +107,11 @@ export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer,
   : Promise<string> => {
 
   const methodLen = dotUtil.getMethodLength(methodString)
-  const callIndex = method.callIndex
+  const callIndex = method.callIndex.padStart(4, '0')
   const numSlashingSpans = method.numSlashingSpans.padEnd(8, '0')
-  const tradeArgument = getTradeArgument(rawData)
+  const tradeArgument = await getTradeArgument(rawData)
 
   const argument = methodLen + callIndex + numSlashingSpans + tradeArgument
+  console.debug('WithdrawUnbondedArgument: ', argument)
   return addPath(argument, addressIndex);
 };

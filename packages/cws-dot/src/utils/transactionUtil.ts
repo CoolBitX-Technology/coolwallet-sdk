@@ -2,7 +2,7 @@ import { error, transport, apdu } from "@coolwallet/core";
 import * as stringUtil from "./stringUtil";
 import { assert, bnToU8a, u8aConcat, u8aToBn } from '@polkadot/util';
 import BN from 'bn.js';
-import { sha256 } from './cryptoUtil';
+import { sha256, blake2b } from './cryptoUtil';
 import * as types from '../config/types';
 import * as dotUtil from './dotUtil';
 
@@ -21,7 +21,8 @@ const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
  */
 export function pubKeyToAddress(compressedPubkey: string): string {
 
-  const zero = '0x' + compressedPubkey.substring(2)
+  const zero = '0x' + Buffer.from(blake2b(compressedPubkey)).toString('hex')
+  console.debug("public key blake2b: ", zero)
   const address = encodeAddress(zero, 0);
   return address;
 }
@@ -34,12 +35,14 @@ export async function getCompleteSignature(transport: types.Transport, publicKey
   const { r, s } = canonicalSignature;
   const { signedTx } = await apdu.tx.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, "hex");
+  const payloaBlake2bHash = blake2b(signedTx)
   const v = ec.getKeyRecoveryParam(
-    sha256(Buffer.from(signedTx, 'hex')),
+    payloaBlake2bHash,
     canonicalSignature,
     keyPair.pub
   );
-
+  console.log("v: ", v)
+  
   const sig = r + s + v.toString().padStart(2, '0');
   return sig
 }
@@ -70,8 +73,8 @@ export function getSubmitTransaction(fromAddress: string, formatTxData: types.Fo
     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
     signature +
     formatTxData.mortalEra +
-    formatTxData.nonce +
-    formatTxData.tip +
+    formatTxData.encodeNonce +
+    formatTxData.encodeTip +
     methodString
 
   const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version))

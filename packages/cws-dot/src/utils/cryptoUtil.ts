@@ -1,5 +1,6 @@
 
 import crypto from "crypto";
+var blake2 = require('blake2b')
 
 export function hexStr2byteArray(str: string) {
   var byteArray = Array();
@@ -69,7 +70,16 @@ export function sha256(dataByte: any): any {
   let dataHex = byteArray2hexStr(dataByte);
   console.debug("dataHex: " + dataHex)
   let hashHex = crypto.createHash("sha256").update(Buffer.from(dataHex, 'hex')).digest();
-  console.debug('hashHex: ' + hashHex)
+  console.debug('hashHex: ', hashHex)
+  return hexStr2byteArray(hashHex.toString('hex'))
+}
+
+
+
+export function blake2b(data: any, length: number = 32): any {
+  var output = new Uint8Array(length)
+  const hashHex = blake2(output.length).update(Buffer.from(data, 'hex')).digest('hex')
+  console.log("hashHex: ", hashHex)
   return hexStr2byteArray(hashHex.toString('hex'))
 }
 
