@@ -46,7 +46,7 @@ payload:
  */
 export const getNormalArgument = async (rawData: types.FormatTransfer, method: types.FormatNormalMethod, methodString: string, addressIndex: number)
   : Promise<string> => {
-    
+
   // const methodLen = dotUtil.getMethodLength(methodString).padStart(4, '0')
   const callIndex = method.callIndex.padStart(4, '0')
   const destAddress = method.destAddress.padStart(64, '0')
@@ -78,11 +78,10 @@ export const getBondArgument = async (rawData: types.FormatTransfer, method: typ
 export const getUnbondArgument = async (rawData: types.FormatTransfer, method: types.FormatUnbondMethod, methodString: string, addressIndex: number)
   : Promise<string> => {
 
-  const methodLen = dotUtil.getMethodLength(methodString)
   const callIndex = method.callIndex.padStart(4, '0')
   const value = method.value.padStart(20, '0')
   const tradeArgument = await getTradeArgument(rawData)
-  const argument = methodLen + callIndex + value + tradeArgument
+  const argument = callIndex + value + tradeArgument
   console.debug('UnbondArgument: ', argument)
   return addPath(argument, addressIndex);
 };

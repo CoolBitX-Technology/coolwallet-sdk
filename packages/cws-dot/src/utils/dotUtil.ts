@@ -79,14 +79,14 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
 
 export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
   const callIndex = params.Method.unbond
-  const value = formatSCALECodec(rawData.value)
+  const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
 
   return {
     method: {
       callIndex,
       value
     },
-    methodString: callIndex + value
+    methodString: callIndex + formatSCALECodec(rawData.value)
   }
 }
 
