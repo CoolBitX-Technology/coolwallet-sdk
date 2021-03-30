@@ -57,7 +57,7 @@ export const signTransaction = async (
   );
   
   const signature = await txUtil.getCompleteSignature(transport, publicKey, canonicalSignature)
-  console.log("signature: ", signature)
+  console.debug("signature: ", signature)
   return '02' + signature
 };
 

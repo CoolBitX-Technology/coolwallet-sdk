@@ -2,17 +2,14 @@ import { error, transport, apdu } from "@coolwallet/core";
 import * as stringUtil from "./stringUtil";
 import { assert, bnToU8a, u8aConcat, u8aToBn } from '@polkadot/util';
 import BN from 'bn.js';
-import { sha256 } from './cryptoUtil';
+import { sha256 } from './cryptoUtil'; 
+import * as BigNumber from 'bignumber.js';
 import * as types from '../config/types';
 import * as params from '../config/params';
 import { SDKError } from "@coolwallet/core/lib/error";
 
 
-// type Transport = transport.default;
-
-const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
-const ec = new elliptic.ec("secp256k1");
 const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
 
 const MAX_U8 = new BN(2).pow(new BN(8 - 2)).subn(1);
@@ -26,9 +23,9 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 
   const mortalEra = getMortalEra(rawData.blockNumber, rawData.era)
   const nonce = parseInt(rawData.nonce).toString(16)
-  const encodeNonce = formatValue(rawData.nonce)
+  const encodeNonce = formatSCALECodec(rawData.nonce)
   const tip = parseInt(rawData.tip).toString(16)
-  const encodeTip = formatValue(rawData.tip)
+  const encodeTip = formatSCALECodec(rawData.tip)
   const specVer = formatVersion(rawData.specVersion)
   const txVer = formatVersion(rawData.transactionVersion)
   const genesisHash = rawData.genesisHash
@@ -51,7 +48,7 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 export function getNormalMethod(rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
   const callIndex = params.Method.transfer
   const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
-  const value = stringUtil.paddingString(BigInt(rawData.value).toString(16))
+  const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
 
   return {
     method: {
@@ -59,28 +56,30 @@ export function getNormalMethod(rawData: types.NormalMethod): { method: types.Fo
       destAddress,
       value
     },
-    methodString: callIndex + '00' + destAddress + formatValue(rawData.value)
+    methodString: callIndex + '00' + destAddress + formatSCALECodec(rawData.value)
   }
 }
 
 export function getBondMethod(rawData: types.BondMethod): { method: types.FormatBondMethod, methodString: string } {
   const callIndex = params.Method.bond
   const controllerAddress = Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
-  const value = formatValue(rawData.value)
+  const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
+  const payeeType = '01'
 
   return {
     method: {
       callIndex,
       controllerAddress,
-      value
+      value, 
+      payeeType
     },
-    methodString: callIndex + '00' + controllerAddress + value
+    methodString: callIndex + '00' + controllerAddress + formatSCALECodec(rawData.value) + payeeType
   }
 }
 
 export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
   const callIndex = params.Method.unbond
-  const value = formatValue(rawData.value)
+  const value = formatSCALECodec(rawData.value)
 
   return {
     method: {
@@ -95,7 +94,7 @@ export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.Fo
 export function getNominateMethod(rawData: types.NominateMethod): { method: types.FormatNominateMethod, methodString: string } {
   const callIndex = params.Method.nominate
   const addressCount = '04'
-  const targetAddress = formatValue(rawData.targetAddress)
+  const targetAddress = formatSCALECodec(rawData.targetAddress)
 
   return {
     method: {
@@ -110,7 +109,7 @@ export function getNominateMethod(rawData: types.NominateMethod): { method: type
 // TODO
 export function getWithdrawUnbondedMethod(rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
   const callIndex = params.Method.withdraw
-  const numSlashingSpans = formatValue(rawData.numSlashingSpans)
+  const numSlashingSpans = formatSCALECodec(rawData.numSlashingSpans)
 
   return {
     method: {
@@ -155,34 +154,36 @@ export function getMortalEra(blockNumber: string, era: string): string {
 }
 
 
-export function formatValue(value: string): string {
+export function formatSCALECodec(value: string): string {
 
-  const bigValue = BigInt(value)
-  let binaryValue = bigValue.toString(2)
+  const bigValue = new BN(value)
+  console.log('bigValue: ', bigValue.shln(2))
+
+  let formatValue
   const mode = getValueMode(value)
+  console.log("mode: ", mode)
   switch (mode){
     case params.ValueMode.singleByteMode:
-      binaryValue += '00'
+      formatValue = (bigValue.shln(2)).or(new BN('0'))
       break;
     case params.ValueMode.twoByteMode:
-      binaryValue += '01'
+      formatValue = (bigValue.shln(2)).or(new BN('1'))
       break;
     case params.ValueMode.foreByteMode:
-      binaryValue += '10'
+      formatValue = (bigValue.shln(2)).or(new BN('2'))
       break;
     case params.ValueMode.bigIntegerMode:
       const length = Math.ceil(bigValue.toString(16).length / 2)
       const addCode = (length - 4).toString(2).padStart(6, '0') + '11'
-      binaryValue = binaryValue + addCode
+
+      formatValue = (bigValue.shln(8)).add(new BN(addCode, 2))
       break;
     default:
-      throw new SDKError(formatValue.name, "input value should be less than 2 ** 536 - 1")
+      throw new SDKError(formatSCALECodec.name, "input value should be less than 2 ** 536 - 1")
   }
-
-  let result = BigInt('0b' + binaryValue).toString(16)
-  result = stringUtil.paddingString(result)
+  
+  let result = stringUtil.paddingString(formatValue.toString(16))
   const output = stringUtil.reverse(result)
-
   if (mode == params.ValueMode.foreByteMode) {
     return  output.padEnd(8, '0')
   }
@@ -190,20 +191,31 @@ export function formatValue(value: string): string {
   return output
 }
 
+console.log(formatSCALECodec('16383'))
+
+/**
+ * 
+- `0b00`: single-byte mode; upper six bits are the LE encoding of the value (valid only for values of 0-63).
+- `0b01`: two-byte mode: upper six bits and the following byte is the LE encoding of the value (valid only for values `64-(2**14-1)`).
+- `0b10`: four-byte mode: upper six bits and the following three bytes are the LE encoding of the value (valid only for values `(2**14)-(2**30-1)`).
+- `0b11`: Big-integer mode: The upper six bits are the number of bytes following, less four. The value is contained, LE encoded, in the bytes following. The final (most significant) byte must be non-zero. Valid only for values `(2**30)-(2**536-1)`.
+ * @param value 
+ * @returns 
+ */
 export function getValueMode(value: string): string {
+  
   let mode;
-  const bigValue = BigInt(value)
-  if (bigValue < 64) {
+  const one = new BN(1)
+  const bigValue = new BN(value)
+  if (bigValue.cmp(new BN(64)) == -1) {
     mode = params.ValueMode.singleByteMode
-  } else if (64 < bigValue && bigValue < (2 ** 14 - 1)) {
+  } else if (bigValue.cmp(new BN(64)) >= 0 && bigValue.cmp(new BN(2 ** 14)) == -1) {
     mode = params.ValueMode.twoByteMode
-  } else if ((2 ** 14) < bigValue && bigValue < (2 ** 30 - 1)) {
+  } else if (bigValue.cmp(new BN(2 ** 14)) >= 0 && bigValue.cmp(new BN(2 ** 30)) == -1) {
     mode = params.ValueMode.foreByteMode
-  } else if ((2 ** 30) < bigValue && bigValue < (2 ** 536 - 1)) {
+  } else { // (2**30)-(2**536-1).
     mode = params.ValueMode.bigIntegerMode
-  } else {
-    throw new SDKError(formatValue.name, "input value should be less than 2 ** 536 - 1")
-  }
+  } 
   return mode;
 }
 
@@ -242,7 +254,7 @@ export function addSignedTxLength(signedTx: string): string {
  * @param _value signed transaction length
  * @returns 
  */
-export function getSignedTxLength(_value: BN | BigInt | number): Uint8Array {
+export function getSignedTxLength(_value: BN | number): Uint8Array {
   const value = stringUtil.bnToBn(_value);
 
   if (value.lte(MAX_U8)) {

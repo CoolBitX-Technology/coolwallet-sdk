@@ -109,7 +109,8 @@ export interface FormatNormalMethod {
 export interface FormatBondMethod {
   callIndex: string,
   controllerAddress: string,
-  value: string
+  value: string,
+  payeeType: string
 }
 
 export interface FormatUnbondMethod {
