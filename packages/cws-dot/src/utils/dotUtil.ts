@@ -77,16 +77,29 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
   }
 }
 
+export function getBondExtraMethod(rawData: types.BondExtraMethod): { method: types.FormatBondExtraMethod, methodString: string } {
+  const callIndex = params.Method.bondExtra
+  const maxAdditional = stringUtil.paddingString(new BN(rawData.maxAdditional).toString(16))
+
+  return {
+    method: {
+      callIndex,
+      maxAdditional
+    },
+    methodString: callIndex + formatSCALECodec(rawData.maxAdditional)
+  }
+}
+
 export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
   const callIndex = params.Method.unbond
-  const value = formatSCALECodec(rawData.value)
+  const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
 
   return {
     method: {
       callIndex,
       value
     },
-    methodString: callIndex + value
+    methodString: callIndex + formatSCALECodec(rawData.value)
   }
 }
 
@@ -109,14 +122,16 @@ export function getNominateMethod(rawData: types.NominateMethod): { method: type
 // TODO
 export function getWithdrawUnbondedMethod(rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
   const callIndex = params.Method.withdraw
-  const numSlashingSpans = formatSCALECodec(rawData.numSlashingSpans)
+  const numSlashingSpans = new BN(rawData.numSlashingSpans).toString(16)
+
+  const formatNumSlashingSpans = stringUtil.reverse(stringUtil.paddingString(numSlashingSpans)).padEnd(8, '0')
 
   return {
     method: {
       callIndex,
       numSlashingSpans
     },
-    methodString: callIndex + numSlashingSpans
+    methodString: callIndex + formatNumSlashingSpans
   }
 }
 
@@ -191,7 +206,7 @@ export function formatSCALECodec(value: string): string {
   return output
 }
 
-console.log(formatSCALECodec('16383'))
+console.log(formatSCALECodec('13051995649'))
 
 /**
  * 
@@ -239,14 +254,12 @@ export function addVersion(signedTx: string, version: number, isSigned: boolean 
  * @returns 
  */
 export function addSignedTxLength(signedTx: string): string {
-  console.log("signedTx:")
-
+  console.debug("signedTx: ", signedTx)
   const signedTxU8a = Uint8Array.from(Buffer.from(signedTx, 'hex'));
   const _value = signedTxU8a.length
   const result = u8aConcat(getSignedTxLength(_value), signedTxU8a)
   return Buffer.from(result).toString('hex')
 }
-
 
 
 /**
