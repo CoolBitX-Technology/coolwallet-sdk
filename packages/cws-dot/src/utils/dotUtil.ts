@@ -109,14 +109,16 @@ export function getNominateMethod(rawData: types.NominateMethod): { method: type
 // TODO
 export function getWithdrawUnbondedMethod(rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
   const callIndex = params.Method.withdraw
-  const numSlashingSpans = formatSCALECodec(rawData.numSlashingSpans)
+  const numSlashingSpans = new BN(rawData.numSlashingSpans).toString(16)
+
+  const formatNumSlashingSpans = stringUtil.reverse(numSlashingSpans).padEnd(8, '0')
 
   return {
     method: {
       callIndex,
       numSlashingSpans
     },
-    methodString: callIndex + numSlashingSpans
+    methodString: callIndex + formatNumSlashingSpans
   }
 }
 
@@ -191,7 +193,7 @@ export function formatSCALECodec(value: string): string {
   return output
 }
 
-console.log(formatSCALECodec('16383'))
+console.log(formatSCALECodec('64'))
 
 /**
  * 
@@ -239,14 +241,12 @@ export function addVersion(signedTx: string, version: number, isSigned: boolean 
  * @returns 
  */
 export function addSignedTxLength(signedTx: string): string {
-  console.log("signedTx:")
-
+  console.debug("signedTx: ", signedTx)
   const signedTxU8a = Uint8Array.from(Buffer.from(signedTx, 'hex'));
   const _value = signedTxU8a.length
   const result = u8aConcat(getSignedTxLength(_value), signedTxU8a)
   return Buffer.from(result).toString('hex')
 }
-
 
 
 /**

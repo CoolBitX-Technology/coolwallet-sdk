@@ -105,12 +105,12 @@ export const getNominateArgument = async (rawData: types.FormatTransfer, method:
 export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer, method: types.FormatWithdrawUnbondedTxMethod, methodString: string, addressIndex: number)
   : Promise<string> => {
 
-  const methodLen = dotUtil.getMethodLength(methodString)
   const callIndex = method.callIndex.padStart(4, '0')
-  const numSlashingSpans = method.numSlashingSpans.padEnd(8, '0')
+  const numSlashingSpans = method.numSlashingSpans.padStart(8, '0')
+  console.log("numSlashingSpans: ", numSlashingSpans)
   const tradeArgument = await getTradeArgument(rawData)
 
-  const argument = methodLen + callIndex + numSlashingSpans + tradeArgument
+  const argument = callIndex + numSlashingSpans + tradeArgument
   console.debug('WithdrawUnbondedArgument: ', argument)
   return addPath(argument, addressIndex);
 };
