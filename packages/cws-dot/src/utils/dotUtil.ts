@@ -79,7 +79,7 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
 
 export function getBondExtraMethod(rawData: types.BondExtraMethod): { method: types.FormatBondExtraMethod, methodString: string } {
   const callIndex = params.Method.bondExtra
-  const maxAdditional = Buffer.from(decodeAddress(rawData.maxAdditional)).toString('hex')
+  const maxAdditional = stringUtil.paddingString(new BN(rawData.maxAdditional).toString(16))
 
   return {
     method: {
