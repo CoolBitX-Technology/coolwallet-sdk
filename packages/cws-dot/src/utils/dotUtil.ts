@@ -77,6 +77,19 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
   }
 }
 
+export function getBondExtraMethod(rawData: types.BondExtraMethod): { method: types.FormatBondExtraMethod, methodString: string } {
+  const callIndex = params.Method.bondExtra
+  const maxAdditional = Buffer.from(decodeAddress(rawData.maxAdditional)).toString('hex')
+
+  return {
+    method: {
+      callIndex,
+      maxAdditional
+    },
+    methodString: callIndex + formatSCALECodec(rawData.maxAdditional)
+  }
+}
+
 export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
   const callIndex = params.Method.unbond
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
@@ -193,7 +206,7 @@ export function formatSCALECodec(value: string): string {
   return output
 }
 
-console.log(formatSCALECodec('1000000000'))
+console.log(formatSCALECodec('13051995649'))
 
 /**
  * 

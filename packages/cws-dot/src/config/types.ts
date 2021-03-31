@@ -53,6 +53,17 @@ export interface BondMethod {
   // payee: string
 }
 
+export interface BondExtraData extends SignTxData {
+  transaction: BondExtraTx
+}
+
+export interface BondExtraTx extends dotTransaction {
+  method: BondExtraMethod
+}
+export interface BondExtraMethod {
+  maxAdditional: string
+}
+
 export interface UnbondData extends SignTxData {
   transaction: UnbondTx
 }
@@ -111,6 +122,11 @@ export interface FormatBondMethod {
   controllerAddress: string,
   value: string,
   payeeType: string
+}
+
+export interface FormatBondExtraMethod {
+  callIndex: string,
+  maxAdditional: string
 }
 
 export interface FormatUnbondMethod {

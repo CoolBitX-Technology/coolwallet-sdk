@@ -44,7 +44,7 @@ payload:
  * @param addressIndex 
  * @returns 
  */
-export const getNormalArgument = async (rawData: types.FormatTransfer, method: types.FormatNormalMethod, methodString: string, addressIndex: number)
+export const getNormalArgument = async (rawData: types.FormatTransfer, method: types.FormatNormalMethod, addressIndex: number)
   : Promise<string> => {
 
   // const methodLen = dotUtil.getMethodLength(methodString).padStart(4, '0')
@@ -60,7 +60,7 @@ export const getNormalArgument = async (rawData: types.FormatTransfer, method: t
 };
 
 
-export const getBondArgument = async (rawData: types.FormatTransfer, method: types.FormatBondMethod, methodString: string, addressIndex: number)
+export const getBondArgument = async (rawData: types.FormatTransfer, method: types.FormatBondMethod, addressIndex: number)
   : Promise<string> => {
 
   const callIndex = method.callIndex.padStart(4, '0')
@@ -74,8 +74,20 @@ export const getBondArgument = async (rawData: types.FormatTransfer, method: typ
   return addPath(argument, addressIndex);
 };
 
+export const getBondExtraArgument = async (rawData: types.FormatTransfer, method: types.FormatBondExtraMethod, addressIndex: number)
+  : Promise<string> => {
 
-export const getUnbondArgument = async (rawData: types.FormatTransfer, method: types.FormatUnbondMethod, methodString: string, addressIndex: number)
+  const callIndex = method.callIndex.padStart(4, '0')
+  const maxAdditional = method.maxAdditional.padStart(20, '0')
+  const tradeArgument = await getTradeArgument(rawData)
+
+  const argument = callIndex + maxAdditional + tradeArgument
+  console.debug('BondExtraArgument: ', argument)
+  return addPath(argument, addressIndex);
+};
+
+
+export const getUnbondArgument = async (rawData: types.FormatTransfer, method: types.FormatUnbondMethod, addressIndex: number)
   : Promise<string> => {
 
   const callIndex = method.callIndex.padStart(4, '0')
@@ -87,22 +99,21 @@ export const getUnbondArgument = async (rawData: types.FormatTransfer, method: t
 };
 
 //  TODO
-export const getNominateArgument = async (rawData: types.FormatTransfer, method: types.FormatNominateMethod, methodString: string, addressIndex: number)
+export const getNominateArgument = async (rawData: types.FormatTransfer, method: types.FormatNominateMethod, addressIndex: number)
   : Promise<string> => {
 
-  const methodLen = dotUtil.getMethodLength(methodString)
   const callIndex = method.callIndex.padStart(4, '0')
   const targetCount = method.addressCount.padStart(2, '0')
   const target = method.targetAddress.padStart(64, '0')
   const tradeArgument = await getTradeArgument(rawData)
 
-  const argument = methodLen + callIndex + targetCount + target + tradeArgument
+  const argument = callIndex + targetCount + target + tradeArgument
   console.debug('NominateArgument: ', argument)
   return addPath(argument, addressIndex);
 };
 
 //  TODO
-export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer, method: types.FormatWithdrawUnbondedTxMethod, methodString: string, addressIndex: number)
+export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer, method: types.FormatWithdrawUnbondedTxMethod, addressIndex: number)
   : Promise<string> => {
 
   const callIndex = method.callIndex.padStart(4, '0')
