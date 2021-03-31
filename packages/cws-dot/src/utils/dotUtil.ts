@@ -111,7 +111,7 @@ export function getWithdrawUnbondedMethod(rawData: types.WithdrawUnbondedMethod)
   const callIndex = params.Method.withdraw
   const numSlashingSpans = new BN(rawData.numSlashingSpans).toString(16)
 
-  const formatNumSlashingSpans = stringUtil.reverse(numSlashingSpans).padEnd(8, '0')
+  const formatNumSlashingSpans = stringUtil.reverse(stringUtil.paddingString(numSlashingSpans)).padEnd(8, '0')
 
   return {
     method: {
@@ -193,7 +193,7 @@ export function formatSCALECodec(value: string): string {
   return output
 }
 
-console.log(formatSCALECodec('64'))
+console.log(formatSCALECodec('1000000000'))
 
 /**
  * 
