@@ -1,5 +1,6 @@
 import { transport } from '@coolwallet/core';
 import * as BN from 'bn.js';
+import * as params from './params';
 
 export type Transport = transport.default;
 
@@ -50,7 +51,7 @@ export interface BondTx extends dotTransaction {
 export interface BondMethod {
   controllerAddress: string,
   value: string,
-  // payee: string
+  payee: params.payeeType
 }
 
 export interface BondExtraData extends SignTxData {

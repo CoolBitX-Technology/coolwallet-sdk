@@ -6,7 +6,9 @@ import * as types from './config/types'
 import * as params from "./config/params"; 
 import * as scriptUtil from "./utils/scriptUtil"; 
 import * as dotSign from "./sign"; 
+import { payeeType } from "./config/params";
 
+export { payeeType }
 
 export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {

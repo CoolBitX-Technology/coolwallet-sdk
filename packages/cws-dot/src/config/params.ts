@@ -10,6 +10,12 @@ export enum Method {
   withdraw = '0703'
 }
 
+export enum payeeType {
+  stash = '01',
+  staked = '00',
+  controller = '02',
+}
+
 export enum ValueMode {
   singleByteMode = 'singleByteMode',
   twoByteMode = 'twoByteMode',

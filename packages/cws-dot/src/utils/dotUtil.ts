@@ -64,7 +64,7 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
   const callIndex = params.Method.bond
   const controllerAddress = Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
-  const payeeType = '01'
+  const payeeType = rawData.payee
 
   return {
     method: {
