@@ -107,11 +107,11 @@ export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.Fo
 export function getNominateMethod(rawData: types.NominateMethod): { method: types.FormatNominateMethod, methodString: string } {
   const callIndex = params.Method.nominate
   const addressCount = rawData.targetAddresses.length.toString(16)
+  const shiftTargetCount = formatSCALECodec(rawData.targetAddresses.length.toString())
   let targetsString = ''
   rawData.targetAddresses.forEach(target => {
     targetsString += params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(target)).toString('hex')
   });
-  
 
   return {
     method: {
@@ -119,7 +119,7 @@ export function getNominateMethod(rawData: types.NominateMethod): { method: type
       addressCount,
       targetsString
     },
-    methodString: callIndex + addressCount + targetsString
+    methodString: callIndex + shiftTargetCount + targetsString
   }
 }
 
@@ -209,8 +209,6 @@ export function formatSCALECodec(value: string): string {
   return output
 }
 
-console.log(formatSCALECodec('13051995649'))
-
 /**
  * 
 - `0b00`: single-byte mode; upper six bits are the LE encoding of the value (valid only for values of 0-63).
@@ -257,13 +255,12 @@ export function addVersion(signedTx: string, version: number, isSigned: boolean 
  * @returns 
  */
 export function addSignedTxLength(signedTx: string): string {
-  console.debug("signedTx: ", signedTx)
+  // console.debug("signedTx: ", signedTx)
   const signedTxU8a = Uint8Array.from(Buffer.from(signedTx, 'hex'));
   const _value = signedTxU8a.length
   const result = u8aConcat(getSignedTxLength(_value), signedTxU8a)
   return Buffer.from(result).toString('hex')
 }
-
 
 /**
  * 

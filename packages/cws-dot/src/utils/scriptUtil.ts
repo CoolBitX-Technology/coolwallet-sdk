@@ -11,6 +11,11 @@ async function addPath(argument: string, addressIndex: number) {
   return SEPath + argument;
 }
 
+/**
+ * 
+ * @param rawData 
+ * @returns 
+ */
 export const getTradeArgument = async (rawData: types.FormatTransfer)
   : Promise<string> => {
   const mortalEra = rawData.mortalEra.padStart(10, '0')
@@ -74,6 +79,13 @@ export const getBondArgument = async (rawData: types.FormatTransfer, method: typ
   return addPath(argument, addressIndex);
 };
 
+/**
+ * 
+ * @param rawData 
+ * @param method 
+ * @param addressIndex 
+ * @returns 
+ */
 export const getBondExtraArgument = async (rawData: types.FormatTransfer, method: types.FormatBondExtraMethod, addressIndex: number)
   : Promise<string> => {
 
@@ -86,7 +98,13 @@ export const getBondExtraArgument = async (rawData: types.FormatTransfer, method
   return addPath(argument, addressIndex);
 };
 
-
+/**
+ * 
+ * @param rawData 
+ * @param method 
+ * @param addressIndex 
+ * @returns 
+ */
 export const getUnbondArgument = async (rawData: types.FormatTransfer, method: types.FormatUnbondMethod, addressIndex: number)
   : Promise<string> => {
 
@@ -98,16 +116,22 @@ export const getUnbondArgument = async (rawData: types.FormatTransfer, method: t
   return addPath(argument, addressIndex);
 };
 
-//  TODO
+/**
+ * Argument = [callIndex (2B)][tradeArgument][targetCount (1B)][targets (Variety)]
+ * @param rawData 
+ * @param method 
+ * @param addressIndex 
+ * @returns 
+ */
 export const getNominateArgument = async (rawData: types.FormatTransfer, method: types.FormatNominateMethod, addressIndex: number)
   : Promise<string> => {
 
   const callIndex = method.callIndex.padStart(4, '0')
   const targetCount = method.addressCount.padStart(2, '0')
-  const targets = method.targetsString.padStart(1056, '0')
+  const targets = method.targetsString
   const tradeArgument = await getTradeArgument(rawData)
 
-  const argument = callIndex + targetCount + targets + tradeArgument
+  const argument = callIndex + tradeArgument + targetCount + targets
   console.debug('NominateArgument: ', argument)
   return addPath(argument, addressIndex);
 };

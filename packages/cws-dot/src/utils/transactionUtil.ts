@@ -76,6 +76,10 @@ export function getSubmitTransaction(fromAddress: string, formatTxData: types.Fo
     formatTxData.encodeTip +
     methodString
 
+  console.log("formatTxData.mortalEra: ", formatTxData.mortalEra)
+  console.log("formatTxData.encodeNonce: ", formatTxData.encodeNonce)
+  console.log("formatTxData.encodeTip: ", formatTxData.encodeTip)
+
   const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version))
 
   return '0x' + resultTx
