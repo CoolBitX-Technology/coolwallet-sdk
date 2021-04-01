@@ -84,7 +84,7 @@ export interface NominateTx extends dotTransaction {
   method: NominateMethod
 }
 export interface NominateMethod {
-  targetAddress: string,
+  targetAddresses: string[],
 }
 
 
@@ -138,7 +138,7 @@ export interface FormatUnbondMethod {
 export interface FormatNominateMethod {
   callIndex: string,
   addressCount: string,
-  targetAddress: string
+  targetsString: string
 }
 
 export interface FormatWithdrawUnbondedTxMethod {

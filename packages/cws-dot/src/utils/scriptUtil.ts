@@ -104,10 +104,10 @@ export const getNominateArgument = async (rawData: types.FormatTransfer, method:
 
   const callIndex = method.callIndex.padStart(4, '0')
   const targetCount = method.addressCount.padStart(2, '0')
-  const target = method.targetAddress.padStart(64, '0')
+  const targets = method.targetsString.padStart(1056, '0')
   const tradeArgument = await getTradeArgument(rawData)
 
-  const argument = callIndex + targetCount + target + tradeArgument
+  const argument = callIndex + targetCount + targets + tradeArgument
   console.debug('NominateArgument: ', argument)
   return addPath(argument, addressIndex);
 };

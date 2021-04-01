@@ -47,7 +47,7 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 
 export function getNormalMethod(rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
   const callIndex = params.Method.transfer
-  const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
+  const destAddress = params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
 
   return {
@@ -56,13 +56,13 @@ export function getNormalMethod(rawData: types.NormalMethod): { method: types.Fo
       destAddress,
       value
     },
-    methodString: callIndex + '00' + destAddress + formatSCALECodec(rawData.value)
+    methodString: callIndex + destAddress + formatSCALECodec(rawData.value)
   }
 }
 
 export function getBondMethod(rawData: types.BondMethod): { method: types.FormatBondMethod, methodString: string } {
   const callIndex = params.Method.bond
-  const controllerAddress = Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
+  const controllerAddress = params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
   const payeeType = rawData.payee
 
@@ -73,7 +73,7 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
       value, 
       payeeType
     },
-    methodString: callIndex + '00' + controllerAddress + formatSCALECodec(rawData.value) + payeeType
+    methodString: callIndex + controllerAddress + formatSCALECodec(rawData.value) + payeeType
   }
 }
 
@@ -106,20 +106,23 @@ export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.Fo
 // TODO
 export function getNominateMethod(rawData: types.NominateMethod): { method: types.FormatNominateMethod, methodString: string } {
   const callIndex = params.Method.nominate
-  const addressCount = '04'
-  const targetAddress = formatSCALECodec(rawData.targetAddress)
+  const addressCount = rawData.targetAddresses.length.toString(16)
+  let targetsString = ''
+  rawData.targetAddresses.forEach(target => {
+    targetsString += params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(target)).toString('hex')
+  });
+  
 
   return {
     method: {
       callIndex,
       addressCount,
-      targetAddress
+      targetsString
     },
-    methodString: callIndex + addressCount + '00' + targetAddress
+    methodString: callIndex + addressCount + targetsString
   }
 }
 
-// TODO
 export function getWithdrawUnbondedMethod(rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
   const callIndex = params.Method.withdraw
   const numSlashingSpans = new BN(rawData.numSlashingSpans).toString(16)
