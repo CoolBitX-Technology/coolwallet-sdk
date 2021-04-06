@@ -1,12 +1,6 @@
-import { error, transport, apdu } from "@coolwallet/core";
 import * as types from "../config/types";
 import * as checkUtil from './checkUtil';
 import BN from 'bn.js';
-const { encodeAddress } = require('@polkadot/keyring');
-
-const MAX_U8 = new BN(2).pow(new BN(8 - 2)).subn(1);
-const MAX_U16 = new BN(2).pow(new BN(16 - 2)).subn(1);
-const MAX_U32 = new BN(2).pow(new BN(32 - 2)).subn(1);
 
 const UNPREFIX_HEX_REGEX = /^[a-fA-F0-9]+$/;
 
