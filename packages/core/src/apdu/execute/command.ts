@@ -217,7 +217,7 @@ export const commands = {
     P1: undefined,
     P2: '00'
   },
-  SHOW_FULL_ADDRESS: {
+  CHANGE_DISPLAY_TYPE: {
     CLA: '80',
     INS: '64',
     P1: undefined,

@@ -131,20 +131,20 @@ export const toggleDisplayAddress = async (transport: Transport, appId: string, 
     transport,
     appId,
     appPrivKey,
-    commands.SHOW_FULL_ADDRESS,
+    commands.CHANGE_DISPLAY_TYPE,
     '',
     detailFlag
   )
 
 
-  const { statusCode, msg } = await executeCommand(transport, commands.SHOW_FULL_ADDRESS, target.SE, signature, detailFlag, undefined);
+  const { statusCode, msg } = await executeCommand(transport, commands.CHANGE_DISPLAY_TYPE, target.SE, signature, detailFlag, undefined);
   if (statusCode === CODE._6A86) {
     const showDetailStatus = showDetailFlag ? "open" : "close";
-    throw new APDUError(commands.SHOW_FULL_ADDRESS, statusCode, `SHOW_FULL_ADDRESS is ${showDetailStatus}, please change showDetailFlag for ${!showDetailFlag} `)
+    throw new APDUError(commands.CHANGE_DISPLAY_TYPE, statusCode, `SHOW_FULL_ADDRESS is ${showDetailStatus}, please change showDetailFlag for ${!showDetailFlag} `)
   } else if (statusCode === CODE._9000) {
     return showDetailFlag
   } else {
-    throw new APDUError(commands.SHOW_FULL_ADDRESS, statusCode, msg)
+    throw new APDUError(commands.CHANGE_DISPLAY_TYPE, statusCode, msg)
   } 
 };
 
