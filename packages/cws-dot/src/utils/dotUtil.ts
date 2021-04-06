@@ -1,16 +1,13 @@
-import { error, transport, apdu } from "@coolwallet/core";
 import * as stringUtil from "./stringUtil";
-import { assert, bnToU8a, u8aConcat, u8aToBn } from '@polkadot/util';
+import { assert, bnToU8a, u8aConcat } from '@polkadot/util';
 import BN from 'bn.js';
-import { sha256 } from './cryptoUtil'; 
-import * as BigNumber from 'bignumber.js';
 import * as types from '../config/types';
 import * as params from '../config/params';
 import { SDKError } from "@coolwallet/core/lib/error";
 
 
 // eslint-disable-next-line new-cap
-const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
+const { decodeAddress } = require('@polkadot/keyring');
 
 const MAX_U8 = new BN(2).pow(new BN(8 - 2)).subn(1);
 const MAX_U16 = new BN(2).pow(new BN(16 - 2)).subn(1);

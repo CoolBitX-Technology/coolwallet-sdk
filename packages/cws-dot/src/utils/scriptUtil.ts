@@ -1,9 +1,7 @@
 import * as types from '../config/types'
 import { utils } from '@coolwallet/core';
 import * as params from '../config/params'
-import * as dotUtil from './dotUtil'
 import * as stringUtil from './stringUtil'
-const { decodeAddress } = require('@polkadot/keyring');
 
 
 async function addPath(argument: string, addressIndex: number) {

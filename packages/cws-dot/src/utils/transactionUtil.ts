@@ -1,8 +1,5 @@
-import { error, transport, apdu } from "@coolwallet/core";
-import * as stringUtil from "./stringUtil";
-import { assert, bnToU8a, u8aConcat, u8aToBn } from '@polkadot/util';
-import BN from 'bn.js';
-import { sha256, blake2b } from './cryptoUtil';
+import { apdu } from "@coolwallet/core";
+import { blake2b } from './cryptoUtil';
 import * as types from '../config/types';
 import * as dotUtil from './dotUtil';
 
