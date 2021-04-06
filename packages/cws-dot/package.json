@@ -1,7 +1,7 @@
 {
   "name": "@coolwallet/dot",
   "version": "0.1.0-beta.12",
-  "description": "Coolwallet dotereum sdk",
+  "description": "Coolwallet polkadot sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
   "license": "Apache-2.0",
