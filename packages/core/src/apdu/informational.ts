@@ -124,7 +124,7 @@ export const toggleDisplayAddress = async (transport: Transport, appId: string, 
   let { showDetail } = await getCardInfo(transport);
   const detailFlag = showDetailFlag ? '00' : '01';
   if (showDetail === showDetailFlag) {
-    return true;
+    return showDetailFlag;
   }
 
   const signature  = await getCommandSignature(
@@ -141,8 +141,10 @@ export const toggleDisplayAddress = async (transport: Transport, appId: string, 
   if (statusCode === CODE._6A86) {
     const showDetailStatus = showDetailFlag ? "open" : "close";
     throw new APDUError(commands.SHOW_FULL_ADDRESS, statusCode, `SHOW_FULL_ADDRESS is ${showDetailStatus}, please change showDetailFlag for ${!showDetailFlag} `)
-  } else if (statusCode !== CODE._9000) {
+  } else if (statusCode === CODE._9000) {
+    return showDetailFlag
+  } else {
     throw new APDUError(commands.SHOW_FULL_ADDRESS, statusCode, msg)
-  }
+  } 
 };
 
