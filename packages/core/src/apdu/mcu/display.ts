@@ -57,7 +57,7 @@ export const updateBalance = async (transport: Transport, appId: string, appPriv
 
   const allBalances = coinTypes.map(coinType => {
     const targetCoin = data.find(coin => {
-      return coin.coinType === coinType;
+      return coin.coinType.toLowerCase() === coinType;
     });
 
 
