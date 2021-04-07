@@ -32,7 +32,7 @@ export function getScriptSigningActions(
 		async (preparedInput) => {
 			// const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
 			const path = await getPath(preparedInput.addressIndex)
-			const SEPath = Buffer.from(`15${path}`, 'hex')
+			const SEPath = Buffer.from(`${path}`, 'hex')
 			const outPoint = preparedInput.preOutPointBuf;
 			let inputScriptType;
 			// TODO
