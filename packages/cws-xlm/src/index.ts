@@ -26,7 +26,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
 
   async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, protocol: PROTOCOL = PROTOCOL.SLIP0010): Promise<string> {
 
-    const isSLIP0010 = protocol === PROTOCOL.BIP44 ? false : true ;
+    const isSLIP0010 = protocol === PROTOCOL.SLIP0010 ? true : false ;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, isSLIP0010);
    
     if (!publicKey) {

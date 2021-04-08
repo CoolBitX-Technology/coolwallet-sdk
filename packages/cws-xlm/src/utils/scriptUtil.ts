@@ -12,9 +12,10 @@ import { PROTOCOL } from '../config/types';
  */
 export const getScriptAndArguments = async (transaction: object, transfer: { script: string, signature: string }, protocol: PROTOCOL) => {
 
-  const keyType = protocol === PROTOCOL.BIP44 ? params.PATH_BIP44 : params.PATH_SLIP0010;
-  const path = await utils.getPath(params.COIN_TYPE, 0, 3)
+  const isBIP44 = protocol === PROTOCOL.BIP44 ? true : false;
+  const path = await utils.getPath(params.COIN_TYPE, 0, 3, isBIP44)
   const SEPath = `0D${path}`;
+  console.log("SEPath: ", SEPath)
   let script;
   let argument;
   script = transfer.script + transfer.signature;
