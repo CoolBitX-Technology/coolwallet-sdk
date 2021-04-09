@@ -1,4 +1,4 @@
-import { utils } from '@coolwallet/core';
+import { utils, config } from '@coolwallet/core';
 import BigNumber from 'bignumber.js';
 import * as params from "../config/params";
 import * as Stellar from 'stellar-sdk';
@@ -12,8 +12,8 @@ import { PROTOCOL } from '../config/types';
  */
 export const getScriptAndArguments = async (transaction: object, transfer: { script: string, signature: string }, protocol: PROTOCOL) => {
 
-  const isBIP44 = protocol === PROTOCOL.BIP44 ? true : false;
-  const path = await utils.getPath(params.COIN_TYPE, 0, 3, isBIP44)
+  const pathType = protocol === PROTOCOL.BIP44 ? config.pathType.BIP32_ED25519 : config.pathType.SLIP0010;
+  const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType)
   const SEPath = `0D${path}`;
   console.debug("SEPath: ", SEPath)
   let script;
