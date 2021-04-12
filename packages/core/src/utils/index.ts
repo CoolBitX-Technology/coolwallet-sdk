@@ -9,7 +9,7 @@ const bip39 = require('bip39');
 
 
 export const getPath = async (coinType: string, keyIndex: number, depth: number = 5, path: pathType = pathType.BIP32): Promise<string> => {
-  let fullPath = path.toString()
+  let fullPath = path.toString();
 
   if (path == pathType.SLIP0010 || path == pathType.BIP32_ED25519) {
     depth = 3;
