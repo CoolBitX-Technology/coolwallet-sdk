@@ -2,7 +2,7 @@
 import * as general from '../apdu/general';
 import Transport from '../transport';
 import { SHA256 } from '../crypto/hash';
-import { SE_KEY_PARAM } from './param';
+import { SE_KEY_PARAM, pathType } from './param';
 const crypto = require('crypto')
 const secp256k1 = require('secp256k1')
 
@@ -12,6 +12,7 @@ const sha512 = (key: Buffer, data: Buffer): Buffer => crypto
   .update(data)
   .digest();
 
+export { pathType }
 
 /**
  * @param {Transport} transport
