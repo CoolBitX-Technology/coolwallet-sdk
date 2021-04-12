@@ -1,7 +1,7 @@
 import * as derivation from './derive';
 import Transport from "../transport";
 import * as utils from "../utils/index";
-import { pathType } from '../config/param'
+import { pathType } from '../config/param';
 
 export default class EDDSACoin {
 
@@ -22,8 +22,8 @@ export default class EDDSACoin {
    */
   async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, isSLIP0010: boolean = true) {
     
-    const pathprefix = isSLIP0010 ? pathType.SLIP0010 : pathType.BIP32_ED25519;
-    const path = await utils.getPath(this.coinType, 0, 3, pathprefix);
+    const pathPrefix = isSLIP0010 ? pathType.SLIP0010 : pathType.BIP32_ED25519;
+    const path = await utils.getPath(this.coinType, 0, 3, pathPrefix);
   
     return derivation.getEd25519PublicKey(
       transport,
