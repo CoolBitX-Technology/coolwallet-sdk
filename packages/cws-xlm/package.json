@@ -21,7 +21,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.40"
+    "@coolwallet/core": "~0.1.0-beta.46"
   },
   "dependencies": {
     "@types/crc": "^3.4.0",
