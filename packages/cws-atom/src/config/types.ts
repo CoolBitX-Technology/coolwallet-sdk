@@ -64,7 +64,7 @@ export interface MsgWithdrawDelegationReward extends Cosmos {
 }
 
 export enum CHAIN_ID {
-  ATOM = 'cosmoshub-3',
+  ATOM = 'cosmoshub-4',
 }
 
 export enum TX_TYPE {
