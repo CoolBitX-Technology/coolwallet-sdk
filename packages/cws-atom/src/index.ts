@@ -62,7 +62,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
     let { addressIndex } = signData
 
     const publicKey = await this.getPublicKey(signData.transport, signData.appPrivateKey, signData.appId, addressIndex);
-    const publicKeyBase46 = Buffer.from(publicKey, 'hex').toString('base64')
+    const publicKeyBase64 = Buffer.from(publicKey, 'hex').toString('base64')
 
     let script;
     let argument;
@@ -72,28 +72,28 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
         script = params.TRANSFER.script + params.TRANSFER.signature;
         argument = scriptUtil.getCosmosSendArgement(signData.transaction, addressIndex)
         genTx = async (signature: string) => {
-          return await txUtil.genSendTx(signData.transaction, signature, publicKeyBase46);
+          return await txUtil.genSendTx(signData.transaction, signature, publicKeyBase64);
         }
         break;
       case types.TX_TYPE.DELEGATE:
         script = params.DELEGATE.script + params.DELEGATE.signature;
         argument = scriptUtil.getCosmosDelgtOrUnDelArgement(signData.transaction, addressIndex)
         genTx = async (signature: string) => {
-          return await txUtil.genDelgtOrUnDelTx(signData.transaction, signature, publicKeyBase46, types.TX_TYPE.DELEGATE);
+          return await txUtil.genDelgtOrUnDelTx(signData.transaction, signature, publicKeyBase64, types.TX_TYPE.DELEGATE);
         }
         break;
       case types.TX_TYPE.UNDELEGATE:
         script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
         argument = scriptUtil.getCosmosDelgtOrUnDelArgement(signData.transaction, addressIndex)
         genTx = async (signature: string) => {
-          return await txUtil.genDelgtOrUnDelTx(signData.transaction, signature, publicKeyBase46, types.TX_TYPE.UNDELEGATE);
+          return await txUtil.genDelgtOrUnDelTx(signData.transaction, signature, publicKeyBase64, types.TX_TYPE.UNDELEGATE);
         }
         break;
       case types.TX_TYPE.WITHDRAW:
         script = params.WITHDRAW.script + params.WITHDRAW.signature;
         argument = scriptUtil.getCosmosWithdrawArgement(signData.transaction, addressIndex)
         genTx = async (signature: string) => {
-          return await txUtil.genWithdrawTx(signData.transaction, signature, publicKeyBase46);
+          return await txUtil.genWithdrawTx(signData.transaction, signature, publicKeyBase64);
         }
         break;
       default:
