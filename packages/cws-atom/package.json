@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/atom",
-  "version": "0.1.0-beta.10",
+  "version": "0.1.0-beta.11",
   "description": "Cosmos API for CoolWalletS",
   "main": "lib/index.js",
   "scripts": {
