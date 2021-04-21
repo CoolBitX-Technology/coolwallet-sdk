@@ -47,7 +47,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     signTxData: types.signTxType
   ): Promise<{ r: string; s: string; } | Buffer> {
     const protocolToUse = signTxData.protocol || PROTOCOL.SLIP0010;
-    console.log("protocolToUse: " + protocolToUse)
+    console.debug("protocolToUse: " + protocolToUse)
     const signature = signTransaction(
       signTxData,
       this.transfer,
