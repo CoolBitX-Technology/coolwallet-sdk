@@ -69,7 +69,6 @@ export const getCommandSignature = async (
   const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
   console.debug("- appIdWithSignature: " + appIdWithSignature)
   return appIdWithSignature;
-  // }
 
 };
 
