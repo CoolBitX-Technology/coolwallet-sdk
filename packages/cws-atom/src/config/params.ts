@@ -32,3 +32,9 @@ export const WITHDRAW = {
 export const COIN_TYPE = '80000076'
 
 
+export enum TX_TYPE_URL{
+	SEND = '/cosmos.bank.v1beta1.MsgSend',
+	DELEGATE = '/cosmos.staking.v1beta1.MsgDelegate',
+	UNDELEGATE = '/cosmos.staking.v1beta1.MsgUndelegate',
+	WITHDRAW = '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward'
+}

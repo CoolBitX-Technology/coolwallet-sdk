@@ -1,0 +1,353 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for tests/teansactionUtil.test.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">tests</a> teansactionUtil.test.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>29/29</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>5/5</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>29/29</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
+import { expect } from 'chai';
+import * as tx from '../src/util/transactionUtil'
+import * as types from '../src/config/types'
+import * as params from '../src/config/params'
+import BigNumber from 'bignumber.js';
+&nbsp;
+&nbsp;
+&nbsp;
+describe('Transaction Util Test', function () {
+  const publicKey = '02f10d4579a3bfbd142afbf2ab36f02d6ec427cb8fbad65ebb00b77abbb4c34ca8'
+  
+  it('- Tx type: send', function () {
+    const expectOutput = '0a93010a8e010a1c2f636f736d6f732e62616e6b2e763162657461312e4d736753656e64126e0a2d636f736d6f7331666e6b336c786c6b733774646736783535796e7636766767746e64373379637173713839736c122d636f736d6f7331686c6c7763716733797a356d67783063706c6838326c323361643836353864767068766a746c1a0e0a057561746f6d12053130303030120012670a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a2102f10d4579a3bfbd142afbf2ab36f02d6ec427cb8fbad65ebb00b77abbb4c34ca812040a020801180a12130a0d0a057561746f6d12043530303010c09a0c1a40c494e1fb5527b5963da9ed1478e1adfd1d63761793af40126ff935b47e44baa77eac29c96d05f317ce6f5da64cd23d23ce2b89cb1613eeb0d1a2d16a8a6deb45'
+    const signData: types.MsgSend = {
+      chainId: types.CHAIN_ID.ATOM,
+      fromAddress: 'cosmos1fnk3lxlks7tdg6x55ynv6vggtnd73ycqsq89sl',
+      toAddress: 'cosmos1hllwcqg3yz5mgx0cplh82l23ad8658dvphvjtl',
+      amount: 10000,
+      feeAmount: 5000,
+      gas: 200000,
+      accountNumber: '7439',
+      sequence: '10',
+      memo: '',
+    };
+    const signature = 'xJTh+1UntZY9qe0UeOGt/R1jdheTr0ASb/k1tH5Euqd+rCnJbQXzF85vXaZM0j0jziuJyxYT7rDRotFqim3rRQ=='
+    const result = tx.getSendTx(signData, signature, publicKey)
+&nbsp;
+    expect(result).equal(expectOutput);
+  });
+&nbsp;
+  
+  it('- Tx type: delegate', function () {
+    const expectOutput = '0aa1010a9c010a232f636f736d6f732e7374616b696e672e763162657461312e4d736744656c656761746512750a2d636f736d6f7331666e6b336c786c6b733774646736783535796e7636766767746e64373379637173713839736c1234636f736d6f7376616c6f706572317765366b6e6d38716172746d6d68327230716670737a367071307337656d763365306d6575771a0e0a057561746f6d12053130303030120012670a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a2102f10d4579a3bfbd142afbf2ab36f02d6ec427cb8fbad65ebb00b77abbb4c34ca812040a020801180a12130a0d0a057561746f6d12043530303010c09a0c1a4093b85b245260b4898c250e30757e4dc49b0de646321bee5f81f4e5dacf2471be774aed7ac7201102a64c78e44e018c184ae44acd8e93b163dc702a0b2a8d5544'
+    const signData: types.MsgDelegate = {
+      chainId: types.CHAIN_ID.ATOM,
+      delegatorAddress: 'cosmos1fnk3lxlks7tdg6x55ynv6vggtnd73ycqsq89sl',
+      validatorAddress: 'cosmosvaloper1we6knm8qartmmh2r0qfpsz6pq0s7emv3e0meuw',
+      amount: 10000,
+      feeAmount: 5000,
+      gas: 200000,
+      accountNumber: '7439',
+      sequence: '10',
+      memo: '',
+    };
+    const signature = 'k7hbJFJgtImMJQ4wdX5NxJsN5kYyG+5fgfTl2s8kcb53Su16xyARAqZMeOROAYwYSuRKzY6TsWPccCoLKo1VRA=='
+    const result = tx.getDelegateTx(signData, signature, publicKey)
+&nbsp;
+    expect(result).equal(expectOutput);
+  });
+&nbsp;
+&nbsp;
+  it('- Tx type: undelegate', function () {
+    const expectOutput = '0aa3010a9e010a252f636f736d6f732e7374616b696e672e763162657461312e4d7367556e64656c656761746512750a2d636f736d6f7331666e6b336c786c6b733774646736783535796e7636766767746e64373379637173713839736c1234636f736d6f7376616c6f706572317765366b6e6d38716172746d6d68327230716670737a367071307337656d763365306d6575771a0e0a057561746f6d12053130303030120012670a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a2102f10d4579a3bfbd142afbf2ab36f02d6ec427cb8fbad65ebb00b77abbb4c34ca812040a020801180a12130a0d0a057561746f6d12043530303010c09a0c1a40204e8d50df5fa292001e8a93d382a38fe515915df9911f99413653b4a4d5409b73dcc6b733c75a65e46ef3da7d52df771dfa54d3e7b0d57e6b09685737f0a04b'
+    const signData: types.MsgUndelegate = {
+      chainId: types.CHAIN_ID.ATOM,
+      delegatorAddress: 'cosmos1fnk3lxlks7tdg6x55ynv6vggtnd73ycqsq89sl',
+      validatorAddress: 'cosmosvaloper1we6knm8qartmmh2r0qfpsz6pq0s7emv3e0meuw',
+      amount: 10000,
+      feeAmount: 5000,
+      gas: 200000,
+      accountNumber: '7439',
+      sequence: '10',
+      memo: '',
+    };
+    const signature = 'IE6NUN9fopIAHoqT04Kjj+UVkV35kR+ZQTZTtKTVQJtz3Ma3M8daZeRu89p9Ut93HfpU0+ew1X5rCWhXN/CgSw=='
+    const result = tx.getUndelegateTx(signData, signature, publicKey)
+&nbsp;
+    expect(result).equal(expectOutput);
+  });
+&nbsp;
+  it('- Tx type: withdraw', function () {
+    const expectOutput = '0aa5010aa0010a372f636f736d6f732e646973747269627574696f6e2e763162657461312e4d7367576974686472617744656c656761746f7252657761726412650a2d636f736d6f7331666e6b336c786c6b733774646736783535796e7636766767746e64373379637173713839736c1234636f736d6f7376616c6f7065723171776c3837396e783974366b65663473757079617a61796637766a68656e6e79683536387973120012670a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a2102f10d4579a3bfbd142afbf2ab36f02d6ec427cb8fbad65ebb00b77abbb4c34ca812040a020801180a12130a0d0a057561746f6d12043530303010c09a0c1a4028f7fd7f9746d64351ecc9aacaf033ca4b3000bc89dc744a2cc7338b2d1df71106008a1fa11ded41a75fc6d6ddca79ce79d5aa0e0375ed87ec347654b576643b'
+    const signData: types.MsgWithdrawDelegationReward = {
+      chainId: types.CHAIN_ID.ATOM,
+      delegatorAddress: 'cosmos1fnk3lxlks7tdg6x55ynv6vggtnd73ycqsq89sl',
+      validatorAddress: 'cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys',
+      feeAmount: 5000,
+      gas: 200000,
+      accountNumber: '7439',
+      sequence: '10',
+      memo: '',
+    };
+    const signature = 'KPf9f5dG1kNR7MmqyvAzykswALyJ3HRKLMcziy0d9xEGAIofoR3tQadfxtbdynnOedWqDgN17YfsNHZUtXZkOw=='
+    const result = tx.getWithdrawDelegatorRewardTx(signData, signature, publicKey)
+&nbsp;
+    expect(result).equal(expectOutput);
+  });
+&nbsp;
+});
+&nbsp;
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
+                at Thu Apr 22 2021 17:15:54 GMT+0800 (台北標準時間)
+            </div>
+        </div>
+        <script src="../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../sorter.js"></script>
+        <script src="../block-navigation.js"></script>
+    </body>
+</html>
+    
