@@ -126,15 +126,6 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     // Install backupSeed script
     progressCallback(progressNum[progressIndex++]);
 
-    // if (cardSEVersion < hasBackupScriptSEVersion) {
-    //   console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
-    //   if (statusCode.toUpperCase() === CODE._6A82) {
-    //     await insertScript(transport, script.newLoadScript);
-    //     await insertScript(transport, script.newInstallScript);
-    //     console.log(`Install loadscript done`);
-    //   }
-    // }
-
     progressCallback(progressNum[progressIndex++]);
     await insertDeleteScript(transport, script.deleteScript);
     console.log('Delete Card Manager Done');
