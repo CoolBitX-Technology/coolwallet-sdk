@@ -34,10 +34,10 @@ export const executeAPDU = async (
       const statusCode = response.status;
       const outputData = response.outputData;
       const msg = util.getReturnMsg(statusCode.toUpperCase());
-      console.debug("app requestAPDUV2")
+      console.log("app requestAPDUV2")
       return { statusCode, msg, outputData };
     }
-    console.debug("not app requestAPDUV2")
+    console.log("not app requestAPDUV2")
     let msg;
     const response = await transport.request(apdu.command, apdu.data);
     let statusCode;
