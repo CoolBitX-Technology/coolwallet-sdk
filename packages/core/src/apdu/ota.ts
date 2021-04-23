@@ -15,7 +15,7 @@ import { SDKError } from '../error/errorHandle';
 
 var jwt = require('jsonwebtoken');
 
-const SE_UPDATE_VER = 307;
+const SE_UPDATE_VER = 308;
 
 const challengeUrl = `https://ota.cbx.io/api/challenge`;
 const cryptogramUrl = `https://ota.cbx.io/api/cryptogram`;
