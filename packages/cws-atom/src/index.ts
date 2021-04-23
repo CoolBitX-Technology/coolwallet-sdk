@@ -100,6 +100,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
     }
     const signature = await sign.signTransaction(signData, script, argument)
     const signTx =  genTx(signature)
-    return signTx;
+    const txBytesBase64 = Buffer.from(signTx, 'binary').toString('base64');
+    return txBytesBase64;
   }
 }
