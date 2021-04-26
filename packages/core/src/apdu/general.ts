@@ -26,6 +26,9 @@ export const hi = async (transport: Transport, appId: string): Promise<boolean> 
  */
 export const getNonce = async (transport: Transport): Promise<string> => {
   const { outputData: nonce, statusCode, msg } = await executeCommand(transport, commands.GET_NONCE, target.SE);
+  console.log("nonce: ", nonce)
+  console.log("statusCode: ", statusCode)
+  console.log("msg: ", msg)
   if (statusCode === CODE._9000) {
     return nonce;
   } else {
