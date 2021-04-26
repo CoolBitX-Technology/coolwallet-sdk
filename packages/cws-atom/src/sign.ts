@@ -37,6 +37,8 @@ export const signTransaction = async (
     true
   );
 
+  const { signedTx } = await core.apdu.tx.getSignedHex(transport);
+  console.debug("signedTx: ", signedTx)
   
   if (!Buffer.isBuffer(canonicalSignature)) {
     const atomSignature = await txUtil.genAtomSigFromSESig(canonicalSignature);

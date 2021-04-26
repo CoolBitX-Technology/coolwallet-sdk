@@ -69,7 +69,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
     switch (signData.txType) {
       case types.TX_TYPE.SEND:
         script = params.TRANSFER.script + params.TRANSFER.signature;
-        argument = scriptUtil.getCosmosSendArgement(signData.transaction, addressIndex)
+        argument = scriptUtil.getCosmosSendArgement(publicKey, signData.transaction, addressIndex)
         genTx = (signature: string) => {
           return txUtil.getSendTx(signData.transaction, signature, publicKey);
         }
@@ -99,8 +99,10 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
         throw new SDKError(this.signCosmosTransaction.name, `not support input tx type`);
     }
     const signature = await sign.signTransaction(signData, script, argument)
+    console.debug("signature: ", signature)
     const signTx =  genTx(signature)
-    const txBytesBase64 = Buffer.from(signTx, 'binary').toString('base64');
+    console.debug("signTx protobuf: ", signTx)
+    const txBytesBase64 = Buffer.from(signTx, 'hex').toString('base64');
     return txBytesBase64;
   }
 }

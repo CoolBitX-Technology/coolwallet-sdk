@@ -2,10 +2,7 @@ import bech32 from 'bech32';
 import * as cryptoUtil from './cryptoUtil'
 import * as types from '../config/types'
 import * as params from '../config/params'
-import * as fs from 'fs';
-const varint = require('varint')
-const protobuf = require('protocol-buffers')
-const messages = protobuf(fs.readFileSync('./src/config/cosmos.proto'))
+const messages = require('../config/messages')
 
 
 export function publicKeyToAddress(publicKey: string, prefix = "cosmos") {
@@ -36,6 +33,8 @@ export const getSendTx = (
     to_address: signData.toAddress,
     amount: [{ denom: 'uatom', amount: signData.amount.toString() }]
   })
+
+  console.log("getSendTx amount: ", signData.amount)
 
   return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SEND, messageBuf)
 }
@@ -98,7 +97,7 @@ export const getTxProtobuf = (
         value: msgValue
       }
     ],
-    memo: Buffer.from(signData.memo, 'hex').toString('hex')
+    memo: signData.memo
   })
   const publicKeyBuf = messages.PublicKey.encode({
     value: Buffer.from(publicKey, 'hex')
@@ -115,6 +114,7 @@ export const getTxProtobuf = (
     sequence: signData.sequence
   })
   const feeBuf = messages.Fee.encode({ amount: [{ denom: 'uatom', amount: signData.feeAmount.toString() }], gas_limit: signData.gas.toString() })
+  console.log("getSendTx fee: ", signData.feeAmount)
   const auth_info_bytes = messages.AuthInfo.encode({ signer_infos: [signerInfobuf], fee: feeBuf });
 
   const txRaw = messages.TxRaw.encode({
@@ -122,6 +122,7 @@ export const getTxProtobuf = (
     auth_info_bytes: auth_info_bytes,
     signatures: [Buffer.from(signature, 'base64')],
   });
+  console.log()
   return Buffer.from(txRaw,'hex').toString('hex')
 
 }

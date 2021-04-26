@@ -4,8 +4,8 @@ import * as types from "../config/types";
 
 
 
-export function getCosmosSendArgement(cosmosData: types.MsgSend, addressIndex: number) {
-
+export function getCosmosSendArgement(publicKey: string, cosmosData: types.MsgSend, addressIndex: number) {
+  const pubKey = publicKey.padStart(66, '0');
   const from = Buffer.from(cosmosData.fromAddress, 'ascii').toString('hex').padStart(128, '0');
   const to = Buffer.from(cosmosData.toAddress, 'ascii').toString('hex').padStart(128, '0');
   const amount = cosmosData.amount.toString(16).padStart(16, '0');
@@ -15,9 +15,7 @@ export function getCosmosSendArgement(cosmosData: types.MsgSend, addressIndex: n
   const sequence = parseInt(cosmosData.sequence).toString(16).padStart(16, '0');
   const memo = Buffer.from(cosmosData.memo, 'ascii').toString('hex');
 
-  const argument = from + to + amount + feeAmount + gas + accountNumber + sequence + memo;
-
-  console.log("getCosmosSendArgement: " + argument)
+  const argument = pubKey + from + to + amount + feeAmount + gas + accountNumber + sequence + memo;
 
   return addPath(argument, addressIndex);
 }
