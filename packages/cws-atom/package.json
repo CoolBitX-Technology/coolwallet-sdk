@@ -5,9 +5,11 @@
   "main": "lib/index.js",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
-    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx,.js\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
-    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish",
+    "test": "mocha -r ts-node/register tests/*.test.ts",
+    "testCover": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report"
   },
   "keywords": [
     "atom",
@@ -26,21 +28,32 @@
     "@coolwallet/core": "~0.1.0-beta.39"
   },
   "devDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.39",
-    "@types/big.js": "^4.0.5",
-    "@types/bn.js": "^4.11.6",
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@types/bech32": "^1.1.1"
+    "@coolwallet/core": "~0.1.0-beta.39",
+    "@types/bech32": "^1.1.1",
+    "@types/big.js": "^4.0.5",
+    "@types/bn.js": "^4.11.6",
+    "@types/chai": "^4.2.16",
+    "@types/mocha": "^8.2.2",
+    "chai": "^4.3.4",
+    "mocha": "^8.3.2",
+    "nyc": "^15.1.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
   },
   "dependencies": {
     "bech32": "^1.1.3",
     "big.js": "^5.2.2",
+    "bignumber.js": "^9.0.1",
     "bn.js": "^4.11.8",
     "is_js": "^0.9.0",
+    "protobufjs": "^6.10.2",
+    "protocol-buffers": "^4.2.0",
     "protocol-buffers-encodings": "^1.1.0",
+    "varint": "^6.0.0",
     "varstruct": "^6.1.2"
   },
   "repository": {
