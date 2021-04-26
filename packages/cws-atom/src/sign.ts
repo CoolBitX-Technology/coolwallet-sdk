@@ -16,7 +16,7 @@ export const signTransaction = async (
   let action;
   const sendScript = async () => {
     await core.apdu.tx.sendScript(transport, script);
-  }
+  };
   preActions.push(sendScript);
 
   action = async () => {
@@ -26,7 +26,8 @@ export const signTransaction = async (
       appPrivateKey,
       argument
     );
-  }
+  };
+  
   const canonicalSignature = await core.tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
@@ -38,7 +39,7 @@ export const signTransaction = async (
   );
 
   const { signedTx } = await core.apdu.tx.getSignedHex(transport);
-  console.debug("signedTx: ", signedTx)
+  console.debug("signedTx: ", signedTx);
   
   if (!Buffer.isBuffer(canonicalSignature)) {
     const atomSignature = await txUtil.genAtomSigFromSESig(canonicalSignature);

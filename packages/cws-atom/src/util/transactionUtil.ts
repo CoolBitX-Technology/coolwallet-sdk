@@ -34,9 +34,7 @@ export const getSendTx = (
     amount: [{ denom: 'uatom', amount: signData.amount.toString() }]
   })
 
-  console.log("getSendTx amount: ", signData.amount)
-
-  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SEND, messageBuf)
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SEND, messageBuf);
 }
 
 export const getDelegateTx = (
@@ -48,9 +46,9 @@ export const getDelegateTx = (
     delegator_address: signData.delegatorAddress,
     validator_address: signData.validatorAddress,
     amount: { denom: 'uatom', amount: signData.amount.toString() }
-  })
+  });
 
-  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.DELEGATE, messageBuf)
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.DELEGATE, messageBuf);
 }
 
 export const getUndelegateTx = (
@@ -62,9 +60,9 @@ export const getUndelegateTx = (
     delegator_address: signData.delegatorAddress,
     validator_address: signData.validatorAddress,
     amount: { denom: 'uatom', amount: signData.amount.toString() }
-  })
+  });
 
-  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.UNDELEGATE, messageBuf)
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.UNDELEGATE, messageBuf);
 }
 
 export const getWithdrawDelegatorRewardTx = (
@@ -75,9 +73,9 @@ export const getWithdrawDelegatorRewardTx = (
   const messageBuf = messages.MsgUndelegate.encode({
     delegator_address: signData.delegatorAddress,
     validator_address: signData.validatorAddress,
-  })
+  });
 
-  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.WITHDRAW, messageBuf)
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.WITHDRAW, messageBuf);
 }
 
 
@@ -98,23 +96,27 @@ export const getTxProtobuf = (
       }
     ],
     memo: signData.memo
-  })
+  });
+
   const publicKeyBuf = messages.PublicKey.encode({
     value: Buffer.from(publicKey, 'hex')
-  })
+  });
+
   const publicKeyInfoBuf = messages.Any.encode({
     type_url: '/cosmos.crypto.secp256k1.PubKey',
     value: publicKeyBuf
-  })
+  });
+
   const signerInfobuf = messages.SignerInfo.encode({
     public_key: publicKeyInfoBuf,
     mode_info:
       { single: { mode: messages.SignMode.SIGN_MODE_DIRECT } }
     ,
     sequence: signData.sequence
-  })
-  const feeBuf = messages.Fee.encode({ amount: [{ denom: 'uatom', amount: signData.feeAmount.toString() }], gas_limit: signData.gas.toString() })
-  console.log("getSendTx fee: ", signData.feeAmount)
+  });
+
+  const feeBuf = messages.Fee.encode({ amount: [{ denom: 'uatom', amount: signData.feeAmount.toString() }], gas_limit: signData.gas.toString() });
+  
   const auth_info_bytes = messages.AuthInfo.encode({ signer_infos: [signerInfobuf], fee: feeBuf });
 
   const txRaw = messages.TxRaw.encode({
@@ -122,7 +124,6 @@ export const getTxProtobuf = (
     auth_info_bytes: auth_info_bytes,
     signatures: [Buffer.from(signature, 'base64')],
   });
-  console.log()
-  return Buffer.from(txRaw,'hex').toString('hex')
+  return Buffer.from(txRaw,'hex').toString('hex');
 
 }
