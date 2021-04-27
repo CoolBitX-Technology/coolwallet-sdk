@@ -34,8 +34,6 @@ export const getCardInfo = async (transport: Transport): Promise<{ paired: boole
     const walletCreated = walletStatus === '01';
     const showDetail = displayType === '00';
 
-    await powerOff(transport)
-
     return {
       paired,
       locked,
