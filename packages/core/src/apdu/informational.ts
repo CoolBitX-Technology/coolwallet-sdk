@@ -5,6 +5,7 @@ import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { APDUError, SDKError } from '../error/errorHandle';
 import { getCommandSignature } from "../setting/auth";
+import { powerOff } from "./mcu/control";
 
 
 
@@ -32,6 +33,8 @@ export const getCardInfo = async (transport: Transport): Promise<{ paired: boole
     const locked = lockedStatus === '01';
     const walletCreated = walletStatus === '01';
     const showDetail = displayType === '00';
+
+    await powerOff(transport)
 
     return {
       paired,

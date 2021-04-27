@@ -5,6 +5,7 @@ import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
 import { APDUError } from '../../error/errorHandle';
 import { getCommandSignature } from "../../setting/auth";
+import { powerOff } from "./control";
 
 /**
  * Display "UPDATE" on wallet display
@@ -82,7 +83,9 @@ export const updateBalance = async (transport: Transport, appId: string, appPriv
 
   const executeCommandData = concatBalance + signature;
 
-  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_BALANCE, target.MCU, executeCommandData, undefined, undefined);
+
+  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_BALANCE, target.SE, executeCommandData, undefined, undefined);
+  await powerOff(transport);
 
   // if (statusCode !== CODE._9000) {
   //   throw new APDUError(commands.UPDATE_BALANCE, statusCode, msg)
