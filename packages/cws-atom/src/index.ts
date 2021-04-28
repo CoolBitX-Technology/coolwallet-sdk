@@ -58,7 +58,6 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
     signData: types.SignDataType
   ): Promise<string> {
 
-
     let { addressIndex } = signData;
 
     const publicKey = await this.getPublicKey(signData.transport, signData.appPrivateKey, signData.appId, addressIndex);
