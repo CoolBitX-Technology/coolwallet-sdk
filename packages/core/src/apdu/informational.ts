@@ -5,7 +5,6 @@ import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { APDUError, SDKError } from '../error/errorHandle';
 import { getCommandSignature } from "../setting/auth";
-import { powerOff } from "./mcu/control";
 
 
 
