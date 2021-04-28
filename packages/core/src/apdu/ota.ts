@@ -15,7 +15,7 @@ import { SDKError } from '../error/errorHandle';
 
 var jwt = require('jsonwebtoken');
 
-const SE_UPDATE_VER = 307;
+const SE_UPDATE_VER = 308;
 
 const challengeUrl = `https://ota.cbx.io/api/challenge`;
 const cryptogramUrl = `https://ota.cbx.io/api/cryptogram`;
@@ -125,15 +125,6 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
 
     // Install backupSeed script
     progressCallback(progressNum[progressIndex++]);
-
-    // if (cardSEVersion < hasBackupScriptSEVersion) {
-    //   console.log(`se card < 76 cardSEVersion:${cardSEVersion}`);
-    //   if (statusCode.toUpperCase() === CODE._6A82) {
-    //     await insertScript(transport, script.newLoadScript);
-    //     await insertScript(transport, script.newInstallScript);
-    //     console.log(`Install loadscript done`);
-    //   }
-    // }
 
     progressCallback(progressNum[progressIndex++]);
     await insertDeleteScript(transport, script.deleteScript);

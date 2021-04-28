@@ -4,8 +4,8 @@ import * as types from "../config/types";
 
 
 
-export function getCosmosSendArgement(cosmosData: types.MsgSend, addressIndex: number) {
-
+export function getCosmosSendArgement(publicKey: string, cosmosData: types.MsgSend, addressIndex: number) {
+  const pubKey = publicKey.padStart(66, '0');
   const from = Buffer.from(cosmosData.fromAddress, 'ascii').toString('hex').padStart(128, '0');
   const to = Buffer.from(cosmosData.toAddress, 'ascii').toString('hex').padStart(128, '0');
   const amount = cosmosData.amount.toString(16).padStart(16, '0');
@@ -15,9 +15,9 @@ export function getCosmosSendArgement(cosmosData: types.MsgSend, addressIndex: n
   const sequence = parseInt(cosmosData.sequence).toString(16).padStart(16, '0');
   const memo = Buffer.from(cosmosData.memo, 'ascii').toString('hex');
 
-  const argument = from + to + amount + feeAmount + gas + accountNumber + sequence + memo;
+  const argument = pubKey + from + to + amount + feeAmount + gas + accountNumber + sequence + memo;
 
-  console.log("getCosmosSendArgement: " + argument)
+  console.debug("getCosmosSendArgement: " + argument);
 
   return addPath(argument, addressIndex);
 }
@@ -27,8 +27,9 @@ export function getCosmosSendArgement(cosmosData: types.MsgSend, addressIndex: n
  * @param cosmosData 
  * @param addressIndex 
  */
-export function getCosmosDelgtOrUnDelArgement(cosmosData: types.MsgDelegate, addressIndex: number) {
+export function getCosmosDelgtOrUnDelArgement(publicKey: string, cosmosData: types.MsgDelegate, addressIndex: number) {
 
+  const pubKey = publicKey.padStart(66, '0');
   const delegatorAddress = Buffer.from(cosmosData.delegatorAddress, 'ascii').toString('hex').padStart(128, '0');
   const validatorAddress = Buffer.from(cosmosData.validatorAddress, 'ascii').toString('hex').padStart(128, '0');
   const amount = cosmosData.amount.toString(16).padStart(16, '0');
@@ -38,15 +39,16 @@ export function getCosmosDelgtOrUnDelArgement(cosmosData: types.MsgDelegate, add
   const sequence = parseInt(cosmosData.sequence).toString(16).padStart(16, '0');
   const memo = Buffer.from(cosmosData.memo, 'ascii').toString('hex');
 
-  const argument = delegatorAddress + validatorAddress + amount + feeAmount + gas + accountNumber + sequence + memo;
+  const argument = pubKey + delegatorAddress + validatorAddress + amount + feeAmount + gas + accountNumber + sequence + memo;
 
-  console.log("getCosmosDelgtOrUnDelArgement: " + argument)
+  console.debug("getCosmosDelgtOrUnDelArgement: " + argument);
 
   return addPath(argument, addressIndex);
 }
 
-export function getCosmosWithdrawArgement(cosmosData: types.MsgWithdrawDelegationReward, addressIndex: number) {
+export function getCosmosWithdrawArgement(publicKey: string, cosmosData: types.MsgWithdrawDelegationReward, addressIndex: number) {
 
+  const pubKey = publicKey.padStart(66, '0');
   const delegatorAddress = Buffer.from(cosmosData.delegatorAddress, 'ascii').toString('hex').padStart(128, '0');
   const validatorAddress = Buffer.from(cosmosData.validatorAddress, 'ascii').toString('hex').padStart(128, '0');
   const feeAmount = cosmosData.feeAmount.toString(16).padStart(16, '0');
@@ -55,9 +57,9 @@ export function getCosmosWithdrawArgement(cosmosData: types.MsgWithdrawDelegatio
   const sequence = parseInt(cosmosData.sequence).toString(16).padStart(16, '0');
   const memo = Buffer.from(cosmosData.memo, 'ascii').toString('hex');
 
-  const argument = delegatorAddress + validatorAddress + feeAmount + gas + accountNumber + sequence + memo;
+  const argument = pubKey + delegatorAddress + validatorAddress + feeAmount + gas + accountNumber + sequence + memo;
 
-  console.log("getCosmosWithdrawArgement: " + argument)
+  console.debug("getCosmosWithdrawArgement: " + argument);
 
   return addPath(argument, addressIndex);
 }
@@ -65,6 +67,6 @@ export function getCosmosWithdrawArgement(cosmosData: types.MsgWithdrawDelegatio
 function addPath(argument: string, addressIndex: number) {
   const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
   const SEPath = `15328000002C${params.COIN_TYPE}8000000000000000${addressIdxHex}`;
-  console.log("SEPath: " + SEPath)
+  console.debug("SEPath: " + SEPath);
   return SEPath + argument;
 }

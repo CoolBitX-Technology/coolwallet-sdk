@@ -55,19 +55,20 @@ export const getCommandSignature = async (
   params2: string = '00',
 ): Promise<string> => {
   const nonce = await general.getNonce(transport);
-
-
+  console.debug("- nonce: ", nonce)
   const P1 = params1 || command.P1;
   const P2 = params2 || command.P2;
   const apduHeader = command.CLA + command.INS + P1 + P2;
   const dataPackets = data || '';
+  console.debug("- dataPackets: ", dataPackets)
   const signatureParams = apduHeader + dataPackets + nonce;
+  console.debug("- signatureParams: ", signatureParams)
   const signature = sign(signatureParams, appPrivateKey).toString('hex');
+  console.debug("- signature: ", signature)
 
   const appIdWithSignature = appId + signature.padStart(144, '0'); // Pad to 72B
-  console.log("appIdWithSignature: " + appIdWithSignature)
+  console.debug("- appIdWithSignature: " + appIdWithSignature)
   return appIdWithSignature;
-  // }
 
 };
 

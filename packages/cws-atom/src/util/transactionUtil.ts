@@ -1,6 +1,8 @@
 import bech32 from 'bech32';
 import * as cryptoUtil from './cryptoUtil'
 import * as types from '../config/types'
+import * as params from '../config/params'
+const messages = require('../config/messages')
 
 
 export function publicKeyToAddress(publicKey: string, prefix = "cosmos") {
@@ -20,155 +22,108 @@ export const genAtomSigFromSESig = async (
   return Buffer.from(r + s, 'hex').toString('base64');
 };
 
-export const genDelgtOrUnDelTx = async (
-  signData: types.MsgDelegate | types.MsgUndelegate,
-  signature: string,
-  publicKeyBase46: string,
-  delType: string
-): Promise<object> => {
 
-  const signedTx = {
-    "tx": {
-      "msg": [
-        {
-          "type": `cosmos-sdk/${delType}`,
-          "value": {
-            "amount":
-            {
-              "amount": signData.amount.toString(),
-              "denom": "uatom"
-            },
-            "delegator_address": signData.delegatorAddress,
-            "validator_address": signData.validatorAddress
-          }
-        }
-      ],
-      "fee": {
-        "amount": [
-          {
-            "amount": signData.feeAmount.toString(),
-            "denom": "uatom"
-          }
-        ],
-        "gas": signData.gas.toString()
-      },
-      "signatures": [
-        {
-          "account_number": signData.accountNumber,
-          "sequence": signData.sequence,
-          "signature": signature,
-          "pub_key": {
-            "type": "tendermint/PubKeySecp256k1",
-            "value": publicKeyBase46
-          }
-        }
-      ],
-      "memo": signData.memo
-    },
-    "mode": "sync"
-  }
-
-  return signedTx
-
-};
-
-
-export const genSendTx = async (
+export const getSendTx = (
   signData: types.MsgSend,
   signature: string,
-  publicKeyBase46: string
-): Promise<object> => {
+  publicKey: string
+): string => {
+  const messageBuf = messages.MsgSend.encode({
+    from_address: signData.fromAddress,
+    to_address: signData.toAddress,
+    amount: [{ denom: 'uatom', amount: signData.amount.toString() }]
+  })
 
-  const signedTx = {
-    "tx": {
-      "msg": [
-        {
-          "type": `cosmos-sdk/${types.TX_TYPE.SEND}`,
-          "value": {
-            "amount": [
-              {
-                "amount": signData.amount.toString(),
-                "denom": "uatom"
-              }
-            ],
-            "from_address": signData.fromAddress,
-            "to_address": signData.toAddress
-          }
-        }
-      ],
-      "fee": {
-        "amount": [
-          {
-            "amount": signData.feeAmount.toString(),
-            "denom": "uatom"
-          }
-        ],
-        "gas": signData.gas.toString()
-      },
-      "signatures": [
-        {
-          "account_number": signData.accountNumber,
-          "sequence": signData.sequence,
-          "signature": signature,
-          "pub_key": {
-            "type": "tendermint/PubKeySecp256k1",
-            "value": publicKeyBase46
-          }
-        }
-      ],
-      "memo": signData.memo
-    },
-    "mode": "sync"
-  }
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SEND, messageBuf);
+}
 
-  return signedTx
+export const getDelegateTx = (
+  signData: types.MsgDelegate,
+  signature: string,
+  publicKey: string
+): string => {
+  const messageBuf = messages.MsgDelegate.encode({
+    delegator_address: signData.delegatorAddress,
+    validator_address: signData.validatorAddress,
+    amount: { denom: 'uatom', amount: signData.amount.toString() }
+  });
 
-};
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.DELEGATE, messageBuf);
+}
 
+export const getUndelegateTx = (
+  signData: types.MsgUndelegate,
+  signature: string,
+  publicKey: string
+): string => {
+  const messageBuf = messages.MsgUndelegate.encode({
+    delegator_address: signData.delegatorAddress,
+    validator_address: signData.validatorAddress,
+    amount: { denom: 'uatom', amount: signData.amount.toString() }
+  });
 
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.UNDELEGATE, messageBuf);
+}
 
-export const genWithdrawTx = async (
+export const getWithdrawDelegatorRewardTx = (
   signData: types.MsgWithdrawDelegationReward,
   signature: string,
-  publicKeyBase46: string
-): Promise<object> => {
+  publicKey: string
+): string => {
+  const messageBuf = messages.MsgUndelegate.encode({
+    delegator_address: signData.delegatorAddress,
+    validator_address: signData.validatorAddress,
+  });
 
-  const signedTx = {
-    "tx": {
-      "msg": [
-        {
-          "type": `cosmos-sdk/${types.TX_TYPE.WITHDRAW}`,
-          "value": {
-            "delegator_address": signData.delegatorAddress,
-            "validator_address": signData.validatorAddress
-          }
-        }
-      ],
-      "fee": {
-        "amount": [
-          {
-            "amount": signData.feeAmount.toString(),
-            "denom": "uatom"
-          }
-        ],
-        "gas": signData.gas.toString()
-      },
-      "signatures": [
-        {
-          "account_number": signData.accountNumber,
-          "sequence": signData.sequence,
-          "signature": signature,
-          "pub_key": {
-            "type": "tendermint/PubKeySecp256k1",
-            "value": publicKeyBase46
-          }
-        }
-      ],
-      "memo": signData.memo
-    },
-    "mode": "sync"
-  }
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.WITHDRAW, messageBuf);
+}
 
-  return signedTx
 
-};
+export const getTxProtobuf = (
+  signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward,
+  signature: string,
+  publicKey: string,
+  type_url: string,
+  msgValue: Buffer
+): string => {
+
+
+  const body_bytes = messages.TxBody.encode({
+    messages: [
+      {
+        type_url: type_url,
+        value: msgValue
+      }
+    ],
+    memo: signData.memo
+  });
+
+  const publicKeyBuf = messages.PublicKey.encode({
+    value: Buffer.from(publicKey, 'hex')
+  });
+
+  const publicKeyInfoBuf = messages.Any.encode({
+    type_url: '/cosmos.crypto.secp256k1.PubKey',
+    value: publicKeyBuf
+  });
+
+  const signerInfobuf = messages.SignerInfo.encode({
+    public_key: publicKeyInfoBuf,
+    mode_info:
+      { single: { mode: messages.SignMode.SIGN_MODE_DIRECT } }
+    ,
+    sequence: signData.sequence
+  });
+
+  const feeBuf = messages.Fee.encode({ amount: [{ denom: 'uatom', amount: signData.feeAmount.toString() }], gas_limit: signData.gas.toString() });
+  
+  const auth_info_bytes = messages.AuthInfo.encode({ signer_infos: [signerInfobuf], fee: feeBuf });
+
+  const txRaw = messages.TxRaw.encode({
+    body_bytes: body_bytes,
+    auth_info_bytes: auth_info_bytes,
+    signatures: [Buffer.from(signature, 'base64')],
+  });
+  return Buffer.from(txRaw,'hex').toString('hex');
+
+}
