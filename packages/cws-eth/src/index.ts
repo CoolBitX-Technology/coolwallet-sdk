@@ -5,15 +5,12 @@ import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types'
 import * as scriptUtils from './utils/scriptUtils';
 import * as params from "./config/params"; 
-import { transactionType }  from "./config/types";
 import { TOKENTYPE } from "./config/tokenType";
 import { removeHex0x } from "./utils/stringUtil";
 
-export { transactionType } 
-
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
-    super(params.COIN_TYPE); 
+    super(params.COIN_TYPE);
   }
 
   /**
@@ -43,39 +40,41 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signTransaction(
     signTxData: types.signTx
   ) {
-    const txData = signTxData.transaction;
+    const { value, data, to } = signTxData.transaction;
 
     // eth
-    if (txData.value && !txData.data) {
+    if (value && !data) {
       return await this.signTransferTransaction(signTxData);
     }
 
     // erc20
-    const functionHash = txData.data.slice(2, 10);
+    const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
     
-    if (txData.data && functionHash === 'a9059cbb') {
+    if (data && functionHash === 'a9059cbb') {
 
-      const upperCaseAddress = txData.to.toUpperCase(); // contractAddr
+      const upperCaseAddress = to.toUpperCase(); // contractAddr
       let tokenSignature;
       for (let tokenInfo of TOKENTYPE) { // get tokenSignature
-        if (removeHex0x(tokenInfo.contractAddress).toUpperCase() ===  upperCaseAddress) {
+        if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
           tokenSignature = tokenInfo.signature;
+          signTxData.transaction.option.info.symbol = tokenInfo.symbol;
+          signTxData.transaction.option.info.decimals = tokenInfo.unit;
           break;
         }
       }
-      if (tokenSignature) {
-        return await this.signERC20Transaction(signTxData, tokenSignature); // 內建
-      }
 
-      if (txData.option.transactionType == types.transactionType.ERC20 && txData.option.info.decimals && txData.option.info.decimals) { // 自建
-        return await this.signERC20Transaction(signTxData);
-      }
+      const { symbol, decimals } = signTxData.transaction.option.info;
+      if (symbol && decimals) {
+        if (tokenSignature) { // 內建
+          return await this.signERC20Transaction(signTxData, tokenSignature);
+        } else { // 自建
+          return await this.signERC20Transaction(signTxData);
+        }
+			}
     }
 
     // smart contract
     return await this.signSmartContractTransaction(signTxData);
-
-
   }
 
 

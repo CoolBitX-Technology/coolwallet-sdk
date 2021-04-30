@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/eth",
-  "version": "0.1.0-beta.20",
+  "version": "0.1.0-beta.22",
   "description": "Coolwallet Ethereum sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",

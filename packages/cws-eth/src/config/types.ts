@@ -52,18 +52,11 @@ export type Transaction = {
 }
 
 export type Option = {
-  transactionType: transactionType,
   info : {
     symbol: string,
     decimals: string
   }
 };
-
-export enum transactionType  {
-  TRANSFER = "TRANSFER",
-  ERC20 = "ERC20",
-  SMART_CONTRACT = "SMART_CONTRACT",
-}
 
 export const EIP712Schema = {
   type: 'object',
