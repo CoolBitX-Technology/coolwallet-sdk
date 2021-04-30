@@ -97,9 +97,9 @@ export const getTokenArgument = async (signObj: Transfer, denom: string, tokenSi
   const memo = Buffer.from(signObj.memo, 'ascii').toString('hex');
   const argument = from + to + value + accountNumber + sequence + source + tokenName + tokenCheck + signature + memo
   
-  console.log("tokenName: " + tokenName)
-  console.log("tokenCheck: " + tokenCheck)
-  console.log("signature: " + signature)
-  console.log("arg: " + argument)
+  console.debug("tokenName: " + tokenName)
+  console.debug("tokenCheck: " + tokenCheck)
+  console.debug("signature: " + signature)
+  console.debug("arg: " + argument)
   return await getPath(addressIndex) + argument;
 };

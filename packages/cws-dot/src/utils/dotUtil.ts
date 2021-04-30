@@ -172,11 +172,11 @@ export function getMortalEra(blockNumber: string, era: string): string {
 export function formatSCALECodec(value: string): string {
 
   const bigValue = new BN(value)
-  console.log('bigValue: ', bigValue.shln(2))
+  console.debug('bigValue: ', bigValue.shln(2))
 
   let formatValue
   const mode = getValueMode(value)
-  console.log("mode: ", mode)
+  console.debug("mode: ", mode)
   switch (mode){
     case params.ValueMode.singleByteMode:
       formatValue = (bigValue.shln(2)).or(new BN('0'))

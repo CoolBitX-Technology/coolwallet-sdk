@@ -92,7 +92,7 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
         const isCardRecognized = await general.hi(transport, appId);
 
         let { walletCreated } = await informational.getCardInfo(transport);
-        console.log(`isCardRecognized: ${isCardRecognized}, walletStatus: ${walletCreated}`);
+        console.debug(`isCardRecognized: ${isCardRecognized}, walletStatus: ${walletCreated}`);
 
         if (isCardRecognized) {
           await deleteBackupRegisterData(transport, appId, appPrivateKey);
@@ -107,7 +107,7 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     await selectApplet(transport, CARDMANAGER_AID);
     const { statusCode } = await selectApplet(transport, BACKUP_AID);
     progressCallback(progressNum[progressIndex++]);
-    console.log(`selectBackUpSeedApplet statusCode: ${statusCode}`);
+    console.debug(`selectBackUpSeedApplet statusCode: ${statusCode}`);
 
 
     //get ssd applet and authorize
@@ -115,24 +115,24 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     await selectApplet(transport, SSD_AID);
     progressCallback(progressNum[progressIndex++]);
 
-    console.log(`mutual Authorization Start----`);
+    console.debug(`mutual Authorization Start----`);
     const challengeResponse = await callAPI(challengeUrl, getAPIOption(cardId));
-    console.log(cardId);
+    console.debug("cardID: ", cardId);
     const challengeObj = await formatAPIResponse(transport, challengeResponse);
     const cryptogramResponse = await callAPI(cryptogramUrl, getAPIOption(cardId, challengeObj.outputData));
     await formatAPIResponse(transport, cryptogramResponse);
-    console.log(`mutual Authorization Done----`);
+    console.debug(`mutual Authorization Done----`);
 
     // Install backupSeed script
     progressCallback(progressNum[progressIndex++]);
 
     progressCallback(progressNum[progressIndex++]);
     await insertDeleteScript(transport, script.deleteScript);
-    console.log('Delete Card Manager Done');
+    console.debug('Delete Card Manager Done');
 
     progressCallback(progressNum[progressIndex]); // progress 50 
     await insertLoadScript(transport, script.loadScript, progressCallback, progressNum[progressIndex], progressNum[progressIndex + 1]);
-    console.log('Load OTA Script Done');
+    console.debug('Load OTA Script Done');
     progressIndex += 1
 
     progressCallback(progressNum[progressIndex++]);
@@ -142,19 +142,19 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
 
     await selectApplet(transport, CARDMANAGER_AID);
     isAppletExist = await selectApplet(transport);
-    console.log(`isAppletExist: ${isAppletExist}`);
+    console.debug(`isAppletExist: ${isAppletExist}`);
 
     if (isAppletExist) {
       // start recover backupData
-      console.log(`Start checking recovery`);
+      console.debug(`Start checking recovery`);
       let isNeedRecover = await setting.checkBackupStatus(transport);
-      console.log(`isNeedRecover: ${isNeedRecover}`);
+      console.debug(`isNeedRecover: ${isNeedRecover}`);
       if (isNeedRecover === true) {
         await recoverBackupData(transport);
       }
     }
     progressCallback(progressNum[progressIndex]);
-    console.log('Install OTA Script (SE Update) Done');
+    console.debug('Install OTA Script (SE Update) Done');
 
     return SE_UPDATE_VER;
   } catch (e) {
@@ -193,7 +193,6 @@ const insertScript = async (transport: Transport, scriptHex: string) => {
       const { CLA, INS, P1, P2, packets } = script;
       const apdu = util.assemblyCommandAndData(CLA, INS, P1, P2, packets);
       await executeAPDU(transport, apdu, target.SE);
-      console.log(num++)
     });
   } catch (e) {
     throw 'insert Script Failed! ' + e;
@@ -256,7 +255,7 @@ const deleteBackupRegisterData = async (transport: Transport, appId: string, app
     const command = commands.DELETE_REGISTER_BACKUP;
     let signedData = await auth.getCommandSignature(transport, appId, appPrivateKey, command)
     let status = await setting.deleteSeedBackup(transport, signedData);
-    console.log(`${deleteBackupRegisterData.name} status: ${status}`);
+    console.debug(`${deleteBackupRegisterData.name} status: ${status}`);
   } catch (e) {
     if (e.message) {
       console.error(`${deleteBackupRegisterData.name} fail: ${e.message}`);
@@ -269,9 +268,9 @@ const backupRegisterData = async (transport: Transport, appId: string, appPrivat
   try {
     const command = commands.BACKUP_REGISTER_DATA;
     let signature = await auth.getCommandSignature(transport, appId, appPrivateKey, command)
-    console.log(`backupRegisterData: ${signature}`)
+    console.debug(`backupRegisterData: ${signature}`)
     let status = await setting.backupSeed(transport, signature);
-    console.log(`${backupRegisterData.name} status: ${status}`);
+    console.debug(`${backupRegisterData.name} status: ${status}`);
   } catch (e) {
     if (e.message) {
       console.error(`${backupRegisterData.name} fail: ${e.message}`);
@@ -296,11 +295,11 @@ export const getAPIOption = (cardId: string, challengeData: string = '') => {
     data = { cryptogram: challengeData, cwid: cardId };
   }
 
-  console.log(data)
+  console.debug(data)
 
   let payload = jwt.sign(data, secret, { expiresIn: 60 * 60 * 24 });
 
-  console.log(`payload: ${payload}`);
+  console.debug(`payload: ${payload}`);
 
   const body = {
     keyNum: '1',
@@ -328,8 +327,7 @@ export const formatAPIResponse = async (transport: Transport, result: Response) 
     bodyText = await result.text();
   }
   const status = result.status
-  console.log(result)
-  console.log(`Server status ${status}`);
+  console.debug(`Server status ${status}`);
   if (status === 405) {
     console.error(`Mutaul Authentication Fail: ${status}`);
     throw `Mutaul Authentication Fail: ${status}`;
@@ -346,7 +344,7 @@ export const formatAPIResponse = async (transport: Transport, result: Response) 
     throw JSON.stringify(message);
   }
   const obj = jwt.decode(bodyText.cryptogram);
-  console.log(`Server Auth Response : ${JSON.stringify(obj)}`);
+  console.debug(`Server Auth Response : ${JSON.stringify(obj)}`);
   const { CLA, INS, P1, P2, packets } = obj;
   const apdu = util.assemblyCommandAndData(CLA, INS, P1, P2, packets);
   const response = await executeAPDU(transport, apdu, target.SE);

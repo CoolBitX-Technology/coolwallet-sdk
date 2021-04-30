@@ -124,7 +124,7 @@ export async function getScriptSigningActions(
 			// const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
 
 			const SEPath = Buffer.concat([Buffer.from('15', 'hex'), Buffer.from(await utils.getPath(params.COIN_TYPE, preparedInput.addressIndex), 'hex')])
-			console.log("SEPath: " + SEPath.toString('hex'))
+			console.debug("SEPath: " + SEPath.toString('hex'))
 
 			//[outPoint(32+4B)] [inputScriptType(1B)] [inputAmount(8B)] [inputHash(20B)] [inputBlockHash(32B)] [inputBlockHeight(3B)]
 			const outPoint = preparedInput.preOutPointBuf;

@@ -140,7 +140,7 @@ export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer,
 
   const callIndex = method.callIndex.padStart(4, '0')
   const numSlashingSpans = method.numSlashingSpans.padStart(8, '0')
-  console.log("numSlashingSpans: ", numSlashingSpans)
+  console.debug("numSlashingSpans: ", numSlashingSpans)
   const tradeArgument = await getTradeArgument(rawData)
 
   const argument = callIndex + numSlashingSpans + tradeArgument

@@ -90,7 +90,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signTransferTransaction(
     signTxData: types.signTx
   ) {
-    console.log("signTransferTransaction")
+    console.debug("signTransferTransaction")
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
     const argument = await scriptUtils.getTransferArgument(signTxData.transaction, signTxData.addressIndex);
     const script = params.TRANSFER.script + params.TRANSFER.signature;
@@ -116,7 +116,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signERC20Transaction(
     signTxData: types.signTx, tokenSignature: string = ''
   ) {
-    console.log("signERC20Transaction")
+    console.debug("signERC20Transaction")
 
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
     const script = params.ERC20.script + params.ERC20.signature;
@@ -143,7 +143,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signSmartContractTransaction(
     signTxData: types.signTx
   ) {
-    console.log("signSmartContractTransaction")
+    console.debug("signSmartContractTransaction")
 
     const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
     const script = params.ETHSmartContract.script + params.ETHSmartContract.signature;

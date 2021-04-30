@@ -76,7 +76,6 @@ export const getEd25519PublicKey = async (
     path
   );
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
-  console.log("decryptedData: " + decryptedData)
   return decryptedData;
 };
 
