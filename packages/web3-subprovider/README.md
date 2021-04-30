@@ -1,17 +1,17 @@
 # Web3-Subprovoder
 
-![version](https://img.shields.io/npm/v/@coolwallets/web3-subprovider)
+![version](https://img.shields.io/npm/v/@coolwallet/web3-subprovider)
 
 ## Introduction
 
-Create a HookedWalletSubprovider for CoolWalletS.
+Create a HookedWalletSubprovider for CoolWallet.
 
-This provider opens up CoolWalletS Connect as a service bridge to handle transaction signing.
+This provider opens up CoolWallet Connect as a service bridge to handle transaction signing.
 
 ## Installation
 
 ```shell
-npm i @coolwallets/web3-subprovider
+npm i @coolwallet/web3-subprovider
 ```
 
 ## Example Usage
@@ -22,7 +22,7 @@ npm i @coolwallets/web3-subprovider
 
 // Starting web3 engine with CoolWallet Subprovider
 import Web3 from 'web3'
-import CoolWalletSubProvider from '@coolwallets/web3-subprovider'
+import CoolWalletSubProvider from '@coolwallet/web3-subprovider'
 import ProviderEngine from 'web3-provider-engine'
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc'
 

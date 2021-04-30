@@ -1,6 +1,6 @@
-import Transport from '@coolwallets/transport';
-import { getBluetoothServiceUuids, getInfosForServiceUuid } from "@coolwallets/devices";
-import { convertToNumberArray } from "./util";
+import { transport } from '@coolwallet/core';
+import { device as coreDevice } from '@coolwallet/core';
+import { convertToNumberArray } from './util';
 
 let server;
 let commandCharacteristic;
@@ -8,7 +8,7 @@ let dataCharacteristic;
 let statusCharacteristic;
 let responseCharacteristic;
 
-export default class WebBleTransport extends Transport {
+export default class WebBleTransport extends transport.default {
   constructor(device,
     sendCommandToCard,
     sendDataToCard,
@@ -30,7 +30,7 @@ export default class WebBleTransport extends Transport {
 
   static async listen(callback) {
     try {
-      const services = getBluetoothServiceUuids();
+      const services = coreDevice.getBluetoothServiceUuids();
       const device = await navigator.bluetooth.requestDevice({ filters: [{ services }] });
       callback(null, device);
     } catch (error) {
@@ -39,12 +39,12 @@ export default class WebBleTransport extends Transport {
   }
 
   static async connect(device) {
-    device.addEventListener('gattserverdisconnected', this._onDeviceDisconnect)
+    device.addEventListener('gattserverdisconnected', this.onDeviceDisconnect);
     server = await device.gatt.connect();
-    console.debug(`${device.name} connected`);
+    console.info(`${device.name} connected`);
     const services = await server.getPrimaryServices();
     const service = services[0];
-    const uuids = getInfosForServiceUuid(service.uuid);
+    const uuids = coreDevice.getInfosForServiceUuid(service.uuid);
     commandCharacteristic = await service.getCharacteristic(uuids.writeUuid);
     dataCharacteristic = await service.getCharacteristic(uuids.dataUuid);
     statusCharacteristic = await service.getCharacteristic(uuids.checkUuid);
@@ -62,20 +62,20 @@ export default class WebBleTransport extends Transport {
   }
 
   static async disconnect() {
-    if (server) await server.disconnect()
-    server = undefined
-    commandCharacteristic = undefined
-    dataCharacteristic = undefined
-    statusCharacteristic = undefined
-    responseCharacteristic = undefined
+    if (server) await server.disconnect();
+    server = undefined;
+    commandCharacteristic = undefined;
+    dataCharacteristic = undefined;
+    statusCharacteristic = undefined;
+    responseCharacteristic = undefined;
   }
 
   static setOnDisconnect(device, onDisconnect) {
-    device.addEventListener('gattserverdisconnected', onDisconnect)
+    device.addEventListener('gattserverdisconnected', onDisconnect);
   }
 
-  async _onDeviceDisconnect(event) {
-    console.debug('Device ' + event.target.name + ' is disconnected.');
+  static onDeviceDisconnect(event) {
+    console.debug(`Device ${event.target.name} is disconnected.`);
   }
 
   sendCommandToCard = async (command) => {

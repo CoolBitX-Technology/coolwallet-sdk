@@ -2,15 +2,36 @@
   "name": "root",
   "private": true,
   "devDependencies": {
-    "@typescript-eslint/parser": "^2.3.0",
+    "@babel/plugin-transform-runtime": "^7.8.3",
+    "@babel/preset-env": "^7.8.6",
+    "@types/jest": "^25.1.3",
+    "@typescript-eslint/eslint-plugin": "^4.10.0",
+    "@typescript-eslint/parser": "^4.10.0",
+    "babel-jest": "^25.1.0",
     "eslint": "^6.1.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-react-hooks": "^1.7.0",
+    "jest": "^25.1.0",
     "lerna": "^3.18.3",
+    "prettier": "^2.0.5",
     "prettier-eslint": "^9.0.0"
   },
-  "license": "Apache-2.0"
+  "jest": {
+    "testPathIgnorePatterns": [
+      "packages/.*/lib"
+    ],
+    "setupFiles": [
+      "<rootDir>/__mocks__/setup.js"
+    ]
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@coolwallet/core": "0.1.0-beta.25"
+  }
 }

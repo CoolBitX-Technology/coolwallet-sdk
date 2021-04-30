@@ -1,11 +1,11 @@
-import { core } from '@coolwallets/core';
+import { tx, transport } from '@coolwallet/core';
 import crypto from 'crypto';
 import BigInteger from 'bigi';
 import base58 from 'bs58';
 
 import { genSignBuf } from './eos_utils';
 
-type Transport = import('@coolwallets/transport').default;
+type Transport = transport.default;
 type Transaction = import('./types').Transaction;
 const elliptic = require('elliptic');
 
@@ -75,15 +75,14 @@ export default async function signTransfer(
   confirmCB: Function | undefined = undefined,
   authorizedCB: Function | undefined = undefined
 ) : Promise<string> {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
+  const keyId = tx.util.addressIndexToKeyId(coinType, addressIndex);
   const signBuf = genSignBuf(txObject, chainId);
-  const dataForSE = core.flow.prepareSEData(keyId, signBuf, 'f6');
-  const canonicalSignature = await core.flow.sendDataToCoolWallet(
+  const dataForSE = tx.flow.prepareSEData(keyId, signBuf, 'f6');
+  const canonicalSignature = await core.flow.getSingleSignatureFromCoolWallet(
     transport,
     appId,
     appPrivateKey,
     dataForSE,
-    '00',
     '00',
     false,
     undefined,

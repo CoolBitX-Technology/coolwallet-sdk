@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallets/icx",
-  "version": "0.0.2",
-  "description": "ICON (ICX) sdk for CoolWalletS ",
+  "name": "@coolwallet/icx",
+  "version": "0.1.0-beta.12",
+  "description": "CoolWallet Icon sdk",
   "main": "lib/index.js",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
@@ -13,19 +13,20 @@
     "icx",
     "icon",
     "hardwarewallet",
-    "coolwallets",
+    "coolwallet",
     "javascript",
     "transaction",
     "signing",
     "cryptocurrency"
   ],
-  "author": "anton",
+  "author": "coolwallet-team",
   "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.0.0"
+  },
   "dependencies": {
     "elliptic": "^6.5.1",
-    "@coolwallets/core": "^0.0.19",
-    "@coolwallets/coin": "^0.1.0",
-    "@coolwallets/transport": "^0.0.10",
+    "icon-sdk-js": "0.0.18",
     "js-sha3": "^0.8.0"
   },
   "devDependencies": {
@@ -33,6 +34,14 @@
     "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7"
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }

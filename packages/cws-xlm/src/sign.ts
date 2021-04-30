@@ -1,44 +1,51 @@
-import { core } from '@coolwallets/core';
+import { tx, apdu, utils } from '@coolwallet/core';
+import * as scriptUtil from './utils/scriptUtil';
+import { signTxType, PROTOCOL } from './config/types';
 
-type Transport = import('@coolwallets/transport').default;
-type protocol = import('./types').protocol
 
-const accountIndexToKeyId = (coinType:string, accountIndex:number) => {
-  const accountIndexHex = accountIndex.toString(16).padStart(2, '0');
-  const keyId = coinType.concat(accountIndexHex).concat('000000');
-  return keyId;
-};
+// const accountIndexToKeyId = (coinType: string, accountIndex: number) => {
+//   const accountIndexHex = accountIndex.toString(16).padStart(2, '0');
+//   const keyId = coinType.concat(accountIndexHex).concat('000000');
+//   return keyId;
+// };
 
 export default async function signTransaction(
-  transport: Transport,
-  appPrivateKey: string,
-  appId: string,
-  coinType: string,
-  signatureBase: Buffer,
-  accountIndex:number,
-  protocol: protocol,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
+  signTxData: signTxType,
+  transfer: { script: string, signature: string },
+  protocol: PROTOCOL,
+): Promise<{ r: string; s: string; } | Buffer> {
 
-) : Promise<Buffer> {
-  const readType = protocol === 'BIP44'
-    ? coinType
-    : `${coinType}10`;
-  const keyId = accountIndexToKeyId(coinType, accountIndex);
-  const dataForSE = core.flow.prepareSEData(keyId, signatureBase, readType);
-  const signature = await core.flow.sendDataToCoolWallet(
+  const { transaction, transport, appPrivateKey, appId, signatureBase, confirmCB, authorizedCB } = signTxData
+
+  const preActions = [];
+
+  const { script, argument } = await scriptUtil.getScriptAndArguments(transaction, transfer, protocol);
+
+  const sendScript = async () => {
+    await apdu.tx.sendScript(transport, script);
+  }
+  preActions.push(sendScript);
+
+  const sendArgument = async () => {
+    return await apdu.tx.executeScript(
+      transport,
+      appId,
+      appPrivateKey,
+      argument
+    );
+  }
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
-    appId,
-    appPrivateKey,
-    dataForSE,
-    '00',
-    '00',
+    preActions,
+    sendArgument,
     true,
-    undefined,
     confirmCB,
     authorizedCB,
     false,
   );
+  await utils.checkSupportScripts(transport);
 
-  return <Buffer> signature;
+
+  return signature;
 }

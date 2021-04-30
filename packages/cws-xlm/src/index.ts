@@ -1,44 +1,57 @@
-import { EDDSACoin } from '@coolwallets/coin';
-import { SDKError } from '@coolwallets/errors';
-import { pubKeyToAddress } from './utils';
-import signTx from './sign';
+import { coin as COIN, error as ERROR, utils } from '@coolwallet/core';
+import * as txUtil from './utils/transactionUtil';
+import signTransaction from './sign';
+import * as types from './config/types';
+import * as params from './config/params';
+import { COIN_SPECIES, PROTOCOL } from './config/types'; 
+export { COIN_SPECIES, PROTOCOL };
 
-type Transport = import('@coolwallets/transport').default;
-type protocol = import('./types').protocol
+export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
+  transfer: { script: string, signature: string};
+  constructor(type: String) {
+    super(params.COIN_TYPE);
 
-export default class XLM extends EDDSACoin {
-  constructor(transport: Transport, appPrivateKey: string, appId:string) {
-    super(transport, appPrivateKey, appId, '94');
+    switch (type) {
+      case COIN_SPECIES.KAU:
+        this.transfer = params.TRANSFER.KAU;
+        break;
+      case COIN_SPECIES.KAG:
+        this.transfer = params.TRANSFER.KAG;
+        break;
+      case COIN_SPECIES.XLM:
+      default:
+        this.transfer = params.TRANSFER.XLM;
+    }
   }
 
-  async getAccount(accountIndex: number, protocol: protocol = 'SLIP0010'): Promise<string> {
-    if (accountIndex !== 0) throw new SDKError('Not Supported', 'Only support account index = 0 for now.');
-    const pubKey = await this.getPublicKey(accountIndex, protocol);
-    return pubKeyToAddress(pubKey);
+  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, protocol: PROTOCOL = PROTOCOL.SLIP0010): Promise<string> {
+
+    const isSLIP0010 = protocol === PROTOCOL.SLIP0010 ? true : false ;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, isSLIP0010);
+   
+    if (!publicKey) {
+      throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
+    }
+    return txUtil.pubKeyToAddress(publicKey);
   }
+
+  async getAddressByAccountKey(publicKey: string): Promise<string> {
+    return txUtil.pubKeyToAddress(publicKey);
+  }
+
 
   /**
    * sign XLM signatureBase with account 0, return signature.
    */
   async signTransaction(
-    signatureBase: Buffer,
-    accountIndex: number,
-    protocol: protocol | undefined,
-    confirmCB: Function | undefined,
-    authorizedCB: Function | undefined,
-  ) : Promise<Buffer> {
-    if (accountIndex !== 0) throw new SDKError('Not Supported', 'Only support account index = 0 for now.');
-    const protocolToUse = protocol || 'SLIP0010';
-    const signature = signTx(
-      this.transport,
-      this.appPrivateKey,
-      this.appId,
-      this.coinType,
-      signatureBase,
-      accountIndex,
+    signTxData: types.signTxType
+  ): Promise<{ r: string; s: string; } | Buffer> {
+    const protocolToUse = signTxData.protocol || PROTOCOL.SLIP0010;
+    console.debug("protocolToUse: " + protocolToUse)
+    const signature = signTransaction(
+      signTxData,
+      this.transfer,
       protocolToUse,
-      confirmCB,
-      authorizedCB,
     );
 
     return signature;

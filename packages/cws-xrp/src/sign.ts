@@ -1,45 +1,43 @@
-import { core } from '@coolwallets/core';
-
-const codec = require('ripple-binary-codec');
-
-type Transport = import('@coolwallets/transport').default;
-type Payment = import('./types').Payment
-
-const generateRawTx = (signature: any, payment:Payment): string => {
-  /* eslint-disable-next-line no-param-reassign */
-  payment.TxnSignature = signature.toUpperCase();
-  return codec.encodeForSigning(payment);
-};
+import { apdu, tx } from "@coolwallet/core";
+import * as scriptUtil from "./utils/scriptUtil";
+import * as txUtil from "./utils/tracsactionUtil";
+import * as types from "./config/types";
+import * as params from "./config/params";
 
 // eslint-disable-next-line import/prefer-default-export
 export const signPayment = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  coinType: string,
-  payment: Payment,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
+  signTxData: types.signTxType,
+  payment: types.Payment
 ): Promise<string> => {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
-  // eslint-disable-next-line no-param-reassign
-  payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
-  const payload = Buffer.from(codec.encodeForSigning(payment), 'hex');
-  const dataForSE = core.flow.prepareSEData(keyId, payload, coinType);
-  const signature = await core.flow.sendDataToCoolWallet(
+
+  const { transport, addressIndex, appId, appPrivateKey, confirmCB, authorizedCB } = signTxData
+
+  const script = params.TRANSFER.script + params.TRANSFER.signature;
+  const argument = await scriptUtil.getPaymentArgument(addressIndex, payment);
+
+  const preActions = [];
+  const sendScript = async () => {
+    await apdu.tx.sendScript(transport, script);
+  }
+  preActions.push(sendScript);
+
+  const sendArgument = async () => {
+    return apdu.tx.executeScript(
+      transport,
+      appId,
+      appPrivateKey,
+      argument
+    );
+  }
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
-    appId,
-    appPrivateKey,
-    dataForSE,
-    '00',
-    '00',
+    preActions,
+    sendArgument,
     false,
-    undefined,
     confirmCB,
     authorizedCB,
     false
   );
-
-  return generateRawTx(signature, payment);
+  return txUtil.generateRawTx(signature.toString('hex'), payment);
 };

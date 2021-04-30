@@ -1,41 +1,46 @@
-import { core } from '@coolwallets/core';
-import * as icxUtil from './util';
-
-type Transport = import('@coolwallets/transport').default;
-
+import { apdu, transport, error, tx, utils } from '@coolwallet/core';
+import * as txUtil from './utils/transactionUtil'
+import * as scriptUtil from './utils/scriptUtil'
+import * as types from './config/types'
 /**
  * Sign ICON Transaction
  */
 // eslint-disable-next-line import/prefer-default-export
-export const signTransaction = async (
-  transport: Transport,
-  appId: string,
-  appPrivateKey: string,
-  coinType: string,
-  rawTx: object | string,
-  addressIndex: number,
+export default async function signTransaction(
+  signTxData: types.signTxType,
   publicKey: string,
-  confirmCB: Function | undefined = undefined,
-  authorizedCB: Function | undefined = undefined
-): Promise<Object> => {
-  const keyId = core.util.addressIndexToKeyId(coinType, addressIndex);
-  const phraseToSign = icxUtil.generateHashKey(rawTx);
-  const rawPayload = Buffer.from(phraseToSign, 'utf-8');
-  const dataForSE = core.flow.prepareSEData(keyId, rawPayload, coinType);
-  const signature = await core.flow.sendDataToCoolWallet(
+): Promise<Object> {
+
+  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData
+
+  let canonicalSignature;
+  const preActions = [];
+
+  const { script, argument } = await scriptUtil.getScriptAndArguments(addressIndex, transaction);
+
+  const sendScript = async () => {
+    await apdu.tx.sendScript(transport, script);
+  }
+  preActions.push(sendScript);
+
+  const sendArgument = async () => {
+    return await apdu.tx.executeScript(
+      transport,
+      appId,
+      appPrivateKey,
+      argument
+    );
+  }
+
+  canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
-    appId,
-    appPrivateKey,
-    dataForSE,
-    '00',
-    '00',
+    preActions,
+    sendArgument,
     false,
-    undefined,
     confirmCB,
     authorizedCB,
     true
   );
-
-  const txObject = await icxUtil.generateRawTx(signature, rawTx, publicKey);
+  const txObject = await txUtil.generateRawTx(canonicalSignature, transaction, publicKey);
   return txObject;
 };

@@ -1,7 +1,7 @@
 {
-  "name": "@coolwallets/btc",
-  "version": "0.0.1",
-  "description": "CoolwalletS Bitcoin App",
+  "name": "@coolwallet/btc",
+  "version": "0.1.0-beta.19",
+  "description": "Coolwallet Bitcoin sdk",
   "main": "lib/index.js",
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
@@ -14,7 +14,7 @@
     "bitcoin",
     "litecoin",
     "ltc",
-    "coolwallets",
+    "coolwallet",
     "omni",
     "usdt",
     "javascript",
@@ -23,18 +23,29 @@
     "coolbitx",
     "transaction"
   ],
-  "author": "anton@coolbitx.com",
+  "author": "coolwallet-team",
   "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.0.0"
+  },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7"
+    "@babel/preset-typescript": "^7.7.7",
+    "jest": "^26.0.1",
+    "@coolwallet/core": "^1.0.0"
   },
   "dependencies": {
-    "@coolwallets/coin": "^0.1.2",
-    "@coolwallets/core": "^0.0.20",
-    "@coolwallets/transport": "0.0.10",
-    "bitcoinjs-lib": "^5.1.7"
+    "@types/bn.js": "^4.11.6",
+    "bitcoinjs-lib": "^5.1.7",
+    "bn.js": "^5.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   }
 }

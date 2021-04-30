@@ -3,18 +3,15 @@ import {
   BleErrorCode,
 } from "react-native-ble-plx";
 
-import {
-  getBluetoothServiceUuids,
-  getInfosForServiceUuid,
-} from "@coolwallets/devices";
+
+import { device as coreDevice } from '@coolwallet/core';
 
 import { Buffer } from 'buffer';
 
-import Transport from "@coolwallets/transport";
+import { transport, error } from "@coolwallet/core";
 
 import { convertToNumberArray } from "./util";
 
-const transportsCache = {};
 const bleManager = new BleManager();
 
 let writeCharacteristic;
@@ -26,7 +23,7 @@ const retrieveInfos = services => {
   if (!services || services.length === 0) return;
   let infos;
   services.map(service => {
-    const info = getInfosForServiceUuid(service.uuid);
+    const info = coreDevice.getInfosForServiceUuid(service.uuid);
     if (info && !infos) {
       infos = info;
     }
@@ -35,7 +32,7 @@ const retrieveInfos = services => {
   return infos;
 };
 
-export default class RNBleTransport extends Transport {
+export default class RNBleTransport extends transport.default {
 
   static isSupported = () =>
     Promise.resolve(typeof BleManager === "function");
@@ -52,7 +49,7 @@ export default class RNBleTransport extends Transport {
         stateSub.remove();
 
         const devices = await bleManager.connectedDevices(
-          getBluetoothServiceUuids()
+          coreDevice.getBluetoothServiceUuids()
         );
         if (unsubscribed) return;
 
@@ -62,7 +59,7 @@ export default class RNBleTransport extends Transport {
         if (unsubscribed) return;
 
         bleManager.startDeviceScan(
-          getBluetoothServiceUuids(),
+          coreDevice.getBluetoothServiceUuids(),
           null,
           (bleError, device) => {
             if (bleError) {
@@ -86,10 +83,6 @@ export default class RNBleTransport extends Transport {
   static async connect(deviceOrId) {
     let device;
     if (typeof deviceOrId === "string") {
-      if (transportsCache[deviceOrId]) {
-        return transportsCache[deviceOrId];
-      }
-
       if (!device) {
         // works for iOS but not Android
         const devices = await bleManager.devices([deviceOrId]);
@@ -98,7 +91,7 @@ export default class RNBleTransport extends Transport {
 
       if (!device) {
         const connectedDevices = await bleManager.connectedDevices(
-          getBluetoothServiceUuids()
+          coreDevice.getBluetoothServiceUuids()
         );
         const connectedDevicesFiltered = connectedDevices.filter(
           d => d.id === deviceOrId
@@ -119,7 +112,7 @@ export default class RNBleTransport extends Transport {
       }
 
       if (!device) {
-        throw new Error('cant open deivce');
+        throw new error.TransportError(this.connect.name, 'cant open deivce');
       }
     } else {
       device = deviceOrId;
@@ -132,13 +125,13 @@ export default class RNBleTransport extends Transport {
     const serviceDevice = await device.discoverAllServicesAndCharacteristics();
     const services = await serviceDevice.services();
     let res = retrieveInfos(services);
-    const serviceUuids = getBluetoothServiceUuids();
+    const serviceUuids = coreDevice.getBluetoothServiceUuids();
     let characteristics;
     if (!res) {
       for (let i = 0; i < serviceUuids.length; i++) {
         try {
           characteristics = await device.characteristicsForService(serviceUuids[i]);
-          res = getInfosForServiceUuid(serviceUuids[i]);
+          res = coreDevice.getInfosForServiceUuid(serviceUuids[i]);
           break;
         } catch (e) {
           console.log('bleTransport e', e);
@@ -147,7 +140,7 @@ export default class RNBleTransport extends Transport {
       }
     }
     if (!res) {
-      throw new Error('service not found');
+      throw new error.TransportError(this.connect.name, 'service not found');
     }
 
     const {
@@ -163,7 +156,7 @@ export default class RNBleTransport extends Transport {
     }
 
     if (!characteristics) {
-      throw new Error('service not found');
+      throw new error.TransportError(this.connect.name, 'service not found');
     }
 
     for (const c of characteristics) {
@@ -178,16 +171,16 @@ export default class RNBleTransport extends Transport {
       }
     }
     if (!writeCharacteristic) {
-      throw new Error('writeCharacteristic not found');
+      throw new error.TransportError(this.connect.name, 'writeCharacteristic not found');
     }
     if (!dataCharacteristic) {
-      throw new Error('dataCharacteristic not found');
+      throw new error.TransportError(this.connect.name, 'dataCharacteristic not found');
     }
     if (!checkCharacteristic) {
-      throw new Error('checkCharacteristic not found');
+      throw new error.TransportError(this.connect.name, 'checkCharacteristic not found');
     }
     if (!readCharacteristic) {
-      throw new Error('readCharacteristic not found');
+      throw new error.TransportError(this.connect.name, 'readCharacteristic not found');
     }
 
     const transport = new RNBleTransport(
@@ -201,11 +194,8 @@ export default class RNBleTransport extends Transport {
     const onDisconnect = () => {
       transport.notYetDisconnected = false;
       disconnectedSub.remove();
-      delete transportsCache[transport.device.id];
     };
 
-    // eslint-disable-next-line require-atomic-updates
-    transportsCache[transport.device.id] = transport;
     const disconnectedSub = device.onDisconnected(e => {
       if (!transport.notYetDisconnected) return;
       onDisconnect(e);
@@ -240,7 +230,7 @@ export default class RNBleTransport extends Transport {
       const base64Command = new Buffer(command).toString('base64');
       await writeCharacteristic.writeWithResponse(base64Command);
     } catch (e) {
-      throw new Error(`sendCommandToCard DisconnectedDeviceDuringOperation(${e.message})`);
+      throw new error.TransportError(this.sendCommandToCard.name, `sendCommandToCard DisconnectedDeviceDuringOperation(${e.message})`);
     }
   };
 
@@ -249,7 +239,7 @@ export default class RNBleTransport extends Transport {
       const base64Packets = new Buffer(packets).toString('base64');
       await dataCharacteristic.writeWithResponse(base64Packets);
     } catch (e) {
-      throw new Error(`sendDataToCard DisconnectedDeviceDuringOperation(${e.message})`);
+      throw new error.TransportError(this.sendDataToCard.name, `sendDataToCard DisconnectedDeviceDuringOperation(${e.message})`);
     }
   };
 
@@ -259,7 +249,7 @@ export default class RNBleTransport extends Transport {
       const hexStatus = Buffer.from(status.value, 'base64').toString('hex');
       return convertToNumberArray(hexStatus)[0];
     } catch (e) {
-      throw new Error(`checkCardStatus DisconnectedDeviceDuringOperation(${e.message})`);
+      throw new error.TransportError(this.checkCardStatus.name, `checkCardStatus DisconnectedDeviceDuringOperation(${e.message})`);
     }
   };
 
@@ -269,7 +259,7 @@ export default class RNBleTransport extends Transport {
       const hexResult = Buffer.from(result.value, 'base64').toString('hex');
       return convertToNumberArray(hexResult);
     } catch (e) {
-      throw new Error(`readDataFromCard DisconnectedDeviceDuringOperation(${e.message})`);
+      throw new error.TransportError(this.readDataFromCard.name, `readDataFromCard DisconnectedDeviceDuringOperation(${e.message})`);
     }
   };
 }

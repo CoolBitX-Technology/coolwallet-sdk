@@ -1,43 +1,41 @@
-import { ECDSACoin } from '@coolwallets/coin';
-import * as icxSign from './sign';
-import { pubKeyToAddress } from './util';
+import { coin as COIN } from '@coolwallet/core';
+import signTransaction from './sign';
+import * as txUtil from './utils/transactionUtil'
+import * as params from './config/params';
+import * as types from './config/types' 
 
-type Transport = import('@coolwallets/transport').default;
 
-export default class ICX extends ECDSACoin {
-  constructor(transport: Transport, appPrivateKey: string, appId: string) {
-    super(transport, appPrivateKey, appId, '4A');
+export default class ICX extends COIN.ECDSACoin implements COIN.Coin {
+  constructor() {
+    super(params.COIN_TYPE);
   }
 
   /**
    * Get ICON address by index
    */
-  async getAddress(addressIndex: number): Promise<string> {
-    const publicKey = await this.getPublicKey(addressIndex);
-    return pubKeyToAddress(publicKey);
+  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    return txUtil.pubKeyToAddress(publicKey);
   }
+
+  async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    return txUtil.pubKeyToAddress(publicKey);
+  }
+
 
   /**
    * Sign ICX Transaction.
    */
   async signTransaction(
-    transaction: string | Object,
-    addressIndex: number,
-    publicKey: string | undefined = undefined,
-    confirmCB: Function | undefined = undefined,
-    authorizedCB: Function | undefined = undefined
+    signTxData: types.signTxType
   ) {
-    if (publicKey === undefined) publicKey = await this.getPublicKey(addressIndex);
-    return icxSign.signTransaction(
-      this.transport,
-      this.appId,
-      this.appPrivateKey,
-      this.coinType,
-      transaction,
-      addressIndex,
-      publicKey,
-      confirmCB,
-      authorizedCB
+    const publicKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
+
+    return signTransaction(
+      signTxData,
+      publicKey
     );
   }
 }
+
