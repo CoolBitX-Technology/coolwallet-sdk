@@ -84,9 +84,9 @@ export const register = async (transport: Transport, appPublicKey: string, passw
  * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivKey
- * @return {Promise<Array<{appId:string, }>>}
+ * @return {Promise<Array<{appId:string, deviceName:string}>>}
  */
-export const getPairedApps = async (transport: Transport, appId: string, appPrivKey: string): Promise<Array<{ appId: string; }>> => {
+export const getPairedApps = async (transport: Transport, appId: string, appPrivKey: string): Promise<Array<{ appId: string, deviceName: string }>> => {
   const signature = await core.auth.getCommandSignature(
     transport,
     appId,

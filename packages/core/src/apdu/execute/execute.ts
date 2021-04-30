@@ -4,6 +4,10 @@ import Transport from '../../transport/index';
 import { SDKError } from '../../error/errorHandle';
 import { target } from '../../config/param';
 
+const commandCounter = {
+	command: '',
+	count: 0
+};
 
 /**
  * @param {Transport} transport
@@ -27,6 +31,19 @@ export const executeAPDU = async (
   console.debug(" data: " + apdu.data)
   console.debug("}")
 
+	// trigger SE_POWER_OFF to prevent from disconnection
+	if (executedTarget === target.SE) {
+		if (commandCounter.command !== apdu.command) {
+			commandCounter.command = apdu.command;
+			commandCounter.count = 0;
+		}
+		if (commandCounter.count === 2) {
+			await transport.request('00097F8000000000000000', '');
+			commandCounter.count = 0;
+		}
+		commandCounter.count += 1;
+	}
+
   try {
     // TODO app transport
     if (transport.requestAPDUV2) {
@@ -36,7 +53,6 @@ export const executeAPDU = async (
       const msg = util.getReturnMsg(statusCode.toUpperCase());
       return { statusCode, msg, outputData };
     }
-    let msg;
     const response = await transport.request(apdu.command, apdu.data);
     let statusCode;
     let outputData;
@@ -45,13 +61,14 @@ export const executeAPDU = async (
       outputData = response.slice(0, -4);
     } else {
 
+			// TODO MCU commands have different response format, should parse them specifically.
       // statusCode = response.slice(-4);
       // outputData = response.slice(0, -4);
       statusCode = response.slice(4, 6);
       outputData = response.slice(6);
     }
 
-    msg = util.getReturnMsg(statusCode.toUpperCase());
+    const msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();
     return { statusCode, msg, outputData };
 
