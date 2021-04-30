@@ -37,7 +37,7 @@ export async function getCompleteSignature(transport: types.Transport, publicKey
     canonicalSignature,
     keyPair.pub
   );
-  console.log("v: ", v)
+  console.debug("v: ", v)
   
   const sig = r + s + v.toString().padStart(2, '0');
   return sig
@@ -72,10 +72,6 @@ export function getSubmitTransaction(fromAddress: string, formatTxData: types.Fo
     formatTxData.encodeNonce +
     formatTxData.encodeTip +
     methodString
-
-  console.log("formatTxData.mortalEra: ", formatTxData.mortalEra)
-  console.log("formatTxData.encodeNonce: ", formatTxData.encodeNonce)
-  console.log("formatTxData.encodeTip: ", formatTxData.encodeTip)
 
   const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version))
 

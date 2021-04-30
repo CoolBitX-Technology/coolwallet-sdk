@@ -16,7 +16,6 @@ const ec = new elliptic.ec("secp256k1");
 export function pubKeyToAddress(compressedPubkey: string): string {
   const keyPair = ec.keyFromPublic(compressedPubkey, "hex");
   const pubkey = `04${keyPair.getPublic(false, "hex").substr(2)}`;
-  console.log("pubkey: " + pubkey)
   let pubBytes = hexStr2byteArray(pubkey)
 
   if (pubBytes.length === 65) {
@@ -26,14 +25,8 @@ export function pubKeyToAddress(compressedPubkey: string): string {
   const hash = keccak256(pubBytes).toString('hex');
   let addressHex = hash.substring(26);
   addressHex = '41' + addressHex;
-  console.log("addressHex: " + addressHex)
-  // const addressBuffer = Buffer.from(addressHex)
   const addressByteArray = hexStr2byteArray(addressHex)
-  console.log(addressByteArray)
-
-  let msgHex = byteArray2hexStr(addressByteArray);
-  const addressHash = sha256(sha256(addressByteArray)).slice(0, 4);
-  console.log(addressHash)
+  const addressHash = sha256(sha256(addressByteArray)).slice(0, 4)
   const address = encode58(addressByteArray.concat(addressHash))
   return address
 }

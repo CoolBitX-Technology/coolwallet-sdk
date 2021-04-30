@@ -22,7 +22,6 @@ export const getMCUVersion = async (transport: Transport) => {
   const { outputData } = await executeCommand(transport, commands.GET_MCU_VERSION, target.MCU);
   const fwStatus = outputData.slice(0, 4); // 3900
   const cardMCUVersion = outputData.slice(4, 12).toUpperCase();
-  console.log(`getMCUVersion: ${outputData}`);
   return { fwStatus, cardMCUVersion };
 };
 
@@ -30,7 +29,6 @@ export const getFWStatus = async (transport: Transport) => {
   const { outputData } = await executeCommand(transport, commands.CHECK_FW_STATUS, target.MCU);
   const fwStatus = outputData.slice(0, 4); // 3900
   const cardMCUVersion = outputData.slice(4, 12).toUpperCase();
-  console.log(`getFWStatus: ${outputData}`);
   return { fwStatus, cardMCUVersion };
 };
 
@@ -55,7 +53,6 @@ export const updateMCU = async (transport: Transport, progressCallback: Function
   try {
     /* pre-update */
     const MCUInfo = await getMCUVersion(transport);
-    console.log('getMCUVersion done ')
 
     if (MCUInfo.fwStatus === '3900') {
       sig = sig_A;
@@ -65,21 +62,16 @@ export const updateMCU = async (transport: Transport, progressCallback: Function
       program = program_B;
     }
 
-    console.log('set params done ')
 
     await sendFWsign(transport, sig);
 
-    console.log('sendFWsign done ')
     await resetFW(transport);
-    console.log('resetFW done ')
 
     /* FW update */
     const command = await assemblyDFUcommand(program);
 
-    console.log('assemblyDFUcommand done ')
     await executeDFU(transport, command, updateSE, progressCallback);
 
-    console.log('update done ')
     progressCallback(100);
     return MCU_UPDATE_VER;
 
@@ -98,7 +90,7 @@ const assemblyDFUcommand = async (data: string): Promise<{ apduCmd: { p1: string
   let srcPos = 0;
   let dstPos = 0;
 
-  console.log('data length=' + data.length + '/ packetNums=' + packetNums);
+  console.debug('data length=' + data.length + '/ packetNums=' + packetNums);
   let p2 = (packetNums).toString(16);
   if (p2.length % 2 > 0)
     p2 = '0' + p2;
@@ -122,7 +114,7 @@ const assemblyDFUcommand = async (data: string): Promise<{ apduCmd: { p1: string
       'packets': cmd //packet
     };
 
-    console.log(`${i} / ${packetNums}`);
+    console.debug(`${i} / ${packetNums}`);
 
     // put all ota data to native for executing loop ble command
     result.push(obj)
@@ -135,7 +127,7 @@ const executeDFU = async (
   DFUCmd: { apduCmd: { p1: string, p2: string, packets: string }[], packetNums: number },
   updateSE: boolean,
   progressCallback: Function) => {
-  console.log('executeDFU start');
+  console.debug('executeDFU start');
   const { apduCmd, packetNums } = DFUCmd;
   let progressNum = updateSE ? 50 : 0;
   const interval = Math.floor((100 - progressNum) / packetNums);
@@ -144,10 +136,10 @@ const executeDFU = async (
   try {
     await promise.each(apduCmd, async (batch: { p1: string, p2: string, packets: string }) => {
       const { p1, p2, packets } = batch;
-      console.log('updateFW start');
+      console.debug('updateFW start');
       const { outputData, statusCode } = await updateFW(transport, p1, p2, packets)
-      console.log('updateFW end');
-      console.log(`FW Update result: ${statusCode} - ${outputData}`);
+      console.debug('updateFW end');
+      console.debug(`FW Update result: ${statusCode} - ${outputData}`);
       if (statusCode == '046A') {
         throw new SDKError(executeDFU.name, 'MCU is already the latest version')
       }
@@ -155,10 +147,10 @@ const executeDFU = async (
       progressCallback(progressNum);
     });
   } catch (e) {
-    console.log('MCU is already the latest version');
+    console.debug('MCU is already the latest version');
   }
 
-  console.log('mcu ver: ' + mcuLatestVersion)
+  console.debug('mcu ver: ' + mcuLatestVersion)
   return mcuLatestVersion;
 };
 

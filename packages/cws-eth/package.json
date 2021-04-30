@@ -12,7 +12,7 @@
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "peerDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.39"
+    "@coolwallet/core": "^1.0.0"
   },
   "dependencies": {
     "@types/node": "^14.0.13",
@@ -27,7 +27,6 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "~0.1.0-beta.39"
   },
   "repository": {
     "type": "git",

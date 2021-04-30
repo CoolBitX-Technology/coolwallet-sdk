@@ -41,13 +41,13 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
 		const inputs = signTxData.inputs;
 		
 		for (const input of inputs) {
-			console.log("input: " + input.preValue)
+			console.debug("input: " + input.preValue)
 			// eslint-disable-next-line no-await-in-loop
 			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, input.addressIndex);
 			input.pubkeyBuf = Buffer.from(pubkey, 'hex');
 		}
 		if (signTxData.change) {
-			console.log("change: " + signTxData.change.value)
+			console.debug("change: " + signTxData.change.value)
 			const pubkey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.change.addressIndex);
 			// eslint-disable-next-line no-param-reassign
 			signTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');

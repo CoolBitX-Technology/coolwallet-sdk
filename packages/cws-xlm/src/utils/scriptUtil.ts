@@ -68,6 +68,6 @@ const getTransferArgument = (transaction: any) => {
     memo.padStart(64, "0") + //memo
     isCreate.padStart(2, "0");  //isCreate 
 
-  console.log("argument:" + argument)
+  console.debug("argument:" + argument)
   return argument;
 };

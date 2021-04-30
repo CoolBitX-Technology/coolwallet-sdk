@@ -34,17 +34,10 @@ export const executeAPDU = async (
       const statusCode = response.status;
       const outputData = response.outputData;
       const msg = util.getReturnMsg(statusCode.toUpperCase());
-      console.log("app response: ", response)
-      console.log("app statusCode: ", statusCode)
-      console.log("app outputData: ", outputData)
-      console.log("app msg: ", msg)
-      console.log("app requestAPDUV2: ", transport.requestAPDUV2)
       return { statusCode, msg, outputData };
     }
-    console.log("not app requestAPDUV2: ", transport.request)
     let msg;
     const response = await transport.request(apdu.command, apdu.data);
-    console.log("response: ", response)
     let statusCode;
     let outputData;
     if (executedTarget === target.SE) {
@@ -57,7 +50,6 @@ export const executeAPDU = async (
       statusCode = response.slice(4, 6);
       outputData = response.slice(6);
     }
-    console.log(response)
 
     msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();

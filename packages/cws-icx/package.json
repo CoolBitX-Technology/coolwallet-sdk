@@ -22,7 +22,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.39"
+    "@coolwallet/core": "^1.0.0"
   },
   "dependencies": {
     "elliptic": "^6.5.1",
@@ -35,7 +35,6 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "~0.1.0-beta.39"
   },
   "repository": {
     "type": "git",

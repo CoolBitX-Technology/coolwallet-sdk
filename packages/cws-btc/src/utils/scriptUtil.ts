@@ -50,7 +50,7 @@ export function getScriptSigningActions(
 
 	const actions = utxoArguments.map(
 		(utxoArgument) => async () => {
-			console.log("utxoArgument: " + utxoArgument)
+			console.debug("utxoArgument: " + utxoArgument)
 			return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, await utxoArgument, (redeemScriptType === ScriptType.P2PKH) ? "10" : "11");
 		});
 	return { actions };
@@ -67,7 +67,7 @@ export function getScriptSigningPreActions(
 } {
 	// const argument = "00" + getBTCArgument(redeemScriptType, inputs, output, change);// keylength zero
 	const argument = "00" + inputArgument;// keylength zero
-	console.log(argument)
+	console.debug("argument: ", argument)
 
 	const preActions = [];
 	const sendScript = async () => {

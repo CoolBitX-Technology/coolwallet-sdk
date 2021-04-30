@@ -25,14 +25,13 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "~0.1.0-beta.57"
+    "@coolwallet/core": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "~0.1.0-beta.39",
     "@types/bech32": "^1.1.1",
     "@types/big.js": "^4.0.5",
     "@types/bn.js": "^4.11.6",
