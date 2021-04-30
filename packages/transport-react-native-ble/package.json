@@ -30,7 +30,8 @@
     "react-test-renderer": "^16.6.3",
     "babel-loader": "^8.0.6",
     "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "@coolwallet/core": "^1.0.0"
   },
   "jest": {
     "preset": "react-native"

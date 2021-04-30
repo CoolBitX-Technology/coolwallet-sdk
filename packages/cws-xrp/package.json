@@ -30,7 +30,8 @@
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7"
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.0.0"
   },
   "dependencies": {
     "@types/node": "^13.11.1",
