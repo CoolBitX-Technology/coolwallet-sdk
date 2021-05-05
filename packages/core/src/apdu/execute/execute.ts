@@ -31,20 +31,27 @@ export const executeAPDU = async (
   console.debug(" data: " + apdu.data)
   console.debug("}")
 
-	// trigger SE_POWER_OFF to prevent from disconnection
-	if (executedTarget === target.SE) {
-		if (commandCounter.command !== apdu.command) {
-			commandCounter.command = apdu.command;
-			commandCounter.count = 0;
-		}
-		if (commandCounter.count === 2) {
-			await transport.request('00097F8000000000000000', '');
-			commandCounter.count = 0;
-		}
-		commandCounter.count += 1;
-	}
-
   try {
+
+    // trigger SE_POWER_OFF to prevent from disconnection
+    if (executedTarget === target.SE) {
+      if (commandCounter.command !== apdu.command) {
+        commandCounter.command = apdu.command;
+        commandCounter.count = 0;
+      }
+      if (commandCounter.count === 2) {
+        const command = '00097F8000000000000000';
+        const data = '';
+        if (transport.requestAPDUV2) {
+          await transport.requestAPDUV2({command, data}, 'MCU_CMD');
+        } else {
+          await transport.request(command, data);
+        }
+        commandCounter.count = 0;
+      }
+      commandCounter.count += 1;
+    }
+
     // TODO app transport
     if (transport.requestAPDUV2) {
       const response = await transport.requestAPDUV2(apdu, (executedTarget === target.SE) ? 'BLE_CMD' : 'MCU_CMD');

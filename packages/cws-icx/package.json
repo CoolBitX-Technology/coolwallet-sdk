@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/icx",
-  "version": "0.1.0-beta.12",
+  "version": "1.0.0",
   "description": "CoolWallet Icon sdk",
   "main": "lib/index.js",
   "scripts": {
