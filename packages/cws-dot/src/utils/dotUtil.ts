@@ -152,20 +152,20 @@ export function getMethodLength(methodString: string): string {
 }
 
 export function getMortalEra(blockNumber: string, era: string): string {
-  const binaryValue = parseInt(blockNumber).toString(2)
-  let power = Math.ceil(Math.log2(parseInt(era)))
+  const binaryValue = parseInt(blockNumber).toString(2);
+  let power = Math.ceil(Math.log2(parseInt(era)));
 
-  let binaryPower = (power - 1).toString(2)
-  binaryPower = stringUtil.paddingString(binaryPower)
+  let binaryPower = (power - 1).toString(2);
+  binaryPower = stringUtil.paddingString(binaryPower);
 
-  let result = binaryValue.substr(binaryValue.length - power) + binaryPower
+  let result = binaryValue.substr(binaryValue.length - power) + binaryPower;
   
-  result = parseInt(result, 2).toString(16)
-  result = stringUtil.paddingString(result).padStart(4, '0')
+  result = parseInt(result, 2).toString(16);
+  result = stringUtil.paddingString(result).padStart(4, '0');
 
-  const mortalEra = stringUtil.reverse(result)
+  const mortalEra = stringUtil.reverse(result);
 
-  return mortalEra
+  return mortalEra;
 }
 
 export function formatSCALECodec(value: string): string {
