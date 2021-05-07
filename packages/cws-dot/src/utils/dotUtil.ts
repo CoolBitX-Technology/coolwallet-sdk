@@ -153,7 +153,7 @@ export function getMethodLength(methodString: string): string {
 
 export function getMortalEra(blockNumber: string, era: string): string {
   const binaryValue = parseInt(blockNumber).toString(2);
-  let power = Math.ceil(Math.log2(parseInt(era)));
+  const power = Math.ceil(Math.log2(parseInt(era)));
 
   let binaryPower = (power - 1).toString(2);
   binaryPower = stringUtil.paddingString(binaryPower);
