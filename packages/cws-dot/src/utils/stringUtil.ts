@@ -80,8 +80,8 @@ export function numberToBn<ExtToBn extends types.ToBn>(value: number | ExtToBn |
 }
 
 export function paddingString(binaryString: string): string {
-  if (binaryString.length % 2 != 0 || binaryString.length <= 4) {
-    return binaryString.padStart(4, '0')
+  if (binaryString.length % 2 != 0) {
+    return '0' + binaryString
   }
   return binaryString;
 }

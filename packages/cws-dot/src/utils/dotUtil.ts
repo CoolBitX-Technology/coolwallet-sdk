@@ -152,29 +152,39 @@ export function getMethodLength(methodString: string): string {
 }
 
 export function getMortalEra(blockNumber: string, era: string): string {
+  console.log('----')
   const binaryValue = parseInt(blockNumber).toString(2)
   console.log("binaryValue: ", binaryValue)
-  const power = Math.ceil(Math.log2(parseInt(era)))
+  let power = Math.ceil(Math.log2(parseInt(era)))
 
+  console.log("power: ", power)
+  
   let binaryPower = (power - 1).toString(2)
+  console.log("binaryPower: ", binaryPower)
   binaryPower = stringUtil.paddingString(binaryPower)
 
   let result = binaryValue.substr(binaryValue.length - power) + binaryPower
-  console.log("power: ", power)
+  
   console.log("binaryValue.length: ", binaryValue.length)
+
   console.log("binaryValue.substr: ", binaryValue.substr(binaryValue.length - power))
+  
   console.log("binaryPower: ", binaryPower)
+  console.log("binaryPower -2 : ", binaryPower.substr(-2))
   console.log("result: ", result)
-  console.log("=====")
   
   result = parseInt(result, 2).toString(16)
-  result = stringUtil.paddingString(result)
+  result = stringUtil.paddingString(result).padStart(4, '0')
+
+
+  // let result2 = binaryValue.substr(binaryValue.length - power)
+  // console.log("result2: ", parseInt(result2, 2).toString())
+  // console.log("result2: ", formatSCALECodec(parseInt(result2, 2).toString()))
 
   const mortalEra = stringUtil.reverse(result)
 
   return mortalEra
 }
-
 
 
 export function formatSCALECodec(value: string): string {
