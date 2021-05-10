@@ -4,9 +4,10 @@ import * as scriptUtil from './utils/scriptUtil';
 import * as txUtil from './utils/transactionUtil';
 import * as type from './config/types';
 import { TX_TYPE } from './config/types';
+import { RESOURCE_CODE } from './config/params';
 import * as params from './config/params';
 
-export { TX_TYPE };
+export { TX_TYPE, RESOURCE_CODE };
 export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 	constructor() {
 		super(params.COIN_TYPE);

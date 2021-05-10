@@ -14,10 +14,6 @@ const numberToHex = (num: number|string): string => {
 	return tBN.toString(16).padStart(20, '0');
 };
 
-const convertResource = (res: number): string => {
-	const resource = (res === 1) ? 1 : 0;
-	return resource.toString().padStart(2, '0');
-};
 
 export const getNormalTradeArgument = async (rawData: NormalContract, addressIndex: number)
 	: Promise<string> => {
@@ -70,7 +66,7 @@ export const getFreezeArgument = async (
 		resource
 	} = contract;
 	const argument = refBlockBytes + refBlockHash + numberToHex(expiration) + ownerAddress
-		+ numberToHex(frozenBalance) + numberToHex(frozenDuration) + convertResource(resource)
+		+ numberToHex(frozenBalance) + numberToHex(frozenDuration) + resource
 		+ (hasReceiver ? receiverAddress : '') + numberToHex(timestamp);
 
 	return addPath(argument, addressIndex);
@@ -103,7 +99,7 @@ export const getUnfreezeArgument = async (
 		resource
 	} = contract;
 	const argument = refBlockBytes + refBlockHash + numberToHex(expiration) + ownerAddress
-		+ convertResource(resource) + (hasReceiver ? receiverAddress : '') + numberToHex(timestamp);
+		+ resource + (hasReceiver ? receiverAddress : '') + numberToHex(timestamp);
 
 	return addPath(argument, addressIndex);
 };
