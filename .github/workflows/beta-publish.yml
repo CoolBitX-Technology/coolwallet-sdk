@@ -14,7 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.DEVOPS_CW_SDK_DEVELOPMENT_TOKEN }}
+
+    - name: Configure CI Git User
+      run: |
+        git config --global user.name 'coolwallet team'
+        git config --global user.email 'cw.tech@coolbitx.com'
+
     - name: Use Node.js 12.x
       uses: actions/setup-node@v1
       with:
