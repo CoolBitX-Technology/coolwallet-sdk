@@ -1,4 +1,5 @@
 import { transport } from '@coolwallet/core';
+import { RESOURCE_CODE } from './params';
 
 export type Transport = transport.default;
 
@@ -37,7 +38,7 @@ export interface FreezeData extends SignTxData {
 
 export interface FreezeContract extends Transaction {
   contract: {
-    resource: number,
+    resource: RESOURCE_CODE,
     frozenDuration: number,
     frozenBalance: number|string,
     receiverAddress?: string,
@@ -51,7 +52,7 @@ export interface UnfreezeData extends SignTxData {
 
 export interface UnfreezeContract extends Transaction {
   contract: {
-    resource: number,
+    resource: RESOURCE_CODE,
     receiverAddress?: string,
     ownerAddress: string,
   }
