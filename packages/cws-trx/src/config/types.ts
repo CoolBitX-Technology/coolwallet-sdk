@@ -80,6 +80,43 @@ export interface WithdrawBalanceContract extends Transaction {
   }
 }
 
+export interface TriggerSmartData extends SignTxData {
+  transaction: TriggerSmartContract
+}
+
+export interface TriggerSmartContract extends Transaction {
+  contract: {
+    ownerAddress: string,
+    contractAddress: string,
+    callValue: number|string,
+    data: string,
+  },
+  feeLimit: number,
+  option: Option
+}
+
+export interface TRC20TransferData extends SignTxData {
+  transaction: TRC20TransferContract
+}
+
+export interface TRC20TransferContract extends Transaction {
+  contract: {
+    ownerAddress: string,
+    contractAddress: string,
+    receiverAddress: string,
+    amount: number|string,
+  },
+  feeLimit: number,
+  option: Option
+}
+
+export type Option = {
+  info : {
+    symbol: string,
+    decimals: number
+  }
+};
+
 /*
   const refBlockBytes = '';
   const refBlockHash = '';
@@ -89,19 +126,3 @@ export interface WithdrawBalanceContract extends Transaction {
   const amount = '';
   const timestamp = '';
 */
-
-export type Option = {
-  transactionType: TX_TYPE,
-  info: {
-    symbol: string,
-    decimals: string
-  }
-};
-
-export enum TX_TYPE {
-  TRANSFER_CONTRACT = 'TRANSFER_CONTRACT',
-  FREEZE_BALANCE_CONTRACT = 'FREEZE_BALANCE_CONTRACT',
-  UNFREEZE_BALANCE_CONTRACT = 'UNFREEZE_BALANCE_CONTRACT',
-  VOTE_WITNESS_CONTRACT = 'VOTE_WITNESS_CONTRACT',
-  WITHDRAW_BALANCE_CONTRACT = 'WITHDRAW_BALANCE_CONTRACT',
-}
