@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/trx",
-  "version": "1.0.4-beta.0",
+  "version": "1.0.4-beta.1",
   "description": "Coolwallet Tron sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
