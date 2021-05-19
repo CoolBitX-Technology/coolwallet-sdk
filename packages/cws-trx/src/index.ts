@@ -2,12 +2,11 @@ import { coin as COIN, } from '@coolwallet/core';
 import * as trxSign from './sign';
 import * as scriptUtil from './utils/scriptUtil';
 import * as txUtil from './utils/transactionUtil';
-import * as type from './config/types';
-import { TX_TYPE } from './config/types';
 import { RESOURCE_CODE } from './config/params';
 import * as params from './config/params';
+import * as type from './config/types';
 
-export { TX_TYPE, RESOURCE_CODE };
+export { RESOURCE_CODE };
 export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 	constructor() {
 		super(params.COIN_TYPE);
@@ -26,11 +25,14 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 		return txUtil.pubKeyToAddress(publicKey);
 	}
 
-	async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+	async getAddressByAccountKey(
+		accPublicKey: string,
+		accChainCode: string,
+		addressIndex: number
+	): Promise<string> {
 		const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
 		return txUtil.pubKeyToAddress(publicKey);
 	}
-
 
 	/**
 	 * Sign Tron Transaction.
@@ -132,6 +134,23 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 			script,
 			argument,
 			publicKey
+		);
+	}
+
+	async signTRC20Transfer(signTxData: type.TRC20TransferData): Promise<string> {
+		const {
+			transport, appPrivateKey, appId, addressIndex, transaction
+		} = signTxData;
+
+		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+		const script = params.TRC20.script + params.TRC20.signature;
+		const argument = await scriptUtil.getTRC20Argument(transaction, addressIndex);
+
+		return trxSign.signTransaction(
+			signTxData,
+			script,
+			argument,
+			publicKey,
 		);
 	}
 }

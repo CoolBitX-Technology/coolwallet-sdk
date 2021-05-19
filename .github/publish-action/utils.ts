@@ -80,8 +80,6 @@ async function updateVersion(path:string, versionType:number) {
 
 async function commit(tag:string) {
 	let result;
-	await command('git', ['config', '--global', 'user.email', 'cw.tech@coolbitx.com']);
-	await command('git', ['config', '--global', 'user.name', 'coolwallet team']);
 	await command('git', ['add', '.']);
 	result = await command('git', ['commit', '-m', tag]);
 	console.log('git commit :', result);
