@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { utils } from '@coolwallet/core';
 import * as param from '../config/params';
+import { TOKENTYPE } from '../config/tokenType';
 import {
 	NormalContract,
 	FreezeContract,
@@ -10,7 +11,7 @@ import {
 	TRC20TransferContract
 } from '../config/types';
 
-export const sanitizeAddress = (address: string): string => {
+const sanitizeAddress = (address: string): string => {
 	if (address.startsWith('41') && address.length === 42) {
 		return address.slice(2);
 	}
@@ -198,7 +199,7 @@ export const getWithdrawBalanceArgument = async (
  + "00000000000005f5e100";// fee_limit
  */
 export const getTRC20Argument = async (
-	rawData: TRC20TransferContract, tokenSignature: string, addressIndex: number
+	transaction: TRC20TransferContract, addressIndex: number
 ): Promise<string> => {
 	const {
 		refBlockBytes,
@@ -207,13 +208,9 @@ export const getTRC20Argument = async (
 		timestamp,
 		contract,
 		feeLimit,
-		option
-	} = rawData;
+	} = transaction;
 
-	const {
-		symbol,
-		decimals
-	} = option.info;
+	const { symbol, decimals, tokenSignature } = checkTokenInfo(transaction);
 
 	const ownerAddress = sanitizeAddress(contract.ownerAddress);
 	const contractAddress = sanitizeAddress(contract.contractAddress);
@@ -227,3 +224,31 @@ export const getTRC20Argument = async (
 
 	return addPath(argument, addressIndex);
 };
+
+function checkTokenInfo(transaction: TRC20TransferContract): ({
+	symbol: string,
+	decimals: string,
+	tokenSignature: string
+}) {
+	let { symbol, decimals } = (transaction.option && transaction.option.info) || {};
+
+	// check if official token
+	let contractAddress = sanitizeAddress(transaction.contract.contractAddress);
+	contractAddress = contractAddress.toUpperCase();
+	let tokenSignature = '';
+	for (const tokenInfo of TOKENTYPE) {
+		if (tokenInfo.contractAddress.toUpperCase() === contractAddress) {
+			tokenSignature = tokenInfo.signature;
+			symbol = tokenInfo.symbol;
+			decimals = tokenInfo.decimals;
+			break;
+		}
+	}
+
+	// verify token info
+	if (!symbol || !decimals) {
+		throw new Error('Token symbol and decimals are required');
+	}
+
+	return { symbol, decimals, tokenSignature };
+}

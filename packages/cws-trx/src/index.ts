@@ -2,10 +2,9 @@ import { coin as COIN, } from '@coolwallet/core';
 import * as trxSign from './sign';
 import * as scriptUtil from './utils/scriptUtil';
 import * as txUtil from './utils/transactionUtil';
-import * as type from './config/types';
-import { TOKENTYPE } from "./config/tokenType";
 import { RESOURCE_CODE } from './config/params';
 import * as params from './config/params';
+import * as type from './config/types';
 
 export { RESOURCE_CODE };
 export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
@@ -26,7 +25,11 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 		return txUtil.pubKeyToAddress(publicKey);
 	}
 
-	async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+	async getAddressByAccountKey(
+		accPublicKey: string,
+		accChainCode: string,
+		addressIndex: number
+	): Promise<string> {
 		const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
 		return txUtil.pubKeyToAddress(publicKey);
 	}
@@ -139,28 +142,9 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 			transport, appPrivateKey, appId, addressIndex, transaction
 		} = signTxData;
 
-		// check if official token
-		let contractAddress = scriptUtil.sanitizeAddress(transaction.contract.contractAddress);
-		contractAddress = contractAddress.toUpperCase();
-		let tokenSignature = '';
-		for (const tokenInfo of TOKENTYPE) {
-			if (tokenInfo.contractAddress.toUpperCase() === contractAddress) {
-				tokenSignature = tokenInfo.signature;
-				transaction.option.info.symbol = tokenInfo.symbol;
-				transaction.option.info.decimals = tokenInfo.decimals;
-				break;
-			}
-		}
-
-		// verify token info
-		const { symbol, decimals } = transaction.option.info;
-		if (!symbol || !decimals) {
-			throw new Error('Token symbol and decimals are required');
-		}
-
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 		const script = params.TRC20.script + params.TRC20.signature;
-		const argument = await scriptUtil.getTRC20Argument(transaction, tokenSignature, addressIndex);
+		const argument = await scriptUtil.getTRC20Argument(transaction, addressIndex);
 
 		return trxSign.signTransaction(
 			signTxData,
@@ -170,4 +154,3 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 		);
 	}
 }
-
