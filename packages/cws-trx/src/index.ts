@@ -170,3 +170,4 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 		);
 	}
 }
+
