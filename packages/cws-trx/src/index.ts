@@ -3,6 +3,7 @@ import * as trxSign from './sign';
 import * as scriptUtil from './utils/scriptUtil';
 import * as txUtil from './utils/transactionUtil';
 import * as type from './config/types';
+import { TOKENTYPE } from "./config/tokenType";
 import { RESOURCE_CODE } from './config/params';
 import * as params from './config/params';
 
@@ -133,13 +134,31 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 		);
 	}
 
-	async signTRC20Transfer(signTxData: type.TRC20TransferData, tokenSignature = ''): Promise<string> {
+	async signTRC20Transfer(signTxData: type.TRC20TransferData): Promise<string> {
 		const {
 			transport, appPrivateKey, appId, addressIndex, transaction
 		} = signTxData;
+
+		// check if official token
+		const contractAddress = transaction.contract.contractAddress.toUpperCase();
+		let tokenSignature = '';
+		for (const tokenInfo of TOKENTYPE) {
+			if (tokenInfo.contractAddress.toUpperCase() === contractAddress) {
+				tokenSignature = tokenInfo.signature;
+				transaction.option.info.symbol = tokenInfo.symbol;
+				transaction.option.info.decimals = tokenInfo.decimals;
+				break;
+			}
+		}
+
+		// verify token info
+		const { symbol, decimals } = transaction.option.info;
+		if (!symbol || !decimals) {
+			throw new Error('Token symbol and decimals are required');
+		}
+
 		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 		const script = params.TRC20.script + params.TRC20.signature;
-
 		const argument = await scriptUtil.getTRC20Argument(transaction, tokenSignature, addressIndex);
 
 		return trxSign.signTransaction(

@@ -21,8 +21,8 @@ const removeHex0x = (hex: string): string => (hex.slice(0, 2) === '0x' ? hex.sli
 const evenHexDigit = (hex: string): string => (hex.length % 2 !== 0 ? `0${hex}` : hex);
 const handleHex = (hex: string): string => evenHexDigit(removeHex0x(hex));
 
-const getSetTokenPayload = (contractAddress: string, symbol: string, decimals: number): string => {
-	const unit = handleHex(decimals.toString(16));
+const getSetTokenPayload = (contractAddress: string, symbol: string, decimals: string): string => {
+	const unit = handleHex(parseInt(decimals, 10).toString(16));
 	const len = handleHex(symbol.length.toString(16));
 	const symb = handleHex(Buffer.from(symbol).toString('hex'));
 	const setTokenPayload = unit + len + symb.padEnd(14, '0') + removeHex0x(contractAddress);

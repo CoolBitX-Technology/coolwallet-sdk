@@ -111,9 +111,9 @@ export interface TRC20TransferContract extends Transaction {
 }
 
 export type Option = {
-  info : {
+  info: {
     symbol: string,
-    decimals: number
+    decimals: string
   }
 };
 
