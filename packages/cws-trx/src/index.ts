@@ -140,7 +140,8 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 		} = signTxData;
 
 		// check if official token
-		const contractAddress = transaction.contract.contractAddress.toUpperCase();
+		let contractAddress = scriptUtil.sanitizeAddress(transaction.contract.contractAddress);
+		contractAddress = contractAddress.toUpperCase();
 		let tokenSignature = '';
 		for (const tokenInfo of TOKENTYPE) {
 			if (tokenInfo.contractAddress.toUpperCase() === contractAddress) {

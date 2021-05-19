@@ -10,7 +10,7 @@ import {
 	TRC20TransferContract
 } from '../config/types';
 
-const sanitizeAddress = (address: string): string => {
+export const sanitizeAddress = (address: string): string => {
 	if (address.startsWith('41') && address.length === 42) {
 		return address.slice(2);
 	}
