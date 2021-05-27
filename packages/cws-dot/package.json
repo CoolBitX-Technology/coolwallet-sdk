@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/dot",
-  "version": "1.0.2-beta.4",
+  "version": "1.0.2-beta.5",
   "description": "Coolwallet polkadot sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
