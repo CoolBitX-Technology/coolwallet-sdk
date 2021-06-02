@@ -31,7 +31,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
   /**
    * Sign Ethereum Transaction.
    * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
-   * value:string, data:string, chainId: number}} transaction
+   * value:string, data:string}} transaction
    * @param {Number} addressIndex
    * @param {String} publicKey
    * @param {Function} confirmCB
@@ -72,7 +72,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
         }
 			}
     }
-
+    
     // smart contract
     return await this.signSmartContractTransaction(signTxData);
   }
@@ -81,7 +81,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
   /**
    * Sign BSC Transaction.
    * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
-   * value:string, data:string, chainId: number}} transaction
+   * value:string, data:string}} transaction
    * @param {Number} addressIndex
    * @param {String} publicKey
    * @param {Function} confirmCB
@@ -106,7 +106,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
   /**
    * Sign BEP20 Transaction.
    * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
-   * value:string, data:string, chainId: number}} transaction
+   * value:string, data:string}} transaction
    * @param {Number} addressIndex
    * @param {String} publicKey
    * @param {Function} confirmCB
@@ -131,7 +131,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
   /**
    * Sign SmartContract Transaction.
    * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
-   * value:string, data:string, chainId: number}} transaction
+   * value:string, data:string}} transaction
    * @param {Number} addressIndex
    * @param {String} publicKey
    * @param {Function} confirmCB

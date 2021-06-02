@@ -18,7 +18,7 @@ const rlp = require('rlp');
  * @param {String} appPrivateKey
  * @param {coinType} coinType
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
- * value:string, data:string, chainId: number}} transaction
+ * value:string, data:string} transaction
  * @param {Number} addressIndex
  * @param {String} publicKey
  * @param {Function} confirmCB
@@ -67,7 +67,7 @@ export const signTransaction = async (
       rlp.encode(rawPayload),
       publicKey
     );
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');

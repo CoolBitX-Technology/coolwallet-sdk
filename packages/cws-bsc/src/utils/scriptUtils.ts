@@ -7,7 +7,7 @@ import { Transaction } from '../config/types';
 const Web3 = require('web3');
 
 /**
- * [toAddress(20B)] [amount(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)]
+ * [toAddress(20B)] [amount(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] 
  * @param transaction 
  */
 export const getTransferArgument = async (transaction: Transaction, addressIndex: number) => {
@@ -17,7 +17,7 @@ export const getTransferArgument = async (transaction: Transaction, addressIndex
     handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, "0"); // 0000000000000289
-
+  
   const path = await utils.getPath(COIN_TYPE, addressIndex)
   console.debug("argument:" + argument)
   console.debug("path:" + path)
@@ -42,16 +42,17 @@ export const getBEP20Argument = async (transaction: Transaction, tokenSignature:
     handleHex(amount).padStart(24, "0") + // 000000b1a2bc2ec50000
     handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
-    handleHex(transaction.nonce).padStart(16, "0"); // 0000000000000289
+    handleHex(transaction.nonce).padStart(16, "0")+ // 0000000000000289
     tokenInfo +
     signature;
+
 
   return '15' + await utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
 
 
 /**
- * [contractAddress(20B)] [value(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)] [contractData(Variety)]
+ * [contractAddress(20B)] [value(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [contractData(Variety)]
  * @param transaction 
  */
 export const getSmartContractArgument = async (transaction: Transaction, addressIndex: number) => {
@@ -60,8 +61,8 @@ export const getSmartContractArgument = async (transaction: Transaction, address
     handleHex(transaction.value).padStart(20, "0") + // 000000b1a2bc2ec50000
     handleHex(transaction.gasPrice).padStart(20, "0") + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, "0") + // 0000000000000000520c
-    handleHex(transaction.nonce).padStart(16, "0"); // 0000000000000289
-    handleHex(transaction.data) // limit of data length : 1208Byte
+    handleHex(transaction.nonce).padStart(16, "0") + // 0000000000000289
+    handleHex(transaction.data); // limit of data length : 1208Byte
 
   return '15' + await utils.getPath(COIN_TYPE, addressIndex) + argument;
 };

@@ -41,7 +41,6 @@ export type signTyped = {
 
 export type Transaction = {
   // [key: string]: any,
-  chainId: number,
   nonce: string,
   gasPrice: string,
   gasLimit: string,

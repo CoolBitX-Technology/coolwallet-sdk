@@ -1,6 +1,7 @@
 import { error, transport, apdu } from "@coolwallet/core";
 import { handleHex } from "./stringUtil";
 import { Transaction } from '../config/types';
+import { CHAIN_ID } from '../config/params';
 
 const Web3 = require('web3');
 const rlp = require("rlp");
@@ -15,7 +16,7 @@ const ec = new elliptic.ec("secp256k1");
 /**
  * Get raw payload
  * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
- * value:string, data:string, chainId: number}} transaction
+ * value:string, data:string}} transaction
  * @return {Array<Buffer>}
  */
 export const getRawHex = (transaction: Transaction): Array<Buffer> => {
@@ -33,7 +34,7 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
     }
     return Buffer.from(hex, "hex");
   });
-  raw[6] = Buffer.from([transaction.chainId]);
+  raw[6] = Buffer.from([CHAIN_ID]);
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
 
@@ -48,11 +49,10 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
  * @param {Number} v
  * @param {String} r
  * @param {String} s
- * @param {number} chainId
  * @return {String}
  */
-export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: string, s: string, chainId: number): string => {
-  const vValue = v + chainId * 2 + 8;
+export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: string, s: string): string => {
+  const vValue = v + CHAIN_ID * 2 + 8;
 
   const transaction = payload.slice(0, 6);
 
@@ -81,10 +81,6 @@ export const genEthSigFromSESig = async (
   const hash = Web3.utils.keccak256(payload);
   const data = Buffer.from(handleHex(hash), "hex");
   const keyPair = ec.keyFromPublic(compressedPubkey, "hex");
-
-  console.log("canonicalSignature", canonicalSignature)
-  console.log("data", data)
-  console.log("keyPair", keyPair)
 
   // get v
   const recoveryParam = ec.getKeyRecoveryParam(
