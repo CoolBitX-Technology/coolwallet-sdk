@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { coin as COIN, setting } from '@coolwallet/core';
-import * as ethSign from './sign';
+import * as sign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types'
 import * as scriptUtils from './utils/scriptUtils';
@@ -14,7 +14,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   /**
-   * Get Ethereum address by index
+   * Get BSC address by index
    * @param {number} addressIndex
    * @return {string}
    */
@@ -29,7 +29,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   /**
-   * Sign Ethereum Transaction.
+   * Sign BSC Transaction.
    * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
    * value:string, data:string}} transaction
    * @param {Number} addressIndex
@@ -72,7 +72,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
         }
 			}
     }
-    
+
     // smart contract
     return await this.signSmartContractTransaction(signTxData);
   }
@@ -94,7 +94,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
     const argument = await scriptUtils.getTransferArgument(signTxData.transaction, signTxData.addressIndex);
     const script = params.TRANSFER.script + params.TRANSFER.signature;
     
-    return ethSign.signTransaction(
+    return sign.signTransaction(
       signTxData,
       script,
       argument,
@@ -119,7 +119,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
     const script = params.BEP20.script + params.BEP20.signature;
     const argument = await scriptUtils.getBEP20Argument(signTxData.transaction, tokenSignature, signTxData.addressIndex);
 
-    return ethSign.signTransaction(
+    return sign.signTransaction(
       signTxData,
       script,
       argument,
@@ -146,7 +146,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
     const script = params.BSCSmartContract.script + params.BSCSmartContract.signature;
     const argument = await scriptUtils.getSmartContractArgument(signTxData.transaction, signTxData.addressIndex);
 
-    return ethSign.signTransaction(
+    return sign.signTransaction(
       signTxData,
       script,
       argument,
@@ -174,7 +174,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
     const argument = await scriptUtils.getSignMessageArgument(signMsgData.message, signMsgData.addressIndex);
 
 
-    return ethSign.signMessage(
+    return sign.signMessage(
       signMsgData,
       script,
       argument,
@@ -197,7 +197,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
     const publicKey = await this.getPublicKey(typedData.transport, typedData.appPrivateKey, typedData.appId, typedData.addressIndex);
     const script = params.SIGN_TYPED_DATA.script + params.SIGN_TYPED_DATA.signature;
 
-    return ethSign.signTypedData(
+    return sign.signTypedData(
       typedData,
       script,
       publicKey,

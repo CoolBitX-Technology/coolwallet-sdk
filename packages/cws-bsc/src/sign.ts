@@ -12,7 +12,7 @@ const typedDataUtils = require('eth-sig-util').TypedDataUtils;
 const rlp = require('rlp');
 
 /**
- * sign ETH Transaction
+ * sign BSC Transaction
  * @param {Transport} transport
  * @param {string} appId
  * @param {String} appPrivateKey
