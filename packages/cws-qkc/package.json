@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/qkc",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0",
   "description": "Coolwallet QuarkChain sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",

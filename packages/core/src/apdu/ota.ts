@@ -15,7 +15,7 @@ import { SDKError } from '../error/errorHandle';
 
 var jwt = require('jsonwebtoken');
 
-const SE_UPDATE_VER = 308;
+const SE_UPDATE_VER = 309;
 
 const challengeUrl = `https://ota.cbx.io/api/challenge`;
 const cryptogramUrl = `https://ota.cbx.io/api/cryptogram`;
@@ -66,7 +66,7 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
 
   }
   let progressIndex = 0;
-  let progressNum = [14, 28, 36, 40, 44, 50, 87, 100];
+  let progressNum = [14, 28, 36, 44, 50, 88, 100];
 
   if (updateMCU) {
     progressNum = progressNum.map(num => Math.floor(num / 2));
@@ -122,9 +122,6 @@ export const updateSE = async (transport: Transport, cardId: string, appId: stri
     const cryptogramResponse = await callAPI(cryptogramUrl, getAPIOption(cardId, challengeObj.outputData));
     await formatAPIResponse(transport, cryptogramResponse);
     console.debug(`mutual Authorization Done----`);
-
-    // Install backupSeed script
-    progressCallback(progressNum[progressIndex++]);
 
     progressCallback(progressNum[progressIndex++]);
     await insertDeleteScript(transport, script.deleteScript);
