@@ -32,6 +32,9 @@ export const executeAPDU = async (
   console.debug("}")
 
   try {
+		if (apdu.data.length > 7600) {
+			throw new Error('payload too long!!');
+		}
 
     // trigger SE_POWER_OFF to prevent from disconnection
     if (executedTarget === target.SE) {
