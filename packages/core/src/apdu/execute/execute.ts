@@ -33,7 +33,7 @@ export const executeAPDU = async (
 
   try {
 		if (apdu.data.length > 4096) {
-			throw new SDKError(executeAPDU.name, 'data too long.');
+			throw new Error('data too long!!');
 		}
 
     // trigger SE_POWER_OFF to prevent from disconnection
