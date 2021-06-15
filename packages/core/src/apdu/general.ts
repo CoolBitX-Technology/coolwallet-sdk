@@ -55,12 +55,18 @@ export const getNonce = async (transport: Transport): Promise<string> => {
  * @returns {Promise<Number>}
  */
 export const getSEVersion = async (transport: Transport): Promise<number> => {
-  const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
-  if (outputData){
-    return parseInt(outputData, 16);
-  }else{
-    throw new APDUError(commands.GET_SE_VERSION, statusCode, msg)
+
+  try {
+    const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
+    if (outputData) {
+      return parseInt(outputData, 16);
+    } else {
+      throw new APDUError(commands.GET_SE_VERSION, statusCode, msg)
+    }
+  } catch (e) {
+    return 0;
   }
+
   
 };
 
