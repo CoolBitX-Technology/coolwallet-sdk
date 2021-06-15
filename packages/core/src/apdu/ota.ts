@@ -40,7 +40,12 @@ export const selectApplet = async (transport: Transport, appletCommand: string =
 };
 
 export const checkUpdate = async (transport: Transport) => {
-  const cardSEVersion = await general.getSEVersion(transport);
+  let cardSEVersion;
+  try {
+    cardSEVersion = await general.getSEVersion(transport);
+  } catch (error) {
+    cardSEVersion = 0
+  }
   const isNeedUpdate = SE_UPDATE_VER > cardSEVersion;
   return { isNeedUpdate, curVersion: cardSEVersion, newVersion: SE_UPDATE_VER };
 };
