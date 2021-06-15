@@ -39,7 +39,7 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
   raw[8] = Buffer.allocUnsafe(0);
 
   const t = rlp.encode(raw);
-  if (t.length > 870) throw new error.SDKError(getRawHex.name, 'data too long');
+  
   return raw;
 };
 
