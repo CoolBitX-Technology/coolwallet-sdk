@@ -188,7 +188,7 @@ export const signTypedData = async (
       typedData.appPrivateKey,
       argument
     );
-  }
+  }   
 
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
@@ -199,7 +199,7 @@ export const signTypedData = async (
     typedData.authorizedCB,
     true
   );  
-  
+
   const prefix = Buffer.from('1901', 'hex');
 
   const dataBuf = Buffer.from(Web3.utils.sha3(encodedData).substr(2), 'hex');
