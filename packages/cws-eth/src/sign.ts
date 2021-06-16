@@ -187,7 +187,7 @@ export const signTypedData = async (
       typedData.appId,
       typedData.appPrivateKey,
       argument
-    );  
+    );
   }
 
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
