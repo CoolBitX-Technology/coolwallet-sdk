@@ -9,7 +9,7 @@ import { TOKENTYPE } from "./config/tokenType";
 
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
-    super(params.COIN_TYPE); 
+    super(params.COIN_TYPE);
   }
 
   /**
