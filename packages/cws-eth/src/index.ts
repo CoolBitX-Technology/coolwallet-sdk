@@ -40,7 +40,6 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     signTxData: types.signTx
   ) {
     const { value, data, to } = signTxData.transaction;
-
     // eth
     if (value && !data) {
       return await this.signTransferTransaction(signTxData);
