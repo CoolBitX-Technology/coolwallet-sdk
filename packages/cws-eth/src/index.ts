@@ -37,7 +37,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransaction(
-    signTxData: types.signTx
+    signTxData: types.signTx 
   ) {
     const { value, data, to } = signTxData.transaction;
     // eth
