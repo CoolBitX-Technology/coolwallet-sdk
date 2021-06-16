@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/xlm",
-  "version": "1.0.1-beta.0",
+  "version": "1.0.1-beta.1",
   "description": "Coolwallet Stella sdk",
   "main": "lib/index.js",
   "scripts": {
