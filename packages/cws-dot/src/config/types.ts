@@ -5,6 +5,18 @@ import * as params from './params';
 export type Transport = transport.default;
 
 
+export enum COIN_SPECIES {
+  DOT = 'DOR', KSM = 'KSM'
+}
+
+export type Method = {
+  transfer: string,
+  bond: string,
+  bondExtra: string,
+  unbond: string,
+  nominate: string,
+  withdraw: string
+}
 
 type SignTxData = {
   transport: Transport,

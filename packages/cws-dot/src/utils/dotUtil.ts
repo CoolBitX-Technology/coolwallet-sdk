@@ -42,10 +42,12 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 
 }
 
-export function getNormalMethod(rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
-  const callIndex = params.Method.transfer
-  const destAddress = params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
+export function getNormalMethod(methodCallIndex: types.Method, addressType: number, rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
+  const callIndex = methodCallIndex.transfer
+  const destAddress = addressType.toString().padStart(2, '0') + Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
+
+  console.log("callIndex: ", callIndex)
 
   return {
     method: {
@@ -62,6 +64,7 @@ export function getBondMethod(rawData: types.BondMethod): { method: types.Format
   const controllerAddress = params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
   const payeeType = rawData.payee
+  
 
   return {
     method: {

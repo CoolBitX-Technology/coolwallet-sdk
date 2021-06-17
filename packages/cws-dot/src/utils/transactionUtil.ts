@@ -16,10 +16,11 @@ const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
  * @param {string} compressedPubkey
  * @return {string}
  */
-export function pubKeyToAddress(compressedPubkey: string): string {
+export function pubKeyToAddress(compressedPubkey: string, addressType: number): string {
 
   const zero = '0x' + Buffer.from(blake2b(compressedPubkey)).toString('hex')
-  const address = encodeAddress(zero, 0);
+  console.log("zero: ", zero)
+  const address = encodeAddress(zero, addressType);
   return address;
 }
 
@@ -62,10 +63,10 @@ method
  * 
  * @returns 
  */
-export function getSubmitTransaction(fromAddress: string, formatTxData: types.FormatTransfer, methodString: string, signature: string, version: number): string {
+export function getSubmitTransaction(addressType: number, fromAddress: string, formatTxData: types.FormatTransfer, methodString: string, signature: string, version: number): string {
 
   const sumitTx =
-    '00' +
+    addressType.toString().padStart(2, '0')+
     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
     signature +
     formatTxData.mortalEra +

@@ -58,6 +58,10 @@ export const signTransaction = async (
   
   const signature = await txUtil.getCompleteSignature(transport, publicKey, canonicalSignature)
   console.debug("signature: ", signature)
+
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
+  console.debug("signedTx: ", signedTx)
+
   return '02' + signature
 };
 
