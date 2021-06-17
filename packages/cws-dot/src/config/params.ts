@@ -3,14 +3,14 @@
 
 // export const DOT_ADDRESS_TYPE = '00'
 
-export enum Method {
-  transfer = '0500',
-  bond = '0700',
-  bondExtra = '0701',
-  unbond = '0702',
-  nominate = '0705',
-  withdraw = '0703'
-}
+// export enum Method {
+//   transfer = '0500',
+//   bond = '0700',
+//   bondExtra = '0701',
+//   unbond = '0702',
+//   nominate = '0705',
+//   withdraw = '0703'
+// }
 
 export enum COIN_TYPE {
   DOT = '80000162', KSM = '800001b2'

@@ -59,26 +59,26 @@ export function getNormalMethod(methodCallIndex: types.Method, addressType: numb
   }
 }
 
-export function getBondMethod(rawData: types.BondMethod): { method: types.FormatBondMethod, methodString: string } {
-  const callIndex = params.Method.bond
+export function getBondMethod(methodCallIndex: types.Method, rawData: types.BondMethod): { method: types.FormatBondMethod, methodString: string } {
+  const callIndex = methodCallIndex.bond
   const controllerAddress = params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
   const payeeType = rawData.payee
-  
+
 
   return {
     method: {
       callIndex,
       controllerAddress,
-      value, 
+      value,
       payeeType
     },
     methodString: callIndex + controllerAddress + formatSCALECodec(rawData.value) + payeeType
   }
 }
 
-export function getBondExtraMethod(rawData: types.BondExtraMethod): { method: types.FormatBondExtraMethod, methodString: string } {
-  const callIndex = params.Method.bondExtra
+export function getBondExtraMethod(methodCallIndex: types.Method, rawData: types.BondExtraMethod): { method: types.FormatBondExtraMethod, methodString: string } {
+  const callIndex = methodCallIndex.bondExtra
   const maxAdditional = stringUtil.paddingString(new BN(rawData.maxAdditional).toString(16))
 
   return {
@@ -90,8 +90,8 @@ export function getBondExtraMethod(rawData: types.BondExtraMethod): { method: ty
   }
 }
 
-export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
-  const callIndex = params.Method.unbond
+export function getUnbondMethod(methodCallIndex: types.Method, rawData: types.UnbondMethod): { method: types.FormatUnbondMethod, methodString: string } {
+  const callIndex = methodCallIndex.unbond
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
 
   return {
@@ -104,8 +104,8 @@ export function getUnbondMethod(rawData: types.UnbondMethod): { method: types.Fo
 }
 
 // TODO
-export function getNominateMethod(rawData: types.NominateMethod): { method: types.FormatNominateMethod, methodString: string } {
-  const callIndex = params.Method.nominate
+export function getNominateMethod(methodCallIndex: types.Method, rawData: types.NominateMethod): { method: types.FormatNominateMethod, methodString: string } {
+  const callIndex = methodCallIndex.nominate
   const addressCount = rawData.targetAddresses.length.toString(16)
   const shiftTargetCount = formatSCALECodec(rawData.targetAddresses.length.toString())
   let targetsString = ''
@@ -123,8 +123,8 @@ export function getNominateMethod(rawData: types.NominateMethod): { method: type
   }
 }
 
-export function getWithdrawUnbondedMethod(rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
-  const callIndex = params.Method.withdraw
+export function getWithdrawUnbondedMethod(methodCallIndex: types.Method, rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
+  const callIndex = methodCallIndex.withdraw
   const numSlashingSpans = new BN(rawData.numSlashingSpans).toString(16)
 
   const formatNumSlashingSpans = stringUtil.reverse(stringUtil.paddingString(numSlashingSpans)).padEnd(8, '0')
@@ -162,7 +162,7 @@ export function getMortalEra(blockNumber: string, era: string): string {
   binaryPower = stringUtil.paddingString(binaryPower);
 
   let result = binaryValue.substr(binaryValue.length - power) + binaryPower;
-  
+
   result = parseInt(result, 2).toString(16);
   result = stringUtil.paddingString(result).padStart(4, '0');
 
@@ -179,7 +179,7 @@ export function formatSCALECodec(value: string): string {
   let formatValue
   const mode = getValueMode(value)
   console.debug("mode: ", mode)
-  switch (mode){
+  switch (mode) {
     case params.ValueMode.singleByteMode:
       formatValue = (bigValue.shln(2)).or(new BN('0'))
       break;
@@ -198,11 +198,11 @@ export function formatSCALECodec(value: string): string {
     default:
       throw new SDKError(formatSCALECodec.name, "input value should be less than 2 ** 536 - 1")
   }
-  
+
   let result = stringUtil.paddingString(formatValue.toString(16))
   const output = stringUtil.reverse(result)
   if (mode == params.ValueMode.foreByteMode) {
-    return  output.padEnd(8, '0')
+    return output.padEnd(8, '0')
   }
 
   return output
@@ -218,7 +218,7 @@ export function formatSCALECodec(value: string): string {
  * @returns 
  */
 export function getValueMode(value: string): string {
-  
+
   let mode;
   const one = new BN(1)
   const bigValue = new BN(value)
@@ -230,7 +230,7 @@ export function getValueMode(value: string): string {
     mode = params.ValueMode.foreByteMode
   } else { // (2**30)-(2**536-1).
     mode = params.ValueMode.bigIntegerMode
-  } 
+  }
   return mode;
 }
 
