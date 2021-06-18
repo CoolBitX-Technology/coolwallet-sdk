@@ -2,6 +2,7 @@ import { apdu } from "@coolwallet/core";
 import { blake2b } from './cryptoUtil';
 import * as types from '../config/types';
 import * as dotUtil from './dotUtil';
+import * as params from '../config/params';
 
 // type Transport = transport.default;
 
@@ -66,7 +67,7 @@ method
 export function getSubmitTransaction(addressType: number, fromAddress: string, formatTxData: types.FormatTransfer, methodString: string, signature: string, version: number): string {
 
   const sumitTx =
-    addressType.toString().padStart(2, '0')+
+    params.TX_ADDRESS_PRE +
     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
     signature +
     formatTxData.mortalEra +

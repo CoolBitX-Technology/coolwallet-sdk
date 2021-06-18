@@ -42,9 +42,9 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 
 }
 
-export function getNormalMethod(methodCallIndex: types.Method, addressType: number, rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
+export function getNormalMethod(methodCallIndex: types.Method, rawData: types.NormalMethod): { method: types.FormatNormalMethod, methodString: string } {
   const callIndex = methodCallIndex.transfer
-  const destAddress = addressType.toString().padStart(2, '0') + Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
+  const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
 
   console.log("callIndex: ", callIndex)
@@ -55,13 +55,13 @@ export function getNormalMethod(methodCallIndex: types.Method, addressType: numb
       destAddress,
       value
     },
-    methodString: callIndex + destAddress + formatSCALECodec(rawData.value)
+    methodString: callIndex + params.TX_ADDRESS_PRE + destAddress + formatSCALECodec(rawData.value)
   }
 }
 
 export function getBondMethod(methodCallIndex: types.Method, rawData: types.BondMethod): { method: types.FormatBondMethod, methodString: string } {
   const callIndex = methodCallIndex.bond
-  const controllerAddress = params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
+  const controllerAddress = Buffer.from(decodeAddress(rawData.controllerAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
   const payeeType = rawData.payee
 
@@ -73,7 +73,7 @@ export function getBondMethod(methodCallIndex: types.Method, rawData: types.Bond
       value,
       payeeType
     },
-    methodString: callIndex + controllerAddress + formatSCALECodec(rawData.value) + payeeType
+    methodString: callIndex + params.TX_ADDRESS_PRE + controllerAddress + formatSCALECodec(rawData.value) + payeeType
   }
 }
 
@@ -110,7 +110,7 @@ export function getNominateMethod(methodCallIndex: types.Method, rawData: types.
   const shiftTargetCount = formatSCALECodec(rawData.targetAddresses.length.toString())
   let targetsString = ''
   rawData.targetAddresses.forEach(target => {
-    targetsString += params.DOT_ADDRESS_TYPE + Buffer.from(decodeAddress(target)).toString('hex')
+    targetsString += params.TX_ADDRESS_PRE + Buffer.from(decodeAddress(target)).toString('hex')
   });
 
   return {
