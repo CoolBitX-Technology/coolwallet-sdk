@@ -55,11 +55,7 @@ export const getNormalArgument = async (rawData: types.FormatTransfer, method: t
   const destAddress = method.destAddress.padStart(64, '0')
   const value = method.value.padStart(20, '0')
   const tradeArgument = await getTradeArgument(rawData)
-
-  console.log("callIndex: ", callIndex)
-  console.log("destAddress: ", destAddress)
-  console.log("value: ", value)
-  // const argument = methodLen + callIndex + destAddress + value + tradeArgument
+  
   const argument = callIndex + destAddress + value + tradeArgument
   console.debug('NormalTradeArgument: ', argument)
   return addPath(argument, addressIndex, coinType);
@@ -133,9 +129,6 @@ export const getNominateArgument = async (rawData: types.FormatTransfer, method:
   const tradeArgument = await getTradeArgument(rawData)
 
   const argument = callIndex + tradeArgument + targetCount + targets
-  console.debug('callIndex: ', callIndex)
-  console.debug('targetCount: ', targetCount)
-  console.debug('targets: ', targets)
   console.debug('NominateArgument: ', argument)
   return addPath(argument, addressIndex, coinType);
 };
@@ -146,7 +139,6 @@ export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer,
 
   const callIndex = method.callIndex.padStart(4, '0')
   const numSlashingSpans = method.numSlashingSpans.padStart(8, '0')
-  console.debug("numSlashingSpans: ", numSlashingSpans)
   const tradeArgument = await getTradeArgument(rawData)
 
   const argument = callIndex + numSlashingSpans + tradeArgument

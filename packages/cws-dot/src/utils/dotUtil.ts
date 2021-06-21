@@ -47,8 +47,6 @@ export function getNormalMethod(methodCallIndex: types.Method, rawData: types.No
   const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex')
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16))
 
-  console.log("valueeeeee: ", value)
-
   return {
     method: {
       callIndex,
@@ -108,9 +106,6 @@ export function getNominateMethod(methodCallIndex: types.Method, rawData: types.
   const callIndex = methodCallIndex.nominate
   const addressCount = rawData.targetAddresses.length.toString(16)
   const shiftTargetCount = formatSCALECodec(rawData.targetAddresses.length.toString())
-  console.log("rawData.addressCount: ", addressCount)
-  console.log("rawData.targetAddresses: ", rawData.targetAddresses.length.toString())
-  console.log("rawData.shiftTargetCount: ", shiftTargetCount)
   let targetsString = ''
   rawData.targetAddresses.forEach(target => {
     targetsString += params.TX_ADDRESS_PRE + Buffer.from(decodeAddress(target, 0)).toString('hex')
