@@ -20,8 +20,6 @@ export const getTransferArgument = async (transaction: Transaction, addressIndex
     handleHex(transaction.chainId.toString(16)).padStart(4, "0"); // 0001
 
   const path = await utils.getPath(COIN_TYPE, addressIndex)
-  console.debug("argument:" + argument)
-  console.debug("path:" + path)
 
   return '15' + path + argument;
 };
