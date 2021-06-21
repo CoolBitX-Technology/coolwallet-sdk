@@ -133,6 +133,9 @@ export const getNominateArgument = async (rawData: types.FormatTransfer, method:
   const tradeArgument = await getTradeArgument(rawData)
 
   const argument = callIndex + tradeArgument + targetCount + targets
+  console.debug('callIndex: ', callIndex)
+  console.debug('targetCount: ', targetCount)
+  console.debug('targets: ', targets)
   console.debug('NominateArgument: ', argument)
   return addPath(argument, addressIndex, coinType);
 };
