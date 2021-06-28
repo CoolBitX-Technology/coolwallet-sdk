@@ -20,7 +20,6 @@ const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
 export function pubKeyToAddress(compressedPubkey: string, addressType: number): string {
 
   const zero = '0x' + Buffer.from(blake2b(compressedPubkey)).toString('hex')
-  console.log("zero: ", zero)
   const address = encodeAddress(zero, addressType);
   return address;
 }

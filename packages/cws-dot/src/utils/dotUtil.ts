@@ -121,8 +121,6 @@ export function getNominateMethod(methodCallIndex: types.Method, rawData: types.
   }
 }
 
-console.log(formatSCALECodec('3'))
-
 export function getWithdrawUnbondedMethod(methodCallIndex: types.Method, rawData: types.WithdrawUnbondedMethod): { method: types.FormatWithdrawUnbondedTxMethod, methodString: string } {
   const callIndex = methodCallIndex.withdraw
   const numSlashingSpans = new BN(rawData.numSlashingSpans).toString(16)
