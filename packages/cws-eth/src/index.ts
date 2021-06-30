@@ -6,6 +6,7 @@ import * as types from './config/types'
 import * as scriptUtils from './utils/scriptUtils';
 import * as params from "./config/params"; 
 import { TOKENTYPE } from "./config/tokenType";
+export { TOKENTYPE }
 
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
