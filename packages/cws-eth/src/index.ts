@@ -6,7 +6,7 @@ import * as types from './config/types'
 import * as scriptUtils from './utils/scriptUtils';
 import * as params from "./config/params"; 
 import { TOKENTYPE } from "./config/tokenType";
-import { removeHex0x } from "./utils/stringUtil";
+export { TOKENTYPE }
 
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
@@ -38,10 +38,9 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTransaction(
-    signTxData: types.signTx
+    signTxData: types.signTx 
   ) {
     const { value, data, to } = signTxData.transaction;
-
     // eth
     if (value && !data) {
       return await this.signTransferTransaction(signTxData);
@@ -207,3 +206,4 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     );
   }
 }
+

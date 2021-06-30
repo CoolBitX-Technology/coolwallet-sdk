@@ -1,4 +1,4 @@
-import { error, transport, apdu } from "@coolwallet/core";
+import { transport } from "@coolwallet/core";
 import { handleHex } from "./stringUtil";
 import { Transaction } from '../config/types';
 
