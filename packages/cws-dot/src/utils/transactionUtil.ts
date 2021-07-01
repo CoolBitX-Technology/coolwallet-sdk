@@ -2,6 +2,7 @@ import { apdu } from "@coolwallet/core";
 import { blake2b } from './cryptoUtil';
 import * as types from '../config/types';
 import * as dotUtil from './dotUtil';
+import * as params from '../config/params';
 
 // type Transport = transport.default;
 
@@ -16,10 +17,10 @@ const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
  * @param {string} compressedPubkey
  * @return {string}
  */
-export function pubKeyToAddress(compressedPubkey: string): string {
+export function pubKeyToAddress(compressedPubkey: string, addressType: number): string {
 
   const zero = '0x' + Buffer.from(blake2b(compressedPubkey)).toString('hex')
-  const address = encodeAddress(zero, 0);
+  const address = encodeAddress(zero, addressType);
   return address;
 }
 
@@ -65,7 +66,7 @@ method
 export function getSubmitTransaction(fromAddress: string, formatTxData: types.FormatTransfer, methodString: string, signature: string, version: number): string {
 
   const sumitTx =
-    '00' +
+    params.TX_ADDRESS_PRE +
     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
     signature +
     formatTxData.mortalEra +
