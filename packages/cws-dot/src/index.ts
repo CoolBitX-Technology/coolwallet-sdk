@@ -65,7 +65,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
       publicKey
     );
 
-    return txUtil.getSubmitTransaction(this.addressType, transaction.fromAddress, formatTxData, methodString, signature, 4)
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
 
   async signBondTransaction(
@@ -87,7 +87,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
       publicKey
     );
 
-    return txUtil.getSubmitTransaction(this.addressType, transaction.fromAddress, formatTxData, methodString, signature, 4)
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
 
 
@@ -110,7 +110,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
       publicKey
     );
 
-    return txUtil.getSubmitTransaction(this.addressType, transaction.fromAddress, formatTxData, methodString, signature, 4)
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
 
   async signUnbondTransaction(
@@ -132,7 +132,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
       publicKey
     );
 
-    return txUtil.getSubmitTransaction(this.addressType, transaction.fromAddress, formatTxData, methodString, signature, 4)
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
 
   async signNominateTransaction(
@@ -161,7 +161,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
       publicKey
     );
 
-    return txUtil.getSubmitTransaction(this.addressType, transaction.fromAddress, formatTxData, methodString, signature, 4)
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
 
   async signWithdrawUnbondedTransaction(
@@ -183,6 +183,6 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
       publicKey
     );
 
-    return txUtil.getSubmitTransaction(this.addressType, transaction.fromAddress, formatTxData, methodString, signature, 4)
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
 }

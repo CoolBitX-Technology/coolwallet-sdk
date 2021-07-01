@@ -63,7 +63,7 @@ method
  * 
  * @returns 
  */
-export function getSubmitTransaction(addressType: number, fromAddress: string, formatTxData: types.FormatTransfer, methodString: string, signature: string, version: number): string {
+export function getSubmitTransaction(fromAddress: string, formatTxData: types.FormatTransfer, methodString: string, signature: string, version: number): string {
 
   const sumitTx =
     params.TX_ADDRESS_PRE +
