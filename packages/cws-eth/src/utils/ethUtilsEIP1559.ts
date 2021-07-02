@@ -1,6 +1,6 @@
 import { transport } from '@coolwallet/core';
 import { handleHex } from './stringUtil';
-import { Transaction } from '../config/types';
+import { EIP1559Transaction } from '../config/types';
 
 const Web3 = require('web3');
 const rlp = require('rlp');
@@ -11,21 +11,17 @@ const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
 const ec = new elliptic.ec('secp256k1');
 
-
-/**
- * Get raw payload
- * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
- * value:string, data:string, chainId: number}} transaction
- * @return {Array<Buffer>}
- */
-export const getRawHex = (transaction: Transaction): Array<Buffer> => {
+export const getRawHex = (transaction: EIP1559Transaction): Array<Buffer> => {
   const rawData = [];
+  rawData.push('01'); // chainId
   rawData.push(transaction.nonce);
-  rawData.push(transaction.gasPrice);
+  rawData.push(transaction.gasTipCap);
+  rawData.push(transaction.gasFeeCap);
   rawData.push(transaction.gasLimit);
   rawData.push(transaction.to);
   rawData.push(transaction.value);
   rawData.push(transaction.data);
+  rawData.push('c0'); // empty accessList
   const raw = rawData.map((d) => {
     const hex = handleHex(d);
     if (hex === '00' || hex === '') {
@@ -33,35 +29,21 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
     }
     return Buffer.from(hex, 'hex');
   });
-  raw[6] = Buffer.from([transaction.chainId]);
-  raw[7] = Buffer.allocUnsafe(0);
-  raw[8] = Buffer.allocUnsafe(0);
 
   return raw;
 };
 
-/**
- * @description Compose Signed Transaction
- * @param {Array<Buffer>} payload
- * @param {Number} v
- * @param {String} r
- * @param {String} s
- * @param {number} chainId
- * @return {String}
- */
-export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: string, s: string, chainId: number): string => {
-  const vValue = v + chainId * 2 + 8;
-
-  const transaction = payload.slice(0, 6);
-
+export const composeSignedTransacton = (
+  payload: Array<Buffer>, v: number, r: string, s: string
+): string => {
+  const transaction = payload;
   transaction.push(
-    Buffer.from([vValue]),
+    Buffer.from([v]),
     Buffer.from(r, 'hex'),
     Buffer.from(s, 'hex')
   );
-
   const serializedTx = rlp.encode(transaction);
-  return `0x${serializedTx.toString('hex')}`;
+  return `0x02${serializedTx.toString('hex')}`;
 };
 
 /**
@@ -76,7 +58,8 @@ export const genEthSigFromSESig = async (
   payload: Buffer,
   compressedPubkey: string | undefined = undefined
 ): Promise<{ v: number; r: string; s: string; }> => {
-  const hash = Web3.utils.keccak256(payload);
+  const prefixedPayload = Buffer.concat([Buffer.from([2]), payload]);
+  const hash = Web3.utils.keccak256(prefixedPayload);
   const data = Buffer.from(handleHex(hash), 'hex');
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
 
@@ -86,7 +69,7 @@ export const genEthSigFromSESig = async (
     canonicalSignature,
     keyPair.pub
   );
-  const v = recoveryParam + 27;
+  const v = recoveryParam;
   const { r } = canonicalSignature;
   const { s } = canonicalSignature;
 
@@ -123,3 +106,4 @@ export function pubKeyToAddress(compressedPubkey: string): string {
   const address = trimFirst12Bytes(Web3.utils.keccak256(pubkey));
   return Web3.utils.toChecksumAddress(address);
 }
+
