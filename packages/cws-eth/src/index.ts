@@ -15,18 +15,26 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     super(params.COIN_TYPE);
   }
 
-  /**
-   * Get Ethereum address by index
-   * @param {number} addressIndex
-   * @return {string}
-   */
-  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+  async getAddress(
+    transport: types.Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number
+  ): Promise<string> {
+    const publicKey = await this.getPublicKey(
+      transport, appPrivateKey, appId, addressIndex
+    );
     return pubKeyToAddress(publicKey);
   }
 
-  async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
-    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+  async getAddressByAccountKey(
+    accPublicKey: string,
+    accChainCode: string,
+    addressIndex: number
+  ): Promise<string> {
+    const publicKey = await this.getAddressPublicKey(
+      accPublicKey, accChainCode, addressIndex
+    );
     return pubKeyToAddress(publicKey);
   }
 
@@ -41,7 +49,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
    */
   async signTransaction(
     signTxData: types.signTx
-  ) {
+  ): Promise<string> {
     const { value, data, to } = signTxData.transaction;
     // eth
     if (value && !data) {
@@ -67,9 +75,9 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
       if (symbol && decimals) {
         if (tokenSignature) { // 內建
           return this.signERC20Transaction(signTxData, tokenSignature);
-        } else { // 自建
-          return this.signERC20Transaction(signTxData);
         }
+        // 自建
+        return this.signERC20Transaction(signTxData);
       }
     }
 
