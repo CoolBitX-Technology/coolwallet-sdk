@@ -79,8 +79,7 @@ export const signTransaction = async (
   argument: string,
   publicKey: string | undefined = undefined,
 ): Promise<string> => {
-
-  const { transport, transaction } = signTxData
+  const { transport, transaction } = signTxData;
 
   const rawPayload = ethUtil.getRawHex(transaction);
 
@@ -88,7 +87,7 @@ export const signTransaction = async (
   let action;
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
-  }
+  };
   preActions.push(sendScript);
 
   action = async () => {
@@ -98,7 +97,7 @@ export const signTransaction = async (
       signTxData.appPrivateKey,
       argument
     );
-  }
+  };
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
