@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, setting } from '@coolwallet/core';
+import { coin as COIN, setting, apdu } from '@coolwallet/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types';
@@ -9,6 +9,15 @@ import * as params from './config/params';
 import { TOKENTYPE } from './config/tokenType';
 
 export { TOKENTYPE };
+
+const convertEIP1559IntoLegacyTx = (eip1559Tx: types.signEIP1559Tx): types.signTx => {
+  const tx: types.Transaction = {
+    chainId: 1,
+    gasPrice: eip1559Tx.transaction.gasFeeCap,
+    ...eip1559Tx.transaction
+  };
+  return { ...eip1559Tx, transaction: tx };
+};
 
 export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
@@ -88,6 +97,12 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signEIP1559Transfer(
     signTxData: types.signEIP1559Tx
   ): Promise<string> {
+    const version = await apdu.general.getSEVersion(signTxData.transport);
+    if (version < 311) {
+      const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
+      return this.signTransferTransaction(data);
+    }
+
     const {
       transport, appPrivateKey, appId, addressIndex, transaction
     } = signTxData;
@@ -110,6 +125,12 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signEIP1559ERC20(
     signTxData: types.signEIP1559Tx, tokenSignature = ''
   ): Promise<string> {
+    const version = await apdu.general.getSEVersion(signTxData.transport);
+    if (version < 311) {
+      const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
+      return this.signERC20Transaction(data, tokenSignature);
+    }
+
     const {
       transport, appPrivateKey, appId, addressIndex, transaction
     } = signTxData;
@@ -132,6 +153,12 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signEIP1559Smart(
     signTxData: types.signEIP1559Tx
   ): Promise<string> {
+    const version = await apdu.general.getSEVersion(signTxData.transport);
+    if (version < 311) {
+      const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
+      return this.signSmartContractTransaction(data);
+    }
+
     const {
       transport, appPrivateKey, appId, addressIndex, transaction
     } = signTxData;

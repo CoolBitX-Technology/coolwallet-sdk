@@ -199,9 +199,9 @@ export const signTypedData = async (
   script: string,
   publicKey: string | undefined = undefined,
 ): Promise<string> => {
-
-  if (!ajv.validate(EIP712Schema, typedData.typedData))
+  if (!ajv.validate(EIP712Schema, typedData.typedData)) {
     throw new error.SDKError(signTypedData.name, ajv.errorsText());
+  }
 
   const { transport } = typedData;
 
@@ -223,10 +223,9 @@ export const signTypedData = async (
 
   const argument = await scriptUtils.getSignTypedDataArgument(domainSeparate.toString('hex'), encodedData.toString('hex'), typedData.addressIndex);
 
-
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
-  }
+  };
   preActions.push(sendScript);
 
   const action = async () => {
@@ -236,7 +235,7 @@ export const signTypedData = async (
       typedData.appPrivateKey,
       argument
     );
-  }   
+  };
 
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
@@ -246,7 +245,7 @@ export const signTypedData = async (
     typedData.confirmCB,
     typedData.authorizedCB,
     true
-  );  
+  );
 
   const prefix = Buffer.from('1901', 'hex');
 
