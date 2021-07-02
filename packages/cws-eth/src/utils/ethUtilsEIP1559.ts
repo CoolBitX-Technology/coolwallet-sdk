@@ -1,5 +1,5 @@
 import { handleHex } from './stringUtil';
-import { Transaction, EIP1559Transaction } from '../config/types';
+import { EIP1559Transaction } from '../config/types';
 
 const Web3 = require('web3');
 const rlp = require('rlp');
@@ -51,7 +51,6 @@ export const genEthSigFromSESig = async (
   compressedPubkey: string | undefined = undefined
 ): Promise<{ v: number; r: string; s: string; }> => {
   const prefixedPayload = Buffer.concat([Buffer.from([2]), payload]);
-  console.log('prefixedPayload :', prefixedPayload.toString('hex'));
   const hash = Web3.utils.keccak256(prefixedPayload);
   const data = Buffer.from(handleHex(hash), 'hex');
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
