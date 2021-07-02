@@ -47,22 +47,13 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     return pubKeyToAddress(publicKey);
   }
 
-  /**
-   * Sign Ethereum Transaction.
-   * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
-   * value:string, data:string, chainId: number}} transaction
-   * @param {Number} addressIndex
-   * @param {String} publicKey
-   * @param {Function} confirmCB
-   * @param {Function} authorizedCB
-   */
-  async signTransaction(
-    signTxData: types.signTx
+  async signEIP1559Transaction(
+    signTxData: types.signEIP1559Tx
   ): Promise<string> {
     const { value, data, to } = signTxData.transaction;
     // eth
     if (value && !data) {
-      return this.signTransferTransaction(signTxData);
+      return this.signEIP1559Transfer(signTxData);
     }
 
     // erc20
@@ -83,15 +74,15 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
       const { symbol, decimals } = signTxData.transaction.option.info;
       if (symbol && decimals) {
         if (tokenSignature) { // 內建
-          return this.signERC20Transaction(signTxData, tokenSignature);
+          return this.signEIP1559ERC20(signTxData, tokenSignature);
         }
         // 自建
-        return this.signERC20Transaction(signTxData);
+        return this.signEIP1559ERC20(signTxData);
       }
     }
 
     // smart contract
-    return this.signSmartContractTransaction(signTxData);
+    return this.signEIP1559Smart(signTxData);
   }
 
   async signEIP1559Transfer(
@@ -176,6 +167,44 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
       argument,
       publicKey,
     );
+  }
+
+  async signTransaction(
+    signTxData: types.signTx
+  ): Promise<string> {
+    const { value, data, to } = signTxData.transaction;
+    // eth
+    if (value && !data) {
+      return this.signTransferTransaction(signTxData);
+    }
+
+    // erc20
+    const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
+
+    if (data && functionHash === 'a9059cbb') {
+      const upperCaseAddress = to.toUpperCase(); // contractAddr
+      let tokenSignature;
+      for (const tokenInfo of TOKENTYPE) { // get tokenSignature
+        if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
+          tokenSignature = tokenInfo.signature;
+          signTxData.transaction.option.info.symbol = tokenInfo.symbol;
+          signTxData.transaction.option.info.decimals = tokenInfo.unit;
+          break;
+        }
+      }
+
+      const { symbol, decimals } = signTxData.transaction.option.info;
+      if (symbol && decimals) {
+        if (tokenSignature) { // 內建
+          return this.signERC20Transaction(signTxData, tokenSignature);
+        }
+        // 自建
+        return this.signERC20Transaction(signTxData);
+      }
+    }
+
+    // smart contract
+    return this.signSmartContractTransaction(signTxData);
   }
 
   async signTransferTransaction(
