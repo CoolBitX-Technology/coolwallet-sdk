@@ -58,26 +58,26 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     // erc20
     const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-
-    if (data && functionHash === 'a9059cbb') {
-      const upperCaseAddress = to.toUpperCase(); // contractAddr
-      let tokenSignature;
-      for (const tokenInfo of TOKENTYPE) { // get tokenSignature
+    if ((!value || value === '0x0') && data && functionHash === 'a9059cbb') {
+      // 檢查是否內建
+      const upperCaseAddress = to.toUpperCase();
+      for (const tokenInfo of TOKENTYPE) {
         if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
-          tokenSignature = tokenInfo.signature;
-          signTxData.transaction.option.info.symbol = tokenInfo.symbol;
-          signTxData.transaction.option.info.decimals = tokenInfo.unit;
-          break;
+          signTxData.transaction.option = {
+            info: {
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.unit
+            }
+          };
+          return this.signEIP1559ERC20(signTxData, tokenInfo.signature);
         }
       }
-
-      const { symbol, decimals } = signTxData.transaction.option.info;
-      if (symbol && decimals) {
-        if (tokenSignature) { // 內建
-          return this.signEIP1559ERC20(signTxData, tokenSignature);
+      // 檢查是否自建
+      if (signTxData.transaction.option && signTxData.transaction.option.info) {
+        const { symbol, decimals } = signTxData.transaction.option.info;
+        if (symbol && decimals) {
+          return this.signEIP1559ERC20(signTxData);
         }
-        // 自建
-        return this.signEIP1559ERC20(signTxData);
       }
     }
 
