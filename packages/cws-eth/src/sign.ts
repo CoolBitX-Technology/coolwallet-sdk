@@ -114,7 +114,7 @@ export const signTransaction = async (
       rlp.encode(rawPayload),
       publicKey
     );
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v + 27, r, s, transaction.chainId);
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
