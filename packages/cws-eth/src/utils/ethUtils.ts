@@ -1,15 +1,15 @@
-import { transport } from "@coolwallet/core";
-import { handleHex } from "./stringUtil";
+import { transport } from '@coolwallet/core';
+import { handleHex } from './stringUtil';
 import { Transaction } from '../config/types';
 
 const Web3 = require('web3');
-const rlp = require("rlp");
+const rlp = require('rlp');
 
 type Transport = transport.default;
 
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
-const ec = new elliptic.ec("secp256k1");
+const ec = new elliptic.ec('secp256k1');
 
 
 /**
@@ -23,15 +23,15 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
   rawData.push(transaction.nonce);
   rawData.push(transaction.gasPrice);
   rawData.push(transaction.gasLimit);
-  rawData.push(transaction.to); 
+  rawData.push(transaction.to);
   rawData.push(transaction.value);
   rawData.push(transaction.data);
   const raw = rawData.map((d) => {
     const hex = handleHex(d);
-    if (hex === "00" || hex === "") {
+    if (hex === '00' || hex === '') {
       return Buffer.allocUnsafe(0);
     }
-    return Buffer.from(hex, "hex");
+    return Buffer.from(hex, 'hex');
   });
   raw[6] = Buffer.from([transaction.chainId]);
   raw[7] = Buffer.allocUnsafe(0);
@@ -56,12 +56,12 @@ export const composeSignedTransacton = (payload: Array<Buffer>, v: number, r: st
 
   transaction.push(
     Buffer.from([vValue]),
-    Buffer.from(r, "hex"),
-    Buffer.from(s, "hex")
+    Buffer.from(r, 'hex'),
+    Buffer.from(s, 'hex')
   );
 
   const serializedTx = rlp.encode(transaction);
-  return `0x${serializedTx.toString("hex")}`;
+  return `0x${serializedTx.toString('hex')}`;
 };
 
 /**
@@ -77,8 +77,8 @@ export const genEthSigFromSESig = async (
   compressedPubkey: string | undefined = undefined
 ): Promise<{ v: number; r: string; s: string; }> => {
   const hash = Web3.utils.keccak256(payload);
-  const data = Buffer.from(handleHex(hash), "hex");
-  const keyPair = ec.keyFromPublic(compressedPubkey, "hex");
+  const data = Buffer.from(handleHex(hash), 'hex');
+  const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
 
   // get v
   const recoveryParam = ec.getKeyRecoveryParam(
@@ -92,7 +92,6 @@ export const genEthSigFromSESig = async (
 
   return { v, r, s };
 };
-
 
 /**
  * @description get APDU set token function
