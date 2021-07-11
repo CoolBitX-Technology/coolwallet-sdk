@@ -3,7 +3,7 @@ npm install
 npm run-script build
 npm link
 
-cd ../transport-web-ble
+cd ../transport-react-native-ble
 ../build.sh
 cd ../cws-bch
 ../build.sh
