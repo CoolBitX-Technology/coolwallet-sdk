@@ -7,6 +7,17 @@ export type Output = {
 
 export type Transport = transport.default;
 
+export type signEIP1559Tx = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  transaction: EIP1559Transaction,
+  addressIndex: number,
+  publicKey: string | undefined,
+  confirmCB: ()=>void | undefined,
+  authorizedCB: ()=>void | undefined
+}
+
 export type signTx = {
   transport: Transport,
   appPrivateKey: string,
@@ -14,8 +25,8 @@ export type signTx = {
   transaction: Transaction,
   addressIndex: number,
   publicKey: string | undefined,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
+  confirmCB: ()=>void | undefined,
+  authorizedCB: ()=>void | undefined
 }
 
 export type signMsg = {
@@ -24,8 +35,8 @@ export type signMsg = {
   appId: string,
   message: string,
   addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
+  confirmCB: ()=>void | undefined,
+  authorizedCB: ()=>void | undefined
 }
 
 export type signTyped = {
@@ -34,10 +45,21 @@ export type signTyped = {
   appId: string,
   typedData: any,
   addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
+  confirmCB: ()=>void | undefined,
+  authorizedCB: ()=>void | undefined
 }
 
+export type EIP1559Transaction = {
+  // [key: string]: any,
+  nonce: string,
+  gasTipCap: string,
+  gasFeeCap: string,
+  gasLimit: string,
+  to: string,
+  value: string,
+  data: string,
+  option: Option
+}
 
 export type Transaction = {
   // [key: string]: any,
@@ -84,4 +106,4 @@ export const EIP712Schema = {
     message: { type: 'object' }
   },
   required: ['types', 'primaryType', 'domain', 'message']
-}
+};

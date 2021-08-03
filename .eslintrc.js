@@ -17,8 +17,6 @@ module.exports = {
   },
   plugins: ["react"],
   rules: {
-    indent: ["error", "tab"],
-    "no-tabs": 0,
     "no-use-before-define": ["error", { functions: false, classes: true }],
     "no-restricted-syntax": [
       "error",
