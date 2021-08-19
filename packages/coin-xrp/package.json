@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/xrp",
-  "version": "1.0.1-beta.0",
+  "version": "1.0.1",
   "description": "Coolwallet Ripple App",
   "main": "lib/index.js",
   "scripts": {
