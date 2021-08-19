@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/zen",
-  "version": "1.0.1-beta.1",
+  "version": "1.0.1",
   "description": "Coolwallet Horizen sdk",
   "main": "lib/index.js",
   "scripts": {
