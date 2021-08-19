@@ -1,0 +1,49 @@
+{
+  "name": "@coolwallet/zen",
+  "version": "1.0.1-beta.1",
+  "description": "Coolwallet Horizen sdk",
+  "main": "lib/index.js",
+  "scripts": {
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+  },
+  "keywords": [
+    "zen",
+    "Horizen",
+    "ZenCash",
+    "coolwallet",
+    "javascript",
+    "hardwarewallet",
+    "cryptocurrency",
+    "coolbitx",
+    "transaction"
+  ],
+  "author": "coolwallet-team",
+  "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "jest": "^26.0.1",
+    "@coolwallet/core": "^1.0.0"
+  },
+  "dependencies": {
+    "@types/bn.js": "^4.11.6",
+    "zencashjs": "^1.2.6",
+    "bs58check": "^2.1.2",
+    "bn.js": "^5.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  }
+}
