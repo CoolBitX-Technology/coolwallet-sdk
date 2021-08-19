@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/ltc",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.0",
   "description": "Coolwallet LiteCoin sdk",
   "main": "lib/index.js",
   "scripts": {
