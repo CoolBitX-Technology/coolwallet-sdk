@@ -9,7 +9,7 @@ CoolWallet Pro involves complex Application Protocol Data Unit (APDU) commands, 
 
 ### What is Signing Script 
 
-As mentioned above, the signing script is a script language developed for CoolWallet Pro to process and compose the signatures for later broadcasting transactions to blockchain. We provide a separate tool in this repository and please refer to [it](https://github.com/CoolBitX-Technology/coolwallet-signing-tools/tree/dev)  for more information.
+As mentioned above, the signing script is a script language developed for CoolWallet Pro to process and compose the signatures for later broadcasting transactions to blockchain. We provide a separate tool in this [repository](https://github.com/CoolBitX-Technology/coolwallet-signing-tools/tree/dev) and please refer to it for more information.
 ### What is CoolWallet SDK
 
 CoolWallet SDK is a set of tools for app developers to easily communicate with CoolWallet Pro for key management and signature generation. The SDK itself supports more than 10 crypto currencies (and the number is increasing), and it also encapsulates all the communication commands required with CoolWallet Pro.
