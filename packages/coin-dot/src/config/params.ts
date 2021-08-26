@@ -16,7 +16,8 @@ export const METHOD_CALL_INDEX = {
     bondExtra: '0701',
     unbond: '0702',
     nominate: '0705',
-    withdraw: '0703'
+    withdraw: '0703',
+    chill: '0706'
   },
   KSM: {
     transfer: '0400',
