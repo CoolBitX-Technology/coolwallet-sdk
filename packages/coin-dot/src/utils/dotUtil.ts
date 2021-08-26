@@ -136,6 +136,10 @@ export function getWithdrawUnbondedMethod(methodCallIndex: types.Method, rawData
   }
 }
 
+export function getChillMethod(methodCallIndex: types.Method): string {
+  return methodCallIndex.chill;
+}
+
 export function getMethodLength(methodString: string): string {
   const len = methodString.length
   let lenStr = ''
