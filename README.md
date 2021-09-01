@@ -156,7 +156,7 @@ import cwsETH from '@coolwallet/eth'
 const ETH = new cwsETH();
 ```
 
-### Getting Address
+### Get Address
 
 ```javascript
 const address = await ETH.getAddress(
@@ -185,8 +185,10 @@ const address = await ETH.getAddressByAccountKey(
 );
 ```
 
+### Sign Transaction
+
 ```javascript
-const param = {
+const transaction = {
     nonce: "0x21d",
     gasPrice: "0x59682f00",
     gasLimit: "0x5208",
@@ -199,7 +201,7 @@ const signTxData = {
   transport,
   appPrivateKey,
   appId,
-  transaction: param,
+  transaction,
   addressIndex,
 };
 
