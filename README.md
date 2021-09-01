@@ -22,7 +22,7 @@ Depending on your platform, you may can choose different [transport](#Transport)
 
 ### 2. Register and setup hardware wallet.
 
-To register you application with the wallet, take a look at the [wallet module](/packages/cws-wallet). This giud you through the process of registeration and seed generation.
+To register you application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet)  in `core` package. This giud you through the process of registeration and seed generation.
 
 ### 3. Build your Application
 
@@ -69,7 +69,8 @@ Other supported coins: BTC, BCH, ZEN. Open an issue if you want the sdk of any o
 
 
 ## Examples: Build ETH in web app
-### 建立連線
+### Create connect
+
 
 ```
 npm install @coolwallet/core
@@ -81,24 +82,18 @@ import WebBleTransport from "@coolwallet/transport-web-ble";
 import * as core from "@coolwallet/core";
 ```
 
-建立連線，取得 Card Name 以及 SE Public Key
+Create a connection to obtain the Card Name and SE Public Key.
 
 ```javascript
 
 connect = async () => {
-  WebBleTransport.listen(async (error, device) => {
-    console.log(device)
-    if (device) {
-      const cardName = device.name;
-      const transport = await WebBleTransport.connect(device);
-      const SEPublicKey = await core.config.getSEPublicKey(transport)
-      this.setState({ transport, cardName, SEPublicKey });
-      localStorage.setItem('cardName', cardName)
-      localStorage.setItem('SEPublicKey', SEPublicKey)
-      console.log(`SEPublicKey: ${SEPublicKey}`);
-    } else {
-      console.log(error);
-    }
+WebBleTransport.listen(async (error, device) => {
+    const cardName = device.name;
+    const transport = await WebBleTransport.connect(device);
+    const SEPublicKey = await core.config.getSEPublicKey(transport)
+    this.setState({ transport, cardName, SEPublicKey });
+    localStorage.setItem('cardName', cardName)
+    localStorage.setItem('SEPublicKey', SEPublicKey)
   });
 };
 
@@ -109,7 +104,10 @@ disconnect = () => {
 
 ```
 
-取得 app key pair
+- transport: 
+- SEPublicKey: 
+
+Obtain app key pairs.
 
 ```javascript
 const keyPair = crypto.key.generateKeyPair()
@@ -117,9 +115,11 @@ localStorage.setItem('appPublicKey', keyPair.publicKey)
 localStorage.setItem('appPrivateKey', keyPair.privateKey)
 ```
 
-### 配對卡片
+- keyPair: 
 
-配對卡片，取得 appId
+### Register card
+
+Register card and obtain the appId.
 
 ```javascript
 const name = 'your app name'
@@ -127,17 +127,24 @@ const SEPublicKey = localStorage.getItem('SEPublicKey')
 const appId = await apdu.pair.register(transport, appPublicKey, password, name, SEPublicKey);
 ```
 
-### 建立/還原錢包
+### Create / Recover the wallet
 
-建立錢包 by seed
+Use function `setSeed` to create or recover your wallet.
 
 ```javascript
+const seedHex = bip39.mnemonicToSeedSync(mnemonic).toString('hex');
 await apdu.wallet.setSeed(transport, appId, appPrivateKey, seedHex, SEPublicKey)
 
 ```
 
+If you want to create seed by card, you can use function `createSeedByCard`. And also choose the length of seed(12, 18, 24).
 
-### 整合幣種
+```javascript
+await apdu.wallet.createSeedByCard(transport, appId, appPrivateKey, 12);
+```
+
+
+### Integration
 
 ```
 npm install @coolwallet/eth
@@ -147,6 +154,11 @@ npm install @coolwallet/eth
 import cwsETH from '@coolwallet/eth'
 
 const ETH = new cwsETH();
+```
+
+### Getting Address
+
+```javascript
 const address = await ETH.getAddress(
   transport,
   appPrivateKey,
@@ -155,6 +167,14 @@ const address = await ETH.getAddress(
 ); 
 
 ```
+
+The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of folllowing BIP44 path:
+
+```none
+m/44'/60'/0'/0/{i}
+```
+
+In the design of current hardware, we only support path `m/44'/60'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
 
 If you have `accountPublicKey` and `accountChainCode`, you can use the function `ETH.getAddressByAccountKey()` to get the address. 
 ```javascript
