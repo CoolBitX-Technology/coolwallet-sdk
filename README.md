@@ -104,8 +104,8 @@ disconnect = () => {
 
 ```
 
-- transport: 
-- SEPublicKey: 
+- transport: The object use to communicate with CoolWallet
+- SEPublicKey: The key use to check se.
 
 Obtain app key pairs.
 
@@ -115,7 +115,7 @@ localStorage.setItem('appPublicKey', keyPair.publicKey)
 localStorage.setItem('appPrivateKey', keyPair.privateKey)
 ```
 
-- keyPair: 
+- keyPair: The keys use to check your app.
 
 ### Register card
 
@@ -208,5 +208,9 @@ const signTxData = {
 const signedTx = await ETH.signTransaction(signTxData);
 
 ```
+
+## Other
+
+If you want to 
 
 If you build something new, welcome to contact us to put your work in the list.
