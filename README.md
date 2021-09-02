@@ -55,9 +55,9 @@ Used to sign transactions of different cryptocurrencies.
 | [`@coolwallet/bch`](/packages/cws-bch) | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash |
 | [`@coolwallet/bnb`](/packages/cws-bnb) | ![version](https://img.shields.io/npm/v/@coolwallet/bnb) | Binance |
 | [`@coolwallet/bsc`](/packages/cws-bsc) | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain |
-| [`@coolwallet/btc`](/packages/cws-btc) | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin |
+| [`@coolwallet/btc`](/packages/cws-btc) | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin/USDT |
 | [`@coolwallet/dot`](/packages/cws-dot) | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot/Kusama |
-| [`@coolwallet/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum |
+| [`@coolwallet/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum (Ether, ERC20, Smart Contract, EIP-1559 etc.)|
 | [`@coolwallet/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon |
 | [`@coolwallet/ltc`](/packages/cws-ltc) | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LetCoin |
 | [`@coolwallet/trx`](/packages/cws-trx) | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron |
