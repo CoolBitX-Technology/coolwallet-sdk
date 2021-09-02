@@ -187,6 +187,8 @@ const address = await ETH.getAddressByAccountKey(
 
 ### Sign Transaction
 
+The signedTx is signed by CoolWallet, which can be sent directly.
+
 ```javascript
 const transaction = {
     nonce: "0x21d",
