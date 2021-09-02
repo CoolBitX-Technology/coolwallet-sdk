@@ -22,7 +22,7 @@ Depending on your platform, you may can choose different [transport](#Transport)
 
 ### 2. Register and setup hardware wallet.
 
-To register you application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet)  in `core` package. This giud you through the process of registeration and seed generation.
+To register you application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet)  in `core` package. This guide you through the process of registeration and seed generation.
 
 ### 3. Build your Application
 
@@ -49,23 +49,21 @@ To communicate with CoolWallet device, you need to specify a bluetooth transport
 
 Used to sign transactions of different cryptocurrencies.
 
-| Package                                 | Version                                                   | Description              |
+| Package                                 | Version                                                   | Coin Name              |
 | --------------------------------------- | --------------------------------------------------------- | ------------------------ |
-| [`@coolwallet/atom`](/packages/cws-atom) | ![version](https://img.shields.io/npm/v/@coolwallet/atom) | Cosmos Application API |
-| [`@coolwallet/bch`](/packages/cws-bch) | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash Application API   |
-| [`@coolwallet/bnb`](/packages/cws-bnb) | ![version](https://img.shields.io/npm/v/@coolwallet/bnb) | Binance Application API  |
-| [`@coolwallet/bsc`](/packages/cws-bsc) | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain Application API  |
-| [`@coolwallet/btc`](/packages/cws-btc) | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin Application API      |
-| [`@coolwallet/dot`](/packages/cws-dot) | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot Application API     |
-| [`@coolwallet/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum Application API     |
-| [`@coolwallet/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon Application API     |
-| [`@coolwallet/ltc`](/packages/cws-ltc) | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LetCoin Application API     |
-| [`@coolwallet/trx`](/packages/cws-trx) | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron Application API     |
-| [`@coolwallet/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar Application API     |
-| [`@coolwallet/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple Application API     |
-| [`@coolwallet/zen`](/packages/cws-zen) | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash Application API     |
-
-Other supported coins: BTC, BCH, ZEN. Open an issue if you want the sdk of any one of them to come out first.
+| [`@coolwallet/atom`](/packages/cws-atom) | ![version](https://img.shields.io/npm/v/@coolwallet/atom) | Cosmos |
+| [`@coolwallet/bch`](/packages/cws-bch) | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash |
+| [`@coolwallet/bnb`](/packages/cws-bnb) | ![version](https://img.shields.io/npm/v/@coolwallet/bnb) | Binance |
+| [`@coolwallet/bsc`](/packages/cws-bsc) | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain |
+| [`@coolwallet/btc`](/packages/cws-btc) | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin |
+| [`@coolwallet/dot`](/packages/cws-dot) | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot/Kusama |
+| [`@coolwallet/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum |
+| [`@coolwallet/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon |
+| [`@coolwallet/ltc`](/packages/cws-ltc) | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LetCoin |
+| [`@coolwallet/trx`](/packages/cws-trx) | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron |
+| [`@coolwallet/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar/Kinesis |
+| [`@coolwallet/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
+| [`@coolwallet/zen`](/packages/cws-zen) | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash |
 
 
 ## Examples: Build ETH in web app
