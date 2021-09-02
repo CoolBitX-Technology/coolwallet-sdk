@@ -211,4 +211,4 @@ const signedTx = await ETH.signTransaction(signTxData);
 
 ## Integration
 
-If you want to integrate the other coin into CoolWallet, you can refer to [CONTRIBUTING](CONTRIBUTING.md) or contact us.
+If you want to integrate the other coin into CoolWallet, you can refer to [CONTRIBUTING](./CONTRIBUTING.md) or contact us.
