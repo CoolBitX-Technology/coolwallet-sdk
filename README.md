@@ -209,8 +209,6 @@ const signedTx = await ETH.signTransaction(signTxData);
 
 ```
 
-## Other
+## Integration
 
-If you want to 
-
-If you build something new, welcome to contact us to put your work in the list.
+If you want to integrate the other coin into CoolWallet, you can refer to [` CONTRIBUTING`](/ CONTRIBUTING.md) or contact us.
