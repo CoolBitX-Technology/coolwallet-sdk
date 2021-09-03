@@ -35,14 +35,24 @@ CoolWallet SDK is designed to incorporate community support. We welcome communit
 	* Folder name should follow the rule: coin-(simbol)
 	<img src="./pics/folder.png" alt="drawing" width="150"/>
 * According to the currency nature, you may need to implement ECDSA or EDDSA class and required functions, getAddress(), and signTransaction().
-	* getAddress
+
+example : [index.ts](./packages/coin-xrp/src/index.ts) 
+
+```javascript
+export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
+```
+
+**getAddress**
+	
 ```javascript
  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return txUtil.pubKeyToAddress(publicKey);
   }
 ```
-	* signTransaction, include signing script
+
+ **signTransaction**, include signing script
+	
 ```javascript
  async signTransaction(
     signTxData: types.signTxType
