@@ -35,14 +35,36 @@ CoolWallet SDK is designed to incorporate community support. We welcome communit
 	* Folder name should follow the rule: coin-(simbol)
 	<img src="./pics/folder.png" alt="drawing" width="150"/>
 * According to the currency nature, you may need to implement ECDSA or EDDSA class and required functions, getAddress(), and signTransaction().
-	* getAddress [sample code]
+	* getAddress
 ```javascript
-	async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+ async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return txUtil.pubKeyToAddress(publicKey);
   }
 ```
-	* signTransaction [sample code], include signing script
+	* signTransaction, include signing script
+```javascript
+ async signTransaction(
+    signTxData: types.signTxType
+  ) {
+    const payment = signTxData.payment;
+
+    payment.TransactionType = "Payment";
+    payment.Flags = 2147483648;
+    if (!payment.SigningPubKey) {
+      payment.SigningPubKey = await this.getPublicKey(signTxData.transport, signTxData.appPrivateKey, signTxData.appId, signTxData.addressIndex);
+      payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
+    }
+    if (!payment.Account) {
+      payment.Account = txUtil.pubKeyToAddress(payment.SigningPubKey);
+    }
+
+    return xrpSign.signPayment(
+      signTxData,
+      payment,
+    );
+  }
+```
 * If the currency has extra functionalities, like smart contracts, staking, etc. You may need to implement additional functions as well.
 * Once you finish the development of new crypto currency, you may want to test the functionalities. Here are some suggested test cases.
 	* Check the address created by getAddress() function and compare it with official tools (CLI, or API).
