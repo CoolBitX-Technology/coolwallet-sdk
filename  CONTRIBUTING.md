@@ -16,7 +16,7 @@ CoolWallet SDK is a set of tools for app developers to easily communicate with C
 
 The relationship between CoolWallet Pro and CoolWallet SDK is shown in the figure below：
 
-![](./architecture.png)
+![](./pics/architecture.png)
 
 CoolWallet SDK is designed to incorporate community support. We welcome community effort to help add more crypto currencies in the SDK. In the following paragraphs we will provide more detail about how to contribute to CoolWallet SDK.
 
@@ -32,8 +32,16 @@ CoolWallet SDK is designed to incorporate community support. We welcome communit
 ### Steps
 
 * Create a package for the crypto currency
+	* Folder name should follow the rule: coin-(simbol)
+	<img src="./pics/folder.png" alt="drawing" width="150"/>
 * According to the currency nature, you may need to implement ECDSA or EDDSA class and required functions, getAddress(), and signTransaction().
 	* getAddress [sample code]
+```javascript
+	async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    return txUtil.pubKeyToAddress(publicKey);
+  }
+```
 	* signTransaction [sample code], include signing script
 * If the currency has extra functionalities, like smart contracts, staking, etc. You may need to implement additional functions as well.
 * Once you finish the development of new crypto currency, you may want to test the functionalities. Here are some suggested test cases.
