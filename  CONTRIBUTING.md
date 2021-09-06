@@ -36,13 +36,17 @@ CoolWallet SDK is designed to incorporate community support. We welcome communit
 	<img src="./pics/folder.png" alt="drawing" width="150"/>
 * According to the currency nature, you may need to implement ECDSA or EDDSA class and required functions, getAddress(), and signTransaction().
 
-example : [index.ts](./packages/coin-xrp/src/index.ts) 
+example : [index.ts](./packages/coin-xrp/src/index.ts)
 
 ```javascript
 export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
+  constructor() {
+    super(params.COIN_TYPE);
+  }
 ```
+The coin type in constructor is defined in [BIP-0044](https://github.com/satoshilabs/slips/blob/master/slip-0044.md).
 
-**getAddress**
+* Implement getAddress function
 	
 ```javascript
  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
@@ -50,8 +54,9 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin{
     return txUtil.pubKeyToAddress(publicKey);
   }
 ```
+The transport, appPrivateKey, appId are descriped in [README.md](./README.md)
 
- **signTransaction**, include signing script
+* signTransaction, include signing script
 	
 ```javascript
  async signTransaction(
