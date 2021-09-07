@@ -126,7 +126,7 @@ const SEPublicKey = localStorage.getItem('SEPublicKey')
 const appId = await apdu.pair.register(transport, appPublicKey, password, name, SEPublicKey);
 ```
 
-- password: Need to set the password, which will be used to change app.
+- password: Pairing password for the app to establish the connection with CoolWallet Pro. The password could be supplied by the user (max length: 8).
 
 NOTE: A single CoolWallet Pro could only be paired to 3 apps.
 
