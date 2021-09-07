@@ -59,7 +59,7 @@ Used to sign transactions of different cryptocurrencies.
 | [`@coolwallet/dot`](/packages/cws-dot) | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot/Kusama |
 | [`@coolwallet/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum (Ether, ERC20, Smart Contract, EIP-1559 etc.)|
 | [`@coolwallet/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon |
-| [`@coolwallet/ltc`](/packages/cws-ltc) | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LetCoin |
+| [`@coolwallet/ltc`](/packages/cws-ltc) | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LiteCoin |
 | [`@coolwallet/trx`](/packages/cws-trx) | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron |
 | [`@coolwallet/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar/Kinesis |
 | [`@coolwallet/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
@@ -67,7 +67,7 @@ Used to sign transactions of different cryptocurrencies.
 
 
 ## Examples: Build ETH in web app
-### Create connect
+### To connect to CoolWallet Pro via BLE
 
 
 ```
@@ -103,7 +103,10 @@ disconnect = () => {
 ```
 
 - transport: The object use to communicate with CoolWallet
-- SEPublicKey: The key use to check se.
+- SEPublicKey: The key used to authenticate SE.
+
+
+### Register application with CoolWallet Pro
 
 Obtain app key pairs.
 
@@ -115,8 +118,6 @@ localStorage.setItem('appPrivateKey', keyPair.privateKey)
 
 - keyPair: The keys use to check your app.
 
-### Register card
-
 Register card and obtain the appId.
 
 ```javascript
@@ -124,6 +125,11 @@ const name = 'your app name'
 const SEPublicKey = localStorage.getItem('SEPublicKey')
 const appId = await apdu.pair.register(transport, appPublicKey, password, name, SEPublicKey);
 ```
+
+- password: Need to set the password, which will be used to change app.
+
+NOTE: A single CoolWallet Pro could only be paired to 3 apps.
+
 
 ### Create / Recover the wallet
 
@@ -142,7 +148,7 @@ await apdu.wallet.createSeedByCard(transport, appId, appPrivateKey, 12);
 ```
 
 
-### Integration
+### Use coin app
 
 ```
 npm install @coolwallet/eth
@@ -209,6 +215,6 @@ const signedTx = await ETH.signTransaction(signTxData);
 
 ```
 
-## Integration
+## Contributing
 
-If you want to integrate the other coin into CoolWallet, you can refer to [CONTRIBUTING](./CONTRIBUTING.md) or contact us.
+If you're interested to develop new coin for CoolWallet Pro, please see [CONTRIBUTING](./CONTRIBUTING.md) for more information.
