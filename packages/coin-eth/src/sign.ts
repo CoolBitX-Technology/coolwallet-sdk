@@ -162,7 +162,6 @@ export const signMessage = async (
   );
 
   const msgHex = handleHex(Web3.utils.toHex(message));
-  console.log('msgHex :', msgHex);
   const msgBuf = Buffer.from(msgHex, 'hex');
 
   const _19Buf = Buffer.from("19", 'hex');
