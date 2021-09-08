@@ -15,7 +15,8 @@ export type Method = {
   bondExtra: string,
   unbond: string,
   nominate: string,
-  withdraw: string
+  withdraw: string,
+  chill: string,
 }
 
 type SignTxData = {
@@ -109,6 +110,10 @@ export interface WithdrawUnbondedTx extends dotTransaction {
 }
 export interface WithdrawUnbondedMethod {
   numSlashingSpans: string,
+}
+
+export interface ChillData extends SignTxData {
+  transaction: dotTransaction
 }
 
 export interface FormatTransfer {

@@ -2,22 +2,23 @@
 import { coin as COIN, setting } from '@coolwallet/core';
 import * as txUtil from './utils/transactionUtil';
 import * as dotUtil from './utils/dotUtil';
-import * as types from './config/types'
-import * as params from "./config/params"; 
-import * as scriptUtil from "./utils/scriptUtil"; 
-import * as dotSign from "./sign"; 
-import { payeeType } from "./config/params";
+import * as types from './config/types';
+import * as params from './config/params';
+import * as scriptUtil from './utils/scriptUtil';
+import * as dotSign from './sign';
+import { payeeType } from './config/params';
 import { COIN_SPECIES } from './config/types';
 
-export { payeeType, COIN_SPECIES }
+export { payeeType, COIN_SPECIES };
 
 export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
-  
-  scriptParams;
-  addressType;
-  methodCallIndex;
-  constructor(type: String) {
+  scriptParams: any
 
+  addressType: any
+
+  methodCallIndex: any
+
+  constructor(type: string) {
     switch (type) {
       case COIN_SPECIES.KSM:
         super(params.COIN_TYPE.KSM);
@@ -174,6 +175,28 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
     const { method, methodString } = dotUtil.getWithdrawUnbondedMethod(this.methodCallIndex, transaction.method)
     const formatTxData = dotUtil.getFormatTxData(transaction);
     const argument = await scriptUtil.getWithdrawUnbondedArgument(formatTxData, method, addressIndex, this.coinType);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+    const signature = await dotSign.signTransaction(
+      signTxData,
+      script,
+      argument,
+      publicKey
+    );
+
+    return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
+  }
+
+  async signChillTransaction(
+    signTxData: types.ChillData
+  ) {
+    const {
+      transport, transaction, appPrivateKey, appId, addressIndex
+    } = signTxData;
+    const script = this.scriptParams.CHILL.script + this.scriptParams.CHILL.signature;
+    const methodString = dotUtil.getChillMethod(this.methodCallIndex);
+    const formatTxData = dotUtil.getFormatTxData(transaction);
+    const argument = await scriptUtil.getChillArgument(formatTxData, methodString, addressIndex, this.coinType);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
     const signature = await dotSign.signTransaction(
