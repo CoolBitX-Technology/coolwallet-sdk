@@ -133,16 +133,69 @@ export const signPayment = async (
 * The **script** in above code is generated in  [coolwallet-signing-tools](https://github.com/CoolBitX-Technology/coolwallet-signing-tools), and **signature** is
 signed by CoolBitX team. In development stage, you can use "FA0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" replace first, if you have development card.
 * Notice the tx.flow.getSingleSignatureFromCoolWallet will return DER encode signature only. If you want another form signature, like canonical signatures, r s v, etc. You should implement here.
+
+[coin-eth/src/sign.ts](./packages/coin-xrp/src/eth.ts)
+
+```javascript
+import { apdu, tx } from "@coolwallet/core";
+
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    action,
+    false,
+    signTxData.confirmCB,
+    signTxData.authorizedCB,
+    true
+  );
+
+  if (!Buffer.isBuffer(canonicalSignature)) {
+    const { v, r, s } = await ethUtil.genEthSigFromSESig(
+      canonicalSignature,
+      rlp.encode(rawPayload),
+      publicKey
+    );
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    return serializedTx;
+  } else {
+    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
+  }
+```
 * The function should return full transaction which can be broadcast to blockchain.
 * Use web-demo page (still under development) to test full flow to make sure signing flow is correct.
 
 ### If the currency has extra functionalities
 * For example, smart contracts, staking, etc. You may need to implement additional functions as well.
 
+[coin-eth/src/sign.ts](./packages/coin-eth/src/index.ts)
+
+```javascript
+  async signERC20Transaction(
+    signTxData: types.signTx, tokenSignature = ''
+  ): Promise<string> {
+    const {
+      transport, appPrivateKey, appId, addressIndex, transaction
+    } = signTxData;
+    const publicKey = await this.getPublicKey(
+      transport, appPrivateKey, appId, addressIndex
+    );
+    const argument = await scriptUtils.getERC20Argument(
+      transaction, tokenSignature, addressIndex
+    );
+    const script = params.ERC20.scriptWithSignature;
+
+    return ethSign.signTransaction(
+      signTxData,
+      script,
+      argument,
+      publicKey,
+    );
+  }
+```
+
 ### Once you finish the development of new crypto currency, you may want to test the functionalities. Here are some suggested test cases.
-* Check the address created by getAddress() function and compare it with official tools (CLI, or API).
+* Check the address created by getAddress() function and compare it with official tools (CLI, API, or wallet).
 * When performing the signature generation, make sure the information shown on CoolWallet Pro is correct. The information includes the blockchain symbol,token name (if it is a token transaction), addresses, and amount.
 * Finally check if the transaction (combined with generated signature) could be broadcasted to the blockchain successfully.
-* 
  
 ### If everything goes well, you’re encouraged to create a pull request to the repository. CoolBitX engineering team will help to review it.
