@@ -145,3 +145,14 @@ export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer,
   console.debug('WithdrawUnbondedArgument: ', argument)
   return addPath(argument, addressIndex, coinType);
 };
+
+export const getChillArgument = async (rawData: types.FormatTransfer, methodString: string, addressIndex: number, coinType: string)
+  : Promise<string> => {
+
+  const callIndex = methodString.padStart(4, '0')
+  const tradeArgument = await getTradeArgument(rawData)
+
+  const argument = callIndex + tradeArgument
+  console.debug('ChillArgument: ', argument)
+  return addPath(argument, addressIndex, coinType);
+};
