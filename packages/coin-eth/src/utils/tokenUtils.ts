@@ -32,11 +32,11 @@ export const parseToAndAmount = (data: string) => {
  */
 export const getSetTokenPayload = (contractAddress: string, symbol: string, decimals: number): string => {
   const unit = handleHex(decimals.toString(16));
-  const len = handleHex(symbol.length.toString(16));
-  let symb = handleHex(Web3.utils.asciiToHex(symbol));
-  if (symb.length > 14) {
-    symb = symb.substring(0, 14);
+  if (symbol.length > 7) {
+    symbol = symbol.substring(0, 7);
   }
+  const len = handleHex(symbol.length.toString(16));
+  const symb = handleHex(Web3.utils.asciiToHex(symbol));
   const setTokenPayload = unit + len + Web3.utils.padRight(symb, 14, '0') + removeHex0x(contractAddress);
   return setTokenPayload;
 };
