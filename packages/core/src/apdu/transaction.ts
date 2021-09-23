@@ -6,6 +6,7 @@ import { commands, CommandType } from "./execute/command";
 import { SDKError, APDUError } from '../error/errorHandle';
 import { CODE } from '../config/status/code';
 import { target } from '../config/param';
+import { getSEVersion } from './general';
 
 
 /**
@@ -41,6 +42,11 @@ export const executeScript = async (
 
   const args = argument.match(/.{2,3800}/g);
   if (args === null) throw new Error('argument is empty');
+
+  if (args.length > 1) {
+    const version = await getSEVersion(transport);
+    if (version < 314) throw new Error('argument too long, try updating to support the longer data');
+  }
 
   for (let [i, v] of args.entries()) {
     const p1 = i.toString(16).padStart(2, '0');
