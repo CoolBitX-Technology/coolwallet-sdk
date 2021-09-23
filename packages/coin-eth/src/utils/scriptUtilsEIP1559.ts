@@ -51,7 +51,7 @@ export const getERC20Argument = async (
   const signature = tokenSignature.slice(58).padStart(144, '0');
   const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, '');
   const amount = transaction.data.slice(74).replace(/\b(0+)/gi, '');
-  const argument = handleHex(toAddress)
+  const argument = handleHex(toAddress).padStart(40, "0")
     + handleHex(amount).padStart(24, '0')
     + handleHex(transaction.gasTipCap).padStart(20, '0')
     + handleHex(transaction.gasFeeCap).padStart(20, '0')
