@@ -6,6 +6,7 @@ import { commands, CommandType } from "./execute/command";
 import { SDKError, APDUError } from '../error/errorHandle';
 import { CODE } from '../config/status/code';
 import { target } from '../config/param';
+import { getSEVersion } from './general';
 
 
 /**
@@ -29,7 +30,7 @@ export const sendScript = async (transport: Transport, script: string) => {
 };
 
 /**
- * Scriptable step 2
+ * Scriptable step 2 : sign tx by arguments and return encrypted signature
  */
 export const executeScript = async (
   transport: Transport,
@@ -37,27 +38,43 @@ export const executeScript = async (
   appPrivKey: string,
   argument: string,
 ) => {
-  const signature = await getCommandSignature(
-    transport,
-    appId,
-    appPrivKey,
-    commands.EXECUTE_SCRIPT,
-    argument,
-    undefined,
-    undefined
-  );
-  const { outputData: encryptedSignature, statusCode, msg } = await executeCommand(
-    transport,
-    commands.EXECUTE_SCRIPT,
-    target.SE,
-    argument + signature,
-    undefined,
-    undefined,
-  );
-  if (encryptedSignature) {
-    return encryptedSignature;
-  } else {
-    throw new APDUError(commands.EXECUTE_SCRIPT, statusCode, msg)
+  if (argument.length > 20000) throw new Error('argument too long');
+
+  const args = argument.match(/.{2,3800}/g);
+  if (args === null) throw new Error('argument is empty');
+
+  if (args.length > 1) {
+    const version = await getSEVersion(transport);
+    if (version < 314) throw new Error('argument too long, try updating to support the longer data');
+  }
+
+  for (let [i, v] of args.entries()) {
+    const p1 = i.toString(16).padStart(2, '0');
+    const p2 = args.length.toString(16).padStart(2, '0');
+    const signature = await getCommandSignature(
+      transport,
+      appId,
+      appPrivKey,
+      commands.EXECUTE_SCRIPT,
+      v,
+      p1,
+      p2,
+    );
+    const { outputData, statusCode, msg } = await executeCommand(
+      transport,
+      commands.EXECUTE_SCRIPT,
+      target.SE,
+      v + signature,
+      p1,
+      p2,
+    );
+    if (i + 1 === args.length) {
+      if (outputData) {
+        return outputData;
+      } else {
+        throw new APDUError(commands.EXECUTE_SCRIPT, statusCode, msg)
+      }
+    }
   }
 };
 
