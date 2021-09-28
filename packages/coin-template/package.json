@@ -1,0 +1,11 @@
+{
+  "name": "coin-template",
+  "version": "1.0.0",
+  "description": "clone this project to build your own coin package",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --verbose"
+  },
+  "author": "",
+  "license": "ISC"
+}
