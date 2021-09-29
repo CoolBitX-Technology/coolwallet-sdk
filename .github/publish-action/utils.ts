@@ -15,7 +15,8 @@ export async function buildAndPublishBeta(path:string) {
 
 async function buildAndPublish(path:string, isBeta:boolean) {
 	await command('npm', ['ci'], path);
-	await command('npm', ['run-script', 'build'], path);
+	const buildLogs = await command('npm', ['run', 'build'], path);
+  console.log('npm run build :', buildLogs);
 	let publishArgs = ['publish', '--access', 'public'];
 	// if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
 	const result = await command('npm', publishArgs, path);
