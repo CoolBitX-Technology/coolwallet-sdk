@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "build:types": "tsc src/*.ts --emitDeclarationOnly",
+    "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
     "build": "npm run build:types ; npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
@@ -35,6 +35,7 @@
     "@babel/plugin-proposal-class-properties": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@types/bluebird": "^3.5.32"
+    "@types/bluebird": "^3.5.32",
+    "typescript": "^4.4.3"
   }
 }
