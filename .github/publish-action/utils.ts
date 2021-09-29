@@ -14,13 +14,14 @@ export async function buildAndPublishBeta(path:string) {
 }
 
 async function buildAndPublish(path:string, isBeta:boolean) {
-	await command('npm', ['ci'], path);
-	const buildLogs = await command('npm', ['run', 'build'], path);
+  const installLogs = await command('npm', ['ci'], path);
+  console.log('npm ci :', installLogs);
+  const buildLogs = await command('npm', ['run', 'build'], path);
   console.log('npm run build :', buildLogs);
-	let publishArgs = ['publish', '--access', 'public'];
-	// if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
-	const result = await command('npm', publishArgs, path);
-	console.log('npm publish :', result);
+  let publishArgs = ['publish', '--access', 'public'];
+  // if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
+  const result = await command('npm', publishArgs, path);
+  console.log('npm publish :', result);
 }
 
 export async function updateVersionProduction(path:string) {
