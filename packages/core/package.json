@@ -5,9 +5,9 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build:types": "tsc src/*.ts --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
-    "build": "npm run build:ts",
+    "build": "npm run build:types ; npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "author": "coolwallet-team",
