@@ -40,16 +40,20 @@ export async function updateVersionMajor(path:string) {
 	await updateVersion(path, 4);
 }
 
-// versionType 1 : production - remove beta version.
-// versionType 2 : patch - add patch and init beta version. if beta exists, just add beta version.
-// versionType 3 : minor - add minor and init beta version. if beta exists, just add beta version.
-// versionType 4 : major - add major and init beta version. if beta exists, just add beta version.
+// versionType 1 : production - if beta exists, remove beta version, else add patch version.
+// versionType 2 : patch - if beta exists, add beta version, else add patch and init beta version.
+// versionType 3 : minor - if beta exists, add beta version, else add minor and init beta version.
+// versionType 4 : major - if beta exists, add beta version, else add major and init beta version.
 async function updateVersion(path:string, versionType:number) {
 	const { version: oldVersion, name } = getPackageInfo(path);
 	const version = disassembleVersion(oldVersion);
 	if (versionType === 1) {
-		version.beta = undefined;
-
+    if (version.beta) {
+		  version.beta = undefined;
+    } else {
+			const patch = parseInt(version.patch) + 1;
+			version.patch = patch.toString();
+    }
 	} else if (version.beta === undefined) {
 		version.beta = '0';
 
