@@ -243,7 +243,7 @@ const insertDeleteScript = async (transport: Transport, scriptHex: string) => {
 const recoverBackupData = async (transport: Transport) => {
   try {
     await setting.recoverSeed(transport);
-  } catch (e) {
+  } catch (e: any) {
     if (e.message) {
       console.error('[recoverBackupData] fail:', e.message);
     }
@@ -258,7 +258,7 @@ const deleteBackupRegisterData = async (transport: Transport, appId: string, app
     let signedData = await auth.getCommandSignature(transport, appId, appPrivateKey, command)
     let status = await setting.deleteSeedBackup(transport, signedData);
     console.debug(`${deleteBackupRegisterData.name} status: ${status}`);
-  } catch (e) {
+  } catch (e: any) {
     if (e.message) {
       console.error(`${deleteBackupRegisterData.name} fail: ${e.message}`);
     }
@@ -273,7 +273,7 @@ const backupRegisterData = async (transport: Transport, appId: string, appPrivat
     console.debug(`backupRegisterData: ${signature}`)
     let status = await setting.backupSeed(transport, signature);
     console.debug(`${backupRegisterData.name} status: ${status}`);
-  } catch (e) {
+  } catch (e: any) {
     if (e.message) {
       console.error(`${backupRegisterData.name} fail: ${e.message}`);
     }
