@@ -12623,20 +12623,26 @@ function updateVersionMajor(path) {
     });
 }
 exports.updateVersionMajor = updateVersionMajor;
-// versionType 1 : production - remove beta version.
-// versionType 2 : patch - add patch and init beta version. if beta exists, just add beta version.
-// versionType 3 : minor - add minor and init beta version. if beta exists, just add beta version.
-// versionType 4 : major - add major and init beta version. if beta exists, just add beta version.
+// versionType 1 : production - if beta exists, remove beta version, else add patch version.
+// versionType 2 : patch - if beta exists, add beta version, else add patch and init beta version.
+// versionType 3 : minor - if beta exists, add beta version, else add minor and init beta version.
+// versionType 4 : major - if beta exists, add beta version, else add major and init beta version.
 function updateVersion(path, versionType) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, oldVersion, name, version, patch, minor, major, beta, newVersion, tag;
+        var _a, oldVersion, name, version, patch, patch, minor, major, beta, newVersion, tag;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = getPackageInfo(path), oldVersion = _a.version, name = _a.name;
                     version = disassembleVersion(oldVersion);
                     if (versionType === 1) {
-                        version.beta = undefined;
+                        if (version.beta) {
+                            version.beta = undefined;
+                        }
+                        else {
+                            patch = parseInt(version.patch) + 1;
+                            version.patch = patch.toString();
+                        }
                     }
                     else if (version.beta === undefined) {
                         version.beta = '0';
