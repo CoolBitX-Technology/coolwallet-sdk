@@ -207,7 +207,7 @@ import { apdu, tx } from "@coolwallet/core";
 
 * Use lower camel case naming for parameters and function names.
 * Ensure any install or build dependencies are removed.
-* Update the README.md should include:
+* The README.md should include:
 	1. The details of signing data and transaction data, this includes parameters.
 	2. Official docs or white paper.
 	3. Website or api can query assets and broadcast transaction.
