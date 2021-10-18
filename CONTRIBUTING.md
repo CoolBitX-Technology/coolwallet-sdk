@@ -193,9 +193,22 @@ import { apdu, tx } from "@coolwallet/core";
   }
 ```
 
+## Test
+
 ### Once you finish the development of new crypto currency, you may want to test the functionalities. Here are some suggested test cases.
+
 * Check the address created by getAddress() function and compare it with official tools (CLI, API, or wallet).
 * When performing the signature generation, make sure the information shown on CoolWallet Pro is correct. The information includes the blockchain symbol,token name (if it is a token transaction), addresses, and amount.
 * Finally check if the transaction (combined with generated signature) could be broadcasted to the blockchain successfully.
  
-### If everything goes well, you’re encouraged to create a pull request to the repository. CoolBitX engineering team will help to review it.
+## Pull Request Process
+
+### Our Standards
+
+* Use lower camel case naming for parameters and function names.
+* Ensure any install or build dependencies are removed.
+* The README.md should include:
+	1. The details of signing data and transaction data, this includes parameters.
+	2. Official docs or white paper.
+	3. Website or api can query assets and broadcast transaction.
+* If everything goes well, you’re encouraged to create a pull request to the repository. CoolBitX engineering team will help to review it.
