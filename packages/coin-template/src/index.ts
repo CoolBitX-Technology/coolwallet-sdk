@@ -6,6 +6,27 @@ import * as scriptUtils from './utils/scriptUtils';
 import * as scriptUtilsEIP1559 from './utils/scriptUtilsEIP1559';
 import * as params from './config/params';
 
+type signTx = {
+  transport: Transport,
+  appPrivateKey: string,
+  appId: string,
+  transaction: Transaction,
+  addressIndex: number,
+  publicKey: string | undefined,
+  confirmCB: ()=>void | undefined,
+  authorizedCB: ()=>void | undefined
+}
+
+type Transaction = {
+  chainId: number,
+  nonce: string,
+  gasPrice: string,
+  gasLimit: string,
+  to: string,
+  value: string,
+  data: string,
+}
+
 export default class TEMP extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
     super(params.COIN_TYPE);
@@ -35,14 +56,14 @@ export default class TEMP extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async signTransaction(
-    signTxData: types.signTx
+    signTxData: signTx
   ): Promise<string> {
     const { value, data, to } = signTxData.transaction;
-
 
     const {
       transport, appPrivateKey, appId, addressIndex, transaction
     } = signTxData;
+
     const publicKey = await this.getPublicKey(
       transport, appPrivateKey, appId, addressIndex
     );
