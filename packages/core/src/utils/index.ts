@@ -1,41 +1,26 @@
-import * as tx from '../apdu/transaction' ;
+import * as tx from '../apdu/transaction';
 import Transport from '../transport';
-import { MSG } from '../config/status/msg'
-import { CODE } from '../config/status/code'
-import { pathType } from '../config/param'
-import { APDUError, SDKError } from '../error/errorHandle'
+import { MSG } from '../config/status/msg';
+import { CODE } from '../config/status/code';
+import { PathType } from '../config/param';
+import { SDKError } from '../error/errorHandle';
+
 const bip39 = require('bip39');
 
-
-
-export const getPath = async (coinType: string, keyIndex: number, depth: number = 5, path: pathType = pathType.BIP32): Promise<string> => {
-  let fullPath = path.toString();
-
-  if (path == pathType.SLIP0010 || path == pathType.BIP32_ED25519) {
-    depth = 3;
-  }
-
-  if (depth >= 1) {
-    fullPath += "8000002C";
-  }
-  if (depth >= 2) {
-    fullPath += coinType;
-  }
-  if (depth >= 3) {
-    fullPath += "80000000";
-  }
-  if (depth >= 4) {
-    fullPath += "00000000";
-  }
-  if (depth >= 5) {
-    fullPath += (keyIndex.toString(16)).padStart(8, "0");
-  }
+// [path_type (1B)][purpose (4B)][coin_type (4B)][account (4B)]
+export const getAccountPath = async ({
+  pathType = PathType.BIP32,
+  purpose = '8000002C',
+  coinType = '80000000',
+}): Promise<string> => {
+  const fullPath = `${pathType.toString()}${purpose}${coinType}80000000`;
   return fullPath;
-}
+};
 
 export const getReturnMsg = (code: string): string => {
-  return MSG[`_${code}`] ? MSG[`_${code}`] : "unknown command error";
-}
+  const message = MSG[`_${code}`] ? MSG[`_${code}`] : 'unknown command error';
+  return message;
+};
 
 const getCheckSum = (data: any) => {
   let XORTemp = 0;
