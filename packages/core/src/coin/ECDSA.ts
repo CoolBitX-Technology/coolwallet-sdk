@@ -1,14 +1,20 @@
 import * as derivation from './derive';
-import Transport from "../transport";
-import * as utils from "../utils/index";
+import Transport from '../transport';
+import * as utils from '../utils/index';
+
 const elliptic = require('elliptic');
 
 export default class ECDSACoin {
   coinType: string;
+
   accPublicKey: string;
+
   accChainCode: string;
+
   publicKeys: any;
+
   ec: any;
+
   constructor(coinType: string, curvePara?: string) {
     this.coinType = coinType;
     this.accPublicKey = '';
@@ -28,9 +34,11 @@ export default class ECDSACoin {
    * @param {Number} addressIndex address index in BIP44 pointing to the target public key.
    * @returns {Promise < string >}
    */
-  async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+  async getPublicKey(
+    transport: Transport, appPrivateKey: string, appId: string, addressIndex: number
+  ): Promise<string> {
     if (this.accPublicKey === '' || this.accChainCode === '') {
-      await this.getAccountPubKeyAndChainCode(transport, appPrivateKey, appId)
+      await this.getAccountPubKeyAndChainCode(transport, appPrivateKey, appId);
     }
     if (!this.publicKeys[addressIndex]) {
       const node = derivation.derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
@@ -45,12 +53,12 @@ export default class ECDSACoin {
         transport,
         appId,
         appPrivateKey,
-        await utils.getPath(this.coinType, 0, 3)
+        await utils.getAccountPath({ coinType: this.coinType })
       );
       this.accPublicKey = accountPublicKey;
       this.accChainCode = accountChainCode;
     }
-    return { accountPublicKey: this.accPublicKey, accountChainCode: this.accChainCode }
+    return { accountPublicKey: this.accPublicKey, accountChainCode: this.accChainCode };
   }
 
   async getAddressPublicKey(accPublicKey: string, accChainCode: string, addressIndex: number, ){
