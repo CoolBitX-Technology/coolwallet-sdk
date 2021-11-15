@@ -10,7 +10,7 @@ import { program_B } from '../script/dfuScript/program_B';
 import { sig_A } from '../script/dfuScript/sig_A';
 import { sig_B } from '../script/dfuScript/sig_B';
 
-const MCU_UPDATE_VER = '150A1A09';
+const MCU_UPDATE_VER = '150B0909';
 
 export const checkUpdate = async (transport: Transport) => {
 	const { cardMCUVersion } = await getMCUVersion(transport);
