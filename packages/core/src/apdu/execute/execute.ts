@@ -32,12 +32,11 @@ export const executeAPDU = async (
   console.debug("}")
 
   try {
-		if (apdu.data.length > 4096) {
-			throw new Error('data too long!!');
-		}
-
     // trigger SE_POWER_OFF to prevent from disconnection
     if (executedTarget === target.SE) {
+      if (apdu.data.length > 4096) {
+        throw new Error('data too long!!');
+      }
       if (commandCounter.command !== apdu.command) {
         commandCounter.command = apdu.command;
         commandCounter.count = 0;
