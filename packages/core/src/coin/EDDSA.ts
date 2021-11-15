@@ -1,4 +1,4 @@
-import * as derivation from './derive';
+import { getAccountExtKeyFromSE } from './derive';
 import Transport from '../transport';
 import * as utils from '../utils/index';
 import { PathType } from '../config/param';
@@ -22,6 +22,6 @@ export default class EDDSACoin {
       pathType: isSLIP0010 ? PathType.SLIP0010 : PathType.BIP32EDDSA,
       coinType: this.coinType,
     });
-    return derivation.getEd25519PublicKey(transport, appId, appPrivateKey, path);
+    return getAccountExtKeyFromSE(transport, appId, appPrivateKey, path);
   }
 }

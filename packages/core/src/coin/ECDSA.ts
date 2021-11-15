@@ -1,8 +1,8 @@
-import * as derivation from './derive';
+import { getAccountExtKeyFromSE, derivePubKey } from './derive';
 import Transport from '../transport';
-import * as utils from '../utils/index';
+import * as utils from '../utils';
 
-const elliptic = require('elliptic');
+const EC = require('elliptic').ec;
 
 export default class ECDSACoin {
   coinType: string;
@@ -11,7 +11,7 @@ export default class ECDSACoin {
 
   accChainCode: string;
 
-  publicKeys: any;
+  publicKeys: string[];
 
   ec: any;
 
@@ -19,62 +19,56 @@ export default class ECDSACoin {
     this.coinType = coinType;
     this.accPublicKey = '';
     this.accChainCode = '';
-    this.publicKeys = {};
+    this.publicKeys = [];
     if (!curvePara) {
-      this.ec = new elliptic.ec("secp256k1");
+      this.ec = new EC('secp256k1');
     } else {
-      this.ec = new elliptic.ec(curvePara);
+      this.ec = new EC(curvePara);
     }
-
     this.getPublicKey = this.getPublicKey.bind(this);
   }
 
   /**
    * For ECDSA based coins
-   * @param {Number} addressIndex address index in BIP44 pointing to the target public key.
-   * @returns {Promise < string >}
    */
-  async getPublicKey(
+  getPublicKey = async (
     transport: Transport, appPrivateKey: string, appId: string, addressIndex: number
-  ): Promise<string> {
+  ): Promise<string> => {
     if (this.accPublicKey === '' || this.accChainCode === '') {
       await this.getAccountPubKeyAndChainCode(transport, appPrivateKey, appId);
     }
     if (!this.publicKeys[addressIndex]) {
-      const node = derivation.derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
+      const node = derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
       this.publicKeys[addressIndex] = node.publicKey;
     }
     return this.publicKeys[addressIndex];
   }
 
-  async getAccountPubKeyAndChainCode(transport: Transport, appPrivateKey: string, appId: string) {
+  getAccountPubKeyAndChainCode = async (
+    transport: Transport, appPrivateKey: string, appId: string
+  ): Promise<{accountPublicKey:string, accountChainCode:string}> => {
     if (this.accPublicKey === '' || this.accChainCode === '') {
-      const { accountPublicKey, accountChainCode } = await derivation.getAccountExtKey(
-        transport,
-        appId,
-        appPrivateKey,
-        await utils.getAccountPath({ coinType: this.coinType })
-      );
-      this.accPublicKey = accountPublicKey;
-      this.accChainCode = accountChainCode;
+      const path = await utils.getAccountPath({ coinType: this.coinType });
+      const decryptedData = await getAccountExtKeyFromSE(transport, appId, appPrivateKey, path);
+      const accBuf = Buffer.from(decryptedData, 'hex');
+      this.accPublicKey = accBuf.slice(0, 33).toString('hex');
+      this.accChainCode = accBuf.slice(33).toString('hex');
     }
     return { accountPublicKey: this.accPublicKey, accountChainCode: this.accChainCode };
   }
 
-  async getAddressPublicKey(accPublicKey: string, accChainCode: string, addressIndex: number, ){
-    const node = derivation.derivePubKey(accPublicKey, accChainCode, 0, addressIndex);
+  getAddressPublicKey = (
+    accPublicKey: string, accChainCode: string, addressIndex: number
+  ): string => {
+    const node = derivePubKey(accPublicKey, accChainCode, 0, addressIndex);
     return node.publicKey;
   }
 
-  
-
-
   /**
- * For ECDSA based coins
- * @returns {fullPublicKey: string}
- */
-  async getFullPubKey(compressPubKey: string) {
-    const keyPair = this.ec.keyFromPublic(compressPubKey, "hex");
-    return keyPair.getPublic(false, "hex");
+   * decompress public key
+   */
+  async getFullPubKey(compressPubKey: string): Promise<string> {
+    const keyPair = this.ec.keyFromPublic(compressPubKey, 'hex');
+    return keyPair.getPublic(false, 'hex');
   }
 }
