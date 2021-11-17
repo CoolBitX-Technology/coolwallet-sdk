@@ -17,6 +17,32 @@ export const getAccountPath = async ({
   return fullPath;
 };
 
+export const getPath = async (
+  coinType: string, keyIndex: number, depth = 5, path = PathType.BIP32
+): Promise<string> => {
+  let fullPath = path.toString();
+
+  if (depth >= 1) {
+    fullPath += '8000002C';
+  }
+  if (depth >= 2) {
+    fullPath += coinType;
+  }
+  if (depth >= 3) {
+    fullPath += '80000000';
+  }
+  if (path === PathType.SLIP0010 || path === PathType.BIP32ED25519) {
+    return fullPath;
+  }
+  if (depth >= 4) {
+    fullPath += '00000000';
+  }
+  if (depth >= 5) {
+    fullPath += (keyIndex.toString(16)).padStart(8, '0');
+  }
+  return fullPath;
+};
+
 export const getReturnMsg = (code: string): string => {
   const message = MSG[`_${code}`] ? MSG[`_${code}`] : 'unknown command error';
   return message;
