@@ -7,20 +7,39 @@ import { SDKError } from '../error/errorHandle';
 
 const bip39 = require('bip39');
 
-// [path_type (1B)][purpose (4B)][coin_type (4B)][account (4B)]
-export const getAccountPath = async ({
+function hardenPath(index: number) {
+  return (Math.floor(index) + 0x80000000).toString(16);
+}
+
+// input :
+//    pathType : BIP32 = '32', SLIP0010 = '10', BIP32EDDSA = '42', BIP32ED25519 = '17'
+//    pathString : 44'/0'/0'/0/0
+//
+// output : [path_type(1B)] [index(4B)] x 5
+//    32 8000002C 80000000 80000000 00000000 00000000
+export const getFullPath = async ({
   pathType = PathType.BIP32,
-  purpose = '8000002C',
-  coinType = '80000000',
+  pathString,
+}: {
+  pathType: PathType,
+  pathString: string,
 }): Promise<string> => {
-  const fullPath = `${pathType.toString()}${purpose}${coinType}80000000`;
-  return fullPath;
+  const paths = pathString.split('/').map((index) => {
+    if (!index.match(/^\d+(|')$/)) {
+      throw new SDKError('getFullPath', `invalid pathString : ${pathString}`);
+    }
+    if (index.endsWith("'")) {
+      return hardenPath(parseInt(index.slice(0, -1), 10));
+    }
+    return parseInt(index, 10).toString(16).padStart(8, '0');
+  });
+  return pathType.toString().concat(...paths);
 };
 
 export const getPath = async (
-  coinType: string, keyIndex: number, depth = 5, path = PathType.BIP32
+  coinType: string, keyIndex: number, depth = 5, pathType = PathType.BIP32
 ): Promise<string> => {
-  let fullPath = path.toString();
+  let fullPath = pathType.toString();
 
   if (depth >= 1) {
     fullPath += '8000002C';
@@ -31,7 +50,7 @@ export const getPath = async (
   if (depth >= 3) {
     fullPath += '80000000';
   }
-  if (path === PathType.SLIP0010 || path === PathType.BIP32ED25519) {
+  if (pathType === PathType.SLIP0010 || pathType === PathType.BIP32ED25519) {
     return fullPath;
   }
   if (depth >= 4) {
