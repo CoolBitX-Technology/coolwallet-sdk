@@ -1,4 +1,4 @@
-import bip39 from 'bip39';
+import * as bip39 from 'bip39';
 import pbkdf2 from 'pbkdf2';
 import { tx, wallet } from '../apdu';
 import Transport from '../transport';
@@ -147,14 +147,9 @@ export const checkSupportScripts = async (transport: Transport) => {
   }
 };
 
-export const createSeedByApp = async (strength: number, randomBytes: (size: number)=>Buffer): Promise<string> => {
-  const toBit = strength * 10.7;
-  const toFloor = Math.floor(toBit);
-
-  let mnemonic;
-  const word = bip39.wordlists.english;
-  mnemonic = bip39.generateMnemonic(toFloor, randomBytes, word);
-  return mnemonic;
+export const createSeedByApp = async (wordNumber: number, randomBytes: (size: number)=>Buffer): Promise<string> => {
+  const strength = wordNumber*11 - wordNumber/3;
+  return bip39.generateMnemonic(strength, randomBytes);
 };
 
 export const createWalletByMnemonic = async (
@@ -162,7 +157,6 @@ export const createWalletByMnemonic = async (
 ): Promise<void> => {
   // mnemonic to seed
   const seed = await bip39.mnemonicToSeed(mnemonic);
-  console.log('seed :', seed.toString('hex'));
 
   // mnemonic to ADA master key
   const entropy = bip39.mnemonicToEntropy(mnemonic);
@@ -170,7 +164,6 @@ export const createWalletByMnemonic = async (
   key[0] &= 0b11111000;
   key[31] &= 0b00011111;
   key[31] |= 0b01000000;
-  console.log('ADA Key :', key.toString('hex'));
 
   return wallet.setSeed(transport, appId, appPrivateKey, Buffer.concat([seed, key]).toString('hex'), SEPublicKey);
 };
