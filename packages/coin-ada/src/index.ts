@@ -2,9 +2,7 @@
 import {
   coin as COIN, transport as Transport, utils, config
 } from '@coolwallet/core';
-import { pubKeyToAddress } from './utils';
-
-const bip32Edd25519 = require('bip32-ed25519');
+import { accountKeyToAddress } from './utils';
 
 // import * as params from './config/params';
 // import * as ethSign from './sign';
@@ -12,34 +10,20 @@ const bip32Edd25519 = require('bip32-ed25519');
 // import * as scriptUtils from './utils/scriptUtils';
 
 export default class ADA implements COIN.Coin {
-
   getAddress = async (
     transport: Transport.default,
     appPrivateKey: string,
     appId: string,
     addressIndex: number
   ): Promise<string> => {
-    const path = await utils.getAccountPath({
+    const path = await utils.getFullPath({
       pathType: config.PathType.BIP32ED25519,
-      purpose: '8000073C',
-      coinType: '80000717',
+      pathString: "1852'/1815'/0'",
     });
-    const accountPublicKey = COIN.getAccountExtKeyFromSE(transport, appId, appPrivateKey, path);
-    console.log('accountPublicKey :', accountPublicKey);
-    return accountPublicKey;
-    // return pubKeyToAddress(publicKey);
+    const accountPublicKey = await COIN.getAccountExtKeyFromSE(transport, appId, appPrivateKey, path);
+    const address = accountKeyToAddress(Buffer.from(accountPublicKey, 'hex'), addressIndex);
+    return address;
   }
-
-  // async getAddressByAccountKey(
-  //   accPublicKey: string,
-  //   accChainCode: string,
-  //   addressIndex: number
-  // ): Promise<string> {
-  //   const publicKey = await this.getAddressPublicKey(
-  //     accPublicKey, accChainCode, addressIndex
-  //   );
-  //   return pubKeyToAddress(publicKey);
-  // }
 
   signTransaction = async (): Promise<string> => 'test';
 }
