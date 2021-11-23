@@ -1,19 +1,64 @@
-import * as tx from '../apdu/transaction';
+import * as bip39 from 'bip39';
+import pbkdf2 from 'pbkdf2';
+import { tx, wallet } from '../apdu';
 import Transport from '../transport';
 import { MSG } from '../config/status/msg';
 import { CODE } from '../config/status/code';
 import { PathType } from '../config/param';
 import { SDKError } from '../error/errorHandle';
 
-const bip39 = require('bip39');
+function hardenPath(index: number) {
+  return (Math.floor(index) + 0x80000000).toString(16);
+}
 
-// [path_type (1B)][purpose (4B)][coin_type (4B)][account (4B)]
-export const getAccountPath = async ({
+// input :
+//    pathType : BIP32 = '32', SLIP0010 = '10', BIP32EDDSA = '42', BIP32ED25519 = '17'
+//    pathString : 44'/0'/0'/0/0
+//
+// output : [path_type(1B)] [index(4B)] x 5
+//    32 8000002C 80000000 80000000 00000000 00000000
+export const getFullPath = async ({
   pathType = PathType.BIP32,
-  purpose = '8000002C',
-  coinType = '80000000',
+  pathString,
+}: {
+  pathType: PathType,
+  pathString: string,
 }): Promise<string> => {
-  const fullPath = `${pathType.toString()}${purpose}${coinType}80000000`;
+  const paths = pathString.split('/').map((index) => {
+    if (!index.match(/^\d+(|')$/)) {
+      throw new SDKError('getFullPath', `invalid pathString : ${pathString}`);
+    }
+    if (index.endsWith("'")) {
+      return hardenPath(parseInt(index.slice(0, -1), 10));
+    }
+    return parseInt(index, 10).toString(16).padStart(8, '0');
+  });
+  return pathType.toString().concat(...paths);
+};
+
+export const getPath = async (
+  coinType: string, keyIndex: number, depth = 5, pathType = PathType.BIP32
+): Promise<string> => {
+  let fullPath = pathType.toString();
+
+  if (depth >= 1) {
+    fullPath += '8000002C';
+  }
+  if (depth >= 2) {
+    fullPath += coinType;
+  }
+  if (depth >= 3) {
+    fullPath += '80000000';
+  }
+  if (pathType === PathType.SLIP0010 || pathType === PathType.BIP32ED25519) {
+    return fullPath;
+  }
+  if (depth >= 4) {
+    fullPath += '00000000';
+  }
+  if (depth >= 5) {
+    fullPath += (keyIndex.toString(16)).padStart(8, '0');
+  }
   return fullPath;
 };
 
@@ -102,16 +147,23 @@ export const checkSupportScripts = async (transport: Transport) => {
   }
 };
 
+export const createSeedByApp = async (wordNumber: number, randomBytes: (size: number)=>Buffer): Promise<string> => {
+  const strength = wordNumber*11 - wordNumber/3;
+  return bip39.generateMnemonic(strength, randomBytes);
+};
 
+export const createWalletByMnemonic = async (
+  transport: Transport, appId: string, appPrivateKey: string, mnemonic: string, SEPublicKey: string
+): Promise<void> => {
+  // mnemonic to seed
+  const seed = await bip39.mnemonicToSeed(mnemonic);
 
-export const createSeedByApp = async (strength: number, randomBytes: Buffer): Promise<string> => {
+  // mnemonic to ADA master key
+  const entropy = bip39.mnemonicToEntropy(mnemonic);
+  const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
+  key[0] &= 0b11111000;
+  key[31] &= 0b00011111;
+  key[31] |= 0b01000000;
 
-  const toBit = strength * 10.7;
-  const toFloor = Math.floor(toBit);
-
-  let mnemonic;
-  const word = bip39.wordlists.english;
-  mnemonic = bip39.generateMnemonic(toFloor, randomBytes, word, false);
-  return mnemonic
-
-}
+  return wallet.setSeed(transport, appId, appPrivateKey, Buffer.concat([seed, key]).toString('hex'), SEPublicKey);
+};

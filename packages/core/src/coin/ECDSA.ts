@@ -48,7 +48,7 @@ export default class ECDSACoin {
     transport: Transport, appPrivateKey: string, appId: string
   ): Promise<{accountPublicKey:string, accountChainCode:string}> => {
     if (this.accPublicKey === '' || this.accChainCode === '') {
-      const path = await utils.getAccountPath({ coinType: this.coinType });
+      const path = await utils.getPath(this.coinType, 0, 3);
       const decryptedData = await getAccountExtKeyFromSE(transport, appId, appPrivateKey, path);
       const accBuf = Buffer.from(decryptedData, 'hex');
       this.accPublicKey = accBuf.slice(0, 33).toString('hex');
