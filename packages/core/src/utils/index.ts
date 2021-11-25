@@ -167,3 +167,10 @@ export const createWalletByMnemonic = async (
 
   return wallet.setSeed(transport, appId, appPrivateKey, Buffer.concat([seed, key]).toString('hex'), SEPublicKey);
 };
+
+/**
+ * Delay the promise and then resolve.
+ * @param {number} d The duration to delay the promise.
+ * @returns {Promise<void>}
+ */
+export const delay = (d: number): Promise<void> => new Promise((r) => setTimeout(r, d));

@@ -10,21 +10,64 @@ npm i @coolwallet/transport-web-ble
 
 ## Usage
 
-The `listen()` method takes in an callback function to handle bluetooth scanning.
-In web-ble, this is when the popup show and the user select the device to pair, so the returned `device` is only one selected device.
+```javascript
+import cwsETH from '@coolwallet/eth';
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
+
+const transport = await createTransport();
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+
+const appId = 'appId that had been registered by wallet';
+
+const ETH = new cwsETH();
+// use transport in other package
+const address = await ETH.getAddress(transport, appPrivateKey, appId, 0);
+```
+
+## API
+
+### createTransport
+
+A convenient to create internal transport.
 
 ```javascript
-import WebBleTransport from '@coolwallet/transport-web-ble'
-await WebBleTransport.listen(async (error, device) => { // browser shows popup
-  if (device) {
-    const transport = await WebBleTransport.connect(device)
-    /**
-     * Do something with transport
-     **/
-  } else throw error
-})
+const createTransport: () => Promise<Transport>
+```
 
-// use transport in other package:
-import CoolWallet from '@coolwallet/wallet'
-const wallet = new CoolWallet(transport, appPrivateKey, appId)
+### WebBleManager
+
+Manage browser bluetooth status.
+
+#### isSupported
+
+Check whether browser support [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility).  
+
+```javascript
+async isSupported(): Promise<boolean>
+```
+
+#### listen
+
+Popup browser bluetooth selector.
+Return the selected `BluetoothDevice`.
+
+```javascript
+async listen(): Promise<BluetoothDevice>
+```
+
+#### connect
+
+Connected to the given `BluetoothDevice` and create `transport`.
+
+```javascript
+async connect(device: BluetoothDevice): Promise<Transport>
+```
+
+#### disconnect
+
+Disconnect from the `BluetoothRemoteGATTServer` and remove `transport`.
+
+```javascript
+async disconnect(): Promise<void>
 ```

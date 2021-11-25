@@ -4,7 +4,9 @@
   "description": "web ble transport layer for coolwallet.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "./node_modules/.bin/webpack",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
+    "build": "npm run build:types ; npm run build:ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "coolwallet-team",
@@ -12,12 +14,17 @@
   "peerDependencies": {
     "@coolwallet/core": "^1.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
   "devDependencies": {
+    "@babel/cli": "^7.16.0",
     "@babel/core": "^7.7.2",
-    "@babel/plugin-proposal-class-properties": "^7.7.0",
-    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
     "@coolwallet/core": "^1.0.0",
+    "@types/lodash": "^4.14.177",
+    "@types/web-bluetooth": "^0.0.11",
     "babel-loader": "^8.0.6",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
