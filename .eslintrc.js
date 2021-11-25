@@ -17,7 +17,8 @@ module.exports = {
   },
   plugins: ['react'],
   rules: {
-    'max-len': ['error', { code: 120 }],
+    'max-len': ['error', { code: 120, ignoreComments: true }],
+    'implicit-arrow-linebreak': 0,
     'no-use-before-define': ['error', { functions: false, classes: true }],
     'no-restricted-syntax': [
       'error',
