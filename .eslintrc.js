@@ -24,8 +24,8 @@ module.exports = {
       'error',
       {
         selector: 'ForInStatement',
-        message:
-          'for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.',
+        message: `for..in loops iterate over the entire prototype chain, which is virtually never what you want. 
+          Use Object.{keys,values,entries}, and iterate over the resulting array.`,
       },
       {
         selector: 'LabeledStatement',
@@ -48,7 +48,7 @@ module.exports = {
     eqeqeq: 'warn',
     'block-scoped-var': 'error',
     'import/prefer-default-export': 'off',
-    'no-plusplus': ['error', { allowForLoopAfterthoughts: true }], //off
+    'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
     'import/extensions': [
       'error',
       'ignorePackages',
