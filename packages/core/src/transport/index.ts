@@ -22,7 +22,7 @@ type TransportDevice = BluetoothDevice | RNBlePlxDevice;
  * abstract checkCardStatus(): Promise<number>;
  *
  * @example
- * // checkCardStatus will use statusCharacteristic to read value from card.
+ * // checkCardStatus will use responseCharacteristic to read value from card.
  * readDataFromCard(): Promise<number[]>;
  */
 abstract class Transport {
