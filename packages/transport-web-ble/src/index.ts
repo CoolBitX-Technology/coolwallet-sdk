@@ -6,7 +6,7 @@ import WebBleManager from './WebBleManager';
 const webBleManager = new WebBleManager();
 
 /**
- * A convenient to create internal transport.
+ * A convenient way to create internal transport.
  * @returns {Transport.default}
  */
 export const createTransport = (): Promise<Transport.default> => (
