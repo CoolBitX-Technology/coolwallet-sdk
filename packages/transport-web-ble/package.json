@@ -24,10 +24,7 @@
     "@babel/preset-typescript": "^7.16.0",
     "@coolwallet/core": "^1.0.0",
     "@types/lodash": "^4.14.177",
-    "@types/web-bluetooth": "^0.0.11",
-    "babel-loader": "^8.0.6",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "@types/web-bluetooth": "^0.0.11"
   },
   "repository": {
     "type": "git",
