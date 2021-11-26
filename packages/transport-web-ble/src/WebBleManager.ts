@@ -30,7 +30,7 @@ class WebBleManager implements Transport.BleManager {
    * @returns {Promise<BluetoothDevice>} selected BluetoothDevice.
    */
   // eslint-disable-next-line class-methods-use-this
-  async listen(): Promise<BluetoothDevice> {
+  listen(): Promise<BluetoothDevice> {
     return new Promise((resolve, reject) => {
       try {
         const services = coreDevice.getBluetoothServiceUuids();

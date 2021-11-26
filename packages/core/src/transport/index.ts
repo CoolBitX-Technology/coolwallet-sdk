@@ -60,7 +60,16 @@ interface BleManager {
   /**
    * Scan device in order to get the BluetoothDevice instance.
    */
-  listen(): Promise<TransportDevice>;
+  listen(
+    callback?: (error: any, device: TransportDevice) => void
+  ): Promise<TransportDevice> | void;
+
+  /**
+   * Stop scanning BluetoothDevice.
+   * 
+   * We make it optional cause not all platforms will need this ex. browser.
+   */
+  stopListen?(): void;
 
   /**
    * Connect to given TransportDevice and return the Transport.
