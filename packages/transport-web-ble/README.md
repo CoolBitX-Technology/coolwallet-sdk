@@ -29,7 +29,7 @@ const address = await ETH.getAddress(transport, appPrivateKey, appId, 0);
 
 ### createTransport
 
-A convenient to create internal transport.
+A convenient way to create internal transport.
 
 ```javascript
 const createTransport: () => Promise<Transport>
