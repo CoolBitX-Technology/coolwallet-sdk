@@ -16,7 +16,7 @@ const eth = new ETH(transport, appPrivateKey, appId)
 
 const address = await eth.getAddress(transport, appPrivateKey, appId, 0);
 
-const tx = {
+const transaction = {
     nonce: "0x21d",
     gasPrice: "0x59682f00",
     gasLimit: "0x5208",
@@ -25,17 +25,24 @@ const tx = {
     data: "0x00",
     chainId: 1
 }
-const tx = await eth.signTransaction(signTx);
+const normalTx = await eth.signTransaction(signTx);
 
-const tokenType = {
-  name: "ACEX",
-  symbol: "ACEX",
-  unit: "8",
-  contractAddress: "0x0be7c99ff48fccb4aa8096d174cacf079c3d1717",
-  signature:
-    "0804414345580000000be7c99ff48fccb4aa8096d174cacf079c3d17173045022100A9A8157BED8DDDBDCABF2E17401B1F63EB5FBB106446D61FC41F92180D87C164022069A1F096ABABC2226C771EAFA4E375B12160DD79842C6556CCBED51A15AC904D"
+const erc20Transaction = {
+    nonce: "0x85",
+    gasPrice: "0x23a427985a",
+    gasLimit: "0x72c2",
+    to: "0xe41d2489571d322189246dafa5ebde1f4699f498",
+    value: "0x0",
+    data: "0x00",
+    chainId: 1,
+    option: {
+      symbol: "USDT",
+      unit: "6"
+    }
 }
-const erc20Transaction = await eth.signERC20Transaction(signTx, tokenSignature);
+const erc20Tx = await eth.erc20Transaction(signTx, tokenSignature);
+
+
 ```
 
 ## Methods
@@ -88,20 +95,6 @@ async signTransaction(signTxData: types.signTx): Promise<string>
 |  transaction  | Essential information/property for Ethereum Transaction | Transaction | Required |
 |  addressIndex |        The from address index in BIP44 derivation       |    number   | Required |
 |   publicKey   |              Public key of the from address             |    string   | Required |
-
-
-### signERC20Transaction
-#### Description
-Sign ERC-20 Token Transaction
-
-```javascript
-async signERC20Transaction(signTxData: types.signTx, tokenSignature = ''): Promise<string> 
-```
-
-#### tokenSignature Arguments (Please see `signTransaction` for `signTx` Arguments)
-|       Arg      |                           Description                          |  Type  |  Default |
-|:--------------:|:--------------------------------------------------------------:|:------:|:--------:|
-| tokenSignature | Signature to verify if ERC-20 token is supported by CoolWallet | string | Required |
 
 
 ### signMessage
