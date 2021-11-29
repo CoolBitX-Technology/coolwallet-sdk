@@ -46,6 +46,7 @@ const bep20Tx = await bsc.bep20Transaction(signTx, tokenSignature);
 ## Methods
 
 ### getAddress
+
 #### Description
 
 The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress` with `addressIndex = i` will get the address of folllowing BIP44 path:
@@ -77,7 +78,9 @@ async getAddress(
 
 
 ### signTransaction
+
 #### Description
+
 Sign BSC Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
 
 ```javascript
@@ -98,7 +101,9 @@ async signTransaction(signTxData: types.signTx)
 |  authorizedCB | Callback of authorized transaction data to the connected application |   Function  | Required |
 
 ### signMessage
+
 #### Description
+
 Perform BSC `personal_sign`.
 
 ```javascript
@@ -107,6 +112,7 @@ async signMessage(signMsgData: types.signMsg): Promise<string>
 ```
 
 #### signMsg Arguments
+
 |      Arg      |                         Description                        |    Type   |  Default |
 |:-------------:|:----------------------------------------------------------:|:---------:|:--------:|
 |   transport   |        Object to communicate with CoolWallet device        | Transport | Required |
@@ -118,7 +124,9 @@ async signMessage(signMsgData: types.signMsg): Promise<string>
 |  authorizedCB |  Callback of authorized data to the connected application  |  Function | Required |
 
 ### signTypedData
+
 #### Description
+
 Perform BSC `sign_typed_data`.
 
 ```javascript
@@ -126,6 +134,7 @@ async signTypedData(typedData: types.signTyped)
 ```
 
 #### signTyped Arguments
+
 |      Arg      |                         Description                        |    Type   |  Default |
 |:-------------:|:----------------------------------------------------------:|:---------:|:--------:|
 |   transport   |        Object to communicate with CoolWallet device        | Transport | Required |

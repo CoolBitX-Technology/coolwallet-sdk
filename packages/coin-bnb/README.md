@@ -44,7 +44,9 @@ const normalTx = await bnb.signTransaction(signType);
 ```
 
 ## Methods
+
 ### getAddress
+
 #### Description
 
 The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress` with `addressIndex = i` will get the address of folllowing BIP44 path:
@@ -75,10 +77,13 @@ async getAddress(
 
 
 ### Sign Transactions
+
 CoolWallet currently support 3 types of Binance DEX transaction: Transfer, PlaceOrder and CancelOrder.
 
 #### signTransfer
+
 #### Description
+
 Sign BNB Transaction
 
 ```javascript
@@ -86,6 +91,7 @@ async signTransaction(signData: signType,): Promise<string>
 ```
 
 #### signType Arguments
+
 |      Arg      |                              Description                             |    Type   |  Default |
 |:-------------:|:--------------------------------------------------------------------:|:---------:|:--------:|
 |   transport   |             Object to communicate with CoolWallet device             | Transport | Required |
@@ -99,7 +105,9 @@ async signTransaction(signData: signType,): Promise<string>
 
 
 #### placeOrder
+
 #### Description
+
 Sign BNB Place Order Transaction
 
 ```javascript
@@ -107,6 +115,7 @@ async signPlaceOrder(signData: signPlaceOrderType): Promise<string>
 ```
 
 #### signPlaceOrderType Arguments
+
 |      Arg      |                              Description                             |    Type    |  Default |
 |:-------------:|:--------------------------------------------------------------------:|:----------:|:--------:|
 |   transport   |             Object to communicate with CoolWallet device             |  Transport | Required |
@@ -119,7 +128,9 @@ async signPlaceOrder(signData: signPlaceOrderType): Promise<string>
 |  authorizedCB | Callback of authorized transaction data to the connected application |  Function  | Required |
 
 #### cancelOrder
+
 #### Description
+
 Sign BNB Cancel Order Transaction
 
 ```javascript
@@ -127,6 +138,7 @@ async signCancelOrder(signData: signCancelOrderType): Promise<string>
 ```
 
 #### signCancelOrderType Arguments
+
 |      Arg      |                              Description                             |     Type    |  Default |
 |:-------------:|:--------------------------------------------------------------------:|:-----------:|:--------:|
 |   transport   |             Object to communicate with CoolWallet device             |  Transport  | Required |

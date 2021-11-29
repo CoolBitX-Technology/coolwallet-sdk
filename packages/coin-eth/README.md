@@ -40,14 +40,14 @@ const erc20Transaction = {
       unit: "6"
     }
 }
+
 const erc20Tx = await eth.erc20Transaction(signTx, tokenSignature);
-
-
 ```
 
 ## Methods
 
 ### getAddress
+
 #### Description
 
 The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress` with `addressIndex = i` will get the address of folllowing BIP44 path:
@@ -78,7 +78,9 @@ async getAddress(
 
 
 ### signTransaction
+
 #### Description
+
 Sign Ethereum Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
 
 ```javascript
@@ -98,7 +100,9 @@ async signTransaction(signTxData: types.signTx): Promise<string>
 
 
 ### signMessage
+
 #### Description
+
 Perform ethereum `personal_sign`.
 
 ```javascript
@@ -107,6 +111,7 @@ async signMessage(signMsgData: types.signMsg): Promise<string>
 ```
 
 #### signMsg Arguments
+
 |      Arg      |                  Description                 |    Type   |  Default |
 |:-------------:|:--------------------------------------------:|:---------:|:--------:|
 |   transport   | Object to communicate with CoolWallet device | Transport | Required |
@@ -116,7 +121,9 @@ async signMessage(signMsgData: types.signMsg): Promise<string>
 |  addressIndex |  The from address index in BIP44 derivation  |   number  | Required |
 
 ### signTypedData
+
 #### Description
+
 Perform ethereum `sign_typed_data`.
 
 ```javascript
@@ -124,6 +131,7 @@ async signTypedData(typedData: types.signTyped): Promise<string>
 ```
 
 #### signTyped Arguments
+
 |      Arg      |                  Description                 |    Type   |  Default |
 |:-------------:|:--------------------------------------------:|:---------:|:--------:|
 |   transport   | Object to communicate with CoolWallet device | Transport | Required |
