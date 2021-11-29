@@ -11,7 +11,7 @@ npm install @coolwallet/eth
 ## Usage
 
 ```javascript
-import ETH from '@coolwallet/ETH'
+import ETH from '@coolwallet/eth'
 const eth = new ETH(transport, appPrivateKey, appId)
 
 const address = await eth.getAddress(transport, appPrivateKey, appId, 0);
