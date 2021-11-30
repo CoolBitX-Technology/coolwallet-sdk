@@ -12,7 +12,7 @@ npm install @coolwallet/bnb
 
 ```javascript
 import BNB from '@coolwallet/bnb';
-const bnb = new BNB(transport, appPrivateKey, appId);
+const bnb = new BNB();
 
 const address = await bnb.getAddress(transport, appPrivateKey, appId, 0);
 
@@ -40,7 +40,7 @@ const transaction = {
   sequence: '503',
   source: '711',
 }
-const normalTx = await bnb.signTransaction(signType);
+const normalTx = await bnb.signTransaction(signData);
 ```
 
 ## Methods

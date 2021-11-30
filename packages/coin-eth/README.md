@@ -12,7 +12,7 @@ npm install @coolwallet/eth
 
 ```javascript
 import ETH from '@coolwallet/eth'
-const eth = new ETH(transport, appPrivateKey, appId)
+const eth = new ETH()
 
 const address = await eth.getAddress(transport, appPrivateKey, appId, 0);
 
@@ -25,7 +25,7 @@ const transaction = {
     data: "0x00",
     chainId: 1
 }
-const normalTx = await eth.signTransaction(signTx);
+const normalTx = await eth.signTransaction(signTxData);
 
 const erc20Transaction = {
     nonce: "0x85",
@@ -41,7 +41,7 @@ const erc20Transaction = {
     }
 }
 
-const erc20Tx = await eth.erc20Transaction(signTx, tokenSignature);
+const erc20Tx = await eth.erc20Transaction(signTxData, tokenSignature);
 ```
 
 ## Methods

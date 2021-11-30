@@ -12,7 +12,7 @@ npm install @coolwallet/bsc
 
 ```javascript
 import BSC from '@coolwallet/bsc'
-const bsc = new BSC(transport, appPrivateKey, appId)
+const bsc = new BSC()
 
 const address = await bsc.getAddress(transport, appPrivateKey, appId, 0);
 
@@ -25,7 +25,7 @@ const transaction = {
     data: "",
     chainId: 56
 }
-const normalTx = await bsc.signTransaction(signTx);
+const normalTx = await bsc.signTransaction(signTxData);
 
 const bep20Transaction = {
     nonce: "0x87",
@@ -40,7 +40,7 @@ const bep20Transaction = {
       unit: "18"
     }
 }
-const bep20Tx = await bsc.bep20Transaction(signTx, tokenSignature);
+const bep20Tx = await bsc.bep20Transaction(signTxData, tokenSignature);
 ```
 
 ## Methods

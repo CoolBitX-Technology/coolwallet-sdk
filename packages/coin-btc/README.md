@@ -12,7 +12,7 @@ npm i @coolwallet/btc
 
 ```javascript
 import BTC from '@coolwallet/btc'
-const btc = new BTC(transport, appPrivateKey, appId)
+const btc = new BTC()
 
 const address = await btc.getAddress(transport, appPrivateKey, appId, scriptType, 0);
 
@@ -36,7 +36,7 @@ const transaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
-const normalTx = await btc.signTransaction(signTx)
+const normalTx = await btc.signTransaction(signTxData)
 
 const usdtTransaction = {
     scriptType: 1,
@@ -58,7 +58,7 @@ const usdtTransaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
-const usdtTx = await btc.signUSDTTransaction(signUSDTTx)
+const usdtTx = await btc.signUSDTTransaction(signUSDTTxData)
 ```
 
 ## Methods
