@@ -69,12 +69,12 @@ async getAddress(
 
 #### Arguments
 
-|      Arg      |                  Description                 |    Type   |  Default |
-|:-------------:|:--------------------------------------------:|:---------:|:--------:|
-|   transport   | Object to communicate with CoolWallet device | Transport | Required |
-| appPrivateKey |   Private key for the connected application  |   string  | Required |
-|     appId     |       ID for the connected application       |   string  | Required |
-|  addressIndex |  The from address index in BIP44 derivation  |   number  | Required |
+|      Arg      |                  Description                 |    Type   |  Required |
+|:-------------:|:--------------------------------------------:|:---------:|:---------:|
+|   transport   | Object to communicate with CoolWallet device | Transport |    True   |
+| appPrivateKey |   Private key for the connected application  |   string  |    True   |
+|     appId     |       ID for the connected application       |   string  |    True   |
+|  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
 
 ### signTransaction
@@ -89,14 +89,14 @@ async signTransaction(signTxData: types.signTx): Promise<string>
 
 #### signTx Arguments
 
-|      Arg      |                       Description                       |     Type    |  Default |
-|:-------------:|:-------------------------------------------------------:|:-----------:|:--------:|
-|   transport   |       Object to communicate with CoolWallet device      |  Transport  | Required |
-| appPrivateKey |        Private key for the connected application        |    string   | Required |
-|     appId     |             ID for the connected application            |    string   | Required |
-|  transaction  | Essential information/property for Ethereum Transaction | Transaction | Required |
-|  addressIndex |        The from address index in BIP44 derivation       |    number   | Required |
-|   publicKey   |              Public key of the from address             |    string   | Required |
+|      Arg      |                       Description                       |     Type    |  Required |
+|:-------------:|:-------------------------------------------------------:|:-----------:|:---------:|
+|   transport   |       Object to communicate with CoolWallet device      |  Transport  |    True   |
+| appPrivateKey |        Private key for the connected application        |    string   |    True   |
+|     appId     |             ID for the connected application            |    string   |    True   |
+|  transaction  | Essential information/property for Ethereum Transaction | Transaction |    True   |
+|  addressIndex |        The from address index in BIP44 derivation       |    number   |    True   |
+|   publicKey   |              Public key of the from address             |    string   |    True   |
 
 
 ### signMessage
@@ -112,13 +112,13 @@ async signMessage(signMsgData: types.signMsg): Promise<string>
 
 #### signMsg Arguments
 
-|      Arg      |                  Description                 |    Type   |  Default |
-|:-------------:|:--------------------------------------------:|:---------:|:--------:|
-|   transport   | Object to communicate with CoolWallet device | Transport | Required |
-| appPrivateKey |   Private key for the connected application  |   string  | Required |
-|     appId     |       ID for the connected application       |   string  | Required |
-|    message    |                Message to sign               |   string  | Required |
-|  addressIndex |  The from address index in BIP44 derivation  |   number  | Required |
+|      Arg      |                  Description                 |    Type   |  Required |
+|:-------------:|:--------------------------------------------:|:---------:|:---------:|
+|   transport   | Object to communicate with CoolWallet device | Transport |    True   |
+| appPrivateKey |   Private key for the connected application  |   string  |    True   |
+|     appId     |       ID for the connected application       |   string  |    True   |
+|    message    |                Message to sign               |   string  |    True   |
+|  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
 ### signTypedData
 
@@ -132,13 +132,13 @@ async signTypedData(typedData: types.signTyped): Promise<string>
 
 #### signTyped Arguments
 
-|      Arg      |                  Description                 |    Type   |  Default |
-|:-------------:|:--------------------------------------------:|:---------:|:--------:|
-|   transport   | Object to communicate with CoolWallet device | Transport | Required |
-| appPrivateKey |   Private key for the connected application  |   string  | Required |
-|     appId     |       ID for the connected application       |   string  | Required |
-|   typedData   |      Typed structured data to be signed      |    any    | Required |
-|  addressIndex |  The from address index in BIP44 derivation  |   number  | Required |
+|      Arg      |                  Description                 |    Type   |  Required |
+|:-------------:|:--------------------------------------------:|:---------:|:---------:|
+|   transport   | Object to communicate with CoolWallet device | Transport |    True   |
+| appPrivateKey |   Private key for the connected application  |   string  |    True   |
+|     appId     |       ID for the connected application       |   string  |    True   |
+|   typedData   |      Typed structured data to be signed      |    any    |    True   |
+|  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
 
 

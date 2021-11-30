@@ -89,13 +89,13 @@ async getAddress(
 
 #### Arguments
 
-|      Arg      |                  Description                 |    Type    |  Default |
-|:-------------:|:--------------------------------------------:|:----------:|:--------:|
-|   transport   | Object to communicate with CoolWallet device |  Transport | Required |
-| appPrivateKey |   Private key for the connected application  |   string   | Required |
-|     appId     |       ID for the connected application       |   string   | Required |
-|   scriptType  |   Define the type of script of the address   | ScriptType | Required |
-|  addressIndex |  The from address index in BIP44 derivation  |   number   | Required |
+|      Arg      |                  Description                 |    Type    |  Required |
+|:-------------:|:--------------------------------------------:|:----------:|:---------:|
+|   transport   | Object to communicate with CoolWallet device |  Transport |    True   |
+| appPrivateKey |   Private key for the connected application  |   string   |    True   |
+|     appId     |       ID for the connected application       |   string   |    True   |
+|   scriptType  |   Define the type of script of the address   | ScriptType |    True   |
+|  addressIndex |  The from address index in BIP44 derivation  |   number   |    True   |
 
 ### signTransaction
 
@@ -109,17 +109,17 @@ async signTransaction(signTxData: signTxType):Promise<string>
 
 #### signTxType Arguments
 
-|      Arg      |                              Description                             |    Type    |  Default |
-|:-------------:|:--------------------------------------------------------------------:|:----------:|:--------:|
-|   transport   |             Object to communicate with CoolWallet device             |  Transport | Required |
-| appPrivateKey |               Private key for the connected application              |   string   | Required |
-|     appId     |                   ID for the connected application                   |   string   | Required |
-|   scriptType  |               Define the type of script of the address               | ScriptType | Required |
-|     inputs    |            Array of inputs of previous transactions (UTXO)           |  [Inputs]  | Required |
-|     output    |                       Output of the transaction                      |   Output   | Required |
-|     change    |                      Address to receive changes                      |   Change   | Required |
-|   confirmCB   |      Callback of confirmation data to the connected application      |  Function  | Required |
-|  authorizedCB | Callback of authorized transaction data to the connected application |  Function  | Required |
+|      Arg      |                              Description                             |    Type    |  Required |
+|:-------------:|:--------------------------------------------------------------------:|:----------:|:---------:|
+|   transport   |             Object to communicate with CoolWallet device             |  Transport |    True   |
+| appPrivateKey |               Private key for the connected application              |   string   |    True   |
+|     appId     |                   ID for the connected application                   |   string   |    True   |
+|   scriptType  |               Define the type of script of the address               | ScriptType |    True   |
+|     inputs    |            Array of inputs of previous transactions (UTXO)           |  [Inputs]  |    True   |
+|     output    |                       Output of the transaction                      |   Output   |    True   |
+|     change    |                      Address to receive changes                      |   Change   |    True   |
+|   confirmCB   |      Callback of confirmation data to the connected application      |  Function  |   False   |
+|  authorizedCB | Callback of authorized transaction data to the connected application |  Function  |   False   |
 
 ### signUSDTTransaction
 
@@ -133,15 +133,15 @@ async signUSDTTransaction(signUSDTTxData: signUSDTTxType): Promise<string>
 
 #### signUSDTTxType Arguments
 
-|      Arg      |                              Description                             |    Type    |  Default |
-|:-------------:|:--------------------------------------------------------------------:|:----------:|:--------:|
-|   transport   |             Object to communicate with CoolWallet device             |  Transport | Required |
-| appPrivateKey |               Private key for the connected application              |   string   | Required |
-|     appId     |                   ID for the connected application                   |   string   | Required |
-|   scriptType  |               Define the type of script of the address               | ScriptType | Required |
-|     inputs    |            Array of inputs of previous transactions (UTXO)           |  [Inputs]  | Required |
-|     output    |                       Output of the transaction                      |   Output   | Required |
-|     value     |                      Amount of USDT to transfer                      |   string   | Required |
-|     change    |                      Address to receive changes                      |   Change   | Required |
-|   confirmCB   |      Callback of confirmation data to the connected application      |  Function  | Required |
-|  authorizedCB | Callback of authorized transaction data to the connected application |  Function  | Required |
+|      Arg      |                              Description                             |    Type    |  Required |
+|:-------------:|:--------------------------------------------------------------------:|:----------:|:---------:|
+|   transport   |             Object to communicate with CoolWallet device             |  Transport |    True   |
+| appPrivateKey |               Private key for the connected application              |   string   |    True   |
+|     appId     |                   ID for the connected application                   |   string   |    True   |
+|   scriptType  |               Define the type of script of the address               | ScriptType |    True   |
+|     inputs    |            Array of inputs of previous transactions (UTXO)           |  [Inputs]  |    True   |
+|     output    |                       Output of the transaction                      |   Output   |    True   |
+|     value     |                      Amount of USDT to transfer                      |   string   |    True   |
+|     change    |                      Address to receive changes                      |   Change   |    True   |
+|   confirmCB   |      Callback of confirmation data to the connected application      |  Function  |   False   |
+|  authorizedCB | Callback of authorized transaction data to the connected application |  Function  |   False   |

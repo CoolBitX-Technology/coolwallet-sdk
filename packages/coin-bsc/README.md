@@ -68,12 +68,12 @@ async getAddress(
 
 #### Arguments
 
-|      Arg      |                  Description                 |    Type   |  Default |
-|:-------------:|:--------------------------------------------:|:---------:|:--------:|
-|   transport   | Object to communicate with CoolWallet device | Transport | Required |
-| appPrivateKey |   Private key for the connected application  |   string  | Required |
-|     appId     |       ID for the connected application       |   string  | Required |
-|  addressIndex |  The from address index in BIP44 derivation  |   number  | Required |
+|      Arg      |                  Description                 |    Type   |  Required |
+|:-------------:|:--------------------------------------------:|:---------:|:---------:|
+|   transport   | Object to communicate with CoolWallet device | Transport |    True   |
+| appPrivateKey |   Private key for the connected application  |   string  |    True   |
+|     appId     |       ID for the connected application       |   string  |    True   |
+|  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
 
 
@@ -89,16 +89,16 @@ async signTransaction(signTxData: types.signTx)
 
 #### signTx Arguments
 
-|      Arg      |                              Description                             |     Type    |  Default |
-|:-------------:|:--------------------------------------------------------------------:|:-----------:|:--------:|
-|   transport   |             Object to communicate with CoolWallet device             |  Transport  | Required |
-| appPrivateKey |               Private key for the connected application              |    string   | Required |
-|     appId     |                   ID for the connected application                   |    string   | Required |
-|  transaction  |          Essential information/property for BSC Transaction          | Transaction | Required |
-|  addressIndex |              The from address index in BIP44 derivation              |    number   | Required |
-|   publicKey   |                    Public key of the from address                    |    string   | Required |
-|   confirmCB   |      Callback of confirmation data to the connected application      |   Function  | Required |
-|  authorizedCB | Callback of authorized transaction data to the connected application |   Function  | Required |
+|      Arg      |                              Description                             |     Type    |  Required |
+|:-------------:|:--------------------------------------------------------------------:|:-----------:|:---------:|
+|   transport   |             Object to communicate with CoolWallet device             |  Transport  |    True   |
+| appPrivateKey |               Private key for the connected application              |    string   |    True   |
+|     appId     |                   ID for the connected application                   |    string   |    True   |
+|  transaction  |          Essential information/property for BSC Transaction          | Transaction |    True   |
+|  addressIndex |              The from address index in BIP44 derivation              |    number   |    True   |
+|   publicKey   |                    Public key of the from address                    |    string   |    True   |
+|   confirmCB   |      Callback of confirmation data to the connected application      |   Function  |   False   |
+|  authorizedCB | Callback of authorized transaction data to the connected application |   Function  |   False   |
 
 ### signMessage
 
@@ -113,15 +113,15 @@ async signMessage(signMsgData: types.signMsg): Promise<string>
 
 #### signMsg Arguments
 
-|      Arg      |                         Description                        |    Type   |  Default |
-|:-------------:|:----------------------------------------------------------:|:---------:|:--------:|
-|   transport   |        Object to communicate with CoolWallet device        | Transport | Required |
-| appPrivateKey |          Private key for the connected application         |   string  | Required |
-|     appId     |              ID for the connected application              |   string  | Required |
-|    message    |                       Message to sign                      |   string  | Required |
-|  addressIndex |         The from address index in BIP44 derivation         |   number  | Required |
-|   confirmCB   | Callback of confirmation data to the connected application |  Function | Required |
-|  authorizedCB |  Callback of authorized data to the connected application  |  Function | Required |
+|      Arg      |                         Description                        |    Type   |  Required |
+|:-------------:|:----------------------------------------------------------:|:---------:|:---------:|
+|   transport   |        Object to communicate with CoolWallet device        | Transport |    True   |
+| appPrivateKey |          Private key for the connected application         |   string  |    True   |
+|     appId     |              ID for the connected application              |   string  |    True   |
+|    message    |                       Message to sign                      |   string  |    True   |
+|  addressIndex |         The from address index in BIP44 derivation         |   number  |    True   |
+|   confirmCB   | Callback of confirmation data to the connected application |  Function |   False   |
+|  authorizedCB |  Callback of authorized data to the connected application  |  Function |   False   |
 
 ### signTypedData
 
@@ -135,12 +135,12 @@ async signTypedData(typedData: types.signTyped)
 
 #### signTyped Arguments
 
-|      Arg      |                         Description                        |    Type   |  Default |
-|:-------------:|:----------------------------------------------------------:|:---------:|:--------:|
-|   transport   |        Object to communicate with CoolWallet device        | Transport | Required |
-| appPrivateKey |          Private key for the connected application         |   string  | Required |
-|     appId     |              ID for the connected application              |   string  | Required |
-|   typedData   |             Typed structured data to be signed             |    any    | Required |
-|  addressIndex |         The from address index in BIP44 derivation         |   number  | Required |
-|   confirmCB   | Callback of confirmation data to the connected application |  Function | Required |
-|  authorizedCB |  Callback of authorized data to the connected application  |  Function | Required |
+|      Arg      |                         Description                        |    Type   |  Required |
+|:-------------:|:----------------------------------------------------------:|:---------:|:---------:|
+|   transport   |        Object to communicate with CoolWallet device        | Transport |    True   |
+| appPrivateKey |          Private key for the connected application         |   string  |    True   |
+|     appId     |              ID for the connected application              |   string  |    True   |
+|   typedData   |             Typed structured data to be signed             |    any    |    True   |
+|  addressIndex |         The from address index in BIP44 derivation         |   number  |    True   |
+|   confirmCB   | Callback of confirmation data to the connected application |  Function |   False   |
+|  authorizedCB |  Callback of authorized data to the connected application  |  Function |   False   |

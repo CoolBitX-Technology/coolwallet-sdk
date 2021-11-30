@@ -68,12 +68,12 @@ async getAddress(
 
 #### Arguments
 
-|      Arg      |                  Description                 |    Type   |  Default |
-|:-------------:|:--------------------------------------------:|:---------:|:--------:|
-|   transport   | Object to communicate with CoolWallet device | Transport | Required |
-| appPrivateKey |   Private key for the connected application  |   string  | Required |
-|     appId     |       ID for the connected application       |   string  | Required |
-|  addressIndex |  The from address index in BIP44 derivation  |   number  | Required |
+|      Arg      |                  Description                 |    Type   |  Required |
+|:-------------:|:--------------------------------------------:|:---------:|:---------:|
+|   transport   | Object to communicate with CoolWallet device | Transport |    True   |
+| appPrivateKey |   Private key for the connected application  |   string  |    True   |
+|     appId     |       ID for the connected application       |   string  |    True   |
+|  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
 
 ### Sign Transactions
@@ -92,16 +92,16 @@ async signTransaction(signData: signType,): Promise<string>
 
 #### signType Arguments
 
-|      Arg      |                              Description                             |    Type   |  Default |
-|:-------------:|:--------------------------------------------------------------------:|:---------:|:--------:|
-|   transport   |             Object to communicate with CoolWallet device             | Transport | Required |
-| appPrivateKey |               Private key for the connected application              |   string  | Required |
-|     appId     |                   ID for the connected application                   |   string  | Required |
-|    signObj    |              Signing object for BNB Transfer transaction             |  Transfer | Required |
-| signPublicKey |                  Public key for signing transaction                  |   Buffer  | Required |
-|  addressIndex |              The from address index in BIP44 derivation              |   number  | Required |
-|   confirmCB   |      Callback of confirmation data to the connected application      |  Function | Required |
-|  authorizedCB | Callback of authorized transaction data to the connected application |  Function | Required |
+|      Arg      |                              Description                             |    Type   |  Required |
+|:-------------:|:--------------------------------------------------------------------:|:---------:|:---------:|
+|   transport   |             Object to communicate with CoolWallet device             | Transport |    True   |
+| appPrivateKey |               Private key for the connected application              |   string  |    True   |
+|     appId     |                   ID for the connected application                   |   string  |    True   |
+|    signObj    |              Signing object for BNB Transfer transaction             |  Transfer |    True   |
+| signPublicKey |                  Public key for signing transaction                  |   Buffer  |    True   |
+|  addressIndex |              The from address index in BIP44 derivation              |   number  |    True   |
+|   confirmCB   |      Callback of confirmation data to the connected application      |  Function |   False   |
+|  authorizedCB | Callback of authorized transaction data to the connected application |  Function |   False   |
 
 
 #### placeOrder
@@ -116,16 +116,16 @@ async signPlaceOrder(signData: signPlaceOrderType): Promise<string>
 
 #### signPlaceOrderType Arguments
 
-|      Arg      |                              Description                             |    Type    |  Default |
-|:-------------:|:--------------------------------------------------------------------:|:----------:|:--------:|
-|   transport   |             Object to communicate with CoolWallet device             |  Transport | Required |
-| appPrivateKey |               Private key for the connected application              |   string   | Required |
-|     appId     |                   ID for the connected application                   |   string   | Required |
-|    signObj    |             Signing object for BNB PlaceOrder transaction            | PlaceOrder | Required |
-| signPublicKey |                  Public key for signing transaction                  |   Buffer   | Required |
-|  addressIndex |              The from address index in BIP44 derivation              |   number   | Required |
-|   confirmCB   |      Callback of confirmation data to the connected application      |  Function  | Required |
-|  authorizedCB | Callback of authorized transaction data to the connected application |  Function  | Required |
+|      Arg      |                              Description                             |    Type    |  Required |
+|:-------------:|:--------------------------------------------------------------------:|:----------:|:---------:|
+|   transport   |             Object to communicate with CoolWallet device             |  Transport |    True   |
+| appPrivateKey |               Private key for the connected application              |   string   |    True   |
+|     appId     |                   ID for the connected application                   |   string   |    True   |
+|    signObj    |             Signing object for BNB PlaceOrder transaction            | PlaceOrder |    True   |
+| signPublicKey |                  Public key for signing transaction                  |   Buffer   |    True   |
+|  addressIndex |              The from address index in BIP44 derivation              |   number   |    True   |
+|   confirmCB   |      Callback of confirmation data to the connected application      |  Function  |   False   |
+|  authorizedCB | Callback of authorized transaction data to the connected application |  Function  |   False   |
 
 #### cancelOrder
 
@@ -139,13 +139,13 @@ async signCancelOrder(signData: signCancelOrderType): Promise<string>
 
 #### signCancelOrderType Arguments
 
-|      Arg      |                              Description                             |     Type    |  Default |
-|:-------------:|:--------------------------------------------------------------------:|:-----------:|:--------:|
-|   transport   |             Object to communicate with CoolWallet device             |  Transport  | Required |
-| appPrivateKey |               Private key for the connected application              |    string   | Required |
-|     appId     |                   ID for the connected application                   |    string   | Required |
-|    signObj    |            Signing object for BNB CancelOrder transaction            | CancelOrder | Required |
-| signPublicKey |                  Public key for signing transaction                  |    Buffer   | Required |
-|  addressIndex |              The from address index in BIP44 derivation              |    number   | Required |
-|   confirmCB   |      Callback of confirmation data to the connected application      |   Function  | Required |
-|  authorizedCB | Callback of authorized transaction data to the connected application |   Function  | Required |
+|      Arg      |                              Description                             |     Type    |  Required |
+|:-------------:|:--------------------------------------------------------------------:|:-----------:|:---------:|
+|   transport   |             Object to communicate with CoolWallet device             |  Transport  |    True   |
+| appPrivateKey |               Private key for the connected application              |    string   |    True   |
+|     appId     |                   ID for the connected application                   |    string   |    True   |
+|    signObj    |            Signing object for BNB CancelOrder transaction            | CancelOrder |    True   |
+| signPublicKey |                  Public key for signing transaction                  |    Buffer   |    True   |
+|  addressIndex |              The from address index in BIP44 derivation              |    number   |    True   |
+|   confirmCB   |      Callback of confirmation data to the connected application      |   Function  |   False   |
+|  authorizedCB | Callback of authorized transaction data to the connected application |   Function  |   False   |
