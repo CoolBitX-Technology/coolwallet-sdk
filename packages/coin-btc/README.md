@@ -36,7 +36,7 @@ const transaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
-const normalTx = await btc.signTransaction()
+const normalTx = await btc.signTransaction(signTx)
 
 const usdtTransaction = {
     scriptType: 1,
@@ -58,7 +58,7 @@ const usdtTransaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
-const usdtTx = await btc.signUSDTTransaction()
+const usdtTx = await btc.signUSDTTransaction(signUSDTTx)
 ```
 
 ## Methods
