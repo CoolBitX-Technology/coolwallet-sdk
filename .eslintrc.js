@@ -19,6 +19,10 @@ module.exports = {
   rules: {
     'max-len': ['error', { code: 120, ignoreComments: true }],
     'implicit-arrow-linebreak': 0,
+    'object-curly-spacing': 'always',
+    'object-curly-newline': 'off',
+    'operator-linebreak': 'off',
+    'no-underscore-dangle': 'off',
     'no-use-before-define': ['error', { functions: false, classes: true }],
     'no-restricted-syntax': [
       'error',
