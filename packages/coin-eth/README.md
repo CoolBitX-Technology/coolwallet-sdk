@@ -76,7 +76,6 @@ async getAddress(
 |     appId     |       ID for the connected application       |   string  |    True   |
 |  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
-
 ### signTransaction
 
 #### Description
@@ -97,7 +96,6 @@ async signTransaction(signTxData: types.signTx): Promise<string>
 |  transaction  | Essential information/property for Ethereum Transaction | Transaction |    True   |
 |  addressIndex |        The from address index in BIP44 derivation       |    number   |    True   |
 |   publicKey   |              Public key of the from address             |    string   |    True   |
-
 
 ### signMessage
 
@@ -139,8 +137,3 @@ async signTypedData(typedData: types.signTyped): Promise<string>
 |     appId     |       ID for the connected application       |   string  |    True   |
 |   typedData   |      Typed structured data to be signed      |    any    |    True   |
 |  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
-
-
-
-
-

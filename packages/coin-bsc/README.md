@@ -75,8 +75,6 @@ async getAddress(
 |     appId     |       ID for the connected application       |   string  |    True   |
 |  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
-
-
 ### signTransaction
 
 #### Description

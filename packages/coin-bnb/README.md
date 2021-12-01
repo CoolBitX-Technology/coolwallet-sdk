@@ -75,7 +75,6 @@ async getAddress(
 |     appId     |       ID for the connected application       |   string  |    True   |
 |  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
-
 ### Sign Transactions
 
 CoolWallet currently support 3 types of Binance DEX transaction: Transfer, PlaceOrder and CancelOrder.
@@ -102,7 +101,6 @@ async signTransaction(signData: signType): Promise<string>
 |  addressIndex |              The from address index in BIP44 derivation              |   number  |    True   |
 |   confirmCB   |      Callback of confirmation data to the connected application      |  Function |   False   |
 |  authorizedCB | Callback of authorized transaction data to the connected application |  Function |   False   |
-
 
 #### placeOrder
 
