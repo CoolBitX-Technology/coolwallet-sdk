@@ -84,7 +84,7 @@ async getAddress(
     appId: string, 
     scriptType: ScriptType, 
     addressIndex: number
-    ): Promise<string> 
+): Promise<string> 
 ```
 
 #### Arguments

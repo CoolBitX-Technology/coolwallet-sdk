@@ -63,7 +63,7 @@ async getAddress(
     appPrivateKey: string, 
     appId: string, 
     addressIndex: number
-  ): Promise<string> 
+): Promise<string> 
 ```
 
 #### Arguments
@@ -87,7 +87,7 @@ CoolWallet currently support 3 types of Binance DEX transaction: Transfer, Place
 Sign BNB Transaction
 
 ```javascript
-async signTransaction(signData: signType,): Promise<string>
+async signTransaction(signData: signType): Promise<string>
 ```
 
 #### signType Arguments

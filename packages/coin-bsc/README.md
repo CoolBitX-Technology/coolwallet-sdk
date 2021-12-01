@@ -63,7 +63,7 @@ async getAddress(
     appPrivateKey: string,
     appId: string,
     addressIndex: number
-  ): Promise<string>
+): Promise<string>
 ```
 
 #### Arguments
