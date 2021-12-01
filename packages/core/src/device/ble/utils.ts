@@ -1,21 +1,19 @@
-import reduce from "lodash/reduce";
-import isEmpty from "lodash/isEmpty";
+import reduce from 'lodash/reduce';
+import isEmpty from 'lodash/isEmpty';
 
 /**
  * Convert number byte into hex string
  * @param {number} byte
  * @returns {string}
  */
-const byteToHex = (byte: number): string =>
-  (byte < 16 ? "0" : "") + byte.toString(16);
+const byteToHex = (byte: number): string => (byte < 16 ? '0' : '') + byte.toString(16);
 
 /**
  * Convert number byte array into hex string
  * @param {number[]} byteArray
  * @returns {string}
  */
-const byteArrayToHex = (byteArray: number[]): string =>
-  byteArray.map((byte) => byteToHex(byte)).join("");
+const byteArrayToHex = (byteArray: number[]): string => byteArray.map((byte) => byteToHex(byte)).join('');
 
 /**
  * Convert hex string into number byte array
