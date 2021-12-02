@@ -20,6 +20,8 @@ const address = await ICON.getAddress(transport, appPrivateKey, appId, 0);
 
 const timestamp = "0x" + (new Date().getTime() * 1000).toString(16);
 
+const { IconBuilder, IconAmount, IconConverter } = IconService;
+
 const param = new IconBuilder.IcxTransactionBuilder()
     .from('hx76f46307b53686f2dd4a2c8ca2f22492e842c4bf')
     .to('hxe86b015c06145965931aff551d4958256a86226e')
