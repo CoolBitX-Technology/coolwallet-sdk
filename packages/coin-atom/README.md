@@ -11,7 +11,7 @@ npm i @coolwallet/atom
 ## Usage
 
 ```javascript
-import ATOM from '@coolwallet/atom'
+import ATOM from '@coolwallet/atom';
 const atom = new ATOM();
 
 const address = await atom.getAddress(transport, appPrivateKey, appId, 0);
@@ -114,6 +114,7 @@ Cosmos transaction can be extended based on the `tx_type` for **staking** purpos
 To transfer ATOM
 
 #### Arguments
+
 |     Arg     |            Description           |  Type  |  Required |
 |:-----------:|:--------------------------------:|:------:|:---------:|
 | fromAddress | From address for the transaction | string |    True   |

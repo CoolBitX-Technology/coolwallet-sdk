@@ -11,8 +11,8 @@ npm i @coolwallet/bch
 ## Usage
 
 ```javascript
-import BCH from '@coolwallet/bch'
-const bch = new BCH()
+import BCH from '@coolwallet/bch';
+const bch = new BCH();
 
 const address = await bch.getAddress(transport, appPrivateKey, appId, 0);
 
@@ -36,7 +36,7 @@ const transaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
-const tx = await bch.signTransaction(signTxData)
+const tx = await bch.signTransaction(signTxData);
 ```
 
 ## Methods

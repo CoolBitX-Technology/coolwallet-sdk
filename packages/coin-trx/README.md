@@ -26,7 +26,7 @@ const transaction = {
         toAddress: "41859009fd225692b11237a6ffd8fdba2eb7140cca",
         amount: 100000000
     }
-}
+};
 const normalTx = await trx.signTransaction(signTxData);
 
 const trc20Transaction = {
@@ -45,8 +45,8 @@ const trc20Transaction = {
         symbol: "USDT",
         decimals: 6
     }
-}
-const trc20Tx = await trx.signTRC20Transfer(signTxData)
+};
+const trc20Tx = await trx.signTRC20Transfer(signTxData);
 ```
 
 ## Methods

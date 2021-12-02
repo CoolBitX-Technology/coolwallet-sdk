@@ -11,8 +11,8 @@ npm install @coolwallet/dot
 ## Usage
 
 ```javascript
-import DOT from '@coolwallet/dot'
-const dot = new DOT()
+import DOT from '@coolwallet/dot';
+const dot = new DOT();
 
 const address = await dot.getAddress(transport, appPrivateKey, appId, 0);
 
@@ -31,7 +31,7 @@ const transaction = {
         destAddress: "14E5nqKAp3oAJcmzgZhUD2RcptBeUBScxKHgJKU4HPNcKVf3",
         value: 10000 
     }
-}
+};
 const normalTx = await dot.signTransaction(signTxData);
 ```
 
