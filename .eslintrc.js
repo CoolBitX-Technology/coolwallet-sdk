@@ -23,6 +23,10 @@ module.exports = {
     'object-curly-newline': 'off',
     'operator-linebreak': 'off',
     'no-underscore-dangle': 'off',
+    'arrow-body-style': 'off',
+    // note you must disable the base rule as it can report incorrect errors
+    'no-unused-expressions': 'off',
+    '@typescript-eslint/no-unused-expressions': ['error'],
     'no-use-before-define': ['error', { functions: false, classes: true }],
     'no-restricted-syntax': [
       'error',

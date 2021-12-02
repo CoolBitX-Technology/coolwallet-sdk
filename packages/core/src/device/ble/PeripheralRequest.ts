@@ -1,6 +1,5 @@
-// We disable no-await-in-loop here.
-// Because no-await-in-loop intend to let user have full advantage of the parallelization benefits of async/await.
-// But we would like to send them sequentially rather than send them parallel.
+// no-await-in-loop is disabled here due to its intention to allow the user has full advantage of the parallelization benefits of async/await.
+// Sending the data sequentially is more preferred than sending the data parallel.
 
 /* eslint-disable no-await-in-loop */
 import isNil from 'lodash/isNil';
@@ -9,25 +8,26 @@ import { delay } from '../../utils';
 import Transport from '../../transport';
 import { MCU_FINISH_CODE, COMMAND_FINISH_CODE, PACKET_DATA_SIZE } from '../constants';
 import { byteArrayToHex, hexToByteArray } from './utils';
+import { TransportError } from '../../error';
 
 /**
  * PeripheralRequest is responsible for peripheral data communication.
  * @class
  *
  * @param {Transport} transport internal transport, which must be specified with different platforms
- * @param {boolean} isFinish since our device can only accept one kind of command once, we should have a flag to determine whether another command is executing.
+ * @param {boolean} isFinish since the device can only accept one kind of command once, a flag is needed to determine whether another command is executing.
  */
 export default class PeripheralRequest {
   private transport: Transport;
 
-  private isFinish = false;
+  private isFinish = true;
 
   constructor(transport: Transport) {
     this.transport = transport;
   }
 
   /**
-   * Send data to card chunk by chunk.
+   * Split the data into array and send them to card separately.
    * The maximum length of each chunk is PACKET_DATA_SIZE.
    * @param {number[]} packets data in byte form
    * @returns
@@ -43,24 +43,28 @@ export default class PeripheralRequest {
   }
 
   /**
-   * Read data from card recursively until we meet the MCU_FINISH_CODE.
+   * Read data from card until we meet the MCU_FINISH_CODE.
    * @param {string} prev previous data string
    * @returns {Promise<string>}
    */
-  private readDataFromCard = async (prev = ''): Promise<string> => {
-    const resultDataRaw = await this.transport.readDataFromCard();
-    const resultData = byteArrayToHex(resultDataRaw);
-    console.debug('_readDataFromCard resultData', resultData);
-    if (resultData === MCU_FINISH_CODE) {
-      return prev;
+  private readDataFromCard = async (): Promise<string> => {
+    let depot = '';
+    while (true) {
+      const resultDataRaw = await this.transport.readDataFromCard();
+      const resultData = byteArrayToHex(resultDataRaw);
+      console.debug('_readDataFromCard resultData', resultData);
+      if (resultData === MCU_FINISH_CODE) {
+        return depot;
+      }
+      // The result data will start with four length status code.
+      depot += resultData.slice(4);
     }
-    return this.readDataFromCard(prev + resultData.slice(4));
   };
 
   /**
    * Polling card status.
-   * Will Start to read bluetooth device data if card status equals to COMMAND_FINISH_CODE.
-   * @returns {Promise<void>}
+   * Will start to read bluetooth device data if card status equals to COMMAND_FINISH_CODE.
+   * @returns {Promise<string>}
    */
   private checkCardStatus = async () => {
     while (true) {
@@ -78,12 +82,15 @@ export default class PeripheralRequest {
 
   /**
    * Will send some byte commands then send some arguments.
-   * After this, we will start to poll our bluetooth device with checkCardStatus.
+   * After this, use checkCardStatus to poll the bluetooth device.
    * @param {string} command
    * @param {string} packets
    * @returns  {Promise<string>}
    */
   sendAPDU = async (command: string, packets: string): Promise<string> => {
+    if (!this.isFinish) {
+      throw new TransportError(this.sendAPDU.name, 'Device is busy');
+    }
     const bytesCommand = hexToByteArray(command);
     await this.transport.sendCommandToCard(bytesCommand);
 
@@ -93,7 +100,7 @@ export default class PeripheralRequest {
     }
 
     this.isFinish = false;
-    const result = await this.checkCardStatus();
-    return result;
+
+    return this.checkCardStatus();
   };
 }

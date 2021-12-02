@@ -13,7 +13,7 @@ export type DeviceModel = {
 };
 
 export type Device = {
-  [cws: string]: DeviceModel;
+  [coolwalletPro: string]: DeviceModel;
 };
 
 export type BluetoothInfos = {
@@ -21,9 +21,9 @@ export type BluetoothInfos = {
 } & BluetoothSpec;
 
 const devices: Device = {
-  cws: {
-    id: 'cws',
-    productName: 'CoolWallets',
+  coolwalletPro: {
+    id: 'coolwalletPro',
+    productName: 'CoolWallet Pro ',
     bluetoothSpec: [
       {
         serviceUuid: '0000a000-0000-1000-8000-00805f9b34fb',

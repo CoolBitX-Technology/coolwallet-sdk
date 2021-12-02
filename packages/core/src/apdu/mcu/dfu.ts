@@ -1,6 +1,5 @@
-// We disable no-await-in-loop here.
-// Because no-await-in-loop intend to let user have full advantage of the parallelization benefits of async/await.
-// But we would like to send them sequentially rather than send them parallel.
+// no-await-in-loop is disabled here due to its intention to allow the user has full advantage of the parallelization benefits of async/await.
+// Sending the data sequentially is more preferred than sending the data parallel.
 
 /* eslint-disable no-await-in-loop */
 import { executeCommand } from '../execute/execute';
