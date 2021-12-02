@@ -118,6 +118,5 @@ export const executeCommand = async (
   const apdu = util.assemblyCommandAndData(command.CLA, command.INS, P1, P2, data);
   console.debug(`Execute Command: ${JSON.stringify(command)}`);
   console.debug(`Execute Target: ${executedTarget}`);
-  const response = await executeAPDU(transport, apdu, executedTarget);
-  return response;
+  return executeAPDU(transport, apdu, executedTarget);
 };
