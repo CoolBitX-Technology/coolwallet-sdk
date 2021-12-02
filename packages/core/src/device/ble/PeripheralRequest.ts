@@ -73,8 +73,7 @@ export default class PeripheralRequest {
       console.debug('_checkCardStatus statusCode', statusCode);
       if (statusCode === COMMAND_FINISH_CODE) {
         this.isFinish = true;
-        const resultFromCard = await this.readDataFromCard();
-        return resultFromCard;
+        return this.readDataFromCard();
       }
       await delay(1000);
     }

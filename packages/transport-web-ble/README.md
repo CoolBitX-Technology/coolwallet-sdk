@@ -11,7 +11,7 @@ npm i @coolwallet/transport-web-ble
 ## Usage
 
 ```javascript
-import cwsETH from '@coolwallet/eth';
+import ETH from '@coolwallet/eth';
 import { crypto } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-web-ble';
 
@@ -20,9 +20,9 @@ const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
 
 const appId = 'appId that had been registered by wallet';
 
-const ETH = new cwsETH();
+const eth = new ETH();
 // use transport in other package
-const address = await ETH.getAddress(transport, appPrivateKey, appId, 0);
+const address = await eth.getAddress(transport, appPrivateKey, appId, 0);
 ```
 
 ## API

@@ -55,8 +55,7 @@ const updateFW = async (
   P2: string,
   data: string
 ): ReturnType<typeof executeCommand> => {
-  const response = await executeCommand(transport, commands.FW_UPDATE, target.MCU, data, P1, P2);
-  return response;
+  return executeCommand(transport, commands.FW_UPDATE, target.MCU, data, P1, P2);
 };
 
 const executeDFU = async (

@@ -8,39 +8,39 @@ import { SE_KEY_PARAM, PathType } from './param';
 const sha512 = (key: Buffer, data: Buffer): Buffer => crypto.createHmac('sha512', key).update(data).digest();
 
 function getCompressedPublicKey(publicKey: string) {
-  let prefix = '04';
+  let prefix;
   const c = publicKey.charAt(129);
-  if (
-    c === '1' ||
-    c === '3' ||
-    c === '5' ||
-    c === '7' ||
-    c === '9' ||
-    c === 'B' ||
-    c === 'D' ||
-    c === 'F' ||
-    c === 'b' ||
-    c === 'd' ||
-    c === 'f'
-  ) {
-    prefix = '03';
-  } else if (
-    c === '0' ||
-    c === '2' ||
-    c === '4' ||
-    c === '6' ||
-    c === '8' ||
-    c === 'A' ||
-    c === 'C' ||
-    c === 'E' ||
-    c === 'a' ||
-    c === 'c' ||
-    c === 'e'
-  ) {
-    prefix = '02';
-  } else {
-    prefix = '888887';
+  switch (c) {
+    case '1':
+    case '3':
+    case '5':
+    case '7':
+    case '9':
+    case 'B':
+    case 'D':
+    case 'F':
+    case 'b':
+    case 'd':
+    case 'f':
+      prefix = '03';
+      break;
+    case '0':
+    case '2':
+    case '4':
+    case '6':
+    case '8':
+    case 'A':
+    case 'C':
+    case 'E':
+    case 'a':
+    case 'c':
+    case 'e':
+      prefix = '02';
+      break;
+    default:
+      prefix = '888887';
   }
+
   return prefix + publicKey.substring(2, 66);
 }
 

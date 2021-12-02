@@ -34,7 +34,7 @@ const getAPIOption = (cardId: string, challengeData = ''): APIOptions => {
     payload,
   };
 
-  const options = {
+  return {
     body: JSON.stringify(body),
     method: 'POST',
     headers: {
@@ -42,8 +42,6 @@ const getAPIOption = (cardId: string, challengeData = ''): APIOptions => {
       'Content-Type': 'application/json',
     },
   };
-
-  return options;
 };
 
 const formatAPIResponse = async (transport: Transport, result: Response): ReturnType<typeof executeCommand> => {
@@ -74,8 +72,8 @@ const formatAPIResponse = async (transport: Transport, result: Response): Return
   const obj = jwt.decode(bodyText.cryptogram);
   console.debug(`Server Auth Response : ${JSON.stringify(obj)}`);
   const { CLA, INS, P1, P2, packets } = obj as Command;
-  const response = await executeCommand(transport, { CLA, INS, P1, P2 }, target.SE, packets);
-  return response;
+
+  return executeCommand(transport, { CLA, INS, P1, P2 }, target.SE, packets);
 };
 
 export { getAPIOption, formatAPIResponse };

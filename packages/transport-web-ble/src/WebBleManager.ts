@@ -21,8 +21,7 @@ class WebBleManager implements Transport.BleManager {
    */
   // eslint-disable-next-line class-methods-use-this
   async isSupported(): Promise<boolean> {
-    const isSupported = await navigator.bluetooth.getAvailability();
-    return isSupported;
+    return navigator.bluetooth.getAvailability();
   }
 
   /**

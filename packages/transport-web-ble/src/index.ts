@@ -20,5 +20,5 @@ export const createTransport = (): Promise<Transport.default> => (
   })
 );
 
-export { default as BleTransport } from './WebBleTransport';
+export { default as WebBleTransport } from './WebBleTransport';
 export default webBleManager;

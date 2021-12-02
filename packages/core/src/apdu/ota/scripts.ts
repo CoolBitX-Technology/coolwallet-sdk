@@ -13,7 +13,8 @@ import type { Command } from './types';
 
 const parseOTAScript = (OTAScript: string): Command[] => {
   const allApplet = OTAScript.split(/\n/);
-  const parsedAPDU = allApplet.map((data, i) => {
+
+  return allApplet.map((data, i) => {
     const CLA = data.slice(0, 2);
     const INS = data.slice(2, 4);
     const P1 = data.slice(4, 6);
@@ -23,8 +24,6 @@ const parseOTAScript = (OTAScript: string): Command[] => {
     if (CLA !== '80') throw new SDKError(parseOTAScript.name, `Problem in OTA Script in line ${i}`);
     return { CLA, INS, P1, P2, packets };
   });
-
-  return parsedAPDU;
 };
 
 const insertScript = async (transport: Transport, scriptHex: string): Promise<void> => {

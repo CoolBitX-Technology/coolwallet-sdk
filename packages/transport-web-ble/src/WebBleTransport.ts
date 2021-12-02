@@ -2,7 +2,7 @@
 import { transport as Transport } from '@coolwallet/core';
 import { convertToNumberArray } from './utils';
 
-class BleTransport extends Transport.default {
+class WebBleTransport extends Transport.default {
   private commandCharacteristic?: BluetoothRemoteGATTCharacteristic;
 
   private dataCharacteristic?: BluetoothRemoteGATTCharacteristic;
@@ -44,4 +44,4 @@ class BleTransport extends Transport.default {
   };
 }
 
-export default BleTransport;
+export default WebBleTransport;
