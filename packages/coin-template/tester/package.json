@@ -1,0 +1,28 @@
+{
+  "name": "tester",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@coolwallet/core": "^1.0.9",
+    "@coolwallet/transport-web-ble": "^1.0.0",
+    "bip32": "^3.0.1",
+    "bluebird": "^3.7.2",
+    "buffer": "^6.0.3",
+    "react": "^17.0.0",
+    "react-bootstrap": "^2.0.2",
+    "react-dom": "^17.0.0",
+    "react-router-dom": "^6.0.2",
+    "secp256k1": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@vitejs/plugin-react": "^1.0.0",
+    "typescript": "^4.3.2",
+    "vite": "^2.6.4"
+  }
+}
