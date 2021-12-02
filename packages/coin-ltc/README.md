@@ -1,7 +1,7 @@
 # CoolWallet Litecoin (LTC) SDK
 [![Version](https://img.shields.io/npm/v/@coolwallet/ltc)](https://www.npmjs.com/package/@coolwallet/ltc)
 
-Typescript library with support for the integration of Bitcoin for third party application, include the functionalities of generation of addresses and signed transactions. 
+Typescript library with support for the integration of Litecoin for third party application, include the functionalities of generation of addresses and signed transactions. 
 
 ## Install
 
