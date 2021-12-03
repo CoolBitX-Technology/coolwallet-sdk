@@ -18,7 +18,9 @@ import { createTransport } from '@coolwallet/transport-web-ble';
 const atom = new ATOM();
 
 const transport = await createTransport();
+
 const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+
 const appId = 'appId that had been registered by wallet';
 
 const address = await atom.getAddress(transport, appPrivateKey, appId, 0);
