@@ -54,7 +54,7 @@ m/44'/74'/0'/0/{i}
 
 In the design of current hardware, we only support path `m/44'/74'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
 
-``javascript
+```javascript
 async getAddress(
     transport: Transport, 
     appPrivateKey: string, 
