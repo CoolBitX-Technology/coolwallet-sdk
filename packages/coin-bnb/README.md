@@ -12,13 +12,33 @@ npm install @coolwallet/bnb
 
 ```javascript
 import BNB from '@coolwallet/bnb';
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
+
 const bnb = new BNB();
 
-const address = await bnb.getAddress(transport, appPrivateKey, appId, 0);
+const transport = await createTransport();
+
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+
+const appId = 'appId that had been registered by wallet';
+
+const addressIndex = 0;
+
+const address = await bnb.getAddress(transport, appPrivateKey, appId, addressIndex);
+
+const chainId = 'Binance-Chain-Tigris';
+
+// Use your way to get account data in this format.
+const accountData = {
+  account_number: '39',
+  public_key: 'account_public_key',
+  sequence: '',
+}
 
 const transaction = {
-  account_number: '39',
-  chain_id: 'Binance-Chain-Tigris',
+  account_number: accountData.account_number,
+  chain_id: chainId,
   data: null,
   memo: '',
   msgs: [
@@ -40,7 +60,29 @@ const transaction = {
   sequence: '503',
   source: '711',
 }
-const normalTx = await bnb.signTransaction(signData);
+
+const signObj = {
+    account_number: accountData.account_number,
+    chain_id: chainId,
+    data: null,
+    memo: "",
+    msgs: ['some messages'],
+    sequence: accountData.sequence,
+    source: "711"
+};
+
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    transaction,
+    addressIndex,
+    signObj,
+    signPublicKey: Buffer.from(accountData.public_key),
+    addressIndex,
+}
+
+const normalTx = await bnb.signTransaction(signTxData);
 ```
 
 ## Methods

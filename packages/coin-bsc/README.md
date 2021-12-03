@@ -12,9 +12,20 @@ npm install @coolwallet/bsc
 
 ```javascript
 import BSC from '@coolwallet/bsc'
-const bsc = new BSC()
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
 
-const address = await bsc.getAddress(transport, appPrivateKey, appId, 0);
+const bsc = new BSC();
+
+const transport = await createTransport();
+
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+
+const appId = 'appId that had been registered by wallet';
+
+const addressIndex = 0;
+
+const address = await bsc.getAddress(transport, appPrivateKey, appId, addressIndex);
 
 const transaction = {
     nonce: "0x87",
@@ -25,6 +36,15 @@ const transaction = {
     data: "",
     chainId: 56
 }
+
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    transaction,
+    addressIndex
+}
+
 const normalTx = await bsc.signTransaction(signTxData);
 
 const bep20Transaction = {
@@ -40,7 +60,16 @@ const bep20Transaction = {
       unit: "18"
     }
 }
-const bep20Tx = await bsc.bep20Transaction(signTxData, tokenSignature);
+
+const bep20SignTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    transaction: bep20Transaction,
+    addressIndex
+}
+
+const bep20Tx = await bsc.signBEP20Transaction(bep20SignTxData);
 ```
 
 ## Methods
@@ -106,7 +135,6 @@ Perform BSC `personal_sign`.
 
 ```javascript
 async signMessage(signMsgData: types.signMsg): Promise<string> 
-
 ```
 
 #### signMsg Arguments
@@ -128,7 +156,7 @@ async signMessage(signMsgData: types.signMsg): Promise<string>
 Perform BSC `sign_typed_data`.
 
 ```javascript
-async signTypedData(typedData: types.signTyped)
+async signTypedData(typedData: types.signTyped): Promise<string>
 ```
 
 #### signTyped Arguments

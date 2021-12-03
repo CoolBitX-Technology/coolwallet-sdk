@@ -11,21 +11,35 @@ npm i @coolwallet/btc
 ## Usage
 
 ```javascript
-import BTC from '@coolwallet/btc'
-const btc = new BTC()
+import BTC from '@coolwallet/btc';
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
+
+const btc = new BTC();
+
+const transport = await createTransport();
+
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+
+const appId = 'appId that had been registered by wallet';
+
+const addressIndex = 0;
 
 const address = await btc.getAddress(transport, appPrivateKey, appId, scriptType, 0);
 
-const transaction = {
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
     scriptType: 1,
-    inputs:{
+    inputs: [{
         preTxHash: "735153f57da91462a01c17937a397aa67f7b5faf9ab74ebcdd4c8f485aba26f5",
         preIndex: 1,
         preValue: "87302",
         sequence: 0xFFFFFFFF,
         addressIndex: 0,
         pubkeyBuf: Uint8Array(33)
-    },
+    }],
     output: {
         value: "10000",
         address: "3442qW39131y5Q8qR963ehjmxXPAXUWn7Q",
@@ -36,18 +50,22 @@ const transaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
+
 const normalTx = await btc.signTransaction(signTxData)
 
-const usdtTransaction = {
+const usdtSignTxData = {
+    transport,
+    appPrivateKey,
+    appId,
     scriptType: 1,
-    inputs:{
+    inputs: [{
         preTxHash: "735153f57da91462a01c17937a397aa67f7b5faf9ab74ebcdd4c8f485aba26f5",
         preIndex: 1,
         preValue: 87302,
         sequence: 0xFFFFFFFF,
         addressIndex: 0,
         pubkeyBuf: Uint8Array(33)
-    },
+    }],
     output: {
         value: "546",
         address: "3442qW39131y5Q8qR963ehjmxXPAXUWn7Q",
@@ -58,7 +76,8 @@ const usdtTransaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
-const usdtTx = await btc.signUSDTTransaction(signUSDTTxData)
+
+const usdtTx = await btc.signUSDTTransaction(usdtSignTxData)
 ```
 
 ## Methods
