@@ -94,7 +94,7 @@ async signTransaction(signTxData: signTxType):Promise<string>
 
 |      Arg      |                              Description                             |    Type    | Required |
 |:-------------:|:--------------------------------------------------------------------:|:----------:|:--------:|
-|       1       |             Object to communicate with CoolWallet device             |  Transport |   TRUE   |
+|   transport   |             Object to communicate with CoolWallet device             |  Transport |   TRUE   |
 | appPrivateKey |               Private key for the connected application              |   string   |   TRUE   |
 |     appId     |                   ID for the connected application                   |   string   |   TRUE   |
 |   scriptType  |               Define the type of script of the address               | ScriptType |   TRUE   |
