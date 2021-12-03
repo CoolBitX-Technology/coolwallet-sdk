@@ -1,5 +1,5 @@
 /// <reference types="web-bluetooth" />
-import { transport as Transport } from '@coolwallet/core';
+import { Transport } from '@coolwallet/core';
 import WebBleManager from './WebBleManager';
 
 // Create a singleton WebBleManager
@@ -9,7 +9,7 @@ const webBleManager = new WebBleManager();
  * A convenient way to create internal transport.
  * @returns {Transport.default}
  */
-export const createTransport = (): Promise<Transport.default> => (
+export const createTransport = (): Promise<Transport> => (
   new Promise((resolve, reject) => {
     webBleManager
       .listen()
