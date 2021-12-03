@@ -1,68 +1,83 @@
-import { sendAPDU } from '../device/ble/sendAPDU';
-import { TransportError } from '../error/errorHandle'
+/// <reference types="web-bluetooth" />
+import type { Device as RNBlePlxDevice } from 'react-native-ble-plx';
+import PeripheralRequest from '../device/ble/PeripheralRequest';
 
-export default class Transport {
-  [x: string]: any;
-  device: any;
-  constructor(
-    device: any,
-    sendCommandToCard: Function,
-    sendDataToCard: Function,
-    checkCardStatus: Function,
-    readCharacteristic: Function
-  ) {
+type TransportDevice = BluetoothDevice | RNBlePlxDevice;
+
+/**
+ * Transport is an abstract class.
+ * All class that implement this abstract class will need to implements following methods:
+ *
+ * @example
+ * // sendCommandToCard will be responsible for sending a byte array by commandCharacteristic.
+ * abstract sendCommandToCard(command: number[]): Promise<void>;
+ *
+ * @example
+ * // sendCommandToCard will be responsible for sending a byte array by dataCharacteristic.
+ * abstract sendDataToCard(packets: number[]): Promise<void>;
+ *
+ * @example
+ * // checkCardStatus will use statusCharacteristic to read value from card.
+ * // But only take the first element of read value.
+ * abstract checkCardStatus(): Promise<number>;
+ *
+ * @example
+ * // readDataFromCard will use responseCharacteristic to read value from card.
+ * readDataFromCard(): Promise<number[]>;
+ */
+abstract class Transport {
+  [key: string]: any;
+
+  peripheral: PeripheralRequest;
+
+  device: TransportDevice;
+
+  constructor(device: TransportDevice) {
     this.device = device;
-    this.sendCommandToCard = this.sendCommandToCard.bind(this);
-    this.sendDataToCard = this.sendDataToCard.bind(this);
-    this.checkCardStatus = this.checkCardStatus.bind(this);
-    this.readDataFromCard = this.readDataFromCard.bind(this);
+    this.peripheral = new PeripheralRequest(this);
   }
 
-  static isSupported(): Promise<boolean> {
-    throw new TransportError(this.isSupported.name, 'isSupported not implemented');
-  }
+  abstract sendCommandToCard(command: number[]): Promise<void>;
 
-  static listen(callback: (error: Error, device: any) => void) {
-    throw new TransportError(this.listen.name, 'listen not implemented');
-  }
+  abstract sendDataToCard(packets: number[]): Promise<void>;
 
-  static async connect(deviceOrId: object | string): Promise<Transport> {
-    throw new TransportError(this.connect.name, 'connectnot implemented');
-  }
+  abstract checkCardStatus(): Promise<number>;
 
-  static async disconnect(deviceOrId: object | string): Promise<void> {
-    throw new TransportError(this.disconnect.name, 'disconnect not implemented');
-  }
-
-  static setOnDisconnect(deviceOrId: object | string, onDisconnect: Function): void {
-    throw new TransportError(this.setOnDisconnect.name, 'setOnDisconnect not implemented');
-  }
-
-  async sendCommandToCard(command: number[]): Promise<void>{
-    throw new TransportError(this.sendCommandToCard.name, 'sendCommandToCard not implemented');
-  }
-
-  async sendDataToCard(packets: number[]): Promise<void> {
-    throw new TransportError(this.sendDataToCard.name, 'sendDataToCard not implemented');
-  }
-
-  async checkCardStatus(): Promise<number> {
-    throw new TransportError(this.checkCardStatus.name, 'checkCardStatus not implemented');
-  }
-
-  async readDataFromCard(): Promise<number[]> {
-    throw new TransportError(this.readDataFromCard.name, 'readDataFromCard not implemented');
-  }
+  abstract readDataFromCard(): Promise<number[]>;
 
   request = async (command: string, packets: string): Promise<string> => {
-    const data = await sendAPDU(
-      this.sendCommandToCard,
-      this.sendDataToCard,
-      this.checkCardStatus,
-      this.readDataFromCard,
-      command,
-      packets
-    );
-    return data;
-  }
+    return this.peripheral.sendAPDU(command, packets);
+  };
 }
+
+interface BleManager {
+  /**
+   * Check whether browser support bluetooth.
+   */
+  isSupported(): Promise<boolean>;
+
+  /**
+   * Scan device in order to get the BluetoothDevice instance.
+   */
+  listen(callback?: (error?: any, device?: TransportDevice) => void): Promise<TransportDevice> | void;
+
+  /**
+   * Stop scanning BluetoothDevice.
+   *
+   * Optional, it is not required to every platform, ex. browser.
+   */
+  stopListen?(): void;
+
+  /**
+   * Connect to given TransportDevice and return the Transport.
+   */
+  connect(device: TransportDevice): Promise<Transport>;
+
+  /**
+   * Disconnect from Transport and TransportDevice.
+   */
+  disconnect(): Promise<void>;
+}
+
+export { BleManager };
+export default Transport;
