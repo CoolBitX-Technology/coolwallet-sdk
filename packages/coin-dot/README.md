@@ -12,11 +12,18 @@ npm install @coolwallet/dot
 
 ```javascript
 import DOT from '@coolwallet/dot';
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
+
 const dot = new DOT();
+
+const transport = await createTransport();
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+const appId = 'appId that had been registered by wallet';
 
 const address = await dot.getAddress(transport, appPrivateKey, appId, 0);
 
-const transaction = {
+const normalTransaction = {
     fromAddress: "13v5sr4E8TLLfnA6ytPQwkA5HsEivYFpvaBATj5dDyDa38mY",
     blockHash: "0x5c697847b25d385178aa150d29e5ce212339c5624183f74bdf45f4912c89749a",
     blockNumber: "999",
@@ -32,6 +39,15 @@ const transaction = {
         value: 10000 
     }
 };
+
+const signTxData = {
+  transport,
+  appPrivateKey,
+  appId,
+  addressIndex: 0,
+  transaction: normalTransaction
+}
+
 const normalTx = await dot.signTransaction(signTxData);
 ```
 

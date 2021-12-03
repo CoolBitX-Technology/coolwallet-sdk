@@ -12,20 +12,32 @@ npm i @coolwallet/bch
 
 ```javascript
 import BCH from '@coolwallet/bch';
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
+
 const bch = new BCH();
+
+const transport = await createTransport();
+
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+
+const appId = 'appId that had been registered by wallet';
 
 const address = await bch.getAddress(transport, appPrivateKey, appId, 0);
 
-const transaction = {
+const signTxData = {
+    tranpsort,
+    appPrivateKey,
+    appId,
     scriptType: 0,
-    inputs:{
+    inputs: [{
         preTxHash: "9d717e7f9fb55c0591eb0f59999866091c592c55234a7024230123e1731524b5",
         preIndex: 0,
         preValue: "500000",
         sequence: 0xFFFFFFFF,
         addressIndex: 2,
         pubkeyBuf: Uint8Array(33)
-    },
+    }],
     output: {
         value: "10000",
         address: "qzr809ywhqvhrlhq5nd9m78kmn3p20qm5y07gj0p8v",
@@ -36,6 +48,7 @@ const transaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
+
 const tx = await bch.signTransaction(signTxData);
 ```
 

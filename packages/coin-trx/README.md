@@ -12,11 +12,18 @@ npm install @coolwallet/trx
 
 ```javascript
 import TRX from '@coolwallet/trx';
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
+
 const trx = new TRX();
+
+const transport = await createTransport();
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+const appId = 'appId that had been registered by wallet';
 
 const address = await trx.getAddress(transport, appPrivateKey, appId, 0);
 
-const transaction = {
+const normalTransaction = {
     refBlockBytes: "c75b",
     refBlockHash: "7cfc890c6e4d7a15",
     expiration: 1583304414000,
@@ -27,6 +34,15 @@ const transaction = {
         amount: 100000000
     }
 };
+
+const signTxData = {
+  transport,
+  appPrivateKey,
+  appId,
+  addressIndex: 0,
+  transaction: normalTransaction
+}
+
 const normalTx = await trx.signTransaction(signTxData);
 
 const trc20Transaction = {
@@ -45,8 +61,17 @@ const trc20Transaction = {
         symbol: "USDT",
         decimals: 6
     }
-};
-const trc20Tx = await trx.signTRC20Transfer(signTxData);
+}
+
+const trc20SignTxData = {
+  transport,
+  appPrivateKey,
+  appId,
+  addressIndex: 0,
+  transaction: trc20Transaction
+}
+
+const trc20Tx = await trx.signTRC20Transfer(trc20SignTxData);
 ```
 
 ## Methods

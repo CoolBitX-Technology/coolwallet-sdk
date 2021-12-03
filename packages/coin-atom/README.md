@@ -12,7 +12,14 @@ npm i @coolwallet/atom
 
 ```javascript
 import ATOM from '@coolwallet/atom';
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
+
 const atom = new ATOM();
+
+const transport = await createTransport();
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+const appId = 'appId that had been registered by wallet';
 
 const address = await atom.getAddress(transport, appPrivateKey, appId, 0);
 
@@ -28,24 +35,17 @@ const normalTransaction = {
     sequence: "14",
     memo: "test signature"
 }
+
+const signData = {
+    transport,
+    appPrivateKey,
+    appId,
+    addressIndex: 0,
+    transaction: normalTransaction,
+    txType: TX_TYPE.SEND,
+}
+
 const normalTx = await atom.signTransaction(signData);
-
-const delegate = {
-    delegatorAddress: "cosmos1uqnpy2ay7rsjyd4s3562d9nyd8ag0kjqseg3gz",
-    validatorAddress: "cosmosvaloper1we6knm8qartmmh2r0qfpsz6pq0s7emv3e0meuw",
-    amount: 100000
-}
-
-const undelegate = {
-    delegatorAddress: "cosmos1uqnpy2ay7rsjyd4s3562d9nyd8ag0kjqseg3gz",
-    validatorAddress: "cosmosvaloper1we6knm8qartmmh2r0qfpsz6pq0s7emv3e0meuw",
-    amount: 100000
-}
-
-const withDrawDelegationReward = {
-    delegatorAddress: "cosmos1uqnpy2ay7rsjyd4s3562d9nyd8ag0kjqseg3gz",
-    validatorAddress: "cosmosvaloper1we6knm8qartmmh2r0qfpsz6pq0s7emv3e0meuw"
-}
 ```
 
 ## Methods
@@ -135,6 +135,20 @@ To delegate & to undelegate ATOM
 | validatorAddress |  Address of validator | string |    True   |
 |      amount      | Amount for delegating | number |    True   |
 
+```javascript
+const delegate = {
+    delegatorAddress: "cosmos1uqnpy2ay7rsjyd4s3562d9nyd8ag0kjqseg3gz",
+    validatorAddress: "cosmosvaloper1we6knm8qartmmh2r0qfpsz6pq0s7emv3e0meuw",
+    amount: 100000
+}
+
+const undelegate = {
+    delegatorAddress: "cosmos1uqnpy2ay7rsjyd4s3562d9nyd8ag0kjqseg3gz",
+    validatorAddress: "cosmosvaloper1we6knm8qartmmh2r0qfpsz6pq0s7emv3e0meuw",
+    amount: 100000
+}
+```
+
 ### MsgWithdrawDelegationReward
 
 #### Description
@@ -147,3 +161,10 @@ To withdraw the delegation and claim the reward
 |:----------------:|:--------------------:|:------:|:---------:|
 | delegatorAddress | Address of delegator | string |    True   |
 | validatorAddress | Address of validator | string |    True   |
+
+```javascript
+const withDrawDelegationReward = {
+    delegatorAddress: "cosmos1uqnpy2ay7rsjyd4s3562d9nyd8ag0kjqseg3gz",
+    validatorAddress: "cosmosvaloper1we6knm8qartmmh2r0qfpsz6pq0s7emv3e0meuw"
+}
+```
