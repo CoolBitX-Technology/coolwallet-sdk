@@ -31,16 +31,12 @@ class WebBleManager implements BleManager {
   // eslint-disable-next-line class-methods-use-this
   listen(): Promise<BluetoothDevice> {
     return new Promise((resolve, reject) => {
-      try {
-        const services = coreDevice.getBluetoothServiceUuids();
-        navigator.bluetooth
-          .requestDevice({
-            filters: [{ services }],
-          })
-          .then(resolve);
-      } catch (error) {
-        reject(error);
-      }
+      const services = coreDevice.getBluetoothServiceUuids();
+      navigator.bluetooth
+        .requestDevice({
+          filters: [{ services }],
+        })
+        .then(resolve, reject);
     });
   }
 
