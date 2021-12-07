@@ -37,6 +37,17 @@ const transaction = {
         pubkeyBuf: Uint8Array(33)
     }
 }
+
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    scriptType,
+    inputs,
+    output,
+    change
+}
+
 const normalTx = await ltc.signTransaction(signTxData)
 ```
 
