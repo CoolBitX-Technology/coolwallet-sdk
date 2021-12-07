@@ -35,6 +35,14 @@ const param = new IconBuilder.IcxTransactionBuilder()
 
 const rawTx = IconConverter.toRawTransaction(param);
 const transaction = JSON.stringify(rawTx);
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    transaction,
+    addressIndex
+}
+
 const signTx = await ICON.signTransaction(signTxData)
 ```
 
