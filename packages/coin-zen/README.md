@@ -41,6 +41,18 @@ const transaction = {
         blockHeight: 1048203
     }
 }
+
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    scriptType,
+    inputs,
+    output,
+    change,
+    addressIndex
+}
+
 const transaction = await zen.signTransaction(signTxData)
 ```
 
