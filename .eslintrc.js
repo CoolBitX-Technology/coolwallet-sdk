@@ -27,7 +27,8 @@ module.exports = {
     // note you must disable the base rule as it can report incorrect errors
     'no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-expressions': ['error'],
-    'no-use-before-define': ['error', { functions: false, classes: true }],
+    '@typescript-eslint/no-use-before-define': ['error'],
+    'no-use-before-define': 'off',
     'no-restricted-syntax': [
       'error',
       {
