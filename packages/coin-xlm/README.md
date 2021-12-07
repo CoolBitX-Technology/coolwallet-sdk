@@ -46,6 +46,15 @@ const txData = {
 	isCreate: true
 }
 
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    transaction,
+    protocol,
+    addressIndex
+}
+
 const signatureTx = await xlm.signTransaction(signTxData)
 ```
 In construct, you can choose the chain you want to implement.
