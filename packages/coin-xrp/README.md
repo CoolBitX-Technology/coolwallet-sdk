@@ -29,6 +29,14 @@ const payment = {
   Destination: "rp6ENYKqYfT5qJqQiN2Y9AnZmFEWv9hRpq"
 }
 
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    payment,
+    addressIndex
+}
+
 const transaction = await xrp.signTransaction(signTxData)
 ```
 
@@ -82,7 +90,7 @@ async signTransaction(signTxData: signTxType):Promise<string>
 
 |      Arg      |                              Description                             |    Type   | Required |
 |:-------------:|:--------------------------------------------------------------------:|:---------:|:--------:|
-|       1       |             Object to communicate with CoolWallet device             | Transport |   TRUE   |
+|   transport   |             Object to communicate with CoolWallet device             | Transport |   TRUE   |
 | appPrivateKey |               Private key for the connected application              |   string  |   TRUE   |
 |     appId     |                   ID for the connected application                   |   string  |   TRUE   |
 |    payment    |          Essential information/property for XRP Transaction          |  Payment  |   TRUE   |
