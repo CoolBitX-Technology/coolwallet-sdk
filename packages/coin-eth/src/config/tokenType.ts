@@ -1,7 +1,7 @@
 export const TOKENTYPE = [
   //VLX
   {
-    name: "VLX",
+    name: "Velas",
     symbol: "VLX",
     unit: "18",
     contractAddress: 0x8c543aed163909142695f2d2acd0d55791a9edb9,
