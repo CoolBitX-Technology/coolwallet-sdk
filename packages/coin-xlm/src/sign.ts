@@ -25,7 +25,7 @@ export default async function signTransaction(
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    return await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    return apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
   };
 
   const signature = await tx.flow.getSingleSignatureFromCoolWallet(
