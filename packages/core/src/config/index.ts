@@ -72,7 +72,7 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
     .add(Point.fromHex(Buffer.from(SE_KEY_PARAM.chipMasterPublicKey, 'hex')))
     .toHex(false);
 
-  return Buffer.from(Ki).toString('hex');
+  return Ki;
 }
 
 export { getSEPublicKey, PathType };
