@@ -1,7 +1,7 @@
 # CoolWallet Icon (ICX) SDK
 [![Version](https://img.shields.io/npm/v/@coolwallet/icx)](https://www.npmjs.com/package/@coolwallet/icx)
 
-Typescript library with support for the integration of Bitcoin for third party application, include the functionalities of generation of addresses and signed transactions. 
+Typescript library with support for the integration of ICON for third party application, include the functionalities of generation of addresses and signed transactions. 
 
 ## Install
 

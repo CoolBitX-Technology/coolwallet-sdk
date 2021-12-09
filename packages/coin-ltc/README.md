@@ -17,25 +17,24 @@ const ltc = new LTC()
 
 const address = await ltc.getAddress(transport, appPrivateKey, appId, scriptType, 0);
 
-const transaction = {
-    scriptType: 1,
-    inputs:{
-        preTxHash: "735153f57da91462a01c17937a397aa67f7b5faf9ab74ebcdd4c8f485aba26f5",
-        preIndex: 1,
-        preValue: "87302",
-        sequence: 0xFFFFFFFF,
-        addressIndex: 0,
-        pubkeyBuf: Uint8Array(33)
-    },
-    output: {
-        value: "10000",
-        address: "MSea9ZqgrZqsB5bvg8iTrcUQ2xpF1ckAsv",
-    },
-    change: {
-        value: "77301.99983500001",
-        addressIndex: 0,
-        pubkeyBuf: Uint8Array(33)
-    }
+const inputs = {
+    preTxHash: "735153f57da91462a01c17937a397aa67f7b5faf9ab74ebcdd4c8f485aba26f5",
+    preIndex: 1,
+    preValue: "87302",
+    sequence: 0xFFFFFFFF,
+    addressIndex: 0,
+    pubkeyBuf: Uint8Array(33)
+}
+
+const output = {
+    value: "10000",
+    address: "MSea9ZqgrZqsB5bvg8iTrcUQ2xpF1ckAsv",
+}
+
+const change = {
+    value: "77301.99983500001",
+    addressIndex: 0,
+    pubkeyBuf: Uint8Array(33)
 }
 
 const signTxData = {
