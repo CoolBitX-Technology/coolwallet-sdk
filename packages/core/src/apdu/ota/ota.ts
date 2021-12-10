@@ -122,10 +122,12 @@ export const updateSE = async (
     progressCallback(progress.next()); // progress 36
 
     console.debug('mutual Authorization Start----');
-    const challengeResponse = await callAPI(CHALLENGE_URL, getAPIOption(cardId));
+    const options = await getAPIOption(cardId);
+    const challengeResponse = await callAPI(CHALLENGE_URL, options);
     console.debug('cardID: ', cardId);
     const challengeObj = await formatAPIResponse(transport, challengeResponse);
-    const cryptogramResponse = await callAPI(CRYPTOGRAM_URL, getAPIOption(cardId, challengeObj.outputData));
+    const challengeOptions = await getAPIOption(cardId, challengeObj.outputData);
+    const cryptogramResponse = await callAPI(CRYPTOGRAM_URL, challengeOptions);
     await formatAPIResponse(transport, cryptogramResponse);
     console.debug('mutual Authorization Done----');
 
