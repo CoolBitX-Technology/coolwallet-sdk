@@ -17,29 +17,28 @@ const zen = new ZEN()
 
 const address = await zen.getAddress(transport, appPrivateKey, appId, scriptType, 0);
 
-const transaction = {
-    scriptType: 1,
-    inputs:{
-        preTxHash: "735153f57da91462a01c17937a397aa67f7b5faf9ab74ebcdd4c8f485aba26f5",
-        preIndex: 1,
-        preValue: "87302",
-        sequence: 0xFFFFFFFF,
-        addressIndex: 0,
-        pubkeyBuf: Uint8Array(33)
-    },
-    output: {
-        value: "10000",
-        address: "MSea9ZqgrZqsB5bvg8iTrcUQ2xpF1ckAsv",
-        blockHash: "0000000000ab3ec2f5e8fe0bd065195bddf39373f99ccba4e9657e9d84dbf9ae",
-        blockHeight: 1048203
-    },
-    change: {
-        value: "77301.99983500001",
-        addressIndex: 0,
-        pubkeyBuf: Uint8Array(33),
-        blockHash: "0000000000ab3ec2f5e8fe0bd065195bddf39373f99ccba4e9657e9d84dbf9ae",
-        blockHeight: 1048203
-    }
+const inputs = {
+    preTxHash: "735153f57da91462a01c17937a397aa67f7b5faf9ab74ebcdd4c8f485aba26f5",
+    preIndex: 1,
+    preValue: "87302",
+    sequence: 0xFFFFFFFF,
+    addressIndex: 0,
+    pubkeyBuf: Uint8Array(33)
+}
+
+const output = {
+    value: "10000",
+    address: "MSea9ZqgrZqsB5bvg8iTrcUQ2xpF1ckAsv",
+    blockHash: "0000000000ab3ec2f5e8fe0bd065195bddf39373f99ccba4e9657e9d84dbf9ae",
+    blockHeight: 1048203
+}
+
+const change = {
+    value: "77301.99983500001",
+    addressIndex: 0,
+    pubkeyBuf: Uint8Array(33),
+    blockHash: "0000000000ab3ec2f5e8fe0bd065195bddf39373f99ccba4e9657e9d84dbf9ae",
+    blockHeight: 1048203
 }
 
 const signTxData = {

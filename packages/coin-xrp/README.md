@@ -1,7 +1,7 @@
 # CoolWallet Ripple (XRP) SDK
 [![Version](https://img.shields.io/npm/v/@coolwallet/xrp)](https://www.npmjs.com/package/@coolwallet/xrp)
 
-Typescript library with support for the integration of Bitcoin for third party application, include the functionalities of generation of addresses and signed transactions.
+Typescript library with support for the integration of Ripple for third party application, include the functionalities of generation of addresses and signed transactions.
 
 ## Install
 
@@ -76,7 +76,7 @@ async getAddress(
 |     appId     |       ID for the connected application       |   string  |   TRUE   |
 |  addressIndex |  The from address index in BIP44 derivation  |   number  |   TRUE   |
 
-### signPayment
+### signTransaction
 
 #### Description
 
