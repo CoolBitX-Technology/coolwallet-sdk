@@ -51,8 +51,7 @@ const signTxData = {
     appPrivateKey,
     appId,
     transaction,
-    protocol,
-    addressIndex
+    protocol
 }
 
 const signatureTx = await xlm.signTransaction(signTxData)
