@@ -78,9 +78,8 @@ We call the fourth parameter **protocol**, which can only be either `'BIP44'` or
 async getAddress(
     transport: Transport, 
     appPrivateKey: string, 
-    appId: string, 
-    addressIndex: number
-    ): Promise<string> 
+    appId: string
+): Promise<string> 
 ```
 
 #### Arguments
