@@ -11,9 +11,9 @@ function decodeCommand(command: string) {
 
 function getCheckSum(data: string[]) {
   let XORTemp = 0;
-  for (let i = 0; i < data.length; i++) {
+  for (const hex of data) {
     // eslint-disable-next-line no-bitwise
-    XORTemp ^= parseInt(data[i], 16);
+    XORTemp ^= parseInt(hex, 16);
   }
   let temp = XORTemp.toString(16);
   if (temp.length % 2 !== 0) {

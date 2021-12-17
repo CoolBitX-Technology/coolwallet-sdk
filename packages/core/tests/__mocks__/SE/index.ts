@@ -16,7 +16,7 @@ class SE {
 
   public async process(ins: APDU_COMMANDS, argument?: string): Promise<Response<string>> {
     let data;
-    let statusCode = STATUS_CODE.INS_NOT_SUPPORT;
+    let statusCode;
     try {
       switch (ins) {
         case APDU_COMMANDS.GET_NONCE:
