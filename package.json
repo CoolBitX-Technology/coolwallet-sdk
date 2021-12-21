@@ -2,12 +2,15 @@
   "name": "root",
   "private": true,
   "devDependencies": {
+    "@babel/core": "^7.16.0",
     "@babel/plugin-transform-runtime": "^7.8.3",
-    "@babel/preset-env": "^7.8.6",
-    "@types/jest": "^25.1.3",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
+    "@types/babel__core": "^7.1.17",
+    "@types/jest": "^27.0.3",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
-    "babel-jest": "^25.1.0",
+    "babel-jest": "^27.4.4",
     "eslint": "^6.1.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-plugin-import": "^2.19.1",
@@ -31,7 +34,5 @@
     "test": "jest"
   },
   "license": "Apache-2.0",
-  "dependencies": {
-    "@coolwallet/core": "0.1.0-beta.25"
-  }
+  "dependencies": {}
 }
