@@ -17,7 +17,7 @@ module.exports = {
   },
   plugins: ['react'],
   rules: {
-    'max-len': ['error', { code: 120, ignoreComments: true }],
+    'max-len': ['error', { code: 120, ignoreComments: true, ignoreTemplateLiterals: true }],
     'implicit-arrow-linebreak': 0,
     'object-curly-spacing': 'always',
     'object-curly-newline': 'off',
@@ -28,6 +28,7 @@ module.exports = {
     'no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-expressions': ['error'],
     '@typescript-eslint/no-use-before-define': ['error'],
+    'react/destructuring-assignment': 'never',
     'react/jsx-filename-extension': [1, { 'extensions': ['.js', '.jsx', '.ts', '.tsx'] }],
     'no-use-before-define': 'off',
     'no-restricted-syntax': [
