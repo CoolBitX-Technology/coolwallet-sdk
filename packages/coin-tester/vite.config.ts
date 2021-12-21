@@ -8,12 +8,11 @@ export default defineConfig({
     target: 'es2020',
   },
   resolve: {
+    preserveSymlinks: true,
     alias: {
-      stream: 'stream-browserify',
-    }
-  },
-  define: {
-    'process.env': {},
+      stream: require.resolve('stream-browserify'),
+      process: require.resolve('process/browser'),
+    },
   },
   plugins: [react(), viteCommonjs()],
 });
