@@ -34,10 +34,10 @@ export const makeConnectComponent = (input: {
   );
 };
 
-export const makeGetComponent = (input: {
+export const Get = (input: {
   title: string,
   content: string,
-  btnName: string | undefined,
+  btnName?: string,
   onClick: () => void,
   disabled: boolean,
 }): JSX.Element => (

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Container } from 'react-bootstrap';
 
-function CoinPage() {
+function CoinTemplate() {
   return (
     <Container />
   );
 }
 
-export default CoinPage;
+export default CoinTemplate;

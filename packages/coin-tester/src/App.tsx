@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { HashRouter as Router } from 'react-router-dom';
+import { Routes, Route, Outlet, Link, Navigate } from "react-router-dom";
 import { Container, Row, Col, ButtonGroup, Button } from 'react-bootstrap';
-import webBleTransport, { createTransport } from '@coolwallet/transport-web-ble';
 import core, { apdu, Transport } from '@coolwallet/core';
-import { makeConnectComponent } from './utils/componentMaker';
-import CoinPage from './components/coin';
+import webBleTransport, { createTransport } from '@coolwallet/transport-web-ble';
+import HeadBar from './components/HeadBar';
+import Settings from './components/settings';
+import CoinTemplate from './components/coins/template';
 
 import logo from './logo.svg';
 import './App.css';
@@ -73,20 +74,48 @@ function App(): JSX.Element {
   }
 
   return (
-    <div className='App'>
-      <Router>
-        <Container>
-          <Row className='title'>
-            <p>CoolWallet Coin Tester</p>
-          </Row>
-          <br />
-          { makeConnectComponent({ transport, connect, disconnect }) }
-        </Container>
-        { transport
-          ? <CoinPage />
-          : <Col>Please Connect Card</Col> }
-      </Router>
-    </div>
+    <Routes>
+      <Route path='/' element={<Navigate to="settings" />} />
+      <Route
+        path='/'
+        element={
+          <div className='App'>
+            <Container>
+              <Row className='title'>
+                <p>CoolWallet SDK Tester</p>
+              </Row>
+              <Row>
+                <Col>
+                  <HeadBar
+                    transport={transport}
+                    connect={connect}
+                    disconnect={disconnect}
+                  />
+                </Col>
+              </Row>
+              <br />
+            </Container>
+            <Outlet />
+          </div>
+        }
+      >
+        <Route
+          path='settings'
+          element={<Settings
+            isLocked={isLocked}
+            setIsLocked={setIsLocked}
+            transport={transport}
+            appPrivateKey={appPrivateKey}
+            appPublicKey={appPublicKey}
+          />}
+        />
+        <Route
+          path='template'
+          element={<CoinTemplate/>}
+        />
+        <Route path='*' element={<Navigate to="settings" />} />
+      </Route>
+    </Routes>
   );
 }
 
