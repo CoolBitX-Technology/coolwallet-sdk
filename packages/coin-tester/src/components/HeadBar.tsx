@@ -54,7 +54,7 @@ function HeadBar(input: {
             title={activeTab === defaultPath ? 'Coins' : `Coin-${activeTab}`}
             id='nav-dropdown'
           >
-            {Coins.map(({path,createFn},i) => (
+            {Coins.map(({ path }, i) => (
               <LinkContainer key={i} to={path}>
                 <NavDropdown.Item>{path}</NavDropdown.Item>
               </LinkContainer>

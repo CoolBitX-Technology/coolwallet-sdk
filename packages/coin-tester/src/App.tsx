@@ -109,8 +109,8 @@ function App(): JSX.Element {
             appPublicKey={appPublicKey}
           />}
         />
-        {Coins.map(({path,createFn},i) => (
-          <Route key={i} path={path} element={createFn()} />
+        {Coins.map(({path,Element},i) => (
+          <Route key={i} path={path} element={<Element />} />
         ))}
         <Route path='*' element={<Navigate to="settings" />} />
       </Route>
