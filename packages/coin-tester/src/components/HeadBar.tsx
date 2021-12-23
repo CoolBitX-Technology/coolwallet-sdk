@@ -11,6 +11,8 @@ import {
 import { Outlet, Link } from "react-router-dom";
 import { LinkContainer } from 'react-router-bootstrap'
 import { Transport } from '@coolwallet/core';
+import Coins from './coins';
+
 import './HeadBar.css';
 
 const defaultPath = '/settings';
@@ -35,26 +37,29 @@ function HeadBar(input: {
                 setActiveTab(defaultPath);
               } else {
                 key = key.slice(1);
-                key = key.charAt(0).toUpperCase() + key.substring(1);
                 setActiveTab(key);
               }
             }
           }}
         >
-          <Nav.Item>
-            <LinkContainer to={defaultPath}>
-              <Nav.Link className='NavItem'>
-                Settings
-              </Nav.Link>
-            </LinkContainer>
-          </Nav.Item>
-          <Nav.Item>
-            <NavDropdown className='NavItem' title={activeTab === defaultPath ? 'Coins' : activeTab} id='collasible-nav-dropdown'>
-              <LinkContainer to="template">
-                <NavDropdown.Item>Template</NavDropdown.Item>
+          <LinkContainer to={defaultPath}>
+            <Nav.Link className='NavItem'>
+              Settings
+            </Nav.Link>
+          </LinkContainer>
+          <NavDropdown
+            active={activeTab !== defaultPath}
+            menuVariant='dark'
+            className='NavItem'
+            title={activeTab === defaultPath ? 'Coins' : `Coin-${activeTab}`}
+            id='nav-dropdown'
+          >
+            {Coins.map(({path,createFn},i) => (
+              <LinkContainer key={i} to={path}>
+                <NavDropdown.Item>{path}</NavDropdown.Item>
               </LinkContainer>
-            </NavDropdown>
-          </Nav.Item>
+            ))}
+          </NavDropdown>
         </Nav>
         <Form className='d-flex'>
           <FormControl

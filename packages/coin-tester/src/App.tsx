@@ -5,7 +5,7 @@ import core, { apdu, Transport } from '@coolwallet/core';
 import webBleTransport, { createTransport } from '@coolwallet/transport-web-ble';
 import HeadBar from './components/HeadBar';
 import Settings from './components/settings';
-import CoinTemplate from './components/coins/template';
+import Coins from './components/coins';
 
 import logo from './logo.svg';
 import './App.css';
@@ -109,10 +109,9 @@ function App(): JSX.Element {
             appPublicKey={appPublicKey}
           />}
         />
-        <Route
-          path='template'
-          element={<CoinTemplate/>}
-        />
+        {Coins.map(({path,createFn},i) => (
+          <Route key={i} path={path} element={createFn()} />
+        ))}
         <Route path='*' element={<Navigate to="settings" />} />
       </Route>
     </Routes>
