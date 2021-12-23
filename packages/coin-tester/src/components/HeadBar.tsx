@@ -61,7 +61,7 @@ function HeadBar(input: {
             ))}
           </NavDropdown>
         </Nav>
-        <Form className='d-flex'>
+        <Form className='d-flex col-3'>
           <FormControl
             placeholder={input.transport?.device.name ?? 'Card Name'}
             className='me-2'
