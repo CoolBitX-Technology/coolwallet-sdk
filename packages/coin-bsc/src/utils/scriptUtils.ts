@@ -73,8 +73,8 @@ export const getSmartContractArgument = async (transaction: Transaction, address
  * @param transaction 
  */
 export const getSignMessageArgument = async (message: string, addressIndex: number) => {
-  const argument =
-    handleHex(Web3.utils.toHex(message))
+  const msgHex = handleHex(Web3.utils.toHex(message));
+  const argument = Buffer.from((msgHex.length/2).toString()).toString('hex') + msgHex;
   return '15' + await utils.getPath(COIN_TYPE, addressIndex) + argument;
 };
 
