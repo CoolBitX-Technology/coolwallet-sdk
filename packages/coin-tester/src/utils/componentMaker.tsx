@@ -2,39 +2,7 @@ import React from 'react';
 import { Form, Row, Col, ButtonGroup, Button } from 'react-bootstrap';
 import { Transport } from '@coolwallet/core';
 
-export const makeConnectComponent = (input: {
-  transport: Transport | null,
-  connect: () => void,
-  disconnect: () => void,
-}): JSX.Element => {
-  return (
-    <Row className='function-component'>
-      <Col xs={2}>
-        Card Name
-      </Col>
-      <Col className='show-text-area'>
-        {input.transport?.device.name ?? ''}
-      </Col>
-      <Col xs={2}>
-        <ButtonGroup className='d-flex'>
-          {input.transport
-            ? (
-              <Button variant='outline-warning' onClick={input.disconnect}>
-                Disconnect
-              </Button>
-            )
-            : (
-              <Button variant='light' onClick={input.connect}>
-                Connect
-              </Button>
-            )}
-        </ButtonGroup>
-      </Col>
-    </Row>
-  );
-};
-
-export const Get = (input: {
+export const NoInput = (input: {
   title: string,
   content: string,
   btnName?: string,
@@ -62,7 +30,7 @@ export const Get = (input: {
   </Row>
 );
 
-export const makeSendComponent = (input: {
+export const OneInput = (input: {
   title: string,
   content: string,
   btnName: string | undefined,
@@ -102,7 +70,7 @@ export const makeSendComponent = (input: {
   </Row>
 );
 
-export const makeSendComponentWithTwoValue = (input: {
+export const TwoInputs = (input: {
   title: string,
   content: string,
   btnName: string | undefined,

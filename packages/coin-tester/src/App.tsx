@@ -36,8 +36,6 @@ function getAppIdOrNull() {
 const { appPublicKey, appPrivateKey } = getAppKeysOrGenerate();
 
 function App(): JSX.Element {
-  const SEPublicKey = useRef<string | undefined>(undefined);
-
   const [transport, setTransport] = useState<Transport | null>(null);
   const [appId, setAppId] = useState(getAppIdOrNull());
   const [msg, setMsg] = useState('');
@@ -45,9 +43,6 @@ function App(): JSX.Element {
 
   async function connect() {
     await setTransport(await createTransport());
-    if (transport !== null) {
-      SEPublicKey.current = await core.config.getSEPublicKey(transport);
-    }
   }
 
   async function disconnect() {
