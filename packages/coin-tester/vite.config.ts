@@ -10,7 +10,6 @@ export default defineConfig({
   resolve: {
     preserveSymlinks: true,
     alias: {
-      stream: require.resolve('stream-browserify'),
       process: require.resolve('process/browser'),
     },
   },
