@@ -2,6 +2,7 @@
 // Sending the data sequentially is more preferred than sending the data parallel.
 
 /* eslint-disable no-await-in-loop */
+/* eslint-disable no-constant-condition */
 import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
 import { delay } from '../../utils';
@@ -56,7 +57,7 @@ export default class PeripheralRequest {
       if (resultData === MCU_FINISH_CODE) {
         return depot;
       }
-      // The result data will start with four length status code.
+      // The result data will start with four bytes `${packetCount}${dataLength}`.
       depot += resultData.slice(4);
     }
   };

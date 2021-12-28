@@ -4,10 +4,10 @@
   "description": "Core library for other CoolWallet SDKs.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "test": "jest --coverage",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
-    "build": "del-cli lib; npm run build:types ; npm run build:ts",
+    "build": "del-cli lib; npm run build:types; npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "author": "coolwallet-team",
@@ -17,6 +17,7 @@
     "@types/elliptic": "^6.4.14",
     "@types/node": "^14.0.13",
     "@types/pbkdf2": "^3.1.0",
+    "bip32": "^2.0.4",
     "bip39": "^3.0.2",
     "bip66": "^1.1.5",
     "bn.js": "^5.1.1",
@@ -35,17 +36,25 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
   "devDependencies": {
-    "@babel/cli": "^7.7.0",
-    "@babel/core": "^7.7.0",
-    "@babel/plugin-proposal-class-properties": "^7.7.0",
-    "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7",
+    "@babel/cli": "^7.8.0",
+    "@babel/core": "^7.8.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.0",
+    "@babel/plugin-transform-runtime": "^7.16.5",
+    "@babel/preset-env": "^7.8.0",
+    "@babel/preset-typescript": "^7.8.0",
+    "@shelf/fast-chunk-string": "^2.0.0",
     "@types/bluebird": "^3.5.32",
+    "@types/elliptic": "^6.4.14",
     "@types/jsonwebtoken": "^8.5.6",
     "@types/lodash": "^4.14.177",
+    "@types/node": "^14.0.13",
+    "@types/pbkdf2": "^3.1.0",
     "@types/web-bluetooth": "^0.0.11",
+    "babel-jest": "^27.4.5",
     "del-cli": "^4.0.1",
+    "jest": "^27.4.5",
+    "mitt": "^3.0.0",
     "react-native-ble-plx": "^2.0.3",
-    "typescript": "^4.4.3"
+    "typescript": "^4.5.4"
   }
 }
