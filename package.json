@@ -34,5 +34,7 @@
     "test": "jest"
   },
   "license": "Apache-2.0",
-  "dependencies": {}
+  "dependencies": {
+    "@coolwallet/core": "^1.0.9"
+  }
 }
