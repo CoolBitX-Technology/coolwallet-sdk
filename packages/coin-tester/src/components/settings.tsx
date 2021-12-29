@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
-import { Transport, apdu, config } from '@coolwallet/core';
-import { NoInput } from '../utils/componentMaker';
+import { Transport, apdu, utils, config } from '@coolwallet/core';
+import { NoInput, OneInput } from '../utils/componentMaker';
 
 interface Props {
   transport: Transport | null,
@@ -17,6 +17,8 @@ function Settings(props: Props) {
   const [cardInfo, setCardInfo] = useState('');
   const [resetStatus, setResetStatus] = useState('');
   const [registerStatus, setRegisterStatus] = useState('');
+  const [mnemonicInput, setMnemonicInput] = useState('');
+  const [mnemonicStatus, setMnemonicStatus] = useState('');
 
   const { transport } = props;
   const disabled = !transport || props.isLocked;
@@ -91,6 +93,16 @@ function Settings(props: Props) {
     }, setRegisterStatus);
   };
 
+  const recoverWallet = async () => {
+    handleState(async () => {
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const SEPublicKey = await config.getSEPublicKey(transport!);
+      await utils.createWalletByMnemonic(transport!, appId, props.appPrivateKey, mnemonicInput, SEPublicKey);
+      return 'success';
+    }, setMnemonicStatus);
+  };
+
   return (
     <Container>
       <NoInput
@@ -124,6 +136,17 @@ function Settings(props: Props) {
         onClick={register}
         disabled={disabled}
         btnName='register'
+      />
+      <OneInput
+        title='Recover Wallet'
+        content={mnemonicStatus}
+        onClick={recoverWallet}
+        disabled={disabled}
+        value={mnemonicInput}
+        setValue={setMnemonicInput}
+        placeholder='mnemonic'
+        btnName='recover'
+        inputSize={4}
       />
     </Container>
   );

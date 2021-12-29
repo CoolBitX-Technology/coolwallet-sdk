@@ -5,9 +5,9 @@ import { Transport } from '@coolwallet/core';
 export const NoInput = (input: {
   title: string,
   content: string,
-  btnName?: string,
   onClick: () => void,
   disabled: boolean,
+  btnName?: string,
 }): JSX.Element => (
   <Row className='function-component'>
     <Col xs={2}>
@@ -33,18 +33,19 @@ export const NoInput = (input: {
 export const OneInput = (input: {
   title: string,
   content: string,
-  btnName: string | undefined,
   onClick: () => void,
   disabled: boolean,
   value: string,
   setValue: (value: string) => void,
   placeholder: string,
+  btnName?: string,
+  inputSize?: number,
 }): JSX.Element => (
   <Row className='function-component'>
     <Col xs={2}>
       {input.title}
     </Col>
-    <Col xs={3} className='input-col'>
+    <Col xs={input.inputSize ?? 3} className='input-col'>
       <Form.Control
         value={input.value}
         onChange={(event) => {
