@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Outlet, Link, Navigate } from "react-router-dom";
 import { Container, Row, Col, ButtonGroup, Button } from 'react-bootstrap';
 import core, { apdu, Transport } from '@coolwallet/core';
@@ -23,23 +23,23 @@ function getAppKeysOrGenerate() {
   return { appPublicKey: keyPair.publicKey, appPrivateKey: keyPair.privateKey };
 }
 
-function getAppIdOrNull() {
-  const appId = localStorage.getItem('appId');
-  if (appId === null) {
-    console.log('No Appid stored, please register!');
-  } else {
-    console.log('get AppId success!');
-  }
-  return appId;
-}
-
 const { appPublicKey, appPrivateKey } = getAppKeysOrGenerate();
 
 function App(): JSX.Element {
   const [transport, setTransport] = useState<Transport | null>(null);
-  const [appId, setAppId] = useState(getAppIdOrNull());
-  const [msg, setMsg] = useState('');
   const [isLocked, setIsLocked] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    if (transport) {
+      const appId = localStorage.getItem('appId');
+      if (appId === null) {
+        console.log('No Appid stored, please register!');
+      } else {
+        console.log('get AppId success!');
+      }
+    }
+  }, [transport]);
 
   async function connect() {
     await setTransport(await createTransport());
@@ -97,11 +97,11 @@ function App(): JSX.Element {
         <Route
           path='settings'
           element={<Settings
-            isLocked={isLocked}
-            setIsLocked={setIsLocked}
             transport={transport}
             appPrivateKey={appPrivateKey}
             appPublicKey={appPublicKey}
+            isLocked={isLocked}
+            setIsLocked={setIsLocked}
           />}
         />
         {Coins.map(({path,Element},i) => (

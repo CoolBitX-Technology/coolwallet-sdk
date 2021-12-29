@@ -4,11 +4,11 @@ import { Transport, apdu, config } from '@coolwallet/core';
 import { NoInput } from '../utils/componentMaker';
 
 interface Props {
-  isLocked: boolean,
-  setIsLocked: (isLocked:boolean) => void,
   transport: Transport | null,
   appPrivateKey: string,
   appPublicKey: string,
+  isLocked: boolean,
+  setIsLocked: (isLocked:boolean) => void,
 }
 
 function Settings(props: Props) {
@@ -18,27 +18,29 @@ function Settings(props: Props) {
   const [resetStatus, setResetStatus] = useState('');
   const [registerStatus, setRegisterStatus] = useState('');
 
-  const { transport, isLocked, appPublicKey } = props;
-  const disabled = !transport || isLocked;
+  const { transport } = props;
+  const disabled = !transport || props.isLocked;
 
   useEffect(() => {
     if (!transport) {
-      setCardInfo('');
       setIsAppletExist('');
       setSEVersion('');
+      setCardInfo('');
+      setResetStatus('');
+      setRegisterStatus('');
     }
   }, [transport]);
 
   const handleState = async (
     request: () => Promise<string>,
-    setState: (state: string) => void
+    handleResponse: (response: string) => void
   ) => {
     props.setIsLocked(true);
     try {
-      const state = await request();
-      setState(state);
+      const response = await request();
+      handleResponse(response);
     } catch (error: any) {
-      setState(error.message);
+      handleResponse(error.message);
       console.error(error);
     } finally {
       props.setIsLocked(false);
@@ -73,6 +75,7 @@ function Settings(props: Props) {
   const resetCard = async () => {
     handleState(async () => {
       const status = await apdu.general.resetCard(transport!);
+      await localStorage.removeItem('appId');
       return status ? 'success' : 'failure';
     }, setResetStatus);
   };
@@ -81,9 +84,9 @@ function Settings(props: Props) {
     handleState(async () => {
       const name = 'TestAPP'
       const password = '12345678';
-      console.log("appPublicKey: " + appPublicKey)
       const SEPublicKey = await config.getSEPublicKey(transport!);
-      const appId = await apdu.pair.register(transport!, appPublicKey, password, name, SEPublicKey);
+      const appId = await apdu.pair.register(transport!, props.appPublicKey, password, name, SEPublicKey);
+      await localStorage.setItem('appId', appId);
       return appId;
     }, setRegisterStatus);
   };
