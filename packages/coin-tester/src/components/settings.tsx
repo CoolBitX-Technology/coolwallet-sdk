@@ -17,6 +17,7 @@ function Settings(props: Props) {
   const [cardInfo, setCardInfo] = useState('');
   const [resetStatus, setResetStatus] = useState('');
   const [registerStatus, setRegisterStatus] = useState('');
+  const [mnemonic, setMnemonic] = useState('');
   const [mnemonicInput, setMnemonicInput] = useState('');
   const [mnemonicStatus, setMnemonicStatus] = useState('');
 
@@ -30,6 +31,7 @@ function Settings(props: Props) {
       setCardInfo('');
       setResetStatus('');
       setRegisterStatus('');
+      setMnemonicStatus('');
     }
   }, [transport]);
 
@@ -93,8 +95,17 @@ function Settings(props: Props) {
     }, setRegisterStatus);
   };
 
+  const createMnemonic = async () => {
+    handleState(async () => {
+      const crypto = require('crypto');
+      const mnemonic = await utils.createSeedByApp(12, crypto.randomBytes)
+      return mnemonic;
+    }, setMnemonic);
+  };
+
   const recoverWallet = async () => {
     handleState(async () => {
+      console.log('mnemonicInput :', mnemonicInput);
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const SEPublicKey = await config.getSEPublicKey(transport!);
@@ -106,19 +117,19 @@ function Settings(props: Props) {
   return (
     <Container>
       <NoInput
-        title='SE Exist'
+        title='Firmware Exist'
         content={isAppletExist}
         onClick={checkApplet}
         disabled={disabled}
       />
       <NoInput
-        title='SE Version'
+        title='Firmware Version'
         content={SEVersion}
         onClick={getSEVersion}
         disabled={disabled}
       />
       <NoInput
-        title='Card Info'
+        title='Card Detail'
         content={cardInfo}
         onClick={getCardInfo}
         disabled={disabled}
@@ -136,6 +147,13 @@ function Settings(props: Props) {
         onClick={register}
         disabled={disabled}
         btnName='register'
+      />
+      <NoInput
+        title='Create Mnemonic'
+        content={mnemonic}
+        onClick={createMnemonic}
+        disabled={disabled}
+        btnName='create'
       />
       <OneInput
         title='Recover Wallet'
