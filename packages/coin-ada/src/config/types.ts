@@ -6,7 +6,7 @@ export type signTxType = {
   appPrivateKey: string;
   appId: string;
   scriptType: ScriptType;
-  inputs: [Input];
+  input: Input;
   output: Output;
   change?: Change;
   confirmCB?: Function;
@@ -14,12 +14,14 @@ export type signTxType = {
 };
 
 export type Input = {
+  addressIndex: number;
+  utxos: [Utxo];
+  pubkeyBuf?: Buffer;
+};
+
+export type Utxo = {
   preTxHash: string;
   preIndex: number;
-  preValue: string;
-  sequence?: number;
-  addressIndex: number;
-  pubkeyBuf?: Buffer;
 };
 
 export type Output = {
@@ -33,28 +35,8 @@ export type Change = {
   pubkeyBuf?: Buffer;
 };
 
-export type PreparedData = {
-  versionBuf: Buffer;
-  inputsCount: Buffer;
-  preparedInputs: {
-    addressIndex: number;
-    pubkeyBuf: Buffer;
-    preOutPointBuf: Buffer;
-    preValueBuf: Buffer;
-    sequenceBuf: Buffer;
-  }[];
-  outputType: ScriptType;
-  outputsCount: Buffer;
-  outputsBuf: Buffer;
-  lockTimeBuf: Buffer;
-};
-
 export enum ScriptType {
   P2PKH = 0,
   P2SH = 1,
   P2POINTER = 2,
-}
-
-export enum OmniType {
-  USDT = 31,
 }
