@@ -4,6 +4,7 @@ import * as scriptUtils from './utils/scriptUtils';
 import { removeHex0x } from './utils/stringUtil';
 import * as scripts from "./config/params";
 import { signMsg, signTyped, EIP712Schema, signTx } from './config/types'
+import { handleHex } from './utils/stringUtil';
 
 const Web3 = require('web3');
 const Ajv = require('ajv');
@@ -114,15 +115,8 @@ export const signMessage = async (
     true
   );
 
-  const keccak256Msg = Web3.utils.keccak256(message)
-
-  let msgBuf;
-  if (Web3.utils.isHex(keccak256Msg)) {
-    msgBuf = Buffer.from(removeHex0x(keccak256Msg), 'hex');
-  } else {
-    msgBuf = Buffer.from(keccak256Msg, 'utf8');
-  }
-
+  const msgHex = handleHex(Web3.utils.toHex(message));
+  const msgBuf = Buffer.from(msgHex, 'hex');
 
   const _19Buf = Buffer.from("19", 'hex');
   const prefix = "Ethereum Signed Message:";
