@@ -1,4 +1,4 @@
-import { getAccountExtKeyFromSE, derivePubKey } from './derive';
+import { getPublicKeyByPath, derivePubKey } from './derive';
 import Transport from '../transport';
 import * as utils from '../utils';
 
@@ -49,7 +49,7 @@ export default class ECDSACoin {
   ): Promise<{accountPublicKey:string, accountChainCode:string}> => {
     if (this.accPublicKey === '' || this.accChainCode === '') {
       const path = await utils.getPath(this.coinType, 0, 3);
-      const decryptedData = await getAccountExtKeyFromSE(transport, appId, appPrivateKey, path);
+      const decryptedData = await getPublicKeyByPath(transport, appId, appPrivateKey, path);
       const accBuf = Buffer.from(decryptedData, 'hex');
       this.accPublicKey = accBuf.slice(0, 33).toString('hex');
       this.accChainCode = accBuf.slice(33).toString('hex');

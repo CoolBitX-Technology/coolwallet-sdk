@@ -1,4 +1,4 @@
-import { getAccountExtKeyFromSE } from './derive';
+import { getPublicKeyByPath } from './derive';
 import Transport from '../transport';
 import * as utils from '../utils/index';
 import { PathType } from '../config/param';
@@ -20,6 +20,6 @@ export default class EDDSACoin {
   ) : Promise<string> {
     const pathType = isSLIP0010 ? PathType.SLIP0010 : PathType.BIP32EDDSA;
     const path = await utils.getPath(this.coinType, 0, 3, pathType);
-    return getAccountExtKeyFromSE(transport, appId, appPrivateKey, path);
+    return getPublicKeyByPath(transport, appId, appPrivateKey, path);
   }
 }
