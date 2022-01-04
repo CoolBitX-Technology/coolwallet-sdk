@@ -17,7 +17,7 @@ const authGetKey = async (transport: Transport, appId: string, appPrivateKey: st
 /**
  * Get extend public key of a specific bip44 account node
  */
-export const getAccountExtKeyFromSE = async (
+export const getPublicKey = async (
   transport: Transport,
   appId: string,
   appPrivateKey: string,
