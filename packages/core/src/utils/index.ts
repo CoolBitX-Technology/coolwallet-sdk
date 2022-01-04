@@ -1,6 +1,6 @@
 import * as bip39 from 'bip39';
 import pbkdf2 from 'pbkdf2';
-import { tx, wallet } from '../apdu';
+import { tx, wallet, general } from '../apdu';
 import Transport from '../transport';
 import { MSG } from '../config/status/msg';
 import { CODE } from '../config/status/code';
@@ -17,13 +17,13 @@ function hardenPath(index: number) {
 //
 // output : [path_type(1B)] [index(4B)] x 5
 //    32 8000002C 80000000 80000000 00000000 00000000
-export const getFullPath = async ({
+export const getFullPath = ({
   pathType = PathType.BIP32,
   pathString,
 }: {
   pathType: PathType,
   pathString: string,
-}): Promise<string> => {
+}): string => {
   const paths = pathString.split('/').map((index) => {
     if (!index.match(/^\d+(|')$/)) {
       throw new SDKError('getFullPath', `invalid pathString : ${pathString}`);
@@ -155,17 +155,26 @@ export const createSeedByApp = async (wordNumber: number, randomBytes: (size: nu
 export const createWalletByMnemonic = async (
   transport: Transport, appId: string, appPrivateKey: string, mnemonic: string, SEPublicKey: string
 ): Promise<void> => {
+
+  const seeds: Array<Buffer> = [];
+  const version = await general.getSEVersion(transport);
+
   // mnemonic to seed
-  const seed = await bip39.mnemonicToSeed(mnemonic);
+  seeds[0] = await bip39.mnemonicToSeed(mnemonic);
 
   // mnemonic to ADA master key
-  const entropy = bip39.mnemonicToEntropy(mnemonic);
-  const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
-  key[0] &= 0b11111000;
-  key[31] &= 0b00011111;
-  key[31] |= 0b01000000;
+  if (version >= 317) {
+    const entropy = bip39.mnemonicToEntropy(mnemonic);
+    const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
+    key[0] &= 0b11111000;
+    key[31] &= 0b00011111;
+    key[31] |= 0b01000000;
 
-  return wallet.setSeed(transport, appId, appPrivateKey, Buffer.concat([seed, key]).toString('hex'), SEPublicKey);
+    seeds[1] = key;
+  }
+
+  const seedHex = Buffer.concat(seeds).toString('hex');
+  return wallet.setSeed(transport, appId, appPrivateKey, seedHex, SEPublicKey);
 };
 
 /**
