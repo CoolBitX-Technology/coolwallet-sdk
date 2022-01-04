@@ -6,9 +6,11 @@ export type signTxType = {
   appPrivateKey: string;
   appId: string;
   scriptType: ScriptType;
+  invalidHereafter: number;
   input: Input;
   output: Output;
-  change?: Change;
+  change: Change;
+  fee: string;
   confirmCB?: Function;
   authorizedCB?: Function;
 };
@@ -32,7 +34,7 @@ export type Output = {
 export type Change = {
   value: string;
   addressIndex: number;
-  pubkeyBuf?: Buffer;
+  pubkeyBuf: Buffer;
 };
 
 export enum ScriptType {

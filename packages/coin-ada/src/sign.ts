@@ -4,17 +4,7 @@ import * as scriptUtil from './utils/scriptUtil';
 import * as params from './config/params';
 
 export async function signTransaction(signTxData: signTxType): Promise<string> {
-  const {
-    scriptType: redeemScriptType,
-    transport,
-    input,
-    output,
-    change,
-    appId,
-    appPrivateKey,
-    confirmCB,
-    authorizedCB,
-  } = signTxData;
+  const { scriptType: redeemScriptType, transport, appId, appPrivateKey, confirmCB, authorizedCB } = signTxData;
 
   const preActions = [];
 
@@ -24,7 +14,7 @@ export async function signTransaction(signTxData: signTxType): Promise<string> {
   };
   preActions.push(sendScript);
 
-  const argument = await scriptUtil.getPaymentArgument(input.addressIndex);
+  const argument = await scriptUtil.getPaymentArgument(signTxData);
   const sendArgument = async () => {
     await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
   };

@@ -28,10 +28,10 @@ export const accountKeyToAddress = (accountPubKey: Buffer, addressIndex: number)
   return address;
 };
 
-export const decodeAddress = (address: string): { paymentPubKey: Buffer; stakePubKey: Buffer } => {
+export const decodeAddress = (address: string): { addressBuff: Buffer; paymentPubKey: Buffer; stakePubKey: Buffer } => {
   const words = bech32.decode(address, 150).words;
   const addressBuff = Buffer.from(bech32.fromWords(words), 'hex');
   const paymentPubKey = addressBuff.slice(1, 33);
   const stakePubKey = addressBuff.slice(33, 65);
-  return { paymentPubKey, stakePubKey };
+  return { addressBuff, paymentPubKey, stakePubKey };
 };
