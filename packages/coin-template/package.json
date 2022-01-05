@@ -1,5 +1,5 @@
 {
-  "name": "coin-template",
+  "name": "@coolwallet/template",
   "version": "1.0.0",
   "description": "clone this project to build your own coin package",
   "main": "lib/index.js",
@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@types/keccak": "^3.0.1",
-    "keccak": "^3.0.2"
+    "bip32": "^2.0.4",
+    "keccak": "^3.0.2",
+    "rlp": "^2.2.7"
   }
 }
