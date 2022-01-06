@@ -35,10 +35,10 @@ export const OneInput = (input: {
   content: string,
   onClick: () => void,
   disabled: boolean,
+  btnName?: string,
   value: string,
   setValue: (value: string) => void,
   placeholder: string,
-  btnName?: string,
   inputSize?: number,
 }): JSX.Element => (
   <Row className='function-component'>
@@ -74,21 +74,23 @@ export const OneInput = (input: {
 export const TwoInputs = (input: {
   title: string,
   content: string,
-  btnName: string | undefined,
   onClick: () => void,
   disabled: boolean,
+  btnName?: string,
   value: string,
   setValue: (value: string) => void,
   placeholder: string,
+  inputSize?: number,
   value2: string,
   setValue2: (value: string) => void,
   placeholder2: string,
+  inputSize2?: number,
 }): JSX.Element => (
   <Row className='function-component'>
     <Col xs={2}>
       {input.title}
     </Col>
-    <Col xs={2} className='input-col'>
+    <Col xs={input.inputSize ?? 2} className='input-col'>
       <Form.Control
         value={input.value}
         onChange={(event) => {
@@ -97,7 +99,7 @@ export const TwoInputs = (input: {
         placeholder={input.placeholder}
       />
     </Col>
-    <Col xs={2} className='input-col'>
+    <Col xs={input.inputSize2 ?? 2} className='input-col'>
       <Form.Control
         value={input.value2}
         onChange={(event) => {

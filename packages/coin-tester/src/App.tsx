@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Routes, Route, Outlet, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { Container, Row, Col, ButtonGroup, Button } from 'react-bootstrap';
 import core, { apdu, Transport } from '@coolwallet/core';
 import webBleTransport, { createTransport } from '@coolwallet/transport-web-ble';
@@ -105,7 +105,13 @@ function App(): JSX.Element {
           />}
         />
         {Coins.map(({path,Element},i) => (
-          <Route key={i} path={path} element={<Element />} />
+          <Route key={i} path={path} element={<Element
+            transport={transport}
+            appPrivateKey={appPrivateKey}
+            appPublicKey={appPublicKey}
+            isLocked={isLocked}
+            setIsLocked={setIsLocked}
+          />} />
         ))}
         <Route path='*' element={<Navigate to="settings" />} />
       </Route>
