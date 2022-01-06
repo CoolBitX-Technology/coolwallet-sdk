@@ -1,79 +1,33 @@
-# CoolWallet Coin Template
+# CoolWallet Coin Tester
 
-This is a template for the developers who want to implement a new CoolWallet Coin SDK.
+Testing Coin SDKs on the website
 
-## Install
+## 1. Use with Coin Template
 
+It is good to be familiar with CoolWallet Pro by playing around this website tester and reading the source code of the coin-template sdk.
 
-## Use with Coin Tester
-
-### Links
-
-```shell
-cd ./packages/coin-template
-npm ci
-npm run build
-npm link
-
-cd ../coin-tester
-npm ci
-npm link @coolwallet/template
-```
-
-## Install
+#### Install and run
 
 ```shell
-npm install @coolwallet/eth
+npm ci
+npm run dev
 ```
 
-## Usage
+## 2. Use with Custom Coin SDK
 
-```javascript
-import cwsETH from '@coolwallet/eth'
-const ETH = new cwsETH(transport, appPrivateKey, appId)
+Please add your custom coin sdk into this tester for further testing.
+
+#### Add a custom coin sdk
+
+add this line in the package.json and replace "custom" with the coin symbol.
+
+```shell
+"@coolwallet/coin-custom": "file:../coin-custom",
 ```
 
-### getAddress
+#### Re-install and run
 
-Get address by address index.
-
-```javascript
-const address = await ETH.getAddress(0)
+```shell
+npm ci
+npm run dev
 ```
-
-The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of folllowing BIP44 path:
-
-```none
-m/44'/60'/0'/0/{i}
-```
-
-In the design of current hardware, we only support path `m/44'/60'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
-
-### signTransaction
-
-Sign Ethereum Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
-
-```javascript
-const tx = {
-    nonce: "0x21d",
-    gasPrice: "0x59682f00",
-    gasLimit: "0x5208",
-    to: "0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C",
-    value: "0x5af3107a4000",
-    data: "0x00",
-    chainId: 1
-}
-// sign with address index 0
-const signedTx = await ETH.signTransaction(tx, 0)
-```
-
-### signMessage
-
-Perform ethereum `personal_sign`.
-
-```javascript
-const message = 'custom message';
-const signature = await ETH.signMessage(message, 0)
-
-```
-
