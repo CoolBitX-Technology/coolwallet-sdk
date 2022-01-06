@@ -23,7 +23,7 @@ export const NoInput = (input: {
           variant='outline-light'
           onClick={input.onClick}
         >
-          {input.btnName ?? 'get'}
+          {input.btnName ?? 'Get'}
         </Button>
       </ButtonGroup>
     </Col>
@@ -64,7 +64,7 @@ export const OneInput = (input: {
           variant='outline-light'
           onClick={input.onClick}
         >
-          {input.btnName ?? 'send'}
+          {input.btnName ?? 'Send'}
         </Button>
       </ButtonGroup>
     </Col>
@@ -118,7 +118,7 @@ export const TwoInputs = (input: {
           variant='outline-light'
           onClick={input.onClick}
         >
-          {input.btnName ?? 'send'}
+          {input.btnName ?? 'Send'}
         </Button>
       </ButtonGroup>
     </Col>

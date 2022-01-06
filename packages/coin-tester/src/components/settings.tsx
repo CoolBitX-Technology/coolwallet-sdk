@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
 import { NoInput, OneInput } from '../utils/componentMaker';
 
@@ -116,6 +116,9 @@ function Settings(props: Props) {
 
   return (
     <Container>
+      <div className='title2'>
+        Using these commands to check the state of CoolWallet Pro.
+      </div>
       <NoInput
         title='Firmware Exist'
         content={isAppletExist}
@@ -134,26 +137,29 @@ function Settings(props: Props) {
         onClick={getCardInfo}
         disabled={disabled}
       />
+      <div className='title2'>
+        By running through below commands, CoolWallet Pro would be ready to use for a coin sdk.
+      </div>
       <NoInput
         title='Reset Card'
         content={resetStatus}
         onClick={resetCard}
         disabled={disabled}
-        btnName='reset'
+        btnName='Reset'
       />
       <NoInput
         title='Register Card'
         content={registerStatus}
         onClick={register}
         disabled={disabled}
-        btnName='register'
+        btnName='Register'
       />
       <NoInput
         title='Create Mnemonic'
         content={mnemonic}
         onClick={createMnemonic}
         disabled={disabled}
-        btnName='create'
+        btnName='Create'
       />
       <OneInput
         title='Recover Wallet'
@@ -163,7 +169,7 @@ function Settings(props: Props) {
         value={mnemonicInput}
         setValue={setMnemonicInput}
         placeholder='mnemonic'
-        btnName='recover'
+        btnName='Recover'
         inputSize={4}
       />
     </Container>

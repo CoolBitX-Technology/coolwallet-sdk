@@ -69,6 +69,9 @@ function CoinTemplate(props: Props) {
 
   return (
     <Container>
+      <div className='title2'>
+        These two basic methods are required to implement in a coin sdk.
+      </div>
       <NoInput
         title='Get Address'
         content={address}
@@ -80,7 +83,7 @@ function CoinTemplate(props: Props) {
         content={signedTransaction}
         onClick={signTransaction}
         disabled={disabled}
-        btnName='sign'
+        btnName='Sign'
         value={value}
         setValue={setValue}
         placeholder='value'
