@@ -8,7 +8,7 @@ import {
   FormControl,
   Button
 } from 'react-bootstrap';
-import { Outlet, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { LinkContainer } from 'react-router-bootstrap'
 import { Transport } from '@coolwallet/core';
 import Coins from './coins';
@@ -22,7 +22,8 @@ function HeadBar(input: {
   connect: () => void,
   disconnect: () => void,
 }): JSX.Element {
-  const [activeTab, setActiveTab] = useState(defaultPath);
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.pathname);
 
   return (
     <Navbar variant='dark' expand='lg'>
@@ -32,13 +33,7 @@ function HeadBar(input: {
           activeKey={activeTab}
           onSelect={(key) => {
             if (typeof key === 'string') {
-              console.log('key :', key);
-              if (key === defaultPath) {
-                setActiveTab(defaultPath);
-              } else {
-                key = key.slice(1);
-                setActiveTab(key);
-              }
+              setActiveTab(key);
             }
           }}
         >
@@ -51,7 +46,9 @@ function HeadBar(input: {
             active={activeTab !== defaultPath}
             menuVariant='dark'
             className='NavItem'
-            title={activeTab === defaultPath ? 'Coins' : `Coin-${activeTab}`}
+            title={activeTab === defaultPath
+              ? 'Coins'
+              : `Coin-${activeTab.slice(1)}`}
             id='nav-dropdown'
           >
             {Coins.map(({ path }, i) => (
