@@ -2,7 +2,12 @@
 
 Testing Coin SDKs on the website
 
-## 1. Use with Coin Template
+## Compatibility
+
+- node 14+
+- npm 7+
+
+## Use with Coin Template
 
 It is good to be familiar with CoolWallet Pro by playing around this website tester and reading the source code of the coin-template sdk.
 
@@ -26,7 +31,7 @@ npm ci
 npm run dev
 ```
 
-## 2. Use with Custom Coin SDK
+## Use with Custom Coin SDK
 
 Please add your custom coin sdk into this tester for further testing.
 
