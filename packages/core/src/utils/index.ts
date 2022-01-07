@@ -1,5 +1,6 @@
 import * as bip39 from 'bip39';
 import pbkdf2 from 'pbkdf2';
+import isEmpty from 'lodash/isEmpty';
 import { tx, wallet, general } from '../apdu';
 import Transport from '../transport';
 import { MSG } from '../config/status/msg';
@@ -93,31 +94,30 @@ export const assemblyCommandAndData = (
 
   const packetLength = 18;
   let dataLength = 0;
-  // flag = true;
-  let packets = '';
 
-  if (oriData) {
-    packets = oriData;
+  let packets = oriData ?? '';
+  
+  let dataBuf = Buffer.from(packets, 'hex');
+  // Origin data length
+  const oriDataLength = dataBuf.length;
+
+  if (!isEmpty(dataBuf)) {
     const data = packets.match(/.{2}/g);
     const checksum = getCheckSum(data);
     packets += checksum;
+    dataBuf = Buffer.concat([dataBuf, Buffer.from(checksum, 'hex')]);
   }
 
-  const dataBuf = Buffer.from(packets, 'hex');
-  let copiedData = dataBuf;
-  let XORLength = dataBuf.length;
-  let oriDataLength = XORLength;
+  // Data with checksum length
+  const XORLength = dataBuf.length;
 
-  if (packets.length > 0) {
-    // copiedData = Buffer.from(copiedData, 'hex');
-    const length = copiedData.length / packetLength;
-    const remains = copiedData.length % packetLength;
+  if (dataBuf.length > 0) {
+    const length = dataBuf.length / packetLength;
+    const remains = dataBuf.length % packetLength;
     dataLength += length;
-    if (remains > 0) {
+    if (remains !== 0) {
       dataLength += 1;
     }
-
-    oriDataLength -= 1;
   }
 
   const oriDataBuf = Buffer.allocUnsafe(4);
@@ -129,9 +129,10 @@ export const assemblyCommandAndData = (
   XORData.fill(0);
   XORData.writeInt16BE(XORLength, 0);
   const hexXORLength = XORData.slice(0, 2).toString('hex').padStart(4, '0');
-  const hexBataLength = Buffer.from([dataLength]).toString('hex');
+  const hexDataLength = Buffer.from([dataLength]).toString('hex');
 
-  const command = pid + cmdLen + cla + ins + p1 + p2 + hexOriDataLength + hexXORLength + hexBataLength;
+  // 00 09 80 54 00 00 0000 0000 00
+  const command = pid + cmdLen + cla + ins + p1 + p2 + hexOriDataLength + hexXORLength + hexDataLength;
   return { command, data: packets };
 };
 
