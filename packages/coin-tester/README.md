@@ -9,6 +9,11 @@ It is good to be familiar with CoolWallet Pro by playing around this website tes
 #### Install and run
 
 ```shell
+cd ./packages/coin-template
+npm ci
+npm run build
+
+cd ../coin-tester
 npm ci
 npm run dev
 ```
