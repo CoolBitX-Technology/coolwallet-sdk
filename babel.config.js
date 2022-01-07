@@ -1,3 +1,4 @@
+/** @type {import('@types/babel__core').TransformOptions} */
 module.exports = {
   presets: [
     [
@@ -5,9 +6,10 @@ module.exports = {
       {
         targets: {
           node: 'current',
-        },
+        }
       },
     ],
+    '@babel/preset-typescript'
   ],
   plugins: [
     ['@babel/plugin-transform-runtime',

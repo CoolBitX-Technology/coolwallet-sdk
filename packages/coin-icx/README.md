@@ -1,8 +1,7 @@
-# CoolWallet Icon (ICX) App
+# CoolWallet Icon (ICX) SDK
+[![Version](https://img.shields.io/npm/v/@coolwallet/icx)](https://www.npmjs.com/package/@coolwallet/icx)
 
-ICON API of CoolWallet.
-
-![version](https://img.shields.io/npm/v/@coolwallet/icx)
+Typescript library with support for the integration of ICON for third party application, include the functionalities of generation of addresses and signed transactions. 
 
 ## Install
 
@@ -13,36 +12,17 @@ npm install @coolwallet/icx
 ## Usage
 
 ```javascript
-import cwsICX from '@coolwallet/icx'
-const ICON = new cwsICX(transport, appPrivateKey, appId)
-```
+import ICX from '@coolwallet/icx'
+import IconService from "icon-sdk-js";
+const ICON = new ICX()
 
-### getAddress
+const address = await ICON.getAddress(transport, appPrivateKey, appId, 0);
 
-Get address by address index.
+const timestamp = "0x" + (new Date().getTime() * 1000).toString(16);
 
-```javascript
-const address = await ICON.getAddress(0)
-console.log(address)
+const { IconBuilder, IconAmount, IconConverter } = IconService;
 
-// hx76f46307b53686f2dd4a2c8ca2f22492e842c4bf
-```
-
-The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of folllowing BIP44 path:
-
-```none
-m/44'/60'/0'/0/{i}
-```
-
-In the design of current hardware, we only support path `m/44'/60'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
-
-### signTransaction
-
-Sign ICON Transaction. We suggest you to use [Icon Official SDK](https://github.com/icon-project/icon-sdk-js) to build an unsigned transaction.
-
-```javascript
-
-const txObj = new IconBuilder.IcxTransactionBuilder()
+const param = new IconBuilder.IcxTransactionBuilder()
     .from('hx76f46307b53686f2dd4a2c8ca2f22492e842c4bf')
     .to('hxe86b015c06145965931aff551d4958256a86226e')
     .value(IconAmount.of('0.023', IconAmount.Unit.ICX).toLoop())
@@ -52,11 +32,74 @@ const txObj = new IconBuilder.IcxTransactionBuilder()
     .timestamp(timestamp)
     .build();
 
-// Returns raw transaction object
-const rawTx = IconConverter.toRawTransaction(txObj);
 
-// sign with address index 0
-const signedTx = await ICON.signTransaction(rawTx, 0)
+const rawTx = IconConverter.toRawTransaction(param);
+const transaction = JSON.stringify(rawTx);
+const signTxData = {
+    transport,
+    appPrivateKey,
+    appId,
+    transaction,
+    addressIndex
+}
+
+const signTx = await ICON.signTransaction(signTxData)
 ```
+
+## Methods
+
+### getAddress
+
+#### Description
+
+Get address by address index.
+
+The ICX address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of folllowing BIP44 path:
+
+```none
+m/44'/74'/0'/0/{i}
+```
+
+In the design of current hardware, we only support path `m/44'/74'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
+
+```javascript
+async getAddress(
+    transport: Transport, 
+    appPrivateKey: string, 
+    appId: string, 
+    addressIndex: number
+    ): Promise<string> 
+```
+
+#### Arguments
+
+|      Arg      |                  Description                 |    Type    |  Required |
+|:-------------:|:--------------------------------------------:|:----------:|:--------:|
+|   transport   | Object to communicate with CoolWallet device |  Transport | TRUE |
+| appPrivateKey |   Private key for the connected application  |   string   | TRUE |
+|     appId     |       ID for the connected application       |   string   | TRUE |
+|  addressIndex |  The from address index in BIP44 derivation  |   number   | TRUE |
+
+### signTransaction
+
+#### Description
+
+Sign ICON Transaction. We suggest you to use [Icon Official SDK](https://github.com/icon-project/icon-sdk-js) to build an unsigned transaction.
+
+```javascript
+async signTransaction(signTxData: signTxType):Promise<string>
+```
+
+#### signTxType Arguments
+
+|      Arg      |                              Description                             |    Type    |  Required |
+|:-------------:|:--------------------------------------------------------------------:|:----------:|:---------:|
+|   transport   |             Object to communicate with CoolWallet device             |  Transport |    TRUE   |
+| appPrivateKey |               Private key for the connected application              |   string   |    TRUE   |
+|     appId     |                   ID for the connected application                   |   string   |    TRUE   |
+|  transaction  |          Essential information/property for ICON Transaction         |   Object   |    TRUE   |
+|  addressIndex |              The from address index in BIP44 derivation              |   number   |    TRUE   |
+|   confirmCB   |      Callback of confirmation data to the connected application      |  Function  |   FALSE   |
+|  authorizedCB | Callback of authorized transaction data to the connected application |  Function  |   FALSE   |
 
 The signed transaction will be in form of `Object`, which you can use the official sdk to broadcast.
