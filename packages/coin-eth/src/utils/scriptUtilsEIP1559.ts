@@ -82,7 +82,8 @@ export const getSmartArgument = async (
     + handleHex(transaction.gasFeeCap).padStart(20, '0')
     + handleHex(transaction.gasLimit).padStart(20, '0')
     + handleHex(transaction.nonce).padStart(16, '0')
-    + handleHex(transaction.data);
+    + (handleHex(transaction.data).length / 2).toString(16).padStart(8, '0'); // data length
+
 
   const path = await utils.getPath(COIN_TYPE, addressIndex);
   return `15${path}${argument}`;

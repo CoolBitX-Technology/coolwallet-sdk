@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, setting, apdu } from '@coolwallet/core';
+import { coin as COIN, setting, apdu, Transport } from '@coolwallet/core';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types';
@@ -25,7 +25,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async getAddress(
-    transport: types.Transport,
+    transport: Transport,
     appPrivateKey: string,
     appId: string,
     addressIndex: number
@@ -161,7 +161,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     );
     const script = params.EIP1559SmartContract.scriptWithSignature;
 
-    return ethSign.signEIP1559Transaction(
+    return ethSign.signEIP1559SmartContractTransaction(
       signTxData,
       script,
       argument,
@@ -265,7 +265,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     );
     const script = params.SmartContract.scriptWithSignature;
 
-    return ethSign.signTransaction(
+    return ethSign.signSmartContractTransaction(
       signTxData,
       script,
       argument,

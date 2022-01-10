@@ -1,11 +1,40 @@
-import { transport } from '@coolwallet/core';
+import { Transport } from '@coolwallet/core';
 
 export type Output = {
   address: string,
   value: number
 }
 
-export type Transport = transport.default;
+export type Option = {
+  info : {
+    symbol: string,
+    decimals: string
+  }
+};
+
+export type EIP1559Transaction = {
+  // [key: string]: any,
+  nonce: string,
+  gasTipCap: string,
+  gasFeeCap: string,
+  gasLimit: string,
+  to: string,
+  value: string,
+  data: string,
+  option: Option
+}
+
+export type Transaction = {
+  // [key: string]: any,
+  chainId: number,
+  nonce: string,
+  gasPrice: string,
+  gasLimit: string,
+  to: string,
+  value: string,
+  data: string,
+  option: Option
+}
 
 export type signEIP1559Tx = {
   transport: Transport,
@@ -48,37 +77,6 @@ export type signTyped = {
   confirmCB: ()=>void | undefined,
   authorizedCB: ()=>void | undefined
 }
-
-export type EIP1559Transaction = {
-  // [key: string]: any,
-  nonce: string,
-  gasTipCap: string,
-  gasFeeCap: string,
-  gasLimit: string,
-  to: string,
-  value: string,
-  data: string,
-  option: Option
-}
-
-export type Transaction = {
-  // [key: string]: any,
-  chainId: number,
-  nonce: string,
-  gasPrice: string,
-  gasLimit: string,
-  to: string,
-  value: string,
-  data: string,
-  option: Option
-}
-
-export type Option = {
-  info : {
-    symbol: string,
-    decimals: string
-  }
-};
 
 export const EIP712Schema = {
   type: 'object',
