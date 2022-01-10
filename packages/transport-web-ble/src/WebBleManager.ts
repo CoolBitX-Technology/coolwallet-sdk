@@ -1,5 +1,5 @@
 /// <reference types="web-bluetooth" />
-import { transport as Transport, device as coreDevice } from '@coolwallet/core';
+import { Transport, BleManager, device as coreDevice } from '@coolwallet/core';
 import BleTransport from './WebBleTransport';
 
 enum BleEvents {
@@ -9,7 +9,7 @@ enum BleEvents {
 /**
  * Manage browser bluetooth status.
  */
-class WebBleManager implements Transport.BleManager {
+class WebBleManager implements BleManager {
   public transport?: BleTransport;
 
   private server?: BluetoothRemoteGATTServer;
@@ -31,25 +31,21 @@ class WebBleManager implements Transport.BleManager {
   // eslint-disable-next-line class-methods-use-this
   listen(): Promise<BluetoothDevice> {
     return new Promise((resolve, reject) => {
-      try {
-        const services = coreDevice.getBluetoothServiceUuids();
-        navigator.bluetooth
-          .requestDevice({
-            filters: [{ services }],
-          })
-          .then(resolve);
-      } catch (error) {
-        reject(error);
-      }
+      const services = coreDevice.getBluetoothServiceUuids();
+      navigator.bluetooth
+        .requestDevice({
+          filters: [{ services }],
+        })
+        .then(resolve, reject);
     });
   }
 
   /**
    * Connected to the given BluetoothDevice and create internal transport.
    * @param device BluetoothDevice which should be connected.
-   * @returns {Transport.default}
+   * @returns {Transport}
    */
-  async connect(device: BluetoothDevice): Promise<Transport.default> {
+  async connect(device: BluetoothDevice): Promise<Transport> {
     this.setOnDisconnect(device, this.onDeviceDisconnect);
     this.server = await device.gatt?.connect();
     console.info(`${device.name} connected`);

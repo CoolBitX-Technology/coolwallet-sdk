@@ -1,4 +1,5 @@
-import jwt from 'jsonwebtoken';
+import { SignJWT } from 'jose';
+import JWTDecode from 'jwt-decode';
 import isEmpty from 'lodash/isEmpty';
 import { target } from '../../config/param';
 import Transport from '../../transport';
@@ -11,7 +12,7 @@ import type { APIOptions, Command } from './types';
  *
  * @param data
  */
-const getAPIOption = (cardId: string, challengeData = ''): APIOptions => {
+const getAPIOption = async (cardId: string, challengeData = ''): Promise<APIOptions> => {
   const secret = 'd579bf4a2883cecf610785c49623e1';
   // let payload = new TokenSigner('ES256K', secret).sign(data)
   // console.log(`signed token ${payload}`)
@@ -25,9 +26,13 @@ const getAPIOption = (cardId: string, challengeData = ''): APIOptions => {
 
   console.debug(data);
 
-  const payload = jwt.sign(data, secret, { expiresIn: 60 * 60 * 24 });
+  const iat = Math.floor(Date.now() / 1000);
 
-  console.debug(`payload: ${payload}`);
+  const payload = await new SignJWT(data)
+    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .setIssuedAt(iat)
+    .setExpirationTime(iat + 60 * 60 * 24)
+    .sign(Buffer.from(secret, 'utf-8'));
 
   const body = {
     keyNum: '1',
@@ -69,7 +74,7 @@ const formatAPIResponse = async (transport: Transport, result: Response): Return
     console.error(`Server message ${JSON.stringify(message)}`);
     throw JSON.stringify(message);
   }
-  const obj = jwt.decode(bodyText.cryptogram);
+  const obj = JWTDecode(bodyText.cryptogram);
   console.debug(`Server Auth Response : ${JSON.stringify(obj)}`);
   const { CLA, INS, P1, P2, packets } = obj as Command;
 

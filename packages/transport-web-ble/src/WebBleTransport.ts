@@ -1,8 +1,8 @@
 /// <reference types="web-bluetooth" />
-import { transport as Transport } from '@coolwallet/core';
+import { Transport } from '@coolwallet/core';
 import { convertToNumberArray } from './utils';
 
-class WebBleTransport extends Transport.default {
+class WebBleTransport extends Transport {
   private commandCharacteristic?: BluetoothRemoteGATTCharacteristic;
 
   private dataCharacteristic?: BluetoothRemoteGATTCharacteristic;
