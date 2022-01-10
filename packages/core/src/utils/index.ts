@@ -1,6 +1,7 @@
 import * as bip39 from 'bip39';
 import pbkdf2 from 'pbkdf2';
-import { tx, wallet } from '../apdu';
+import isEmpty from 'lodash/isEmpty';
+import { tx, wallet, general } from '../apdu';
 import Transport from '../transport';
 import { MSG } from '../config/status/msg';
 import { CODE } from '../config/status/code';
@@ -17,13 +18,13 @@ function hardenPath(index: number) {
 //
 // output : [path_type(1B)] [index(4B)] x 5
 //    32 8000002C 80000000 80000000 00000000 00000000
-export const getFullPath = async ({
+export const getFullPath = ({
   pathType = PathType.BIP32,
   pathString,
 }: {
   pathType: PathType,
   pathString: string,
-}): Promise<string> => {
+}): string => {
   const paths = pathString.split('/').map((index) => {
     if (!index.match(/^\d+(|')$/)) {
       throw new SDKError('getFullPath', `invalid pathString : ${pathString}`);
@@ -93,31 +94,30 @@ export const assemblyCommandAndData = (
 
   const packetLength = 18;
   let dataLength = 0;
-  // flag = true;
-  let packets = '';
 
-  if (oriData) {
-    packets = oriData;
+  let packets = oriData ?? '';
+  
+  let dataBuf = Buffer.from(packets, 'hex');
+  // Origin data length
+  const oriDataLength = dataBuf.length;
+
+  if (!isEmpty(dataBuf)) {
     const data = packets.match(/.{2}/g);
     const checksum = getCheckSum(data);
     packets += checksum;
+    dataBuf = Buffer.concat([dataBuf, Buffer.from(checksum, 'hex')]);
   }
 
-  const dataBuf = Buffer.from(packets, 'hex');
-  let copiedData = dataBuf;
-  let XORLength = dataBuf.length;
-  let oriDataLength = XORLength;
+  // Data with checksum length
+  const XORLength = dataBuf.length;
 
-  if (packets.length > 0) {
-    // copiedData = Buffer.from(copiedData, 'hex');
-    const length = copiedData.length / packetLength;
-    const remains = copiedData.length % packetLength;
+  if (dataBuf.length > 0) {
+    const length = dataBuf.length / packetLength;
+    const remains = dataBuf.length % packetLength;
     dataLength += length;
-    if (remains > 0) {
+    if (remains !== 0) {
       dataLength += 1;
     }
-
-    oriDataLength -= 1;
   }
 
   const oriDataBuf = Buffer.allocUnsafe(4);
@@ -129,9 +129,10 @@ export const assemblyCommandAndData = (
   XORData.fill(0);
   XORData.writeInt16BE(XORLength, 0);
   const hexXORLength = XORData.slice(0, 2).toString('hex').padStart(4, '0');
-  const hexBataLength = Buffer.from([dataLength]).toString('hex');
+  const hexDataLength = Buffer.from([dataLength]).toString('hex');
 
-  const command = pid + cmdLen + cla + ins + p1 + p2 + hexOriDataLength + hexXORLength + hexBataLength;
+  // 00 09 80 54 00 00 0000 0000 00
+  const command = pid + cmdLen + cla + ins + p1 + p2 + hexOriDataLength + hexXORLength + hexDataLength;
   return { command, data: packets };
 };
 
@@ -155,15 +156,31 @@ export const createSeedByApp = async (wordNumber: number, randomBytes: (size: nu
 export const createWalletByMnemonic = async (
   transport: Transport, appId: string, appPrivateKey: string, mnemonic: string, SEPublicKey: string
 ): Promise<void> => {
+
+  const seeds: Array<Buffer> = [];
+  const version = await general.getSEVersion(transport);
+
   // mnemonic to seed
-  const seed = await bip39.mnemonicToSeed(mnemonic);
+  seeds[0] = await bip39.mnemonicToSeed(mnemonic);
 
   // mnemonic to ADA master key
-  const entropy = bip39.mnemonicToEntropy(mnemonic);
-  const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
-  key[0] &= 0b11111000;
-  key[31] &= 0b00011111;
-  key[31] |= 0b01000000;
+  if (version >= 317) {
+    const entropy = bip39.mnemonicToEntropy(mnemonic);
+    const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
+    key[0] &= 0b11111000;
+    key[31] &= 0b00011111;
+    key[31] |= 0b01000000;
 
-  return wallet.setSeed(transport, appId, appPrivateKey, Buffer.concat([seed, key]).toString('hex'), SEPublicKey);
+    seeds[1] = key;
+  }
+
+  const seedHex = Buffer.concat(seeds).toString('hex');
+  return wallet.setSeed(transport, appId, appPrivateKey, seedHex, SEPublicKey);
 };
+
+/**
+ * Delay the promise and then resolve.
+ * @param {number} d The duration to delay the promise.
+ * @returns {Promise<void>}
+ */
+export const delay = (d: number): Promise<void> => new Promise((r) => setTimeout(r, d));

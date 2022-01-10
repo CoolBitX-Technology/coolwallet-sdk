@@ -1,9 +1,9 @@
 import ECDSACoin from './ECDSA';
 import EDDSACoin from './EDDSA';
-import { getAccountExtKeyFromSE } from './derive';
+import { getPublicKeyByPath } from './derive';
 
 export {
-  ECDSACoin, EDDSACoin, getAccountExtKeyFromSE
+  ECDSACoin, EDDSACoin, getPublicKeyByPath
 };
 
 export interface Coin{
