@@ -9,7 +9,7 @@ Testing Coin SDKs on the website
 
 ## Use with Coin Template
 
-It is good to be familiar with CoolWallet Pro by playing around this website tester and reading the source code of the coin-template sdk.
+It would be beneficial to be familiar with CoolWallet Pro by playing around with this website tester and reading the source code of the coin-template sdk.
 
 #### Install and run
 
