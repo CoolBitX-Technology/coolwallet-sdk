@@ -1,4 +1,3 @@
-import { Transport } from '@coolwallet/core';
 import { handleHex } from './stringUtil';
 import { Transaction } from '../config/types';
 

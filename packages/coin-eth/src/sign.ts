@@ -42,7 +42,7 @@ export const signEIP1559Transaction = async (
     const serializedTx = ethUtilEIP1559.composeSignedTransacton(rawPayload, v, r, s);
     return serializedTx;
   } else {
-    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
+    throw new error.SDKError(signEIP1559Transaction.name, 'canonicalSignature type error');
   }
 };
 
@@ -82,8 +82,7 @@ export const signEIP1559SmartContractTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtilEIP1559.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    const serializedTx = ethUtilEIP1559.composeSignedTransacton(rawPayload, v, r, s);
-    return serializedTx;
+    return ethUtilEIP1559.composeSignedTransacton(rawPayload, v, r, s);
   } else {
     throw new error.SDKError(signEIP1559Transaction.name, 'canonicalSignature type error');
   }
@@ -114,15 +113,12 @@ export const signTransaction = async (
   const rawPayload = ethUtil.getRawHex(transaction);
 
   const preActions = [];
-  let action;
-  const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
-  };
+  const sendScript = () => apdu.tx.sendScript(transport, script);
+
   preActions.push(sendScript);
 
-  action = async () => {
-    return apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
-  };
+  const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
+
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
@@ -135,8 +131,7 @@ export const signTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
-    return serializedTx;
+    return ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
