@@ -3,7 +3,7 @@ import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 
-import Template from '@coolwallet/template';
+import ETC from '@coolwallet/ETC';
 
 interface Props {
   transport: Transport | null,
@@ -14,7 +14,7 @@ interface Props {
 }
 
 function CoinTemplate(props: Props) {
-  const temp = new Template();
+  const temp = new ETC();
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
@@ -51,8 +51,8 @@ function CoinTemplate(props: Props) {
   const signTransaction = async () => {
     handleState(async () => {
       const transaction = {
-        chainId: 1,
-        nonce: '0x289',
+        chainId: 61,
+        nonce: '0x290',
         gasPrice: '0x20c855800',
         gasLimit: '0x520c',
         to: to,
