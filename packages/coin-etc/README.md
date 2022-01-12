@@ -49,3 +49,15 @@ const tx = {
 const signedTx = await etc.signTransaction(tx, 0)
 ```
 
+## Coin Tester
+
+To run coin tester for testing ETC functionalities, please register for an account on GetBlock.io First. it's free for the first 40k requests. After finishing the application, simply paste the API key to to packages/coin-tester/src/components/coins/ETC/index.tsx line 9.
+
+## More about Ethereum Classic
+
+Ethereum Classic is one of the most popular coins in the crypto world with a top 50 market cap.
+It's basically a fork from Ethereum with different chain Id and HD wallet path.
+For more information about Ethereum Classic...
+see official site [here](https://ethereumclassic.org/).
+
+
