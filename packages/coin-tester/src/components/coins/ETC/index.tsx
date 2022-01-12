@@ -5,7 +5,9 @@ import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 import ETC from '@coolwallet/ETC';
 import axios from 'axios';
 
-const API_ENDPOINT = "https://etc.getblock.io/mainnet/?api_key=127f3844-bdbc-4cde-a81e-ab303fbd9c32";
+// apply for an API key on https://getblock.io for ETC endpoint, it's free for the first 40k requests.
+const API_KEY = "";
+const API_ENDPOINT = `https://etc.getblock.io/mainnet/?api_key=${API_KEY}`;
 
 interface Props {
   transport: Transport | null,
