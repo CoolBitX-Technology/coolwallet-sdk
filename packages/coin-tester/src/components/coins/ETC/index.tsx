@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
+import ETC from '@coolwallet/ETC';
+import axios from 'axios';
 
-import Template from '@coolwallet/template';
+const API_ENDPOINT = "https://etc.getblock.io/mainnet/?api_key=127f3844-bdbc-4cde-a81e-ab303fbd9c32";
 
 interface Props {
   transport: Transport | null,
@@ -14,9 +16,11 @@ interface Props {
 }
 
 function CoinTemplate(props: Props) {
-  const temp = new Template();
+  const temp = new ETC();
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
+  const [txSentResult, setTxSentResult] = useState('');
+  const [transactionResponse, setTransactionResponse] = useState('');
   const [value, setValue] = useState('0');
   const [to, setTo] = useState('0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C');
 
@@ -48,17 +52,78 @@ function CoinTemplate(props: Props) {
     }, setAddress);
   };
 
+  const getGasInfo = async () => {
+    const response = await axios.post(API_ENDPOINT, {
+      "jsonrpc": "2.0",
+      "method": "eth_gasPrice",
+      "params": [],
+      "id": "getblock.io"
+    });
+    return `${response.data.result}`;
+  }
+
+  const traceTx = async () => {
+    const response = await axios.post(API_ENDPOINT, {
+      "jsonrpc": "2.0",
+      "method": "trace_transaction",
+      "params": [
+        txSentResult
+      ],
+      "id": "getblock.io"
+    });
+    console.log({response});
+    setTransactionResponse(JSON.stringify(response.data.result));
+    return response.data.result;
+  }
+
+  const sendRawTx = async () => {
+    console.log("sendRawTx", signedTransaction);
+    const response = await axios.post(API_ENDPOINT, {
+      "jsonrpc": "2.0",
+      "method": "eth_sendRawTransaction",
+      "params": [
+        signedTransaction
+      ],
+      "id": "getblock.io"
+    });
+    console.log({response})
+    setTxSentResult(response.data.result);
+    return response.data;
+  }
+
+
+  const getNonce = async () => {
+    console.log("sendRawTx", signedTransaction);
+    const response = await axios.post(API_ENDPOINT, {
+      "jsonrpc": "2.0",
+      "method": "eth_getTransactionCount",
+      "params": [
+        address,
+        "latest"
+      ],
+      "id": "getblock.io"
+    });
+    console.log({response})
+    const hexString = response.data.result.split('0x')[1];
+    const nonce = parseInt(hexString, 16);
+    const newNonce = `0x${(nonce).toString(16)}`;
+    console.log({newNonce});
+    return `${newNonce}`;
+  };
+
   const signTransaction = async () => {
     handleState(async () => {
       const transaction = {
-        chainId: 1,
-        nonce: '0x289',
-        gasPrice: '0x20c855800',
-        gasLimit: '0x520c',
+        chainId: 61,
+        nonce: await getNonce(),
+        gasPrice: await getGasInfo(),
+        gasLimit: '0xcccc',
         to: to,
         value: `0x${parseInt(value).toString(16)}`,
         data: '',
       };
+
+      console.log({transaction})
 
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
@@ -92,6 +157,20 @@ function CoinTemplate(props: Props) {
         setValue2={setTo}
         placeholder2='to'
         inputSize2={3}
+      />
+      <NoInput
+        title='Send Transaction'
+        btnName='Send'
+        content={txSentResult}
+        onClick={sendRawTx}
+        disabled={(signedTransaction === '')}
+      />
+      <NoInput
+        title='Trace Transaction'
+        btnName='Get'
+        content={transactionResponse}
+        onClick={traceTx}
+        disabled={txSentResult === ''}
       />
     </Container>
   );

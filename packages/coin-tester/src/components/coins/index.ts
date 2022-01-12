@@ -1,5 +1,7 @@
 import template from './template';
+import ETC from './ETC';
 
 export default [
-  { path: 'ETC', Element: template },
+  { path: 'Template', Element: template },
+  { path: 'ETC', Element: ETC },
 ];

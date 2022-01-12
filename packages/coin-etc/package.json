@@ -29,9 +29,13 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
   "dependencies": {
+    "@truffle/hdwallet-provider": "^2.0.0",
     "@types/keccak": "^3.0.1",
     "bip32": "^2.0.4",
+    "bip39": "^3.0.4",
     "keccak": "^3.0.2",
-    "rlp": "^2.2.7"
+    "rlp": "^2.2.7",
+    "truffle-hdwallet-provider": "^0.0.3",
+    "web3": "^1.6.1"
   }
 }
