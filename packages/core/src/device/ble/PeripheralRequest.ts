@@ -9,7 +9,6 @@ import { delay } from '../../utils';
 import Transport from '../../transport';
 import { MCU_FINISH_CODE, COMMAND_FINISH_CODE, PACKET_DATA_SIZE } from '../constants';
 import { byteArrayToHex, hexToByteArray } from './utils';
-import { TransportError } from '../../error';
 
 /**
  * PeripheralRequest is responsible for peripheral data communication.
@@ -88,18 +87,15 @@ export default class PeripheralRequest {
    * @returns  {Promise<string>}
    */
   sendAPDU = async (command: string, packets: string): Promise<string> => {
-    if (!this.isFinish) {
-      throw new TransportError(this.sendAPDU.name, 'Device is busy');
-    }
     const bytesCommand = hexToByteArray(command);
+    console.debug('sendCommandToCard statusCode', command);
+    this.isFinish = false;
     await this.transport.sendCommandToCard(bytesCommand);
 
     const bytesPackets = hexToByteArray(packets);
     if (!isNil(bytesPackets) && !isEmpty(bytesPackets)) {
       await this.sendDataToCard(bytesPackets);
     }
-
-    this.isFinish = false;
 
     return this.checkCardStatus();
   };
