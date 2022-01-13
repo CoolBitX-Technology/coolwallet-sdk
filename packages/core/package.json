@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/core",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Core library for other CoolWallet SDKs.",
   "main": "lib/index.js",
   "scripts": {
@@ -31,6 +31,7 @@
     "key-encoder": "^2.0.3",
     "lodash": "^4.17.21",
     "pbkdf2": "^3.1.2",
+    "react-native-ble-plx": "^2.0.3",
     "rlp": "^2.2.3"
   },
   "repository": {
@@ -52,7 +53,6 @@
     "del-cli": "^4.0.1",
     "jest": "^27.4.5",
     "mitt": "^3.0.0",
-    "react-native-ble-plx": "^2.0.3",
     "typescript": "^4.5.4"
   }
 }
