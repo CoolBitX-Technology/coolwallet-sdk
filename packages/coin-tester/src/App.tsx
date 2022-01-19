@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { Container, Row, Col, ButtonGroup, Button } from 'react-bootstrap';
-import core, { apdu, Transport } from '@coolwallet/core';
+import {crypto, apdu, Transport } from '@coolwallet/core';
 import webBleTransport, { createTransport } from '@coolwallet/transport-web-ble';
 import HeadBar from './components/HeadBar';
 import Settings from './components/settings';
@@ -17,7 +17,7 @@ function getAppKeysOrGenerate() {
     return { appPublicKey, appPrivateKey };
   }
 
-  const keyPair = core.crypto.key.generateKeyPair();
+  const keyPair = crypto.key.generateKeyPair();
   localStorage.setItem('appPublicKey', keyPair.publicKey);
   localStorage.setItem('appPrivateKey', keyPair.privateKey);
   return { appPublicKey: keyPair.publicKey, appPrivateKey: keyPair.privateKey };
