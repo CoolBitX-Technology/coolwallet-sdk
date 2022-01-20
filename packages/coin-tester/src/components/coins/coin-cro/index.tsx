@@ -51,7 +51,6 @@ function CoinCRO(props: Props) {
   const signTransaction = async () => {
     handleState(async () => {
       const transaction = {
-        chainId: 1,
         nonce: await web3.eth.getTransactionCount(address, 'pending'),
         gasPrice: await web3.eth.getGasPrice(),
         gasLimit: await web3.eth.estimateGas({ to, data }),
@@ -62,7 +61,15 @@ function CoinCRO(props: Props) {
 
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const signedTx = await temp.signTransaction(transport!, appPrivateKey, appId, 0, transaction);
+      const signTxData = {
+        transport,
+        appPrivateKey,
+        appId,
+        transaction: transaction,
+        addressIndex: 0,
+      };
+
+      const signedTx = await cro.signTransaction(transport!, appPrivateKey, appId, 0, transaction);
       return signedTx;
     }, setSignedTransaction);
   };
