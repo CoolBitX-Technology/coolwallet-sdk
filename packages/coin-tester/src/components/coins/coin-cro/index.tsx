@@ -56,7 +56,7 @@ function CoinCRO(props: Props) {
         gasPrice: await web3.eth.getGasPrice(),
         gasLimit: '' + (await web3.eth.estimateGas({ to, data })),
         to: to,
-        value: `0x${parseInt(value).toString(16)}`,
+        value: web3.utils.toHex(web3.utils.toWei(value.toString(), 'ether')),
         data: data,
       };
 
