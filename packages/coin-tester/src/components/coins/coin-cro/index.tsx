@@ -76,6 +76,10 @@ function CoinCRO(props: Props) {
       };
 
       const signedTx = await cro.signTransaction(signTxData);
+      console.log('signedTx :', signedTx);
+
+      await web3.eth.sendSignedTransaction(signedTx);
+
       return signedTx;
     }, setSignedTransaction);
   };
@@ -90,7 +94,7 @@ function CoinCRO(props: Props) {
           content={signedTransaction}
           onClick={signTransaction}
           disabled={disabled}
-          btnName="Sign"
+          btnName="Sign&Send"
           value={value}
           setValue={setValue}
           placeholder="value"
@@ -99,19 +103,6 @@ function CoinCRO(props: Props) {
           setValue2={setTo}
           placeholder2="to"
           inputSize2={3}
-        />
-      }
-      {
-        <OneInput
-          title="Sign contract"
-          content={signedTransaction}
-          onClick={signTransaction}
-          disabled={disabled}
-          btnName="Sign"
-          value={data}
-          setValue={setData}
-          placeholder="data"
-          inputSize={1}
         />
       }
     </Container>
