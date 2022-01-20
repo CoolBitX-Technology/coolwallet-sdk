@@ -5,6 +5,7 @@ import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 import Web3 from 'web3';
 
 import CRO from '@coolwallet/coin-cro';
+import { Transaction } from '@coolwallet/coin-cro/lib/config/types';
 
 const web3 = new Web3('https://evm-cronos.crypto.org');
 
@@ -50,10 +51,10 @@ function CoinCRO(props: Props) {
 
   const signTransaction = async () => {
     handleState(async () => {
-      const transaction = {
-        nonce: await web3.eth.getTransactionCount(address, 'pending'),
+      const transaction: Transaction = {
+        nonce: '' + (await web3.eth.getTransactionCount(address, 'pending')),
         gasPrice: await web3.eth.getGasPrice(),
-        gasLimit: await web3.eth.estimateGas({ to, data }),
+        gasLimit: '' + (await web3.eth.estimateGas({ to, data })),
         to: to,
         value: `0x${parseInt(value).toString(16)}`,
         data: data,
@@ -62,14 +63,14 @@ function CoinCRO(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const signTxData = {
-        transport,
+        transport: transport!,
         appPrivateKey,
         appId,
         transaction: transaction,
         addressIndex: 0,
       };
 
-      const signedTx = await cro.signTransaction(transport!, appPrivateKey, appId, 0, transaction);
+      const signedTx = await cro.signTransaction(signTxData);
       return signedTx;
     }, setSignedTransaction);
   };
