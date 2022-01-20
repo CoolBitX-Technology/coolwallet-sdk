@@ -30,7 +30,6 @@ export default class CRO extends COIN.ECDSACoin implements COIN.Coin {
 
     // erc20
     const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-
     if (data && functionHash === 'a9059cbb') {
       const upperCaseAddress = to.toUpperCase(); // contractAddr
       let tokenSignature;
@@ -48,8 +47,7 @@ export default class CRO extends COIN.ECDSACoin implements COIN.Coin {
         }
       }
 
-      const symbol = signTxData.transaction.option?.info?.symbol;
-      const decimals = signTxData.transaction.option?.info?.decimals;
+      const { symbol, decimals } = signTxData.transaction.option.info;
       if (symbol && decimals) {
         if (tokenSignature) {
           // 內建

@@ -62,12 +62,17 @@ function CoinCRO(props: Props) {
 
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
+      const option = {
+        info: { symbol: '', decimals: '' },
+      };
+
       const signTxData = {
         transport: transport!,
         appPrivateKey,
         appId,
         transaction: transaction,
         addressIndex: 0,
+        option,
       };
 
       const signedTx = await cro.signTransaction(signTxData);

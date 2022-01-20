@@ -19,7 +19,7 @@ export type Transaction = {
   to: string;
   value: string;
   data: string;
-  option?: Option;
+  option: Option;
 };
 
 export type signTx = {
