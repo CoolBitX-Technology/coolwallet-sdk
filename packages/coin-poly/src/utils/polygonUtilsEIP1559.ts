@@ -11,7 +11,7 @@ export const getRawHex = (
   transaction: EIP1559Transaction
 ): Array<Buffer|Buffer[]> => {
   const rawData = [];
-  rawData.push('0137'); // chainId
+  rawData.push('89'); // chainId
   rawData.push(transaction.nonce);
   rawData.push(transaction.gasTipCap);
   rawData.push(transaction.gasFeeCap);
