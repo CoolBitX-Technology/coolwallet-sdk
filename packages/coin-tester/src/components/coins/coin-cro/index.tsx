@@ -52,9 +52,10 @@ function CoinCRO(props: Props) {
   const signTransaction = async () => {
     handleState(async () => {
       const transaction: Transaction = {
-        nonce: '' + (await web3.eth.getTransactionCount(address, 'pending')),
-        gasPrice: await web3.eth.getGasPrice(),
-        gasLimit: '' + (await web3.eth.estimateGas({ to, data })),
+        nonce: web3.utils.toHex(
+          await web3.eth.getTransactionCount(address, 'pending')),
+        gasPrice: web3.utils.toHex(await web3.eth.getGasPrice()),
+        gasLimit: web3.utils.toHex(await web3.eth.estimateGas({ to, data })),
         to: to,
         value: web3.utils.toHex(web3.utils.toWei(value.toString(), 'ether')),
         data: data,
