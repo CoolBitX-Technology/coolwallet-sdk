@@ -38,13 +38,18 @@ export default class CRO extends COIN.ECDSACoin implements COIN.Coin {
         // get tokenSignature
         if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
           tokenSignature = tokenInfo.signature;
-          signTxData.transaction.option.info.symbol = tokenInfo.symbol;
-          signTxData.transaction.option.info.decimals = tokenInfo.unit;
+          signTxData.transaction.option = {
+            info: {
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.unit,
+            },
+          };
           break;
         }
       }
 
-      const { symbol, decimals } = signTxData.transaction.option.info;
+      const symbol = signTxData.transaction.option?.info?.symbol;
+      const decimals = signTxData.transaction.option?.info?.decimals;
       if (symbol && decimals) {
         if (tokenSignature) {
           // 內建
