@@ -30,9 +30,11 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
     return Buffer.from(hex, 'hex');
   });
   
+  // to handle with chainID number greater than Uint8
   const chainIdBuffer = new Uint32Array(1);
   chainIdBuffer[0] = transaction.chainId;
   
+  // when sign chain treat r s v as number do we need slide `00` byte in buffer
   const chainIdEncode = Buffer.from(chainIdBuffer.buffer).filter(e=>e!==0);
 
   raw[6] = Buffer.from(chainIdEncode).reverse();
