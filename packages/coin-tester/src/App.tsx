@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { Container, Row, Col, ButtonGroup, Button } from 'react-bootstrap';
-import {crypto, apdu, Transport } from '@coolwallet/core';
+import { apdu, crypto, Transport } from '@coolwallet/core';
 import webBleTransport, { createTransport } from '@coolwallet/transport-web-ble';
 import HeadBar from './components/HeadBar';
 import Settings from './components/settings';
@@ -70,22 +70,18 @@ function App(): JSX.Element {
 
   return (
     <Routes>
-      <Route path='/' element={<Navigate to="settings" />} />
+      <Route path="/" element={<Navigate to="settings" />} />
       <Route
-        path='/'
+        path="/"
         element={
-          <div className='App'>
+          <div className="App">
             <Container>
-              <Row className='title'>
+              <Row className="title">
                 <p>CoolWallet SDK Tester</p>
               </Row>
               <Row>
                 <Col>
-                  <HeadBar
-                    transport={transport}
-                    connect={connect}
-                    disconnect={disconnect}
-                  />
+                  <HeadBar transport={transport} connect={connect} disconnect={disconnect} />
                 </Col>
               </Row>
               <br />
@@ -95,25 +91,33 @@ function App(): JSX.Element {
         }
       >
         <Route
-          path='settings'
-          element={<Settings
-            transport={transport}
-            appPrivateKey={appPrivateKey}
-            appPublicKey={appPublicKey}
-            isLocked={isLocked}
-            setIsLocked={setIsLocked}
-          />}
+          path="settings"
+          element={
+            <Settings
+              transport={transport}
+              appPrivateKey={appPrivateKey}
+              appPublicKey={appPublicKey}
+              isLocked={isLocked}
+              setIsLocked={setIsLocked}
+            />
+          }
         />
-        {Coins.map(({path,Element},i) => (
-          <Route key={i} path={path} element={<Element
-            transport={transport}
-            appPrivateKey={appPrivateKey}
-            appPublicKey={appPublicKey}
-            isLocked={isLocked}
-            setIsLocked={setIsLocked}
-          />} />
+        {Coins.map(({ path, Element }, i) => (
+          <Route
+            key={i}
+            path={path}
+            element={
+              <Element
+                transport={transport}
+                appPrivateKey={appPrivateKey}
+                appPublicKey={appPublicKey}
+                isLocked={isLocked}
+                setIsLocked={setIsLocked}
+              />
+            }
+          />
         ))}
-        <Route path='*' element={<Navigate to="settings" />} />
+        <Route path="*" element={<Navigate to="settings" />} />
       </Route>
     </Routes>
   );
