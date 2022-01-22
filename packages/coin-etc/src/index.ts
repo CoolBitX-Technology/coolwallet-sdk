@@ -61,7 +61,7 @@ export default class ETC implements COIN.Coin {
     addressIndex: number,
     transaction: Transaction
   ): Promise<string> => {
-    const script = '03010601C707000000003DCC0710C0C2ACD70032FFF8C2ACD7001EFFF6C2ACD70028FFF6CC071094CAA02700C2A2D700FFF6CC071080C2ACD7003AFFFECC07C0028080C3709710DC07C003455443CC0FC0023078BAA02F6C0E04DDF09700DAA2D7C0FFF612D207CC05065052455353425554546F4E';
+    const script = '03040601C707000000003DA00700C2ACD70032FFF8C2ACD7001EFFF6C2ACD70028FFF6CC071094CAA02700C2A2D700FFF6CC071080CC0E1061C2E09700CC07C0028080BE0710DC07C003455443CC0FC0023078BAA02F6C0E04DDF09700DAA2D7C0FFF612D207CC05065052455353425554546F4E';
     return this.doTransaction(transport, appPrivateKey, appId, addressIndex, transaction, script);
   }
 
@@ -94,7 +94,6 @@ export default class ETC implements COIN.Coin {
       handleHex(transaction.gasPrice).padStart(20, "0") +
       handleHex(transaction.gasLimit).padStart(20, "0") +
       handleHex(transaction.nonce).padStart(16, "0") +
-      handleHex(transaction.chainId.toString(16)).padStart(4, "0") +
       handleHex(transaction.data);
 
     // 3. Validation and The Encrypted Signature ***
