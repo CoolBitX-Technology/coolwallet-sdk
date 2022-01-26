@@ -1,21 +1,21 @@
-# CoolWallet Ethereum SDK
+# CoolWallet Polygon SDK
 
 Typescript library with support for the integration of Ethereum for third party application, include the functionalities of generation of addresses and signed transactions. 
 
 ## Install
 
 ```shell
-npm install @coolwallet/eth
+npm install @coolwallet/poly
 ```
 
 ## Usage
 
 ```javascript
-import ETH from '@coolwallet/eth'
+import Poly from '@coolwallet/poly'
 import { crypto } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-web-ble';
 
-const eth = new ETH();
+const poly = new Poly();
 
 const transport = await createTransport();
 
@@ -34,7 +34,7 @@ const transaction = {
     to: "0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C",
     value: "0x5af3107a4000",
     data: "0x00",
-    chainId: 1
+    chainId: 137
 }
 
 const signTxData = {
@@ -45,7 +45,7 @@ const signTxData = {
     addressIndex
 }
 
-const normalTx = await eth.signTransaction(signTxData);
+const normalTx = await poly.signTransaction(signTxData);
 
 const signTxData = {
     transport,
@@ -62,7 +62,7 @@ const erc20Transaction = {
     to: "0xe41d2489571d322189246dafa5ebde1f4699f498",
     value: "0x0",
     data: "0x00",
-    chainId: 1,
+    chainId: 137,
     option: {
       symbol: "USDT",
       unit: "6"
@@ -77,7 +77,7 @@ const erc20SignTxData = {
     addressIndex
 }
 
-const erc20Tx = await eth.signERC20Transaction(erc20SignTxData);
+const erc20Tx = await poly.signERC20Transaction(erc20SignTxData);
 ```
 
 ## Methods
@@ -116,7 +116,7 @@ async getAddress(
 
 #### Description
 
-Sign Ethereum Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
+Sign Polygon Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
 
 ```javascript
 async signTransaction(signTxData: types.signTx): Promise<string>
