@@ -18,7 +18,7 @@ function CoinTemplate(props: Props) {
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
-  const [to, setTo] = useState('0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C');
+  const [to, setTo] = useState('28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x');
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
@@ -48,21 +48,29 @@ function CoinTemplate(props: Props) {
     }, setAddress);
   };
 
+  const evenHexDigit = (hex: string) => (hex.length % 2 !== 0 ? `0${hex}` : hex);
+  const removeHex0x = (hex: string) => (hex.startsWith('0x') ? hex.slice(2) : hex);
+  const handleHex = (hex: string) => evenHexDigit(removeHex0x(hex));
+
   const signTransaction = async () => {
     handleState(async () => {
       const transaction = {
-        chainId: 1,
-        nonce: '0x289',
-        gasPrice: '0x20c855800',
-        gasLimit: '0x520c',
+        amount: "0x02000000a086010000000000",
         to: to,
-        value: `0x${parseInt(value).toString(16)}`,
+        programId: '0x3131313131313131313131313131313131313131313131313131313131313131',
         data: '',
       };
 
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const signedTx = await temp.signTransaction(transport!, appPrivateKey, appId, 0, transaction);
+      const script = '03000202C7070000000091CC07C0022001CAAC570022CC07C0023333CAA0C70016C2ACC700160CCC071099CC07C0028080C3709710DC07C003534F4CBAA0CF6C160E04DDF09700DAACC7C0160C0AD207CC05065052455353425554544F4E'
+      
+      const argument =
+        handleHex(Buffer.from(transaction.to).toString('hex')) +
+        handleHex(transaction.amount).padStart(20, "0") +
+        handleHex(transaction.programId).padStart(64, "0") 
+      
+      const signedTx = await temp.signTransaction(transport!, appPrivateKey, appId, 0, transaction as any, script, argument);
       return signedTx;
     }, setSignedTransaction);
   };

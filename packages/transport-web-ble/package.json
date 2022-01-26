@@ -6,7 +6,7 @@
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
-    "build": "npm run build:types ; npm run build:ts",
+    "build": "npm run build:types && npm run build:ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "coolwallet-team",
