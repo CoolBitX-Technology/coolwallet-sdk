@@ -3,90 +3,13 @@ import * as rlp from 'rlp';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import Ajv from 'ajv';
 import { apdu, error, tx } from '@coolwallet/core';
+import { CHAIN_ID } from './config/params';
 import * as ethUtil from './utils/ethUtils';
-import * as ethUtilEIP1559 from './utils/ethUtilsEIP1559';
 import * as scriptUtils from './utils/scriptUtils';
 import { handleHex } from './utils/stringUtil';
-import { signMsg, signTyped, EIP712Schema, signTx, signEIP1559Tx } from './config/types';
+import { signMsg, signTyped, EIP712Schema, signTx } from './config/types';
 
 const ajv = new Ajv();
-
-export const signEIP1559Transaction = async (
-  signTxData: signEIP1559Tx,
-  script: string,
-  argument: string,
-  publicKey: string | undefined = undefined
-): Promise<string> => {
-  const { transport, transaction } = signTxData;
-
-  const rawPayload = ethUtilEIP1559.getRawHex(transaction);
-
-  const preActions = [];
-  const sendScript = () => apdu.tx.sendScript(transport, script);
-  preActions.push(sendScript);
-
-  const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
-
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
-    transport,
-    preActions,
-    action,
-    false,
-    signTxData.confirmCB,
-    signTxData.authorizedCB,
-    true
-  );
-
-  if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtilEIP1559.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    const serializedTx = ethUtilEIP1559.composeSignedTransacton(rawPayload, v, r, s);
-    return serializedTx;
-  } else {
-    throw new error.SDKError(signEIP1559Transaction.name, 'canonicalSignature type error');
-  }
-};
-
-export const signEIP1559SmartContractTransaction = async (
-  signTxData: signEIP1559Tx,
-  script: string,
-  argument: string,
-  publicKey: string | undefined = undefined
-): Promise<string> => {
-  const { transport, transaction } = signTxData;
-
-  const rawPayload = ethUtilEIP1559.getRawHex(transaction);
-
-  const preActions = [];
-
-  preActions.push(() => apdu.tx.sendScript(transport, script));
-
-  preActions.push(() => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument));
-
-  const action = () =>
-    apdu.tx.executeSegmentScript(
-      transport,
-      signTxData.appId,
-      signTxData.appPrivateKey,
-      handleHex(signTxData.transaction.data)
-    );
-
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
-    transport,
-    preActions,
-    action,
-    false,
-    signTxData.confirmCB,
-    signTxData.authorizedCB,
-    true
-  );
-
-  if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtilEIP1559.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    return ethUtilEIP1559.composeSignedTransacton(rawPayload, v, r, s);
-  } else {
-    throw new error.SDKError(signEIP1559Transaction.name, 'canonicalSignature type error');
-  }
-};
 
 /**
  * sign ETH Transaction
@@ -106,7 +29,7 @@ export const signTransaction = async (
   signTxData: signTx,
   script: string,
   argument: string,
-  publicKey: string | undefined = undefined
+  publicKey: string
 ): Promise<string> => {
   const { transport, transaction } = signTxData;
 
@@ -131,7 +54,7 @@ export const signTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    return ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    return ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN_ID);
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
@@ -155,7 +78,7 @@ export const signSmartContractTransaction = async (
   signTxData: signTx,
   script: string,
   argument: string,
-  publicKey: string | undefined = undefined
+  publicKey: string
 ): Promise<string> => {
   const { transport, transaction } = signTxData;
 
@@ -187,7 +110,7 @@ export const signSmartContractTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN_ID);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
@@ -202,8 +125,8 @@ export const signMessage = async (
   signMsgData: signMsg,
   script: string,
   argument: string,
-  publicKey: string | undefined = undefined
-) => {
+  publicKey: string
+): Promise<string> => {
   const { transport, message } = signMsgData;
 
   const preActions = [];
@@ -252,11 +175,7 @@ export const signMessage = async (
  * @description Sign Typed Data
  * @return {Promise<String>}
  */
-export const signTypedData = async (
-  typedData: signTyped,
-  script: string,
-  publicKey: string | undefined = undefined
-): Promise<string> => {
+export const signTypedData = async (typedData: signTyped, script: string, publicKey: string): Promise<string> => {
   if (!ajv.validate(EIP712Schema, typedData.typedData)) {
     throw new error.SDKError(signTypedData.name, ajv.errorsText());
   }
@@ -267,7 +186,12 @@ export const signTypedData = async (
 
   const sanitizedData = typedDataUtils.sanitizeData(typedData.typedData);
 
-  const encodedData = typedDataUtils.encodeData(sanitizedData.primaryType, sanitizedData.message, sanitizedData.types);
+  const encodedData = typedDataUtils.encodeData(
+    // FIXME: not test yet
+    sanitizedData.primaryType as string,
+    sanitizedData.message,
+    sanitizedData.types
+  );
 
   const domainSeparate = typedDataUtils.hashStruct('EIP712Domain', sanitizedData.domain, sanitizedData.types);
 

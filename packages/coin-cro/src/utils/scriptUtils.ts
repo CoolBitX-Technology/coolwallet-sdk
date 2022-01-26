@@ -4,7 +4,7 @@ import * as token from './tokenUtils';
 import { utils } from '@coolwallet/core';
 import { handleHex } from './stringUtil';
 import { Transaction } from '../config/types';
-const Web3 = require('web3');
+import Web3 from 'web3';
 
 /**
  * [toAddress(20B)] [amount(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)]
@@ -16,8 +16,7 @@ export const getTransferArgument = async (transaction: Transaction, addressIndex
     handleHex(transaction.value).padStart(20, '0') + // 000000b1a2bc2ec50000
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
-    handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
-    handleHex(transaction.chainId.toString(16)).padStart(4, '0'); // 0001
+    handleHex(transaction.nonce).padStart(16, '0'); // 0000000000000289
 
   const path = await utils.getPath(COIN_TYPE, addressIndex);
 
@@ -45,7 +44,6 @@ export const getERC20Argument = async (transaction: Transaction, tokenSignature:
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
-    handleHex(transaction.chainId.toString(16)).padStart(4, '0') + // 0001
     tokenInfo +
     signature;
 

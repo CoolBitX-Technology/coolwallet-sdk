@@ -7,6 +7,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@coolwallet/coin-cro": "file:../coin-cro",
     "@coolwallet/core": "file:../core",
     "@coolwallet/ETC": "file:../coin-etc",
     "@coolwallet/template": "file:../coin-template",
@@ -36,7 +37,8 @@
     "secp256k1": "^4.0.2",
     "stream": "npm:readable-stream@^3.6.0",
     "util": "^0.12.4",
-    "vite": "^2.7.4"
+    "vite": "^2.7.4",
+    "web3": "1.2.2"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",

@@ -7,7 +7,7 @@ const webBleManager = new WebBleManager();
 
 /**
  * A convenient way to create internal transport.
- * @returns {Transport.default}
+ * @returns {Transport}
  */
 export const createTransport = (): Promise<Transport> => (
   new Promise((resolve, reject) => {

@@ -28,7 +28,7 @@ module.exports = {
     '@typescript-eslint/indent': ['error', 2],
     '@typescript-eslint/no-unused-expressions': ['error'],
     '@typescript-eslint/no-use-before-define': ['error'],
-    'react/destructuring-assignment': 'never',
+    'react/destructuring-assignment': 0,
     'react/jsx-filename-extension': [1, { 'extensions': ['.js', '.jsx', '.ts', '.tsx'] }],
     'no-use-before-define': 'off',
     'no-restricted-syntax': [

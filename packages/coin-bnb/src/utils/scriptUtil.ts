@@ -34,7 +34,7 @@ export const getPlaceOrderArgument = async (signObj: PlaceOrder, addressIndex: n
     throw new error.SDKError(getPlaceOrderArgument.name, `Unsupport timeinforce '${timeinforce}'`);
   }
 
-  const orderAddress = id.split("-")[0].padStart(40, '0');
+  const orderAddress = Buffer.from(id.split("-")[0], 'ascii').toString('hex').padStart(40, '0');
   const orderSequence = parseInt(id.split("-")[1]).toString(16).padStart(16, '0');
   const senderAddress = Buffer.from(signObj.msgs[0].sender, 'ascii').toString('hex').padStart(128, '0');
   const side = sideNum.toString(16).padStart(2, '0');

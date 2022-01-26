@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/core",
-  "version": "1.0.9",
+  "version": "1.0.13",
   "description": "Core library for other CoolWallet SDKs.",
   "main": "lib/index.js",
   "scripts": {
@@ -17,6 +17,10 @@
     "@types/elliptic": "^6.4.14",
     "@types/node": "^14.0.13",
     "@types/pbkdf2": "^3.1.0",
+    "@types/bluebird": "^3.5.32",
+    "@types/jsonwebtoken": "^8.5.6",
+    "@types/lodash": "^4.14.177",
+    "@types/web-bluetooth": "^0.0.11",
     "bip32": "^2.0.4",
     "bip39": "^3.0.2",
     "bip66": "^1.1.5",
@@ -27,6 +31,7 @@
     "key-encoder": "^2.0.3",
     "lodash": "^4.17.21",
     "pbkdf2": "^3.1.2",
+    "react-native-ble-plx": "^2.0.3",
     "rlp": "^2.2.3"
   },
   "repository": {
@@ -44,18 +49,10 @@
     "@babel/preset-env": "^7.8.0",
     "@babel/preset-typescript": "^7.8.0",
     "@shelf/fast-chunk-string": "^2.0.0",
-    "@types/bluebird": "^3.5.32",
-    "@types/elliptic": "^6.4.14",
-    "@types/jsonwebtoken": "^8.5.6",
-    "@types/lodash": "^4.14.177",
-    "@types/node": "^14.0.13",
-    "@types/pbkdf2": "^3.1.0",
-    "@types/web-bluetooth": "^0.0.11",
     "babel-jest": "^27.4.5",
     "del-cli": "^4.0.1",
     "jest": "^27.4.5",
     "mitt": "^3.0.0",
-    "react-native-ble-plx": "^2.0.3",
     "typescript": "^4.5.4"
   }
 }
