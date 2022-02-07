@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@coolwallet/core": "file:../core",
+    "@coolwallet/xlm": "file:../coin-xlm",
     "@coolwallet/template": "file:../coin-template",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",
     "@originjs/vite-plugin-commonjs": "^1.0.1",
@@ -32,6 +33,9 @@
     "stream": "npm:readable-stream@^3.6.0",
     "util": "^0.12.4",
     "vite": "^2.7.4"
+  },
+  "browser": {
+    "vertx": false
   },
   "devDependencies": {
     "@types/react": "^17.0.0",

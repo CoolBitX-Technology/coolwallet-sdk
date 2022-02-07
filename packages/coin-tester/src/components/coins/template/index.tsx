@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
+import XLM from '@coolwallet/xlm';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 
 import Template from '@coolwallet/template';
+// import XLM from '../../../coin-xlm/src';
 
 interface Props {
   transport: Transport | null,
@@ -15,6 +17,7 @@ interface Props {
 
 function CoinTemplate(props: Props) {
   const temp = new Template();
+  const xlm = new XLM();
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
@@ -43,7 +46,8 @@ function CoinTemplate(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const address = await temp.getAddress(transport!, appPrivateKey, appId, 0);
+      // const address = await temp.getAddress(transport!, appPrivateKey, appId, 0);
+      const address = await xlm.getAddress(transport, appPrivateKey, appId)
       return address;
     }, setAddress);
   };

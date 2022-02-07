@@ -12,7 +12,7 @@ import { PROTOCOL } from '../config/types';
  */
 export const getScriptAndArguments = async (transaction: object, transfer: { script: string, signature: string }, protocol: PROTOCOL) => {
 
-  const pathType = protocol === PROTOCOL.BIP44 ? config.PathType.BIP32ED25519 : config.PathType.SLIP0010;
+  const pathType = protocol === PROTOCOL.BIP44 ? config.pathType.BIP32_ED25519 : config.pathType.SLIP0010;
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
   const SEPath = `0D${path}`;
   console.debug("SEPath: ", SEPath);

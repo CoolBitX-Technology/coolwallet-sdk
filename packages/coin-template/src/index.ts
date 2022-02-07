@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import { coin as COIN, Transport, utils, config, apdu, tx } from '@coolwallet/core';
-// import crc from 'crc';
+import crc from 'crc';
 import base58 from 'bs58';
-const crc = require('crc')
+// const crc = require('crc')
 // const base58 = require('bs58')
 
 const bip32 = require('bip32');
