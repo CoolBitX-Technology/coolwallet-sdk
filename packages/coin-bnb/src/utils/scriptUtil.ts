@@ -37,7 +37,7 @@ export const getPlaceOrderArgument = async (signObj: PlaceOrder, addressIndex: n
   const orderAddress = Buffer.from(id.split("-")[0], 'ascii').toString('hex').padStart(40, '0');
   const orderSequence = parseInt(id.split("-")[1]).toString(16).padStart(16, '0');
   const senderAddress = Buffer.from(signObj.msgs[0].sender, 'ascii').toString('hex').padStart(128, '0');
-  const side = sideNum.toString(16).padStart(2, '0');
+  const side = (sideNum-1).toString(16).padStart(2, '0');
   const quoteTokenName = Buffer.from(symbol.split("_")[0], 'ascii').toString('hex').padStart(40, '0');
   const baseTokenName = Buffer.from(symbol.split("_")[1], 'ascii').toString('hex').padStart(40, '0');
   const quantity = signObj.msgs[0].quantity.toString(16).padStart(16, '0');
@@ -65,7 +65,7 @@ export const getCancelOrderArgument = async (signObj: CancelOrder, addressIndex:
   const refid = signObj.msgs[0].refid;
   const symbol = signObj.msgs[0].symbol;
 
-  const orderAddress = refid.split("-")[0].padStart(40, '0');
+  const orderAddress = Buffer.from(refid.split("-")[0], 'ascii').toString('hex').padStart(40, '0');
   const orderSequence = parseInt(refid.split("-")[1]).toString(16).padStart(16, '0');
   const senderAddress = Buffer.from(signObj.msgs[0].sender, 'ascii').toString('hex').padStart(128, '0');
   const quoteTokenName = Buffer.from(symbol.split("_")[0], 'ascii').toString('hex').padStart(40, '0');
