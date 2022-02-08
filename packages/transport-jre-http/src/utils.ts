@@ -1,4 +1,11 @@
-function decodeCommand(command: string) {
+type APDUCommand = {
+  cla: number;
+  ins: number;
+  p1: number;
+  p2: number;
+};
+
+function decodeCommand(command: string): APDUCommand {
   const cla = command.slice(4, 6);
   const ins = command.slice(6, 8);
   const p1 = command.slice(8, 10);

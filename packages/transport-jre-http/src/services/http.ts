@@ -1,6 +1,7 @@
 import axios from 'axios';
+import type { AxiosInstance } from 'axios';
 
-function createAxiosInstance(baseURL: string) {
+function createAxiosInstance(baseURL: string): AxiosInstance {
   return axios.create({
     baseURL,
     method: 'POST',
