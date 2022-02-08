@@ -1,0 +1,33 @@
+{
+  "name": "transport-jre-http",
+  "version": "1.0.0",
+  "description": "Http transport for javacard virtual machine.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "jest",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
+    "build": "del-cli lib; npm run build:types; npm run build:ts"
+  },
+  "author": "coolwallet-team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@coolwallet/core": "^1.0.14",
+    "axios": "^0.25.0",
+    "lodash": "^4.17.21"
+  },
+  "peerDependencies": {
+    "@coolwallet/core": "^1.0.14"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.8",
+    "@babel/core": "^7.16.10",
+    "@babel/preset-env": "^7.16.10",
+    "@babel/preset-typescript": "^7.16.7",
+    "babel-jest": "^27.4.6",
+    "del-cli": "^4.0.1",
+    "jest": "^27.4.7",
+    "react-native-ble-plx": "^2.0.3",
+    "typescript": "^4.5.4"
+  }
+}
