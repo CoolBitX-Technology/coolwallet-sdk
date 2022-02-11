@@ -60,7 +60,7 @@ function CoinCRO(props: Props) {
         to: to,
         value: web3.utils.toHex(web3.utils.toWei(value.toString(), 'ether')),
         data: data,
-      };
+      } as Transaction;
 
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');

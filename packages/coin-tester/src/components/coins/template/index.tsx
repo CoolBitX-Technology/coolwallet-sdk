@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
+import web3 from 'web3';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 
 import Template from '@coolwallet/template';
@@ -43,8 +44,7 @@ function CoinTemplate(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const address = await temp.getAddress(transport!, appPrivateKey, appId, 0);
-      return address;
+      return temp.getAddress(transport!, appPrivateKey, appId, 0);
     }, setAddress);
   };
 
@@ -56,7 +56,7 @@ function CoinTemplate(props: Props) {
         gasPrice: '0x20c855800',
         gasLimit: '0x520c',
         to: to,
-        value: `0x${parseInt(value).toString(16)}`,
+        value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
         data: '',
       };
 

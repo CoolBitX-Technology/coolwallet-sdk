@@ -1,5 +1,4 @@
-import React from 'react';
-import { memo, FC } from 'react';
+import React, { memo, FC } from 'react';
 import { Row, Col, ButtonGroup, Button as BootStrapButton, Form } from 'react-bootstrap';
 import './Inputs.css'
 
