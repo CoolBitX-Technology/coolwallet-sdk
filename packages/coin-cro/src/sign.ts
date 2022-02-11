@@ -60,8 +60,44 @@ export const signTransaction = async (
   }
 };
 
+export const signSmartContractTransaction = async (
+  signTxData: signTx,
+  script: string,
+  argument: string,
+  publicKey: string
+): Promise<string> => {
+  const { transport, transaction } = signTxData;
+
+  const rawPayload = ethUtil.getRawHex(transaction);
+
+  const preActions = [];
+
+  preActions.push(() => apdu.tx.sendScript(transport, script));
+
+  const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
+
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    action,
+    false,
+    signTxData.confirmCB,
+    signTxData.authorizedCB,
+    true
+  );
+
+  if (!Buffer.isBuffer(canonicalSignature)) {
+    const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN_ID);
+    return serializedTx;
+  } else {
+    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
+  }
+};
+
 /**
- * sign ETH Smart Contract Transaction
+ * sign ETH Smart Contract Transaction segmentally
+ *
  * @param {Transport} transport
  * @param {string} appId
  * @param {String} appPrivateKey
@@ -74,7 +110,7 @@ export const signTransaction = async (
  * @param {Function} authorizedCB
  * @return {Promise<string>}
  */
-export const signSmartContractTransaction = async (
+export const signSegmentSmartContractTransaction = async (
   signTxData: signTx,
   script: string,
   argument: string,
