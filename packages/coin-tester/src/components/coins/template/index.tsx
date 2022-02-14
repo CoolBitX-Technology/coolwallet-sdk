@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
+import web3 from 'web3';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 import base58 from 'bs58';
 import Template from '@coolwallet/template';
@@ -203,6 +204,7 @@ function CoinTemplate(props: Props) {
       ]).toString("hex")
       console.log("🚀 ~ file: index.tsx ~ line 204 ~ handleState ~ data", data)
       const transaction = {
+<<<<<<< HEAD
         numberRequireSignature: "01",
         numberReadonlySignedAccount: "00",
         numberReadonlyUnSignedAccount: "01",
@@ -214,6 +216,15 @@ function CoinTemplate(props: Props) {
         keyIndices,
         dataLength: "0c",
         data
+=======
+        chainId: 1,
+        nonce: '0x289',
+        gasPrice: '0x20c855800',
+        gasLimit: '0x520c',
+        to: to,
+        value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
+        data: '',
+>>>>>>> cb985746ed746a56527819366de80c8c053f0b6a
       };
 
       const appId = localStorage.getItem('appId');
