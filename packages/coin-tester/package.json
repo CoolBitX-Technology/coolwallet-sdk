@@ -10,6 +10,7 @@
     "@coolwallet/coin-cro": "file:../coin-cro",
     "@coolwallet/core": "file:../core",
     "@coolwallet/ETC": "file:../coin-etc",
+    "@coolwallet/xlm": "file:../coin-xlm",
     "@coolwallet/template": "file:../coin-template",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",
     "@originjs/vite-plugin-commonjs": "^1.0.1",
