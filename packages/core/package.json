@@ -7,7 +7,7 @@
     "test": "jest --coverage",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
-    "build": "del-cli lib; npm run build:types; npm run build:ts",
+    "build": "del-cli lib && npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "author": "coolwallet-team",

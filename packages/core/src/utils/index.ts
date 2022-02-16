@@ -22,8 +22,8 @@ export const getFullPath = ({
   pathType = PathType.BIP32,
   pathString,
 }: {
-  pathType: PathType,
-  pathString: string,
+  pathType: PathType;
+  pathString: string;
 }): string => {
   const paths = pathString.split('/').map((index) => {
     if (!index.match(/^\d+(|')$/)) {
@@ -38,7 +38,10 @@ export const getFullPath = ({
 };
 
 export const getPath = async (
-  coinType: string, keyIndex: number, depth = 5, pathType = PathType.BIP32
+  coinType: string,
+  keyIndex: number,
+  depth = 5,
+  pathType = PathType.BIP32
 ): Promise<string> => {
   let fullPath = pathType.toString();
 
@@ -58,7 +61,7 @@ export const getPath = async (
     fullPath += '00000000';
   }
   if (depth >= 5) {
-    fullPath += (keyIndex.toString(16)).padStart(8, '0');
+    fullPath += keyIndex.toString(16).padStart(8, '0');
   }
   return fullPath;
 };
@@ -96,7 +99,7 @@ export const assemblyCommandAndData = (
   let dataLength = 0;
 
   let packets = oriData ?? '';
-  
+
   let dataBuf = Buffer.from(packets, 'hex');
   // Origin data length
   const oriDataLength = dataBuf.length;
@@ -136,27 +139,29 @@ export const assemblyCommandAndData = (
   return { command, data: packets };
 };
 
-
 export const checkSupportScripts = async (transport: Transport) => {
   const { statusCode } = await tx.getSignedHex(transport);
-  if (statusCode === CODE._9000){
+  if (statusCode === CODE._9000) {
     return true;
   } else if (statusCode === CODE._6D00) {
     return false;
   } else {
-    throw new SDKError(checkSupportScripts.name, 'checkSupportScripts error')
+    throw new SDKError(checkSupportScripts.name, 'checkSupportScripts error');
   }
 };
 
-export const createSeedByApp = async (wordNumber: number, randomBytes: (size: number)=>Buffer): Promise<string> => {
-  const strength = wordNumber*11 - wordNumber/3;
+export const createSeedByApp = async (wordNumber: number, randomBytes: (size: number) => Buffer): Promise<string> => {
+  const strength = wordNumber * 11 - wordNumber / 3;
   return bip39.generateMnemonic(strength, randomBytes);
 };
 
 export const createWalletByMnemonic = async (
-  transport: Transport, appId: string, appPrivateKey: string, mnemonic: string, SEPublicKey: string
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  mnemonic: string,
+  SEPublicKey: string
 ): Promise<void> => {
-
   const seeds: Array<Buffer> = [];
   const version = await general.getSEVersion(transport);
 

@@ -26,8 +26,10 @@ export const getPublicKeyByPath = async (
 ): Promise<string> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
   const response = await apdu.wallet.getAccountExtendedKey(transport, path);
+  console.log("🚀 ~ file: derive.ts ~ line 29 ~ getAccountExtendedKey", response)
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
-  if (!decryptedData) throw Error('Decryption Failed');
+  console.log("🚀 ~ file: derive.ts ~ line 31 ~ decryptedData", decryptedData)
+  if (!decryptedData) throw Error('Decryption Failed');`  `
   return decryptedData;
 };
 

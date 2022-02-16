@@ -36,7 +36,8 @@
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "file:../core"
+    "@coolwallet/core": "file:../core",
+    "bs58": "^4.0.1"
   },
   "repository": {
     "type": "git",

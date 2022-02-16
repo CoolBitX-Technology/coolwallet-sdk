@@ -4,7 +4,7 @@ import * as types from '../config/types';
 import * as params from '../config/params';
 
 const base32 = require('base32.js');
-
+const base58 = require('bs58');
 function calculateChecksum(payload: Buffer) {
   // This code calculates CRC16-XModem checksum of payload
   // and returns it as Buffer in little-endian order.
@@ -21,11 +21,11 @@ export function encodeCheck(versionByteName: types.versionByteNames, data: Buffe
   const checksum = calculateChecksum(payload);
   const unencoded = Buffer.concat([payload, checksum]);
 
-  return base32.encode(unencoded);
+  return base58.encode(unencoded);
 }
 
 export function encodeEd25519PublicKey(data: Buffer) {
-  return encodeCheck('ed25519PublicKey', data);
+  return base58.encode(data);
 }
 
 export function pubKeyToAddress(publicKey: string): string {
