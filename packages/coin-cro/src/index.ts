@@ -83,8 +83,8 @@ export default class CRO extends COIN.ECDSACoin implements COIN.Coin {
   async signSmartContractTransaction(signTxData: types.signTx): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    // if data bytes is larger than 8192 sign it segmentally.
-    if (transaction.data.length > 8192 * 2) {
+    // if data bytes is larger than 8000 sign it segmentally.
+    if (transaction.data.length > 8000 * 2) {
       const argument = await scriptUtils.getSmartContractSegmentArgument(transaction, addressIndex);
       const script = params.SmartContractSegment.scriptWithSignature;
 

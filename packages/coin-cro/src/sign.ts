@@ -3,7 +3,7 @@ import * as rlp from 'rlp';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import Ajv from 'ajv';
 import { apdu, error, tx } from '@coolwallet/core';
-import { CHAIN_ID } from './config/params';
+import CHAIN from './config/chain';
 import * as ethUtil from './utils/ethUtils';
 import * as scriptUtils from './utils/scriptUtils';
 import { handleHex } from './utils/stringUtil';
@@ -54,7 +54,7 @@ export const signTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    return ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN_ID);
+    return ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN.id);
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
@@ -88,7 +88,7 @@ export const signSmartContractTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN_ID);
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN.id);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
@@ -146,7 +146,7 @@ export const signSegmentSmartContractTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN_ID);
+    const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, CHAIN.id);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
