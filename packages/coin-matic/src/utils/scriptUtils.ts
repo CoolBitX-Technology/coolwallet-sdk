@@ -45,7 +45,7 @@ export const getERC20Argument = async (transaction: Transaction, tokenSignature:
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
-    handleHex(transaction.chainId.toString(16)).padStart(10, '0') + // 0001
+    // handleHex(transaction.chainId.toString(16)).padStart(10, '0') + // No need
     tokenInfo +
     signature;
 
