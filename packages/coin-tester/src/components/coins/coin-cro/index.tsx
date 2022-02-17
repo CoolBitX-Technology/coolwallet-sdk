@@ -1,25 +1,12 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
-import { SignDataType, TX_TYPE, CHAIN_ID } from '../../../../../coin-org/lib/config/types';
-//import { BigNumber } from '@ethersproject/bignumber';
+import { SignDataType, TX_TYPE, CHAIN_ID } from '@coolwallet/coin-cro/lib/config/types';
 import BigNumber from 'bignumber.js';
 
 import cosmosjs from './cosmos';
-import Cro from '../../../../../coin-org/lib';
-=======
-import { useState } from 'react';
-import Web3 from 'web3';
-import { Container } from 'react-bootstrap';
-import { Transport } from '@coolwallet/core';
-import CRO from '@coolwallet/coin-cro';
-import { Transaction } from '@coolwallet/coin-cro/lib/config/types';
-import Inputs from '../../Inputs';
-
-const web3 = new Web3('https://evm-cronos.crypto.org');
->>>>>>> master
+import Cro from '@coolwallet/coin-cro';
 
 interface Props {
   transport: Transport | null,
@@ -34,18 +21,8 @@ function CoinCro(props: Props) {
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
-<<<<<<< HEAD
   const [to, setTo] = useState('cro1afl0lvvlrde2xh7p2a45re6uvrneelhhg8z287');
 
-=======
-  const [to, setTo] = useState('0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C');
-  const [smartContractTo, setSmartContractTo] = useState('0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C');
-  const [smartContractSignature, setSmartContractSignature] = useState('');
-  const [erc20TokenTo, setErc20TokenTo] = useState('0x8A1628c2397F6cA75579A45E81EE3e17DF19720e');
-  const [erc20TokenAmount, setErc20TokenAmount] = useState('0.000001');
-  const [erc20TokenSingature, setErc20TokenSignature] = useState('');
-  const [data, setData] = useState('');
->>>>>>> master
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
 

@@ -4,7 +4,7 @@ import { Transport, apdu, utils, config } from '@coolwallet/core';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 import Web3 from 'web3';
 
-import Cronos from '@coolwallet/coin-cro';
+import Cronos from '@coolwallet/coin-cronos';
 import { Transaction } from '@coolwallet/coin-cro/lib/config/types';
 
 const web3 = new Web3('https://evm-cronos.crypto.org');
