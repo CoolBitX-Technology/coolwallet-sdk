@@ -1,5 +1,6 @@
 import { Option } from '../config/types';
 import { COIN_TYPE } from '../config/params';
+import CHAIN from '../config/chain';
 import * as token from './tokenUtils';
 import { utils } from '@coolwallet/core';
 import { handleHex } from './stringUtil';
@@ -35,6 +36,8 @@ export const getERC20Argument = async (transaction: Transaction, tokenSignature:
     txTokenInfo.info.symbol,
     parseInt(txTokenInfo.info.decimals)
   );
+  const chainInfo = CHAIN.toSignatureData();
+  const chainSignature = CHAIN.getSignature();
   const signature = tokenSignature.slice(58).padStart(144, '0');
   const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, '');
   const amount = transaction.data.slice(74).replace(/\b(0+)/gi, '');
@@ -44,6 +47,8 @@ export const getERC20Argument = async (transaction: Transaction, tokenSignature:
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
+    chainInfo +
+    chainSignature +
     tokenInfo +
     signature;
 
