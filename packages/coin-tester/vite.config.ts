@@ -14,4 +14,7 @@ export default defineConfig({
     },
   },
   plugins: [react(), viteCommonjs()],
+  //optimizeDeps: {
+  //  exclude: ["@cosmostation/cosmosjs"]
+  //}
 });
