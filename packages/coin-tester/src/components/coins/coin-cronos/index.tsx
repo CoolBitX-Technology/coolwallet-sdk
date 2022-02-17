@@ -4,8 +4,8 @@ import { Transport, apdu, utils, config } from '@coolwallet/core';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 import Web3 from 'web3';
 
-import CRO from '@coolwallet/coin-cro';
-import { Transaction } from '@coolwallet/coin-cro/lib/config/types';
+import Cronos from '@coolwallet/coin-cronos';
+import { Transaction } from '@coolwallet/coin-cronos/lib/config/types';
 
 const web3 = new Web3('https://evm-cronos.crypto.org');
 
@@ -17,8 +17,8 @@ interface Props {
   setIsLocked: (isLocked: boolean) => void;
 }
 
-function CoinCRO(props: Props) {
-  const cro = new CRO();
+function CoinCRONOS(props: Props) {
+  const cronos = new Cronos();
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
@@ -31,11 +31,10 @@ function CoinCRO(props: Props) {
     props.setIsLocked(true);
     try {
       const response = await request();
-      console.log("Response :", response);
       handleResponse(response);
-    } catch (error) {
+    } catch (error: any) {
       handleResponse(error.message);
-      console.log(error);
+      console.error(error);
     } finally {
       props.setIsLocked(false);
     }
@@ -45,56 +44,45 @@ function CoinCRO(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const address = await cro.getAddress(transport!, appPrivateKey, appId, 0);
+      const address = await cronos.getAddress(transport!, appPrivateKey, appId, 0);
       return address;
     }, setAddress);
   };
 
   const signTransaction = async () => {
     handleState(async () => {
-      let signedTx = "";
-      try {
-        const nonce = '' + await web3.eth.getTransactionCount(address, 'pending');
-        console.log(nonce);
-        const gasPrice = '' + await web3.eth.getGasPrice();
-        const gasLimit = '' + await web3.eth.estimateGas({ to, data });
-        const transaction = {
-          nonce,
-          gasPrice,
-          gasLimit,
-          to,
-          value: `0x${parseInt(value).toString(16)}`,
-          data,
-          option: {
-            info: {
-              symbol: '',
-              decimals: '',
-            }
-          }
-        };
+      const transaction: Transaction = {
+        nonce: web3.utils.toHex(
+          await web3.eth.getTransactionCount(address, 'pending')),
+        gasPrice: web3.utils.toHex(await web3.eth.getGasPrice()),
+        gasLimit: web3.utils.toHex(await web3.eth.estimateGas({ to, data })),
+        to: to,
+        value: web3.utils.toHex(web3.utils.toWei(value.toString(), 'ether')),
+        data: data,
+      };
 
-        const appId = localStorage.getItem('appId');
-        if (!appId) throw new Error('No Appid stored, please register!');
-        const signTxData = {
-          transport: transport!,
-          appPrivateKey,
-          appId,
-          transaction,
-          addressIndex: 0,
-          publicKey: "",
-          confirmCB: () => { },
-          authorizedCB: () => { },
-        };
-        signedTx = await cro.signTransaction(signTxData);
-      } catch (e) {
-        console.log(e);
-      }
-      console.log(signedTx);
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const option = {
+        info: { symbol: '', decimals: '' },
+      };
+
+      const signTxData = {
+        transport: transport!,
+        appPrivateKey,
+        appId,
+        transaction: transaction,
+        addressIndex: 0,
+        option,
+      };
+
+      const signedTx = await cronos.signTransaction(signTxData);
+      console.log('signedTx :', signedTx);
+
+      await web3.eth.sendSignedTransaction(signedTx);
+
       return signedTx;
-    }, (response) => {
-      console.log(response);
-      setSignedTransaction(response);
-    });
+    }, setSignedTransaction);
   };
 
   return (
@@ -122,4 +110,4 @@ function CoinCRO(props: Props) {
   );
 }
 
-export default CoinCRO;
+export default CoinCRONOS;
