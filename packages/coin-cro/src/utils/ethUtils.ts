@@ -1,4 +1,4 @@
-import { CHAIN_ID } from '../config/params';
+import CHAIN from '../config/chain';
 import { Transaction } from '../config/types';
 import { handleHex } from './stringUtil';
 const Web3 = require('web3');
@@ -48,7 +48,7 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
     }
     return Buffer.from(hex, 'hex');
   });
-  raw[6] = Buffer.from([CHAIN_ID]);
+  raw[6] = Buffer.from([CHAIN.id]);
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
 

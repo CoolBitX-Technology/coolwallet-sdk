@@ -13,8 +13,5 @@ export default defineConfig({
       process: require.resolve('process/browser'),
     },
   },
-  plugins: [react(), viteCommonjs()],
-  //optimizeDeps: {
-  //  exclude: ["@cosmostation/cosmosjs"]
-  //}
+  plugins: [react(), viteCommonjs({ skipPreBuild: true })],
 });
