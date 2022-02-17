@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
-import { SignDataType, TX_TYPE, CHAIN_ID } from '@coolwallet/coin-cro/lib/config/types';
+import { SignDataType, TX_TYPE, CHAIN_ID } from '../../../../../coin-org/lib/config/types';
 //import { BigNumber } from '@ethersproject/bignumber';
 import BigNumber from 'bignumber.js';
 
 import cosmosjs from './cosmos';
-import Cro from '@coolwallet/coin-cro';
+import Cro from '../../../../../coin-org/lib';
 
 interface Props {
   transport: Transport | null,
