@@ -1,82 +1,41 @@
 import { Transport } from '@coolwallet/core';
+//export type Transport = transport.default;
 
-export type Output = {
-  address: string;
-  value: number;
-};
+export type SignDataType = SignMsgSendType 
 
-export type Option = {
-  info: {
-    symbol: string;
-    decimals: string;
-  };
-};
+interface SignType {
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number,
+    confirmCB: Function | undefined,
+    authorizedCB: Function | undefined
+}
 
-export type Transaction = {
-  nonce: string;
-  gasPrice: string;
-  gasLimit: string;
-  to: string;
-  value: string;
-  data: string;
-  option: Option;
-};
+export interface SignMsgSendType extends SignType {
+    txType: TX_TYPE.SEND,
+    transaction: MsgSend,
+}
 
-export type signTx = {
-  transport: Transport;
-  appPrivateKey: string;
-  appId: string;
-  transaction: Transaction;
-  addressIndex: number;
-  publicKey?: string;
-  confirmCB?: () => void;
-  authorizedCB?: () => void;
-};
+type Crypto_org_Chain = {
+    chainId: CHAIN_ID,
+    feeAmount: number,
+    gas: number,
+    accountNumber: string,
+    sequence: string,
+    memo: string,
+}
 
-export type signMsg = {
-  transport: Transport;
-  appPrivateKey: string;
-  appId: string;
-  message: string;
-  addressIndex: number;
-  confirmCB: () => void | undefined;
-  authorizedCB: () => void | undefined;
-};
+export interface MsgSend extends Crypto_org_Chain {
+    fromAddress: string,
+    toAddress: string,
+    amount: number,
+}
 
-export type signTyped = {
-  transport: Transport;
-  appPrivateKey: string;
-  appId: string;
-  typedData: any;
-  addressIndex: number;
-  confirmCB: () => void | undefined;
-  authorizedCB: () => void | undefined;
-};
+export enum CHAIN_ID {
+    CRO = 'crypto-org-chain-mainnet-1',
+}
 
-export const EIP712Schema = {
-  type: 'object',
-  properties: {
-    types: {
-      type: 'object',
-      properties: {
-        EIP712Domain: { type: 'array' },
-      },
-      additionalProperties: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            type: { type: 'string' },
-          },
-          required: ['name', 'type'],
-        },
-      },
-      required: ['EIP712Domain'],
-    },
-    primaryType: { type: 'string' },
-    domain: { type: 'object' },
-    message: { type: 'object' },
-  },
-  required: ['types', 'primaryType', 'domain', 'message'],
-};
+export enum TX_TYPE {
+    SEND = 'MsgSend'
+}

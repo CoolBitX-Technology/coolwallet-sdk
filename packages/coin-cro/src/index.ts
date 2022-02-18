@@ -1,98 +1,71 @@
 import { coin as COIN, Transport } from '@coolwallet/core';
-import * as ethSign from './sign';
-import { pubKeyToAddress } from './utils/ethUtils';
 import * as params from './config/params';
-import * as types from './config/types';
-import * as scriptUtils from './utils/scriptUtils';
-import { TOKENTYPE } from './config/tokenType';
+import * as txUtil from './utils/transactionUtils';
+import * as scriptUtil from './utils/scriptUtil';
+import * as types from './config/types'
+import { TX_TYPE } from './config/types'
+import { SDKError } from '@coolwallet/core/lib/error';
+import * as sign from './sign';
 
-export default class CRO extends COIN.ECDSACoin implements COIN.Coin {
-  constructor() {
-    super(params.COIN_TYPE);
-  }
+export { TX_TYPE };
 
-  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    return pubKeyToAddress(publicKey);
-  }
+export default class CRO extends COIN.ECDSACoin implements COIN.Coin{
+    public Types: any;
 
-  getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): string {
-    const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
-    return pubKeyToAddress(publicKey);
-  }
-
-  async signTransaction(signTxData: types.signTx): Promise<string> {
-    const { value, data, to } = signTxData.transaction;
-    // eth
-    if (value && !data) {
-      return this.signTransferTransaction(signTxData);
+    constructor(){
+        super(params.COIN_TYPE);
+        this.Types = types;
     }
 
-    // erc20
-    const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-    if (data && functionHash === 'a9059cbb') {
-      const upperCaseAddress = to.toUpperCase(); // contractAddr
-      let tokenSignature;
-      for (const tokenInfo of TOKENTYPE) {
-        // get tokenSignature
-        if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
-          tokenSignature = tokenInfo.signature;
-          signTxData.transaction.option = {
-            info: {
-              symbol: tokenInfo.symbol,
-              decimals: tokenInfo.unit,
-            },
-          };
-          break;
+    async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string>{
+        const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+        return txUtil.publicKeyToAddress(publicKey);
+    }
+
+    async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+        const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+        return txUtil.publicKeyToAddress(publicKey);
+    }
+    
+    async signTransaction(
+        signData: types.SignDataType
+    ): Promise<string> {
+        const chainId = signData.transaction.chainId
+        switch (chainId) {
+        case types.CHAIN_ID.CRO:
+            return this.signCROTransaction(signData);
+        default:
+            throw new SDKError(this.signTransaction.name, `not support input chainId: ${chainId}`);
         }
-      }
+    }
+    
+    async signCROTransaction(
+        signData: types.SignDataType
+    ): Promise<string>{
+        let { addressIndex } = signData;
 
-      const { symbol, decimals } = signTxData.transaction.option.info;
-      if (symbol && decimals) {
-        if (tokenSignature) {
-          // 內建
-          return this.signERC20Transaction(signTxData, tokenSignature);
+        const publicKey = await this.getPublicKey(signData.transport, signData.appPrivateKey, signData.appId, addressIndex);
+
+        let script;
+        let argument;
+        let genTx;
+        switch (signData.txType) {
+            case types.TX_TYPE.SEND:
+              script = params.TRANSFER.script + params.TRANSFER.signature;
+              argument = scriptUtil.getCroSendArgement(publicKey, signData.transaction, addressIndex);
+              genTx = (signature: string) => {
+                return txUtil.getSendTx(signData.transaction, signature, publicKey);
+              }
+              break;
+            default:
+              throw new SDKError(this.signCROTransaction.name, `not support input tx type`);
         }
-        // 自建
-        return this.signERC20Transaction(signTxData);
-      }
+        const signature = await sign.signTransaction(signData, script, argument);
+        console.debug("signature: ", signature);
+        const signTx =  genTx(signature);
+        console.debug("signTx protobuf: ", signTx);
+        const txBytesBase64 = Buffer.from(signTx, 'hex').toString('base64');
+        return txBytesBase64;
     }
-
-    // smart contract
-    return this.signSmartContractTransaction(signTxData);
-  }
-
-  async signTransferTransaction(signTxData: types.signTx): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    const argument = await scriptUtils.getTransferArgument(transaction, addressIndex);
-    const script = params.TRANSFER.scriptWithSignature;
-
-    return ethSign.signTransaction(signTxData, script, argument, publicKey);
-  }
-
-  async signERC20Transaction(signTxData: types.signTx, tokenSignature = ''): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    const argument = await scriptUtils.getERC20Argument(transaction, tokenSignature, addressIndex);
-    const script = params.ERC20.scriptWithSignature;
-
-    return ethSign.signTransaction(signTxData, script, argument, publicKey);
-  }
-
-  async signSmartContractTransaction(signTxData: types.signTx): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    // if data bytes is larger than 8000 sign it segmentally.
-    if (transaction.data.length > 8000 * 2) {
-      const argument = await scriptUtils.getSmartContractSegmentArgument(transaction, addressIndex);
-      const script = params.SmartContractSegment.scriptWithSignature;
-
-      return ethSign.signSegmentSmartContractTransaction(signTxData, script, argument, publicKey);
-    }
-    const argument = await scriptUtils.getSmartContractArgument(transaction, addressIndex);
-    const script = params.SmartContract.scriptWithSignature;
-
-    return ethSign.signSmartContractTransaction(signTxData, script, argument, publicKey);
-  }
 }
+            
