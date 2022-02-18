@@ -27,6 +27,7 @@ export const getPublicKeyByPath = async (
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
   const response = await apdu.wallet.getAccountExtendedKey(transport, path);
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
+  console.log("decryptedData: ", decryptedData)
   if (!decryptedData) throw Error('Decryption Failed');
   return decryptedData;
 };
