@@ -85,7 +85,7 @@ export default class CRONOS extends COIN.ECDSACoin implements COIN.Coin {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     // if data bytes is larger than 8000 sign it segmentally.
-    if (transaction.data.length > 8000 * 2) {
+    if (transaction.data.length > 8000) {
       const argument = await scriptUtils.getSmartContractSegmentArgument(transaction, addressIndex);
       const script = params.SmartContractSegment.scriptWithSignature;
 

@@ -12,6 +12,7 @@
     "@coolwallet/coin-cronos": "file:../coin-cronos",
     "@coolwallet/core": "file:../core",
     "@coolwallet/ETC": "file:../coin-etc",
+    "@coolwallet/coin-eth": "file:../coin-eth",
     "@coolwallet/template": "file:../coin-template",
     "@coolwallet/transport-jre-http": "file:../transport-jre-http",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",
