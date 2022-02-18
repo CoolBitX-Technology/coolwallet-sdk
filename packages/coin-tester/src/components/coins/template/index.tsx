@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
-import web3 from 'web3';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
-
+import base58 from 'bs58';
 import Template from '@coolwallet/template';
+// import XLM from '../../../coin-xlm/src';
+import {
+  Connection
+} from "@solana/web3.js";
 
 interface Props {
   transport: Transport | null,
@@ -19,7 +22,7 @@ function CoinTemplate(props: Props) {
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
-  const [to, setTo] = useState('0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C');
+  const [to, setTo] = useState('28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x');
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
@@ -44,30 +47,75 @@ function CoinTemplate(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      return temp.getAddress(transport!, appPrivateKey, appId, 0);
+      const accExtKey = await temp.getAddress(transport!, appPrivateKey, appId, 0);
+      console.log("🚀 ~ file: index.tsx ~ line 51 ~ handleState ~ accExtKey", accExtKey)
+      // const address = await xlm.getAddress(transport, appPrivateKey, appId)
+      return "success";
     }, setAddress);
   };
+
+  const evenHexDigit = (hex: string) => (hex.length % 2 !== 0 ? `0${hex}` : hex);
+  const removeHex0x = (hex: string) => (hex.startsWith('0x') ? hex.slice(2) : hex);
+  const handleHex = (hex: string | number) => evenHexDigit(removeHex0x(hex.toString()));
+  const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+
 
   const signTransaction = async () => {
     handleState(async () => {
       const transaction = {
-        chainId: 1,
-        nonce: '0x289',
-        gasPrice: '0x20c855800',
-        gasLimit: '0x520c',
-        to: to,
-        value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
-        data: '',
+        numberRequireSignature: "01",
+        numberReadonlySignedAccount: "00",
+        numberReadonlyUnSignedAccount: "01",
+        keyCount: "03",
+        from: "8rzt5i6guiEgcRBgE5x5nmjPL97Ptcw76rnGTyehni7r",
+        to: "D4Bo5ohVx9V7ZpY6xySTTohwBDXNqRXfrDsfP8abNfKJ",
+        // recentBlockHash: (await connection.getRecentBlockhash()).blockhash,
+        recentBlockHash: "AEx9iQxJ4yYMPg2VMwWZVduvhgTVQkpA6PVfFDVtPJis",
+        programIdIndex: "02",
+        keyIndicesCount: "02",
+        keyIndices: "0001",
+        dataLength: "0c",
+        data: "020000008096980000000000",
       };
+      console.log("🚀 ~ file: index.tsx ~ line 78 ~ handleState ~ transaction", transaction)
 
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const signedTx = await temp.signTransaction(transport!, appPrivateKey, appId, 0, transaction);
+      const script = '03000202C70700000001F5CAA01700CAA11700CAACD70002FFFFCAACD70003FFFFCAACD70004FFA0CAACD70064FFE0CAAC170084CAAC170085CAAC170086CAACC7008702CAACC7008902CAAC97008BDC07C003534F4CDDFC970008DAAC97C08B0CD207CC05065052455353425554546F4E'
+      
+      const getArgument = (transaction: any): string => {
+        const keys = Buffer.concat([base58.decode(transaction.from), base58.decode(transaction.to), Buffer.alloc(32).fill(0)]).toString("hex")
+        const recentBlockHash = base58.decode(transaction.recentBlockHash).toString("hex")
+        
+        const argument =
+        handleHex(transaction.numberRequireSignature).padStart(18, "0") +
+        handleHex(transaction.numberReadonlySignedAccount).padStart(2, "0") +
+        handleHex(transaction.numberReadonlyUnSignedAccount).padStart(2, "0") +
+        handleHex(transaction.keyCount).padStart(2, "0") +
+        keys.padStart(192, "0") +
+        recentBlockHash.padStart(64, "0") +
+        handleHex("01").padStart(2, "0") +
+        handleHex(transaction.programIdIndex).padStart(2, "0") +
+        handleHex(transaction.keyIndicesCount).padStart(2, "0") +
+        transaction.keyIndices.padStart(4, "0") +
+        handleHex(transaction.dataLength).padStart(2, "0") +
+        transaction.data.padStart(24, "0")
+
+        return argument;
+      }
+
+      const argument = getArgument(transaction)
+      
+      
+      console.log("🚀 ~ file: index.tsx ~ line 237 ~ handleState ~ argument", argument)
+      const signedTx = await temp.signTransaction(transport!, appPrivateKey, appId, 0, transaction as any, script, argument);
       return signedTx;
+      // return ""
     }, setSignedTransaction);
   };
 
   return (
+    // @ts-ignore
     <Container>
       <div className='title2'>
         These two basic methods are required to implement in a coin sdk.
