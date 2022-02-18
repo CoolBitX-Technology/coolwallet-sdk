@@ -7,11 +7,13 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@coolwallet/ada": "file:../coin-ada",
     "@coolwallet/coin-cro": "file:../coin-cro",
     "@coolwallet/coin-cronos": "file:../coin-cronos",
     "@coolwallet/core": "file:../core",
     "@coolwallet/ETC": "file:../coin-etc",
     "@coolwallet/template": "file:../coin-template",
+    "@coolwallet/transport-jre-http": "file:../transport-jre-http",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",
     "@cosmostation/cosmosjs": "^0.11.1",
     "@ethersproject/bignumber": "^5.5.0",
@@ -28,6 +30,7 @@
     "crypto": "npm:crypto-browserify@^3.12.0",
     "ethereum-hdwallet": "^0.0.26",
     "events": "^3.3.0",
+    "isomorphic-fetch": "^3.0.0",
     "lodash": "^4.17.21",
     "mnemonic-to-key-pair": "^1.0.0",
     "mnemonic-to-private-key": "^0.4.1",

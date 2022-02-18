@@ -6,10 +6,13 @@ import {
   NavDropdown,
   Form,
   FormControl,
-  Button
+  Button,
+  ButtonGroup,
 } from 'react-bootstrap';
 import { useLocation } from "react-router-dom";
 import { LinkContainer } from 'react-router-bootstrap'
+import { createTransport } from '@coolwallet/transport-web-ble';
+import httpTransport from '@coolwallet/transport-jre-http';
 import { Transport } from '@coolwallet/core';
 import Coins from './coins';
 
@@ -18,8 +21,8 @@ import './HeadBar.css';
 const defaultPath = '/settings';
 
 function HeadBar(input: {
-  transport: Transport | null,
-  connect: () => void,
+  transport?: Transport,
+  connect: (newTransport: Transport) => void,
   disconnect: () => void,
 }): JSX.Element {
   const location = useLocation();
@@ -58,7 +61,7 @@ function HeadBar(input: {
             ))}
           </NavDropdown>
         </Nav>
-        <Form className='d-flex col-3'>
+        <Form className='d-flex col-4'>
           <FormControl
             placeholder={input.transport?.device.name ?? 'Card Name'}
             className='me-2'
@@ -67,14 +70,23 @@ function HeadBar(input: {
           />
           {input.transport
             ? (
-              <Button variant='outline-warning' onClick={input.disconnect}>
+              <Button variant='outline-success' onClick={input.disconnect}>
                 Disconnect
               </Button>
             )
             : (
-              <Button variant='light' onClick={input.connect}>
-                Connect
-              </Button>
+              <ButtonGroup className='d-flex connect-btn'>
+                <Button variant='success' onClick={async ()=>{
+                  input.connect(await createTransport());
+                }}>
+                  BLE
+                </Button>
+                <Button variant='success' onClick={async ()=>{
+                  input.connect(new httpTransport('http://localhost:8080'));
+                }}>
+                  HTTP
+                </Button>
+              </ButtonGroup>
             )}
         </Form>
       </Container>
