@@ -57,6 +57,27 @@ export default class CRO extends COIN.ECDSACoin implements COIN.Coin{
                 return txUtil.getSendTx(signData.transaction, signature, publicKey);
               }
               break;
+            case types.TX_TYPE.DELEGATE:
+                script = params.DELEGATE.script + params.DELEGATE.signature;
+                argument = scriptUtil.getCroDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
+                genTx = (signature: string) => {
+                    return txUtil.getDelegateTx(signData.transaction, signature, publicKey);
+                }
+                break;
+            case types.TX_TYPE.UNDELEGATE:
+                script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
+                argument = scriptUtil.getCroDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
+                genTx = (signature: string) => {
+                    return txUtil.getUndelegateTx(signData.transaction, signature, publicKey);
+                }
+                break;
+            case types.TX_TYPE.WITHDRAW:
+                script = params.WITHDRAW.script + params.WITHDRAW.signature;
+                argument = scriptUtil.getCroWithdrawArgement(publicKey, signData.transaction, addressIndex);
+                genTx = (signature: string) => {
+                    return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
+                }
+                break;
             default:
               throw new SDKError(this.signCROTransaction.name, `not support input tx type`);
         }
