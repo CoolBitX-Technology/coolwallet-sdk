@@ -69,7 +69,7 @@ export default class Template extends COIN.EDDSACoin implements COIN.Coin {
       //   handleHex(newTx.fee).padStart(20, "0") +
       //   handleHex(newTx.amount).padStart(20, "0") +
       //   handleHex(transaction.data);
-      const extendArgument = '15' + path + argument
+      const extendArgument = '0d' + path + argument
 
       console.log("🚀 ~ file: index.ts ~ line 119 ~ Template ~ argument", extendArgument)
 
