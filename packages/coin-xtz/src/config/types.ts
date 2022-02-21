@@ -1,9 +1,15 @@
-import { transport } from '@coolwallet/core';
+import { Transport } from '@coolwallet/core';
 
-export type Transport = transport.default;
+export type transport = Transport;
+
+export type hexString = string;
+
+export enum PATH_STYLE {
+  CWT = 'CWT', XTZ = 'XTZ'
+}
 
 export type SignTxData = {
-  transport: Transport,
+  transport: transport,
   appPrivateKey: string,
   appId: string,
   addressIndex: number,

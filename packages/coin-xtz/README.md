@@ -1,6 +1,9 @@
 # CoolWallet Tezos (XTZ) SDK
 
-Typescript library with support for the integration of Tezos (XTZ) for third party applications, include the functionalities of generation of addresses, signed transactions, and baking.
+Typescript library with support for the integration of Tezos (XTZ) for third party applications, include the functionalities of generation of addresses, signed transactions, and baking. The XTZ library supports two styles of key derivation path
+
+1. PATH_STYPE.CWT (default): `m/44'/1729'/0'/0/{addressIndex}`
+2. PATH_STYLE.XTZ: `m/44'/1729'/{accountIndex}'/0'` 
 
 ## Install
 
@@ -12,10 +15,12 @@ npm install @coolwallet/xtz
 
 ```javascript
 import XTZ from '@coolwallet/xtz';
+import { PATH_STYLE } from '@coolwallet/xtz';
 import { crypto } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-web-ble';
 
-const xtz = new XTZ();
+// const xtz = new XTZ() // Path: m/44'/1729'/0'/0/{i}
+const xtz = new XTZ(PATH_STYLE.XTZ); // Path: m/44'/1729'/{i}'/0' 
 
 const transport = await createTransport();
 
@@ -28,11 +33,11 @@ const address = await xtz.getAddress(transport, appPrivateKey, appId, 0);
 const normalTransaction = {
     brance: "BKiXcfN1ZTXnNNbTWSRArSWzVFc6om7radWq5mTqGX6rY4P2Uhe",
     source: "tz1YU2zoyCkXPKEA4jknSpCpMs7yUndVNe3S",
-    fee: "1520",
+    fee: "1520", // in mutez
     counter: "2622173",
     gas_limit: "10500",
     storage_limit: "300",
-    amount: "300000",
+    amount: "300000", // in mutez
     destination: "tz2FwBnXhuXvPAUcr1aF3uX84Z6JELxrdYxD"
 };
 
@@ -43,10 +48,37 @@ const signTxData = {
   addressIndex: 0
 }
 
+// Submit transcation can be directly injected into blockchain
 const normalTx = await xtz.signTransaction(signTxData, normalTransaction);
 ```
 
 ## Methods
+
+### XTZ (Constructor)
+
+#### Description
+
+Create XTZ with specified path style with `pathStyle` to indicate the selected path style as
+
+```none
+1. PATH_STYLE.CWS (defalut)
+m/44'/1729'/0'/0/{addressIndex}
+
+2. PATH_STYLE.XTZ
+m/44'/1729'/{accountIndex}'/0' 
+```
+
+```javascript
+XTZ(
+    pathStyle: PATH_STYLE
+)
+```
+
+#### Arguments
+
+|      Arg      |               Description              |    Type    |  Required |
+|:-------------:|:--------------------------------------:|:----------:|:---------:|
+|   pathStype   |   Path style (CWS by default or XTZ)   | PATH_STYLE |   False   |
 
 ### getAddress
 
@@ -57,7 +89,11 @@ Get address by address index.
 The XTZ address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress` with `addressIndex = i` will get the address of folllowing path:
 
 ```none
+1. PATH_STYLE.CWS (defalut)
 m/44'/1729'/0'/0/{i}
+
+2. PATH_STYLE.XTZ
+m/44'/1729'/{i}'/0' 
 ```
 
 In the design of current hardware, we only support path `m/44'/1729'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
@@ -89,7 +125,11 @@ Get public key hash by address index.
 The XTZ public key hash generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getPublicKeyHash` with `addressIndex = i` will get the public key hash of folllowing path:
 
 ```none
+1. PATH_STYLE.CWS (defalut)
 m/44'/1729'/0'/0/{i}
+
+2. PATH_STYLE.XTZ
+m/44'/1729'/{i}'/0'
 ```
 
 In the design of current hardware, we only support path `m/44'/1729'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
@@ -111,6 +151,32 @@ async getPublicKeyHash(
 | appPrivateKey |   Private key for the connected application  |   string  |    True   |
 |     appId     |       ID for the connected application       |   string  |    True   |
 |  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
+
+### isRevealNeeded
+
+#### Description
+
+Check if the public key needs to be revealed.
+
+```javascript
+async isRevealNeeded(
+    transport: types.Transport, 
+    appPrivateKey: string, 
+    appId: string, 
+    addressIndex: number,
+    nodeUrl: string
+): Promise<Boolean>
+```
+
+#### Arguments
+
+|      Arg      |                  Description                 |    Type   |  Required |
+|:-------------:|:--------------------------------------------:|:---------:|:---------:|
+|   transport   | Object to communicate with CoolWallet device | Transport |    True   |
+| appPrivateKey |   Private key for the connected application  |   string  |    True   |
+|     appId     |       ID for the connected application       |   string  |    True   |
+|  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
+|    nodeUrl    |          The url of blockchain node          |   string  |    True   |
 
 ### Sign Transaction
 

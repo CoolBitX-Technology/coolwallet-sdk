@@ -1,12 +1,9 @@
-import * as stringUtil from "./stringUtil";
-//import BN from 'bn.js';
 import * as types from '../config/types';
-import * as params from '../config/params';
-import { SDKError } from "@coolwallet/core/lib/error";
+import { hexString } from '../config/types';
 import * as forger from '@taquito/local-forging'
 import { ForgeParams, OpKind } from "@taquito/taquito";
 
-export function getFormatReveal(rawData: types.xtzReveal): any {
+export async function getFormatReveal(rawData: types.xtzReveal): Promise<hexString> {
   let tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
@@ -21,10 +18,11 @@ export function getFormatReveal(rawData: types.xtzReveal): any {
       }
     ]
   }; 
-  return forger.localForger.forge(tx);
+  const rawTx = await forger.localForger.forge(tx);
+  return rawTx;
 }
 
-export function getFormatTransfer(rawData: types.xtzTransaction): any {
+export async function getFormatTransfer(rawData: types.xtzTransaction): Promise<hexString> {
   let tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
@@ -40,10 +38,11 @@ export function getFormatTransfer(rawData: types.xtzTransaction): any {
       }
     ]
   }; 
-  return forger.localForger.forge(tx);
+  const rawTx = await forger.localForger.forge(tx);
+  return rawTx;
 }
 
-export function getFormatOrigination(rawData: types.xtzOrigination): any {
+export async function getFormatOrigination(rawData: types.xtzOrigination): Promise<hexString> {
   let tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
@@ -58,10 +57,11 @@ export function getFormatOrigination(rawData: types.xtzOrigination): any {
       }
     ]
   }; 
-  return forger.localForger.forge(tx);
+  const rawTx = await forger.localForger.forge(tx);
+  return rawTx;
 }
 
-export function getFormatDelegation(rawData: types.xtzDelegation): any {
+export async function getFormatDelegation(rawData: types.xtzDelegation): Promise<hexString> {
   let tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
@@ -76,10 +76,11 @@ export function getFormatDelegation(rawData: types.xtzDelegation): any {
       }
     ]
   }; 
-  return forger.localForger.forge(tx);
+  const rawTx = await forger.localForger.forge(tx);
+  return rawTx;
 }
 
-export function getFormatUndelegation(rawData: types.xtzDelegation): any {
+export async function getFormatUndelegation(rawData: types.xtzDelegation): Promise<hexString> {
   let tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
@@ -93,5 +94,6 @@ export function getFormatUndelegation(rawData: types.xtzDelegation): any {
       }
     ]
   }; 
-  return forger.localForger.forge(tx);
+  const rawTx = await forger.localForger.forge(tx);
+  return rawTx;
 }

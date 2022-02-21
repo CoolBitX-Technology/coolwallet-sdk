@@ -1,12 +1,11 @@
-import { apdu, /*transport, */tx } from '@coolwallet/core';
-
-//type Transport = transport.default;
+import { apdu, tx } from '@coolwallet/core';
+import { SignTxData } from './config/types';
 
 /*
  * sign XTZ Operation in CoolWallet
  */
 export const signTransaction = async (
-  signTxData: any,
+  signTxData: SignTxData,
   script: string,
   argument: string,
   publicKey: string
@@ -22,28 +21,22 @@ export const signTransaction = async (
 
   preActions.push(sendScript);
 
-  const action = async () => apdu.tx.executeScript(
+  const sendArgument = async () => apdu.tx.executeScript(
     transport,
     appId,
     appPrivateKey,
     argument
   );
 
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
-    action,
-    false,
+    sendArgument,
+    true,
     confirmCB,
     authorizedCB,
-    true
+    false
   );
   
-  //const signature = await txUtil.getCompleteSignature(transport, publicKey, canonicalSignature)
-  //console.debug("signature: ", signature)
-
-  //const { signedTx } = await apdu.tx.getSignedHex(transport);
-  //console.debug("signedTx: ", signedTx)
-
-  return canonicalSignature.toString('hex');
+  return signature.toString('hex');
 };
