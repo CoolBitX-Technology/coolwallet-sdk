@@ -38,7 +38,7 @@ export const getFullPath = ({
 };
 
 export const getPath = async (
-  coinType: string, keyIndex: number, depth = 5, pathType = PathType.BIP32
+  coinType: string, keyIndex: number, depth = 5, pathType = PathType.SLIP0010
 ): Promise<string> => {
   let fullPath = pathType.toString();
 
@@ -50,9 +50,6 @@ export const getPath = async (
   }
   if (depth >= 3) {
     fullPath += '80000000';
-  }
-  if (pathType === PathType.SLIP0010 || pathType === PathType.BIP32ED25519) {
-    return fullPath;
   }
   if (depth >= 4) {
     fullPath += '00000000';

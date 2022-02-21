@@ -47,10 +47,10 @@ function CoinTemplate(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const accExtKey = await temp.getAddress(transport!, appPrivateKey, appId, 0);
+      const accExtKey = await temp.getAddress(transport!, appPrivateKey, appId, 2);
       console.log("🚀 ~ file: index.tsx ~ line 51 ~ handleState ~ accExtKey", accExtKey)
       // const address = await xlm.getAddress(transport, appPrivateKey, appId)
-      return "success";
+      return base58.encode(Buffer.from(accExtKey, "hex"));
     }, setAddress);
   };
 
@@ -69,8 +69,8 @@ function CoinTemplate(props: Props) {
         keyCount: "03",
         from: "8rzt5i6guiEgcRBgE5x5nmjPL97Ptcw76rnGTyehni7r",
         to: "D4Bo5ohVx9V7ZpY6xySTTohwBDXNqRXfrDsfP8abNfKJ",
-        // recentBlockHash: (await connection.getRecentBlockhash()).blockhash,
-        recentBlockHash: "AEx9iQxJ4yYMPg2VMwWZVduvhgTVQkpA6PVfFDVtPJis",
+        recentBlockHash: (await connection.getRecentBlockhash()).blockhash,
+        // recentBlockHash: "AEx9iQxJ4yYMPg2VMwWZVduvhgTVQkpA6PVfFDVtPJis",
         programIdIndex: "02",
         keyIndicesCount: "02",
         keyIndices: "0001",
@@ -88,7 +88,7 @@ function CoinTemplate(props: Props) {
         const recentBlockHash = base58.decode(transaction.recentBlockHash).toString("hex")
         
         const argument =
-        handleHex(transaction.numberRequireSignature).padStart(18, "0") +
+        handleHex(transaction.numberRequireSignature).padStart(2, "0") +
         handleHex(transaction.numberReadonlySignedAccount).padStart(2, "0") +
         handleHex(transaction.numberReadonlyUnSignedAccount).padStart(2, "0") +
         handleHex(transaction.keyCount).padStart(2, "0") +

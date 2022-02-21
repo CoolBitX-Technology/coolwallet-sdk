@@ -12,7 +12,7 @@ export default class Template extends COIN.EDDSACoin implements COIN.Coin {
     addressIndex: number
   ): Promise<string> => {
 
-    const accExtKey = await this.getPublicKey(transport, appPrivateKey, appId, false);
+    const accExtKey = await this.getPublicKey(transport, appPrivateKey, appId, true, addressIndex);
     return accExtKey;
   };
 
@@ -54,11 +54,12 @@ export default class Template extends COIN.EDDSACoin implements COIN.Coin {
       //
       // Format : [fullPath length (1B)] [fullPath (~)] [arguments (~)]
 
-      const path = await utils.getFullPath({
-        pathType: config.PathType.BIP32,
-        // pathString: "44'/60'/0'/0/0",
-        pathString: "44'/501'/0'"
-      });
+      // const path = await utils.getFullPath({
+      //   pathType: config.PathType.BIP32,
+      //   // pathString: "44'/60'/0'/0/0",
+      //   pathString: "44'/501'/0'"
+      // });
+      const path = await utils.getPath("800001f5", 0, 3)
       console.log('path :', path);
 
       const newTx = transaction as any
@@ -159,4 +160,44 @@ export default class Template extends COIN.EDDSACoin implements COIN.Coin {
       console.log("errrrrrrrrrrr: ", error)
     }
   };
+
+
+  // signTransaction = async (transport: Transport,
+  //   appPrivateKey: string,
+  //   appId: string,
+  //   addressIndex: number,
+  //   transaction: any,
+  //   script: string,
+  //   argument: string): Promise<any> => {
+  //     // const { transaction, transport, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
+  //     const scriptSig = 'FA0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
+
+  //     const extendArgument = '0D' + "8000002C800001f580000000" + argument
+
+  //     const preActions = [];
+
+  //     console.log(script + scriptSig, extendArgument)
+    
+  //     const sendScript = async () => {
+  //       await apdu.tx.sendScript(transport, script + scriptSig);
+  //     };
+  //     preActions.push(sendScript);
+    
+  //     const sendArgument = async () => {
+  //       return apdu.tx.executeScript(transport, appId, appPrivateKey, extendArgument);
+  //     };
+    
+  //     const signature = await tx.flow.getSingleSignatureFromCoolWallet(
+  //       transport,
+  //       preActions,
+  //       sendArgument,
+  //       true,
+  //       undefined,
+  //       undefined,
+  //       false
+  //     );
+  //     await utils.checkSupportScripts(transport);
+    
+  //     return signature;
+  // }
 }
