@@ -2,8 +2,8 @@ import { useState } from 'react';
 import Web3 from 'web3';
 import { Container } from 'react-bootstrap';
 import { Transport } from '@coolwallet/core';
-import CRONOS from '@coolwallet/coin-cronos';
-import { Transaction } from '@coolwallet/coin-cro/lib/config/types';
+import CRONOS from '@coolwallet/cronos';
+import { Transaction } from '@coolwallet/cronos/lib/config/types';
 import Inputs from '../../Inputs';
 
 const web3 = new Web3('https://evm-cronos.crypto.org');

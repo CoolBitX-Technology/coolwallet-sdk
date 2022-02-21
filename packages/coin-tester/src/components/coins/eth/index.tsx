@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import Web3 from 'web3';
 import { Container } from 'react-bootstrap';
-import CoinETH from '@coolwallet/coin-eth';
+import CoinETH from '@coolwallet/eth';
 import { Transport } from '@coolwallet/core';
 import Inputs from '../../Inputs';
 import { useRequest } from '../../../utils/hooks';
 import type { FC } from 'react';
-import type { EIP1559Transaction, Transaction } from '@coolwallet/coin-eth/lib/config/types';
+import type { EIP1559Transaction, Transaction } from '@coolwallet/eth/lib/config/types';
 
 const web3 = new Web3('https://mainnet.infura.io/v3/03fde1c3db944328aef007132d260202');
 
