@@ -1,4 +1,4 @@
-import { Transport, coin as COIN } from '@coolwallet/core'; 
+import { Transport, coin as COIN } from '@coolwallet/core';
 import { sign } from './sign';
 import { getTransferArgument, getCancelOrderArgument, getPlaceOrderArgument, getTokenArgument } from './utils/scriptUtil';
 import { signType, signCancelOrderType, signPlaceOrderType } from './config/types'
