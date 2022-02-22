@@ -1,76 +1,60 @@
 import { utils, config } from '@coolwallet/core';
 import BigNumber from 'bignumber.js';
 import * as params from '../config/params';
-// import * as Stellar from 'stellar-sdk';
-import { PROTOCOL } from '../config/types';
+import base58 from 'bs58';
+import { txType } from '../config/types';
+import { handleHex } from './stringUtil';
 
 /**
  * TODO
- * @param {number} addressIndex
  * @param {*} transaction
  */
-export const getScriptAndArguments = async (
-  transaction: object,
-  transfer: { script: string; signature: string },
-  protocol: PROTOCOL
-) => {
-  const pathType = protocol === PROTOCOL.BIP44 ? config.PathType.BIP32ED25519 : config.PathType.SLIP0010;
+export const getTransferArguments = async (transaction: txType) => {
+  const pathType = config.PathType.SLIP0010;
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
   const SEPath = `0D${path}`;
   console.debug('SEPath: ', SEPath);
-  let script;
-  let argument;
-  script = transfer.script + transfer.signature;
-  argument = '123';
-  //  getTransferArgument(transaction);
+  let argument = transferTxSerialize(transaction);
 
-  return {
-    script,
-    argument: SEPath + argument,
-  };
+  return SEPath + argument;
 };
 
-// const getTransferArgument = (transaction: any) => {
+const transferTxSerialize = (transaction: txType): string => {
+  const formattedTx = {
+    numberRequireSignature: '01',
+    numberReadonlySignedAccount: '00',
+    numberReadonlyUnSignedAccount: '01',
+    keyCount: '03',
+    from: transaction.fromPubkey,
+    to: transaction.toPubkey,
+    recentBlockHash: transaction.recentBlockHash,
+    programIdIndex: transaction.txTypeIndex,
+    keyIndicesCount: '02',
+    keyIndices: '0001',
+    dataLength: transaction.dataLength,
+    data: transaction.data,
+  };
 
-//   const isCreate = transaction.isCreate ? "00" : "01";
-//   let memoType;
-//   let memo = transaction.memo;
-//   switch (transaction.memoType) {
-//     case Stellar.MemoHash:
-//       memoType = "03"
-//       break;
-//     case Stellar.MemoReturn:
-//       memoType = "04"
-//       break;
-//     case Stellar.MemoText:
-//       memoType = "01"
-//       memo = Buffer.from(memo, 'ascii').toString('hex')
-//       break;
-//     case Stellar.MemoID:
-//       memoType = "02"
-//       memo = parseInt(memo).toString(16)
-//       break;
-//     case Stellar.MemoNone:
-//     default:
-//       memoType = "00"
-//       break;
-//   }
+  const fromBuf = typeof formattedTx.from === 'string' ? base58.decode(formattedTx.from) : formattedTx.from;
+  const toBuf = typeof formattedTx.to === 'string' ? base58.decode(formattedTx.to) : formattedTx.to;
 
-//   const minTime = transaction.minTime ? transaction.minTime : "0"
-//   const maxTime = transaction.maxTime ? transaction.maxTime : "0"
+  const keys = Buffer.concat([fromBuf, toBuf, Buffer.alloc(32).fill(0)]).toString('hex');
 
-//   const argument =
-//     transaction.from +
-//     transaction.to +
-//     parseInt(transaction.amount).toString(16).padStart(16, "0") +
-//     parseInt(transaction.fee).toString(16).padStart(16, "0") +
-//     new BigNumber(transaction.sequence).toString(16).padStart(16, "0") +
-//     parseInt(minTime).toString(16).padStart(16, "0") +
-//     parseInt(maxTime).toString(16).padStart(16, "0") +
-//     memoType.padStart(2, "0") + //memoType
-//     memo.padStart(64, "0") + //memo
-//     isCreate.padStart(2, "0");  //isCreate
+  const recentBlockHash = base58.decode(formattedTx.recentBlockHash).toString('hex');
 
-//   console.debug("argument:" + argument)
-//   return argument;
-// };
+  const argument =
+    handleHex(formattedTx.numberRequireSignature).padStart(2, '0') +
+    handleHex(formattedTx.numberReadonlySignedAccount).padStart(2, '0') +
+    handleHex(formattedTx.numberReadonlyUnSignedAccount).padStart(2, '0') +
+    handleHex(formattedTx.keyCount).padStart(2, '0') +
+    keys.padStart(192, '0') +
+    recentBlockHash.padStart(64, '0') +
+    handleHex('01').padStart(2, '0') +
+    handleHex(formattedTx.programIdIndex as string).padStart(2, '0') +
+    handleHex(formattedTx.keyIndicesCount).padStart(2, '0') +
+    formattedTx.keyIndices.padStart(4, '0') +
+    handleHex(formattedTx.dataLength as string).padStart(2, '0') +
+    formattedTx.data.padStart(24, '0');
+
+  return argument;
+};

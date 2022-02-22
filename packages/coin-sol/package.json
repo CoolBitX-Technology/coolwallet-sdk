@@ -24,6 +24,7 @@
     "@coolwallet/core": "file:../core"
   },
   "dependencies": {
+    "@types/bs58": "^4.0.1",
     "@types/crc": "^3.4.0",
     "bignumber.js": "^9.0.1",
     "bn.js": "^5.1.3"

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
-import web3 from 'web3';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
-
-import Template from '@coolwallet/template';
+// import base58 from 'bs58';
+import { Connection } from '@solana/web3.js';
+import SOL, { types } from '@coolwallet/sol';
 
 interface Props {
   transport: Transport | null;
@@ -14,12 +14,12 @@ interface Props {
   setIsLocked: (isLocked: boolean) => void;
 }
 
-function CoinTemplate(props: Props) {
-  const temp = new Template();
+function CoinSol(props: Props) {
+  const sol = new SOL();
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
-  const [to, setTo] = useState('0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C');
+  const [to, setTo] = useState('28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x');
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
@@ -41,30 +41,44 @@ function CoinTemplate(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      return temp.getAddress(transport!, appPrivateKey, appId, 0);
+      const address = await sol.getAddress(transport!, appPrivateKey, appId);
+
+      return address;
     }, setAddress);
   };
 
+  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+
   const signTransaction = async () => {
     handleState(async () => {
-      const transaction = {
-        chainId: 1,
-        nonce: '0x289',
-        gasPrice: '0x20c855800',
-        gasLimit: '0x520c',
-        to: to,
-        value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
-        data: '',
+      const recentBlockHash = (await connection.getRecentBlockhash()).blockhash;
+      console.log('🚀 ~ file: index.tsx ~ line 55 ~ handleState ~ recentBlockHash', recentBlockHash);
+
+      const transaction: types.txType = {
+        fromPubkey: '8rzt5i6guiEgcRBgE5x5nmjPL97Ptcw76rnGTyehni7r',
+        toPubkey: 'D4Bo5ohVx9V7ZpY6xySTTohwBDXNqRXfrDsfP8abNfKJ',
+        amount: 10,
+        recentBlockHash,
+        data: '020000008096980000000000',
       };
 
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const signedTx = await temp.signTransaction(transport!, appPrivateKey, appId, 0, transaction);
-      return signedTx;
+
+      const signedTx = await sol.signTransaction({
+        transport: transport as Transport,
+        appPrivateKey,
+        appId,
+        transaction,
+      });
+      console.log(signedTx);
+      return Buffer.from(signedTx, 'hex').toString('base64');
+      // return ""
     }, setSignedTransaction);
   };
 
   return (
+    // @ts-ignore
     <Container>
       <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
       <NoInput title='Get Address' content={address} onClick={getAddress} disabled={disabled} />
@@ -87,4 +101,4 @@ function CoinTemplate(props: Props) {
   );
 }
 
-export default CoinTemplate;
+export default CoinSol;

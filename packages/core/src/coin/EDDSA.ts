@@ -16,10 +16,8 @@ export default class EDDSACoin {
    * @dev Temporarily only support 0 as account Index for speed optimization.
    */
   async getPublicKey(transport: Transport, appPrivateKey: string, appId: string, isSLIP0010 = true): Promise<string> {
-    const pathType = isSLIP0010 ? PathType.SLIP0010 : PathType.BIP32EDDSA;
-    console.log('🚀 ~ file: EDDSA.ts ~ line 22 ~ EDDSACoin ~ pathType', pathType);
+    const pathType = isSLIP0010 ? PathType.SLIP0010 : PathType.BIP32ED25519;
     const path = await utils.getPath(this.coinType, 0, 3, pathType);
-    console.log('🚀 ~ file: EDDSA.ts ~ line 23 ~ EDDSACoin ~ path', path);
     return getPublicKeyByPath(transport, appId, appPrivateKey, path);
   }
 }

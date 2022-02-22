@@ -5,12 +5,7 @@ import { commands } from '../apdu/execute/command';
 const bip32 = require('bip32');
 
 const authGetKey = async (transport: Transport, appId: string, appPrivateKey: string) => {
-  const signature = await setting.auth.getCommandSignature(
-    transport,
-    appId,
-    appPrivateKey,
-    commands.AUTH_EXT_KEY
-  );
+  const signature = await setting.auth.getCommandSignature(transport, appId, appPrivateKey, commands.AUTH_EXT_KEY);
   return apdu.wallet.authGetExtendedKey(transport, signature);
 };
 
@@ -26,10 +21,8 @@ export const getPublicKeyByPath = async (
 ): Promise<string> => {
   if (authFirst) await authGetKey(transport, appId, appPrivateKey);
   const response = await apdu.wallet.getAccountExtendedKey(transport, path);
-  console.log("🚀 ~ file: derive.ts ~ line 29 ~ getAccountExtendedKey", response)
   const decryptedData = crypto.encryption.ECIESDec(appPrivateKey, response);
-  console.log("🚀 ~ file: derive.ts ~ line 31 ~ decryptedData", decryptedData)
-  if (!decryptedData) throw Error('Decryption Failed');`  `
+  if (!decryptedData) throw Error('Decryption Failed');
   return decryptedData;
 };
 
@@ -41,11 +34,8 @@ export const derivePubKey = (
   chainCode: string,
   changeIndex = 0,
   addressIndex = 0
-): { publicKey:string, parentPublicKey:string, parentChainCode:string } => {
-  const accountNode = bip32.fromPublicKey(
-    Buffer.from(accountPublicKey, 'hex'),
-    Buffer.from(chainCode, 'hex')
-  );
+): { publicKey: string; parentPublicKey: string; parentChainCode: string } => {
+  const accountNode = bip32.fromPublicKey(Buffer.from(accountPublicKey, 'hex'), Buffer.from(chainCode, 'hex'));
   const changeNode = accountNode.derive(changeIndex);
   const addressNode = changeNode.derive(addressIndex);
   const publicKey = addressNode.publicKey.toString('hex');

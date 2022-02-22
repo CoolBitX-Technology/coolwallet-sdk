@@ -1,24 +1,20 @@
 import { tx, apdu, utils } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtil';
-import { signTxType, PROTOCOL } from './config/types';
-
-// const accountIndexToKeyId = (coinType: string, accountIndex: number) => {
-//   const accountIndexHex = accountIndex.toString(16).padStart(2, '0');
-//   const keyId = coinType.concat(accountIndexHex).concat('000000');
-//   return keyId;
-// };
+import { signTxType } from './config/types';
 
 export default async function signTransaction(
   signTxData: signTxType,
-  transfer: { script: string; signature: string },
-  protocol: PROTOCOL
-): Promise<{ r: string; s: string } | Buffer> {
+  transfer: { index: string; dataLength: string; script: string; signature: string }
+): Promise<string> {
   const { transaction, transport, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
 
   const preActions = [];
+  if (!transfer.index || !transfer.dataLength) throw new Error('Unsupported transaction type');
+  transaction.txTypeIndex = transfer.index;
+  transaction.dataLength = transfer.dataLength;
+  const argument = await scriptUtil.getTransferArguments(transaction);
 
-  const { script, argument } = await scriptUtil.getScriptAndArguments(transaction, transfer, protocol);
-
+  const script = transfer.script + transfer.signature;
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
   };
@@ -34,10 +30,10 @@ export default async function signTransaction(
     sendArgument,
     true,
     confirmCB,
-    authorizedCB,
-    false
+    authorizedCB
   );
   await utils.checkSupportScripts(transport);
+  const { signedTx: rawTx } = await apdu.tx.getSignedHex(transport);
 
-  return signature;
+  return '01' + (signature as Buffer).toString('hex') + rawTx;
 }
