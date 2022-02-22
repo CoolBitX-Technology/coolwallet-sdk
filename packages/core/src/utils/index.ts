@@ -40,7 +40,7 @@ export const getFullPath = ({
 export const getPath = async (
   coinType: string,
   keyIndex: number,
-  depth = 5,
+  depth = 3,
   pathType = PathType.BIP32
 ): Promise<string> => {
   let fullPath = pathType.toString();

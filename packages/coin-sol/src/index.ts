@@ -28,10 +28,11 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     transport: Transport,
     appPrivateKey: string,
     appId: string,
-    protocol: PROTOCOL = PROTOCOL.SLIP0010
+    protocol: PROTOCOL.SLIP0010
   ): Promise<string> {
     const isSLIP0010 = protocol === PROTOCOL.SLIP0010 ? true : false;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, isSLIP0010);
+    // console.log("🚀 ~ file: index.ts ~ line 32 ~ XLM ~ getAddress ~ publicKey", publicKey)
 
     if (!publicKey) {
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');

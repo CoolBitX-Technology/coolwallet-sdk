@@ -1,0 +1,46 @@
+{
+  "name": "@coolwallet/xlm",
+  "version": "1.0.3",
+  "description": "Coolwallet Stella sdk",
+  "main": "lib/index.js",
+  "scripts": {
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+  },
+  "keywords": [
+    "cryptocurrency",
+    "coolwallet",
+    "coolbitx",
+    "stellar",
+    "xlm",
+    "transaction",
+    "hardwarewallet"
+  ],
+  "author": "coolwallet-team",
+  "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "file:../core"
+  },
+  "dependencies": {
+    "@types/crc": "^3.4.0",
+    "bignumber.js": "^9.0.1",
+    "bn.js": "^5.1.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "file:../core",
+    "bs58": "^4.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  }
+}
