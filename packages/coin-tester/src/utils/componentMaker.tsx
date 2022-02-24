@@ -93,12 +93,15 @@ export const TwoInputs = (input: {
   setNumberValue2?: (value: number) => void,
   placeholder2: string,
   inputSize2?: number,
-}): JSX.Element => (
-  <Row className='function-component'>
+}): JSX.Element => {
+  const inputSize = input.inputSize ?? 2;
+  const inputSize2 = input.inputSize2 ?? 2;
+  const outputSize = 8 - inputSize - inputSize2;
+  return (<Row className='function-component'>
     <Col xs={2}>
       {input.title}
     </Col>
-    <Col xs={input.inputSize ?? 2} className='input-col'>
+    <Col xs={inputSize} className='input-col'>
       <Form.Control
         value={input.value}
         onChange={(event) => {
@@ -112,7 +115,7 @@ export const TwoInputs = (input: {
         placeholder={input.placeholder}
       />
     </Col>
-    <Col xs={input.inputSize2 ?? 2} className='input-col'>
+    <Col xs={inputSize2} className='input-col'>
       <Form.Control
         value={input.value2}
         onChange={(event) => {
@@ -126,7 +129,7 @@ export const TwoInputs = (input: {
         placeholder={input.placeholder2}
       />
     </Col>
-    <Col className='show-text-area'>
+    <Col xs={outputSize} className='show-text-area'>
       {input.content}
     </Col>
     <Col xs={2}>
@@ -140,8 +143,8 @@ export const TwoInputs = (input: {
         </Button>
       </ButtonGroup>
     </Col>
-  </Row>
-);
+  </Row>);
+};
 
 export const ObjInputs = (input: {
   title: string,

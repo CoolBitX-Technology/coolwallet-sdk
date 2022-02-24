@@ -1,5 +1,5 @@
-import { coin as COIN } from '@coolwallet/core'; 
-import { walletConnectSignature, transferSignature } from './sign';
+import { Transport, coin as COIN } from '@coolwallet/core';
+import { sign } from './sign';
 import { getTransferArgument, getCancelOrderArgument, getPlaceOrderArgument, getTokenArgument } from './utils/scriptUtil';
 import { signType, signCancelOrderType, signPlaceOrderType } from './config/types'
 import * as param from './config/param'
@@ -17,7 +17,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   /**
    * Get Binance address by index
    */
-  async getAddress(transport: Types.Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return txUtil.publicKeyToAddress(publicKey);
   }
@@ -28,16 +28,17 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   /**
-   * Sign Binance tansfer transaction.
+   * Sign Binance transfer transaction.
    */
   async signTransaction(
     signData: signType,
+    returnSig: boolean = false,
   ): Promise<string> {
     
     const denom = signData.signObj.msgs[0].inputs[0].coins[0].denom;
 
     if ("BNB" === denom){
-      return this.signTansferTransaction(signData)
+      return this.signTransferTransaction(signData, returnSig)
     }
 
     let tokenSignature;
@@ -48,42 +49,56 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
       }
     }
     if (tokenSignature) {
-      return await this.signTokenTransaction(signData, denom, tokenSignature); // 內建
+      return await this.signTokenTransaction(signData, denom, tokenSignature, returnSig); // 內建
     } else {
-      return await this.signTokenTransaction(signData, denom); // 自建
+      return await this.signTokenTransaction(signData, denom, '', returnSig); // 自建
     }
   }
 
   /**
- * Sign Binance tansfer transaction.
+ * Sign Binance transfer transaction.
  */
-  async signTansferTransaction(
-    signData: signType
+  async signTransferTransaction(
+    signData: signType,
+    returnSig: boolean = false,
   ): Promise<string> {
     const script = param.TRANSFER.script + param.TRANSFER.signature;
     const argument = await getTransferArgument(signData.signObj, signData.addressIndex);
-    return transferSignature(
-      signData,
-      'BNB',
+    const signature = await sign(
+      signData.transport,
+      signData.appId,
+      signData.appPrivateKey,
       script,
-      argument
+      argument,
+      signData.confirmCB,
+      signData.authorizedCB
     );
+    if (returnSig) return signature;
+    return txUtil.composeSignedTransacton(signData.signObj as Types.Transfer, 'BNB', signature, signData.signPublicKey)
   }
 
   /**
  * Sign Binance token transaction.
  */
   async signTokenTransaction(
-    signData: signType, denom: string, tokenSignature: string = ''
+    signData: signType,
+    denom: string,
+    tokenSignature: string = '',
+    returnSig: boolean = false,
   ): Promise<string> {
     const script = param.BEP2Token.script + param.BEP2Token.signature;
     const argument = await getTokenArgument(signData.signObj, denom, tokenSignature, signData.addressIndex);
-    return transferSignature(
-      signData,
-      denom,
+    const signature = await sign(
+      signData.transport,
+      signData.appId,
+      signData.appPrivateKey,
       script,
-      argument
+      argument,
+      signData.confirmCB,
+      signData.authorizedCB
     );
+    if (returnSig) return signature;
+    return txUtil.composeSignedTransacton(signData.signObj as Types.Transfer, denom, signature, signData.signPublicKey)
   }
 
   /**
@@ -94,7 +109,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   ): Promise<string> {
     const script = param.PlaceOrder.script + param.PlaceOrder.signature;
     const argument = await getPlaceOrderArgument(signData.signObj, signData.addressIndex);
-    const signature = await walletConnectSignature(
+    const signature = await sign(
       signData.transport,
       signData.appId,
       signData.appPrivateKey,
@@ -114,7 +129,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
   ): Promise<string> {
     const script = param.CancelOrder.script + param.CancelOrder.signature;
     const argument = await getCancelOrderArgument(signData.signObj, signData.addressIndex);
-    const signature = await walletConnectSignature(
+    const signature = await sign(
       signData.transport,
       signData.appId,
       signData.appPrivateKey,
