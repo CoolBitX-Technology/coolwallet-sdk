@@ -1,4 +1,3 @@
-import { transport } from '@coolwallet/core';
 import * as cryptoUtil from "./cryptoUtil";
 import * as bufferUtil from "./bufferUtil";
 import * as types from '../config/types';

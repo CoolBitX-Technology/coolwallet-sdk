@@ -1,66 +1,64 @@
 /* eslint-disable camelcase  */
-import { transport } from '@coolwallet/core';
-export type Transport = transport.default;
+import { Transport } from '@coolwallet/core';
 
-export type SignDataType = SignMsgSendType | SignMsgDelegateType | SignMsgUndelegateType | SignMsgWithdrawDelegationRewardType
-
+export type SignDataType =
+  | SignMsgSendType
+  | SignMsgDelegateType
+  | SignMsgUndelegateType
+  | SignMsgWithdrawDelegationRewardType;
 
 interface SignType {
-  transport: Transport,
-  appPrivateKey: string,
-  appId: string,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 }
 
 export interface SignMsgSendType extends SignType {
-  txType: TX_TYPE.SEND,
-  transaction: MsgSend,
+  txType: TX_TYPE.SEND;
+  transaction: MsgSend;
 }
 export interface SignMsgDelegateType extends SignType {
-  txType: TX_TYPE.DELEGATE,
-  transaction: MsgDelegate,
+  txType: TX_TYPE.DELEGATE;
+  transaction: MsgDelegate;
 }
 export interface SignMsgUndelegateType extends SignType {
-  txType: TX_TYPE.UNDELEGATE,
-  transaction: MsgUndelegate,
+  txType: TX_TYPE.UNDELEGATE;
+  transaction: MsgUndelegate;
 }
 export interface SignMsgWithdrawDelegationRewardType extends SignType {
-  txType: TX_TYPE.WITHDRAW,
-  transaction: MsgWithdrawDelegationReward,
+  txType: TX_TYPE.WITHDRAW;
+  transaction: MsgWithdrawDelegationReward;
 }
-
-
 
 type Cosmos = {
-  chainId: CHAIN_ID,
-  feeAmount: number,
-  gas: number,
-  accountNumber: string,
-  sequence: string,
-  memo: string,
-}
+  chainId: CHAIN_ID;
+  feeAmount: number;
+  gas: number;
+  accountNumber: string;
+  sequence: string;
+  memo: string;
+};
 
 export interface MsgSend extends Cosmos {
-  fromAddress: string,
-  toAddress: string,
-  amount: number,
+  fromAddress: string;
+  toAddress: string;
+  amount: number;
 }
 
 export interface MsgDelegate extends Cosmos {
-  delegatorAddress: string,
-  validatorAddress: string,
-  amount: number,
+  delegatorAddress: string;
+  validatorAddress: string;
+  amount: number;
 }
 
-export interface MsgUndelegate extends MsgDelegate {
-}
-
+export interface MsgUndelegate extends MsgDelegate {}
 
 export interface MsgWithdrawDelegationReward extends Cosmos {
-  delegatorAddress: string,
-  validatorAddress: string,
+  delegatorAddress: string;
+  validatorAddress: string;
 }
 
 export enum CHAIN_ID {

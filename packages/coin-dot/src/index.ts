@@ -209,3 +209,4 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
     return txUtil.getSubmitTransaction(transaction.fromAddress, formatTxData, methodString, signature, 4)
   }
 }
+

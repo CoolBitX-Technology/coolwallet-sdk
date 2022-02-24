@@ -89,4 +89,3 @@ export default class CRO extends COIN.ECDSACoin implements COIN.Coin{
         return txBytesBase64;
     }
 }
-            

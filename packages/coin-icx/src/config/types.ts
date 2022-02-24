@@ -1,14 +1,13 @@
-import { transport } from '@coolwallet/core';
+import { Transport } from '@coolwallet/core';
 
-export type Transport = transport.default;
+export { Transport };
 
 export type signTxType = {
-	transport: Transport,
-	appPrivateKey: string,
-	appId: string,
-	transaction: Object,
-	addressIndex: number,
-	confirmCB: Function | undefined,
-	authorizedCB: Function | undefined
-}
-
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  transaction: Record<string, any>;
+  addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+};

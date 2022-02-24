@@ -1,9 +1,6 @@
-import { apdu, transport, tx } from '@coolwallet/core';
-import { sha256 } from './utils/cryptoUtil';
-import * as types from './config/types';
+import { apdu, tx } from '@coolwallet/core';
 import * as txUtil from './utils/transactionUtil';
 
-type Transport = transport.default;
 
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
@@ -29,7 +26,7 @@ export const signTransaction = async (
   publicKey: string
 ): Promise<string> => {
   const {
-    transport, appPrivateKey, appId, confirmCB, authorizedCB, transaction
+    transport, appPrivateKey, appId, confirmCB, authorizedCB
   } = signTxData;
 
   const preActions = [];
