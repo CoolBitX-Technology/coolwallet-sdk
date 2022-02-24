@@ -1,5 +1,5 @@
 {
-  "name": "@coolwallet/template",
+  "name": "@coolwallet/etc",
   "version": "1.0.0",
   "description": "clone this project to build your own coin package",
   "main": "lib/index.js",
