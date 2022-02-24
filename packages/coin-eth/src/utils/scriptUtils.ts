@@ -63,6 +63,23 @@ export const getSmartContractArgument = async (transaction: Transaction, address
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
+    handleHex("0001") +
+    handleHex(transaction.data);
+
+  return '15' + (await utils.getPath(COIN_TYPE, addressIndex)) + argument;
+};
+
+/**
+ * [contractAddress(20B)] [value(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [dataLength(4B)]
+ * @param transaction
+ */
+export const getSmartContractArgumentSegment = async (transaction: Transaction, addressIndex: number) => {
+  const argument =
+    handleHex(transaction.to) + // contractAddress : 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
+    handleHex(transaction.value).padStart(20, '0') + // 000000b1a2bc2ec50000
+    handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
+    handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
+    handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
     (handleHex(transaction.data).length / 2).toString(16).padStart(8, '0'); // data length
 
   return '15' + (await utils.getPath(COIN_TYPE, addressIndex)) + argument;

@@ -13,5 +13,5 @@ export default defineConfig({
       process: require.resolve('process/browser'),
     },
   },
-  plugins: [react(), viteCommonjs()],
+  plugins: [react(), viteCommonjs({ skipPreBuild: true })],
 });

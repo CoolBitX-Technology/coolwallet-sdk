@@ -6,7 +6,12 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  extends: ['eslint:recommended', 'plugin:react/recommended', 'plugin:@typescript-eslint/recommended'],
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:@typescript-eslint/recommended',
+  ],
   parserOptions: {
     ecmaFeatures: {
       experimentalObjectRestSpread: true,
@@ -29,7 +34,7 @@ module.exports = {
     '@typescript-eslint/no-unused-expressions': ['error'],
     '@typescript-eslint/no-use-before-define': ['error'],
     'react/destructuring-assignment': 0,
-    'react/jsx-filename-extension': [1, { 'extensions': ['.js', '.jsx', '.ts', '.tsx'] }],
+    'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
     'no-use-before-define': 'off',
     'no-restricted-syntax': [
       'error',

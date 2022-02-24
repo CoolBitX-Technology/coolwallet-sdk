@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import { Transport, apdu, utils, config } from '@coolwallet/core';
-import { NoInput, OneInput } from '../utils/componentMaker';
+import { Transport, apdu, tx, utils, config } from '@coolwallet/core';
+import { NoInput, OneInput, ObjInputs } from '../utils/componentMaker';
 
 interface Props {
   transport: Transport | null,
@@ -12,17 +12,28 @@ interface Props {
 }
 
 function Settings(props: Props) {
+  const { transport } = props;
+  const disabled = !transport || props.isLocked;
+
   const [isAppletExist, setIsAppletExist] = useState('');
   const [SEVersion, setSEVersion] = useState('');
   const [cardInfo, setCardInfo] = useState('');
+  const [displayAddressResult, setDisplayAddressResult] = useState('');
   const [resetStatus, setResetStatus] = useState('');
   const [registerStatus, setRegisterStatus] = useState('');
   const [mnemonic, setMnemonic] = useState('');
   const [mnemonicInput, setMnemonicInput] = useState('');
   const [mnemonicStatus, setMnemonicStatus] = useState('');
 
-  const { transport } = props;
-  const disabled = !transport || props.isLocked;
+  const [signingKeys, setSigningKeys] = useState([
+    'Script',
+    'Arguments',
+  ]);
+  const [signingValues, setSigningValues] = useState([
+    '',
+    '',
+  ]);
+  const [signature, setSignature] = useState('');
 
   useEffect(() => {
     if (!transport) {
@@ -76,6 +87,16 @@ function Settings(props: Props) {
     }, setCardInfo);
   };
 
+  const toggleDisplayAddress = async () => {
+    handleState(async () => {
+      const { showDetail } = await apdu.info.getCardInfo(transport!);
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const data = await apdu.info.toggleDisplayAddress(transport!, appId, props.appPrivateKey, !showDetail);
+      return `showDetail: ${data.toString()}`;
+    }, setDisplayAddressResult);
+  };
+
   const resetCard = async () => {
     handleState(async () => {
       const status = await apdu.general.resetCard(transport!);
@@ -114,6 +135,24 @@ function Settings(props: Props) {
     }, setMnemonicStatus);
   };
 
+  const sign = async () => {
+    handleState(async () => {
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const scriptSig = 'FA0000000000000000000000000000000000000000000000000000000000000000000000'
+                      + '000000000000000000000000000000000000000000000000000000000000000000000000';
+      await apdu.tx.sendScript(transport!, signingValues[0] + scriptSig);
+      const encryptedSig = await apdu.tx.executeScript(transport!, appId, props.appPrivateKey, signingValues[1]);
+      await apdu.tx.finishPrepare(transport!);
+      await apdu.tx.getTxDetail(transport!);
+      const decryptingKey = await apdu.tx.getSignatureKey(transport!);
+      await apdu.tx.clearTransaction(transport!);
+      await apdu.mcu.control.powerOff(transport!);
+      const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, false, false);
+      return sig.toString('hex');
+    }, setSignature);
+  };
+
   return (
     <Container>
       <div className='title2'>
@@ -132,10 +171,17 @@ function Settings(props: Props) {
         disabled={disabled}
       />
       <NoInput
-        title='Card Detail'
+        title='Card Information'
         content={cardInfo}
         onClick={getCardInfo}
         disabled={disabled}
+      />
+      <NoInput
+        title='Toggle showDetail'
+        content={displayAddressResult}
+        onClick={toggleDisplayAddress}
+        disabled={disabled}
+        btnName='Switch'
       />
       <div className='title2'>
         By running through below commands, CoolWallet Pro would be ready to use for a coin sdk.
@@ -170,7 +216,20 @@ function Settings(props: Props) {
         setValue={setMnemonicInput}
         placeholder='mnemonic'
         btnName='Recover'
-        inputSize={4}
+        inputSize={6}
+      />
+      <div className='title2'>
+        For Scriptable Signing Test
+      </div>
+      <ObjInputs
+        title='Scriptable Signing'
+        content={signature}
+        onClick={sign}
+        disabled={disabled}
+        keys={signingKeys}
+        values={signingValues}
+        setValues={setSigningValues}
+        btnName='Sign'
       />
     </Container>
   );

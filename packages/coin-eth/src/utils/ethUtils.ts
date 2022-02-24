@@ -29,7 +29,7 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
     }
     return Buffer.from(hex, 'hex');
   });
-  raw[6] = Buffer.from([transaction.chainId]);
+  raw[6] = Buffer.from([1]);
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
 

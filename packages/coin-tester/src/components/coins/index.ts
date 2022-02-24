@@ -1,8 +1,18 @@
 import template from './template';
-import cro from './coin-cro';
-import matic from './coin-matic';
+import bnb from './bnb';
+import ADA from './ada';
+import CRONOS from './cronos';
+import ETC from './etc';
+import ETH from './eth';
+import CRO from './cro';
+import matic from './matic';
 export default [
   { path: 'template', Element: template },
-  { path: 'CRO', Element: cro },
-  { path: 'MATIC', Element: matic },
+  { path: 'bnb', Element: bnb },
+  { path: 'ada', Element: ADA },
+  { path: 'eth', Element: ETH },
+  { path: 'etc', Element: ETC },
+  { path: 'cronos', Element: CRONOS },
+  { path: 'cro', Element: CRO },
+  { path: 'matic', Element: matic },
 ];

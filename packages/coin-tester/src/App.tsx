@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { Container, Row, Col, ButtonGroup, Button } from 'react-bootstrap';
 import { apdu, crypto, Transport } from '@coolwallet/core';
-import webBleTransport, { createTransport } from '@coolwallet/transport-web-ble';
 import HeadBar from './components/HeadBar';
 import Settings from './components/settings';
 import Coins from './components/coins';
@@ -41,12 +40,12 @@ function App(): JSX.Element {
     }
   }, [transport]);
 
-  async function connect() {
-    await setTransport(await createTransport());
+  async function connect(newTransport: Transport) {
+    // await setTransport(await createTransport());
+    await setTransport(newTransport);
   }
 
   async function disconnect() {
-    webBleTransport.disconnect();
     setTransport(null);
   }
 
