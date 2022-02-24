@@ -1,4 +1,4 @@
-import { coin as COIN, error as ERROR, utils } from '@coolwallet/core';
+import { coin as COIN, error as ERROR } from '@coolwallet/core';
 import * as txUtil from './utils/transactionUtil';
 import signTransaction from './sign';
 import * as types from './config/types';
@@ -7,8 +7,8 @@ import { COIN_SPECIES, PROTOCOL } from './config/types';
 export { COIN_SPECIES, PROTOCOL };
 
 export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
-  transfer: { script: string, signature: string};
-  constructor(type: String) {
+  transfer: { script: string; signature: string };
+  constructor(type: string) {
     super(params.COIN_TYPE);
 
     switch (type) {
@@ -24,11 +24,15 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     }
   }
 
-  async getAddress(transport: types.Transport, appPrivateKey: string, appId: string, protocol: PROTOCOL = PROTOCOL.SLIP0010): Promise<string> {
-
-    const isSLIP0010 = protocol === PROTOCOL.SLIP0010 ? true : false ;
+  async getAddress(
+    transport: types.Transport,
+    appPrivateKey: string,
+    appId: string,
+    protocol: PROTOCOL = PROTOCOL.SLIP0010
+  ): Promise<string> {
+    const isSLIP0010 = protocol === PROTOCOL.SLIP0010 ? true : false;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, isSLIP0010);
-   
+
     if (!publicKey) {
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
     }
@@ -39,22 +43,14 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     return txUtil.pubKeyToAddress(publicKey);
   }
 
-
   /**
    * sign XLM signatureBase with account 0, return signature.
    */
-  async signTransaction(
-    signTxData: types.signTxType
-  ): Promise<{ r: string; s: string; } | Buffer> {
+  async signTransaction(signTxData: types.signTxType): Promise<{ r: string; s: string } | Buffer> {
     const protocolToUse = signTxData.protocol || PROTOCOL.SLIP0010;
-    console.debug("protocolToUse: " + protocolToUse)
-    const signature = signTransaction(
-      signTxData,
-      this.transfer,
-      protocolToUse,
-    );
+    console.debug('protocolToUse: ' + protocolToUse);
+    const signature = signTransaction(signTxData, this.transfer, protocolToUse);
 
     return signature;
   }
 }
-

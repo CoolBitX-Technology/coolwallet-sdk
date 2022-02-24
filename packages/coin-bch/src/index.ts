@@ -6,7 +6,11 @@ import * as txUtil from './utils/transactionUtil';
 
 export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
   public ScriptType: any;
-  public addressToOutScript: Function;
+  public addressToOutScript: (address: string) => {
+    scriptType: types.ScriptType;
+    outScript: Buffer;
+    outHash: Buffer;
+  };
 
   constructor() {
     super(params.COIN_TYPE);
@@ -72,4 +76,3 @@ export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
     return signTransaction(signTxData);
   }
 }
-
