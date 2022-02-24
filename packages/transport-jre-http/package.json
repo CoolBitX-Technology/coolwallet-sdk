@@ -12,12 +12,12 @@
   "author": "coolwallet-team",
   "license": "Apache-2.0",
   "dependencies": {
-    "@coolwallet/core": "^1.0.14",
+    "@coolwallet/core": "^1.1.1",
     "axios": "^0.25.0",
     "lodash": "^4.17.21"
   },
   "peerDependencies": {
-    "@coolwallet/core": "^1.0.14"
+    "@coolwallet/core": "^1.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",
