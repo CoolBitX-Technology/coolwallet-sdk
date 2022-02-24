@@ -11,6 +11,9 @@
     "build": "npm run build:types && npm run build:ts",
     "test": "jest --verbose"
   },
+  "peerDependencies": {
+    "@coolwallet/core": "^1.0.14"
+  },
   "devDependencies": {
     "@babel/cli": "^7.16.8",
     "@babel/core": "^7.16.7",

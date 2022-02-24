@@ -17,6 +17,9 @@
     "bip32-ed25519": "^0.0.4",
     "blake2b": "^2.1.3"
   },
+  "peerDependencies": {
+    "@coolwallet/core": "^1.0.14"
+  },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
