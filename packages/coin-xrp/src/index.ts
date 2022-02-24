@@ -52,3 +52,4 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
     return xrpSign.signPayment(signTxData, payment);
   }
 }
+

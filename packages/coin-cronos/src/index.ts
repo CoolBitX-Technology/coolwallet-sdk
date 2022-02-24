@@ -97,3 +97,4 @@ export default class CRONOS extends COIN.ECDSACoin implements COIN.Coin {
     return ethSign.signSmartContractTransaction(signTxData, script, argument, publicKey);
   }
 }
+

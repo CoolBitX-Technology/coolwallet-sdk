@@ -210,3 +210,4 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     return ethSign.signTypedData(typedData, script, publicKey);
   }
 }
+

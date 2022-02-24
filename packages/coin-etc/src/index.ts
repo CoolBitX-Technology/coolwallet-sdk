@@ -145,3 +145,4 @@ export default class ETC implements COIN.Coin {
     return `0x${serializedTx.toString('hex')}`;
   };
 }
+

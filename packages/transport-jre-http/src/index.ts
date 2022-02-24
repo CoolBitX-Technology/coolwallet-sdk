@@ -17,3 +17,4 @@ const createTransport = (baseURL = 'http://localhost:8080'): Promise<Transport |
   });
 
 export { createTransport, HttpTransport };
+

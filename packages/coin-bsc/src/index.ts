@@ -230,3 +230,4 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
     return sign.signTypedData(typedData, script, publicKey);
   }
 }
+

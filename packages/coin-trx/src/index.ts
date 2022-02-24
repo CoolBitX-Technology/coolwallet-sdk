@@ -108,3 +108,4 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
 }
+

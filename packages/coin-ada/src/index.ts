@@ -93,3 +93,4 @@ export default class ADA implements COIN.Coin {
     return signedTx;
   }
 }
+
