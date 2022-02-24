@@ -13,6 +13,7 @@
     "@coolwallet/core": "file:../core",
     "@coolwallet/etc": "file:../coin-etc",
     "@coolwallet/eth": "file:../coin-eth",
+    "@coolwallet/luna": "file:../coin-luna",
     "@coolwallet/template": "file:../coin-template",
     "@coolwallet/transport-jre-http": "file:../transport-jre-http",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport } from '@coolwallet/core';
-import { NoInput, TwoInputs } from '../../../utils/componentMaker';
+import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 import { SignDataType, TX_TYPE, CHAIN_ID } from '@coolwallet/cro/lib/config/types';
 import BigNumber from 'bignumber.js';
 

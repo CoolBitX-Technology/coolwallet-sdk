@@ -1,9 +1,10 @@
 import template from './template';
 import ADA from './ada';
 import CRONOS from './cronos';
-import ETC from './etc';
+import ETC from './ETC';
 import ETH from './eth';
 import CRO from './cro';
+import LUNA from './luna';
 
 export default [
   { path: 'Template', Element: template },
@@ -12,4 +13,5 @@ export default [
   { path: 'etc', Element: ETC },
   { path: 'cronos', Element: CRONOS },
   { path: 'cro', Element: CRO },
+  { path: 'luna', Element: LUNA},
 ];
