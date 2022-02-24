@@ -1,19 +1,12 @@
 /* eslint-disable no-param-reassign */
 import { coin as COIN, Transport, utils, config, apdu, tx } from '@coolwallet/core';
-import {
-  accountKeyToAddress,
-  genTransferTxBody,
-  genFakeWitness,
-  genWitness,
-  getTransferArgument,
-} from './utils';
+import { accountKeyToAddress, genTransferTxBody, genFakeWitness, genWitness, getTransferArgument } from './utils';
 import * as params from './config/params';
 
 import type { Options, TransferWithoutFee, Transfer } from './config/types';
 export type { Options, TransferWithoutFee, Transfer };
 
 export default class ADA implements COIN.Coin {
-
   // implement this because of not extending ECDSACoin
   async getAccountPubKey(transport: Transport, appPrivateKey: string, appId: string): Promise<string> {
     const pathType = config.PathType.BIP32ED25519;
@@ -37,17 +30,11 @@ export default class ADA implements COIN.Coin {
 
   getTransactionSize(transaction: TransferWithoutFee): number {
     const { addrIndexes } = transaction;
-    let estimatedTx = '83'
-      + genTransferTxBody(transaction)
-      + genFakeWitness(addrIndexes)
-      + 'f6';
+    const estimatedTx = '83' + genTransferTxBody(transaction) + genFakeWitness(addrIndexes) + 'f6';
     return estimatedTx.length / 2;
   }
 
-  async signTransaction(
-    transaction: Transfer,
-    options: Options
-  ): Promise<string> {
+  async signTransaction(transaction: Transfer, options: Options): Promise<string> {
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
     const { inputs, output, change, fee, ttl } = transaction;
 
@@ -59,7 +46,7 @@ export default class ADA implements COIN.Coin {
 
     // request CoolWallet to sign tx
 
-    for (let witness of witnesses) {
+    for (const witness of witnesses) {
       await apdu.tx.sendScript(transport, script);
       const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, witness.arg);
       if (!encryptedSig) throw new Error('executeScript fails to return signature');
@@ -74,7 +61,7 @@ export default class ADA implements COIN.Coin {
     // resolve signature
 
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
-    for (let witness of witnesses) {
+    for (const witness of witnesses) {
       const encryptedSig = witness.sig;
       const sig = tx.util.decryptSignatureFromSE(encryptedSig, decryptingKey, true);
       witness.sig = sig.toString('hex');
@@ -84,13 +71,9 @@ export default class ADA implements COIN.Coin {
 
     // construct the signed transaction
 
-    const signedTx = '83'
-      + genTransferTxBody(transaction)
-      + genWitness(witnesses)
-      + 'f6';
+    const signedTx = '83' + genTransferTxBody(transaction) + genWitness(witnesses) + 'f6';
 
     // const { signedTx: verifyTxBody } = await apdu.tx.getSignedHex(transport);
     return signedTx;
   }
 }
-

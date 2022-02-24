@@ -2,11 +2,10 @@ import { coin as COIN } from '@coolwallet/core';
 import * as trxSign from './sign';
 import * as scriptUtil from './utils/scriptUtil';
 import * as txUtil from './utils/transactionUtil';
-import { RESOURCE_CODE } from './config/params';
 import * as params from './config/params';
 import * as type from './config/types';
 
-export { RESOURCE_CODE };
+export { RESOURCE_CODE } from './config/params';
 export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
     super(params.COIN_TYPE);
@@ -108,4 +107,3 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
 }
-

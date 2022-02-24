@@ -9,7 +9,7 @@ const webBleManager = new WebBleManager();
  * A convenient way to create internal transport.
  * @returns {Transport}
  */
-export const createTransport = (): Promise<Transport> => (
+export const createTransport = (): Promise<Transport> =>
   new Promise((resolve, reject) => {
     webBleManager
       .listen()
@@ -17,9 +17,7 @@ export const createTransport = (): Promise<Transport> => (
         webBleManager.connect(device).then(resolve).catch(reject);
       })
       .catch(reject);
-  })
-);
+  });
 
 export { default as WebBleTransport } from './WebBleTransport';
 export default webBleManager;
-

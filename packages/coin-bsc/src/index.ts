@@ -72,7 +72,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
     if (data && functionHash === "a9059cbb") {
       const upperCaseAddress = to.toUpperCase(); // contractAddr
       let tokenSignature;
-      for (let tokenInfo of TOKENTYPE) {
+      for (const tokenInfo of TOKENTYPE) {
         // get tokenSignature
         if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
           tokenSignature = tokenInfo.signature;
@@ -134,7 +134,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
    */
   async signBEP20Transaction(
     signTxData: types.signTx,
-    tokenSignature: string = ""
+    tokenSignature = ""
   ) {
     const publicKey = await this.getPublicKey(
       signTxData.transport,
