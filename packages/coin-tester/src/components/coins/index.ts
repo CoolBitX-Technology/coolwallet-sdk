@@ -1,10 +1,15 @@
 import template from './template';
-import cronos from './coin-cronos';
-import ETC from './ETC';
-import cro from './coin-cro';
+import ADA from './ada';
+import CRONOS from './cronos';
+import ETC from './etc';
+import ETH from './eth';
+import CRO from './cro';
+
 export default [
   { path: 'Template', Element: template },
-  { path: 'ETC', Element: ETC },
-  { path: 'Cronos', Element: cronos},
-  { path: 'Crypto.Org', Element: cro}
+  { path: 'ada', Element: ADA },
+  { path: 'eth', Element: ETH },
+  { path: 'etc', Element: ETC },
+  { path: 'cronos', Element: CRONOS },
+  { path: 'cro', Element: CRO },
 ];

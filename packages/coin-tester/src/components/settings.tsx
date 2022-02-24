@@ -15,6 +15,7 @@ function Settings(props: Props) {
   const [isAppletExist, setIsAppletExist] = useState('');
   const [SEVersion, setSEVersion] = useState('');
   const [cardInfo, setCardInfo] = useState('');
+  const [displayAddressResult, setDisplayAddressResult] = useState('');
   const [resetStatus, setResetStatus] = useState('');
   const [registerStatus, setRegisterStatus] = useState('');
   const [mnemonic, setMnemonic] = useState('');
@@ -76,6 +77,16 @@ function Settings(props: Props) {
     }, setCardInfo);
   };
 
+  const toggleDisplayAddress = async () => {
+    handleState(async () => {
+      const { showDetail } = await apdu.info.getCardInfo(transport!);
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const data = await apdu.info.toggleDisplayAddress(transport!, appId, props.appPrivateKey, !showDetail);
+      return `showDetail: ${data.toString()}`;
+    }, setDisplayAddressResult);
+  };
+
   const resetCard = async () => {
     handleState(async () => {
       const status = await apdu.general.resetCard(transport!);
@@ -132,10 +143,17 @@ function Settings(props: Props) {
         disabled={disabled}
       />
       <NoInput
-        title='Card Detail'
+        title='Card Information'
         content={cardInfo}
         onClick={getCardInfo}
         disabled={disabled}
+      />
+      <NoInput
+        title='Toggle showDetail'
+        content={displayAddressResult}
+        onClick={toggleDisplayAddress}
+        disabled={disabled}
+        btnName='Switch'
       />
       <div className='title2'>
         By running through below commands, CoolWallet Pro would be ready to use for a coin sdk.
@@ -170,7 +188,7 @@ function Settings(props: Props) {
         setValue={setMnemonicInput}
         placeholder='mnemonic'
         btnName='Recover'
-        inputSize={4}
+        inputSize={6}
       />
     </Container>
   );
