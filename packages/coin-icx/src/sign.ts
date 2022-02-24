@@ -1,38 +1,31 @@
-import { apdu, transport, error, tx, utils } from '@coolwallet/core';
-import * as txUtil from './utils/transactionUtil'
-import * as scriptUtil from './utils/scriptUtil'
-import * as types from './config/types'
+import { apdu, tx } from '@coolwallet/core';
+import * as txUtil from './utils/transactionUtil';
+import * as scriptUtil from './utils/scriptUtil';
+import * as types from './config/types';
+
 /**
  * Sign ICON Transaction
  */
-// eslint-disable-next-line import/prefer-default-export
 export default async function signTransaction(
   signTxData: types.signTxType,
-  publicKey: string,
-): Promise<Object> {
+  publicKey: string
+): Promise<Record<string, any>> {
+  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
 
-  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData
-
-  let canonicalSignature;
   const preActions = [];
 
   const { script, argument } = await scriptUtil.getScriptAndArguments(addressIndex, transaction);
 
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
-  }
+  };
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    return await apdu.tx.executeScript(
-      transport,
-      appId,
-      appPrivateKey,
-      argument
-    );
-  }
+    return await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  };
 
-  canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
     sendArgument,
@@ -43,4 +36,4 @@ export default async function signTransaction(
   );
   const txObject = await txUtil.generateRawTx(canonicalSignature, transaction, publicKey);
   return txObject;
-};
+}

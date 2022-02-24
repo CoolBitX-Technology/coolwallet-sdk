@@ -1,4 +1,4 @@
-import { coin as COIN, transport } from '@coolwallet/core';
+import { coin as COIN, Transport } from '@coolwallet/core';
 import * as txUtil from './util/transactionUtil';
 import * as scriptUtil from './util/scriptUtil';
 import * as types from './config/types'
@@ -9,7 +9,6 @@ import { SDKError } from '@coolwallet/core/lib/error';
 
 export { TX_TYPE };
 
-type Transport = transport.default;
 
 export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
   public Types: any;
@@ -58,7 +57,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
     signData: types.SignDataType
   ): Promise<string> {
 
-    let { addressIndex } = signData;
+    const { addressIndex } = signData;
 
     const publicKey = await this.getPublicKey(signData.transport, signData.appPrivateKey, signData.appId, addressIndex);
 

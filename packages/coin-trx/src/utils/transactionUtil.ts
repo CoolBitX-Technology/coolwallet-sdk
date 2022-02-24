@@ -1,5 +1,5 @@
-import { hexStr2byteArray, byteArray2hexStr, sha256 } from './cryptoUtil';
-import { encode58 } from "./base58";
+import { hexStr2byteArray, sha256 } from './cryptoUtil';
+import { encode } from "bs58";
 const Web3 = require('web3');
 const {
   keccak256,
@@ -27,6 +27,6 @@ export function pubKeyToAddress(compressedPubkey: string): string {
   addressHex = '41' + addressHex;
   const addressByteArray = hexStr2byteArray(addressHex)
   const addressHash = sha256(sha256(addressByteArray)).slice(0, 4)
-  const address = encode58(addressByteArray.concat(addressHash))
+  const address = encode(addressByteArray.concat(addressHash))
   return address
 }
