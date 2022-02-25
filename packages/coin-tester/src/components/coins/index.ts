@@ -1,4 +1,5 @@
 import template from './template';
+import bnb from './bnb';
 import ADA from './ada';
 import CRONOS from './cronos';
 import ETC from './ETC';
@@ -7,7 +8,8 @@ import CRO from './cro';
 import LUNA from './luna';
 
 export default [
-  { path: 'Template', Element: template },
+  { path: 'template', Element: template },
+  { path: 'bnb', Element: bnb },
   { path: 'ada', Element: ADA },
   { path: 'eth', Element: ETH },
   { path: 'etc', Element: ETC },

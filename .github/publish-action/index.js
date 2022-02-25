@@ -69,22 +69,23 @@ async function run() {
 	const context = github.context;
 	console.log('context :', context);
 	await checkAndPublish(context, 'packages/core');
-	await checkAndPublish(context, 'packages/coin-bnb');
-	await checkAndPublish(context, 'packages/coin-btc');
+	await checkAndPublish(context, 'packages/coin-ada');
+	await checkAndPublish(context, 'packages/coin-atom');
 	await checkAndPublish(context, 'packages/coin-bch');
-	await checkAndPublish(context, 'packages/coin-ltc');
-	await checkAndPublish(context, 'packages/coin-zen');
-	await checkAndPublish(context, 'packages/coin-eos');
+	await checkAndPublish(context, 'packages/coin-bnb');
+	await checkAndPublish(context, 'packages/coin-bsc');
+	await checkAndPublish(context, 'packages/coin-btc');
+	await checkAndPublish(context, 'packages/coin-cro');
+	await checkAndPublish(context, 'packages/coin-cronos');
+	await checkAndPublish(context, 'packages/coin-dot');
+	await checkAndPublish(context, 'packages/coin-etc');
 	await checkAndPublish(context, 'packages/coin-eth');
 	await checkAndPublish(context, 'packages/coin-icx');
-	await checkAndPublish(context, 'packages/coin-qkc');
+	await checkAndPublish(context, 'packages/coin-ltc');
+	await checkAndPublish(context, 'packages/coin-trx');
 	await checkAndPublish(context, 'packages/coin-xlm');
 	await checkAndPublish(context, 'packages/coin-xrp');
-	await checkAndPublish(context, 'packages/coin-trx');
-	await checkAndPublish(context, 'packages/coin-atom');
-	await checkAndPublish(context, 'packages/coin-dot');
-	await checkAndPublish(context, 'packages/coin-bsc');
-	await checkAndPublish(context, 'packages/transport-react-native-ble');
+	await checkAndPublish(context, 'packages/coin-zen');
 	await checkAndPublish(context, 'packages/transport-web-ble');
 }
 

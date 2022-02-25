@@ -1,12 +1,10 @@
-import { error, transport, apdu } from "@coolwallet/core";
+import { error, Transport, apdu } from "@coolwallet/core";
 import { handleHex } from "./stringUtil";
 import { Transaction } from '../config/types';
 import { CHAIN_ID } from '../config/params';
 
 const Web3 = require('web3');
 const rlp = require("rlp");
-
-type Transport = transport.default;
 
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap

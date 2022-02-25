@@ -2,91 +2,85 @@ import { coin as COIN, Transport } from '@coolwallet/core';
 import * as params from './config/params';
 import * as txUtil from './utils/transactionUtils';
 import * as scriptUtil from './utils/scriptUtil';
-import * as types from './config/types'
-import { TX_TYPE } from './config/types'
+import * as types from './config/types';
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as sign from './sign';
 
-export { TX_TYPE };
+export { TX_TYPE } from './config/types';
 
-export default class CRO extends COIN.ECDSACoin implements COIN.Coin{
-    public Types: any;
+export default class CRO extends COIN.ECDSACoin implements COIN.Coin {
+  public Types: any;
 
-    constructor(){
-        super(params.COIN_TYPE);
-        this.Types = types;
+  constructor() {
+    super(params.COIN_TYPE);
+    this.Types = types;
+  }
+
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    return txUtil.publicKeyToAddress(publicKey);
+  }
+
+  async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    return txUtil.publicKeyToAddress(publicKey);
+  }
+
+  async signTransaction(signData: types.SignDataType): Promise<string> {
+    const chainId = signData.transaction.chainId;
+    switch (chainId) {
+      case types.CHAIN_ID.CRO:
+        return this.signCROTransaction(signData);
+      default:
+        throw new SDKError(this.signTransaction.name, `not support input chainId: ${chainId}`);
     }
+  }
 
-    async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string>{
-        const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-        return txUtil.publicKeyToAddress(publicKey);
-    }
+  async signCROTransaction(signData: types.SignDataType): Promise<string> {
+    const { addressIndex } = signData;
 
-    async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
-        const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
-        return txUtil.publicKeyToAddress(publicKey);
-    }
-    
-    async signTransaction(
-        signData: types.SignDataType
-    ): Promise<string> {
-        const chainId = signData.transaction.chainId
-        switch (chainId) {
-        case types.CHAIN_ID.CRO:
-            return this.signCROTransaction(signData);
-        default:
-            throw new SDKError(this.signTransaction.name, `not support input chainId: ${chainId}`);
-        }
-    }
-    
-    async signCROTransaction(
-        signData: types.SignDataType
-    ): Promise<string>{
-        let { addressIndex } = signData;
+    const publicKey = await this.getPublicKey(signData.transport, signData.appPrivateKey, signData.appId, addressIndex);
 
-        const publicKey = await this.getPublicKey(signData.transport, signData.appPrivateKey, signData.appId, addressIndex);
-
-        let script;
-        let argument;
-        let genTx;
-        switch (signData.txType) {
-            case types.TX_TYPE.SEND:
-              script = params.TRANSFER.script + params.TRANSFER.signature;
-              argument = scriptUtil.getCroSendArgement(publicKey, signData.transaction, addressIndex);
-              genTx = (signature: string) => {
-                return txUtil.getSendTx(signData.transaction, signature, publicKey);
-              }
-              break;
-            case types.TX_TYPE.DELEGATE:
-                script = params.DELEGATE.script + params.DELEGATE.signature;
-                argument = scriptUtil.getCroDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
-                genTx = (signature: string) => {
-                    return txUtil.getDelegateTx(signData.transaction, signature, publicKey);
-                }
-                break;
-            case types.TX_TYPE.UNDELEGATE:
-                script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
-                argument = scriptUtil.getCroDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
-                genTx = (signature: string) => {
-                    return txUtil.getUndelegateTx(signData.transaction, signature, publicKey);
-                }
-                break;
-            case types.TX_TYPE.WITHDRAW:
-                script = params.WITHDRAW.script + params.WITHDRAW.signature;
-                argument = scriptUtil.getCroWithdrawArgement(publicKey, signData.transaction, addressIndex);
-                genTx = (signature: string) => {
-                    return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
-                }
-                break;
-            default:
-              throw new SDKError(this.signCROTransaction.name, `not support input tx type`);
-        }
-        const signature = await sign.signTransaction(signData, script, argument);
-        console.debug("signature: ", signature);
-        const signTx =  genTx(signature);
-        console.debug("signTx protobuf: ", signTx);
-        const txBytesBase64 = Buffer.from(signTx, 'hex').toString('base64');
-        return txBytesBase64;
+    let script;
+    let argument;
+    let genTx;
+    switch (signData.txType) {
+      case types.TX_TYPE.SEND:
+        script = params.TRANSFER.script + params.TRANSFER.signature;
+        argument = scriptUtil.getCroSendArgement(publicKey, signData.transaction, addressIndex);
+        genTx = (signature: string) => {
+          return txUtil.getSendTx(signData.transaction, signature, publicKey);
+        };
+        break;
+      case types.TX_TYPE.DELEGATE:
+        script = params.DELEGATE.script + params.DELEGATE.signature;
+        argument = scriptUtil.getCroDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
+        genTx = (signature: string) => {
+          return txUtil.getDelegateTx(signData.transaction, signature, publicKey);
+        };
+        break;
+      case types.TX_TYPE.UNDELEGATE:
+        script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
+        argument = scriptUtil.getCroDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
+        genTx = (signature: string) => {
+          return txUtil.getUndelegateTx(signData.transaction, signature, publicKey);
+        };
+        break;
+      case types.TX_TYPE.WITHDRAW:
+        script = params.WITHDRAW.script + params.WITHDRAW.signature;
+        argument = scriptUtil.getCroWithdrawArgement(publicKey, signData.transaction, addressIndex);
+        genTx = (signature: string) => {
+          return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
+        };
+        break;
+      default:
+        throw new SDKError(this.signCROTransaction.name, `not support input tx type`);
     }
+    const signature = await sign.signTransaction(signData, script, argument);
+    console.debug('signature: ', signature);
+    const signTx = genTx(signature);
+    console.debug('signTx protobuf: ', signTx);
+    const txBytesBase64 = Buffer.from(signTx, 'hex').toString('base64');
+    return txBytesBase64;
+  }
 }
-            
