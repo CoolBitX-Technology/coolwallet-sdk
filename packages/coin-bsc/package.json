@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/bsc",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Coolwallet BSC sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
