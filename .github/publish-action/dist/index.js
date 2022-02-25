@@ -9622,21 +9622,17 @@ function getPackageInfo(path) {
 }
 function getDiff(base, head, path, ref) {
     return __awaiter(this, void 0, void 0, function () {
-        var srcDiff, configDiff;
+        var diff;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, command('git', ['fetch', '--no-tags', '--no-recurse-submodules', '--depth=10000', 'origin', ref])];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, command('git', ['diff', base, head, '--name-only', '--', "".concat(path, "/src")])];
-                case 2:
-                    srcDiff = _a.sent();
-                    console.log('srcDiff :', srcDiff);
                     return [4 /*yield*/, command('git', ['diff', base, head, '--name-only', '--', "".concat(path, "/package.json")])];
-                case 3:
-                    configDiff = _a.sent();
-                    console.log('configDiff :', configDiff);
-                    if (!srcDiff || srcDiff.includes('fatal:') || !configDiff || configDiff.includes('fatal:'))
+                case 2:
+                    diff = _a.sent();
+                    console.log('diff :', diff);
+                    if (!diff || diff.includes('fatal:'))
                         return [2 /*return*/, false];
                     return [2 /*return*/, true];
             }

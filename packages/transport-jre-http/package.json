@@ -1,6 +1,6 @@
 {
   "name": "transport-jre-http",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Http transport for javacard virtual machine.",
   "main": "lib/index.js",
   "scripts": {
