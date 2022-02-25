@@ -4,10 +4,6 @@ on:
   push:
     branches: [ master, stg*, hotfix*, beta ]
 
-  pull_request:
-    types: [ closed ]
-    branches: [ master, stg*, hotfix* ]
-
 jobs:
   check_and_publish_npm_packages:
 

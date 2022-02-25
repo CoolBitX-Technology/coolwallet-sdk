@@ -2,15 +2,22 @@
   "name": "publish-action",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@actions/core": "^1.2.6",
-    "@actions/github": "^4.0.0"
+    "@actions/github": "^4.0.0",
+    "semver": "^7.3.5"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.3.5",
+    "@vercel/ncc": "^0.33.3",
+    "typescript": "^4.5.5"
   }
 }
