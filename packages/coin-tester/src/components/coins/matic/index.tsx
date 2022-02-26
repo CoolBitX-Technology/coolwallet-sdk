@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Container } from 'react-bootstrap';
-import { Transport, apdu, utils, config } from '@coolwallet/core';
-import { NoInput, TwoInputs } from '../../../utils/componentMaker';
-
+import { Transport } from '@coolwallet/core';
 import Matic from '@coolwallet/matic';
+import React, { useState } from 'react';
+import { Container } from 'react-bootstrap';
+import Web3 from 'web3';
+import Inputs from '../../Inputs';
+
+const web3 = new Web3('https://mainnet.infura.io/v3/03fde1c3db944328aef007132d260202');
 
 interface Props {
   transport: Transport | null;
@@ -15,13 +17,14 @@ interface Props {
 
 function CoinMatic(props: Props) {
   const matic = new Matic();
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState('0x64797030263Fa2f3be3Fb4d9b7c16FDf11e6d8E1');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
   const [to, setTo] = useState('0xCc4949373fBDf5CB53c1d4b9DdF59F46d40bDfFF');
-
+  
   const { transport, appPrivateKey } = props;
-  const disabled = !transport || props.isLocked;
+  // const disabled = !transport || props.isLocked;
+  const disabled = false;
 
   const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
@@ -80,17 +83,29 @@ function CoinMatic(props: Props) {
       //   option: { info: { symbol: 'FXT', decimals: '18' } },
       // }; //coin-matic-normal-tx-erc20
 
+      // const transaction = {
+      //   nonce: '0x11',
+      //   gasTipCap: '0x9502F9000',
+      //   gasFeeCap: '0x9502F9000',
+      //   gasLimit: '0x5208',
+      //   to: to,
+      //   value: '0x38d7ea4c68000', // 0.001
+      //   data: '',
+      //   option: { info: { symbol: '', decimals: '' } },
+      // }; //coin-matic-EIP1559-transfer
+
       const transaction = {
-        nonce: '0x11',
-        gasTipCap: '0x9502F9000',
-        gasFeeCap: '0x9502F9000',
-        gasLimit: '0x5208',
+        nonce:  web3.utils.toHex(await web3.eth.getTransactionCount(address, 'pending')),
+        gasTipCap: web3.utils.toHex(await web3.eth.getGasPrice()),
+        gasFeeCap: web3.utils.toHex(await web3.eth.getGasPrice()),
+        gasLimit: web3.utils.toHex(await web3.eth.estimateGas({ to })),
         to: to,
-        value: '0x38d7ea4c68000', // 0.001
+        value: web3.utils.toHex(web3.utils.toWei(value, 'ether')), // 0.001
         data: '',
         option: { info: { symbol: '', decimals: '' } },
       }; //coin-matic-EIP1559-transfer
-
+      console.log(transaction);
+      
       // const transaction = {
       //   nonce: '0x12',
       //   gasTipCap: '0x9502F9000',
@@ -220,29 +235,35 @@ function CoinMatic(props: Props) {
       //   typedData,
       //   addressIndex: 0,
       // }); // sign typed data
-
+      
+      
       return signedTx;
     }, setSignedTransaction);
   };
 
   return (
+
     <Container>
       <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
-      <NoInput title='Get Address' content={address} onClick={getAddress} disabled={disabled} />
-      <TwoInputs
+      <Inputs btnTitle='Get Address' title='Get' content={address} onClick={getAddress} disabled={disabled} />
+      <Inputs
+        btnTitle='Sign'
         title='Sign Transaction'
         content={signedTransaction}
         onClick={signTransaction}
         disabled={disabled}
-        btnName='Sign'
-        value={value}
-        setValue={setValue}
-        placeholder='value'
-        inputSize={1}
-        value2={to}
-        setValue2={setTo}
-        placeholder2='to'
-        inputSize2={3}
+        inputs={[
+          {
+            value: to,
+            onChange: setTo,
+            placeholder: 'to',
+          },
+          {
+            value: value,
+            onChange: setValue,
+            placeholder: 'value',
+          }
+        ]}
       />
     </Container>
   );
