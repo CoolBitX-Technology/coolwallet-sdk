@@ -16,7 +16,10 @@ interface Props {
 }
 
 function CoinMatic(props: Props) {
+  const { transport, appPrivateKey } = props;
+  const disabled = !transport || props.isLocked;
   const matic = new Matic();
+  
   const [address, setAddress] = useState('0x64797030263Fa2f3be3Fb4d9b7c16FDf11e6d8E1');
 
   const [ legacy, setLegacy] = useState({
@@ -47,9 +50,6 @@ function CoinMatic(props: Props) {
     result: '' 
   })
   
-  const { transport, appPrivateKey } = props;
-  // const disabled = !transport || props.isLocked;
-  const disabled = false;
 
   const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
@@ -77,37 +77,24 @@ function CoinMatic(props: Props) {
     handleState(async () => {
       const transactionData = `0x${legacy.data}`;
        // const transaction = {
-      //   chainId: 137,
-      //   nonce: '0x08',
-      //   gasPrice: '0xEE6B2801',
-      //   gasLimit: '0x0493e0',
-      //   to: to,
-      //   value: '0x38d7ea4c68000', // 0.001
+      //   ...
+      //   to: to
       //   data: '',
-      //   option: { info: { symbol: '', decimals: '' } },
-      // }; //coin-matic-normal-tx
+      // }; //coin-matic-normal-tx sample-data
 
       // const transaction = {
-      //   chainId: 137,
-      //   nonce: '0x0d',
-      //   gasPrice: '0xEE6B2801',
-      //   gasLimit: '0x0493e0',
+      //   ...
       //   to: '0xdd0Db7aA1E23E38AaEf1FC3A5b7CF32c8574b414',
-      //   value: '0x00', // 0
       //   data: '0xa9059cbb000000000000000000000000cc4949373fbdf5cb53c1d4b9ddf59f46d40bdfff000000000000000000000000000000000000000000000000002386f26fc10000',
       //   option: { info: { symbol: 'FXT', decimals: '18' } },
-      // }; //coin-matic-normal-tx-erc20
+      // }; //coin-matic-normal-tx-erc20 sample-data
 
       // const transaction = {
-      //   chainId: 137,
-      //   nonce: '0x0c',
-      //   gasPrice: '0xEE6B2801',
-      //   gasLimit: '0x0493e0',
+      //   ...
       //   to: '0x1cE84db0841829E10191E86758A187C026Abb6D7',
-      //   value: '0x00', // 0,
       //   data: '0x60fe47b10000000000000000000000000000000000000000000000000000000000000004',
-      //   option: { info: { symbol: '', decimals: '' } },
-      // }; //coin-matic-normal-tx-sc
+      // }; //coin-matic-normal-tx-sc sample-data
+
       const transaction = {
         chainId: 137,
         nonce:  web3.utils.toHex(await web3.eth.getTransactionCount(address, 'pending')),
@@ -137,38 +124,25 @@ function CoinMatic(props: Props) {
   const signEIP1559 = async () => {
     handleState(async () => { 
       const transactionData = `0x${eip1559.data}`;
-      // const transaction = {
-      //   nonce: '0x11',
-      //   gasTipCap: '0x9502F9000',
-      //   gasFeeCap: '0x9502F9000',
-      //   gasLimit: '0x5208',
-      //   to: to,
-      //   value: '0x38d7ea4c68000', // 0.001
-      //   data: '',
-      //   option: { info: { symbol: '', decimals: '' } },
-      // }; //coin-matic-EIP1559-transfer
+      
+    //  const transaction = {
+    //      ...
+    //     to: to,
+    //     data: '',
+    //   }; //coin-matic-EIP1559-transfer sample-data
 
-       // const transaction = {
-      //   nonce: '0x12',
-      //   gasTipCap: '0x9502F9000',
-      //   gasFeeCap: '0x9502F9000',
-      //   gasLimit: '0xF5F4',
+      //  const transaction = {
+      //   ...
       //   to: '0x1cE84db0841829E10191E86758A187C026Abb6D7',
-      //   value: '0x00', // 0
       //   data: '0x60fe47b10000000000000000000000000000000000000000000000000000000000000004',
-      //   option: { info: { symbol: '', decimals: '' } },
-      // }; //coin-matic-EIP1559-sc
+      // }; //coin-matic-EIP1559-sc sample-data
 
-     // const transaction = {
-      //   nonce: '0x13',
-      //   gasTipCap: '0x9502F9000',
-      //   gasFeeCap: '0x9502F9000',
-      //   gasLimit: '0xF5F4',
-      //   to: '0xdd0Db7aA1E23E38AaEf1FC3A5b7CF32c8574b414',
-      //   value: '0x00', // 0
-      //   data: '0xa9059cbb000000000000000000000000cc4949373fbdf5cb53c1d4b9ddf59f46d40bdfff000000000000000000000000000000000000000000000000002386f26fc10000',
-      //   option: { info: { symbol: 'FXT', decimals: '18' } },
-      // }; //coin-matic-EIP1559-erc20
+    //  const transaction = {
+    //     ...
+    //     to: '0xdd0Db7aA1E23E38AaEf1FC3A5b7CF32c8574b414',
+    //     data: '0xa9059cbb000000000000000000000000cc4949373fbdf5cb53c1d4b9ddf59f46d40bdfff000000000000000000000000000000000000000000000000002386f26fc10000',
+    //     option: { info: { symbol: 'FXT', decimals: '18' } },
+    //   }; //coin-matic-EIP1559-erc20 sample-data
 
       const transaction = {
         nonce: web3.utils.toHex(await web3.eth.getTransactionCount(address, 'pending')),
@@ -202,13 +176,6 @@ function CoinMatic(props: Props) {
 
   const signMessage = async () => {
     handleState(async () => { 
-      // const signedTx = await matic.signMessage({
-      //   transport,
-      //   appPrivateKey,
-      //   appId,
-      //   addressIndex: 0,
-      //   message: 'matic sign message',
-      // }); // sign message
 
       const signedTx = await matic.signMessage({
         transport,
@@ -305,14 +272,6 @@ function CoinMatic(props: Props) {
           nonce: '6',
         },
       }
-
-      // const signedTX = await matic.signTypedData({
-      //   transport,
-      //   appPrivateKey,
-      //   appId,
-      //   typedData,
-      //   addressIndex: 0,
-      // }); // sign typed data
 
       const signedTx = await matic.signTypedData({
         transport,
