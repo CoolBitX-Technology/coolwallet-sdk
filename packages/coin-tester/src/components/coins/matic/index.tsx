@@ -56,84 +56,7 @@ function CoinMatic(props: Props) {
   })
 
   const [typedData, setTypedData] = useState({
-    typedData: {
-        types: {
-          EIP712Domain: [
-            {
-              name: 'name',
-              type: 'string',
-            },
-            {
-              name: 'version',
-              type: 'string',
-            },
-            {
-              name: 'chainId',
-              type: 'uint256',
-            },
-            {
-              name: 'verifyingContract',
-              type: 'address',
-            },
-          ],
-          ForwardRequest: [
-            {
-              name: 'from',
-              type: 'address',
-            },
-            {
-              name: 'to',
-              type: 'address',
-            },
-            {
-              name: 'value',
-              type: 'uint256',
-            },
-            {
-              name: 'gas',
-              type: 'uint256',
-            },
-            {
-              name: 'nonce',
-              type: 'uint256',
-            },
-            {
-              name: 'data',
-              type: 'bytes',
-            },
-          ],
-        },
-        domain: {
-          name: 'TEST',
-          version: '0.0.1',
-          chainId: 1,
-          verifyingContract: '0x3216C8Ac30000d3Ec32Dd648f4Dd0de4f4774579',
-        },
-        primaryType: 'ForwardRequest',
-        message: {
-          to: '0x5ED76954e8e271Ea85462Bc23beA0412D8a5AE15',
-          from: '0xCc4949373fBDf5CB53c1d4b9DdF59F46d40bDfFF',
-          data: '0x',
-          gas: '21000',
-          value: '10000000000000000',
-          nonce: '6',
-        },
-        domain: {
-          name: 'TEST',
-          version: '0.0.1',
-          chainId: '8001',
-          verifyingContract: '0x3216C8Ac30000d3Ec32Dd648f4Dd0de4f4774579',
-        },
-        primaryType: 'ForwardRequest',
-        message: {
-          to: '0x5ED76954e8e271Ea85462Bc23beA0412D8a5AE15',
-          from: '0xCc4949373fBDf5CB53c1d4b9DdF59F46d40bDfFF',
-          data: '0x',
-          gas: '21000',
-          value: '10000000000000000',
-          nonce: '6',
-        },
-      },
+    typedData: '',
     result: '' 
   })
   
@@ -404,6 +327,85 @@ function CoinMatic(props: Props) {
 
   const signTypedData = async () => {
     handleState(async () => { 
+      // const typedData = {
+      //   types: {
+      //     EIP712Domain: [
+      //       {
+      //         name: 'name',
+      //         type: 'string',
+      //       },
+      //       {
+      //         name: 'version',
+      //         type: 'string',
+      //       },
+      //       {
+      //         name: 'chainId',
+      //         type: 'uint256',
+      //       },
+      //       {
+      //         name: 'verifyingContract',
+      //         type: 'address',
+      //       },
+      //     ],
+      //     ForwardRequest: [
+      //       {
+      //         name: 'from',
+      //         type: 'address',
+      //       },
+      //       {
+      //         name: 'to',
+      //         type: 'address',
+      //       },
+      //       {
+      //         name: 'value',
+      //         type: 'uint256',
+      //       },
+      //       {
+      //         name: 'gas',
+      //         type: 'uint256',
+      //       },
+      //       {
+      //         name: 'nonce',
+      //         type: 'uint256',
+      //       },
+      //       {
+      //         name: 'data',
+      //         type: 'bytes',
+      //       },
+      //     ],
+      //   },
+      //   domain: {
+      //     name: 'TEST',
+      //     version: '0.0.1',
+      //     chainId: 1,
+      //     verifyingContract: '0x3216C8Ac30000d3Ec32Dd648f4Dd0de4f4774579',
+      //   },
+      //   primaryType: 'ForwardRequest',
+      //   message: {
+      //     to: '0x5ED76954e8e271Ea85462Bc23beA0412D8a5AE15',
+      //     from: '0xCc4949373fBDf5CB53c1d4b9DdF59F46d40bDfFF',
+      //     data: '0x',
+      //     gas: '21000',
+      //     value: '10000000000000000',
+      //     nonce: '6',
+      //   },
+      //   domain: {
+      //     name: 'TEST',
+      //     version: '0.0.1',
+      //     chainId: '8001',
+      //     verifyingContract: '0x3216C8Ac30000d3Ec32Dd648f4Dd0de4f4774579',
+      //   },
+      //   primaryType: 'ForwardRequest',
+      //   message: {
+      //     to: '0x5ED76954e8e271Ea85462Bc23beA0412D8a5AE15',
+      //     from: '0xCc4949373fBDf5CB53c1d4b9DdF59F46d40bDfFF',
+      //     data: '0x',
+      //     gas: '21000',
+      //     value: '10000000000000000',
+      //     nonce: '6',
+      //   },
+      // }
+
       // const signedTX = await matic.signTypedData({
       //   transport,
       //   appPrivateKey,
@@ -412,12 +414,12 @@ function CoinMatic(props: Props) {
       //   addressIndex: 0,
       // }); // sign typed data
 
-      const signedTx = await matic.signMessage({
+      const signedTx = await matic.signTypedData({
         transport,
         appPrivateKey,
         appId,
         addressIndex: 0,
-        message: message.message,
+        typedData: typedData.typedData,
       });
       
       return signedTx;
@@ -581,7 +583,7 @@ function CoinMatic(props: Props) {
         inputs={[
           {
             value: message.message,
-            onChange: (message) =>  setSignTransition(prevState => ({
+            onChange: (message) =>  setMessage(prevState => ({
               ...prevState,
               message
             })),
@@ -598,7 +600,7 @@ function CoinMatic(props: Props) {
         inputs={[
           {
             value: typedData.typedData,
-            onChange: (typedData) =>  setSignTransition(prevState => ({
+            onChange: (typedData) =>  setTypedData(prevState => ({
               ...prevState,
               typedData
             })),
