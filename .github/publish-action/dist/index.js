@@ -9628,10 +9628,10 @@ function getDiff(base, head, path, ref) {
                 case 0: return [4 /*yield*/, command('git', ['fetch', '--no-tags', '--no-recurse-submodules', '--depth=10000', 'origin', ref])];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, command('git', ['diff', base, head, '--name-only', '--', "".concat(path, "/src")])];
+                    return [4 /*yield*/, command('git', ['diff', base, head, '--name-only', '--', "".concat(path, "/package.json")])];
                 case 2:
                     diff = _a.sent();
-                    console.log(diff);
+                    console.log('diff :', diff);
                     if (!diff || diff.includes('fatal:'))
                         return [2 /*return*/, false];
                     return [2 /*return*/, true];

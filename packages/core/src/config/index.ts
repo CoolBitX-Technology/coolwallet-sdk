@@ -1,9 +1,9 @@
 import crypto from 'crypto';
-import { getPublicKey, Point } from '@noble/secp256k1';
 import * as general from '../apdu/general';
 import Transport from '../transport';
 import { SHA256 } from '../crypto/hash';
 import { SE_KEY_PARAM, PathType } from './param';
+import secp256k1 from 'secp256k1';
 
 const sha512 = (key: Buffer, data: Buffer): Buffer => crypto.createHmac('sha512', key).update(data).digest();
 
@@ -52,7 +52,7 @@ function getCompressedPublicKey(publicKey: string) {
  */
 async function getSEPublicKey(transport: Transport): Promise<string> {
   const cardId = await general.getCardId(transport);
-  console.debug(`cardId: ${cardId}`);
+  console.debug('cardId: ' + cardId);
   const cardIdHash = SHA256(cardId).toString('hex');
   const parseCardIdHash = parseInt(cardIdHash.slice(0, 2), 16) & 0x7f;
   const index = parseCardIdHash.toString(16).padStart(2, '0') + cardIdHash.slice(2, 8);
@@ -63,16 +63,19 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
     Buffer.from(SE_KEY_PARAM.chipMasterChainCode, 'hex'),
     Buffer.from(compressedPublicKey + index, 'hex')
   ).toString('hex');
-
   const privateKey = Buffer.from(addend.slice(0, 64), 'hex');
 
-  const fullPublicKey = getPublicKey(privateKey, false);
+  const fullPubilcKey = secp256k1.publicKeyCreate(privateKey, false);
+  const Ki = secp256k1.publicKeyCombine(
+    [
+      secp256k1.publicKeyConvert(fullPubilcKey),
+      secp256k1.publicKeyConvert(Buffer.from(SE_KEY_PARAM.chipMasterPublicKey, 'hex')),
+    ],
+    false
+  );
 
-  const Ki = Point.fromHex(fullPublicKey)
-    .add(Point.fromHex(Buffer.from(SE_KEY_PARAM.chipMasterPublicKey, 'hex')))
-    .toHex(false);
-
-  return Ki;
+  const SEPublicKey = Buffer.from(Ki).toString('hex');
+  return SEPublicKey;
 }
 
 export { getSEPublicKey, PathType };

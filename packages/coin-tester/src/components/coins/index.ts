@@ -2,10 +2,12 @@ import template from './template';
 import bnb from './bnb';
 import ADA from './ada';
 import CRONOS from './cronos';
-import ETC from './etc';
+import ETC from './ETC';
 import ETH from './eth';
 import CRO from './cro';
 import matic from './matic';
+import LUNA from './luna';
+
 export default [
   { path: 'template', Element: template },
   { path: 'bnb', Element: bnb },
@@ -15,4 +17,5 @@ export default [
   { path: 'cronos', Element: CRONOS },
   { path: 'cro', Element: CRO },
   { path: 'matic', Element: matic },
+  { path: 'luna', Element: LUNA},
 ];

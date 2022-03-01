@@ -126,8 +126,8 @@ function getPackageInfo(path:string): { version:string, name:string } {
 
 export async function getDiff(base:string, head:string, path:string, ref:string): Promise<boolean> {
 	await command('git', ['fetch', '--no-tags', '--no-recurse-submodules', '--depth=10000', 'origin', ref]);
-	const diff = await command('git', ['diff', base, head, '--name-only', '--', `${path}/src`]);
-	console.log(diff);
+	const diff = await command('git', ['diff', base, head, '--name-only', '--', `${path}/package.json`]);
+  console.log('diff :', diff);
 	if (!diff || diff.includes('fatal:')) return false;
 	return true;
 }
