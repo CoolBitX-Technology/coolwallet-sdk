@@ -9,7 +9,7 @@ const ec = new elliptic.ec('secp256k1');
 
 export const getRawHex = (
   transaction: EIP1559Transaction
-): Array<Buffer|Buffer[]> => {
+): Array<Buffer | Buffer[]> => {
   const rawData = [];
   rawData.push('89'); // chainId in hex form
   rawData.push(transaction.nonce);
@@ -19,7 +19,7 @@ export const getRawHex = (
   rawData.push(transaction.to);
   rawData.push(transaction.value);
   rawData.push(transaction.data);
-  const raw: Array<Buffer|Buffer[]> = rawData.map((d) => {
+  const raw: Array<Buffer | Buffer[]> = rawData.map((d) => {
     const hex = handleHex(d);
     if (hex === '00' || hex === '') {
       return Buffer.allocUnsafe(0);
@@ -33,14 +33,15 @@ export const getRawHex = (
 };
 
 export const composeSignedTransacton = (
-  payload: Array<Buffer|Buffer[]>, v: number, r: string, s: string
+  payload: Array<Buffer | Buffer[]>, v: number, r: string, s: string
 ): string => {
   const transaction = payload;
-  transaction.push(
-    Buffer.from([v]),
-    Buffer.from(r, 'hex'),
-    Buffer.from(s, 'hex')
-  );
+  if (v === 0) {
+    transaction.push(Buffer.allocUnsafe(0));
+  } else {
+    transaction.push(Buffer.from([v]));
+  }
+  transaction.push(Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
   const serializedTx = rlp.encode(transaction);
   return `0x02${serializedTx.toString('hex')}`;
 };
