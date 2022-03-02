@@ -45,12 +45,6 @@ function CoinMatic(props: Props) {
     result: '' 
   })
 
-  const [typedData, setTypedData] = useState({
-    typedData: '',
-    result: '' 
-  })
-  
-
   const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
     try {
@@ -75,7 +69,7 @@ function CoinMatic(props: Props) {
 
   const signLegacy = async () => {
     handleState(async () => {
-      const transactionData = `0x${legacy.data}`;
+      const transactionData = legacy.data ? `0x${legacy.data}` : "";
        // const transaction = {
       //   ...
       //   to: to
@@ -96,17 +90,15 @@ function CoinMatic(props: Props) {
       // }; //coin-matic-normal-tx-sc sample-data
 
       const transaction = {
-        chainId: 137,
+        chainId: "137",
         nonce:  web3.utils.toHex(await web3.eth.getTransactionCount(address, 'pending')),
-        gasTipCap: web3.utils.toHex(await web3.eth.getGasPrice()),
-        gasFeeCap: web3.utils.toHex(await web3.eth.getGasPrice()),
+        gasPrice: web3.utils.toHex(await web3.eth.getGasPrice()),
         gasLimit: web3.utils.toHex(await web3.eth.estimateGas({ to: legacy.to })),
         to: legacy.to,
         value: web3.utils.toHex(web3.utils.toWei(legacy.value, 'ether')), // 0.001
         data: transactionData,
         option: { info: { symbol: legacy.symbol, decimals: legacy.decimals } },
-      }; 
-      console.log(transaction);
+      };
 
 
       const appId = localStorage.getItem('appId');
@@ -122,8 +114,8 @@ function CoinMatic(props: Props) {
   };
 
   const signEIP1559 = async () => {
-    handleState(async () => { 
-      const transactionData = `0x${eip1559.data}`;
+    handleState(async () => {
+      const transactionData = eip1559.data ? `0x${eip1559.data}` : "";
       
     //  const transaction = {
     //      ...
@@ -153,8 +145,7 @@ function CoinMatic(props: Props) {
         value:  web3.utils.toHex(web3.utils.toWei(eip1559.value, 'ether')),
         data: transactionData,
         option: { info: { symbol: eip1559.symbol, decimals: eip1559.decimals } },
-      }; 
-      console.log(transaction);
+      };
       
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
@@ -176,6 +167,8 @@ function CoinMatic(props: Props) {
 
   const signMessage = async () => {
     handleState(async () => { 
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
 
       const signedTx = await matic.signMessage({
         transport,
@@ -187,102 +180,6 @@ function CoinMatic(props: Props) {
       
       return signedTx;
     } , (result) =>  setMessage(prevState => ({
-      ...prevState,
-      result}))
-    );
-  }
-
-  const signTypedData = async () => {
-    handleState(async () => { 
-      const typedData = {
-        types: {
-          EIP712Domain: [
-            {
-              name: 'name',
-              type: 'string',
-            },
-            {
-              name: 'version',
-              type: 'string',
-            },
-            {
-              name: 'chainId',
-              type: 'uint256',
-            },
-            {
-              name: 'verifyingContract',
-              type: 'address',
-            },
-          ],
-          ForwardRequest: [
-            {
-              name: 'from',
-              type: 'address',
-            },
-            {
-              name: 'to',
-              type: 'address',
-            },
-            {
-              name: 'value',
-              type: 'uint256',
-            },
-            {
-              name: 'gas',
-              type: 'uint256',
-            },
-            {
-              name: 'nonce',
-              type: 'uint256',
-            },
-            {
-              name: 'data',
-              type: 'bytes',
-            },
-          ],
-        },
-        domain: {
-          name: 'TEST',
-          version: '0.0.1',
-          chainId: 1,
-          verifyingContract: '0x3216C8Ac30000d3Ec32Dd648f4Dd0de4f4774579',
-        },
-        primaryType: 'ForwardRequest',
-        message: {
-          to: '0x5ED76954e8e271Ea85462Bc23beA0412D8a5AE15',
-          from: '0xCc4949373fBDf5CB53c1d4b9DdF59F46d40bDfFF',
-          data: '0x',
-          gas: '21000',
-          value: '10000000000000000',
-          nonce: '6',
-        },
-        domain: {
-          name: 'TEST',
-          version: '0.0.1',
-          chainId: '8001',
-          verifyingContract: '0x3216C8Ac30000d3Ec32Dd648f4Dd0de4f4774579',
-        },
-        primaryType: 'ForwardRequest',
-        message: {
-          to: '0x5ED76954e8e271Ea85462Bc23beA0412D8a5AE15',
-          from: '0xCc4949373fBDf5CB53c1d4b9DdF59F46d40bDfFF',
-          data: '0x',
-          gas: '21000',
-          value: '10000000000000000',
-          nonce: '6',
-        },
-      }
-
-      const signedTx = await matic.signTypedData({
-        transport,
-        appPrivateKey,
-        appId,
-        addressIndex: 0,
-        typedData
-      });
-      
-      return signedTx;
-    } , (result) =>  setTypedData(prevState => ({
       ...prevState,
       result}))
     );
@@ -416,13 +313,6 @@ function CoinMatic(props: Props) {
             placeholder: 'message',
           }
         ]}
-      />
-       <Inputs
-        btnTitle='Sign'
-        title='Sign Typed Data'
-        content={typedData.result}
-        onClick={signTypedData}
-        disabled={disabled}
       />
     </Container>
   );
