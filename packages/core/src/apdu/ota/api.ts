@@ -1,10 +1,10 @@
-import { KJUR } from 'jsrsasign';
 import JWTDecode from 'jwt-decode';
 import isEmpty from 'lodash/isEmpty';
 import { target } from '../../config/param';
 import Transport from '../../transport';
 import { executeCommand } from '../execute/execute';
 import { SDKError } from '../../error/errorHandle';
+import jwt from '../../utils/jwt';
 
 import type { APIOptions, Command } from './types';
 
@@ -24,17 +24,7 @@ const getAPIOption = async (cardId: string, challengeData = ''): Promise<APIOpti
     data = { cryptogram: challengeData, cwid: cardId };
   }
 
-  console.debug(data);
-
-  const iat = Math.floor(Date.now() / 1000);
-  const header = {
-    alg: 'HS256',
-    typ: 'JWT',
-  };
-  data = { iat, exp: iat + 60 * 60 * 24, ...data };
-  const payload = KJUR.jws.JWS.sign(header.alg, header, data, {
-    b64: Buffer.from(secret, 'utf-8').toString('base64'),
-  });
+  const payload = jwt(data, secret);
 
   const body = {
     keyNum: '1',
