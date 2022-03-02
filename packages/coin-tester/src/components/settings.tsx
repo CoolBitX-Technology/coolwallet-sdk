@@ -4,11 +4,11 @@ import { Transport, apdu, tx, utils, config } from '@coolwallet/core';
 import { NoInput, OneInput, ObjInputs } from '../utils/componentMaker';
 
 interface Props {
-  transport: Transport | null,
-  appPrivateKey: string,
-  appPublicKey: string,
-  isLocked: boolean,
-  setIsLocked: (isLocked:boolean) => void,
+  transport: Transport | null;
+  appPrivateKey: string;
+  appPublicKey: string;
+  isLocked: boolean;
+  setIsLocked: (isLocked: boolean) => void;
 }
 
 function Settings(props: Props) {
@@ -18,6 +18,8 @@ function Settings(props: Props) {
   const [isAppletExist, setIsAppletExist] = useState('');
   const [SEVersion, setSEVersion] = useState('');
   const [cardInfo, setCardInfo] = useState('');
+  const [cardMode, setCardMode] = useState('');
+  const [progress, setProgress] = useState('');
   const [displayAddressResult, setDisplayAddressResult] = useState('');
   const [resetStatus, setResetStatus] = useState('');
   const [registerStatus, setRegisterStatus] = useState('');
@@ -25,14 +27,8 @@ function Settings(props: Props) {
   const [mnemonicInput, setMnemonicInput] = useState('');
   const [mnemonicStatus, setMnemonicStatus] = useState('');
 
-  const [signingKeys, setSigningKeys] = useState([
-    'Script',
-    'Arguments',
-  ]);
-  const [signingValues, setSigningValues] = useState([
-    '',
-    '',
-  ]);
+  const [signingKeys, setSigningKeys] = useState(['Script', 'Arguments']);
+  const [signingValues, setSigningValues] = useState(['', '']);
   const [signature, setSignature] = useState('');
 
   useEffect(() => {
@@ -46,10 +42,7 @@ function Settings(props: Props) {
     }
   }, [transport]);
 
-  const handleState = async (
-    request: () => Promise<string>,
-    handleResponse: (response: string) => void
-  ) => {
+  const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
     try {
       const response = await request();
@@ -82,9 +75,35 @@ function Settings(props: Props) {
   const getCardInfo = async () => {
     handleState(async () => {
       const data = await apdu.info.getCardInfo(transport!);
-      const formattedData = `paired: ${data.paired}, locked: ${data.locked}, walletCreated: ${data.walletCreated},showDetail: ${data.showDetail}, pairRemainTimes: ${data.pairRemainTimes}`;
+      const formattedData = `paired: ${data.paired}, locked: ${data.locked}, walletCreated: ${data.walletCreated},showDetail: ${data.showDetail}, pairRemainTimes: ${data.pairRemainTimes}, cardanoSeed: ${data.cardanoSeed}`;
       return formattedData;
     }, setCardInfo);
+  };
+
+  const getCardMode = async () => {
+    handleState(async () => {
+      const data = await apdu.general.getSEMode(transport!);
+      return data;
+    }, setCardMode);
+  };
+
+  const upgradeSE = async () => {
+    handleState(async () => {
+      const cardId = await apdu.general.getCardId(transport!);
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      await apdu.ota.updateSE(
+        transport!,
+        cardId,
+        appId,
+        props.appPrivateKey,
+        (number) => {
+          setProgress('' + number);
+        },
+        fetch
+      );
+      return '100';
+    }, setProgress);
   };
 
   const toggleDisplayAddress = async () => {
@@ -107,9 +126,10 @@ function Settings(props: Props) {
 
   const register = async () => {
     handleState(async () => {
-      const name = 'TestAPP'
+      const name = 'TestAPP';
       const password = '12345678';
       const SEPublicKey = await config.getSEPublicKey(transport!);
+      console.log(SEPublicKey);
       const appId = await apdu.pair.register(transport!, props.appPublicKey, password, name, SEPublicKey);
       await localStorage.setItem('appId', appId);
       return appId;
@@ -119,7 +139,7 @@ function Settings(props: Props) {
   const createMnemonic = async () => {
     handleState(async () => {
       const crypto = require('crypto');
-      const mnemonic = await utils.createSeedByApp(12, crypto.randomBytes)
+      const mnemonic = await utils.createSeedByApp(12, crypto.randomBytes);
       return mnemonic;
     }, setMnemonic);
   };
@@ -139,8 +159,9 @@ function Settings(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const scriptSig = 'FA0000000000000000000000000000000000000000000000000000000000000000000000'
-                      + '000000000000000000000000000000000000000000000000000000000000000000000000';
+      const scriptSig =
+        'FA0000000000000000000000000000000000000000000000000000000000000000000000' +
+        '000000000000000000000000000000000000000000000000000000000000000000000000';
       await apdu.tx.sendScript(transport!, signingValues[0] + scriptSig);
       const encryptedSig = await apdu.tx.executeScript(transport!, appId, props.appPrivateKey, signingValues[1]);
       await apdu.tx.finishPrepare(transport!);
@@ -155,27 +176,12 @@ function Settings(props: Props) {
 
   return (
     <Container>
-      <div className='title2'>
-        Using these commands to check the state of CoolWallet Pro.
-      </div>
-      <NoInput
-        title='Firmware Exist'
-        content={isAppletExist}
-        onClick={checkApplet}
-        disabled={disabled}
-      />
-      <NoInput
-        title='Firmware Version'
-        content={SEVersion}
-        onClick={getSEVersion}
-        disabled={disabled}
-      />
-      <NoInput
-        title='Card Information'
-        content={cardInfo}
-        onClick={getCardInfo}
-        disabled={disabled}
-      />
+      <div className='title2'>Using these commands to check the state of CoolWallet Pro.</div>
+      <NoInput title='Firmware Exist' content={isAppletExist} onClick={checkApplet} disabled={disabled} />
+      <NoInput title='Firmware Version' content={SEVersion} onClick={getSEVersion} disabled={disabled} />
+      <NoInput title='Card Information' content={cardInfo} onClick={getCardInfo} disabled={disabled} />
+      <NoInput title='Card Mode' content={cardMode} onClick={getCardMode} disabled={disabled} />
+      <NoInput title='Upgrade SE' content={progress} onClick={upgradeSE} disabled={disabled} />
       <NoInput
         title='Toggle showDetail'
         content={displayAddressResult}
@@ -186,13 +192,7 @@ function Settings(props: Props) {
       <div className='title2'>
         By running through below commands, CoolWallet Pro would be ready to use for a coin sdk.
       </div>
-      <NoInput
-        title='Reset Card'
-        content={resetStatus}
-        onClick={resetCard}
-        disabled={disabled}
-        btnName='Reset'
-      />
+      <NoInput title='Reset Card' content={resetStatus} onClick={resetCard} disabled={disabled} btnName='Reset' />
       <NoInput
         title='Register Card'
         content={registerStatus}
@@ -218,9 +218,7 @@ function Settings(props: Props) {
         btnName='Recover'
         inputSize={6}
       />
-      <div className='title2'>
-        For Scriptable Signing Test
-      </div>
+      <div className='title2'>For Scriptable Signing Test</div>
       <ObjInputs
         title='Scriptable Signing'
         content={signature}

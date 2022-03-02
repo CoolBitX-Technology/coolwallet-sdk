@@ -1,4 +1,4 @@
-import { SignJWT } from 'jose';
+import { KJUR } from 'jsrsasign';
 import JWTDecode from 'jwt-decode';
 import isEmpty from 'lodash/isEmpty';
 import { target } from '../../config/param';
@@ -27,12 +27,14 @@ const getAPIOption = async (cardId: string, challengeData = ''): Promise<APIOpti
   console.debug(data);
 
   const iat = Math.floor(Date.now() / 1000);
-
-  const payload = await new SignJWT(data)
-    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-    .setIssuedAt(iat)
-    .setExpirationTime(iat + 60 * 60 * 24)
-    .sign(Buffer.from(secret, 'utf-8'));
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT',
+  };
+  data = { iat, exp: iat + 60 * 60 * 24, ...data };
+  const payload = KJUR.jws.JWS.sign(header.alg, header, data, {
+    b64: Buffer.from(secret, 'utf-8').toString('base64'),
+  });
 
   const body = {
     keyNum: '1',

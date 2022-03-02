@@ -23,7 +23,7 @@
     "bip66": "^1.1.5",
     "bn.js": "^5.1.1",
     "elliptic": "^6.5.3",
-    "jose": "^4.3.7",
+    "jsrsasign": "^10.5.8",
     "jwt-decode": "^3.1.2",
     "key-encoder": "^2.0.3",
     "lodash": "^4.17.21",
@@ -46,12 +46,11 @@
     "@babel/preset-env": "^7.8.0",
     "@babel/preset-typescript": "^7.8.0",
     "@shelf/fast-chunk-string": "^2.0.0",
-    "@types/secp256k1": "^4.0.3",
+    "@types/jsrsasign": "^9.0.3",
     "babel-jest": "^27.4.5",
     "del-cli": "^4.0.1",
     "jest": "^27.4.5",
     "mitt": "^3.0.0",
-    "secp256k1": "^4.0.3",
     "typescript": "^4.5.4"
   }
 }
