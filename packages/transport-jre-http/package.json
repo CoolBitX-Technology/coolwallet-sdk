@@ -7,7 +7,7 @@
     "test": "jest",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
-    "build": "del-cli lib; npm run build:types; npm run build:ts"
+    "build": "del-cli lib && npm run build:types && npm run build:ts"
   },
   "author": "coolwallet-team",
   "license": "Apache-2.0",

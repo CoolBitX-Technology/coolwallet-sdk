@@ -5,6 +5,7 @@ import CRONOS from './cronos';
 import ETC from './ETC';
 import ETH from './eth';
 import CRO from './cro';
+import matic from './matic';
 import LUNA from './luna';
 
 export default [
@@ -15,5 +16,6 @@ export default [
   { path: 'etc', Element: ETC },
   { path: 'cronos', Element: CRONOS },
   { path: 'cro', Element: CRO },
+  { path: 'matic', Element: matic },
   { path: 'luna', Element: LUNA},
 ];
