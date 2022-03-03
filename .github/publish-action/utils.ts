@@ -18,13 +18,13 @@ export async function isLocalUpgraded(path: string) {
   const { version, name } = getPackageInfo(path);
   const remoteVersion = semver.clean(await command('npm', ['view', name, 'version'])) ?? '';
   console.log(`${name}`);
-  console.log(`remote version: ${remoteVersion}`)
-  console.log(`local version: ${version}`)
+  console.log(`remote version: ${remoteVersion}`);
+  console.log(`local version: ${version}`);
   return semver.gt(version, remoteVersion);
 }
 
 export async function buildAndPublish(path: string) {
-  const { version } = getPackageInfo(path);
+  const { name, version } = getPackageInfo(path);
   const preRelease = semver.prerelease(version);
   const isBeta = betaList.includes('' + preRelease?.[0]);
   const installLogs = await command('npm', ['ci'], path);
@@ -35,6 +35,7 @@ export async function buildAndPublish(path: string) {
   if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
   const result = await command('npm', publishArgs, path);
   console.log('npm publish :', result);
+  await pushTag(`${name}@${version}`);
 }
 
 function getPackageInfo(path: string): { version: string; name: string } {
@@ -43,6 +44,12 @@ function getPackageInfo(path: string): { version: string; name: string } {
   const version = packageObj.version;
   const name = packageObj.name;
   return { version, name };
+}
+
+async function pushTag(tag: string) {
+  await command('git', ['tag', tag]);
+  const result = await command('git', ['push', '--tags']);
+  console.log('git push --tags :', result);
 }
 
 function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
