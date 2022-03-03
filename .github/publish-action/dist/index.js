@@ -15814,28 +15814,31 @@ function isLocalUpgraded(path) {
 exports.isLocalUpgraded = isLocalUpgraded;
 function buildAndPublish(path) {
     return __awaiter(this, void 0, void 0, function () {
-        var version, preRelease, isBeta, installLogs, buildLogs, publishArgs, result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a, name, version, preRelease, isBeta, installLogs, buildLogs, publishArgs, result;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    version = getPackageInfo(path).version;
+                    _a = getPackageInfo(path), name = _a.name, version = _a.version;
                     preRelease = semver_1.default.prerelease(version);
                     isBeta = betaList.includes('' + (preRelease === null || preRelease === void 0 ? void 0 : preRelease[0]));
                     return [4 /*yield*/, command('npm', ['ci'], path)];
                 case 1:
-                    installLogs = _a.sent();
+                    installLogs = _b.sent();
                     console.log('npm ci :', installLogs);
                     return [4 /*yield*/, command('npm', ['run', 'build'], path)];
                 case 2:
-                    buildLogs = _a.sent();
+                    buildLogs = _b.sent();
                     console.log('npm run build :', buildLogs);
                     publishArgs = ['publish', '--access', 'public'];
                     if (isBeta)
                         publishArgs = publishArgs.concat(['--tag', 'beta']);
                     return [4 /*yield*/, command('npm', publishArgs, path)];
                 case 3:
-                    result = _a.sent();
+                    result = _b.sent();
                     console.log('npm publish :', result);
+                    return [4 /*yield*/, pushTag("".concat(name, "@").concat(version))];
+                case 4:
+                    _b.sent();
                     return [2 /*return*/];
             }
         });
@@ -15848,6 +15851,23 @@ function getPackageInfo(path) {
     var version = packageObj.version;
     var name = packageObj.name;
     return { version: version, name: name };
+}
+function pushTag(tag) {
+    return __awaiter(this, void 0, void 0, function () {
+        var result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, command('git', ['tag', tag])];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, command('git', ['push', '--tags'])];
+                case 2:
+                    result = _a.sent();
+                    console.log('git push --tags :', result);
+                    return [2 /*return*/];
+            }
+        });
+    });
 }
 function command(cmd, args, cwd) {
     return new Promise(function (resolve, reject) {
