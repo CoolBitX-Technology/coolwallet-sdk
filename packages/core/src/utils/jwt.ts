@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 function toBase64Url(buf: string, encoding: BufferEncoding = 'utf-8') {
-  return Buffer.from(buf, encoding).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=*$/, '');
+  return Buffer.from(buf, encoding).toString('base64').replace(/[=]/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
 function jwt(data: Record<string, string | number>, secret: string) {
@@ -13,8 +13,8 @@ function jwt(data: Record<string, string | number>, secret: string) {
   const bs64Header = toBase64Url(JSON.stringify(header));
   const bs64Payload = toBase64Url(JSON.stringify(payload));
 
-  const hmac = crypto.createHmac('sha256', Buffer.from(secret));
-  hmac.update(Buffer.from(bs64Header + '.' + bs64Payload));
+  const hmac = crypto.createHmac('sha256', secret);
+  hmac.update(bs64Header + '.' + bs64Payload);
   const sig = hmac.digest('hex');
   const bs64Sig = toBase64Url(sig, 'hex');
   return bs64Header + '.' + bs64Payload + '.' + bs64Sig;
