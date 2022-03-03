@@ -3,7 +3,9 @@ import * as general from '../apdu/general';
 import Transport from '../transport';
 import { SHA256 } from '../crypto/hash';
 import { SE_KEY_PARAM, PathType } from './param';
-import secp256k1 from 'secp256k1';
+import { ec as EC } from 'elliptic';
+
+const secp256k1 = new EC('secp256k1');
 
 const sha512 = (key: Buffer, data: Buffer): Buffer => crypto.createHmac('sha512', key).update(data).digest();
 
@@ -65,17 +67,13 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
   ).toString('hex');
   const privateKey = Buffer.from(addend.slice(0, 64), 'hex');
 
-  const fullPubilcKey = secp256k1.publicKeyCreate(privateKey, false);
-  const Ki = secp256k1.publicKeyCombine(
-    [
-      secp256k1.publicKeyConvert(fullPubilcKey),
-      secp256k1.publicKeyConvert(Buffer.from(SE_KEY_PARAM.chipMasterPublicKey, 'hex')),
-    ],
-    false
-  );
+  const keyPair = secp256k1.keyFromPrivate(privateKey);
+  const publicKey = keyPair.getPublic();
+  const chipMasterPublicKey = secp256k1.keyFromPublic(Buffer.from(SE_KEY_PARAM.chipMasterPublicKey, 'hex')).getPublic();
 
-  const SEPublicKey = Buffer.from(Ki).toString('hex');
-  return SEPublicKey;
+  const Ki = publicKey.add(chipMasterPublicKey);
+
+  return Ki.encode("hex", false);
 }
 
 export { getSEPublicKey, PathType };
