@@ -215,6 +215,14 @@ const signedTx = await ETH.signTransaction(signTxData);
 
 ```
 
+## Scripts
+
+- `bootstrap`: Initialize monorepo environment with lerna.
+- `build`: Build all packages.
+- `clean`: Remove all packages's node_modules.
+- `ci`: Script for CI.
+- `update:lock`: Update package-lock.json information.
+
 ## Contributing
 
 If you're interested to develop new coin for CoolWallet Pro, please see [CONTRIBUTING](./CONTRIBUTING.md) for more information.

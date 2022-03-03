@@ -1,25 +1,5 @@
 {
-  "packages": [
-    "packages/coin-ada",
-    "packages/coin-atom",
-    "packages/coin-bch",
-    "packages/coin-bnb",
-    "packages/coin-bsc",
-    "packages/coin-btc",
-    "packages/coin-cro",
-    "packages/coin-cronos",
-    "packages/coin-dot",
-    "packages/coin-etc",
-    "packages/coin-eth",
-    "packages/coin-icx",
-    "packages/coin-ltc",
-    "packages/coin-trx",
-    "packages/coin-xlm",
-    "packages/coin-xrp",
-    "packages/coin-zen",
-    "packages/transport-jre-http",
-    "packages/transport-web-ble"
-  ],
+  "packages": ["packages/*"],
   "version": "1.1.2",
   "command": {
     "bootstrap": {
