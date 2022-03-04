@@ -70,10 +70,9 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
       reject(err);
     });
 
-    command.on('close', () => {
-      if (stderr) resolve(stderr);
-      if (stdout) resolve(stdout);
-      resolve('');
+    command.on('exit', (code) => {
+      if (code !== 0) reject(stderr);
+      resolve(stdout);
     });
   });
 }
