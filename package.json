@@ -34,5 +34,8 @@
     "test": "jest",
     "build-template": "cd packages/core && npm ci && npm run build && cd ../transport-web-ble && npm ci && npm run build && cd ../transport-jre-http && npm ci && npm run build && cd ../coin-template && npm ci && npm run build"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@coolwallet/core": "^1.1.3"
+  }
 }
