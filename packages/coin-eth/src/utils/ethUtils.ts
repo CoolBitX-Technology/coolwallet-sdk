@@ -79,6 +79,8 @@ export const genEthSigFromSESig = async (
   const keyPair = ec.keyFromPublic(compressedPubkey!, 'hex');
 
   // get v
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const recoveryParam = ec.getKeyRecoveryParam(data, canonicalSignature, keyPair.getPublic());
   const v = recoveryParam + 27;
   const { r } = canonicalSignature;
