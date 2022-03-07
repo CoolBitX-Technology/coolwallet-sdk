@@ -35,9 +35,6 @@ export const signTransaction = async (
         authorizedCB,
         true
     );
-
-    const { signedTx } = await core.apdu.tx.getSignedHex(transport);
-    console.debug("signedTx: ", signedTx);
   
     if (!Buffer.isBuffer(canonicalSignature)) {
         const lunaSignature = await txUtil.genLUNASigFromSESig(canonicalSignature);
