@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import semver from 'semver';
 import { spawn } from 'child_process';
 
@@ -27,7 +28,7 @@ export async function isLocalUpgraded(path: string) {
   } catch (e) {
     const error = e as Error;
     if (error.message.includes(NPM_404_ERR_CODE)) {
-      console.log('Cannot find package in the npm registry, trying to publish it!')
+      console.log('Cannot find package in the npm registry, trying to publish it!');
       return true;
     }
   }
@@ -36,17 +37,22 @@ export async function isLocalUpgraded(path: string) {
 
 export async function buildAndPublish(path: string) {
   const { name, version } = getPackageInfo(path);
-  const preRelease = semver.prerelease(version);
-  const isBeta = betaList.includes('' + preRelease?.[0]);
-  const installLogs = await command('npm', ['ci'], path);
-  console.log('npm ci :', installLogs);
-  const buildLogs = await command('npm', ['run', 'build'], path);
-  console.log('npm run build :', buildLogs);
-  let publishArgs = ['publish', '--access', 'public'];
-  if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
-  const result = await command('npm', publishArgs, path);
-  console.log('npm publish :', result);
-  await pushTag(`${name}@${version}`);
+  try {
+    const preRelease = semver.prerelease(version);
+    const isBeta = betaList.includes('' + preRelease?.[0]);
+    const installLogs = await command('npm', ['ci'], path);
+    console.log('npm ci :', installLogs);
+    const buildLogs = await command('npm', ['run', 'build'], path);
+    console.log('npm run build :', buildLogs);
+    let publishArgs = ['publish', '--access', 'public'];
+    if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
+    const result = await command('npm', publishArgs, path);
+    console.log('npm publish :', result);
+    await pushTag(`${name}@${version}`);
+  } catch (e) {
+    const error = e as Error;
+    core.error(`Cannot publish package ${name}, reason: ${error.message}`)
+  }
 }
 
 function getPackageInfo(path: string): { version: string; name: string } {
