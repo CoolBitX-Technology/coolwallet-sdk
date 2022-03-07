@@ -59,6 +59,6 @@ async function run() {
 try {
   run();
 } catch (e) {
-	const error = e as Error;
+  const error = e as Error;
   core.setFailed(error.message);
 }
