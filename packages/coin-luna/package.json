@@ -31,6 +31,8 @@
   },
   "homepage": "https://github.com/CoolBitX-Technology/coolwallet3-sdk#readme",
   "dependencies": {
-    "bech32": "^2.0.0"
+    "bech32": "^2.0.0",
+    "protocol-buffers": "^4.2.0",
+    "protocol-buffers-encodings": "^1.1.1"
   }
 }

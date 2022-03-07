@@ -1,33 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
-import { Transport, apdu, utils, config } from '@coolwallet/core';
-import web3 from 'web3';
+import { Transport } from '@coolwallet/core';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
+import { CHAIN_ID, TX_TYPE, SignDataType } from '@coolwallet/luna/lib/config/types';
+import BigNumber from 'bignumber.js';
 
+import cosmosjs from './cosmos';
 import Luna from '@coolwallet/luna';
 
 interface Props {
-  transport: Transport | null,
-  appPrivateKey: string,
-  appPublicKey: string,
-  isLocked: boolean,
-  setIsLocked: (isLocked:boolean) => void,
+  transport: Transport | null;
+  appPrivateKey: string;
+  appPublicKey: string;
+  isLocked: boolean;
+  setIsLocked: (isLocked: boolean) => void;
 }
 
 function CoinLuna(props: Props) {
   const luna = new Luna();
   const [address, setAddress] = useState('');
-//   const [signedTransaction, setSignedTransaction] = useState('');
-//   const [value, setValue] = useState('0');
-//   const [to, setTo] = useState('0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C');
+  const [signedTransaction, setSignedTransaction] = useState('');
+  const [value, setValue] = useState('0');
+  const [to, setTo] = useState('terra1seckusy09dzgtyxtz9xqzg2x7xfgtf0lhyzmf9');
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
 
-  const handleState = async (
-    request: () => Promise<string>,
-    handleResponse: (response: string) => void
-  ) => {
+  const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
     try {
       const response = await request();
@@ -48,37 +47,46 @@ function CoinLuna(props: Props) {
     }, setAddress);
   };
 
-//   const signTransaction = async () => {
-//     handleState(async () => {
-//       const transaction = {
-//         chainId: 1,
-//         nonce: '0x289',
-//         gasPrice: '0x20c855800',
-//         gasLimit: '0x520c',
-//         to: to,
-//         value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
-//         data: '',
-//       };
-
-//       const appId = localStorage.getItem('appId');
-//       if (!appId) throw new Error('No Appid stored, please register!');
-//       const signedTx = await temp.signTransaction(transport!, appPrivateKey, appId, 0, transaction);
-//       return signedTx;
-//     }, setSignedTransaction);
-//   };
+  const signTransaction = async () => {
+    handleState(async () => {
+      const { sequence, account_number } = await cosmosjs.getSequence(address);
+      const transaction = {
+        chainId: CHAIN_ID.LUNA,
+        fromAddress: address,
+        toAddress: to,
+        amount: new BigNumber(value).multipliedBy(1000000).toNumber(),
+        feeAmount: 1000,
+        gas: 85000,
+        accountNumber: account_number,
+        sequence,
+        memo: 'test signature',
+      };
+      console.log(transaction);
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const signTxData: SignDataType = {
+        txType: TX_TYPE.SEND,
+        transaction: transaction,
+        transport: transport!,
+        appPrivateKey,
+        appId,
+        addressIndex: 0,
+        confirmCB: undefined,
+        authorizedCB: undefined,
+      };
+      const signedTx = await luna.signTransaction(signTxData);
+      console.log('signedTx: ' + signedTx);
+      const sendTx = await cosmosjs.broadcastGRPC(signedTx);
+      console.log('sendTx: ' + sendTx);
+      return sendTx;
+    }, setSignedTransaction);
+  };
 
   return (
     <Container>
-      <div className='title2'>
-        These two basic methods are required to implement in a coin sdk.
-      </div>
-      <NoInput
-        title='Get Address'
-        content={address}
-        onClick={getAddress}
-        disabled={disabled}
-      />
-      {/* <TwoInputs
+      <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
+      <NoInput title='Get Address' content={address} onClick={getAddress} disabled={disabled} />
+      <TwoInputs
         title='Sign Transaction'
         content={signedTransaction}
         onClick={signTransaction}
@@ -92,7 +100,7 @@ function CoinLuna(props: Props) {
         setValue2={setTo}
         placeholder2='to'
         inputSize2={3}
-      /> */}
+      />
     </Container>
   );
 }
