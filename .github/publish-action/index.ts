@@ -11,9 +11,9 @@ async function checkAndPublish(context: Context, path: string) {
   const isUpgraded = await isLocalUpgraded(path);
 
   if (isUpgraded) {
-    console.log('Version upgrade!');
+    console.log('Should publish a new version.');
   } else {
-    console.log('Version same or smaller!');
+    console.log('Locale version is same as the npm registry.');
     return;
   }
 

@@ -12477,10 +12477,10 @@ function checkAndPublish(context, path) {
                 case 1:
                     isUpgraded = _a.sent();
                     if (isUpgraded) {
-                        console.log('Version upgrade!');
+                        console.log('Should publish a new version.');
                     }
                     else {
-                        console.log('Version same or smaller!');
+                        console.log('Locale version is same as the npm registry.');
                         return [2 /*return*/];
                     }
                     ref = context.ref.split('/')[2];
@@ -12636,6 +12636,7 @@ exports.buildAndPublish = exports.isLocalUpgraded = exports.installCore = void 0
 var semver_1 = __importDefault(__nccwpck_require__(1383));
 var child_process_1 = __nccwpck_require__(2081);
 var betaList = ['beta', 'hotfix', 'stg'];
+var NPM_404_ERR_CODE = 'npm ERR! code E404';
 function installCore(isBeta) {
     if (isBeta === void 0) { isBeta = false; }
     return __awaiter(this, void 0, void 0, function () {
@@ -12662,19 +12663,31 @@ exports.installCore = installCore;
 function isLocalUpgraded(path) {
     var _a;
     return __awaiter(this, void 0, void 0, function () {
-        var _b, version, name, remoteVersion, _c, _d;
+        var _b, version, name, remoteVersion, _c, _d, e_1, error;
         return __generator(this, function (_e) {
             switch (_e.label) {
                 case 0:
                     _b = getPackageInfo(path), version = _b.version, name = _b.name;
+                    console.log("".concat(name));
+                    _e.label = 1;
+                case 1:
+                    _e.trys.push([1, 3, , 4]);
                     _d = (_c = semver_1.default).clean;
                     return [4 /*yield*/, command('npm', ['view', name, 'version'])];
-                case 1:
+                case 2:
                     remoteVersion = (_a = _d.apply(_c, [_e.sent()])) !== null && _a !== void 0 ? _a : '';
-                    console.log("".concat(name));
                     console.log("remote version: ".concat(remoteVersion));
                     console.log("local version: ".concat(version));
                     return [2 /*return*/, semver_1.default.gt(version, remoteVersion)];
+                case 3:
+                    e_1 = _e.sent();
+                    error = e_1;
+                    if (error.message.includes(NPM_404_ERR_CODE)) {
+                        console.log('Cannot find package in the npm registry, trying to publish it!');
+                        return [2 /*return*/, true];
+                    }
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/, false];
             }
         });
     });
@@ -12753,7 +12766,7 @@ function command(cmd, args, cwd) {
         });
         command.on('exit', function (code) {
             if (code !== 0)
-                reject(stderr);
+                reject(new Error(stderr));
             resolve(stdout);
         });
     });

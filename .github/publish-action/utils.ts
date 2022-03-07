@@ -3,6 +3,8 @@ import { spawn } from 'child_process';
 
 const betaList = ['beta', 'hotfix', 'stg'];
 
+const NPM_404_ERR_CODE = 'npm ERR! code E404';
+
 export async function installCore(isBeta: boolean = false) {
   const packageName = isBeta ? '@coolwallet/core@beta' : '@coolwallet/core';
   await command('npm', ['i', packageName]);
@@ -16,11 +18,20 @@ export async function installCore(isBeta: boolean = false) {
  */
 export async function isLocalUpgraded(path: string) {
   const { version, name } = getPackageInfo(path);
-  const remoteVersion = semver.clean(await command('npm', ['view', name, 'version'])) ?? '';
   console.log(`${name}`);
-  console.log(`remote version: ${remoteVersion}`);
-  console.log(`local version: ${version}`);
-  return semver.gt(version, remoteVersion);
+  try {
+    const remoteVersion = semver.clean(await command('npm', ['view', name, 'version'])) ?? '';
+    console.log(`remote version: ${remoteVersion}`);
+    console.log(`local version: ${version}`);
+    return semver.gt(version, remoteVersion);
+  } catch (e) {
+    const error = e as Error;
+    if (error.message.includes(NPM_404_ERR_CODE)) {
+      console.log('Cannot find package in the npm registry, trying to publish it!')
+      return true;
+    }
+  }
+  return false;
 }
 
 export async function buildAndPublish(path: string) {
@@ -71,7 +82,7 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
     });
 
     command.on('exit', (code) => {
-      if (code !== 0) reject(stderr);
+      if (code !== 0) reject(new Error(stderr));
       resolve(stdout);
     });
   });
