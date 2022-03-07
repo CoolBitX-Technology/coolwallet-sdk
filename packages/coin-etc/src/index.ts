@@ -28,12 +28,27 @@ export default class ETC implements COIN.Coin {
     const accExtKeyBuf = Buffer.from(accExtKey, 'hex');
     const accPublicKey = accExtKeyBuf.slice(0, 33);
     const accChainCode = accExtKeyBuf.slice(33);
+    return this.getPublicKeyByAccountKey(accPublicKey, accChainCode, addressIndex);
+  };
 
+  getPublicKeyByAccountKey = (
+    accPublicKey: Buffer,
+    accChainCode: Buffer,
+    addressIndex: number
+  ): string => {
     const accNode = bip32.fromPublicKey(accPublicKey, accChainCode);
     const changeNode = accNode.derive(0);
     const addressNode = changeNode.derive(addressIndex);
     const publicKey = addressNode.publicKey.toString('hex');
     return publicKey;
+  };
+
+  publicKeyToAddress = (publicKey: string) => {
+    const uncompressedKey = ec.keyFromPublic(publicKey, 'hex').getPublic(false, 'hex');
+    const keyBuffer = Buffer.from(uncompressedKey.substr(2), 'hex');
+    const keyHash = createKeccakHash('keccak256').update(keyBuffer).digest('hex');
+    const address = '0x'.concat(keyHash.substr(-40));
+    return address;
   };
 
   getAddress = async (
@@ -43,11 +58,19 @@ export default class ETC implements COIN.Coin {
     addressIndex: number
   ): Promise<string> => {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    const uncompressedKey = ec.keyFromPublic(publicKey, 'hex').getPublic(false, 'hex');
-    const keyBuffer = Buffer.from(uncompressedKey.substr(2), 'hex');
-    const keyHash = createKeccakHash('keccak256').update(keyBuffer).digest('hex');
-    const address = '0x'.concat(keyHash.substr(-40));
-    return address;
+    return this.publicKeyToAddress(publicKey);
+  };
+
+  getAddressByAccountKey = async (
+    accPublicKey: string,
+    accChainCode: string,
+    addressIndex: number
+  ): Promise<string> => {
+    const publicKey = await this.getPublicKeyByAccountKey(
+      Buffer.from(accPublicKey, 'hex'),
+      Buffer.from(accChainCode, 'hex'),
+      addressIndex);
+    return this.publicKeyToAddress(publicKey);
   };
 
   signTransaction = async (
