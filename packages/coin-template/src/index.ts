@@ -16,6 +16,15 @@ export default class Template implements COIN.Coin {
     appId: string,
     addressIndex: number
   ): Promise<string> => {
+    const { accPublicKey, accChainCode } = await this.getAccountPubKeyAndChainCode(transport, appId, appPrivateKey);
+    return this.getPublicKeyByAccountKey(accPublicKey, accChainCode, addressIndex);
+  };
+
+  getAccountPubKeyAndChainCode = async (
+    transport: Transport,
+    appId: string,
+    appPrivateKey: string
+  ): Promise<{accPublicKey:string, accChainCode:string}> => {
 
 
     // *** 1. Full Path ***
@@ -44,17 +53,19 @@ export default class Template implements COIN.Coin {
 
     const accExtKey = await COIN.getPublicKeyByPath(transport, appId, appPrivateKey, path);
     const accExtKeyBuf = Buffer.from(accExtKey, 'hex');
-    const accPublicKey = accExtKeyBuf.slice(0, 33);
-    const accChainCode = accExtKeyBuf.slice(33);
-    return this.getPublicKeyByAccountKey(accPublicKey, accChainCode, addressIndex);
+    const accPublicKey = accExtKeyBuf.slice(0, 33).toString('hex');
+    const accChainCode = accExtKeyBuf.slice(33).toString('hex');
+    return { accPublicKey, accChainCode };
   };
 
   getPublicKeyByAccountKey = (
-    accPublicKey: Buffer,
-    accChainCode: Buffer,
+    accPublicKey: string,
+    accChainCode: string,
     addressIndex: number
   ): string => {
-    const accNode = bip32.fromPublicKey(accPublicKey, accChainCode);
+    const accNode = bip32.fromPublicKey(
+      Buffer.from(accPublicKey, 'hex'),
+      Buffer.from(accChainCode, 'hex'));
     const changeNode = accNode.derive(0);
     const addressNode = changeNode.derive(addressIndex);
     const publicKey = addressNode.publicKey.toString('hex');
@@ -84,10 +95,7 @@ export default class Template implements COIN.Coin {
     accChainCode: string,
     addressIndex: number
   ): Promise<string> => {
-    const publicKey = await this.getPublicKeyByAccountKey(
-      Buffer.from(accPublicKey, 'hex'),
-      Buffer.from(accChainCode, 'hex'),
-      addressIndex);
+    const publicKey = await this.getPublicKeyByAccountKey(accPublicKey, accChainCode, addressIndex);
     return this.publicKeyToAddress(publicKey);
   };
 
