@@ -15703,6 +15703,9 @@ function run() {
                     return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
                 case 19:
                     _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
+                case 20:
+                    _a.sent();
                     return [2 /*return*/];
             }
         });

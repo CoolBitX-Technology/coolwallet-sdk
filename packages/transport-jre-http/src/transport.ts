@@ -1,5 +1,4 @@
 import { Transport } from '@coolwallet/core';
-import PeripheralRequest from '@coolwallet/core/lib/device/ble/PeripheralRequest';
 import { TransportError } from '@coolwallet/core/lib/error';
 import { createAxiosInstance } from './services/http';
 import { decodeCommand } from './utils';
@@ -8,16 +7,11 @@ import { PID, CMD_LEN } from './configs/commands';
 import type { Device } from 'react-native-ble-plx';
 import type { Axios } from 'axios';
 
-class JRETransport implements Transport {
-  peripheral: PeripheralRequest;
-
-  device: BluetoothDevice | Device;
-
+class JRETransport extends Transport {
   requestAxios: Axios;
 
   constructor(baseURL: string) {
-    this.device = { name: 'JRE' } as Device;
-    this.peripheral = new PeripheralRequest(this);
+    super({ name: 'JRE' } as Device);
     this.requestAxios = createAxiosInstance(baseURL);
   }
 

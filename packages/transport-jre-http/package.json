@@ -12,7 +12,6 @@
   "author": "coolwallet-team",
   "license": "Apache-2.0",
   "dependencies": {
-    "@coolwallet/core": "^1.1.1",
     "axios": "^0.25.0",
     "lodash": "^4.17.21"
   },
@@ -24,6 +23,7 @@
     "@babel/core": "^7.16.10",
     "@babel/preset-env": "^7.16.10",
     "@babel/preset-typescript": "^7.16.7",
+    "@coolwallet/core": "^1.1.1",
     "babel-jest": "^27.4.6",
     "del-cli": "^4.0.1",
     "jest": "^27.4.7",
