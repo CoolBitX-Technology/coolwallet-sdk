@@ -23,7 +23,7 @@ export default class ETC implements COIN.Coin {
     transport: Transport,
     appId: string,
     appPrivateKey: string
-  ): Promise<{accPublicKey:string, accChainCode:string}> => {
+  ): Promise<{ accPublicKey: string; accChainCode: string }> => {
     // *** 1. Define Full Path: 44'/61'/0' as the path for Ethereum Classic
     const path = utils.getFullPath({
       pathType: config.PathType.BIP32,
@@ -37,14 +37,8 @@ export default class ETC implements COIN.Coin {
     return { accPublicKey, accChainCode };
   };
 
-  getPublicKeyByAccountKey = (
-    accPublicKey: string,
-    accChainCode: string,
-    addressIndex: number
-  ): string => {
-    const accNode = bip32.fromPublicKey(
-      Buffer.from(accPublicKey, 'hex'),
-      Buffer.from(accChainCode, 'hex'));
+  getPublicKeyByAccountKey = (accPublicKey: string, accChainCode: string, addressIndex: number): string => {
+    const accNode = bip32.fromPublicKey(Buffer.from(accPublicKey, 'hex'), Buffer.from(accChainCode, 'hex'));
     const changeNode = accNode.derive(0);
     const addressNode = changeNode.derive(addressIndex);
     const publicKey = addressNode.publicKey.toString('hex');
@@ -86,7 +80,7 @@ export default class ETC implements COIN.Coin {
     transaction: Transaction
   ): Promise<string> => {
     const script =
-      '03040601C707000000003DA00700C2ACD70032FFF8C2ACD7001EFFF6C2ACD70028FFF6CC071094CAA02700C2A2D700FFF6CC071080CC0E103DC2E09700CC07C0028080BE0710DC07C003455443CC0FC0023078BAA02F6C0E04DDF09700DAA2D7C0FFF612D207CC05065052455353425554546F4E';
+      `03040601C707000000003DA00700C2ACD70032FFF8C2ACD7001EFFF6C2ACD70028FFF6CC071094CAA02700C2A2D700FFF6CC071080CC0E103DC2E09700CC07C0028080BE0710DC07C003455443CC0FC0023078BAA02F6C0E04DDF09700DAA2D7C0FFF612D207CC05065052455353425554546F4E`;
     return this.doTransaction(transport, appPrivateKey, appId, addressIndex, transaction, script);
   };
 
@@ -101,7 +95,10 @@ export default class ETC implements COIN.Coin {
     // *** 1. send script with signature
 
     const scriptSig =
-      'FA0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
+      `3045022100C75C82DBAD0B2FEF75E40828F281F49A963E420221D4A7CF95575ED265DC010502202CE1484B54E51AAFF93368583C9CD3474DEE423355C1BFAD025BF6907458CB7B`.padStart(
+        144,
+        '0'
+      );
 
     await apdu.tx.sendScript(transport, script + scriptSig);
 
@@ -155,7 +152,9 @@ export default class ETC implements COIN.Coin {
 
     const vValue = v + transaction.chainId * 2 + 8;
     const signedTransaction = rawTx.slice(0, 6);
-    signedTransaction.push(Buffer.from([vValue]), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
+    const vBuf = Buffer.allocUnsafe(6);
+    vBuf.writeIntBE(vValue, 0, 6);
+    signedTransaction.push(Buffer.from(vBuf.filter((e) => e !== 0)), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
     const serializedTx = rlp.encode(signedTransaction);
     return `0x${serializedTx.toString('hex')}`;
   };
