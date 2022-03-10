@@ -123,9 +123,15 @@ export default class ETC implements COIN.Coin {
 
     const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
+    if (typeof transaction.confirmCB === "function") {
+      transaction.confirmCB();
+    }
     await apdu.tx.finishPrepare(transport);
     await apdu.tx.getTxDetail(transport);
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
+    if (typeof transaction.authorizedCB === "function") {
+      transaction.authorizedCB();
+    }
     await apdu.tx.clearTransaction(transport);
     await apdu.mcu.control.powerOff(transport);
     const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
