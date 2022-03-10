@@ -53,17 +53,6 @@ export default class XTZ extends COIN.EDDSACoin implements COIN.Coin {
     return codecUtil.pubKeyToAddress(publicKey);
   }
 
-  async isRevealNeeded(
-    transport: Transport, appPrivateKey: string, appId: string, addressIndex: number = 0, nodeUrl: string,
-  ): Promise<Boolean> {
-    const publicKey = await this.getPublicKeyByPathType(transport, appPrivateKey, appId, addressIndex);
-    const address = codecUtil.pubKeyToAddress(publicKey);
-    const Tezos = new TezosToolkit(nodeUrl);
-    const manager = await Tezos.rpc.getManagerKey(address);
-    const haveManager = manager && typeof manager === 'object' ? !!manager.key : !!manager;
-    return !haveManager; 
-  }
-
   async signTransaction(
     signTxData: types.SignTxData,
     operation: types.xtzTransaction

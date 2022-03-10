@@ -100,10 +100,10 @@ function CoinXTZ(props: Props) {
       if(address == '') {
         return 'Get address first';
       }
-      const appId = localStorage.getItem('appId');
-      if (!appId) throw new Error('No Appid stored, please register!');
-      const isRevealNeeded = await xtz.isRevealNeeded(transport!, appPrivateKey, appId, selectedIndex, selectedNode);
-      return isRevealNeeded.toString();
+      const Tezos = new TezosToolkit(node);
+      const manager = await Tezos.rpc.getManagerKey(address);
+      const haveManager = manager && typeof manager === 'object' ? !!manager.key : !!manager;
+      return (!haveManager).toString(); 
     }, checkRevealNeeded);
   };
 

@@ -152,32 +152,6 @@ async getPublicKeyHash(
 |     appId     |       ID for the connected application       |   string  |    True   |
 |  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
 
-### isRevealNeeded
-
-#### Description
-
-Check if the public key needs to be revealed.
-
-```javascript
-async isRevealNeeded(
-    transport: types.Transport, 
-    appPrivateKey: string, 
-    appId: string, 
-    addressIndex: number,
-    nodeUrl: string
-): Promise<Boolean>
-```
-
-#### Arguments
-
-|      Arg      |                  Description                 |    Type   |  Required |
-|:-------------:|:--------------------------------------------:|:---------:|:---------:|
-|   transport   | Object to communicate with CoolWallet device | Transport |    True   |
-| appPrivateKey |   Private key for the connected application  |   string  |    True   |
-|     appId     |       ID for the connected application       |   string  |    True   |
-|  addressIndex |  The from address index in BIP44 derivation  |   number  |    True   |
-|    nodeUrl    |          The url of blockchain node          |   string  |    True   |
-
 ### Sign Transaction
 
 #### Description
