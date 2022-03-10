@@ -156,7 +156,7 @@ export default class ETC implements COIN.Coin {
     const v = recoveryParam + 27;
     const { r, s } = sig as { r: string; s: string };
 
-    const vValue = v + transaction.chainId * 2 + 8;
+    const vValue = v + 61 * 2 + 8;
     const signedTransaction = rawTx.slice(0, 6);
     const vBuf = Buffer.allocUnsafe(6);
     vBuf.writeIntBE(vValue, 0, 6);

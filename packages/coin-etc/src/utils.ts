@@ -1,5 +1,4 @@
 export interface Transaction {
-  chainId: number;
   nonce: string;
   gasPrice: string;
   gasLimit: string;
