@@ -1,21 +1,30 @@
 import { Transport } from '@coolwallet/core';
 // export type Transport;
 
-export type txType = {
-  fromPubkey: string | Buffer;
-  toPubkey: string | Buffer;
-  amount: number;
-  recentBlockHash: string;
-  txTypeIndex: string | undefined;
+export type header = {
+  numRequiredSignatures: number;
+  numReadonlySignedAccounts: number;
+  numReadonlyUnsignedAccounts: number;
+};
+
+export type instruction = {
+  accounts: number[];
   data: string;
-  dataLength: string | undefined;
+  programIdIndex: number;
+};
+
+export type messageType = {
+  header: header;
+  accountKeys: Buffer[];
+  recentBlockhash: string;
+  instructions: instruction[];
 };
 
 export type signTxType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  transaction: txType;
+  message: messageType;
   confirmCB: Function | undefined;
   authorizedCB: Function | undefined;
 };
