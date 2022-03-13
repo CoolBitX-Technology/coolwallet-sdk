@@ -1,6 +1,6 @@
 import { Transport } from '@coolwallet/core';
 import SOL from '@coolwallet/sol';
-import { Connection, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js';
 import base58 from 'bs58';
 import React, { useState } from 'react';
 import { Container } from 'react-bootstrap';
@@ -27,6 +27,12 @@ function CoinSol(props: Props) {
   const [transaction, setTransaction] = useState({
     to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
     value: '0',
+    result: '',
+  });
+
+  const [programTransaction, setProgramTransaction] = useState({
+    programId: 'BJ1UbRs1usobCHy3Hdd1PWWQ5796xPdvKujTqhDRybri',
+    data: '',
     result: '',
   });
 
@@ -70,11 +76,37 @@ function CoinSol(props: Props) {
     return tx;
   };
 
+  const getProgramTransaction = async () => {
+    const fromPubkey = new PublicKey(address);
+
+    const programId = new PublicKey(programTransaction.programId);
+
+    const SEED = "Hello";
+    const greetedPubkey = await PublicKey.createWithSeed(
+      fromPubkey,
+      SEED,
+      programId
+    );
+
+    const instruction = new TransactionInstruction({
+      keys: [{ pubkey: greetedPubkey, isSigner: false, isWritable: true }],
+      programId: programTransaction.programId,
+      data: Buffer.from(programTransaction.data, "hex")
+    });
+
+    const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+
+    const tx = new Transaction({ recentBlockhash }).add(instruction);
+
+    tx.feePayer = fromPubkey;
+    return tx;
+  }
+
   const getMessage = (tx: Transaction) => {
     const { header, accountKeys, instructions } = tx.compileMessage();
     return {
       header,
-      accountKeys: accountKeys.map((key) => key.toBuffer()),
+      accountKeys: accountKeys.map((key: any) => key.toBuffer()),
       recentBlockhash: tx.recentBlockhash as string,
       instructions,
     };
@@ -115,6 +147,41 @@ function CoinSol(props: Props) {
     );
   };
 
+  const signSmartContractTransaction = async () => {
+    handleState(
+      async () => {
+        const tx = await getProgramTransaction();
+        const message = getMessage(tx);
+
+        const appId = localStorage.getItem('appId');
+        if (!appId) throw new Error('No Appid stored, please register!');
+        const signature = await sol.signSmartContract({
+          transport: transport as Transport,
+          appPrivateKey,
+          appId,
+          message,
+          confirmCB: () => {},
+          authorizedCB: () => {},
+        });
+        tx.addSignature(new PublicKey(address), signature);
+
+        const serializeTx = tx.serialize();
+
+        console.log('🚀 ~ file: index.tsx ~ line 99 ~ signedTx', serializeTx.toString('base64'));
+
+        const verifySig = Transaction.from(serializeTx).verifySignatures();
+
+        // signature need to be valid
+        if (!verifySig) throw new Error('Fail to verify signature');
+
+        const send = await connection.sendRawTransaction(serializeTx);
+
+        return send;
+      },
+      (result) => setTransaction((prev) => ({ ...prev, result }))
+    );
+  }
+
   return (
     // @ts-ignore
     <Container>
@@ -132,6 +199,21 @@ function CoinSol(props: Props) {
         inputSize={1}
         value2={transaction.to}
         setValue2={(to) => setTransaction((prev) => ({ ...prev, to }))}
+        placeholder2='to'
+        inputSize2={3}
+      />
+      <TwoInputs
+        title='Sign Smart Contract Transaction'
+        content={programTransaction.result}
+        onClick={signSmartContractTransaction}
+        disabled={disabled}
+        btnName='Sign'
+        value={programTransaction.data}
+        setValue={(data) => setProgramTransaction((prev) => ({ ...prev, data }))}
+        placeholder='data'
+        inputSize={1}
+        value2={programTransaction.programId}
+        setValue2={(programId) => setProgramTransaction((prev) => ({ ...prev, programId }))}
         placeholder2='to'
         inputSize2={3}
       />
