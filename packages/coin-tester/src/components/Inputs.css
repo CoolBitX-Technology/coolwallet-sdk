@@ -2,7 +2,8 @@
   width: 100%;
   font-size: 1.25rem;
   line-height: 1.75rem;
-  margin-top: 1rem;
+  margin: 0;
+  margin-bottom: 1.25rem;
   flex-wrap: nowrap;
 }
 
@@ -12,6 +13,7 @@
   justify-items: center;
   border-radius: 0.25rem;
   background-color: #808080;
+  overflow-wrap: anywhere;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }

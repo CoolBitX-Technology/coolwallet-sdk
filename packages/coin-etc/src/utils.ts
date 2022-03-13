@@ -1,11 +1,12 @@
 export interface Transaction {
-  chainId: number,
-  nonce: string,
-  gasPrice: string,
-  gasLimit: string,
-  to: string,
-  value: string,
-  data: string,
+  nonce: string;
+  gasPrice: string;
+  gasLimit: string;
+  to: string;
+  value: string;
+  data: string;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 }
 
 const evenHexDigit = (hex: string) => (hex.length % 2 !== 0 ? `0${hex}` : hex);
@@ -28,7 +29,7 @@ export const getRawTx = (transaction: Transaction): Array<Buffer> => {
     }
     return Buffer.from(hex, 'hex');
   });
-  rawData[6] = Buffer.from([transaction.chainId]);
+  rawData[6] = Buffer.from([61]);
   rawData[7] = Buffer.allocUnsafe(0);
   rawData[8] = Buffer.allocUnsafe(0);
 

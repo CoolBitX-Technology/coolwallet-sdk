@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { coin as COIN, error as ERROR, utils, Transport } from '@coolwallet/core';
+=======
+import { coin as COIN, error as ERROR } from '@coolwallet/core';
+>>>>>>> 8fb4ea2082fbf601bdf42512a126c16509202759
 import * as txUtil from './utils/transactionUtil';
 import signTransaction from './sign';
 import * as types from './config/types';
@@ -8,7 +12,11 @@ export { COIN_SPECIES, PROTOCOL };
 
 export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
   transfer: { script: string; signature: string };
+<<<<<<< HEAD
   constructor(type: String) {
+=======
+  constructor(type: string) {
+>>>>>>> 8fb4ea2082fbf601bdf42512a126c16509202759
     super(params.COIN_TYPE);
 
     switch (type) {
@@ -25,7 +33,11 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
   }
 
   async getAddress(
+<<<<<<< HEAD
     transport: Transport,
+=======
+    transport: types.Transport,
+>>>>>>> 8fb4ea2082fbf601bdf42512a126c16509202759
     appPrivateKey: string,
     appId: string,
     protocol: PROTOCOL = PROTOCOL.SLIP0010

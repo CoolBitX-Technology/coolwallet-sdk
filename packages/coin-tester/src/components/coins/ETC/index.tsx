@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Container } from 'react-bootstrap';
-import { Transport, apdu, utils, config } from '@coolwallet/core';
+import { Transport } from '@coolwallet/core';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
-import ETC from '@coolwallet/ETC';
+import ETC from '@coolwallet/etc';
 import axios from 'axios';
 
 // apply for an API key on https://getblock.io for ETC endpoint, it's free for the first 40k requests.

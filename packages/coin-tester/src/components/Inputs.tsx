@@ -1,6 +1,6 @@
 import React, { memo, FC } from 'react';
 import { Row, Col, ButtonGroup, Button as BootStrapButton, Form } from 'react-bootstrap';
-import './Inputs.css'
+import './Inputs.css';
 
 const row = 'inputs-component';
 
@@ -21,9 +21,9 @@ interface Input {
 
 interface Props {
   title: string;
-  inputs: Input[];
   content: string;
   onClick(): void;
+  inputs?: Input[];
   btnTitle?: string;
   variant?: string;
   disabled?: boolean;
@@ -33,7 +33,7 @@ const ButtonInputs: FC<Props> = (props: Props) => {
   return (
     <Row className={row}>
       <Col xs={2}>{props.title}</Col>
-      {props.inputs.map((input, i) => (
+      {props.inputs?.map((input, i) => (
         <Col xs={input.xs ?? 2} key={'' + i + ''} className={inputCol}>
           <Form.Control
             value={input.value}
@@ -56,6 +56,6 @@ const ButtonInputs: FC<Props> = (props: Props) => {
   );
 };
 
-ButtonInputs.defaultProps = { disabled: false, variant: 'outline-light', btnTitle: 'Get' };
+ButtonInputs.defaultProps = { disabled: false, variant: 'outline-light', btnTitle: 'Get', inputs: [] };
 
 export default memo(ButtonInputs);

@@ -16,6 +16,15 @@ export default class Template implements COIN.Coin {
     appId: string,
     addressIndex: number
   ): Promise<string> => {
+    const { accPublicKey, accChainCode } = await this.getAccountPubKeyAndChainCode(transport, appId, appPrivateKey);
+    return this.getPublicKeyByAccountKey(accPublicKey, accChainCode, addressIndex);
+  };
+
+  getAccountPubKeyAndChainCode = async (
+    transport: Transport,
+    appId: string,
+    appPrivateKey: string
+  ): Promise<{ accPublicKey: string; accChainCode: string }> => {
     // *** 1. Full Path ***
 
     // The fullPath follows BIP-32 and BIP-44 rules with a pathType prefix.
@@ -41,14 +50,25 @@ export default class Template implements COIN.Coin {
 
     const accExtKey = await COIN.getPublicKeyByPath(transport, appId, appPrivateKey, path);
     const accExtKeyBuf = Buffer.from(accExtKey, 'hex');
-    const accPublicKey = accExtKeyBuf.slice(0, 33);
-    const accChainCode = accExtKeyBuf.slice(33);
+    const accPublicKey = accExtKeyBuf.slice(0, 33).toString('hex');
+    const accChainCode = accExtKeyBuf.slice(33).toString('hex');
+    return { accPublicKey, accChainCode };
+  };
 
-    const accNode = bip32.fromPublicKey(accPublicKey, accChainCode);
+  getPublicKeyByAccountKey = (accPublicKey: string, accChainCode: string, addressIndex: number): string => {
+    const accNode = bip32.fromPublicKey(Buffer.from(accPublicKey, 'hex'), Buffer.from(accChainCode, 'hex'));
     const changeNode = accNode.derive(0);
     const addressNode = changeNode.derive(addressIndex);
     const publicKey = addressNode.publicKey.toString('hex');
     return publicKey;
+  };
+
+  publicKeyToAddress = (publicKey: string) => {
+    const uncompressedKey = ec.keyFromPublic(publicKey, 'hex').getPublic(false, 'hex');
+    const keyBuffer = Buffer.from(uncompressedKey.substr(2), 'hex');
+    const keyHash = createKeccakHash('keccak256').update(keyBuffer).digest('hex');
+    const address = '0x'.concat(keyHash.substr(-40));
+    return address;
   };
 
   getAddress = async (
@@ -58,11 +78,16 @@ export default class Template implements COIN.Coin {
     addressIndex: number
   ): Promise<string> => {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    const uncompressedKey = ec.keyFromPublic(publicKey, 'hex').getPublic(false, 'hex');
-    const keyBuffer = Buffer.from(uncompressedKey.substr(2), 'hex');
-    const keyHash = createKeccakHash('keccak256').update(keyBuffer).digest('hex');
-    const address = '0x'.concat(keyHash.substr(-40));
-    return address;
+    return this.publicKeyToAddress(publicKey);
+  };
+
+  getAddressByAccountKey = async (
+    accPublicKey: string,
+    accChainCode: string,
+    addressIndex: number
+  ): Promise<string> => {
+    const publicKey = await this.getPublicKeyByAccountKey(accPublicKey, accChainCode, addressIndex);
+    return this.publicKeyToAddress(publicKey);
   };
 
   signTransaction = async (

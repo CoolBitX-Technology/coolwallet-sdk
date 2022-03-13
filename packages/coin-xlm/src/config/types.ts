@@ -1,5 +1,9 @@
 import { Transport } from '@coolwallet/core';
+<<<<<<< HEAD
 // export type Transport;
+=======
+export { Transport };
+>>>>>>> 8fb4ea2082fbf601bdf42512a126c16509202759
 
 export type signTxType = {
   transport: Transport;
@@ -7,8 +11,8 @@ export type signTxType = {
   appId: string;
   transaction: object;
   protocol: PROTOCOL | undefined;
-  confirmCB: Function | undefined;
-  authorizedCB: Function | undefined;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 };
 
 export type versionByteNames = 'ed25519PublicKey' | 'ed25519SecretSeed' | 'preAuthTx' | 'sha256Hash';

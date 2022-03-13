@@ -109,10 +109,14 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    const argument = await scriptUtilsEIP1559.getSmartArgument(transaction, addressIndex);
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.EIP1559SmartContractSegment.scriptWithSignature;
+      const argument = await scriptUtilsEIP1559.getSmartArgumentSegment(transaction, addressIndex);
+      return ethSign.signEIP1559SmartContractTransaction(signTxData, script, argument, publicKey);
+    }
     const script = params.EIP1559SmartContract.scriptWithSignature;
-
-    return ethSign.signEIP1559SmartContractTransaction(signTxData, script, argument, publicKey);
+    const argument = await scriptUtilsEIP1559.getSmartArgument(transaction, addressIndex);
+    return ethSign.signEIP1559Transaction(signTxData, script, argument, publicKey);
   }
 
   async signTransaction(signTxData: types.signTx): Promise<string> {
@@ -174,10 +178,15 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   async signSmartContractTransaction(signTxData: types.signTx): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    const argument = await scriptUtils.getSmartContractArgument(transaction, addressIndex);
+    // if data bytes is larger than 4000 sign it segmentally.
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.SmartContractSegment.scriptWithSignature;
+      const argument = await scriptUtils.getSmartContractArgumentSegment(transaction, addressIndex);
+      return ethSign.signSmartContractTransaction(signTxData, script, argument, publicKey);
+    }
     const script = params.SmartContract.scriptWithSignature;
-
-    return ethSign.signSmartContractTransaction(signTxData, script, argument, publicKey);
+    const argument = await scriptUtils.getSmartContractArgument(transaction, addressIndex);
+    return ethSign.signTransaction(signTxData, script, argument, publicKey);
   }
 
   async signMessage(signMsgData: types.signMsg): Promise<string> {

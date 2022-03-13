@@ -1,7 +1,5 @@
-import { apdu, transport, tx } from '@coolwallet/core';
+import { apdu, tx } from '@coolwallet/core';
 import { sha256 } from './utils/cryptoUtil';
-
-type Transport = transport.default;
 
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap

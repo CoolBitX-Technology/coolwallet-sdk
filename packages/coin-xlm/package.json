@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/xlm",
-  "version": "1.0.3",
+  "version": "1.1.2",
   "description": "Coolwallet Stella sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "file:../core"
+    "@coolwallet/core": "^1.1.1"
   },
   "dependencies": {
     "@types/crc": "^3.4.0",
@@ -36,8 +36,7 @@
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "file:../core",
-    "bs58": "^4.0.1"
+    "@coolwallet/core": "^1.1.1"
   },
   "repository": {
     "type": "git",
