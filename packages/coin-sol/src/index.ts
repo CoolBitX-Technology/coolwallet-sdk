@@ -1,6 +1,6 @@
 import { coin as COIN, error as ERROR, Transport } from '@coolwallet/core';
 import * as txUtil from './utils/transactionUtil';
-import signTransaction from './sign';
+import { signTransaction, signSmartContractTransaction } from './sign';
 import * as types from './config/types';
 import * as params from './config/params';
 
@@ -26,6 +26,11 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
 
   async signTransaction(signTxData: types.signTxType): Promise<Buffer> {
     const signature = signTransaction(signTxData, params.TRANSACTION_TYPE.TRANSFER);
+    return signature;
+  }
+
+  async signSmartContract(signTxData: types.signTxType): Promise<Buffer> {
+    const signature = signSmartContractTransaction(signTxData, params.TRANSACTION_TYPE.TRANSFER);
     return signature;
   }
 }

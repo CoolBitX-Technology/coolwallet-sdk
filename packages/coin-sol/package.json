@@ -24,7 +24,6 @@
     "@coolwallet/core": "file:../core"
   },
   "dependencies": {
-    "@types/bs58": "^4.0.1",
     "@types/crc": "^3.4.0",
     "bignumber.js": "^9.0.1",
     "bn.js": "^5.1.3"
@@ -35,6 +34,7 @@
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
     "@coolwallet/core": "file:../core",
+    "@types/bs58": "^4.0.1",
     "bs58": "^4.0.1"
   },
   "repository": {

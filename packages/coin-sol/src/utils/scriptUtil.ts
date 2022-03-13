@@ -58,9 +58,9 @@ const messageSerialize = (message: messageType): string => {
     const instructionData =
       numberToStringHex(instruction.programIdIndex, 2) +
       numberToStringHex(keyIndicesCount, 2) +
-      numberToStringHex(instruction.accounts, 4) +
+      numberToStringHex(instruction.accounts, instruction.accounts.length * 2) +
       numberToStringHex(dataCount, 2) +
-      data.toString('hex').padStart(24, '0');
+      data.toString('hex').padStart(data.length * 2, '0');
     argument = argument.concat(instructionData);
   });
 
