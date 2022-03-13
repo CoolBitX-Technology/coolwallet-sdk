@@ -81,17 +81,13 @@ function CoinSol(props: Props) {
 
     const programId = new PublicKey(programTransaction.programId);
 
-    const SEED = "Hello";
-    const greetedPubkey = await PublicKey.createWithSeed(
-      fromPubkey,
-      SEED,
-      programId
-    );
+    const SEED = 'hello';
+    const greetedPubkey = await PublicKey.createWithSeed(fromPubkey, SEED, programId);
 
     const instruction = new TransactionInstruction({
       keys: [{ pubkey: greetedPubkey, isSigner: false, isWritable: true }],
-      programId: programTransaction.programId,
-      data: Buffer.from(programTransaction.data, "hex")
+      programId,
+      data: Buffer.from(programTransaction.data, 'hex'),
     });
 
     const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
@@ -100,7 +96,7 @@ function CoinSol(props: Props) {
 
     tx.feePayer = fromPubkey;
     return tx;
-  }
+  };
 
   const getMessage = (tx: Transaction) => {
     const { header, accountKeys, instructions } = tx.compileMessage();
@@ -132,8 +128,6 @@ function CoinSol(props: Props) {
 
         const serializeTx = tx.serialize();
 
-        console.log('🚀 ~ file: index.tsx ~ line 99 ~ signedTx', serializeTx.toString('base64'));
-
         const verifySig = Transaction.from(serializeTx).verifySignatures();
 
         // signature need to be valid
@@ -155,7 +149,7 @@ function CoinSol(props: Props) {
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
-        const signature = await sol.signSmartContract({
+        const signature = await sol.signTransaction({
           transport: transport as Transport,
           appPrivateKey,
           appId,
@@ -167,8 +161,6 @@ function CoinSol(props: Props) {
 
         const serializeTx = tx.serialize();
 
-        console.log('🚀 ~ file: index.tsx ~ line 99 ~ signedTx', serializeTx.toString('base64'));
-
         const verifySig = Transaction.from(serializeTx).verifySignatures();
 
         // signature need to be valid
@@ -178,9 +170,9 @@ function CoinSol(props: Props) {
 
         return send;
       },
-      (result) => setTransaction((prev) => ({ ...prev, result }))
+      (result) => setProgramTransaction((prev) => ({ ...prev, result }))
     );
-  }
+  };
 
   return (
     // @ts-ignore
