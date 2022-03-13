@@ -24,7 +24,7 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     return txUtil.pubKeyToAddress(publicKey);
   }
 
-  async signTransaction(signTxData: types.signTxType): Promise<string> {
+  async signTransaction(signTxData: types.signTxType): Promise<Buffer> {
     const signature = signTransaction(signTxData, params.TRANSACTION_TYPE.TRANSFER);
     return signature;
   }

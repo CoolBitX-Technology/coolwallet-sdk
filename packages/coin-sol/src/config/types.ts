@@ -7,7 +7,7 @@ export type header = {
   numReadonlyUnsignedAccounts: number;
 };
 
-export type instruction = {
+export type CompliedInstruction = {
   accounts: number[];
   data: string;
   programIdIndex: number;
@@ -17,7 +17,7 @@ export type messageType = {
   header: header;
   accountKeys: Buffer[];
   recentBlockhash: string;
-  instructions: instruction[];
+  instructions: CompliedInstruction[];
 };
 
 export type signTxType = {

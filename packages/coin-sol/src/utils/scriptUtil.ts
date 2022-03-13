@@ -1,5 +1,4 @@
 import { utils, config } from '@coolwallet/core';
-import BigNumber from 'bignumber.js';
 import * as params from '../config/params';
 import base58 from 'bs58';
 import { messageType } from '../config/types';
@@ -7,14 +6,15 @@ import { handleHex } from './stringUtil';
 
 /**
  * TODO
- * @param {*} transaction
+ * @param {messageType} message
+ * @returns {Promise<string>}
  */
-export const getTransferArguments = async (transaction: messageType) => {
+export const getTransferArguments = async (message: messageType): Promise<string> => {
   const pathType = config.PathType.SLIP0010;
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
   const SEPath = `0D${path}`;
   console.debug('SEPath: ', SEPath);
-  let argument = transactionSerialize(transaction);
+  let argument = messageSerialize(message);
 
   return SEPath + argument;
 };
@@ -24,17 +24,17 @@ const numberToStringHex = (value: number | number[], pad: number) =>
     .toString('hex')
     .padStart(pad, '0');
 
-const transactionSerialize = (transaction: messageType): string => {
-  const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } = transaction.header;
+const messageSerialize = (message: messageType): string => {
+  const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } = message.header;
   const formattedTx = {
     numberRequireSignature: numberToStringHex(numRequiredSignatures, 2),
     numberReadonlySignedAccount: numberToStringHex(numReadonlySignedAccounts, 2),
     numberReadonlyUnSignedAccount: numberToStringHex(numReadonlyUnsignedAccounts, 2),
-    keyCount: numberToStringHex(transaction.accountKeys.length, 2),
-    recentBlockHash: transaction.recentBlockhash,
+    keyCount: numberToStringHex(message.accountKeys.length, 2),
+    recentBlockHash: message.recentBlockhash,
   };
 
-  const keys = Buffer.concat(transaction.accountKeys).toString('hex');
+  const keys = Buffer.concat(message.accountKeys).toString('hex');
 
   const recentBlockHash = base58.decode(formattedTx.recentBlockHash).toString('hex');
 
@@ -45,21 +45,22 @@ const transactionSerialize = (transaction: messageType): string => {
     handleHex(formattedTx.keyCount).padStart(2, '0') +
     keys.padStart(192, '0') +
     recentBlockHash.padStart(64, '0') +
-    numberToStringHex(transaction.instructions.length, 2);
+    numberToStringHex(message.instructions.length, 2);
 
   // iterate instruction
-  transaction.instructions.forEach((instruction) => {
+  message.instructions.forEach((instruction) => {
     let keyIndicesCount: number[] = [];
     encodeLength(keyIndicesCount, instruction.accounts.length);
-
+    const data = base58.decode(instruction.data);
     let dataCount: number[] = [];
-    encodeLength(dataCount, instruction.data.length);
+    encodeLength(dataCount, data.length);
+
     const instructionData =
       numberToStringHex(instruction.programIdIndex, 2) +
       numberToStringHex(keyIndicesCount, 2) +
       numberToStringHex(instruction.accounts, 4) +
       numberToStringHex(dataCount, 2) +
-      base58.decode(instruction.data).toString('hex').padStart(24, '0');
+      data.toString('hex').padStart(24, '0');
     argument = argument.concat(instructionData);
   });
 

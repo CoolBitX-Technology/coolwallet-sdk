@@ -26,7 +26,7 @@ function CoinSol(props: Props) {
 
   const [transaction, setTransaction] = useState({
     to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
-    value: 0,
+    value: '0',
     result: '',
   });
 
@@ -69,40 +69,47 @@ function CoinSol(props: Props) {
     tx.feePayer = fromPubkey;
     return tx;
   };
+
   const getMessage = (tx: Transaction) => {
     const { header, accountKeys, instructions } = tx.compileMessage();
     return {
       header,
       accountKeys: accountKeys.map((key) => key.toBuffer()),
-      recentBlockhash: tx.recentBlockhash,
+      recentBlockhash: tx.recentBlockhash as string,
       instructions,
     };
   };
+
   const signTransaction = async () => {
     handleState(
       async () => {
-        // const transaction: types.txType = {
-        //   fromPubkey: '8rzt5i6guiEgcRBgE5x5nmjPL97Ptcw76rnGTyehni7r',
-        //   toPubkey: 'D4Bo5ohVx9V7ZpY6xySTTohwBDXNqRXfrDsfP8abNfKJ',
-        //   amount: 10,
-        //   recentBlockHash,
-        //   data: '020000008096980000000000',
-        // };
-        const transaction = await getTransferTransaction();
-        const message = getMessage(transaction);
-        console.log('🚀 ~ file: index.tsx ~ line 91 ~ transaction', transaction);
+        const tx = await getTransferTransaction();
+        const message = getMessage(tx);
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
-
-        const signedTx = await sol.signTransaction({
+        const signature = await sol.signTransaction({
           transport: transport as Transport,
           appPrivateKey,
           appId,
           message,
+          confirmCB: () => {},
+          authorizedCB: () => {},
         });
+        tx.addSignature(new PublicKey(address), signature);
 
-        return signedTx;
+        const serializeTx = tx.serialize();
+
+        console.log('🚀 ~ file: index.tsx ~ line 99 ~ signedTx', serializeTx.toString('base64'));
+
+        const verifySig = Transaction.from(serializeTx).verifySignatures();
+
+        // signature need to be valid
+        if (!verifySig) throw new Error('Fail to verify signature');
+
+        const send = await connection.sendRawTransaction(serializeTx);
+
+        return send;
       },
       (result) => setTransaction((prev) => ({ ...prev, result }))
     );

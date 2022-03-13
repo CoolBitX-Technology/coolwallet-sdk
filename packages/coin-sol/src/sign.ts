@@ -5,7 +5,7 @@ import { signTxType } from './config/types';
 export default async function signTransaction(
   signTxData: signTxType,
   transfer: { script: string; signature: string }
-): Promise<string> {
+): Promise<Buffer> {
   const { message, transport, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
 
   const preActions = [];
@@ -33,7 +33,6 @@ export default async function signTransaction(
     authorizedCB
   );
   await utils.checkSupportScripts(transport);
-  const { signedTx: rawTx } = await apdu.tx.getSignedHex(transport);
 
-  return '01' + (signature as Buffer).toString('hex') + rawTx;
+  return signature as Buffer;
 }
