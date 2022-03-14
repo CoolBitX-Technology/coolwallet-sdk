@@ -1,11 +1,11 @@
 export interface Transaction {
-  chainId: number;
-  nonce: string;
-  gasPrice: string;
-  gasLimit: string;
-  to: string;
-  value: string;
-  data: string;
+  chainId: number,
+  nonce: string,
+  gasPrice: string,
+  gasLimit: string,
+  to: string,
+  value: string,
+  data: string,
 }
 
 const evenHexDigit = (hex: string) => (hex.length % 2 !== 0 ? `0${hex}` : hex);

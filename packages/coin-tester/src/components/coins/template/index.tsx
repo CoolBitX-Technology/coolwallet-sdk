@@ -7,11 +7,11 @@ import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 import Template from '@coolwallet/template';
 
 interface Props {
-  transport: Transport | null;
-  appPrivateKey: string;
-  appPublicKey: string;
-  isLocked: boolean;
-  setIsLocked: (isLocked: boolean) => void;
+  transport: Transport | null,
+  appPrivateKey: string,
+  appPublicKey: string,
+  isLocked: boolean,
+  setIsLocked: (isLocked:boolean) => void,
 }
 
 function CoinTemplate(props: Props) {
@@ -24,7 +24,10 @@ function CoinTemplate(props: Props) {
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
 
-  const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
+  const handleState = async (
+    request: () => Promise<string>,
+    handleResponse: (response: string) => void
+  ) => {
     props.setIsLocked(true);
     try {
       const response = await request();
@@ -66,8 +69,15 @@ function CoinTemplate(props: Props) {
 
   return (
     <Container>
-      <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
-      <NoInput title='Get Address' content={address} onClick={getAddress} disabled={disabled} />
+      <div className='title2'>
+        These two basic methods are required to implement in a coin sdk.
+      </div>
+      <NoInput
+        title='Get Address'
+        content={address}
+        onClick={getAddress}
+        disabled={disabled}
+      />
       <TwoInputs
         title='Sign Transaction'
         content={signedTransaction}

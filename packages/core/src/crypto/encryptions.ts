@@ -83,18 +83,15 @@ export const ECIESDec = (recipientPrivKey: string, encryption: string): string =
   const ephemeralPubKey = encryptionBuf.slice(0, 65);
   const mac = encryptionBuf.slice(65, 85);
   const ciphertext = encryptionBuf.slice(85);
-
   const recipient = crypto.createECDH('secp256k1');
-  
   recipient.setPrivateKey(Buffer.from(recipientPrivKey, 'hex'));
-  
   const sharedSecret = recipient.computeSecret(ephemeralPubKey, 'hex');
   const hashedSecret = sha512(sharedSecret);
-  
   const encryptionKey = hashedSecret.slice(0, 32);
   const macKey = hashedSecret.slice(32);
 
-  const iv = Buffer.alloc(16).fill(0);
+  const iv = Buffer.alloc(16);
+  iv.fill(0);
   const dataToMac = Buffer.concat([iv, ephemeralPubKey, ciphertext]);
   const realMac = hmacSha1(macKey, dataToMac);
   if (equalConstTime(mac, realMac)) {

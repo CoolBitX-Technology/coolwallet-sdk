@@ -1,9 +1,5 @@
 import { Transport } from '@coolwallet/core';
-<<<<<<< HEAD
-// export type Transport;
-=======
 export { Transport };
->>>>>>> 8fb4ea2082fbf601bdf42512a126c16509202759
 
 export type signTxType = {
   transport: Transport;

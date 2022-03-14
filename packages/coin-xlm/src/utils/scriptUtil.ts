@@ -4,32 +4,6 @@ import * as params from '../config/params';
 import * as Stellar from 'stellar-sdk';
 import { PROTOCOL } from '../config/types';
 
-<<<<<<< HEAD
-
-/**
- * TODO
- * @param {number} addressIndex
- * @param {*} transaction
- */
-export const getScriptAndArguments = async (transaction: object, transfer: { script: string, signature: string }, protocol: PROTOCOL) => {
-
-  const pathType = protocol === PROTOCOL.BIP44 ? config.PathType.BIP32ED25519 : config.PathType.SLIP0010;
-  const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
-  const SEPath = `0D${path}`;
-  console.debug("SEPath: ", SEPath);
-  let script;
-  let argument;
-  script = transfer.script + transfer.signature;
-  argument = getTransferArgument(transaction);
-
-  return {
-    script,
-    argument: SEPath + argument,
-  };
-};
-
-=======
->>>>>>> 8fb4ea2082fbf601bdf42512a126c16509202759
 const getTransferArgument = (transaction: any) => {
   const isCreate = transaction.isCreate ? '00' : '01';
   let memoType;
