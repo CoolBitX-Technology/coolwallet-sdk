@@ -2,6 +2,7 @@
   "name": "tester",
   "version": "0.0.0",
   "scripts": {
+    "bootstrap": "babel-node -x \".tsx,.ts\" tools/index.tsx",
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview"
@@ -14,8 +15,8 @@
     "@coolwallet/cronos": "file:../coin-cronos",
     "@coolwallet/etc": "file:../coin-etc",
     "@coolwallet/eth": "file:../coin-eth",
-    "@coolwallet/matic": "file:../coin-matic",
     "@coolwallet/luna": "file:../coin-luna",
+    "@coolwallet/matic": "file:../coin-matic",
     "@coolwallet/template": "file:../coin-template",
     "@coolwallet/transport-jre-http": "file:../transport-jre-http",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",
@@ -53,8 +54,15 @@
     "web3": "1.2.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.7",
+    "@babel/node": "^7.16.8",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/inquirer": "^8.2.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "inquirer": "^8.2.1",
+    "log-symbols": "^4.1.0",
     "typescript": "^4.3.2"
   }
 }

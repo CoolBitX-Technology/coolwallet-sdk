@@ -2,7 +2,7 @@ import template from './template';
 import bnb from './bnb';
 import ADA from './ada';
 import CRONOS from './cronos';
-import ETC from './ETC';
+import ETC from './etc';
 import ETH from './eth';
 import CRO from './cro';
 import matic from './matic';
