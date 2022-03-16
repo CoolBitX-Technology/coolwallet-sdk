@@ -131,7 +131,7 @@ export const signTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await polyUtil.genPolySigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    return polyUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    return polyUtil.composeSignedTransaction(rawPayload, v, r, s);
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
@@ -187,7 +187,7 @@ export const signSmartContractTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await polyUtil.genPolySigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    const serializedTx = polyUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    const serializedTx = polyUtil.composeSignedTransaction(rawPayload, v, r, s);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
