@@ -35,7 +35,7 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
   chainIdBuffer.writeIntBE(137, 0, 6);
 
   // when sign chain treat r s v as number do we need slide `00` byte in buffer
-  raw[6] = Buffer.from(chainIdBuffer.filter((e) => e !== 0)).reverse();
+  raw[6] = Buffer.from(chainIdBuffer.filter((e) => e !== 0));
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
 
@@ -50,12 +50,7 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
  * @param {String} s
  * @return {String}
  */
-export const composeSignedTransaction = (
-  payload: Array<Buffer>,
-  v: number,
-  r: string,
-  s: string,
-): string => {
+export const composeSignedTransaction = (payload: Array<Buffer>, v: number, r: string, s: string): string => {
   const transaction = payload.slice(0, 6);
 
   const vValue = v + 137 * 2 + 8;
@@ -63,11 +58,7 @@ export const composeSignedTransaction = (
   const vValueBuffer = Buffer.allocUnsafe(6);
   vValueBuffer.writeIntBE(vValue, 0, 6);
 
-  transaction.push(
-    Buffer.from(vValueBuffer.filter((e) => e !== 0)).reverse(),
-    Buffer.from(r, 'hex'),
-    Buffer.from(s, 'hex')
-  );
+  transaction.push(Buffer.from(vValueBuffer.filter((e) => e !== 0)), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
 
   const serializedTx = rlp.encode(transaction);
   return `0x${serializedTx.toString('hex')}`;
