@@ -17,7 +17,7 @@ export const getTransferArgument = async (transaction: Transaction, addressIndex
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
-    handleHex(transaction.chainId.toString(16)).padStart(10, '0'); 
+    handleHex(Number(137).toString(16)).padStart(10, '0');
 
   const path = await utils.getPath(COIN_TYPE, addressIndex);
 
@@ -30,11 +30,11 @@ export const getTransferArgument = async (transaction: Transaction, addressIndex
  * @param tokenSignature
  */
 export const getERC20Argument = async (transaction: Transaction, tokenSignature: string, addressIndex: number) => {
-  const txTokenInfo: Option = transaction.option;
+  const txTokenInfo = transaction.option;
   const tokenInfo = token.getSetTokenPayload(
     transaction.to,
-    txTokenInfo.info.symbol,
-    parseInt(txTokenInfo.info.decimals)
+    txTokenInfo?.info?.symbol ?? '',
+    parseInt(txTokenInfo?.info?.decimals ?? '')
   );
   const signature = tokenSignature.slice(58).padStart(144, '0');
   const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, '');
@@ -45,7 +45,6 @@ export const getERC20Argument = async (transaction: Transaction, tokenSignature:
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
-    // handleHex(transaction.chainId.toString(16)).padStart(10, '0') + // No need
     tokenInfo +
     signature;
 

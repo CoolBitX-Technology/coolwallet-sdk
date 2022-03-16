@@ -12,7 +12,6 @@ export { TOKENTYPE };
 
 const convertEIP1559IntoLegacyTx = (eip1559Tx: types.signEIP1559Tx): types.signTx => {
   const tx: types.Transaction = {
-    chainId: 137,
     gasPrice: eip1559Tx.transaction.gasFeeCap,
     ...eip1559Tx.transaction,
   };
@@ -132,13 +131,19 @@ export default class POLY extends COIN.ECDSACoin implements COIN.Coin {
         // get tokenSignature
         if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
           tokenSignature = tokenInfo.signature;
-          signTxData.transaction.option.info.symbol = tokenInfo.symbol;
-          signTxData.transaction.option.info.decimals = tokenInfo.unit;
+          signTxData.transaction.option = {
+            info: {
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.unit,
+            },
+          };
+
           break;
         }
       }
 
-      const { symbol, decimals } = signTxData.transaction.option.info;
+      const symbol = signTxData.transaction.option?.info?.symbol;
+      const decimals = signTxData.transaction.option?.info?.decimals;
       if (symbol && decimals) {
         if (tokenSignature) {
           // 內建
