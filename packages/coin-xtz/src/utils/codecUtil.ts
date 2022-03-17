@@ -1,6 +1,9 @@
 import * as forger from '@taquito/local-forging';
+import { ProtocolsHash } from '@taquito/local-forging';
 import { hexString } from '../config/types';
 import { blake2b } from './cryptoUtil';
+
+const ProtocolHash = ProtocolsHash.PtHangz2;
 
 /**
  * Convert public key (hex) to address (b58c)
@@ -10,7 +13,7 @@ import { blake2b } from './cryptoUtil';
  */
 export function pubKeyToAddress(compressedPubkey: hexString): string {
   const pkDig = blake2b(compressedPubkey, 20);
-  const addressStr = forger.getCodec(forger.CODEC.TZ1).decoder(pkDig);
+  const addressStr = forger.getCodec(forger.CODEC.TZ1, ProtocolHash).decoder(pkDig);
   return addressStr;
 }
 
@@ -24,7 +27,7 @@ export function pubKeyToAddress(compressedPubkey: hexString): string {
  * @returns {hexString} - address (hex)
  */
  export function addressStrToHex(addressHash: string): hexString {
-  const addressHex = forger.getCodec(forger.CODEC.ADDRESS).encoder(addressHash);
+  const addressHex = forger.getCodec(forger.CODEC.ADDRESS, ProtocolHash).encoder(addressHash);
   return addressHex;
 }
 
@@ -35,7 +38,7 @@ export function pubKeyToAddress(compressedPubkey: hexString): string {
  * @returns {string} public key (b58c)
  */
  export function pubKeyHexToStr(compressedPubkey: hexString): string {
-  const pubkeyStr = forger.getCodec(forger.CODEC.PUBLIC_KEY).decoder('00'.concat(compressedPubkey));
+  const pubkeyStr = forger.getCodec(forger.CODEC.PUBLIC_KEY, ProtocolHash).decoder('00'.concat(compressedPubkey));
   return pubkeyStr;
 }
 
@@ -45,7 +48,7 @@ export function pubKeyToAddress(compressedPubkey: hexString): string {
  * @returns {string} public key (hex)
  */
  export function pubKeyStrToHex(pubKeyHash: string): hexString {
-  const pubKeyHex = forger.getCodec(forger.CODEC.PUBLIC_KEY).encoder(pubKeyHash);
+  const pubKeyHex = forger.getCodec(forger.CODEC.PUBLIC_KEY, ProtocolHash).encoder(pubKeyHash);
   return pubKeyHex;
 }
 
@@ -55,6 +58,6 @@ export function pubKeyToAddress(compressedPubkey: hexString): string {
  * @returns {string} branch (hex)
  */
  export function branchHashToHex(branchStr: string): hexString {
-  const branchHex = forger.getCodec(forger.CODEC.BRANCH).encoder(branchStr);
+  const branchHex = forger.getCodec(forger.CODEC.BRANCH, ProtocolHash).encoder(branchStr);
   return branchHex;
 }

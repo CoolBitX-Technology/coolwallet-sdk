@@ -15,8 +15,8 @@
     "@coolwallet/core": "^1.0.14"
   },
   "dependencies": {
-    "@taquito/local-forging": "^11.2.0",
-    "@taquito/taquito": "^11.2.0",
+    "@taquito/local-forging": "^12.0.0",
+    "@taquito/taquito": "^12.0.0",
     "blake2b": "^2.1.3"
   },
   "devDependencies": {
