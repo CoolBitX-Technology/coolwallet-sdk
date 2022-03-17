@@ -1,0 +1,38 @@
+{
+  "name": "@coolwallet/luna",
+  "version": "1.0.0",
+  "description": "Coolwallet Terra sdk",
+  "main": "lib/index.js",
+  "author": "coolwallet-team",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx,.js\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "test": "jest --verbose"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.8",
+    "@babel/core": "^7.16.7",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.0.14",
+    "@types/eth-sig-util": "^2.1.1",
+    "@types/node": "^14.0.13",
+    "typescript": "^4.4.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "homepage": "https://github.com/CoolBitX-Technology/coolwallet3-sdk#readme",
+  "dependencies": {
+    "bech32": "^2.0.0",
+    "protocol-buffers": "^4.2.0",
+    "protocol-buffers-encodings": "^1.1.1"
+  }
+}

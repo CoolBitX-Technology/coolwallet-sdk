@@ -1,11 +1,23 @@
 import template from './template';
-import ETC from './ETC';
-import cro from './coin-cro';
-import xtz from './coin-xtz';
+import bnb from './bnb';
+import ADA from './ada';
+import CRONOS from './cronos';
+import ETC from './etc';
+import ETH from './eth';
+import CRO from './cro';
+import matic from './matic';
+import LUNA from './luna';
+import XTZ from './xtz';
 
 export default [
-  { path: 'Template', Element: template },
-  { path: 'ETC', Element: ETC },
-  { path: 'CRO', Element: cro},
-  { path: 'XTZ', Element: xtz},
+  { path: 'template', Element: template },
+  { path: 'bnb', Element: bnb },
+  { path: 'ada', Element: ADA },
+  { path: 'eth', Element: ETH },
+  { path: 'etc', Element: ETC },
+  { path: 'cronos', Element: CRONOS },
+  { path: 'cro', Element: CRO },
+  { path: 'matic', Element: matic },
+  { path: 'luna', Element: LUNA},
+  { path: 'xtz', Element: XTZ},
 ];

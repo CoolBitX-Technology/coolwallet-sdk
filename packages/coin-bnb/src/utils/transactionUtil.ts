@@ -36,10 +36,7 @@ export function serializePubKey(unencodedPubKey: Buffer): Buffer {
 export const composeSignedTransacton = (
   signObj: Transfer,
   denom: string,
-  canonicalSignature: {
-    r: string;
-    s: string;
-  },
+  signature: string,
   signPublicKey: Buffer
 ): string => {
   const fromAddress = signObj.msgs[0].inputs[0].address;
@@ -73,7 +70,6 @@ export const composeSignedTransacton = (
   };
 
   const pubKey = txUtil.serializePubKey(signPublicKey);
-  const signature = canonicalSignature.r + canonicalSignature.s;
   const signatures = [
     {
       pub_key: pubKey,

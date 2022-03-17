@@ -1,10 +1,10 @@
-import { SignJWT } from 'jose';
 import JWTDecode from 'jwt-decode';
 import isEmpty from 'lodash/isEmpty';
 import { target } from '../../config/param';
 import Transport from '../../transport';
 import { executeCommand } from '../execute/execute';
 import { SDKError } from '../../error/errorHandle';
+import jwt from '../../utils/jwt';
 
 import type { APIOptions, Command } from './types';
 
@@ -24,15 +24,7 @@ const getAPIOption = async (cardId: string, challengeData = ''): Promise<APIOpti
     data = { cryptogram: challengeData, cwid: cardId };
   }
 
-  console.debug(data);
-
-  const iat = Math.floor(Date.now() / 1000);
-
-  const payload = await new SignJWT(data)
-    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-    .setIssuedAt(iat)
-    .setExpirationTime(iat + 60 * 60 * 24)
-    .sign(Buffer.from(secret, 'utf-8'));
+  const payload = jwt(data, secret);
 
   const body = {
     keyNum: '1',

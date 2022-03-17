@@ -1,6 +1,7 @@
 import Web3 from 'web3';
 import * as rlp from 'rlp';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
+import createKeccakHash from 'keccak';
 import Ajv from 'ajv';
 import { apdu, error, tx } from '@coolwallet/core';
 import * as ethUtil from './utils/ethUtils';
@@ -298,7 +299,7 @@ export const signTypedData = async (
 
   const prefix = Buffer.from('1901', 'hex');
 
-  const dataBuf = Buffer.from(Web3.utils.sha3(encodedData.toString('hex'))?.substr(2) ?? '', 'hex');
+  const dataBuf = createKeccakHash('keccak256').update(encodedData).digest();
 
   const payload = Buffer.concat([prefix, domainSeparate, dataBuf]);
 

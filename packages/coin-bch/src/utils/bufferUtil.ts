@@ -1,5 +1,4 @@
 import BN from 'bn.js';
-import { transport, tx, apdu } from '@coolwallet/core';
 import * as varuint from './varuint';
 
 const ZERO = Buffer.alloc(1, 0);
