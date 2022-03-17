@@ -1,4 +1,5 @@
 import { Transport } from '@coolwallet/core';
+import { DenomInfo } from "../config/denomType";
 
 export type SignDataType = SignMsgSendType | SignMsgDelegateType | SignMsgUndelegateType | SignMsgWithdrawDelegationRewardType
 
@@ -28,22 +29,24 @@ export interface SignMsgWithdrawDelegationRewardType extends SignType {
     transaction: MsgWithdrawDelegationReward;
 }
 
-type Luna = {
+type Terra = {
     chainId: CHAIN_ID,
+    denom: DenomInfo,
     feeAmount: number,
+    feeDenom: DenomInfo,
     gas: number,
     accountNumber: string,
     sequence: string,
     memo: string,
 }
 
-export interface MsgSend extends Luna {
+export interface MsgSend extends Terra {
     fromAddress: string,
     toAddress: string,
     amount: number,
 }
 
-export interface MsgDelegate extends Luna {
+export interface MsgDelegate extends Terra {
     delegatorAddress: string;
     validatorAddress: string;
     amount: number;
@@ -51,13 +54,14 @@ export interface MsgDelegate extends Luna {
   
 export interface MsgUndelegate extends MsgDelegate {}
   
-export interface MsgWithdrawDelegationReward extends Luna {
+export interface MsgWithdrawDelegationReward extends Terra {
     delegatorAddress: string;
     validatorAddress: string;
 }
 
 export enum CHAIN_ID {
-    LUNA = 'columbus-5',
+    MAIN = 'columbus-5',
+    TEST = 'bombay-12',
 }
 
 export enum TX_TYPE {

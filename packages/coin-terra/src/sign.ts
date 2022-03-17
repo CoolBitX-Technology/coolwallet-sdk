@@ -37,8 +37,8 @@ export const signTransaction = async (
     );
   
     if (!Buffer.isBuffer(canonicalSignature)) {
-        const lunaSignature = await txUtil.genLUNASigFromSESig(canonicalSignature);
-        return lunaSignature;
+        const terraSignature = await txUtil.genTERRASigFromSESig(canonicalSignature);
+        return terraSignature;
     } else {
         throw new core.error.SDKError(signTransaction.name, 'canonicalSignature type error');
     }

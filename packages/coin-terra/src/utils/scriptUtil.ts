@@ -1,62 +1,69 @@
 import * as params from "../config/params";
 import * as types from "../config/types";
 
-export function getLunaSendArgement(publicKey: string, lunaData: types.MsgSend, addressIndex: number) {
+export function getTerraSendArgement(publicKey: string, terraData: types.MsgSend, addressIndex: number) {
     const pubKey = publicKey.padStart(66, '0');
-    const from = Buffer.from(lunaData.fromAddress, 'ascii').toString('hex').padStart(128, '0');
-    const to = Buffer.from(lunaData.toAddress, 'ascii').toString('hex').padStart(128, '0');
-    const amount = lunaData.amount.toString(16).padStart(16, '0');
-    const feeAmount = lunaData.feeAmount.toString(16).padStart(16, '0');
-    const gas = lunaData.gas.toString(16).padStart(16, '0');
-    const accountNumber = parseInt(lunaData.accountNumber).toString(16).padStart(16, '0');
-    const sequence = parseInt(lunaData.sequence).toString(16).padStart(16, '0');
-    const memo = Buffer.from(lunaData.memo, 'ascii').toString('hex');
+    const from = Buffer.from(terraData.fromAddress, 'ascii').toString('hex').padStart(128, '0');
+    const to = Buffer.from(terraData.toAddress, 'ascii').toString('hex').padStart(128, '0');
+    const amount = terraData.amount.toString(16).padStart(16, '0');
+    const feeAmount = terraData.feeAmount.toString(16).padStart(16, '0');
+    const gas = terraData.gas.toString(16).padStart(16, '0');
+    const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
+    const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
+    const denomLabel = Buffer.from(terraData.denom.name, 'ascii').toString('hex').padStart(16, '0');
+    const denom = terraData.denom.protoUnit.padStart(16, '0');
+    const denomSignature = terraData.denom.signature.slice(32).padStart(144, "0"); 
+    const feeDenomLabel = Buffer.from(terraData.feeDenom.name, 'ascii').toString('hex').padStart(16, '0');
+    const feeDenom = terraData.feeDenom.protoUnit.padStart(16, '0');
+    const feeDenomSignature = terraData.feeDenom.signature.slice(32).padStart(144, "0");
 
-    const argument = pubKey + from + to + amount + feeAmount + gas + accountNumber + sequence + memo;
+    const memo = Buffer.from(terraData.memo, 'ascii').toString('hex');
 
-    console.debug("getLunaSendArgement: " + argument);
+    const argument = pubKey + from + to + amount + feeAmount + gas + accountNumber + sequence + denomLabel + denom + denomSignature + feeDenomLabel + feeDenom + feeDenomSignature + memo;
+
+    console.debug("getTerraSendArgement: " + argument);
 
     return addPath(argument, addressIndex);
 }
 
 /**
  * Get Luna Delegate Or Undelegate Argement
- * @param lunaData 
+ * @param terraData 
  * @param addressIndex 
  */
- export function getLunaDelgtOrUnDelArgement(publicKey: string, lunaData: types.MsgDelegate, addressIndex: number) {
+ export function getTerraDelgtOrUnDelArgement(publicKey: string, terraData: types.MsgDelegate, addressIndex: number) {
 
     const pubKey = publicKey.padStart(66, '0');
-    const delegatorAddress = Buffer.from(lunaData.delegatorAddress, 'ascii').toString('hex').padStart(128, '0');
-    const validatorAddress = Buffer.from(lunaData.validatorAddress, 'ascii').toString('hex').padStart(128, '0');
-    const amount = lunaData.amount.toString(16).padStart(16, '0');
-    const feeAmount = lunaData.feeAmount.toString(16).padStart(16, '0');
-    const gas = lunaData.gas.toString(16).padStart(16, '0');
-    const accountNumber = parseInt(lunaData.accountNumber).toString(16).padStart(16, '0');
-    const sequence = parseInt(lunaData.sequence).toString(16).padStart(16, '0');
-    const memo = Buffer.from(lunaData.memo, 'ascii').toString('hex');
+    const delegatorAddress = Buffer.from(terraData.delegatorAddress, 'ascii').toString('hex').padStart(128, '0');
+    const validatorAddress = Buffer.from(terraData.validatorAddress, 'ascii').toString('hex').padStart(128, '0');
+    const amount = terraData.amount.toString(16).padStart(16, '0');
+    const feeAmount = terraData.feeAmount.toString(16).padStart(16, '0');
+    const gas = terraData.gas.toString(16).padStart(16, '0');
+    const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
+    const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
+    const memo = Buffer.from(terraData.memo, 'ascii').toString('hex');
   
     const argument = pubKey + delegatorAddress + validatorAddress + amount + feeAmount + gas + accountNumber + sequence + memo;
   
-    console.debug("getLunaDelgtOrUnDelArgement: " + argument);
+    console.debug("getTerraDelgtOrUnDelArgement: " + argument);
   
     return addPath(argument, addressIndex);
 }
 
-export function getLunaWithdrawArgement(publicKey: string, lunaData: types.MsgWithdrawDelegationReward, addressIndex: number) {
+export function getTerraWithdrawArgement(publicKey: string, terraData: types.MsgWithdrawDelegationReward, addressIndex: number) {
 
     const pubKey = publicKey.padStart(66, '0');
-    const delegatorAddress = Buffer.from(lunaData.delegatorAddress, 'ascii').toString('hex').padStart(128, '0');
-    const validatorAddress = Buffer.from(lunaData.validatorAddress, 'ascii').toString('hex').padStart(128, '0');
-    const feeAmount = lunaData.feeAmount.toString(16).padStart(16, '0');
-    const gas = lunaData.gas.toString(16).padStart(16, '0');
-    const accountNumber = parseInt(lunaData.accountNumber).toString(16).padStart(16, '0');
-    const sequence = parseInt(lunaData.sequence).toString(16).padStart(16, '0');
-    const memo = Buffer.from(lunaData.memo, 'ascii').toString('hex');
+    const delegatorAddress = Buffer.from(terraData.delegatorAddress, 'ascii').toString('hex').padStart(128, '0');
+    const validatorAddress = Buffer.from(terraData.validatorAddress, 'ascii').toString('hex').padStart(128, '0');
+    const feeAmount = terraData.feeAmount.toString(16).padStart(16, '0');
+    const gas = terraData.gas.toString(16).padStart(16, '0');
+    const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
+    const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
+    const memo = Buffer.from(terraData.memo, 'ascii').toString('hex');
   
     const argument = pubKey + delegatorAddress + validatorAddress + feeAmount + gas + accountNumber + sequence + memo;
   
-    console.debug("getLunaWithdrawArgement: " + argument);
+    console.debug("getTerraWithdrawArgement: " + argument);
   
     return addPath(argument, addressIndex);
 }

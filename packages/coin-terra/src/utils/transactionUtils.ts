@@ -12,7 +12,7 @@ export function publicKeyToAddress(publicKey: string, prefix = "terra") {
     return bech32.encode(prefix, words);
 }
 
-export const genLUNASigFromSESig = async (
+export const genTERRASigFromSESig = async (
   canonicalSignature: { r: string; s: string }
 ): Promise<string> => {
   const { r } = canonicalSignature;
@@ -29,7 +29,7 @@ export const getSendTx = (
     const messageBuf = messages.MsgSend.encode({
       from_address: signData.fromAddress,
       to_address: signData.toAddress,
-      amount: [{ denom: 'uluna', amount: signData.amount.toString() }]
+      amount: [{ denom: signData.denom.unit, amount: signData.amount.toString() }]
     })
   
     return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SEND, messageBuf);
@@ -112,7 +112,7 @@ export const getTxProtobuf = (
       sequence: signData.sequence
     });
   
-    const feeBuf = messages.Fee.encode({ amount: [{ denom: 'uluna', amount: signData.feeAmount.toString() }], gas_limit: signData.gas.toString() });
+    const feeBuf = messages.Fee.encode({ amount: [{ denom: signData.feeDenom.unit, amount: signData.feeAmount.toString() }], gas_limit: signData.gas.toString() });
     
     const auth_info_bytes = messages.AuthInfo.encode({ signer_infos: [signerInfobuf], fee: feeBuf });
   

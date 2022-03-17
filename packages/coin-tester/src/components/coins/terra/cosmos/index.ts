@@ -3,8 +3,8 @@ import type { GetAddress } from './response';
 class Cosmos {
   url: string;
 
-  constructor() {
-    this.url = 'https://lcd.terra.dev/';
+  constructor(_url: string) {
+    this.url = _url;
   }
 
   getSequence(address: string): Promise<GetAddress> {
@@ -40,9 +40,12 @@ class Cosmos {
       method: 'POST',
     }).then(async (res) => {
       const result = await res.json();
+      console.log(result);
       return JSON.stringify(result.tx_response.txhash);
     });
   }
 }
 
-export default new Cosmos();
+export default new Cosmos('https://lcd.terra.dev/');
+export const Mainnet = new Cosmos('https://lcd.terra.dev/');
+export const Testnet = new Cosmos('https://bombay-lcd.terra.dev/');
