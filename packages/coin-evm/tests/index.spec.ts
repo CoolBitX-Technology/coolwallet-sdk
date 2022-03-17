@@ -1,5 +1,5 @@
 import { Transport } from '@coolwallet/core';
-import { createTransport } from 'transport-jre-http';
+import { createTransport } from '@coolwallet/transport-jre-http';
 import * as utils from 'web3-utils';
 import EVM, { CHAIN } from '../src';
 import { initialize } from './utils/se';
