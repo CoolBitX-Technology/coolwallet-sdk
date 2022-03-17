@@ -16,7 +16,7 @@ import {
   handleHex, getRawTx, hexToBuffer, removeHex0x, asciiToHex
 } from './utils';
 
-export default class AVAX implements COIN.Coin {
+export default class AVAXC implements COIN.Coin {
   getPublicKey = async (
     transport: Transport,
     appPrivateKey: string,
