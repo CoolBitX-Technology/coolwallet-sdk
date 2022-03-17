@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
-import XTZ from '@coolwallet/coin-xtz';
-import { PATH_STYLE } from '@coolwallet/coin-xtz';
-import { TezosToolkit, DEFAULT_FEE, DEFAULT_GAS_LIMIT, DEFAULT_STORAGE_LIMIT } from '@taquito/taquito';
-import { InMemorySigner} from '@taquito/signer';
-import { SignTxData, xtzReveal, xtzTransaction, xtzDelegation, } from '@coolwallet/coin-xtz/lib/config/types';
+import XTZ from '@coolwallet/xtz';
+import { PATH_STYLE } from '@coolwallet/xtz';
+import { 
+  TezosToolkit, 
+  WalletProvider, 
+  DEFAULT_FEE, DEFAULT_GAS_LIMIT, DEFAULT_STORAGE_LIMIT, 
+  WalletDelegateParams, WalletOriginateParams, WalletTransferParams, 
+  createTransferOperation, createSetDelegateOperation, createOriginationOperation 
+} from '@taquito/taquito';
+import { SignTxData, xtzReveal, xtzTransaction, xtzDelegation, } from '@coolwallet/xtz/lib/config/types';
 import axios from 'axios';
+import { resolvePreset } from '@babel/core';
 
 interface Props {
   transport: Transport | null,
@@ -19,8 +25,31 @@ interface Props {
 
 function CoinXTZ(props: Props) {
 
-  // place your private key for test account below but NEVER commit it
-  const throwAwayPrivateKey = 'N/A';
+  class mockCoolWallet implements WalletProvider {
+    async getPKH() {
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      return xtz.getAddress(transport!, appPrivateKey, appId, selectedIndex);
+    }
+
+    async mapTransferParamsToWalletParams(params: () => Promise<WalletTransferParams>) {
+      return createTransferOperation(await params());
+    }
+
+    async mapOriginateParamsToWalletParams(params: () => Promise<WalletOriginateParams<any>>) {
+      return createOriginationOperation(await params() as any);
+    }
+    async mapDelegateParamsToWalletParams(params: () => Promise<WalletDelegateParams>) {
+      return createSetDelegateOperation(await params() as any);
+    }
+
+    async sendOperations(params: any[]) {
+      return undefined as any;
+    }
+
+  }
+
+  const useDefaultEstimate = false;
 
   const xtz = new XTZ(PATH_STYLE.XTZ);
   
@@ -71,7 +100,7 @@ function CoinXTZ(props: Props) {
     }
 };
 
-  const getPubkeyHash = async () => {
+  const getPubkey = async () => {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
@@ -132,20 +161,10 @@ function CoinXTZ(props: Props) {
       // };
 
       // For validation
-      let estimateFee = 500;
-      let estimateGasLimit = 1600;
-      let estimateStorageLimit = 1;
-
-      if(throwAwayPrivateKey.startsWith('edsk') != true) {
-        Tezos.setProvider({ signer: new InMemorySigner(throwAwayPrivateKey) });
-        const est = await Tezos.estimate.reveal(); 
-        if(est === undefined) {
-          return 'Reveal is not required!';
-        }
-        estimateFee = est.suggestedFeeMutez;
-        estimateGasLimit = est.gasLimit;
-        estimateStorageLimit = est.storageLimit;
-      }
+      // It is safe to use default estimate for Reveal operation
+      let estimateFee = DEFAULT_FEE.REVEAL;
+      let estimateGasLimit = DEFAULT_GAS_LIMIT.REVEAL;
+      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.REVEAL*/;
  
       const operation: xtzReveal = {
         branch: await Tezos.rpc.getBlockHash(),
@@ -153,7 +172,7 @@ function CoinXTZ(props: Props) {
         fee: estimateFee.toString(),
         counter: await getCounter(selectedNode, address),
         gas_limit: estimateGasLimit.toString(), 
-        storage_limit: estimateStorageLimit.toString(),
+        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(),
         public_key: pubkeyhash,
       };
 
@@ -200,12 +219,12 @@ function CoinXTZ(props: Props) {
       // };
 
       // For validation
-      let estimateFee = 500;
-      let estimateGasLimit = 1600;
-      let estimateStorageLimit = 1;
+      let estimateFee = DEFAULT_FEE.TRANSFER;
+      let estimateGasLimit = DEFAULT_GAS_LIMIT.TRANSFER;
+      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.TRANSFER*/;
 
-      if(throwAwayPrivateKey.startsWith('edsk') != true) {
-        Tezos.setProvider({ signer: new InMemorySigner(throwAwayPrivateKey) });
+      if(useDefaultEstimate == false) {
+        Tezos.setProvider({ wallet: new mockCoolWallet() });
         const est = await Tezos.estimate.transfer({to: to, amount: parseInt(value), mutez: true}); 
         estimateFee = est.suggestedFeeMutez;
         estimateGasLimit = est.gasLimit;
@@ -218,7 +237,7 @@ function CoinXTZ(props: Props) {
         fee: estimateFee.toString(),
         counter: await getCounter(selectedNode, address),
         gas_limit: estimateGasLimit.toString(),
-        storage_limit: estimateStorageLimit.toString(), 
+        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), 
         amount: value,
         destination: to
       };
@@ -265,12 +284,12 @@ function CoinXTZ(props: Props) {
       // };
 
       // For validation
-      let estimateFee = 500;
-      let estimateGasLimit = 1600;
-      let estimateStorageLimit = 1;
+      let estimateFee = DEFAULT_FEE.DELEGATION;
+      let estimateGasLimit = DEFAULT_GAS_LIMIT.DELEGATION;
+      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.DELEGATION*/;
 
-      if(throwAwayPrivateKey.startsWith('edsj') != true) {
-        Tezos.setProvider({ signer: new InMemorySigner(throwAwayPrivateKey) });
+      if(useDefaultEstimate == false) {
+        Tezos.setProvider({ wallet: new mockCoolWallet() });
         const est = await Tezos.estimate.setDelegate({ source: address, delegate: baker });  
         estimateFee = est.suggestedFeeMutez;
         estimateGasLimit = est.gasLimit;
@@ -283,7 +302,7 @@ function CoinXTZ(props: Props) {
         fee: estimateFee.toString(),
         counter: await getCounter(selectedNode, address),
         gas_limit: estimateGasLimit.toString(),
-        storage_limit: estimateStorageLimit.toString(), // Bug: CoolWallet can not handle 0
+        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(),
         delegate: baker
       };
 
@@ -328,12 +347,12 @@ function CoinXTZ(props: Props) {
       // };
 
       // For validation
-      let estimateFee = 500;
-      let estimateGasLimit = 1600;
-      let estimateStorageLimit = 1;
+      let estimateFee = DEFAULT_FEE.DELEGATION;
+      let estimateGasLimit = DEFAULT_GAS_LIMIT.DELEGATION;
+      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.DELEGATION*/;
 
-      if(throwAwayPrivateKey.startsWith('edsk') != true) {
-        Tezos.setProvider({ signer: new InMemorySigner(throwAwayPrivateKey) });
+      if(useDefaultEstimate == false) {
+        Tezos.setProvider({ wallet: new mockCoolWallet() });
         const est = await Tezos.estimate.setDelegate({ source: address });  
         estimateFee = est.suggestedFeeMutez;
         estimateGasLimit = est.gasLimit;
@@ -346,7 +365,7 @@ function CoinXTZ(props: Props) {
         fee: estimateFee.toString(),
         counter: await getCounter(selectedNode, address),
         gas_limit: estimateGasLimit.toString(),
-        storage_limit: estimateStorageLimit.toString(), // Bug: CoolWallet can not handle 0
+        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(),
       };
 
       const appId = localStorage.getItem('appId');
@@ -387,9 +406,9 @@ function CoinXTZ(props: Props) {
         inputSize={1}
       /> 
       <NoInput
-        title='Get PubKey Hash'
+        title='Get PubKey'
         content={pubkeyhash}
-        onClick={getPubkeyHash}
+        onClick={getPubkey}
         disabled={disabled}
       />
       <NoInput
