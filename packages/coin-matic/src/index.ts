@@ -108,6 +108,11 @@ export default class POLY extends COIN.ECDSACoin implements COIN.Coin {
 
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.EIP1559SmartContractSegment.scriptWithSignature;
+      const argument = await scriptUtilsEIP1559.getSmartArgumentSegment(transaction, addressIndex);
+      return polySign.signEIP1559SmartContractTransaction(signTxData, script, argument, publicKey);
+    }
     const argument = await scriptUtilsEIP1559.getSmartArgument(transaction, addressIndex);
     const script = params.EIP1559SmartContract.scriptWithSignature;
 
@@ -179,6 +184,12 @@ export default class POLY extends COIN.ECDSACoin implements COIN.Coin {
   async signSmartContractTransaction(signTxData: types.signTx): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    // if data bytes is larger than 4000 sign it segmentally.
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.SmartContractSegment.scriptWithSignature;
+      const argument = await scriptUtils.getSmartContractArgumentSegment(transaction, addressIndex);
+      return polySign.signSmartContractTransaction(signTxData, script, argument, publicKey);
+    }
     const argument = await scriptUtils.getSmartContractArgument(transaction, addressIndex);
     const script = params.SmartContract.scriptWithSignature;
 
