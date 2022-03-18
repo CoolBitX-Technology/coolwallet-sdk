@@ -4,7 +4,7 @@ import * as token from './tokenUtils';
 import { utils } from '@coolwallet/core';
 import { handleHex } from './stringUtil';
 import { Transaction } from '../config/types';
-const Web3 = require('web3');
+import Web3Utils from 'web3-utils';
 
 /**
  * [toAddress(20B)] [amount(10B)] [gasPrice(10B)] [gasLimit(10B)] [nonce(8B)] [chainId(2B)]
@@ -88,7 +88,7 @@ export const getSmartContractArgumentSegment = async (transaction: Transaction, 
  * @param transaction
  */
 export const getSignMessageArgument = async (message: string, addressIndex: number) => {
-  const msgHex = handleHex(Web3.utils.toHex(message));
+  const msgHex = handleHex(Web3Utils.toHex(message));
   const argument = Buffer.from((msgHex.length / 2).toString()).toString('hex') + msgHex;
   return '15' + (await utils.getPath(COIN_TYPE, addressIndex)) + argument;
 };

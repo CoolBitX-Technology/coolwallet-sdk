@@ -1,7 +1,7 @@
 import { handleHex } from './stringUtil';
 import { Transaction } from '../config/types';
+import Web3Utils from 'web3-utils';
 
-const Web3 = require('web3');
 const rlp = require('rlp');
 
 const elliptic = require('elliptic');
@@ -76,7 +76,7 @@ export const genPolySigFromSESig = async (
   payload: Buffer,
   compressedPubkey: string | undefined = undefined
 ): Promise<{ v: number; r: string; s: string }> => {
-  const hash = Web3.utils.keccak256(payload);
+  const hash = Web3Utils.keccak256((payload as unknown) as string);
   const data = Buffer.from(handleHex(hash), 'hex');
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
 
@@ -116,6 +116,6 @@ function trimFirst12Bytes(hexString: string): string {
 export function pubKeyToAddress(compressedPubkey: string): string {
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
   const pubkey = `0x${keyPair.getPublic(false, 'hex').substr(2)}`;
-  const address = trimFirst12Bytes(Web3.utils.keccak256(pubkey));
-  return Web3.utils.toChecksumAddress(address);
+  const address = trimFirst12Bytes(Web3Utils.keccak256(pubkey));
+  return Web3Utils.toChecksumAddress(address);
 }

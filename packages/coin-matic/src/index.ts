@@ -116,7 +116,7 @@ export default class POLY extends COIN.ECDSACoin implements COIN.Coin {
     const argument = await scriptUtilsEIP1559.getSmartArgument(transaction, addressIndex);
     const script = params.EIP1559SmartContract.scriptWithSignature;
 
-    return polySign.signEIP1559SmartContractTransaction(signTxData, script, argument, publicKey);
+    return polySign.signEIP1559Transaction(signTxData, script, argument, publicKey);
   }
 
   async signTransaction(signTxData: types.signTx): Promise<string> {
@@ -193,7 +193,7 @@ export default class POLY extends COIN.ECDSACoin implements COIN.Coin {
     const argument = await scriptUtils.getSmartContractArgument(transaction, addressIndex);
     const script = params.SmartContract.scriptWithSignature;
 
-    return polySign.signSmartContractTransaction(signTxData, script, argument, publicKey);
+    return polySign.signTransaction(signTxData, script, argument, publicKey);
   }
 
   async signMessage(signMsgData: types.signMsg): Promise<string> {
