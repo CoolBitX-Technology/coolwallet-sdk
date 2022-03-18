@@ -29,15 +29,13 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
     }
     return Buffer.from(hex, 'hex');
   });
-  
-  // to handle with chainID number greater than Uint8
-  const chainIdBuffer = new Uint32Array(1);
-  chainIdBuffer[0] = transaction.chainId;
-  
-  // when sign chain treat r s v as number do we need slide `00` byte in buffer
-  const chainIdEncode = Buffer.from(chainIdBuffer.buffer).filter(e=>e!==0);
 
-  raw[6] = Buffer.from(chainIdEncode).reverse();
+  // to handle with chainID number greater than Uint8
+  const chainIdBuffer = Buffer.allocUnsafe(6);
+  chainIdBuffer.writeIntBE(137, 0, 6);
+
+  // when sign chain treat r s v as number do we need slide `00` byte in buffer
+  raw[6] = Buffer.from(chainIdBuffer.filter((e) => e !== 0));
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
 
@@ -50,27 +48,17 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
  * @param {Number} v
  * @param {String} r
  * @param {String} s
- * @param {number} chainId
  * @return {String}
  */
-export const composeSignedTransacton = (
-  payload: Array<Buffer>,
-  v: number,
-  r: string,
-  s: string,
-  chainId: number
-): string => {
+export const composeSignedTransaction = (payload: Array<Buffer>, v: number, r: string, s: string): string => {
   const transaction = payload.slice(0, 6);
-  
-  const vValue = v + chainId * 2 + 8;
 
-    let vValueBuffer = new Uint32Array(1);
+  const vValue = v + 137 * 2 + 8;
 
-    vValueBuffer[0] = vValue;
+  const vValueBuffer = Buffer.allocUnsafe(6);
+  vValueBuffer.writeIntBE(vValue, 0, 6);
 
-    const vValueEncode = Buffer.from(vValueBuffer.buffer).filter((e) => e !== 0);
-
-    transaction.push(Buffer.from(vValueEncode).reverse(), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
+  transaction.push(Buffer.from(vValueBuffer.filter((e) => e !== 0)), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
 
   const serializedTx = rlp.encode(transaction);
   return `0x${serializedTx.toString('hex')}`;
