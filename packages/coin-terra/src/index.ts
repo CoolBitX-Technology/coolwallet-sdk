@@ -55,21 +55,30 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         };
         break;
       case types.TX_TYPE.DELEGATE:
-        script = params.DELEGATE.script + params.DELEGATE.signature;
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.DELEGATE.script + params.DELEGATE.signature;
+        else
+          script = params.DELEGATE.script_test + params.DELEGATE.signature_test;
         argument = scriptUtil.getTerraDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
         genTx = (signature: string) => {
           return txUtil.getDelegateTx(signData.transaction, signature, publicKey);
         };
         break;
       case types.TX_TYPE.UNDELEGATE:
-        script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
+        else
+          script = params.UNDELEGATE.script_test + params.UNDELEGATE.signature_test;
         argument = scriptUtil.getTerraDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
         genTx = (signature: string) => {
           return txUtil.getUndelegateTx(signData.transaction, signature, publicKey);
         };
         break;
       case types.TX_TYPE.WITHDRAW:
-        script = params.WITHDRAW.script + params.WITHDRAW.signature;
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.WITHDRAW.script + params.WITHDRAW.signature;
+        else
+          script = params.WITHDRAW.script_test + params.WITHDRAW.signature_test;
         argument = scriptUtil.getTerraWithdrawArgement(publicKey, signData.transaction, addressIndex);
         genTx = (signature: string) => {
           return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);

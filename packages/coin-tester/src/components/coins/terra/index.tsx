@@ -24,11 +24,14 @@ function CoinTerra(props: Props) {
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
-  const [to, setTo] = useState('terra1seckusy09dzgtyxtz9xqzg2x7xfgtf0lhyzmf9');
+  //const [to, setTo] = useState('terra1seckusy09dzgtyxtz9xqzg2x7xfgtf0lhyzmf9');
+  const [to, setTo] = useState('terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv'); // Testnet - Wallet
 
   const[delegateValue, setDelegateValue] = useState('0');
   const[signedDelegate, setSignedDelegate] = useState('');
-  const[validatorAddress] = useState('terravaloper1259cmu5zyklsdkmgstxhwqpe0utfe5hhyty0at');
+  //const[validatorAddress] = useState('terravaloper1259cmu5zyklsdkmgstxhwqpe0utfe5hhyty0at');
+  const[validatorAddress] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm'); // Testnet - Accomplice Blockchain
+
 
   const[undelegateValue, setUndelegateValue] = useState('0');
   const[signedUndelegate, setSignedUndelegate] = useState('');
@@ -147,7 +150,7 @@ function CoinTerra(props: Props) {
       console.log("tempSignedTx: " + tempSignedTx);
 
       const getGas = await cosmosjs.getGas(tempSignedTx);
-      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0114);
+      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
       transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
       console.log("new gas amount transaction: ");
       console.log(transaction);
@@ -192,7 +195,7 @@ function CoinTerra(props: Props) {
       console.log("tempSignedTx: " + tempSignedTx);
 
       const getGas = await cosmosjs.getGas(tempSignedTx);
-      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0114);
+      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
       transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
       console.log("new gas amount transaction: ");
       console.log(transaction);
@@ -236,7 +239,7 @@ function CoinTerra(props: Props) {
       console.log("tempSignedTx: " + tempSignedTx);
 
       const getGas = await cosmosjs.getGas(tempSignedTx);
-      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0114);
+      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
       transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
       console.log("new gas amount transaction: ");
       console.log(transaction);
