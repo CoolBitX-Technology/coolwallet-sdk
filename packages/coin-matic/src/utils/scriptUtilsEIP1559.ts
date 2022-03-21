@@ -80,6 +80,32 @@ export const getSmartArgument = async (transaction: EIP1559Transaction, addressI
     handleHex(transaction.gasFeeCap).padStart(20, '0') +
     handleHex(transaction.gasLimit).padStart(20, '0') +
     handleHex(transaction.nonce).padStart(16, '0') +
+    handleHex(transaction.data);
+
+  const path = await utils.getPath(COIN_TYPE, addressIndex);
+  return `15${path}${argument}`;
+};
+
+/**
+ * [contractAddress(20B)]
+ * [value(10B)]
+ * [gasTipCap(10B)]
+ * [gasFeeCap(10B)]
+ * [gasLimit(10B)]
+ * [nonce(8B)]
+ * [dataLength(4B)]
+ */
+export const getSmartArgumentSegment = async (
+  transaction: EIP1559Transaction,
+  addressIndex: number
+): Promise<string> => {
+  const argument =
+    handleHex(transaction.to) +
+    handleHex(transaction.value).padStart(20, '0') +
+    handleHex(transaction.gasTipCap).padStart(20, '0') +
+    handleHex(transaction.gasFeeCap).padStart(20, '0') +
+    handleHex(transaction.gasLimit).padStart(20, '0') +
+    handleHex(transaction.nonce).padStart(16, '0') +
     (handleHex(transaction.data).length / 2).toString(16).padStart(8, '0'); // data length
 
   const path = await utils.getPath(COIN_TYPE, addressIndex);
