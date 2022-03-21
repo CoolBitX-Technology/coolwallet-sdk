@@ -76,8 +76,59 @@ export const getWithdrawDelegatorRewardTx = (
   return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.WITHDRAW, messageBuf);
 }
 
+
+export const getSmartTx = (
+  signData: types.MsgExecuteContract,
+  signature: string,
+  publicKey: string
+): string => {
+  let funds = [];
+  if(signData.funds !== undefined){
+    funds.push({ denom: signData.funds.denom, amount: signData.funds.toString() });
+  }
+  const messageBuf = messages.MsgExecuteContract.encode({
+    sender: signData.senderAddress,
+    contract: signData.contractAddress,
+    msg: signData.execute_msg,
+    funds: funds
+  })
+  console.log(messageBuf.toString('hex'));
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SMART, messageBuf);
+}
+
+/*
+export const getSmartTxTemp = (
+  signData: types.MsgExecuteContract
+): string => {
+  let funds = [];
+  if(signData.funds !== undefined){
+    funds.push({ denom: 'uluna', amount: signData.funds.toString() });
+  }
+  const messageBuf = messages.MsgExecuteContract.encode({
+    sender: signData.senderAddress,
+    contract: signData.contractAddress,
+    msg: signData.execute_msg,
+    funds: funds
+  })
+  console.log(Buffer.from(messageBuf, 'hex').toString('hex'));
+  console.log(Buffer.from(messageBuf).toString('hex'));
+  const body_bytes = messages.TxBody.encode({
+    messages: [
+      {
+        type_url: '/terra.wasm.v1beta1.MsgExecuteContract',
+        value: messageBuf
+      }
+    ],
+    memo: signData.memo
+  });
+  console.log('body_bytes:');
+  const result = Buffer.from(body_bytes,'hex').toString('hex');
+  return result;
+}
+*/
+
 export const getTxProtobuf = (
-    signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward,
+    signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward | types.MsgExecuteContract,
     signature: string,
     publicKey: string,
     type_url: string,

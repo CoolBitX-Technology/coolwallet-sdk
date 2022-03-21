@@ -1,6 +1,6 @@
 import { Transport } from '@coolwallet/core';
 
-export type SignDataType = SignMsgSendType | SignMsgDelegateType | SignMsgUndelegateType | SignMsgWithdrawDelegationRewardType
+export type SignDataType = SignMsgSendType | SignMsgDelegateType | SignMsgUndelegateType | SignMsgWithdrawDelegationRewardType | SignMsgExecuteContractType
 
 interface SignType {
     transport: Transport,
@@ -26,6 +26,10 @@ export interface SignMsgUndelegateType extends SignType {
 export interface SignMsgWithdrawDelegationRewardType extends SignType {
     txType: TX_TYPE.WITHDRAW;
     transaction: MsgWithdrawDelegationReward;
+}
+export interface SignMsgExecuteContractType extends SignType{
+    txType: TX_TYPE.SMART,
+    transaction: MsgExecuteContract;
 }
 
 type Luna = {
@@ -56,6 +60,16 @@ export interface MsgWithdrawDelegationReward extends Luna {
     validatorAddress: string;
 }
 
+export interface MsgExecuteContract extends Luna {
+    senderAddress: string,
+    contractAddress: string,
+    execute_msg: Uint8Array,
+    funds?: {
+        denom: string,
+        amount: number
+    }
+}
+
 export enum CHAIN_ID {
     LUNA = 'columbus-5',
 }
@@ -65,4 +79,5 @@ export enum TX_TYPE {
     DELEGATE = 'MsgDelegate',
     UNDELEGATE = 'MsgUndelegate',
     WITHDRAW = 'MsgWithdrawDelegationReward',
+    SMART = 'MsgExecuteContract'
 }

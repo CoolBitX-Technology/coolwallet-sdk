@@ -34,6 +34,19 @@ export default class LUNA extends COIN.ECDSACoin implements COIN.Coin{
         }
     }
 
+    /*
+    async getLunaProtocol(
+      signData: types.SignDataType
+      ): Promise<string> {
+        if(signData.txType == types.TX_TYPE.SMART){
+          return txUtil.getSmartTxTemp(signData.transaction);
+        }else{
+          return 'random';
+        }
+    }
+    */
+    
+
     async signLUNATransaction(signData: types.SignDataType): Promise<string> {
         const { addressIndex } = signData;
     
@@ -70,6 +83,13 @@ export default class LUNA extends COIN.ECDSACoin implements COIN.Coin{
             genTx = (signature: string) => {
               return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
             };
+            break;
+          case types.TX_TYPE.SMART:
+            script = params.SMART.script + params.SMART.signature;
+            argument = scriptUtil.getLunaSmartArgument(publicKey, signData.transaction, addressIndex);
+            genTx = (signature: string) => {
+              return txUtil.getSmartTx(signData.transaction, signature, publicKey);
+            }
             break;
           default:
             throw new SDKError(this.signLUNATransaction.name, `not support input tx type`);
