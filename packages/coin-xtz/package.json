@@ -8,7 +8,7 @@
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
-    "build": "del-cli lib && npm run build:types && npm run build:ts",
+    "build": "npm run build:types && npm run build:ts",
     "test": "jest"
   },
   "peerDependencies": {
