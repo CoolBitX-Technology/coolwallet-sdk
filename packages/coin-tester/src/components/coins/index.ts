@@ -7,6 +7,8 @@ import ETH from './eth';
 import CRO from './cro';
 import matic from './matic';
 import LUNA from './luna';
+import TERRA from './terra';
+import XTZ from './xtz';
 
 export default [
   { path: 'template', Element: template },
@@ -18,4 +20,6 @@ export default [
   { path: 'cro', Element: CRO },
   { path: 'matic', Element: matic },
   { path: 'luna', Element: LUNA},
+  { path: 'terra', Element: TERRA},
+  { path: 'xtz', Element: XTZ},
 ];
