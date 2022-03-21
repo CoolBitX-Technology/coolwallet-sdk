@@ -19,6 +19,7 @@
     "@coolwallet/luna": "file:../coin-luna",
     "@coolwallet/terra": "file:../coin-terra",
     "@coolwallet/matic": "file:../coin-matic",
+    "@coolwallet/bsc": "file:../coin-bsc",
     "@coolwallet/template": "file:../coin-template",
     "@coolwallet/transport-jre-http": "file:../transport-jre-http",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",

@@ -5,10 +5,11 @@ import CRONOS from './cronos';
 import ETC from './etc';
 import ETH from './eth';
 import CRO from './cro';
-import matic from './matic';
+import MATIC from './matic';
 import LUNA from './luna';
 import TERRA from './terra';
 import XTZ from './xtz';
+import BSC from './bsc';
 
 export default [
   { path: 'template', Element: template },
@@ -18,8 +19,9 @@ export default [
   { path: 'etc', Element: ETC },
   { path: 'cronos', Element: CRONOS },
   { path: 'cro', Element: CRO },
-  { path: 'matic', Element: matic },
-  { path: 'luna', Element: LUNA},
-  { path: 'terra', Element: TERRA},
-  { path: 'xtz', Element: XTZ},
+  { path: 'matic', Element: MATIC },
+  { path: 'luna', Element: LUNA },
+  { path: 'terra', Element: TERRA },
+  { path: 'xtz', Element: XTZ },
+  { path: 'bsc', Element: BSC },
 ];
