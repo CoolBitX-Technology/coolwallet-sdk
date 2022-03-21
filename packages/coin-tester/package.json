@@ -17,6 +17,7 @@
     "@coolwallet/etc": "file:../coin-etc",
     "@coolwallet/eth": "file:../coin-eth",
     "@coolwallet/luna": "file:../coin-luna",
+    "@coolwallet/terra": "file:../coin-terra",
     "@coolwallet/matic": "file:../coin-matic",
     "@coolwallet/template": "file:../coin-template",
     "@coolwallet/transport-jre-http": "file:../transport-jre-http",
