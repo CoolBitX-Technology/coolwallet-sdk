@@ -13,7 +13,7 @@ export type signTx = {
   appId: string;
   transaction: Transaction;
   addressIndex: number;
-  publicKey: string | undefined;
+  publicKey?: string;
   confirmCB?(): void;
   authorizedCB?(): void;
 };
@@ -46,7 +46,7 @@ export type Transaction = {
   to: string;
   value: string;
   data: string;
-  option: Option;
+  option?: Option;
 };
 
 export type Option = {
