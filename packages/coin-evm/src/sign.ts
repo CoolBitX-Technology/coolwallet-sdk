@@ -29,7 +29,6 @@ async function signSingleTransaction(
   const { transport, appId, appPrivateKey } = client;
   const preActions = [() => apdu.tx.sendScript(transport, script)];
   const action = () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
-  console.log(rawPayload.toString('hex'));
 
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,

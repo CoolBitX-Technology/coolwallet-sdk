@@ -81,7 +81,6 @@ async function getSEEIP712MessageTransaction(
   const chainInfo = chain.toHexChainInfo();
   const chainSignature = chain.getSignature();
   const messageHex = formatHex(ToHex(message));
-  console.log('Hex: ', messageHex);
   const messageBytesLength = Buffer.from((messageHex.length / 2).toString()).toString('hex');
 
   return '15' + path + chainInfo + chainSignature + messageBytesLength + messageHex;
