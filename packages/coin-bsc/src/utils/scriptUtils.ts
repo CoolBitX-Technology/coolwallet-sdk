@@ -31,11 +31,11 @@ export const getTransferArgument = async (transaction: Transaction, addressIndex
  * @param tokenSignature
  */
 export const getBEP20Argument = async (transaction: Transaction, tokenSignature: string, addressIndex: number) => {
-  const txTokenInfo: Option = transaction.option;
+  const txTokenInfo = transaction.option;
   const tokenInfo = token.getSetTokenPayload(
     transaction.to,
-    txTokenInfo.info.symbol,
-    parseInt(txTokenInfo.info.decimals)
+    txTokenInfo?.info.symbol ?? '',
+    parseInt(txTokenInfo?.info.decimals ?? '0')
   );
   const signature = tokenSignature.slice(58).padStart(144, '0');
   const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, '');

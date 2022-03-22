@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, setting } from '@coolwallet/core';
+import { coin as COIN, setting, Transport } from '@coolwallet/core';
 import * as sign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types';
@@ -19,12 +19,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
    * @param {number} addressIndex
    * @return {string}
    */
-  async getAddress(
-    transport: types.Transport,
-    appPrivateKey: string,
-    appId: string,
-    addressIndex: number
-  ): Promise<string> {
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return pubKeyToAddress(publicKey);
   }
@@ -61,13 +56,18 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
         // get tokenSignature
         if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
           tokenSignature = tokenInfo.signature;
-          signTxData.transaction.option.info.symbol = tokenInfo.symbol;
-          signTxData.transaction.option.info.decimals = tokenInfo.unit;
+          signTxData.transaction.option = {
+            info: {
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.unit,
+            },
+          };
           break;
         }
       }
 
-      const { symbol, decimals } = signTxData.transaction.option.info;
+      const symbol = signTxData.transaction.option?.info.symbol;
+      const decimals = signTxData.transaction.option?.info.decimals;
       if (symbol && decimals) {
         if (tokenSignature) {
           // 內建
