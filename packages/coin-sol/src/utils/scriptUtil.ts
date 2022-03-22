@@ -25,6 +25,7 @@ const numberToStringHex = (value: number | number[], pad: number) =>
     .padStart(pad, '0');
 
 const messageSerialize = (message: messageType): string => {
+  console.log('🚀 ~ file: scriptUtil.ts ~ line 29 ~ messageSerialize ~ message', message);
   const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } = message.header;
   const formattedTx = {
     numberRequireSignature: numberToStringHex(numRequiredSignatures, 2),
@@ -43,7 +44,7 @@ const messageSerialize = (message: messageType): string => {
     handleHex(formattedTx.numberReadonlySignedAccount).padStart(2, '0') +
     handleHex(formattedTx.numberReadonlyUnSignedAccount).padStart(2, '0') +
     handleHex(formattedTx.keyCount).padStart(2, '0') +
-    keys.padStart(192, '0') +
+    keys.padStart(message.accountKeys.length * 64, '0') +
     recentBlockHash.padStart(64, '0') +
     numberToStringHex(message.instructions.length, 2);
 

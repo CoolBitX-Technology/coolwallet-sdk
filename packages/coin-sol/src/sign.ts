@@ -11,6 +11,7 @@ async function signTransaction(
   const preActions = [];
 
   const argument = await scriptUtil.getTransferArguments(message);
+  console.log('🚀 ~ file: sign.ts ~ line 14 ~ argument', argument);
 
   const script = transfer.script + transfer.signature;
 
@@ -33,6 +34,9 @@ async function signTransaction(
     authorizedCB
   );
   await utils.checkSupportScripts(transport);
+
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
+  console.log('🚀 ~ file: sign.ts ~ line 27 ~ signedTx', signedTx);
 
   return signature as Buffer;
 }

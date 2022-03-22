@@ -27,4 +27,5 @@ export type signTxType = {
   message: messageType;
   confirmCB: Function | undefined;
   authorizedCB: Function | undefined;
+  testscript: string | undefined;
 };

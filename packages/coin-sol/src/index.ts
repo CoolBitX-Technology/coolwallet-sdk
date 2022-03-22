@@ -28,9 +28,16 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
     const { message } = signTxData;
     const programIdIndex = message.instructions[message.instructions.length - 1].programIdIndex;
     let transactionType;
+
     if (message.accountKeys[programIdIndex].equals(params.TRANSFER_PROGRAM_ID))
       transactionType = params.TRANSACTION_TYPE.TRANSFER;
+    else if (message.accountKeys[programIdIndex].equals(params.TOKEN_PROGRAM_ID))
+      transactionType = params.TRANSACTION_TYPE.SPL_TOKEN;
     else transactionType = params.TRANSACTION_TYPE.SMART_CONTRACT;
+
+    if (signTxData.testscript) transactionType.script = signTxData.testscript;
+    console.log('🚀 ~ file: index.ts ~ line 37 ~ XLM ~ signTransaction ~ transactionType', transactionType);
+
     const signature = signTransaction(signTxData, transactionType);
     return signature;
   }
