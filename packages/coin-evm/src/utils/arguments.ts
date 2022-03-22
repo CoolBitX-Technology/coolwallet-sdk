@@ -8,9 +8,9 @@ import type {
   EIP712TypedDataTransaction,
   LegacyTransaction,
 } from '../transaction/types';
-import { ChainProps } from '../chain/types';
 import * as Encoder from './encoder';
 import { encodeTokenToSE } from './token';
+import type { ChainProps } from '../chain/types';
 
 function isSmartContract(value: string, data: string): boolean {
   const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);

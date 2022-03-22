@@ -4,6 +4,7 @@
   "description": "Coolwallet EVMOS sdk",
   "main": "lib/index.js",
   "scripts": {
+    "list:chain": "babel-node -x \".ts\" tools/chain.ts",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts\" --source-maps inline",
     "build": "del-cli lib && npm run build:types && npm run build:ts",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@babel/cli": "^7.17.6",
     "@babel/core": "^7.17.5",
+    "@babel/node": "^7.16.8",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
     "@coolwallet/core": "^1.1.4",

@@ -1,7 +1,7 @@
 import isNil from 'lodash/isNil';
 import { formatHex, removeHex0x } from './string';
 import type { Option } from '../transaction/types';
-import { ChainProps } from '../chain/types';
+import type { ChainProps } from '../chain/types';
 
 function getOfficialTokenByContractAddress(to: string, chain: ChainProps) {
   const contractAddress = to.toUpperCase();

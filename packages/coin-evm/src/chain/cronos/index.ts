@@ -1,7 +1,7 @@
 import { TOKENS } from './token';
-import type { ChainProps } from '../types';
+import { ChainProps } from '../types';
 
-class CronosChain implements ChainProps {
+class CronosChain extends ChainProps {
   id = 25;
   symbol = 'CRO';
   signature =
@@ -10,29 +10,6 @@ class CronosChain implements ChainProps {
       '0'
     );
   tokens = TOKENS;
-
-  getSignature() {
-    return this.signature;
-  }
-
-  toHexChainInfo() {
-    const chainIdHex = this.getChainId();
-    const chainIdLength = Math.ceil(chainIdHex.length / 2).toString(16).padStart(2, '0');
-    const symbolHex = this.getSymbol();
-    const symbolLength = (symbolHex.length / 2).toString(16).padStart(2, '0');
-    return chainIdLength + chainIdHex.padEnd(12, '0') + symbolLength + symbolHex.padEnd(14, '0');
-  }
-
-  private getSymbol() {
-    return Buffer.from(this.symbol).toString('hex');
-  }
-
-  private getChainId() {
-    const buffer = Buffer.allocUnsafe(6);
-    buffer.writeIntBE(this.id, 0, 6);
-    // Remove leading zeros.
-    return buffer.toString('hex').replace(/^0+/, '');
-  }
 }
 
 export default new CronosChain();
