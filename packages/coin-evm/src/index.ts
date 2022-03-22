@@ -30,7 +30,7 @@ class Evm extends COIN.ECDSACoin {
   }
 
   async signTransaction(client: Transaction.LegacyTransaction): Promise<string> {
-    const type = getTransactionType(client);
+    const type = getTransactionType(client, this.chain);
     switch (type) {
       case TRANSACTION_TYPE.TRANSFER:
         return this.signTransferTransaction(client);
@@ -56,19 +56,9 @@ class Evm extends COIN.ECDSACoin {
 
   async signERC20Transaction(client: Transaction.LegacyTransaction, signature = ''): Promise<string> {
     const {
-      transaction: { to },
+      transaction: { option },
     } = client;
-    let tokenSignature = signature;
-    const official = getOfficialTokenByContractAddress(to, this.chain);
-    if (!isNil(official)) {
-      tokenSignature = official.signature;
-      client.transaction.option = {
-        info: {
-          symbol: official.symbol,
-          decimals: official.unit,
-        },
-      };
-    }
+    const tokenSignature = option?.info.signature ?? signature;
     const script = SCRIPTS.signERC20Transaction.scriptWithSignature;
     const argument = await SEArguments.getSELegacyERC20Transaction(client, tokenSignature, this.chain, this.coinType);
     const publicKey = await this.getPublicKey(
@@ -135,7 +125,7 @@ class Evm extends COIN.ECDSACoin {
   }
 
   async signEIP1559Transaction(client: Transaction.EIP1559Transaction): Promise<string> {
-    const type = getTransactionType(client);
+    const type = getTransactionType(client, this.chain);
     switch (type) {
       case TRANSACTION_TYPE.TRANSFER:
         return this.signEIP1559TransferTransaction(client);
@@ -161,19 +151,9 @@ class Evm extends COIN.ECDSACoin {
 
   async signEIP1559ERC20Transaction(client: Transaction.EIP1559Transaction, signature = ''): Promise<string> {
     const {
-      transaction: { to },
+      transaction: { option },
     } = client;
-    let tokenSignature = signature;
-    const official = getOfficialTokenByContractAddress(to, this.chain);
-    if (!isNil(official)) {
-      tokenSignature = official.signature;
-      client.transaction.option = {
-        info: {
-          symbol: official.symbol,
-          decimals: official.unit,
-        },
-      };
-    }
+    const tokenSignature = option?.info.signature ?? signature;
     const publicKey = await this.getPublicKey(
       client.transport,
       client.appPrivateKey,

@@ -14,6 +14,7 @@ type Option = {
   info: {
     symbol: string;
     decimals: string;
+    signature?: string;
   };
 };
 
