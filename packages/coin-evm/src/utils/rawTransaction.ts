@@ -11,8 +11,13 @@ import {
 /**
  * Get raw payload
  *
- * @param {{nonce:string, gasPrice:string, gasLimit:string, to:string,
- * value:string, data:string, chainId: number}} transaction
+ * @param transaction LegacyTransaction
+ * @param transaction.nonce transaction nonce
+ * @param transaction.gasPrice transaction gasPrice
+ * @param transaction.gasLimit transaction gasLimit
+ * @param transaction.to transaction to
+ * @param transaction.value transaction value
+ * @param transaction.data transaction data
  * @return {Array<Buffer>}
  */
 function getLegacyRawHex(transaction: LegacyTransaction['transaction'], chainId: number): Buffer[] {
