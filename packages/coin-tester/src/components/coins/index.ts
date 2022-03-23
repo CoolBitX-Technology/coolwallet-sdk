@@ -1,17 +1,20 @@
-import template from './template';
-import bnb from './bnb';
+import TEMPLATE from './template';
+import BNB from './bnb';
 import ADA from './ada';
 import CRONOS from './cronos';
-import ETC from './ETC';
+import ETC from './etc';
 import ETH from './eth';
 import CRO from './cro';
-import matic from './matic';
+import MATIC from './matic';
 import LUNA from './luna';
 import sol from './coin-sol';
+import TERRA from './terra';
+import XTZ from './xtz';
+import BSC from './bsc';
 
 export default [
-  { path: 'template', Element: template },
-  { path: 'bnb', Element: bnb },
+  { path: 'template', Element: TEMPLATE },
+  { path: 'bnb', Element: BNB },
   { path: 'ada', Element: ADA },
   { path: 'eth', Element: ETH },
   { path: 'etc', Element: ETC },
@@ -20,4 +23,7 @@ export default [
   { path: 'matic', Element: matic },
   { path: 'luna', Element: LUNA },
   { path: 'SOL', Element: sol },
+  { path: 'terra', Element: TERRA },
+  { path: 'xtz', Element: XTZ },
+  { path: 'bsc', Element: BSC },
 ];

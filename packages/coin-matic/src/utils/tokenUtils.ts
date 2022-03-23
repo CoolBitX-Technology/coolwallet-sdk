@@ -1,6 +1,6 @@
 // import { asciiToHex, padRight } from './lib';
 import { handleHex, removeHex0x } from './stringUtil';
-const Web3 = require('web3');
+import Web3Utils from 'web3-utils';
 
 /**
  * @param {string} data
@@ -36,8 +36,8 @@ export const getSetTokenPayload = (contractAddress: string, symbol: string, deci
     symbol = symbol.substring(0, 7);
   }
   const len = handleHex(symbol.length.toString(16));
-  const symb = handleHex(Web3.utils.asciiToHex(symbol));
-  const setTokenPayload = unit + len + Web3.utils.padRight(symb, 14, '0') + removeHex0x(contractAddress);
+  const symb = handleHex(Web3Utils.asciiToHex(symbol));
+  const setTokenPayload = unit + len + Web3Utils.padRight(symb, 14, '0') + removeHex0x(contractAddress);
   return setTokenPayload;
 };
 
@@ -49,12 +49,12 @@ export const getSetTokenPayload = (contractAddress: string, symbol: string, deci
  * @return {Function}
  */
 // export const getSetTokenPreAction = (isBuiltIn, setTokenPayload) => {
-  // if (isBuiltIn) {
-  //   return async () => {
-  //     await apdu.tx.setToken(transport, setTokenPayload);
-  //   };
-  // }
-  // return async () => {
-  //   await apdu.tx.setCustomToken(transport, setTokenPayload);
-  // };
+// if (isBuiltIn) {
+//   return async () => {
+//     await apdu.tx.setToken(transport, setTokenPayload);
+//   };
+// }
+// return async () => {
+//   await apdu.tx.setCustomToken(transport, setTokenPayload);
+// };
 // };
