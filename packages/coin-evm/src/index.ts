@@ -1,13 +1,13 @@
-import { coin as COIN, Transport } from '@coolwallet/core';
-import isNil from 'lodash/isNil';
+import { coin as COIN, Transport, error } from '@coolwallet/core';
+import Ajv from 'ajv';
 import { SCRIPTS } from './config/scripts';
 import { COIN_TYPE } from './config/constants';
+import { EIP712Schema } from './config/schema';
 import { TRANSACTION_TYPE } from './transaction/constants';
 import { getTransactionType } from './transaction';
 import * as sign from './sign';
 import { pubKeyToAddress } from './utils/address';
 import * as SEArguments from './utils/arguments';
-import { getOfficialTokenByContractAddress } from './utils/token';
 import type { ChainProps } from './chain/types';
 import type * as Transaction from './transaction/types';
 
@@ -112,6 +112,10 @@ class Evm extends COIN.ECDSACoin {
   }
 
   async signTypedData(client: Transaction.EIP712TypedDataTransaction): Promise<string> {
+    const ajv = new Ajv();
+    if (!ajv.validate(EIP712Schema, client.typedData)) {
+      throw new error.SDKError(this.signTypedData.name, ajv.errorsText());
+    }
     const publicKey = await this.getPublicKey(
       client.transport,
       client.appPrivateKey,
