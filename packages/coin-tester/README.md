@@ -7,59 +7,85 @@ Testing Coin SDKs on the website
 - node 14+
 - npm 7+
 
-## Use with Coin Template
+## Initialize with Coin Template
 
 It would be beneficial to be familiar with CoolWallet Pro by playing around with this website tester and reading the source code of the coin-template sdk.
 
-#### Install and run
+#### Install
 
 ```shell
-cd ./packages/core
-npm ci
-npm run build
+npm install
+```
 
-cd ../transport-web-ble
-npm ci
-npm run build
+#### Generate Coin Config
 
-cd ../coin-template
-npm ci
-npm run build
+```shell
+echo '["@coolwallet/template"]' > coin.config.json
+```
 
-cd ../coin-tester
-npm ci
+#### Build
+
+```shell
+npm run bootstrap
+```
+This command would ask you which packages should be built.
+
+Choose the first one - `Build both mandatory library and coin packages`.
+
+#### Run
+
+```shell
 npm run dev
 ```
 
-## Use with Custom Coin SDK
+## Add a Custom Coin SDK
 
 Please add your custom coin sdk into this tester for further testing.
 
-#### Add a custom coin sdk
+#### Add a custom coin sdk into coin-tester for demonstration
 
-a. add this line in the package.json and replace **`custom`** with the coin symbol.
+a. Add this line in the package.json and replace **`custom`** with the coin symbol.
 
 ```shell
-"@coolwallet/coin-custom": "file:../coin-custom",
+"@coolwallet/custom": "file:../coin-custom",
 ```
 
-b. develop your custom coin page in the `src/components/coins/custom/`
+b. Develop your custom coin page in the `src/components/coins/custom/`
 
-c. export it in the `src/components/coins/index.ts`
+c. Export it in the `src/components/coins/index.ts`
 
 ```shell
-import template from './template';
-import custom from './custom';
+import TEMPLATE from './template';
+import CUSTOM from './custom';
 
 export default [
-  { path: 'template', Element: template },
-  { path: 'custom', Element: custom },
+  { path: 'template', Element: TEMPLATE },
+  { path: 'custom', Element: CUSTOM },
 ];
 ```
 
-#### Re-install and run
+#### Build a custom coin sdk
+
+a. Add the custom coin package name to `coin.config.json` file.
 
 ```shell
-npm ci
-npm run dev
+[
+  "@coolwallet/template",
+  "@coolwallet/custom"
+]
+```
+
+b. Re-build
+
+```shell
+npm run bootstrap
+```
+This time choose `Build coin packages which specific in coin.config.json`.
+
+It will only build coin sdk listed in the `coin.config.json`.
+
+#### Clean cache and Run
+
+```shell
+npm run dev -- --force
 ```
