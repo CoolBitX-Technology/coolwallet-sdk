@@ -1,5 +1,5 @@
-import template from './template';
-import bnb from './bnb';
+import TEMPLATE from './template';
+import BNB from './bnb';
 import ADA from './ada';
 import CRONOS from './cronos';
 import ETC from './etc';
@@ -12,8 +12,8 @@ import XTZ from './xtz';
 import BSC from './bsc';
 
 export default [
-  { path: 'template', Element: template },
-  { path: 'bnb', Element: bnb },
+  { path: 'template', Element: TEMPLATE },
+  { path: 'bnb', Element: BNB },
   { path: 'ada', Element: ADA },
   { path: 'eth', Element: ETH },
   { path: 'etc', Element: ETC },
