@@ -59,81 +59,32 @@ function CoinSol(props: Props) {
     }, setAddress);
   };
 
-  const getTransferTransaction = async () => {
-    const fromPubkey = new PublicKey(address);
-
-    const transfer = SystemProgram.transfer({
-      fromPubkey,
-      toPubkey: new PublicKey(transaction.to),
-      lamports: Number(transaction.value) * LAMPORTS_PER_SOL,
-    });
-
-    const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-
-    const tx = new Transaction({ recentBlockhash }).add(transfer);
-
-    tx.feePayer = fromPubkey;
-    return tx;
-  };
-
-  const getProgramTransaction = async () => {
-    const fromPubkey = new PublicKey(address);
-
-    const programId = new PublicKey(programTransaction.programId);
-
-    const SEED = 'hello';
-    const greetedPubkey = await PublicKey.createWithSeed(fromPubkey, SEED, programId);
-
-    const instruction = new TransactionInstruction({
-      keys: [{ pubkey: greetedPubkey, isSigner: false, isWritable: true }],
-      programId,
-      data: Buffer.from(programTransaction.data, 'hex'),
-    });
-
-    const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-
-    const tx = new Transaction({ recentBlockhash }).add(instruction);
-
-    tx.feePayer = fromPubkey;
-    return tx;
-  };
-
-  const getMessage = (tx: Transaction) => {
-    const { header, accountKeys, instructions } = tx.compileMessage();
-    return {
-      header,
-      accountKeys: accountKeys.map((key: any) => key.toBuffer()),
-      recentBlockhash: tx.recentBlockhash as string,
-      instructions,
-    };
-  };
-
   const signTransaction = async () => {
     handleState(
       async () => {
-        const tx = await getTransferTransaction();
-        const message = getMessage(tx);
+        const fromPubkey = address;
+        const toPubkey = transaction.to;
+        const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+        const tx = { fromPubkey, toPubkey, recentBlockhash, amount: 1 };
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
-        const signature = await sol.signTransaction({
+        const signedTx = await sol.signTransaction({
           transport: transport as Transport,
           appPrivateKey,
           appId,
-          message,
+          transaction: tx,
           confirmCB: () => {},
           authorizedCB: () => {},
         });
-        tx.addSignature(new PublicKey(address), signature);
+        const recoveredTx = Transaction.from(signedTx);
 
-        const serializeTx = tx.serialize();
-
-        const verifySig = Transaction.from(serializeTx).verifySignatures();
+        const verifySig = recoveredTx.verifySignatures();
 
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
-
-        const send = await connection.sendRawTransaction(serializeTx);
+        // return 'success';
+        const send = await connection.sendRawTransaction(recoveredTx.serialize());
 
         return send;
       },
@@ -144,29 +95,41 @@ function CoinSol(props: Props) {
   const signSmartContractTransaction = async () => {
     handleState(
       async () => {
-        const tx = await getProgramTransaction();
-        const message = getMessage(tx);
+        const programId = new PublicKey(programTransaction.programId);
+
+        const SEED = 'hello';
+        const greetedPubkey = await PublicKey.createWithSeed(new PublicKey(address), SEED, programId);
+        const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+
+        const tx = {
+          fromPubkey: greetedPubkey.toBase58(),
+          recentBlockhash,
+          options: {
+            owner: address,
+            programId: programTransaction.programId,
+            data: programTransaction.data,
+          },
+        };
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
-        const signature = await sol.signTransaction({
+        const signedTx = await sol.signTransaction({
           transport: transport as Transport,
           appPrivateKey,
           appId,
-          message,
+          transaction: tx,
           confirmCB: () => {},
           authorizedCB: () => {},
         });
-        tx.addSignature(new PublicKey(address), signature);
+        const recoveredTx = Transaction.from(signedTx);
 
-        const serializeTx = tx.serialize();
-
-        const verifySig = Transaction.from(serializeTx).verifySignatures();
+        const verifySig = recoveredTx.verifySignatures();
 
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
+        // return 'success';
 
-        const send = await connection.sendRawTransaction(serializeTx);
+        const send = await connection.sendRawTransaction(recoveredTx.serialize());
 
         return send;
       },

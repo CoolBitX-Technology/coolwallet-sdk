@@ -3,6 +3,7 @@ import * as txUtil from './utils/transactionUtil';
 import { signTransaction } from './sign';
 import * as types from './config/types';
 import * as params from './config/params';
+import { getTxType } from './utils/stringUtil';
 
 export { types };
 
@@ -25,13 +26,26 @@ export default class XLM extends COIN.EDDSACoin implements COIN.Coin {
   }
 
   async signTransaction(signTxData: types.signTxType): Promise<Buffer> {
-    const { message } = signTxData;
-    const programIdIndex = message.instructions[message.instructions.length - 1].programIdIndex;
+    const { transaction } = signTxData;
+
+    const txType = getTxType(transaction);
+
     let transactionType;
-    if (message.accountKeys[programIdIndex].equals(params.TRANSFER_PROGRAM_ID))
-      transactionType = params.TRANSACTION_TYPE.TRANSFER;
-    else transactionType = params.TRANSACTION_TYPE.SMART_CONTRACT;
-    const signature = signTransaction(signTxData, transactionType);
-    return signature;
+
+    switch (txType) {
+      case params.TX_TYPE.SMART_CONTRACT:
+        transactionType = params.TRANSACTION_TYPE.SMART_CONTRACT;
+        break;
+      case params.TX_TYPE.SPL_TOKEN:
+        transactionType = params.TRANSACTION_TYPE.SPL_TOKEN;
+        break;
+      default:
+        transactionType = params.TRANSACTION_TYPE.TRANSFER;
+        signTxData.transaction.options = { programId: params.TRANSFER_PROGRAM_ID };
+        break;
+    }
+
+    const signedTx = signTransaction(signTxData, transactionType);
+    return signedTx;
   }
 }

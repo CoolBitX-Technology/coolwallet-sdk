@@ -9,7 +9,6 @@ import matic from './matic';
 import LUNA from './luna';
 import sol from './coin-sol';
 
-
 export default [
   { path: 'template', Element: template },
   { path: 'bnb', Element: bnb },
@@ -18,7 +17,7 @@ export default [
   { path: 'etc', Element: ETC },
   { path: 'cronos', Element: CRONOS },
   { path: 'cro', Element: CRO },
-  { path: 'SOL', Element: sol },
   { path: 'matic', Element: matic },
-  { path: 'luna', Element: LUNA},
+  { path: 'luna', Element: LUNA },
+  { path: 'SOL', Element: sol },
 ];
