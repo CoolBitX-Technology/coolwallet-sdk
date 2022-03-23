@@ -35,8 +35,49 @@ export const getSendTx = (
     return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SEND, messageBuf);
 }
 
+export const getDelegateTx = (
+  signData: types.MsgDelegate,
+  signature: string,
+  publicKey: string
+): string => {
+  const messageBuf = messages.MsgDelegate.encode({
+    delegator_address: signData.delegatorAddress,
+    validator_address: signData.validatorAddress,
+    amount: { denom: 'uluna', amount: signData.amount.toString() }
+  });
+
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.DELEGATE, messageBuf);
+}
+
+export const getUndelegateTx = (
+  signData: types.MsgUndelegate,
+  signature: string,
+  publicKey: string
+): string => {
+  const messageBuf = messages.MsgUndelegate.encode({
+    delegator_address: signData.delegatorAddress,
+    validator_address: signData.validatorAddress,
+    amount: { denom: 'uluna', amount: signData.amount.toString() }
+  });
+
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.UNDELEGATE, messageBuf);
+}
+
+export const getWithdrawDelegatorRewardTx = (
+  signData: types.MsgWithdrawDelegationReward,
+  signature: string,
+  publicKey: string
+): string => {
+  const messageBuf = messages.MsgUndelegate.encode({
+    delegator_address: signData.delegatorAddress,
+    validator_address: signData.validatorAddress,
+  });
+
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.WITHDRAW, messageBuf);
+}
+
 export const getTxProtobuf = (
-    signData: types.MsgSend,
+    signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward,
     signature: string,
     publicKey: string,
     type_url: string,

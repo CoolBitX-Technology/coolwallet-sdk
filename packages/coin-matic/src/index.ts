@@ -12,7 +12,6 @@ export { TOKENTYPE };
 
 const convertEIP1559IntoLegacyTx = (eip1559Tx: types.signEIP1559Tx): types.signTx => {
   const tx: types.Transaction = {
-    chainId: 137,
     gasPrice: eip1559Tx.transaction.gasFeeCap,
     ...eip1559Tx.transaction,
   };
@@ -109,10 +108,15 @@ export default class POLY extends COIN.ECDSACoin implements COIN.Coin {
 
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.EIP1559SmartContractSegment.scriptWithSignature;
+      const argument = await scriptUtilsEIP1559.getSmartArgumentSegment(transaction, addressIndex);
+      return polySign.signEIP1559SmartContractTransaction(signTxData, script, argument, publicKey);
+    }
     const argument = await scriptUtilsEIP1559.getSmartArgument(transaction, addressIndex);
     const script = params.EIP1559SmartContract.scriptWithSignature;
 
-    return polySign.signEIP1559SmartContractTransaction(signTxData, script, argument, publicKey);
+    return polySign.signEIP1559Transaction(signTxData, script, argument, publicKey);
   }
 
   async signTransaction(signTxData: types.signTx): Promise<string> {
@@ -132,13 +136,19 @@ export default class POLY extends COIN.ECDSACoin implements COIN.Coin {
         // get tokenSignature
         if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
           tokenSignature = tokenInfo.signature;
-          signTxData.transaction.option.info.symbol = tokenInfo.symbol;
-          signTxData.transaction.option.info.decimals = tokenInfo.unit;
+          signTxData.transaction.option = {
+            info: {
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.unit,
+            },
+          };
+
           break;
         }
       }
 
-      const { symbol, decimals } = signTxData.transaction.option.info;
+      const symbol = signTxData.transaction.option?.info?.symbol;
+      const decimals = signTxData.transaction.option?.info?.decimals;
       if (symbol && decimals) {
         if (tokenSignature) {
           // 內建
@@ -174,10 +184,16 @@ export default class POLY extends COIN.ECDSACoin implements COIN.Coin {
   async signSmartContractTransaction(signTxData: types.signTx): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    // if data bytes is larger than 4000 sign it segmentally.
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.SmartContractSegment.scriptWithSignature;
+      const argument = await scriptUtils.getSmartContractArgumentSegment(transaction, addressIndex);
+      return polySign.signSmartContractTransaction(signTxData, script, argument, publicKey);
+    }
     const argument = await scriptUtils.getSmartContractArgument(transaction, addressIndex);
     const script = params.SmartContract.scriptWithSignature;
 
-    return polySign.signSmartContractTransaction(signTxData, script, argument, publicKey);
+    return polySign.signTransaction(signTxData, script, argument, publicKey);
   }
 
   async signMessage(signMsgData: types.signMsg): Promise<string> {

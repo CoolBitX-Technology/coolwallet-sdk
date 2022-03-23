@@ -196,6 +196,14 @@ function CoinAda(props: Props) {
     }, setDifference);
   };
 
+  const confirmCB = () => {
+    alert('Please confirm your info on card');
+  };
+
+  const authorizedCB = () => {
+    alert('Transaction has authorized and signed');
+  };
+
   const signTransferTx = async () => {
     handleState(async () => {
       const transaction = {
@@ -208,7 +216,9 @@ function CoinAda(props: Props) {
       const options = {
         transport: transport!,
         appPrivateKey,
-        appId
+        appId,
+        confirmCB,
+        authorizedCB
       };
 
       const signedTx = await ada.signTransaction(transaction, options);

@@ -34,7 +34,7 @@
     "test": "jest",
     "bootstrap": "lerna bootstrap --ignore=\"@coolwallet/transport-react-native-ble\" --ignore=\"tester\"",
     "build": "lerna run build --ignore=\"@coolwallet/transport-react-native-ble\" --ignore=\"tester\"",
-    "clean": "lerna clean --yes",
+    "clean": "lerna clean --yes && lerna exec -- rm -rf lib",
     "ci": "npm run clean && npm run bootstrap && npm run build",
     "update:lock": "lerna exec --ignore=\"@coolwallet/transport-react-native-ble\" -- npm i",
     "build-template": "cd packages/core && npm ci && npm run build && cd ../transport-web-ble && npm ci && npm run build && cd ../transport-jre-http && npm ci && npm run build && cd ../coin-template && npm ci && npm run build"

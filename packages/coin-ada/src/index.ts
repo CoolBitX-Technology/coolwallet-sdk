@@ -53,6 +53,9 @@ export default class ADA implements COIN.Coin {
       witness.sig = encryptedSig;
     }
 
+    if (typeof confirmCB === "function")
+      confirmCB();
+
     // show information for verification
 
     await apdu.tx.finishPrepare(transport);
@@ -61,6 +64,9 @@ export default class ADA implements COIN.Coin {
     // resolve signature
 
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
+    if (typeof authorizedCB === "function") {
+      authorizedCB();
+    }
     for (const witness of witnesses) {
       const encryptedSig = witness.sig;
       const sig = tx.util.decryptSignatureFromSE(encryptedSig, decryptingKey, true);
