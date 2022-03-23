@@ -1,21 +1,15 @@
 import { utils, config } from '@coolwallet/core';
-import isEmpty from 'lodash/isEmpty';
 import { TypedDataUtils, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { formatHex, ToHex } from './string';
+import * as Encoder from './encoder';
+import { encodeTokenToSE } from './token';
 import type {
   EIP1559Transaction,
   EIP712MessageTransaction,
   EIP712TypedDataTransaction,
   LegacyTransaction,
 } from '../transaction/types';
-import * as Encoder from './encoder';
-import { encodeTokenToSE } from './token';
 import type { ChainProps } from '../chain/types';
-
-function isSmartContract(value: string, data: string): boolean {
-  const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-  return (isEmpty(value) || value === '0x0') && (functionHash === 'a9059cbb' || functionHash === '095ea7b3');
-}
 
 async function getSELegacyTransaction(client: LegacyTransaction, chain: ChainProps, coinType: string): Promise<string> {
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
@@ -186,7 +180,6 @@ async function getSEEIP1559SmartContractSegmentTransaction(
 }
 
 export {
-  isSmartContract,
   getSELegacyTransaction,
   getSELegacyERC20Transaction,
   getSELegacySmartContractTransaction,
