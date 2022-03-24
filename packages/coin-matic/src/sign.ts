@@ -1,4 +1,4 @@
-import Web3 from 'web3';
+import Web3Utils from 'web3-utils';
 import * as rlp from 'rlp';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import Ajv from 'ajv';
@@ -131,7 +131,7 @@ export const signTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await polyUtil.genPolySigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    return polyUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    return polyUtil.composeSignedTransaction(rawPayload, v, r, s);
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
@@ -187,7 +187,7 @@ export const signSmartContractTransaction = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await polyUtil.genPolySigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
-    const serializedTx = polyUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
+    const serializedTx = polyUtil.composeSignedTransaction(rawPayload, v, r, s);
     return serializedTx;
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
@@ -227,7 +227,7 @@ export const signMessage = async (
     true
   );
 
-  const msgHex = handleHex(Web3.utils.toHex(message));
+  const msgHex = handleHex(Web3Utils.toHex(message));
   const msgBuf = Buffer.from(msgHex, 'hex');
 
   const _19Buf = Buffer.from('19', 'hex');
@@ -298,7 +298,7 @@ export const signTypedData = async (
 
   const prefix = Buffer.from('1901', 'hex');
 
-  const dataBuf = Buffer.from(Web3.utils.sha3(encodedData.toString('hex'))?.substr(2) ?? '', 'hex');
+  const dataBuf = Buffer.from(Web3Utils.sha3(encodedData.toString('hex'))?.substr(2) ?? '', 'hex');
 
   const payload = Buffer.concat([prefix, domainSeparate, dataBuf]);
 

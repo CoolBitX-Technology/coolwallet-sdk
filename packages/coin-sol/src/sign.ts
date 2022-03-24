@@ -1,19 +1,19 @@
 import { tx, apdu, utils } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtil';
 import { signTxType } from './config/types';
+import { formTransaction } from './utils/transactionUtil';
+import * as params from './config/params';
 
-async function signTransaction(
-  signTxData: signTxType,
-  transfer: { script: string; signature: string }
-): Promise<Buffer> {
-  const { message, transport, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
+async function signTransaction(signTxData: signTxType, txType: string): Promise<Buffer> {
+  const { transaction, transport, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
 
   const preActions = [];
 
-  const argument = await scriptUtil.getTransferArguments(message);
-  console.log('🚀 ~ file: sign.ts ~ line 14 ~ argument', argument);
+  const rawTx = formTransaction(transaction, txType);
+  const argument = await scriptUtil.getTransferArguments(rawTx);
 
-  const script = transfer.script + transfer.signature;
+  ///
+  const script = params.SCRIPT[txType].getScript();
 
   const sendScript = async () => {
     await apdu.tx.sendScript(transport, script);
@@ -35,10 +35,9 @@ async function signTransaction(
   );
   await utils.checkSupportScripts(transport);
 
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-  console.log('🚀 ~ file: sign.ts ~ line 27 ~ signedTx', signedTx);
+  rawTx.signature = signature.toString('hex');
 
-  return signature as Buffer;
+  return Buffer.from(rawTx.serialize(), 'hex');
 }
 
 export { signTransaction };
