@@ -163,7 +163,6 @@ const CoinEVM: React.FC<Props> = (props: Props) => {
             const input = data as GetDataType<TxType.ERC20>;
             const token = selectedChain.properties.tokens[input.symbol];
             if (isNil(token)) throw new Error(`Cannot find given token ${input.symbol}`);
-            // Assuming it is a USDT
             const scale = 10 ** +token.unit;
             const amount = web3.utils.toHex(Math.floor(+input.value * scale)).slice(2);
             const erc20To = input.to.startsWith('0x') ? input.to.slice(2) : input.to;
@@ -173,7 +172,9 @@ const CoinEVM: React.FC<Props> = (props: Props) => {
               ...transaction,
               to: contractAddress,
               data: erc20Data,
-              gasLimit: web3.utils.toHex(await web3.eth.estimateGas({ to: input.to, data: erc20Data })),
+              gasLimit: web3.utils.toHex(
+                await web3.eth.estimateGas({ from: address, to: contractAddress, data: erc20Data })
+              ),
             };
             break;
           }
