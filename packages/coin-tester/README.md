@@ -20,7 +20,7 @@ npm install
 #### Generate Coin Config
 
 ```shell
-echo '["@coolwallet/template"]' > coin.config.json
+echo '[\n  "@coolwallet/template"\n]' > coin.config.json
 ```
 
 #### Build
