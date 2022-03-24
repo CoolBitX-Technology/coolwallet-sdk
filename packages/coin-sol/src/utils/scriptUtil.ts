@@ -3,7 +3,7 @@ import * as params from '../config/params';
 import { RawTransaction } from './transactionUtil';
 
 /**
- * TODO
+ * getTransferArguments
  * @param {RawTransaction} RawTransaction transaction with extracted fields from a regular sol transaction
  * @returns {Promise<string>}
  */

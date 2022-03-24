@@ -1,6 +1,6 @@
 import * as params from '../config/params';
 import { TransactionOptions, TransactionType } from '../config/types';
-import { addressToHex, encodeLength, getTxType, isBase58Format, numberToStringHex } from './stringUtil';
+import { addressToHex, encodeLength, isBase58Format, numberToStringHex } from './stringUtil';
 
 import base58 from 'bs58';
 
@@ -128,12 +128,9 @@ export function formTransaction(transaction: TransactionType, txType: string, si
 
   switch (txType) {
     case params.TRANSACTION_TYPE.SMART_CONTRACT:
-      rawTx.data =
-        typeof data === 'string'
-          ? isBase58Format(data)
-            ? base58.decode(data).toString('hex')
-            : data
-          : (data as Buffer).toString('hex');
+      if (typeof data === 'string') {
+        rawTx.data = isBase58Format(data) ? base58.decode(data).toString('hex') : data;
+      } else rawTx.data = (data as Buffer).toString('hex');
       rawTx.data = rawTx.data.length === 0 ? '00' : evenHexDigit(rawTx.data);
       rawTx.keyIndicesCount = '01';
       rawTx.keyIndices = '01';

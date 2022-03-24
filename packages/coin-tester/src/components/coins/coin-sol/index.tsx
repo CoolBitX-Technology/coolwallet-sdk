@@ -1,8 +1,7 @@
+import { useMemo, useState } from 'react';
 import { Transport } from '@coolwallet/core';
 import SOL from '@coolwallet/sol';
-import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js';
-import base58 from 'bs58';
-import React, { useMemo, useState } from 'react';
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Container } from 'react-bootstrap';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 import Inputs from '../../Inputs';
@@ -26,7 +25,7 @@ function CoinSol(props: Props) {
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
 
-  const [address, setAddress] = useState('');
+  const [account, setAccount] = useState('');
 
   const [transaction, setTransaction] = useState({
     to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
@@ -48,8 +47,6 @@ function CoinSol(props: Props) {
     result: '',
   });
 
-  const fromPubkey = useMemo(() => (address ? new PublicKey(address) : null), [address]);
-
   const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
     try {
@@ -67,10 +64,8 @@ function CoinSol(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const address = await sol.getAddress(transport!, appPrivateKey, appId);
-
-      return address;
-    }, setAddress);
+      return await sol.getAddress(transport!, appPrivateKey, appId);
+    }, setAccount);
   };
 
   // for transfer spl-token
@@ -85,9 +80,12 @@ function CoinSol(props: Props) {
   const signTransaction = async () => {
     handleState(
       async () => {
-        const fromPubkey = address;
+        if (account.length < 1) throw new Error('please get account first');
+
+        const fromPubkey = account;
         const toPubkey = transaction.to;
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+
         const tx = { fromPubkey, toPubkey, recentBlockhash, amount: transaction.value };
 
         const appId = localStorage.getItem('appId');
@@ -97,8 +95,6 @@ function CoinSol(props: Props) {
           appPrivateKey,
           appId,
           transaction: tx,
-          confirmCB: () => {},
-          authorizedCB: () => {},
         });
         const recoveredTx = Transaction.from(signedTx);
 
@@ -106,10 +102,8 @@ function CoinSol(props: Props) {
 
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
-        // return 'success';
-        const send = await connection.sendRawTransaction(recoveredTx.serialize());
 
-        return send;
+        return await connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setTransaction((prev: any) => ({ ...prev, result }))
     );
@@ -118,17 +112,19 @@ function CoinSol(props: Props) {
   const signSmartContractTransaction = async () => {
     handleState(
       async () => {
+        if (account.length < 1) throw new Error('please get account first');
+
         const programId = new PublicKey(programTransaction.programId);
 
         const SEED = 'hello';
-        const greetedPubkey = await PublicKey.createWithSeed(new PublicKey(address), SEED, programId);
+        const greetedPubkey = await PublicKey.createWithSeed(new PublicKey(account), SEED, programId);
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
         const tx = {
           fromPubkey: greetedPubkey.toBase58(),
           recentBlockhash,
           options: {
-            owner: address,
+            owner: account,
             programId: programTransaction.programId,
             data: programTransaction.data,
           },
@@ -141,8 +137,6 @@ function CoinSol(props: Props) {
           appPrivateKey,
           appId,
           transaction: tx,
-          confirmCB: () => {},
-          authorizedCB: () => {},
         });
         const recoveredTx = Transaction.from(signedTx);
 
@@ -150,11 +144,8 @@ function CoinSol(props: Props) {
 
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
-        // return 'success';
 
-        const send = await connection.sendRawTransaction(recoveredTx.serialize());
-
-        return send;
+        return await connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setProgramTransaction((prev: any) => ({ ...prev, result }))
     );
@@ -163,9 +154,11 @@ function CoinSol(props: Props) {
   const signSplTokenTransaction = () =>
     handleState(
       async () => {
-        if (fromPubkey === null) throw new Error('please get account first');
+        if (account.length < 1) throw new Error('please get account first');
 
         const token = new PublicKey(splTokenTransaction.token);
+
+        const fromPubkey = new PublicKey(account);
 
         const toAccount = new PublicKey(splTokenTransaction.to);
 
@@ -180,7 +173,7 @@ function CoinSol(props: Props) {
           toPubkey: toTokenAccount.toBase58(),
           recentBlockhash,
           options: {
-            owner: address,
+            owner: account,
             decimals: splTokenTransaction.decimals,
             value: splTokenTransaction.amount,
           },
@@ -194,8 +187,6 @@ function CoinSol(props: Props) {
           appPrivateKey,
           appId,
           transaction: tx,
-          confirmCB: () => {},
-          authorizedCB: () => {},
         });
 
         const recoveredTx = Transaction.from(signedTx);
@@ -204,11 +195,8 @@ function CoinSol(props: Props) {
 
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
-        return 'success';
 
-        const send = await connection.sendRawTransaction(recoveredTx.serialize());
-
-        return send;
+        return await connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setSplTokenTransaction((prev: any) => ({ ...prev, result }))
     );
@@ -217,7 +205,7 @@ function CoinSol(props: Props) {
     // @ts-ignore
     <Container>
       <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
-      <NoInput title='Get Address' content={address} onClick={getAddress} disabled={disabled} />
+      <NoInput title='Get Address' content={account} onClick={getAddress} disabled={disabled} />
       <TwoInputs
         title='Sign Transaction'
         content={transaction.result}

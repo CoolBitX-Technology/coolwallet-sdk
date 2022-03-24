@@ -46,8 +46,6 @@ export default class SOL extends COIN.EDDSACoin implements COIN.Coin {
         break;
     }
 
-    const signedTx = signTransaction(signTxData, transactionType);
-
-    return signedTx;
+    return signTransaction(signTxData, transactionType);
   }
 }
