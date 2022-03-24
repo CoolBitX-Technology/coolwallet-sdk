@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, setting } from "@coolwallet/core";
-import * as sign from "./sign";
-import { pubKeyToAddress } from "./utils/ethUtils";
-import * as types from "./config/types";
-import * as scriptUtils from "./utils/scriptUtils";
-import * as params from "./config/params";
-import { TOKENTYPE } from "./config/tokenType";
+import { coin as COIN, setting, Transport } from '@coolwallet/core';
+import * as sign from './sign';
+import { pubKeyToAddress } from './utils/ethUtils';
+import * as types from './config/types';
+import * as scriptUtils from './utils/scriptUtils';
+import * as params from './config/params';
+import { TOKENTYPE } from './config/tokenType';
 
 export { TOKENTYPE };
 
@@ -19,31 +19,13 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
    * @param {number} addressIndex
    * @return {string}
    */
-  async getAddress(
-    transport: types.Transport,
-    appPrivateKey: string,
-    appId: string,
-    addressIndex: number
-  ): Promise<string> {
-    const publicKey = await this.getPublicKey(
-      transport,
-      appPrivateKey,
-      appId,
-      addressIndex
-    );
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return pubKeyToAddress(publicKey);
   }
 
-  async getAddressByAccountKey(
-    accPublicKey: string,
-    accChainCode: string,
-    addressIndex: number
-  ): Promise<string> {
-    const publicKey = await this.getAddressPublicKey(
-      accPublicKey,
-      accChainCode,
-      addressIndex
-    );
+  async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     return pubKeyToAddress(publicKey);
   }
 
@@ -65,24 +47,27 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
     }
 
     // bep20
-    const functionHash = data.startsWith("0x")
-      ? data.slice(2, 10)
-      : data.slice(0, 8);
+    const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
 
-    if (data && functionHash === "a9059cbb") {
+    if (data && functionHash === 'a9059cbb') {
       const upperCaseAddress = to.toUpperCase(); // contractAddr
       let tokenSignature;
       for (const tokenInfo of TOKENTYPE) {
         // get tokenSignature
         if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
           tokenSignature = tokenInfo.signature;
-          signTxData.transaction.option.info.symbol = tokenInfo.symbol;
-          signTxData.transaction.option.info.decimals = tokenInfo.unit;
+          signTxData.transaction.option = {
+            info: {
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.unit,
+            },
+          };
           break;
         }
       }
 
-      const { symbol, decimals } = signTxData.transaction.option.info;
+      const symbol = signTxData.transaction.option?.info.symbol;
+      const decimals = signTxData.transaction.option?.info.decimals;
       if (symbol && decimals) {
         if (tokenSignature) {
           // 內建
@@ -114,10 +99,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
       signTxData.appId,
       signTxData.addressIndex
     );
-    const argument = await scriptUtils.getTransferArgument(
-      signTxData.transaction,
-      signTxData.addressIndex
-    );
+    const argument = await scriptUtils.getTransferArgument(signTxData.transaction, signTxData.addressIndex);
     const script = params.TRANSFER.script + params.TRANSFER.signature;
 
     return sign.signTransaction(signTxData, script, argument, publicKey);
@@ -132,10 +114,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} confirmCB
    * @param {Function} authorizedCB
    */
-  async signBEP20Transaction(
-    signTxData: types.signTx,
-    tokenSignature = ""
-  ) {
+  async signBEP20Transaction(signTxData: types.signTx, tokenSignature = '') {
     const publicKey = await this.getPublicKey(
       signTxData.transport,
       signTxData.appPrivateKey,
@@ -162,20 +141,16 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signSmartContractTransaction(signTxData: types.signTx) {
-    console.debug("signSmartContractTransaction");
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-    const publicKey = await this.getPublicKey(
-      signTxData.transport,
-      signTxData.appPrivateKey,
-      signTxData.appId,
-      signTxData.addressIndex
-    );
-    const script =
-      params.BSCSmartContract.script + params.BSCSmartContract.signature;
-    const argument = await scriptUtils.getSmartContractArgument(
-      signTxData.transaction,
-      signTxData.addressIndex
-    );
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.BSCSmartContractSegment.script + params.BSCSmartContractSegment.signature;
+      const argument = await scriptUtils.getSmartContractArgumentSegment(transaction, addressIndex);
+      return sign.signSmartContractTransaction(signTxData, script, argument, publicKey);
+    }
+    const script = params.BSCSmartContract.script + params.BSCSmartContract.signature;
+    const argument = await scriptUtils.getSmartContractArgument(signTxData.transaction, signTxData.addressIndex);
 
     return sign.signTransaction(signTxData, script, argument, publicKey);
   }
@@ -200,10 +175,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
       signMsgData.addressIndex
     );
     const script = params.SIGN_MESSAGE.script + params.SIGN_MESSAGE.signature;
-    const argument = await scriptUtils.getSignMessageArgument(
-      signMsgData.message,
-      signMsgData.addressIndex
-    );
+    const argument = await scriptUtils.getSignMessageArgument(signMsgData.message, signMsgData.addressIndex);
 
     return sign.signMessage(signMsgData, script, argument, publicKey);
   }
@@ -224,10 +196,8 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
       typedData.appId,
       typedData.addressIndex
     );
-    const script =
-      params.SIGN_TYPED_DATA.script + params.SIGN_TYPED_DATA.signature;
+    const script = params.SIGN_TYPED_DATA.script + params.SIGN_TYPED_DATA.signature;
 
     return sign.signTypedData(typedData, script, publicKey);
   }
 }
-

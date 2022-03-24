@@ -188,7 +188,7 @@ function CoinMatic(props: Props) {
             await web3.eth.estimateGas({ to: legacyData.to, data: web3.utils.toHex(legacyData.data) })
           ),
           to: legacyData.to,
-          value: web3.utils.toHex(web3.utils.toWei(legacy.value, 'ether')), // 0.001
+          value: web3.utils.toHex(web3.utils.toWei(legacyData.value, 'ether')), // 0.001
           data: web3.utils.toHex(legacyData.data),
         } as Transaction;
         console.log(transaction);
@@ -222,6 +222,7 @@ function CoinMatic(props: Props) {
   const signEIP1559 = async () => {
     handleState(
       async () => {
+        web3.eth.getFeeHistory(20, 'latest', [25, 50, 75]).then(console.log);
         const transaction = {
           nonce: web3.utils.toHex(await web3.eth.getTransactionCount(address, 'pending')),
           gasTipCap: web3.utils.toHex(await web3.eth.getGasPrice()),
@@ -317,7 +318,7 @@ function CoinMatic(props: Props) {
             await web3.eth.estimateGas({ to: eip1559Data.to, data: web3.utils.toHex(eip1559Data.data) })
           ),
           to: eip1559Data.to,
-          value: web3.utils.toHex(web3.utils.toWei(legacy.value, 'ether')), // 0.001
+          value: web3.utils.toHex(web3.utils.toWei(eip1559Data.value, 'ether')), // 0.001
           data: web3.utils.toHex(eip1559Data.data),
         } as EIP1559Transaction;
         console.log(transaction);
