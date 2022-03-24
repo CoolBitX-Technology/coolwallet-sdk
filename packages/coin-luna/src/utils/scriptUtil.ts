@@ -1,7 +1,7 @@
 import * as params from '../config/params';
 import * as types from '../config/types';
 
-export function getLunaSendArgement(publicKey: string, lunaData: types.MsgSend, addressIndex: number) {
+export function getLunaSendArgument(publicKey: string, lunaData: types.MsgSend, addressIndex: number) {
   const pubKey = publicKey.padStart(66, '0');
   const from = Buffer.from(lunaData.fromAddress, 'ascii').toString('hex').padStart(128, '0');
   const to = Buffer.from(lunaData.toAddress, 'ascii').toString('hex').padStart(128, '0');
@@ -14,17 +14,17 @@ export function getLunaSendArgement(publicKey: string, lunaData: types.MsgSend, 
 
   const argument = pubKey + from + to + amount + feeAmount + gas + accountNumber + sequence + memo;
 
-  console.debug('getLunaSendArgement: ' + argument);
+  console.debug('getLunaSendArgument: ' + argument);
 
   return addPath(argument, addressIndex);
 }
 
 /**
- * Get Luna Delegate Or Undelegate Argement
+ * Get Luna Delegate Or Undelegate Argument
  * @param lunaData
  * @param addressIndex
  */
-export function getLunaDelgtOrUnDelArgement(publicKey: string, lunaData: types.MsgDelegate, addressIndex: number) {
+export function getLunaDelgtOrUnDelArgument(publicKey: string, lunaData: types.MsgDelegate, addressIndex: number) {
   const pubKey = publicKey.padStart(66, '0');
   const delegatorAddress = Buffer.from(lunaData.delegatorAddress, 'ascii').toString('hex').padStart(128, '0');
   const validatorAddress = Buffer.from(lunaData.validatorAddress, 'ascii').toString('hex').padStart(128, '0');
@@ -38,12 +38,12 @@ export function getLunaDelgtOrUnDelArgement(publicKey: string, lunaData: types.M
   const argument =
     pubKey + delegatorAddress + validatorAddress + amount + feeAmount + gas + accountNumber + sequence + memo;
 
-  console.debug('getLunaDelgtOrUnDelArgement: ' + argument);
+  console.debug('getLunaDelgtOrUnDelArgument: ' + argument);
 
   return addPath(argument, addressIndex);
 }
 
-export function getLunaWithdrawArgement(
+export function getLunaWithdrawArgument(
   publicKey: string,
   lunaData: types.MsgWithdrawDelegationReward,
   addressIndex: number
@@ -59,7 +59,7 @@ export function getLunaWithdrawArgement(
 
   const argument = pubKey + delegatorAddress + validatorAddress + feeAmount + gas + accountNumber + sequence + memo;
 
-  console.debug('getLunaWithdrawArgement: ' + argument);
+  console.debug('getLunaWithdrawArgument: ' + argument);
 
   return addPath(argument, addressIndex);
 }
