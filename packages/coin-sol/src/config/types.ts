@@ -13,7 +13,7 @@ export type TransactionOptions = {
   programId?: string | Buffer;
   data?: string | Buffer;
   owner?: string | Buffer;
-  decimals?: number;
+  decimals?: number | string;
   value?: number | string;
 };
 
@@ -27,7 +27,7 @@ export type TransactionOptions = {
  */
 export type TransactionType = {
   fromPubkey: string | Buffer;
-  toPubkey: string | Buffer;
+  toPubkey?: string | Buffer;
   recentBlockhash: string;
   amount?: number | string;
   options?: TransactionOptions;

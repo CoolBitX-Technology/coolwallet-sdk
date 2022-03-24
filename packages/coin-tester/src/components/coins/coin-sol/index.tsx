@@ -22,7 +22,6 @@ const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xW
 function CoinSol(props: Props) {
   const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
   const sol = new SOL();
-  const LAMPORTS_PER_SOL = Math.pow(10, 9);
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
@@ -112,7 +111,7 @@ function CoinSol(props: Props) {
 
         return send;
       },
-      (result) => setTransaction((prev) => ({ ...prev, result }))
+      (result) => setTransaction((prev: any) => ({ ...prev, result }))
     );
   };
 
@@ -157,7 +156,7 @@ function CoinSol(props: Props) {
 
         return send;
       },
-      (result) => setProgramTransaction((prev) => ({ ...prev, result }))
+      (result) => setProgramTransaction((prev: any) => ({ ...prev, result }))
     );
   };
 
@@ -211,7 +210,7 @@ function CoinSol(props: Props) {
 
         return send;
       },
-      (result) => setSplTokenTransaction((prev) => ({ ...prev, result }))
+      (result) => setSplTokenTransaction((prev: any) => ({ ...prev, result }))
     );
 
   return (

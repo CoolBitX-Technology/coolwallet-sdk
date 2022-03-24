@@ -143,7 +143,7 @@ export function formTransaction(transaction: TransactionType, txType: string, si
       rawTx.programIdIndex = '03';
       rawTx.keyIndicesCount = '04';
       rawTx.keyIndices = '020100';
-      rawTx.dataEncode(value as string | number, decimals);
+      rawTx.dataEncode(value as string | number, Number(decimals));
       break;
     default:
       rawTx.dataEncode(amount as string | number);
