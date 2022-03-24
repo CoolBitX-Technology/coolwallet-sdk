@@ -44,23 +44,23 @@ Please add your custom coin sdk into this tester for further testing.
 
 #### Add a custom coin sdk into coin-tester for demonstration
 
-a. Add this line in the package.json and replace **`custom`** with the coin symbol.
+a. Add this line in the package.json and replace all following **`${custom}`** with the coin symbol.
 
 ```shell
-"@coolwallet/custom": "file:../coin-custom",
+"@coolwallet/${custom}": "file:../coin-${custom}",
 ```
 
-b. Develop your custom coin page in the `src/components/coins/custom/`
+b. Develop your custom coin page in the `src/components/coins/${custom}/`
 
 c. Export it in the `src/components/coins/index.ts`
 
 ```shell
 import TEMPLATE from './template';
-import CUSTOM from './custom';
+import ${CUSTOM} from './${custom}';
 
 export default [
   { path: 'template', Element: TEMPLATE },
-  { path: 'custom', Element: CUSTOM },
+  { path: '${custom}', Element: ${CUSTOM} },
 ];
 ```
 
@@ -71,7 +71,7 @@ a. Add the custom coin package name to `coin.config.json` file.
 ```shell
 [
   "@coolwallet/template",
-  "@coolwallet/custom"
+  "@coolwallet/${custom}"
 ]
 ```
 
