@@ -1,8 +1,4 @@
-import type { TokenProps } from '../types';
-
-type TokenName = 'WETH' | 'USDT' | 'BNB' | 'USDC' | 'MATIC' | 'BUSD' | 'CRO' | 'UST' | 'LINK' | 'WBTC';
-
-export const TOKENS: Record<TokenName, TokenProps> = {
+export const TOKENS = {
   WETH: {
     name: 'Wrapped Ether',
     symbol: 'WETH',

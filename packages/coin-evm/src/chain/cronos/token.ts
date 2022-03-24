@@ -1,6 +1,4 @@
-import type { TokenProps } from '../types';
-
-export const TOKENS: Record<'USDT', TokenProps> = {
+export const TOKENS = {
   // USDT
   USDT: {
     name: 'Tether USD',

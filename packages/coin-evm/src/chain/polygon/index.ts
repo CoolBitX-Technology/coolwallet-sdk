@@ -1,7 +1,7 @@
 import { TOKENS } from './token';
 import { ChainProps } from '../types';
 
-class PolygonChain extends ChainProps {
+class PolygonChain extends ChainProps<keyof typeof TOKENS> {
   id = 137;
   symbol = 'MATIC';
   signature =

@@ -6,11 +6,11 @@ interface TokenProps {
   signature: string;
 }
 
-abstract class ChainProps {
+abstract class ChainProps<T extends string> {
   abstract readonly id: number;
   abstract readonly symbol: string;
   abstract readonly signature: string;
-  abstract readonly tokens: Record<string, TokenProps>;
+  abstract readonly tokens: Record<T, TokenProps>;
 
   getSignature() {
     return this.signature;
