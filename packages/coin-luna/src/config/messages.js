@@ -45,6 +45,13 @@ var MsgWithdrawDelegatorReward = exports.MsgWithdrawDelegatorReward = {
   decode: null
 }
 
+var MsgExecuteContract = exports.MsgExecuteContract = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
 var Fee = exports.Fee = {
   buffer: true,
   encodingLength: null,
@@ -112,6 +119,7 @@ defineMsgSend()
 defineMsgDelegate()
 defineMsgUndelegate()
 defineMsgWithdrawDelegatorReward()
+defineMsgExecuteContract()
 defineFee()
 defineCoin()
 defineTxBody()
@@ -457,6 +465,114 @@ function defineMsgWithdrawDelegatorReward () {
         obj.validator_address = encodings.string.decode(buf, offset)
         offset += encodings.string.decode.bytes
         found1 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineMsgExecuteContract () {
+  MsgExecuteContract.encodingLength = encodingLength
+  MsgExecuteContract.encode = encode
+  MsgExecuteContract.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (defined(obj.sender)) {
+      var len = encodings.string.encodingLength(obj.sender)
+      length += 1 + len
+    }
+    if (defined(obj.contract)) {
+      var len = encodings.string.encodingLength(obj.contract)
+      length += 1 + len
+    }
+    if (defined(obj.msg)) {
+      var len = encodings.bytes.encodingLength(obj.msg)
+      length += 1 + len
+    }
+    if (defined(obj.funds)) {
+      for (var i = 0; i < obj.funds.length; i++) {
+        if (!defined(obj.funds[i])) continue
+        var len = Coin.encodingLength(obj.funds[i])
+        length += varint.encodingLength(len)
+        length += 1 + len
+      }
+    }
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (defined(obj.sender)) {
+      buf[offset++] = 10
+      encodings.string.encode(obj.sender, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
+    if (defined(obj.contract)) {
+      buf[offset++] = 18
+      encodings.string.encode(obj.contract, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
+    if (defined(obj.msg)) {
+      buf[offset++] = 26
+      encodings.bytes.encode(obj.msg, buf, offset)
+      offset += encodings.bytes.encode.bytes
+    }
+    if (defined(obj.funds)) {
+      for (var i = 0; i < obj.funds.length; i++) {
+        if (!defined(obj.funds[i])) continue
+        buf[offset++] = 42
+        varint.encode(Coin.encodingLength(obj.funds[i]), buf, offset)
+        offset += varint.encode.bytes
+        Coin.encode(obj.funds[i], buf, offset)
+        offset += Coin.encode.bytes
+      }
+    }
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      sender: "",
+      contract: "",
+      msg: null,
+      funds: []
+    }
+    while (true) {
+      if (end <= offset) {
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.sender = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        break
+        case 2:
+        obj.contract = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        break
+        case 3:
+        obj.msg = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
+        break
+        case 5:
+        var len = varint.decode(buf, offset)
+        offset += varint.decode.bytes
+        obj.funds.push(Coin.decode(buf, offset, offset + len))
+        offset += Coin.decode.bytes
         break
         default:
         offset = skip(prefix & 7, buf, offset)
@@ -1199,3 +1315,5 @@ function defineTxRaw () {
 function defined (val) {
   return val !== null && val !== undefined && (typeof val !== 'number' || !isNaN(val))
 }
+const txBytes = Buffer.from("0a4e0a4a0a262f74657272612e7761736d2e763162657461312e4d736745786563757465436f6e747261637412200a0012001a002a180a05756c756e61120f5b6f626a656374204f626a6563745d120012620a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a210342ab4261fc03828c61cfb7eaee9033f4eafc5a28f3b064f96f578c62f500d95912040a0208011800120e0a0a0a05756c756e6112013010001a402dbd0939943df6acb46cca8a1bfdfed45d1dfccdd6c08d3a1f14b069ba93e11f3577ecde6a8483230be2ed5c0413e66da4cb23383db703817fb29f9012490654", "hex");
+console.log(TxBody.decode(TxRaw.decode(txBytes).body_bytes).messages[0].value.toString('hex'));
