@@ -99,7 +99,6 @@ export const TwoInputs = (input: {
               input.setNumberValue(value ? value : 0);
             }
           }}
-          style={{ wordBreak: 'break-words' }}
           placeholder={input.placeholder}
         />
       </Col>
@@ -114,7 +113,6 @@ export const TwoInputs = (input: {
               input.setNumberValue2(value ? value : 0);
             }
           }}
-          style={{ wordBreak: 'break-words' }}
           placeholder={input.placeholder2}
         />
       </Col>
@@ -158,7 +156,6 @@ export const ObjInputs = (input: {
                 values[i] = event.target.value;
                 input.setValues(values);
               }}
-              style={{ wordBreak: 'break-words' }}
               placeholder={key}
             />
           </Col>

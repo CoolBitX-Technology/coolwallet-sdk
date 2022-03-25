@@ -38,6 +38,6 @@ export type signTxType = {
   appPrivateKey: string;
   appId: string;
   transaction: TransactionType;
-  confirmCB?: Function;
-  authorizedCB?: Function;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 };

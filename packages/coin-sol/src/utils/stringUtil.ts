@@ -21,10 +21,7 @@ export const numberToStringHex = (value: number | number[], pad: number) =>
     .toString('hex')
     .padStart(pad, '0');
 
-const isFieldsValid = (fields: Array<any>) => {
-  console.log('🚀 ~ file: stringUtil.ts ~ line 25 ~ fields', fields);
-  return fields.every((e) => e !== undefined);
-};
+const isFieldsValid = (fields: Array<any>) => fields.every((e) => e !== undefined);
 
 export const getTxType = (transaction: TransactionType): string => {
   if (transaction.options) {

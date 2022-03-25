@@ -1,9 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Transport } from '@coolwallet/core';
 import SOL from '@coolwallet/sol';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Container } from 'react-bootstrap';
-import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 import Inputs from '../../Inputs';
 
 interface Props {
@@ -29,7 +28,7 @@ function CoinSol(props: Props) {
 
   const [transaction, setTransaction] = useState({
     to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
-    value: '0',
+    value: '0.1',
     result: '',
   });
 
@@ -60,11 +59,11 @@ function CoinSol(props: Props) {
     }
   };
 
-  const getAddress = async () => {
-    handleState(async () => {
+  const getAddress = () => {
+    handleState(() => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      return await sol.getAddress(transport!, appPrivateKey, appId);
+      return sol.getAddress(transport!, appPrivateKey, appId);
     }, setAccount);
   };
 
@@ -103,7 +102,7 @@ function CoinSol(props: Props) {
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
 
-        return await connection.sendRawTransaction(recoveredTx.serialize());
+        return connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setTransaction((prev: any) => ({ ...prev, result }))
     );
@@ -145,7 +144,7 @@ function CoinSol(props: Props) {
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
 
-        return await connection.sendRawTransaction(recoveredTx.serialize());
+        return connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setProgramTransaction((prev: any) => ({ ...prev, result }))
     );
@@ -196,7 +195,7 @@ function CoinSol(props: Props) {
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
 
-        return await connection.sendRawTransaction(recoveredTx.serialize());
+        return connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setSplTokenTransaction((prev: any) => ({ ...prev, result }))
     );
@@ -205,36 +204,64 @@ function CoinSol(props: Props) {
     // @ts-ignore
     <Container>
       <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
-      <NoInput title='Get Address' content={account} onClick={getAddress} disabled={disabled} />
-      <TwoInputs
+      <Inputs btnTitle='Get' title='Get Address' content={account} onClick={getAddress} disabled={disabled} />
+      <Inputs
+        btnTitle='Sign'
         title='Sign Transaction'
         content={transaction.result}
         onClick={signTransaction}
         disabled={disabled}
-        btnName='Sign'
-        value={transaction.value}
-        setValue={(value) => setTransaction((prev: any) => ({ ...prev, value }))}
-        placeholder='value'
-        inputSize={1}
-        value2={transaction.to}
-        setValue2={(to) => setTransaction((prev: any) => ({ ...prev, to }))}
-        placeholder2='to'
-        inputSize2={3}
+        inputs={[
+          {
+            xs: 1,
+            value: transaction.value,
+            onChange: (value: any) =>
+              setTransaction((prevState: any) => ({
+                ...prevState,
+                value,
+              })),
+            placeholder: 'amount',
+          },
+          {
+            xs: 2,
+            value: transaction.to,
+            onChange: (to: any) =>
+              setTransaction((prevState: any) => ({
+                ...prevState,
+                to,
+              })),
+            placeholder: 'to',
+          },
+        ]}
       />
-      <TwoInputs
+      <Inputs
+        btnTitle='Sign'
         title='Sign Smart Contract Transaction'
         content={programTransaction.result}
         onClick={signSmartContractTransaction}
         disabled={disabled}
-        btnName='Sign'
-        value={programTransaction.data}
-        setValue={(data) => setProgramTransaction((prev: any) => ({ ...prev, data }))}
-        placeholder='data'
-        inputSize={1}
-        value2={programTransaction.programId}
-        setValue2={(programId) => setProgramTransaction((prev: any) => ({ ...prev, programId }))}
-        placeholder2='to'
-        inputSize2={3}
+        inputs={[
+          {
+            xs: 2,
+            value: programTransaction.data,
+            onChange: (data: any) =>
+              setProgramTransaction((prevState: any) => ({
+                ...prevState,
+                data,
+              })),
+            placeholder: 'data',
+          },
+          {
+            xs: 2,
+            value: programTransaction.programId,
+            onChange: (programId: any) =>
+              setProgramTransaction((prevState: any) => ({
+                ...prevState,
+                programId,
+              })),
+            placeholder: 'programId',
+          },
+        ]}
       />
       <Inputs
         btnTitle='Sign'
