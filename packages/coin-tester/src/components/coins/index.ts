@@ -2,6 +2,7 @@ import TEMPLATE from './template';
 import BNB from './bnb';
 import ADA from './ada';
 import CRONOS from './cronos';
+import EVM from './evm';
 import ETC from './etc';
 import ETH from './eth';
 import CRO from './cro';
@@ -17,6 +18,7 @@ export default [
   { path: 'bnb', Element: BNB },
   { path: 'ada', Element: ADA },
   { path: 'eth', Element: ETH },
+  { path: 'evm', Element: EVM },
   { path: 'etc', Element: ETC },
   { path: 'cronos', Element: CRONOS },
   { path: 'cro', Element: CRO },
