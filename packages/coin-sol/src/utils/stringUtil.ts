@@ -16,12 +16,13 @@ export const addressToHex = (address: string | Buffer | undefined): string => {
   return address.toString('hex');
 };
 
-export const numberToStringHex = (value: number | number[], pad: number) =>
+export const numberToStringHex = (value: number | number[], pad: number): string =>
   Buffer.from(typeof value === 'number' ? [value] : value)
     .toString('hex')
     .padStart(pad, '0');
 
-const isFieldsValid = (fields: Array<any>) => fields.every((e) => e !== undefined);
+const isFieldsValid = (fields: Array<string | number | Buffer | undefined>): boolean =>
+  fields.every((e) => e !== undefined);
 
 export const getTxType = (transaction: TransactionType): string => {
   if (transaction.options) {

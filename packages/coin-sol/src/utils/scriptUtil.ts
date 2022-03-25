@@ -12,7 +12,6 @@ export const getTransferArguments = async (rawTx: RawTransaction): Promise<strin
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
   const SEPath = `0D${path}`;
   console.debug('SEPath: ', SEPath);
-  let argument = rawTx.serializeArgument();
 
-  return SEPath + argument;
+  return SEPath + rawTx.serializeArgument();
 };

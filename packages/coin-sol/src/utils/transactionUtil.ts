@@ -3,6 +3,7 @@ import { TransactionOptions, TransactionType } from '../config/types';
 import { addressToHex, encodeLength, isBase58Format, numberToStringHex } from './stringUtil';
 
 import base58 from 'bs58';
+const BN = require('bn.js');
 
 const evenHexDigit = (hex: string) => (hex.length % 2 !== 0 ? `0${hex}` : hex);
 
@@ -76,18 +77,18 @@ export class RawTransaction {
       data.writeUInt32LE(lo32, programIdIndexSpan);
       data.writeInt32LE(hi32, programIdIndexSpan + 4);
     } else {
-      const value = BigInt(
-        Number(amount) * (decimals === undefined ? params.LAMPORTS_PER_SOL : Math.pow(10, decimals))
-      );
-      const valueHex = value.toString(16);
-      const valueBuf = Buffer.from(valueHex.padStart(8 * 2, '0').slice(0, 8 * 2), 'hex').reverse();
+      const LAMPORTS_PER_TOKEN = new BN(10).pow(new BN(decimals));
+      const value = new BN(amount).mul(LAMPORTS_PER_TOKEN);
+      const valueHex = value.toString(16, 8 * 2);
+      const valueBuf = Buffer.from(valueHex, 'hex').reverse();
+
       data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
     }
     this.data = data.toString('hex');
     return data.toString('hex');
   }
 
-  serialize() {
+  serialize(): string {
     return (
       this.sigCount +
       this.signature +
@@ -105,7 +106,7 @@ export class RawTransaction {
       this.data
     );
   }
-  serializeArgument() {
+  serializeArgument(): string {
     return this.keys + this.recentBlockHash + this.dataLength + this.data;
   }
 }
