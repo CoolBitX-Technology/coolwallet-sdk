@@ -61,21 +61,28 @@ export class RawTransaction {
   dataEncode(amount: number | string, decimals?: number | undefined): string {
     const programIdToNumber = Number(this.programIdIndex);
     const isNormalTransfer = programIdToNumber === 2;
+    const programIdIndexSpan = isNormalTransfer ? 4 : 1;
     const dataAlloc = isNormalTransfer ? 12 : 9;
     const data = Buffer.alloc(dataAlloc);
 
-    const v2e32 = Math.pow(2, 32);
-
-    const value = Number(amount) * (decimals ? Math.pow(10, decimals) : params.LAMPORTS_PER_SOL);
-
-    const hi32 = Math.floor(value / v2e32);
-    const lo32 = value - hi32 * v2e32;
-
-    const programIdIndexSpan = isNormalTransfer ? 4 : 1;
-
     data.writeUIntLE(programIdToNumber, 0, programIdIndexSpan);
-    data.writeUInt32LE(lo32, programIdIndexSpan);
-    data.writeInt32LE(hi32, programIdIndexSpan + 4);
+
+    if (isNormalTransfer) {
+      const v2e32 = Math.pow(2, 32);
+      const value = Number(amount) * params.LAMPORTS_PER_SOL;
+      const hi32 = Math.floor(value / v2e32);
+      const lo32 = value - hi32 * v2e32;
+
+      data.writeUInt32LE(lo32, programIdIndexSpan);
+      data.writeInt32LE(hi32, programIdIndexSpan + 4);
+    } else {
+      const value = BigInt(
+        Number(amount) * (decimals === undefined ? params.LAMPORTS_PER_SOL : Math.pow(10, decimals))
+      );
+      const valueHex = value.toString(16);
+      const valueBuf = Buffer.from(valueHex.padStart(8 * 2, '0').slice(0, 8 * 2), 'hex').reverse();
+      data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
+    }
     this.data = data.toString('hex');
     return data.toString('hex');
   }
