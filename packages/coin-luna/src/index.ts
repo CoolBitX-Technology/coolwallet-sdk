@@ -45,31 +45,38 @@ export default class LUNA extends COIN.ECDSACoin implements COIN.Coin{
         switch (signData.txType) {
           case types.TX_TYPE.SEND:
             script = params.TRANSFER.script + params.TRANSFER.signature;
-            argument = scriptUtil.getLunaSendArgement(publicKey, signData.transaction, addressIndex);
+            argument = scriptUtil.getLunaSendArgument(publicKey, signData.transaction, addressIndex);
             genTx = (signature: string) => {
               return txUtil.getSendTx(signData.transaction, signature, publicKey);
             };
             break;
           case types.TX_TYPE.DELEGATE:
             script = params.DELEGATE.script + params.DELEGATE.signature;
-            argument = scriptUtil.getLunaDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
+            argument = scriptUtil.getLunaDelgtOrUnDelArgument(publicKey, signData.transaction, addressIndex);
             genTx = (signature: string) => {
               return txUtil.getDelegateTx(signData.transaction, signature, publicKey);
             };
             break;
           case types.TX_TYPE.UNDELEGATE:
             script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
-            argument = scriptUtil.getLunaDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
+            argument = scriptUtil.getLunaDelgtOrUnDelArgument(publicKey, signData.transaction, addressIndex);
             genTx = (signature: string) => {
               return txUtil.getUndelegateTx(signData.transaction, signature, publicKey);
             };
             break;
           case types.TX_TYPE.WITHDRAW:
             script = params.WITHDRAW.script + params.WITHDRAW.signature;
-            argument = scriptUtil.getLunaWithdrawArgement(publicKey, signData.transaction, addressIndex);
+            argument = scriptUtil.getLunaWithdrawArgument(publicKey, signData.transaction, addressIndex);
             genTx = (signature: string) => {
               return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
             };
+            break;
+          case types.TX_TYPE.SMART:
+            script = params.SMART.script + params.SMART.signature;
+            argument = scriptUtil.getLunaSmartArgument(publicKey, signData.transaction, addressIndex);
+            genTx = (signature: string) => {
+              return txUtil.getSmartTx(signData.transaction, signature, publicKey);
+            }
             break;
           default:
             throw new SDKError(this.signLUNATransaction.name, `not support input tx type`);
