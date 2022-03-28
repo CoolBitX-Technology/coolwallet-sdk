@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Dropdown, Form } from 'react-bootstrap';
+import { Container, Row, Col, Dropdown, Form, Badge } from 'react-bootstrap';
 import { Transport } from '@coolwallet/core';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
-import { CHAIN_ID, TX_TYPE, SignDataType } from '@coolwallet/luna/lib/config/types';
+import { CHAIN_ID, TX_TYPE, SignDataType } from '@coolwallet/terra/lib/config/types';
 import { DENOMTYPE } from "@coolwallet/terra/lib/config/denomType";
 import BigNumber from 'bignumber.js';
 
 //import cosmosjs from './cosmos';
 import { Testnet, Mainnet } from './cosmos';
 import Terra from '@coolwallet/terra';
-import { DenomTrace } from '@terra-money/terra.js/dist/core/ibc-transfer/DenomTrace';
 
 interface Props {
   transport: Transport | null;
@@ -29,8 +28,10 @@ function CoinTerra(props: Props) {
 
   const[delegateValue, setDelegateValue] = useState('0');
   const[signedDelegate, setSignedDelegate] = useState('');
-  //const[validatorAddress] = useState('terravaloper1259cmu5zyklsdkmgstxhwqpe0utfe5hhyty0at');
-  const[validatorAddress] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm'); // Testnet - Accomplice Blockchain
+  //const [delegateValidator, setDelegateValidator] = useState('terravaloper1259cmu5zyklsdkmgstxhwqpe0utfe5hhyty0at');
+  const [delegateValidator, setDelegateValidator] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm'); // Testnet - Accomplice Blockchain
+  const [undelegateValidator, setUndelegateValidator] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm');
+  const [withdrawValidator, setWithdrawValidator] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm');
 
 
   const[undelegateValue, setUndelegateValue] = useState('0');
@@ -41,12 +42,21 @@ function CoinTerra(props: Props) {
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
 
-  const[feeAmount, setFeeAmount] = useState(0.0012);
-  const[feeDenom, setFeeDenom] = useState(DENOMTYPE.LUNA);
-  const[denom, setDenom] = useState(DENOMTYPE.LUNA);
-  const[cosmosjs, setNetwork] = useState(Testnet);
   const[chainId, setChainId] = useState(CHAIN_ID.TEST);
   const[netLabel, setNetLabel] = useState("Test Net");
+  const[cosmosjs, setNetwork] = useState(Testnet);
+  const[balances, setBalances] = useState([]);
+  const[validators, setValidators] = useState([]);
+  const[denom, setDenom] = useState(DENOMTYPE.LUNA);
+  const[feeAmount, setFeeAmount] = useState(0.001);
+  const[feeDenom, setFeeDenom] = useState(DENOMTYPE.LUNA);
+  const[delegateFeeAmount, setDelegateFeeAmount] = useState(0.006);
+  const[delegateFeeDenom, setDelegateFeeDenom] = useState(DENOMTYPE.LUNA);
+  const[undelegateFeeAmount, setUndelegateFeeAmount] = useState(0.006);
+  const[undelegateFeeDenom, setUndelegateFeeDenom] = useState(DENOMTYPE.LUNA);
+  const[withdrawFeeAmount, setWithdrawFeeAmount] = useState(0.005);
+  const[withdrawFeeDenom, setWithdrawFeeDenom] = useState(DENOMTYPE.LUNA);
+
 
   const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
@@ -61,23 +71,42 @@ function CoinTerra(props: Props) {
     }
   };
 
+  const updateAccStatus = (_network, _address)=> {
+    _network.getBalance(_address).then((_balances:[]) => {
+      setBalances(_balances);
+    });
+    _network.getValidators(_address).then((_validators:[]) => {
+      setValidators(_validators);
+    });
+  };
+
   const handleNetChange = (e)=>{
+    let newNetwork;
     if('Test Net' === e){
+      newNetwork = Testnet;
       setNetwork(Testnet);
       setChainId(CHAIN_ID.TEST);
     }
     else{
+      newNetwork = Mainnet;
       setNetwork(Mainnet);
       setChainId(CHAIN_ID.MAIN);
     }
     setNetLabel(e); 
+    if(address.length > 0) {
+      updateAccStatus(newNetwork, address);
+    }
   }
 
   const getAddress = async () => {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      return terra.getAddress(transport!, appPrivateKey, appId, 0);
+      const tAdd = await terra.getAddress(transport!, appPrivateKey, appId, 0);
+
+      updateAccStatus(cosmosjs, tAdd);
+
+      return tAdd;
     }, setAddress);
   };
 
@@ -114,6 +143,9 @@ function CoinTerra(props: Props) {
       console.log('signedTx: ' + signedTx);
       const sendTx = await cosmosjs.broadcastGRPC(signedTx);
       console.log('sendTx: ' + sendTx);
+
+      updateAccStatus(cosmosjs, address);
+
       return sendTx;
     }, setSignedTransaction);
   };
@@ -124,10 +156,11 @@ function CoinTerra(props: Props) {
       const transaction = {
         chainId: chainId,
         delegatorAddress: address,
-        validatorAddress,
+        validatorAddress: delegateValidator,
         amount: new BigNumber(delegateValue).multipliedBy(1000000).toNumber(),
-        feeAmount: 1000,
-        gas: 21000,
+        feeAmount: new BigNumber(delegateFeeAmount).multipliedBy(1000000).toNumber(),
+        feeDenom: delegateFeeDenom,
+        gas: 520000,
         accountNumber: account_number,
         sequence,
         memo: '',
@@ -146,19 +179,22 @@ function CoinTerra(props: Props) {
         confirmCB: undefined,
         authorizedCB: undefined,
       }
-      const tempSignedTx = await terra.signTransaction(signTxData);
-      console.log("tempSignedTx: " + tempSignedTx);
+      // const tempSignedTx = await terra.signTransaction(signTxData);
+      // console.log("tempSignedTx: " + tempSignedTx);
 
-      const getGas = await cosmosjs.getGas(tempSignedTx);
-      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
-      transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
-      console.log("new gas amount transaction: ");
-      console.log(transaction);
+      // const getGas = await cosmosjs.getGas(tempSignedTx);
+      // transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
+      // transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
+      // console.log("new gas amount transaction: ");
+      // console.log(transaction);
 
       const signedTx = await terra.signTransaction(signTxData);
       console.log("signedTx: " + signedTx);
       const sendTx = await cosmosjs.broadcastGRPC(signedTx);
       console.log("sendTx: " + sendTx);
+
+      updateAccStatus(cosmosjs, address);
+
       return sendTx;
     }, setSignedDelegate);
   };
@@ -169,10 +205,11 @@ function CoinTerra(props: Props) {
       const transaction = {
         chainId: chainId,
         delegatorAddress: address,
-        validatorAddress,
+        validatorAddress: undelegateValidator,
         amount: new BigNumber(undelegateValue).multipliedBy(1000000).toNumber(),
-        feeAmount: 1000,
-        gas: 21000,
+        feeAmount: new BigNumber(undelegateFeeAmount).multipliedBy(1000000).toNumber(),
+        feeDenom: undelegateFeeDenom,
+        gas: 520000,
         accountNumber: account_number,
         sequence,
         memo: '',
@@ -191,19 +228,22 @@ function CoinTerra(props: Props) {
         confirmCB: undefined,
         authorizedCB: undefined,
       }
-      const tempSignedTx = await terra.signTransaction(signTxData);
-      console.log("tempSignedTx: " + tempSignedTx);
+      // const tempSignedTx = await terra.signTransaction(signTxData);
+      // console.log("tempSignedTx: " + tempSignedTx);
 
-      const getGas = await cosmosjs.getGas(tempSignedTx);
-      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
-      transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
-      console.log("new gas amount transaction: ");
-      console.log(transaction);
+      // const getGas = await cosmosjs.getGas(tempSignedTx);
+      // transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
+      // transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
+      // console.log("new gas amount transaction: ");
+      // console.log(transaction);
 
       const signedTx = await terra.signTransaction(signTxData);
       console.log("signedTx: " + signedTx);
       const sendTx = await cosmosjs.broadcastGRPC(signedTx);
       console.log("sendTx: " + sendTx);
+
+      updateAccStatus(cosmosjs, address);
+
       return sendTx;
     }, setSignedUndelegate);
   }
@@ -214,9 +254,10 @@ function CoinTerra(props: Props) {
       const transaction = {
         chainId: chainId,
         delegatorAddress: address,
-        validatorAddress,
-        feeAmount: 1000,
-        gas: 21000,
+        validatorAddress: withdrawValidator,
+        feeAmount: new BigNumber(withdrawFeeAmount).multipliedBy(1000000).toNumber(),
+        feeDenom: withdrawFeeDenom,
+        gas: 400000,
         accountNumber: account_number,
         sequence,
         memo: '',
@@ -235,19 +276,22 @@ function CoinTerra(props: Props) {
         confirmCB: undefined,
         authorizedCB: undefined,
       }
-      const tempSignedTx = await terra.signTransaction(signTxData);
-      console.log("tempSignedTx: " + tempSignedTx);
+      // const tempSignedTx = await terra.signTransaction(signTxData);
+      // console.log("tempSignedTx: " + tempSignedTx);
 
-      const getGas = await cosmosjs.getGas(tempSignedTx);
-      transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
-      transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
-      console.log("new gas amount transaction: ");
-      console.log(transaction);
+      // const getGas = await cosmosjs.getGas(tempSignedTx);
+      // transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
+      // transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
+      // console.log("new gas amount transaction: ");
+      // console.log(transaction);
 
       const signedTx = await terra.signTransaction(signTxData);
       console.log("signedTx: " + signedTx);
       const sendTx = await cosmosjs.broadcastGRPC(signedTx);
       console.log("sendTx: " + sendTx);
+
+      updateAccStatus(cosmosjs, address);
+      
       return sendTx;
     }, setSignedWithdraw);
   };
@@ -259,8 +303,8 @@ function CoinTerra(props: Props) {
       {
         <Row style={{ marginBottom: '15px' }}>
           <Col 
-            xs={12}
-            md={{ span: 8, offset: 2 }}
+            xs={3}
+            md={1}
           >
             <Dropdown onSelect={handleNetChange}>
               <Dropdown.Toggle variant='danger'>
@@ -271,6 +315,12 @@ function CoinTerra(props: Props) {
                 <Dropdown.Item eventKey='Main Net'>Main Net</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
+          </Col>
+
+          <Col>
+          {balances.map(function(balance){
+            return <Badge bg="secondary" key={balance.denom}  style={{margin: '0 10px'}}>{balance.amount} {balance.denom}</Badge>;
+          })}
           </Col>
         </Row>
       }
@@ -298,7 +348,7 @@ function CoinTerra(props: Props) {
           <Col 
             xs={2}>
             <Dropdown onSelect={(e)=>{setDenom(DENOMTYPE[e])}}>
-              <Dropdown.Toggle variant='success'>
+              <Dropdown.Toggle variant='primary'>
                 {denom.name}
               </Dropdown.Toggle>
             
@@ -340,7 +390,7 @@ function CoinTerra(props: Props) {
           </Col>
         </Row>
       }
-      {<OneInput
+      {<TwoInputs
         title='Delegate' 
         content={signedDelegate} 
         onClick={signDelegate}
@@ -350,8 +400,58 @@ function CoinTerra(props: Props) {
         setValue={setDelegateValue}
         placeholder='delegateValue'
         inputSize={1}
+        value2={delegateValidator}
+        setValue2={setDelegateValidator}
+        placeholder2='delegateValidator'
+        inputSize2={3}
       />}
-      {<OneInput
+      {
+        <Row style={{ marginBottom: '15px' }}>
+          <Col 
+            xs={{ span: 2, offset: 2 }}
+            md={{ span: 1, offset: 5 }}
+          >Fee:</Col>
+          <Col 
+            xs={2}>
+            <Dropdown onSelect={(e)=>{setDelegateFeeDenom(DENOMTYPE[e])}}>
+              <Dropdown.Toggle variant='primary'>
+                {delegateFeeDenom.name}
+              </Dropdown.Toggle>
+            
+              <Dropdown.Menu>
+                {Object.values(DENOMTYPE).map(function(denomT){
+                  return <Dropdown.Item key={'fee_'+denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
+                })}
+              </Dropdown.Menu>
+            </Dropdown>
+          </Col>
+          <Col 
+            xs={3}
+            md={2}>
+            <Form.Control 
+              type='number'
+              placeholder='Fee Amount'
+              value={delegateFeeAmount}
+              onChange={(event) => {
+                setDelegateFeeAmount(event.target.value);
+              }}
+            />
+          </Col>
+        </Row>
+      }
+      {
+        <Row style={{ marginBottom: '15px' }}>
+          <Col 
+            xs={2}>Validators:</Col>
+          <Col
+            xs={8}>
+            {validators.map(function(validator){
+              return <Badge bg="info" key={validator.validator_address}  style={{margin: '0 10px'}}>{validator.validator_address} = {validator.amount}{validator.denom}</Badge>;
+            })}
+          </Col>
+        </Row>
+      }
+      {<TwoInputs
         title='Undelegate' 
         content={signedUndelegate} 
         onClick={signUndelegate}
@@ -361,14 +461,90 @@ function CoinTerra(props: Props) {
         setValue={setUndelegateValue}
         placeholder='undelegateValue'
         inputSize={1}
+        value2={undelegateValidator}
+        setValue2={setUndelegateValidator}
+        placeholder2='undelegateValidator'
+        inputSize2={3}
       />}
-      {<NoInput
+      {
+        <Row style={{ marginBottom: '15px' }}>
+          <Col 
+            xs={{ span: 2, offset: 2 }}
+            md={{ span: 1, offset: 5 }}
+          >Fee:</Col>
+          <Col 
+            xs={2}>
+            <Dropdown onSelect={(e)=>{setUndelegateFeeDenom(DENOMTYPE[e])}}>
+              <Dropdown.Toggle variant='primary'>
+                {undelegateFeeDenom.name}
+              </Dropdown.Toggle>
+            
+              <Dropdown.Menu>
+                {Object.values(DENOMTYPE).map(function(denomT){
+                  return <Dropdown.Item key={'fee_'+denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
+                })}
+              </Dropdown.Menu>
+            </Dropdown>
+          </Col>
+          <Col 
+            xs={3}
+            md={2}>
+            <Form.Control 
+              type='number'
+              placeholder='Fee Amount'
+              value={undelegateFeeAmount}
+              onChange={(event) => {
+                setUndelegateFeeAmount(event.target.value);
+              }}
+            />
+          </Col>
+        </Row>
+      }
+      {<OneInput
         title='Withdraw' 
         content={signedWithdraw} 
         onClick={signWithdraw}
         disabled={disabled}
         btnName='Withdraw'
+        value={withdrawValidator}
+        setValue={setWithdrawValidator}
+        placeholder='withdrawValidator'
+        inputSize={4}
       />}
+      {
+        <Row style={{ marginBottom: '15px' }}>
+          <Col 
+            xs={{ span: 2, offset: 2 }}
+            md={{ span: 1, offset: 5 }}
+          >Fee:</Col>
+          <Col 
+            xs={2}>
+            <Dropdown onSelect={(e)=>{setWithdrawFeeDenom(DENOMTYPE[e])}}>
+              <Dropdown.Toggle variant='primary'>
+                {withdrawFeeDenom.name}
+              </Dropdown.Toggle>
+            
+              <Dropdown.Menu>
+                {Object.values(DENOMTYPE).map(function(denomT){
+                  return <Dropdown.Item key={'fee_'+denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
+                })}
+              </Dropdown.Menu>
+            </Dropdown>
+          </Col>
+          <Col 
+            xs={3}
+            md={2}>
+            <Form.Control 
+              type='number'
+              placeholder='Fee Amount'
+              value={withdrawFeeAmount}
+              onChange={(event) => {
+                setWithdrawFeeAmount(event.target.value);
+              }}
+            />
+          </Col>
+        </Row>
+      }
     </Container>
   );
 }

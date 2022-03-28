@@ -42,8 +42,14 @@ export function getTerraSendArgement(publicKey: string, terraData: types.MsgSend
     const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
     const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
     const memo = Buffer.from(terraData.memo, 'ascii').toString('hex');
+    const denomLabel = Buffer.from(terraData.denom.name, 'ascii').toString('hex').padStart(16, '0');
+    const denom = terraData.denom.protoUnit.padStart(16, '0');
+    const denomSignature = terraData.denom.signature.slice(32).padStart(144, "0"); 
+    const feeDenomLabel = Buffer.from(terraData.feeDenom.name, 'ascii').toString('hex').padStart(16, '0');
+    const feeDenom = terraData.feeDenom.protoUnit.padStart(16, '0');
+    const feeDenomSignature = terraData.feeDenom.signature.slice(32).padStart(144, "0");
   
-    const argument = pubKey + delegatorAddress + validatorAddress + amount + feeAmount + gas + accountNumber + sequence + memo;
+    const argument = pubKey + delegatorAddress + validatorAddress + amount + feeAmount + gas + accountNumber + sequence + denomLabel + denom + denomSignature + feeDenomLabel + feeDenom + feeDenomSignature + memo;
   
     console.debug("getTerraDelgtOrUnDelArgement: " + argument);
   
@@ -59,9 +65,12 @@ export function getTerraWithdrawArgement(publicKey: string, terraData: types.Msg
     const gas = terraData.gas.toString(16).padStart(16, '0');
     const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
     const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
+    const feeDenomLabel = Buffer.from(terraData.feeDenom.name, 'ascii').toString('hex').padStart(16, '0');
+    const feeDenom = terraData.feeDenom.protoUnit.padStart(16, '0');
+    const feeDenomSignature = terraData.feeDenom.signature.slice(32).padStart(144, "0");
     const memo = Buffer.from(terraData.memo, 'ascii').toString('hex');
   
-    const argument = pubKey + delegatorAddress + validatorAddress + feeAmount + gas + accountNumber + sequence + memo;
+    const argument = pubKey + delegatorAddress + validatorAddress + feeAmount + gas + accountNumber + sequence + feeDenomLabel + feeDenom + feeDenomSignature + memo;
   
     console.debug("getTerraWithdrawArgement: " + argument);
   
