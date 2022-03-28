@@ -27,6 +27,12 @@ message MsgWithdrawDelegatorReward {
   required string validator_address = 2;
 }
 
+message MsgExecuteContract {
+  string sender = 1;
+  string contract = 2;
+  bytes msg = 3;
+  repeated Coin funds = 5;
+}
 
 message Fee {
   repeated Coin amount  = 1;

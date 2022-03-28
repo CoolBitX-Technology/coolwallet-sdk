@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
-import { Container, Row, Col, ButtonGroup, Button } from 'react-bootstrap';
+import { Container, Row, Col, ButtonGroup, Button, Modal } from 'react-bootstrap';
 import { apdu, crypto, Transport } from '@coolwallet/core';
 import HeadBar from './components/HeadBar';
 import Settings from './components/settings';
@@ -27,7 +27,6 @@ const { appPublicKey, appPrivateKey } = getAppKeysOrGenerate();
 function App(): JSX.Element {
   const [transport, setTransport] = useState<Transport | null>(null);
   const [isLocked, setIsLocked] = useState(false);
-  const [msg, setMsg] = useState('');
 
   useEffect(() => {
     if (transport) {
@@ -54,28 +53,15 @@ function App(): JSX.Element {
     alert('cancel action success!!!');
   }
 
-  function showMessage() {
-    return msg ? (
-      <Row style={{ margin: 25, background: 'white' }}>
-        <div style={{ width: '4px', background: 'red' }} />
-        <Col style={{ paddingTop: 15 }}>
-          <p style={{ fontSize: 15, color: 'red' }}>{msg}</p>
-        </Col>
-      </Row>
-    ) : (
-      <Row style={{ margin: 25 }} />
-    );
-  }
-
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="settings" />} />
+      <Route path='/' element={<Navigate to='settings' />} />
       <Route
-        path="/"
+        path='/'
         element={
-          <div className="App">
+          <div className='App'>
             <Container>
-              <Row className="title">
+              <Row className='title'>
                 <p>CoolWallet SDK Tester</p>
               </Row>
               <Row>
@@ -90,7 +76,7 @@ function App(): JSX.Element {
         }
       >
         <Route
-          path="settings"
+          path='settings'
           element={
             <Settings
               transport={transport}
@@ -116,7 +102,7 @@ function App(): JSX.Element {
             }
           />
         ))}
-        <Route path="*" element={<Navigate to="settings" />} />
+        <Route path='*' element={<Navigate to='settings' />} />
       </Route>
     </Routes>
   );

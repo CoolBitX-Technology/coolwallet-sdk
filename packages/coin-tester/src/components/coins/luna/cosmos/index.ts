@@ -23,6 +23,7 @@ class Cosmos {
       headers: new Headers({ 'Content-type': 'application/json' }),
     }).then(async (res) => {
       const result = await res.json();
+      console.log(JSON.stringify(result));
       return JSON.stringify(result.gas_info.gas_used);
     });
   }
