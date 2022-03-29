@@ -106,7 +106,7 @@ export default class ETC implements COIN.Coin {
 
     const path = await utils.getFullPath({
       pathType: config.PathType.BIP32,
-      pathString: "44'/61'/0'/0/0",
+      pathString: `44'/61'/0'/0/${addressIndex}`,
     });
 
     const argument =
@@ -151,7 +151,6 @@ export default class ETC implements COIN.Coin {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
     const keyPair = ec.keyFromPublic(publicKey, 'hex');
-
     const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
     const v = recoveryParam + 27;
     const { r, s } = sig as { r: string; s: string };

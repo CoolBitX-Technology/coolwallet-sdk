@@ -1,0 +1,50 @@
+{
+  "name": "@coolwallet/evm",
+  "version": "1.0.0",
+  "description": "Coolwallet EVMOS sdk",
+  "main": "lib/index.js",
+  "scripts": {
+    "list:chain": "babel-node -x \".ts\" tools/chain.ts",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts\" --source-maps inline",
+    "build": "del-cli lib && npm run build:types && npm run build:ts",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "author": "coolwallet-team",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "homepage": "https://github.com/CoolBitX-Technology/coolwallet3-sdk#readme",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.1.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.5",
+    "@babel/node": "^7.16.8",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@coolwallet/core": "^1.1.4",
+    "@types/elliptic": "^6.4.14",
+    "@types/keccak": "^3.0.1",
+    "@types/lodash": "^4.14.179",
+    "del-cli": "^4.0.1",
+    "jest": "^27.5.1",
+    "typescript": "^4.6.2",
+    "web3-utils": "^1.7.1"
+  },
+  "dependencies": {
+    "@metamask/eth-sig-util": "^4.0.0",
+    "ajv": "^8.10.0",
+    "bn.js": "^5.2.0",
+    "elliptic": "^6.5.4",
+    "keccak": "^3.0.2",
+    "lodash": "^4.17.21",
+    "rlp": "^3.0.0"
+  }
+}
