@@ -87,6 +87,16 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
           return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
         };
         break;
+      case types.TX_TYPE.SMART:
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.WITHDRAW.script + params.WITHDRAW.signature;
+        else
+          script = params.SMART.script_test + params.SMART.signature_test;
+        argument = scriptUtil.getTerraSmartArgument(publicKey, signData.transaction, addressIndex);
+        genTx = (signature: string) => {
+          return txUtil.getSmartTx(signData.transaction, signature, publicKey);
+        }
+        break;
       default:
         throw new SDKError(this.signTERRATransaction.name, `not support input tx type`);
     }
