@@ -58,7 +58,7 @@ function CoinTerra(props: Props) {
   //const [swapAddress, setSwapAddress] = useState('terra1tndcaqxkpc5ce9qee5ggqf430mr2z3pefe5wj6'); // mainnet luna2ust
   const [swapAddress, setSwapAddress] = useState('terra156v8s539wtz0sjpn8y8a8lfg8fhmwa7fy22aff'); // testnet luna2ust
   const [swapDenom, setSwapDenom] = useState(DENOMTYPE.LUNA);
-  const [swapFeeAmount, setSwapFeeAmount] = useState(0.0025);
+  const [swapFeeAmount, setSwapFeeAmount] = useState(0.003);
   const [swapFeeDenom, setSwapFeeDenom] = useState(DENOMTYPE.LUNA);
 
   const ancMain = 'terra14z56l0fp2lsf86zy3hty2z47ezkhnthtr9yq76'; // mainnet ANC
@@ -370,7 +370,8 @@ function CoinTerra(props: Props) {
       },
       feeDenom: swapFeeDenom,
       feeAmount: new BigNumber(swapFeeAmount).multipliedBy(1000000).toNumber(),
-      gas: 180000,
+      gas: 250000,
+      //gas: 180000,
       memo: 'Swap test',
     };
 

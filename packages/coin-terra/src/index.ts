@@ -89,7 +89,7 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         break;
       case types.TX_TYPE.SMART:
         if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
-          script = params.WITHDRAW.script + params.WITHDRAW.signature;
+          script = params.SMART.script + params.SMART.signature;
         else
           script = params.SMART.script_test + params.SMART.signature_test;
         argument = scriptUtil.getTerraSmartArgument(publicKey, signData.transaction, addressIndex);
