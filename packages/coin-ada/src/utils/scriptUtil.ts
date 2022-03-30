@@ -21,11 +21,21 @@ const getUintArgument = (value: Integer) => {
   return length + data.padEnd(18, '0');
 };
 
-const getOutputArgument = (output?: Output) => {
-  if (!output) return '0'.repeat(136);
-  const addressBuff = decodeAddress(output.address);
+const getOutputArgument = (output: Output) => {
+  if (!output) return '0'.repeat(204);
+  const { addressBuff, addressEncodeType } = decodeAddress(output.address);
+  const encodeType = addressEncodeType.toString(16).padStart(2, '0');
   const addressLength = addressBuff.length.toString(16).padStart(2, '0');
-  const address = addressBuff.toString('hex').padEnd(114, '0');
+  const address = addressBuff.toString('hex').padEnd(180, '0');
+  const amount = getUintArgument(output.amount);
+  return encodeType + addressLength + address + amount;
+};
+
+const getChangeArgument = (output?: Output) => {
+  if (!output) return '0'.repeat(202);
+  const { addressBuff } = decodeAddress(output.address);
+  const addressLength = addressBuff.length.toString(16).padStart(2, '0');
+  const address = addressBuff.toString('hex').padEnd(180, '0');
   const amount = getUintArgument(output.amount);
   return addressLength + address + amount;
 };
@@ -37,7 +47,7 @@ export const getTransferArgument = (
   const { addrIndexes, inputs, output, change, fee, ttl } = transaction;
   const accPubkeyBuff = Buffer.from(accPubkey, 'hex');
 
-  const argument = getOutputArgument(change)
+  const argument = getChangeArgument(change)
     + getOutputArgument(output)
     + getUintArgument(fee)
     + getUintArgument(ttl)

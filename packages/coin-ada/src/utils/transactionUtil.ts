@@ -1,4 +1,3 @@
-import { bech32 } from 'bech32';
 import { decodeAddress, cborEncode } from './index';
 import {
   MajorType,
@@ -25,14 +24,14 @@ export const genOutputs = (output: Output, change?: Output): string => {
   let result = '01' + cborEncode(MajorType.Array, outputCount);
   // output
   result += '82';
-  const addressBuff = decodeAddress(output.address);
+  let addressBuff = decodeAddress(output.address).addressBuff;
   result += cborEncode(MajorType.Byte, addressBuff.length);
   result += addressBuff.toString('hex');
   result += cborEncode(MajorType.Uint, output.amount)
   // change
   if (change) {
     result += '82';
-    const addressBuff = decodeAddress(change.address);
+    addressBuff = decodeAddress(change.address).addressBuff;
     result += cborEncode(MajorType.Byte, addressBuff.length);
     result += addressBuff.toString('hex');
     result += cborEncode(MajorType.Uint, change.amount)
