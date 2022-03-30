@@ -12,8 +12,7 @@ const rlp = require('rlp');
 const Ajv = require('ajv');
 
 import {
-  Transaction, ERC20Transaction, SmartContractTransaction,
-  handleHex, getRawTx, hexToBuffer, removeHex0x, asciiToHex
+  Transaction, handleHex, getRawTx, hexToBuffer, removeHex0x, asciiToHex
 } from './utils';
 
 export default class AVAXC implements COIN.Coin {
@@ -157,8 +156,16 @@ export default class AVAXC implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     addressIndex: number,
-    transaction: ERC20Transaction,
+    transaction: Transaction,
   ): Promise<string> => {
+
+
+		if(!params.Token[`${transaction.to}`]){
+			throw new Error('unexpected transaction format!');
+			return;
+		}
+
+		const token = params.Token[`${transaction.to}`];
 
 
     await apdu.tx.sendScript(transport, params.Erc20.script + params.Erc20.signature);
@@ -168,8 +175,8 @@ export default class AVAXC implements COIN.Coin {
       pathString: `44'/${params.PathString}'/0'/0/0`,
     });
 
-    let symbol = transaction.symbol;
-    const decimals = parseInt(transaction.decimals);
+    let symbol = token.symbol;
+    const decimals = parseInt(token.decimals);
 
     const unit = handleHex(decimals.toString(16));
     if (symbol.length > 7) {
@@ -182,7 +189,7 @@ export default class AVAXC implements COIN.Coin {
     const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, '');
     const amount = transaction.data.slice(74).replace(/\b(0+)/gi, '');
 
-    const tokenSignature = transaction.tokenSignature;
+    const tokenSignature = token.signature;
 
     const argument = '15' + path +
       handleHex(toAddress).padStart(40, '0') +

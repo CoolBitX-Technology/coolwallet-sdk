@@ -10,27 +10,6 @@ export interface Transaction {
   data: string,
 }
 
-export interface ERC20Transaction {
-  nonce: string,
-  gasPrice: string,
-  gasLimit: string,
-  to: string,
-  data: string,
-  value: string,
-	symbol: string,
-	decimals: string,
-	tokenSignature: string,
-}
-
-export interface SmartContractTransaction {
-  nonce: string,
-  gasPrice: string,
-  gasLimit: string,
-  to: string,
-  value: string,
-  data: string,
-}
-
 const evenHexDigit = (hex: string) => (hex.length % 2 !== 0 ? `0${hex}` : hex);
 export const removeHex0x = (hex: string) => (hex.startsWith('0x') ? hex.slice(2) : hex);
 export const handleHex = (hex: string) => evenHexDigit(removeHex0x(hex));
