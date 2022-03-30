@@ -41,10 +41,12 @@ export const decodeAddress = (address: string)
   let addressBuff;
   let addressEncodeType;
   try {
-    const words = bech32.decode(address, 150).words;
+    const { prefix, words } = bech32.decode(address, 150);
     addressBuff = Buffer.from(bech32.fromWords(words));
-    if (addressBuff.length === 57) addressEncodeType = 1;
-    if (addressBuff.length === 29) addressEncodeType = 2;
+    const dataLen = addressBuff.length;
+    if (prefix === 'addr' && dataLen === 57) addressEncodeType = 1;
+    if (prefix === 'addr' && dataLen === 29) addressEncodeType = 2;
+    if (prefix === 'stake' && dataLen === 29) addressEncodeType = 3;
     if (!addressEncodeType) throw new Error('address not supported');
   } catch(err) {
     try {
