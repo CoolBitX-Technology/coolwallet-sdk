@@ -59,16 +59,30 @@ export class RawTransaction {
     this.data = rawTx.data;
   }
 
-  dataEncode(amount: number | string, decimals?: number | undefined): string {
+  dataEncode(amount: number | string, decimals: number = 9): string {
     const programIdToNumber = Number(this.programIdIndex);
-    const isNormalTransfer = programIdToNumber === 2;
-    const programIdIndexSpan = isNormalTransfer ? 4 : 1;
-    const dataAlloc = isNormalTransfer ? 12 : 9;
+    const isSplTransfer = programIdToNumber === 3;
+    const programIdIndexSpan = isSplTransfer ? 1 : 4;
+    const dataAlloc = isSplTransfer ? 9 : 12;
     const data = Buffer.alloc(dataAlloc);
 
     data.writeUIntLE(programIdToNumber, 0, programIdIndexSpan);
+    if (isSplTransfer) {
+      const [round, decimal] = amount.toString().split('.');
+      let value = Number(round) > 0 ? round : '';
+      if (decimal) {
+        value += decimal.charAt(decimals)
+          ? decimal.split('').slice(0, decimals).join('')
+          : decimal.padEnd(decimals, '0');
+      } else {
+        value = value.padEnd(decimals + 1, '0');
+      }
 
-    if (isNormalTransfer) {
+      const valueHex = new BN(value).toString(16, 8 * 2);
+      const valueBuf = Buffer.from(valueHex, 'hex').reverse();
+
+      data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
+    } else {
       const v2e32 = Math.pow(2, 32);
       const value = Number(amount) * params.LAMPORTS_PER_SOL;
       const hi32 = Math.floor(value / v2e32);
@@ -76,13 +90,6 @@ export class RawTransaction {
 
       data.writeUInt32LE(lo32, programIdIndexSpan);
       data.writeInt32LE(hi32, programIdIndexSpan + 4);
-    } else {
-      const LAMPORTS_PER_TOKEN = new BN(10).pow(new BN(decimals));
-      const value = new BN(amount).mul(LAMPORTS_PER_TOKEN);
-      const valueHex = value.toString(16, 8 * 2);
-      const valueBuf = Buffer.from(valueHex, 'hex').reverse();
-
-      data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
     }
     this.data = data.toString('hex');
     return data.toString('hex');
@@ -115,7 +122,11 @@ export function formTransaction(transaction: TransactionType, txType: string, si
   const { fromPubkey, toPubkey, recentBlockhash, amount, options } = transaction;
   const { programId, data, owner, decimals, value } = options as TransactionOptions;
 
-  const keys = addressToHex(owner) + addressToHex(fromPubkey) + addressToHex(toPubkey) + addressToHex(programId);
+  const fromAddress = addressToHex(fromPubkey);
+  const toAddress = fromAddress === addressToHex(toPubkey) ? '' : addressToHex(toPubkey);
+
+  const keys = addressToHex(owner) + fromAddress + toAddress + addressToHex(programId);
+
   const recentBH = base58.decode(recentBlockhash).toString('hex');
 
   const rawTx = new RawTransaction({
@@ -144,12 +155,19 @@ export function formTransaction(transaction: TransactionType, txType: string, si
       rawTx.keyIndices = '01';
       break;
     case params.TRANSACTION_TYPE.SPL_TOKEN:
+      rawTx.keys = addressToHex(owner) + toAddress + fromAddress + addressToHex(programId);
       rawTx.keyCount = '04';
       rawTx.programIdIndex = '03';
-      rawTx.keyIndicesCount = '04';
+      rawTx.keyIndicesCount = '03';
       rawTx.keyIndices = '020100';
       rawTx.dataEncode(value as string | number, Number(decimals));
       break;
+    case params.TRANSACTION_TYPE.TRANSFER_SELF:
+      rawTx.keyCount = '02';
+      rawTx.programIdIndex = '01';
+      rawTx.keyIndicesCount = '02';
+      rawTx.keyIndices = '0000';
+      rawTx.dataEncode(value as string | number, Number(decimals));
     default:
       rawTx.dataEncode(amount as string | number);
       break;

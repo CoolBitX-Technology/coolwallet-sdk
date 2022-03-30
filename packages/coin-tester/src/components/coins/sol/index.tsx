@@ -101,7 +101,6 @@ function CoinSol(props: Props) {
 
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
-
         return connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setTransaction((prev: any) => ({ ...prev, result }))
@@ -187,10 +186,12 @@ function CoinSol(props: Props) {
           appId,
           transaction: tx,
         });
+        console.log('🚀 ~ file: index.tsx ~ line 190 ~ signedTx', signedTx.toString('hex'));
 
         const recoveredTx = Transaction.from(signedTx);
 
         const verifySig = recoveredTx.verifySignatures();
+        console.log('🚀 ~ file: index.tsx ~ line 194 ~ recoveredTx', recoveredTx.compileMessage());
 
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');

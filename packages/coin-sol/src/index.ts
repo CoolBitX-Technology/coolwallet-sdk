@@ -30,22 +30,17 @@ export default class SOL extends COIN.EDDSACoin implements COIN.Coin {
 
     const txType = getTxType(transaction);
 
-    let transactionType;
-
     switch (txType) {
       case params.TRANSACTION_TYPE.SMART_CONTRACT:
-        transactionType = params.TRANSACTION_TYPE.SMART_CONTRACT;
         break;
       case params.TRANSACTION_TYPE.SPL_TOKEN:
-        transactionType = params.TRANSACTION_TYPE.SPL_TOKEN;
         (signTxData.transaction.options as types.TransactionOptions).programId = params.TOKEN_PROGRAM_ID;
         break;
       default:
-        transactionType = params.TRANSACTION_TYPE.TRANSFER;
-        signTxData.transaction.options = { programId: params.TRANSFER_PROGRAM_ID };
+        signTxData.transaction.options = { programId: params.SYSTEM_PROGRAM_ID };
         break;
     }
 
-    return signTransaction(signTxData, transactionType);
+    return signTransaction(signTxData, txType);
   }
 }

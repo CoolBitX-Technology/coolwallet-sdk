@@ -30,6 +30,8 @@ export const getTxType = (transaction: TransactionType): string => {
     if (isFieldsValid([programId, data, owner])) return TRANSACTION_TYPE.SMART_CONTRACT;
     else if (isFieldsValid([owner, decimals, value])) return TRANSACTION_TYPE.SPL_TOKEN;
   }
+  if (addressToHex(transaction.fromPubkey) === addressToHex(transaction.toPubkey))
+    return TRANSACTION_TYPE.TRANSFER_SELF;
   return TRANSACTION_TYPE.TRANSFER;
 };
 
