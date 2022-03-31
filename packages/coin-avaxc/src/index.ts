@@ -233,23 +233,42 @@ export default class AVAXC implements COIN.Coin {
 		addressIndex: number,
 		transaction: Transaction
 	): Promise<string> => {
-		await apdu.tx.sendScript(transport, params.SmartContract.script + params.SmartContract.signature);
-
 		const path = await utils.getFullPath({
 			pathType: config.PathType.BIP32,
 			pathString: `44'/${params.PathString}'/0'/0/0`,
 		});
 
-		const argument =
-			'15' +
-			path +
-			handleHex(transaction.to) +
-			handleHex(transaction.value).padStart(20, '0') +
-			handleHex(transaction.gasPrice).padStart(20, '0') +
-			handleHex(transaction.gasLimit).padStart(20, '0') +
-			handleHex(transaction.nonce).padStart(16, '0') +
-			handleHex(params.ChainId.toString(16)).padStart(4, '0') +
-			handleHex(transaction.data);
+		let scriptWithSignature = '';
+		let argument = '';
+
+		if (transaction.data.length > 8000) {
+			scriptWithSignature = params.SmartContractSegment.script + params.SmartContractSegment.signature;
+
+			argument =
+				'15' +
+				path +
+				handleHex(transaction.to) +
+				handleHex(transaction.value).padStart(20, '0') +
+				handleHex(transaction.gasPrice).padStart(20, '0') +
+				handleHex(transaction.gasLimit).padStart(20, '0') +
+				handleHex(transaction.nonce).padStart(16, '0') +
+				(handleHex(transaction.data).length / 2).toString(16).padStart(8, '0');
+		} else {
+			scriptWithSignature = params.SmartContract.script + params.SmartContract.signature;
+
+			argument =
+				'15' +
+				path +
+				handleHex(transaction.to) +
+				handleHex(transaction.value).padStart(20, '0') +
+				handleHex(transaction.gasPrice).padStart(20, '0') +
+				handleHex(transaction.gasLimit).padStart(20, '0') +
+				handleHex(transaction.nonce).padStart(16, '0') +
+				handleHex(params.ChainId.toString(16)).padStart(4, '0') +
+				handleHex(transaction.data);
+		}
+
+		await apdu.tx.sendScript(transport, scriptWithSignature);
 
 		const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
