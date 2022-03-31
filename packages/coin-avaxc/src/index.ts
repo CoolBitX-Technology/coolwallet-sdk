@@ -136,12 +136,27 @@ export default class AVAXC implements COIN.Coin {
 		addressIndex: number,
 		transaction: Transaction
 	): Promise<string> => {
-		if (!params.Token[`${transaction.to}`]) {
+
+
+		let token = {
+			contractAddress: '',
+			symbol: '',
+			decimals: '',
+			signature: '',
+		}
+
+
+		const upperCaseAddress = `${transaction.to}`.toUpperCase();
+		for (const tokenInfo of params.Token) {
+			if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
+				token = tokenInfo;
+			}
+		}
+		if (token.symbol.length == 0) {
 			throw new Error('unexpected transaction format!');
 			return;
 		}
 
-		const token = params.Token[`${transaction.to}`];
 
 		await apdu.tx.sendScript(transport, params.Erc20.script + params.Erc20.signature);
 
