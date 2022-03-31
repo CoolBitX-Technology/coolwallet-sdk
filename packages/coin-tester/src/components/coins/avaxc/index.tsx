@@ -76,13 +76,193 @@ function CoinTemplate(props: Props) {
 
 	const signERC20Transaction = async () => {
 		handleState(async () => {
+			const contractAddress = '0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846';
+
+			const abiArray = [
+				{
+					constant: true,
+					inputs: [],
+					name: 'name',
+					outputs: [{ name: '', type: 'string' }],
+					payable: false,
+					stateMutability: 'view',
+					type: 'function',
+				},
+				{
+					constant: false,
+					inputs: [
+						{ name: '_spender', type: 'address' },
+						{ name: '_value', type: 'uint256' },
+					],
+					name: 'approve',
+					outputs: [{ name: '', type: 'bool' }],
+					payable: false,
+					stateMutability: 'nonpayable',
+					type: 'function',
+				},
+				{
+					constant: true,
+					inputs: [],
+					name: 'totalSupply',
+					outputs: [{ name: '', type: 'uint256' }],
+					payable: false,
+					stateMutability: 'view',
+					type: 'function',
+				},
+				{
+					constant: false,
+					inputs: [
+						{ name: '_from', type: 'address' },
+						{ name: '_to', type: 'address' },
+						{ name: '_value', type: 'uint256' },
+					],
+					name: 'transferFrom',
+					outputs: [{ name: '', type: 'bool' }],
+					payable: false,
+					stateMutability: 'nonpayable',
+					type: 'function',
+				},
+				{
+					constant: true,
+					inputs: [],
+					name: 'decimals',
+					outputs: [{ name: '', type: 'uint8' }],
+					payable: false,
+					stateMutability: 'view',
+					type: 'function',
+				},
+				{
+					constant: false,
+					inputs: [
+						{ name: '_to', type: 'address' },
+						{ name: '_value', type: 'uint256' },
+						{ name: '_data', type: 'bytes' },
+					],
+					name: 'transferAndCall',
+					outputs: [{ name: 'success', type: 'bool' }],
+					payable: false,
+					stateMutability: 'nonpayable',
+					type: 'function',
+				},
+				{
+					constant: false,
+					inputs: [
+						{ name: '_spender', type: 'address' },
+						{ name: '_subtractedValue', type: 'uint256' },
+					],
+					name: 'decreaseApproval',
+					outputs: [{ name: 'success', type: 'bool' }],
+					payable: false,
+					stateMutability: 'nonpayable',
+					type: 'function',
+				},
+				{
+					constant: true,
+					inputs: [{ name: '_owner', type: 'address' }],
+					name: 'balanceOf',
+					outputs: [{ name: 'balance', type: 'uint256' }],
+					payable: false,
+					stateMutability: 'view',
+					type: 'function',
+				},
+				{
+					constant: true,
+					inputs: [],
+					name: 'symbol',
+					outputs: [{ name: '', type: 'string' }],
+					payable: false,
+					stateMutability: 'view',
+					type: 'function',
+				},
+				{
+					constant: false,
+					inputs: [
+						{ name: '_to', type: 'address' },
+						{ name: '_value', type: 'uint256' },
+					],
+					name: 'transfer',
+					outputs: [{ name: 'success', type: 'bool' }],
+					payable: false,
+					stateMutability: 'nonpayable',
+					type: 'function',
+				},
+				{
+					constant: false,
+					inputs: [
+						{ name: '_spender', type: 'address' },
+						{ name: '_addedValue', type: 'uint256' },
+					],
+					name: 'increaseApproval',
+					outputs: [{ name: 'success', type: 'bool' }],
+					payable: false,
+					stateMutability: 'nonpayable',
+					type: 'function',
+				},
+				{
+					constant: true,
+					inputs: [
+						{ name: '_owner', type: 'address' },
+						{ name: '_spender', type: 'address' },
+					],
+					name: 'allowance',
+					outputs: [{ name: 'remaining', type: 'uint256' }],
+					payable: false,
+					stateMutability: 'view',
+					type: 'function',
+				},
+				{ inputs: [], payable: false, stateMutability: 'nonpayable', type: 'constructor' },
+				{
+					anonymous: false,
+					inputs: [
+						{ indexed: true, name: 'from', type: 'address' },
+						{ indexed: true, name: 'to', type: 'address' },
+						{ indexed: false, name: 'value', type: 'uint256' },
+						{ indexed: false, name: 'data', type: 'bytes' },
+					],
+					name: 'Transfer',
+					type: 'event',
+				},
+				{
+					anonymous: false,
+					inputs: [
+						{ indexed: true, name: 'owner', type: 'address' },
+						{ indexed: true, name: 'spender', type: 'address' },
+						{ indexed: false, name: 'value', type: 'uint256' },
+					],
+					name: 'Approval',
+					type: 'event',
+				},
+				{
+					anonymous: false,
+					inputs: [
+						{ indexed: true, name: 'from', type: 'address' },
+						{ indexed: true, name: 'to', type: 'address' },
+						{ indexed: false, name: 'value', type: 'uint256' },
+					],
+					name: 'Transfer',
+					type: 'event',
+				},
+			];
+
+			const contract = new web3.eth.Contract(abiArray, contractAddress, {
+				from: '0xd22b659b218fabf5936a4052f699d373f2b74313',
+			});
+
+			await contract.methods
+				.balanceOf('0xd22b659b218fabf5936a4052f699d373f2b74313')
+				.call()
+				.then(function (wei) {
+					const balance = web3.utils.fromWei(wei, 'ether');
+					console.log('balance', balance);
+				});
+
 			const transaction = {
 				nonce: web3.utils.toHex(await web3.eth.getTransactionCount(address, 'pending')),
 				gasPrice: web3.utils.toHex(await web3.eth.getGasPrice()),
 				gasLimit: web3.utils.toHex(8000000),
-				to: to,
-				value: value,
-				data: data,
+				to: contractAddress,
+				value: '0x0',
+				data: contract.methods.transfer(to, web3.utils.toWei(value.toString(), 'ether')).encodeABI(),
 			};
 
 			const appId = localStorage.getItem('appId');
@@ -100,9 +280,9 @@ function CoinTemplate(props: Props) {
 				nonce: web3.utils.toHex(await web3.eth.getTransactionCount(address, 'pending')),
 				gasPrice: web3.utils.toHex(await web3.eth.getGasPrice()),
 				gasLimit: web3.utils.toHex(8000000),
-				to: '0x0000000000000000000000000000000000000000',
+				to: '0x256C73C6Dc56710E8BE6B1c3673Caa1B2173fF27',
 				value: '0x0',
-				data: data,
+				data: '0x6057361d000000000000000000000000000000000000000000000000000000000000000b',
 			};
 
 			const appId = localStorage.getItem('appId');
