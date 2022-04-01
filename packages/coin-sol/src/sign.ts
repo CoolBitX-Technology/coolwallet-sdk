@@ -12,7 +12,6 @@ async function signTransaction(signTxData: signTxType, txType: string): Promise<
   const rawTx = formTransaction(transaction, txType);
   const argument = await scriptUtil.getTransferArguments(rawTx);
 
-  ///
   const script = params.SCRIPT[txType].getScript();
 
   const sendScript = async () => {

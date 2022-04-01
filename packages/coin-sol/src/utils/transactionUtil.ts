@@ -19,7 +19,7 @@ export class RawTransaction {
   numberReadonlySignedAccount: string;
   numberReadonlyUnSignedAccount: string;
   keyCount: string;
-  keys: string;
+  keys: string[];
   recentBlockHash: string;
   instructionCount: string;
   programIdIndex: string;
@@ -34,7 +34,7 @@ export class RawTransaction {
     numberReadonlySignedAccount: string;
     numberReadonlyUnSignedAccount: string;
     keyCount: string;
-    keys: string;
+    keys: string[];
     recentBlockHash: string;
     instructionCount: string;
     programIdIndex: string;
@@ -75,7 +75,7 @@ export class RawTransaction {
           ? decimal.split('').slice(0, decimals).join('')
           : decimal.padEnd(decimals, '0');
       } else {
-        value = value.padEnd(decimals + 1, '0');
+        value = value + ''.padEnd(decimals, '0');
       }
 
       const valueHex = new BN(value).toString(16, 8 * 2);
@@ -96,6 +96,7 @@ export class RawTransaction {
   }
 
   serialize(): string {
+    const keysLength = this.keys.length;
     return (
       this.sigCount +
       this.signature +
@@ -103,7 +104,14 @@ export class RawTransaction {
       this.numberReadonlySignedAccount +
       this.numberReadonlyUnSignedAccount +
       this.keyCount +
-      this.keys +
+      this.keys
+        .map((key, index) => {
+          if (key === ''.padStart(64, '0') && index !== keysLength - 1) {
+            return '';
+          }
+          return key;
+        })
+        .join('') +
       this.recentBlockHash +
       this.instructionCount +
       this.programIdIndex +
@@ -114,7 +122,7 @@ export class RawTransaction {
     );
   }
   serializeArgument(): string {
-    return this.keys + this.recentBlockHash + this.dataLength + this.data;
+    return this.keyCount + this.keys.join('') + this.recentBlockHash + this.dataLength + this.data;
   }
 }
 
@@ -123,9 +131,9 @@ export function formTransaction(transaction: TransactionType, txType: string, si
   const { programId, data, owner, decimals, value } = options as TransactionOptions;
 
   const fromAddress = addressToHex(fromPubkey);
-  const toAddress = fromAddress === addressToHex(toPubkey) ? '' : addressToHex(toPubkey);
+  const toAddress = fromAddress === addressToHex(toPubkey) ? ''.padStart(64, '0') : addressToHex(toPubkey);
 
-  const keys = addressToHex(owner) + fromAddress + toAddress + addressToHex(programId);
+  const keys = [addressToHex(owner), fromAddress, toAddress, addressToHex(programId)];
 
   const recentBH = base58.decode(recentBlockhash).toString('hex');
 
@@ -155,20 +163,21 @@ export function formTransaction(transaction: TransactionType, txType: string, si
       rawTx.keyIndices = '01';
       break;
     case params.TRANSACTION_TYPE.SPL_TOKEN:
-      rawTx.keys = addressToHex(owner) + toAddress + fromAddress + addressToHex(programId);
+      rawTx.keys = [addressToHex(owner), toAddress, fromAddress, addressToHex(programId)];
       rawTx.keyCount = '04';
       rawTx.programIdIndex = '03';
       rawTx.keyIndicesCount = '03';
       rawTx.keyIndices = '020100';
       rawTx.dataEncode(value as string | number, Number(decimals));
       break;
-    case params.TRANSACTION_TYPE.TRANSFER_SELF:
-      rawTx.keyCount = '02';
-      rawTx.programIdIndex = '01';
-      rawTx.keyIndicesCount = '02';
-      rawTx.keyIndices = '0000';
-      rawTx.dataEncode(value as string | number, Number(decimals));
+
     default:
+      if (addressToHex(transaction.fromPubkey) === addressToHex(transaction.toPubkey)) {
+        rawTx.keyCount = '02';
+        rawTx.programIdIndex = '01';
+        rawTx.keyIndicesCount = '02';
+        rawTx.keyIndices = '0000';
+      }
       rawTx.dataEncode(amount as string | number);
       break;
   }
