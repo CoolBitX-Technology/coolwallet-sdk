@@ -5,6 +5,7 @@ import * as types from './config/types';
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
+import { TOKENTYPE } from './config/tokenType';
 
 export default class LUNA extends COIN.ECDSACoin implements COIN.Coin{
     public Types: any;
@@ -77,6 +78,24 @@ export default class LUNA extends COIN.ECDSACoin implements COIN.Coin{
             genTx = (signature: string) => {
               return txUtil.getSmartTx(signData.transaction, signature, publicKey);
             }
+            break;
+          case types.TX_TYPE.CW20:
+            const upperCaseAddress = signData.transaction.contractAddress.toUpperCase();
+            let tokenSignature = '';
+            for(const tokenInfo of TOKENTYPE){
+              // supported cw-20
+              if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
+                tokenSignature = tokenInfo.signature;
+                signData.transaction.option.info.symbol = tokenInfo.symbol;
+                signData.transaction.option.info.decimals = tokenInfo.unit;
+                break;
+              }
+            }
+            script = params.CW20.script + params.CW20.signature;
+            argument = scriptUtil.getCW20Argument(publicKey, signData.transaction, addressIndex, tokenSignature);
+            genTx = (signature: string) => {
+              return txUtil.getSmartTx(signData.transaction, signature, publicKey);
+            };
             break;
           default:
             throw new SDKError(this.signLUNATransaction.name, `not support input tx type`);

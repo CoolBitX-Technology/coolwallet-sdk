@@ -77,7 +77,7 @@ export const getWithdrawDelegatorRewardTx = (
 }
 
 export const getSmartTx = (
-  signData: types.MsgExecuteContract,
+  signData: types.MsgExecuteContract | types.MsgCW20,
   signature: string,
   publicKey: string
 ): string => {
@@ -88,14 +88,14 @@ export const getSmartTx = (
   const messageBuf = messages.MsgExecuteContract.encode({
     sender: signData.senderAddress,
     contract: signData.contractAddress,
-    msg: signData.execute_msg,
+    msg: JSON.stringify(signData.execute_msg),
     funds: funds
   })
   return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SMART, messageBuf);
 }
 
 export const getTxProtobuf = (
-    signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward | types.MsgExecuteContract,
+    signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward | types.MsgExecuteContract | types.MsgCW20,
     signature: string,
     publicKey: string,
     type_url: string,

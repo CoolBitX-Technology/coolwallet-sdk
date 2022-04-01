@@ -1,5 +1,7 @@
 import * as params from '../config/params';
 import * as types from '../config/types';
+import { Option } from '../config/types';
+import * as token from './tokenUtils';
 
 export function getLunaSendArgument(publicKey: string, lunaData: types.MsgSend, addressIndex: number) {
   const pubKey = publicKey.padStart(66, '0');
@@ -79,7 +81,7 @@ export function getLunaSmartArgument(publicKey: string, lunaData: types.MsgExecu
   const accountNumber = parseInt(lunaData.accountNumber).toString(16).padStart(16, '0');
   const sequence = parseInt(lunaData.sequence).toString(16).padStart(16, '0');
   const memo = Buffer.from(lunaData.memo, 'ascii').toString('hex').padStart(256, '0');
-  const execute_msg = Buffer.from(lunaData.execute_msg).toString('hex');
+  const execute_msg = Buffer.from(JSON.stringify(lunaData.execute_msg)).toString('hex');
 
   const argument =
     pubKey +
@@ -96,6 +98,35 @@ export function getLunaSmartArgument(publicKey: string, lunaData: types.MsgExecu
 
   console.debug('getLunaSmartArgument: ' + argument);
 
+  return addPath(argument, addressIndex);
+}
+
+export function getCW20Argument(publicKey: string, lunaData: types.MsgCW20, addressIndex: number, tokenSignature: string){
+  const { amount, recipient } = lunaData.execute_msg.transfer;
+  const pubKey = publicKey.padStart(66, '0');
+  const senderAddress = Buffer.from(lunaData.senderAddress, 'ascii').toString('hex').padStart(128, '0');
+  const contractAddress = Buffer.from(lunaData.contractAddress, 'ascii').toString('hex').padStart(128, '0');
+  const toAddress = Buffer.from(recipient, 'ascii').toString('hex').padStart(128, '0');
+  const value = parseInt(amount).toString(16).padStart(16, '0');
+  const feeAmount = lunaData.feeAmount.toString(16).padStart(16, '0');
+  const gas = lunaData.gas.toString(16).padStart(16, '0');
+  const accountNumber = parseInt(lunaData.accountNumber).toString(16).padStart(16, '0');
+  const sequence = parseInt(lunaData.sequence).toString(16).padStart(16, '0');
+  const memo = Buffer.from(lunaData.memo, 'ascii').toString('hex').padStart(256, '0');
+
+  const txTokenInfo: Option = lunaData.option;
+  const tokenInfo = token.getSetTokenPayload(
+    lunaData.contractAddress,
+    txTokenInfo.info.symbol,
+    parseInt(txTokenInfo.info.decimals)
+  );
+  const signature = tokenSignature.slice(106).padStart(144, '0');
+
+  const execute_msg = Buffer.from(JSON.stringify(lunaData.execute_msg)).toString('hex');
+
+  const argument = pubKey + senderAddress + contractAddress + toAddress + value + feeAmount + gas + accountNumber + sequence + memo + tokenInfo + signature + execute_msg;
+  
+  console.debug('getTerraCW20Argument: ' + argument);
   return addPath(argument, addressIndex);
 }
 
