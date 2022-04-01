@@ -154,7 +154,6 @@ export default class AVAXC implements COIN.Coin {
 		}
 		if (token.symbol.length == 0) {
 			throw new Error('unexpected transaction format!');
-			return;
 		}
 
 
