@@ -34,6 +34,8 @@ function CoinLuna(props: Props) {
 
   const[signedSmartContract, setSignedSmartContract] = useState('');
 
+  const[signedCW20, setSignedCW20] = useState('');
+
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
 
@@ -231,25 +233,22 @@ const signSmartContract = async() =>{
   handleState(async () => {
     const { sequence, account_number } = await cosmosjs.getSequence(address);
     // based on the structure of the smart contract- execute_msg may be different and funds may be undefined
-    const executeMsgObj = {
-      swap: {
-        offer_asset: {
-          info: {
-            native_token: {
-              denom: 'uluna'
-            }
-          },
-          amount: '1'
-        }
-      }
-    };
-    
     const transaction = {
       chainId: CHAIN_ID.LUNA,
       senderAddress: address,
       contractAddress: 'terra1tndcaqxkpc5ce9qee5ggqf430mr2z3pefe5wj6',
-      execute_msg: JSON.stringify(executeMsgObj),
-      // funds: undefined,
+      execute_msg: {
+        swap: {
+          offer_asset: {
+            info: {
+              native_token: {
+                denom: 'uluna'
+              }
+            },
+            amount: '1'
+          }
+        }
+      },
       funds: {
         denom: 'uluna', 
         amount: new BigNumber(0.000001).multipliedBy(1000000).toNumber()
@@ -258,7 +257,7 @@ const signSmartContract = async() =>{
       gas: 180000,
       accountNumber: account_number,
       sequence,
-      memo: '',
+      memo: ''
     }
     console.log(transaction);
     const appId = localStorage.getItem('appId');
@@ -279,6 +278,52 @@ const signSmartContract = async() =>{
     console.log("sendTx: " + sendTx);
     return sendTx;
   }, setSignedSmartContract);
+};
+
+const signCW20 = async() =>{
+  handleState(async () => {
+    const { sequence, account_number } = await cosmosjs.getSequence(address);
+    const transaction = {
+      chainId: CHAIN_ID.LUNA,
+      senderAddress: address,
+      contractAddress: 'terra14z56l0fp2lsf86zy3hty2z47ezkhnthtr9yq76',
+      execute_msg: {
+        transfer: {
+          amount: "1",
+          recipient: "terra1seckusy09dzgtyxtz9xqzg2x7xfgtf0lhyzmf9"
+        }
+      },
+      feeAmount: 3000,
+      gas: 180000,
+      accountNumber: account_number,
+      sequence,
+      memo: '',
+      option: {
+        info:{
+          symbol: "ANC",
+          decimals: "6"
+        }
+      }
+    }
+    console.log(transaction);
+    const appId = localStorage.getItem('appId');
+    if (!appId) throw new Error('No Appid stored, please register!');
+    const signTxData: SignDataType = {
+      txType: TX_TYPE.CW20,
+      transaction: transaction,
+      transport: transport!,
+      appPrivateKey,
+      appId,
+      addressIndex: 0,
+      confirmCB: undefined,
+      authorizedCB: undefined,
+    };
+    const signedTx = await luna.signTransaction(signTxData);
+    console.log("signedTx: " + signedTx);
+    const sendTx = await cosmosjs.broadcastGRPC(signedTx);
+    console.log("sendTx: " + sendTx);
+    return sendTx;
+  }, setSignedCW20);
 };
 
   return (
@@ -335,6 +380,13 @@ const signSmartContract = async() =>{
         onClick={signSmartContract}
         disabled={disabled}
         btnName='Smart Contract'
+      />}
+      {<NoInput
+        title='CW20' 
+        content={signedCW20} 
+        onClick={signCW20}
+        disabled={disabled}
+        btnName='CW20'
       />}
     </Container>
   );
