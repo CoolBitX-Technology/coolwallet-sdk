@@ -8,7 +8,7 @@ const sigUtil = require('eth-sig-util');
 
 const web3 = new Web3('https://api.avax-test.network/ext/bc/C/rpc');
 
-import Template from '@coolwallet/coin-avaxc';
+import Template from '@coolwallet/avaxc';
 
 interface Props {
 	transport: Transport | null;
