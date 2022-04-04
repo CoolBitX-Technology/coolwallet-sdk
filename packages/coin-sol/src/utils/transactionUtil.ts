@@ -59,38 +59,36 @@ export class RawTransaction {
     this.data = rawTx.data;
   }
 
-  dataEncode(amount: number | string, decimals: number = 9): string {
-    const programIdToNumber = Number(this.programIdIndex);
-    const isSplTransfer = programIdToNumber === 3;
-    const programIdIndexSpan = isSplTransfer ? 1 : 4;
-    const dataAlloc = isSplTransfer ? 9 : 12;
-    const data = Buffer.alloc(dataAlloc);
+  transferDataEncode(amount: number | string, decimals: number = 9): string {
+    const data = Buffer.alloc(12);
+    const programIdIndexSpan = 4;
+    data.writeUIntLE(2, 0, programIdIndexSpan);
+    const v2e32 = Math.pow(2, 32);
+    const value = Number(amount) * params.LAMPORTS_PER_SOL;
+    const hi32 = Math.floor(value / v2e32);
+    const lo32 = value - hi32 * v2e32;
+    data.writeUInt32LE(lo32, programIdIndexSpan);
+    data.writeInt32LE(hi32, programIdIndexSpan + 4);
+    this.data = data.toString('hex');
+    return data.toString('hex');
+  }
 
-    data.writeUIntLE(programIdToNumber, 0, programIdIndexSpan);
-    if (isSplTransfer) {
-      const [round, decimal] = amount.toString().split('.');
-      let value = Number(round) > 0 ? round : '';
-      if (decimal) {
-        value += decimal.charAt(decimals)
-          ? decimal.split('').slice(0, decimals).join('')
-          : decimal.padEnd(decimals, '0');
-      } else {
-        value = value + ''.padEnd(decimals, '0');
-      }
+  splDataEncode(amount: number | string, decimals: number = 9): string {
+    const data = Buffer.alloc(9);
+    const programIdIndexSpan = 1;
+    data.writeUIntLE(3, 0, programIdIndexSpan);
+    const [round, decimal] = amount.toString().split('.');
 
-      const valueHex = new BN(value).toString(16, 8 * 2);
-      const valueBuf = Buffer.from(valueHex, 'hex').reverse();
-
-      data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
+    let value = Number(round) > 0 ? round : '';
+    if (decimal) {
+      value += decimal.charAt(decimals) ? decimal.split('').slice(0, decimals).join('') : decimal.padEnd(decimals, '0');
     } else {
-      const v2e32 = Math.pow(2, 32);
-      const value = Number(amount) * params.LAMPORTS_PER_SOL;
-      const hi32 = Math.floor(value / v2e32);
-      const lo32 = value - hi32 * v2e32;
-
-      data.writeUInt32LE(lo32, programIdIndexSpan);
-      data.writeInt32LE(hi32, programIdIndexSpan + 4);
+      value = value + ''.padEnd(decimals, '0');
     }
+    const valueHex = new BN(value).toString(16, 8 * 2);
+    const valueBuf = Buffer.from(valueHex, 'hex').reverse();
+
+    data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
     this.data = data.toString('hex');
     return data.toString('hex');
   }
@@ -131,7 +129,8 @@ export function formTransaction(transaction: TransactionType, txType: string, si
   const { programId, data, owner, decimals, value } = options as TransactionOptions;
 
   const fromAddress = addressToHex(fromPubkey);
-  const toAddress = fromAddress === addressToHex(toPubkey) ? ''.padStart(64, '0') : addressToHex(toPubkey);
+  const isTransferSelf = fromAddress === addressToHex(toPubkey);
+  const toAddress = isTransferSelf ? ''.padStart(64, '0') : addressToHex(toPubkey);
 
   const keys = [addressToHex(owner), fromAddress, toAddress, addressToHex(programId)];
 
@@ -164,21 +163,28 @@ export function formTransaction(transaction: TransactionType, txType: string, si
       break;
     case params.TRANSACTION_TYPE.SPL_TOKEN:
       rawTx.keys = [addressToHex(owner), toAddress, fromAddress, addressToHex(programId)];
-      rawTx.keyCount = '04';
-      rawTx.programIdIndex = '03';
-      rawTx.keyIndicesCount = '03';
-      rawTx.keyIndices = '020100';
-      rawTx.dataEncode(value as string | number, Number(decimals));
+      if (isTransferSelf) {
+        rawTx.keyCount = '03';
+        rawTx.programIdIndex = '02';
+        rawTx.keyIndicesCount = '03';
+        rawTx.keyIndices = '010100';
+      } else {
+        rawTx.keyCount = '04';
+        rawTx.programIdIndex = '03';
+        rawTx.keyIndicesCount = '03';
+        rawTx.keyIndices = '020100';
+      }
+      rawTx.splDataEncode(value as string | number, Number(decimals));
       break;
 
     default:
-      if (addressToHex(transaction.fromPubkey) === addressToHex(transaction.toPubkey)) {
+      if (isTransferSelf) {
         rawTx.keyCount = '02';
         rawTx.programIdIndex = '01';
         rawTx.keyIndicesCount = '02';
         rawTx.keyIndices = '0000';
       }
-      rawTx.dataEncode(amount as string | number);
+      rawTx.transferDataEncode(amount as string | number);
       break;
   }
 
