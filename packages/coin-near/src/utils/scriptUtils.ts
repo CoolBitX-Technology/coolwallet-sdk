@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js';
 import * as params from '../config/params';
 import * as types from '../config/types';
 import * as nearAPI from 'near-api-js';
+import { BN } from 'bn.js';
 
 const addPath = async (argument: string, addressIndex: number): Promise<string> => {
 	const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
@@ -15,12 +16,12 @@ const numberToHex = (num: number|string, pad = 20): string => {
 };
 
 const getTransferArgument = async (
-  txn: types.txType
+  txn: types.Transaction
 ) => {
 
   // constructs actions that will be passed to the createTransaction method below
   const amount = nearAPI.utils.format.parseNearAmount(txn.amount);
-  const actions = [nearAPI.transactions.transfer(amount)];
+  const actions = [nearAPI.transactions.transfer(new BN(amount ? amount : '0'))];
   
   // create transaction
   const transaction = nearAPI.transactions.createTransaction(
@@ -37,16 +38,16 @@ const getTransferArgument = async (
     transaction
   );
 
-  const argument = '00000000000000989680'; //numberToHex('123.123'); // TODO: Round the number
+  const argument = '';//'00000000000000989680'; // TODO: Round the number
 
-  return await addPath(argument, 0) + serializedTx.toString('hex');
+  return await addPath(argument, 0) + Buffer.from(serializedTx).toString('hex');
 };
 
 /**
  * @param {*} transaction
  */
 const getScriptAndArguments = (
-  txn: types.txType
+  txn: types.Transaction
 ) => {
   const script = params.TRANSFER.script + params.TRANSFER.signature;
   const argument = getTransferArgument(txn);

@@ -2,7 +2,7 @@ import { Transport } from '@coolwallet/core';
 export { Transport };
 
 
-export type transaction = {
+export type Transaction = {
   sender: string;
   publicKey: string; 
   receiver: string;
@@ -11,11 +11,11 @@ export type transaction = {
   recentBlockHash: string;
 }
 
-export type signTxType = {
+export type SignTxType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  transaction: transaction;
+  transaction: Transaction;
   confirmCB?(): void;
   authorizedCB?(): void;
 };
