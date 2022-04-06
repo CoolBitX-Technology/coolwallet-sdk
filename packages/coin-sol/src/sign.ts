@@ -1,7 +1,7 @@
 import { tx, apdu, utils } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtil';
-import { signTxType } from './config/types';
-import { formTransaction } from './utils/transactionUtil';
+import { signTxType, TransactionArgs, TransferTransaction } from './config/types';
+import { formTransferTx, Transaction } from './utils/transactionUtil';
 import * as params from './config/params';
 
 async function signTransaction(signTxData: signTxType, txType: string): Promise<Buffer> {
@@ -9,7 +9,11 @@ async function signTransaction(signTxData: signTxType, txType: string): Promise<
 
   const preActions = [];
 
-  const rawTx = formTransaction(transaction, txType);
+  const rawTx =
+    txType === params.TRANSACTION_TYPE.SMART_CONTRACT
+      ? new Transaction(transaction as TransactionArgs)
+      : formTransferTx(transaction as TransferTransaction);
+
   const argument = await scriptUtil.getTransferArguments(rawTx);
 
   const script = params.SCRIPT[txType].getScript();
@@ -34,9 +38,7 @@ async function signTransaction(signTxData: signTxType, txType: string): Promise<
   );
   await utils.checkSupportScripts(transport);
 
-  rawTx.signature = signature.toString('hex');
-
-  return Buffer.from(rawTx.serialize(), 'hex');
+  return Buffer.from(rawTx.serialize(signature.toString('hex')), 'hex');
 }
 
 export { signTransaction };

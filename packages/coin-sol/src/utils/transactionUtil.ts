@@ -1,18 +1,12 @@
+import * as types from '../config/types';
 import * as params from '../config/params';
-import { TransactionOptions, TransactionType } from '../config/types';
-import { addressToHex, encodeLength, isBase58Format, numberToStringHex } from './stringUtil';
+import * as stringUtil from './stringUtil';
 
 import base58 from 'bs58';
+import Message from './messageUtil';
 const BN = require('bn.js');
 
-const evenHexDigit = (hex: string) => (hex.length % 2 !== 0 ? `0${hex}` : hex);
-
-export function pubKeyToAddress(publicKey: string): string {
-  const pubKeyBuf = Buffer.from(publicKey, 'hex');
-  return base58.encode(pubKeyBuf);
-}
-
-export class RawTransaction {
+export class TransferTx {
   sigCount: string;
   signature: string;
   numberRequireSignature: string;
@@ -93,7 +87,8 @@ export class RawTransaction {
     return data.toString('hex');
   }
 
-  serialize(): string {
+  serialize(signature: string): string {
+    this.signature = signature;
     const keysLength = this.keys.length;
     return (
       this.sigCount +
@@ -124,19 +119,18 @@ export class RawTransaction {
   }
 }
 
-export function formTransaction(transaction: TransactionType, txType: string, signature?: string): RawTransaction {
+export function formTransferTx(transaction: types.TransferTransaction, signature?: string): TransferTx {
   const { fromPubkey, toPubkey, recentBlockhash, amount, options } = transaction;
-  const { programId, data, owner, decimals, value } = options as TransactionOptions;
 
-  const fromAddress = addressToHex(fromPubkey);
-  const isTransferSelf = fromAddress === addressToHex(toPubkey);
-  const toAddress = isTransferSelf ? ''.padStart(64, '0') : addressToHex(toPubkey);
+  const fromAddress = stringUtil.formHex(fromPubkey);
+  const isTransferSelf = fromAddress === stringUtil.formHex(toPubkey);
+  const toAddress = isTransferSelf ? ''.padStart(64, '0') : stringUtil.formHex(toPubkey);
 
-  const keys = [addressToHex(owner), fromAddress, toAddress, addressToHex(programId)];
+  const keys = [fromAddress, toAddress, stringUtil.formHex(params.SYSTEM_PROGRAM_ID)];
 
   const recentBH = base58.decode(recentBlockhash).toString('hex');
 
-  const rawTx = new RawTransaction({
+  const rawTx = new TransferTx({
     signature,
     numberRequireSignature: '01',
     numberReadonlySignedAccount: '00',
@@ -152,46 +146,191 @@ export function formTransaction(transaction: TransactionType, txType: string, si
     data: '',
   });
 
-  switch (txType) {
-    case params.TRANSACTION_TYPE.SMART_CONTRACT:
-      if (typeof data === 'string') {
-        rawTx.data = isBase58Format(data) ? base58.decode(data).toString('hex') : data;
-      } else rawTx.data = (data as Buffer).toString('hex');
-      rawTx.data = rawTx.data.length === 0 ? '00' : evenHexDigit(rawTx.data);
-      rawTx.keyIndicesCount = '01';
-      rawTx.keyIndices = '01';
-      break;
-    case params.TRANSACTION_TYPE.SPL_TOKEN:
-      rawTx.keys = [addressToHex(owner), toAddress, fromAddress, addressToHex(programId)];
-      if (isTransferSelf) {
-        rawTx.keyCount = '03';
-        rawTx.programIdIndex = '02';
-        rawTx.keyIndicesCount = '03';
-        rawTx.keyIndices = '010100';
-      } else {
-        rawTx.keyCount = '04';
-        rawTx.programIdIndex = '03';
-        rawTx.keyIndicesCount = '03';
-        rawTx.keyIndices = '020100';
-      }
-      rawTx.splDataEncode(value as string | number, Number(decimals));
-      break;
-
-    default:
-      if (isTransferSelf) {
-        rawTx.keyCount = '02';
-        rawTx.programIdIndex = '01';
-        rawTx.keyIndicesCount = '02';
-        rawTx.keyIndices = '0000';
-      }
-      rawTx.transferDataEncode(amount as string | number);
-      break;
+  if (options) {
+    rawTx.keys = [
+      stringUtil.formHex(options.owner),
+      toAddress,
+      fromAddress,
+      stringUtil.formHex(params.TOKEN_PROGRAM_ID),
+    ];
+    if (isTransferSelf) {
+      rawTx.keyCount = '03';
+      rawTx.programIdIndex = '02';
+      rawTx.keyIndicesCount = '03';
+      rawTx.keyIndices = '010100';
+    } else {
+      rawTx.keyCount = '04';
+      rawTx.programIdIndex = '03';
+      rawTx.keyIndicesCount = '03';
+      rawTx.keyIndices = '020100';
+    }
+    rawTx.splDataEncode(amount as string | number, Number(options.decimals || 9));
+  } else {
+    if (isTransferSelf) {
+      rawTx.keyCount = '02';
+      rawTx.programIdIndex = '01';
+      rawTx.keyIndicesCount = '02';
+      rawTx.keyIndices = '0000';
+    }
+    rawTx.transferDataEncode(amount as string | number);
   }
 
   let dataCount: number[] = [];
-  encodeLength(dataCount, rawTx.data.length / 2);
+  stringUtil.encodeLength(dataCount, rawTx.data.length / 2);
 
-  rawTx.dataLength = numberToStringHex(dataCount, 2);
+  rawTx.dataLength = stringUtil.numberToStringHex(dataCount, 2);
 
   return rawTx;
+}
+
+export class Transaction {
+  feePayer: string | Buffer;
+  recentBlockhash: string;
+  instructions: types.TransactionInstruction[];
+  signature?: string;
+  constructor(tx: types.TransactionArgs) {
+    this.feePayer = stringUtil.formHex(tx.feePayer);
+    this.recentBlockhash = stringUtil.formHex(tx.recentBlockhash);
+    this.instructions = tx.instructions.map((instruction) => ({
+      ...instruction,
+      programId: stringUtil.formHex(instruction.programId),
+      accounts: instruction.accounts.map((account) => ({
+        ...account,
+        pubkey: stringUtil.formHex(account.pubkey),
+      })),
+    }));
+  }
+  serialize(signature: string): string {
+    this.signature = signature;
+    return '01' + this.signature + this.serializeArgument();
+  }
+  serializeArgument(): string {
+    return this.complieMessage().serialize();
+  }
+
+  complieMessage(): Message {
+    const { recentBlockhash, feePayer } = this;
+    if (!recentBlockhash) {
+      throw new Error('Transaction recentBlockhash required');
+    }
+
+    if (this.instructions.length < 1) {
+      console.warn('No instructions provided');
+    }
+
+    if (!feePayer || feePayer.length < 1) {
+      throw new Error('Transaction fee payer required');
+    }
+
+    const programIds: string[] = [];
+    const accountMetas: types.AccountMeta[] = [];
+    this.instructions.forEach((instruction) => {
+      instruction.accounts.forEach((accountMeta) => {
+        accountMetas.push(accountMeta);
+      });
+      let programId = stringUtil.formHex(instruction.programId);
+
+      if (!programIds.includes(programId)) {
+        programIds.push(programId);
+      }
+    });
+
+    // Append programID account metas
+    programIds.forEach((programId) => {
+      accountMetas.push({
+        pubkey: programId,
+        isSigner: false,
+        isWritable: false,
+      });
+    });
+
+    // Sort. Prioritizing first by signer, then by writable
+    accountMetas.sort((cur, next) => {
+      const pubkeySorting = (cur.pubkey as string) === (next.pubkey as string) ? 1 : 0;
+      const checkSigner = cur.isSigner === next.isSigner ? 0 : cur.isSigner ? -1 : 1;
+      const checkWritable = cur.isWritable === next.isWritable ? pubkeySorting : cur.isWritable ? -1 : 1;
+      return checkSigner || checkWritable;
+    });
+
+    // Cull duplicate account metas
+    const uniqueMetas: types.AccountMeta[] = [];
+    accountMetas.forEach((accountMeta) => {
+      const uniqueIndex = uniqueMetas.findIndex((e) => {
+        return e.pubkey === (accountMeta.pubkey as string);
+      });
+      if (uniqueIndex > -1) {
+        uniqueMetas[uniqueIndex].isWritable = uniqueMetas[uniqueIndex].isWritable || accountMeta.isWritable;
+      } else {
+        uniqueMetas.push(accountMeta);
+      }
+    });
+
+    // Move fee payer to the front
+    const feePayerIndex = uniqueMetas.findIndex((e) => {
+      return e.pubkey === feePayer;
+    });
+    if (feePayerIndex > -1) {
+      const [payerMeta] = uniqueMetas.splice(feePayerIndex, 1);
+      payerMeta.isSigner = true;
+      payerMeta.isWritable = true;
+      uniqueMetas.unshift(payerMeta);
+    } else {
+      uniqueMetas.unshift({
+        pubkey: feePayer,
+        isSigner: true,
+        isWritable: true,
+      });
+    }
+
+    // transaction header data
+    let numRequiredSignatures = 0;
+    let numReadonlySignedAccounts = 0;
+    let numReadonlyUnsignedAccounts = 0;
+
+    // Split out signing from non-signing keys and count header values
+    const signedKeys: string[] = [];
+    const unsignedKeys: string[] = [];
+    uniqueMetas.forEach(({ pubkey, isSigner, isWritable }) => {
+      if (isSigner) {
+        signedKeys.push(pubkey.toString());
+        numRequiredSignatures += 1;
+        if (!isWritable) {
+          numReadonlySignedAccounts += 1;
+        }
+      } else {
+        unsignedKeys.push(pubkey.toString());
+        if (!isWritable) {
+          numReadonlyUnsignedAccounts += 1;
+        }
+      }
+    });
+
+    const accountKeys = signedKeys.concat(unsignedKeys);
+    const instructions: types.CompliedInstruction[] = this.instructions.map((instruction) => {
+      const { data, programId } = instruction;
+      return {
+        programIdIndex: accountKeys.indexOf(programId as string),
+        accounts: instruction.accounts.map((meta) => accountKeys.indexOf(meta.pubkey as string)),
+        data: stringUtil.formHex(data),
+      };
+    });
+
+    instructions.forEach((instruction) => {
+      if (instruction.programIdIndex < 0) throw new Error('Assertion failed');
+
+      instruction.accounts.forEach((keyIndex) => {
+        if (keyIndex < 0) throw new Error('Assertion failed');
+      });
+    });
+    return new Message({
+      header: {
+        numRequiredSignatures,
+        numReadonlySignedAccounts,
+        numReadonlyUnsignedAccounts,
+      },
+      accountKeys,
+      recentBlockhash: this.recentBlockhash,
+      instructions,
+    });
+  }
 }

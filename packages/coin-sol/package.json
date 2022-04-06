@@ -24,6 +24,7 @@
     "@coolwallet/core": "^1.1.1"
   },
   "dependencies": {
+    "@solana/buffer-layout": "^4.0.0",
     "@types/crc": "^3.4.0",
     "bignumber.js": "^9.0.1",
     "bn.js": "^5.2.0"

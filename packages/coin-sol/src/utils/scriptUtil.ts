@@ -1,13 +1,13 @@
-import { utils, config } from '@coolwallet/core';
 import * as params from '../config/params';
-import { RawTransaction } from './transactionUtil';
+import { utils, config } from '@coolwallet/core';
+import { Transaction, TransferTx } from './transactionUtil';
 
 /**
  * getTransferArguments
- * @param {RawTransaction} RawTransaction transaction with extracted fields from a regular sol transaction
+ * @param {TransferTx} TransferTx transaction with extracted fields from a regular sol transaction
  * @returns {Promise<string>}
  */
-export const getTransferArguments = async (rawTx: RawTransaction): Promise<string> => {
+export const getTransferArguments = async (rawTx: Transaction | TransferTx): Promise<string> => {
   const pathType = config.PathType.SLIP0010;
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
   const SEPath = `0D${path}`;

@@ -1,13 +1,16 @@
-import { TransactionType } from '../config/types';
 import base58 from 'bs58';
-import { TRANSACTION_TYPE } from '../config/params';
 
 export const isBase58Format = (value: string): boolean => {
   const match = value.match(/([G-Z])|([g-z])/g);
   return !!(match && match.length > 0);
 };
 
-export const addressToHex = (address: string | Buffer | undefined): string => {
+export function pubKeyToAddress(publicKey: string): string {
+  const pubKeyBuf = Buffer.from(publicKey, 'hex');
+  return base58.encode(pubKeyBuf);
+}
+
+export const formHex = (address: string | Buffer | undefined): string => {
   if (!address) return '';
   if (typeof address === 'string') {
     if (isBase58Format(address)) return base58.decode(address).toString('hex');
@@ -20,18 +23,6 @@ export const numberToStringHex = (value: number | number[], pad: number): string
   Buffer.from(typeof value === 'number' ? [value] : value)
     .toString('hex')
     .padStart(pad, '0');
-
-const isFieldsValid = (fields: Array<string | number | Buffer | undefined>): boolean =>
-  fields.every((e) => e !== undefined);
-
-export const getTxType = (transaction: TransactionType): string => {
-  if (transaction.options) {
-    const { programId, data, owner, decimals, value } = transaction.options;
-    if (isFieldsValid([programId, data, owner])) return TRANSACTION_TYPE.SMART_CONTRACT;
-    else if (isFieldsValid([owner, decimals, value])) return TRANSACTION_TYPE.SPL_TOKEN;
-  }
-  return TRANSACTION_TYPE.TRANSFER;
-};
 
 export const encodeLength = (bytes: number[], len: number): void => {
   let rem_len = len;

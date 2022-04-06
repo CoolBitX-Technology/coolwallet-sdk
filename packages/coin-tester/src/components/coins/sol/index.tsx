@@ -119,13 +119,15 @@ function CoinSol(props: Props) {
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
         const tx = {
-          fromPubkey: greetedPubkey.toBase58(),
+          instructions: [
+            {
+              accounts: [{ pubkey: greetedPubkey.toBase58(), isSigner: false, isWritable: true }],
+              programId: programTransaction.programId,
+              data: programTransaction.data,
+            },
+          ],
           recentBlockhash,
-          options: {
-            owner: account,
-            programId: programTransaction.programId,
-            data: programTransaction.data,
-          },
+          feePayer: account,
         };
 
         const appId = localStorage.getItem('appId');
@@ -136,6 +138,7 @@ function CoinSol(props: Props) {
           appId,
           transaction: tx,
         });
+
         const recoveredTx = Transaction.from(signedTx);
 
         const verifySig = recoveredTx.verifySignatures();
@@ -170,10 +173,10 @@ function CoinSol(props: Props) {
           fromPubkey: fromTokenAccount.toBase58(),
           toPubkey: toTokenAccount.toBase58(),
           recentBlockhash,
+          amount: splTokenTransaction.amount,
           options: {
             owner: account,
             decimals: splTokenTransaction.decimals,
-            value: splTokenTransaction.amount,
           },
         };
 
