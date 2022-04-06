@@ -2,12 +2,6 @@ import { tx, apdu/*, utils*/ } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtils';
 import * as types from './config/types';
 
-// const accountIndexToKeyId = (coinType: string, accountIndex: number) => {
-//   const accountIndexHex = accountIndex.toString(16).padStart(2, '0');
-//   const keyId = coinType.concat(accountIndexHex).concat('000000');
-//   return keyId;
-// };
-
 export default async function signTransaction(
   signTxData: types.SignTxType
 ): Promise<string> {

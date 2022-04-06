@@ -44,23 +44,18 @@ function CoinNear(props: Props) {
     }
   };
 
-  function hexStringToByteArray(hexString: string) {
-    if (hexString.length % 2 !== 0) {
-        throw "Must have an even number of hex digits to convert to bytes";
-    }/* w w w.  jav  a2 s .  c o  m*/
-    var numBytes = hexString.length / 2;
-    var byteArray = new Uint8Array(numBytes);
-    for (var i=0; i<numBytes; i++) {
-        byteArray[i] = parseInt(hexString.substr(i*2, 2), 16);
-    }
-    return byteArray;
-}
-
   const getAddress = async () => {
     handleState(async () => {
+
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      return Promise.resolve('yohoo'); //near.getAddress(transport!, appPrivateKey, appId, 0);
+
+      const appPrivateKey = '4X9hqNchzMzCi3Btjiss5swoMJrDeSorT8zMcqki6oZCCYX79tguTcBSoaLJCzM8YAa9whGZdcCrbzeLKFNffbd4';
+
+      // const keyPair = nearAPI.utils.key_pair.KeyPairEd25519.fromString(appPrivateKey);
+      // const publicKey = keyPair.getPublicKey();
+
+      return near.getAddress(transport!, appPrivateKey, appId, 0);
     }, setAddress);
   };
 
@@ -108,7 +103,7 @@ function CoinNear(props: Props) {
 
       const signTxData = {
         transport: transport!,
-        appPrivateKey: props.appPrivateKey, // appPrivateKey,
+        appPrivateKey: appPrivateKey,
         appId: appId,
         addressIndex: 0,
         transaction: txn

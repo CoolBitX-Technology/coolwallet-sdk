@@ -1,18 +1,28 @@
 import { utils, config } from '@coolwallet/core';
-import BigNumber from 'bignumber.js';
 import * as params from '../config/params';
 import * as types from '../config/types';
 import * as nearAPI from 'near-api-js';
 import { BN } from 'bn.js';
+const base58 = require('bs58');
 
-const addPath = async (argument: string, addressIndex: number): Promise<string> => {
-	const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
-	return SEPath + argument;
+
+const publicKeyToAddress = (
+  publicKey: string
+) => {
+  return base58.decode(publicKey);
 };
 
-const numberToHex = (num: number|string, pad = 20): string => {
-	const tBN = new BigNumber(num);
-	return tBN.toString(16).padStart(pad, '0');
+const getScriptAndArguments = (
+  txn: types.Transaction
+) => {
+  const script = params.TRANSFER.script + params.TRANSFER.signature;
+  const argument = getTransferArgument(txn);
+
+  console.log(argument);
+  return {
+    script: script,
+    argument: argument,
+  };
 };
 
 const getTransferArgument = async (
@@ -38,24 +48,32 @@ const getTransferArgument = async (
     transaction
   );
 
-  const argument = '';//'00000000000000989680'; // TODO: Round the number
+  const argument = nearToDisplay(txn.amount);
 
   return await addPath(argument, 0) + Buffer.from(serializedTx).toString('hex');
 };
 
-/**
- * @param {*} transaction
- */
-const getScriptAndArguments = (
-  txn: types.Transaction
-) => {
-  const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = getTransferArgument(txn);
-
-  return {
-    script: script,
-    argument: argument,
-  };
+const addPath = async (argument: string, addressIndex: number): Promise<string> => {
+	const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
+	return SEPath + argument;
 };
 
-export { getScriptAndArguments };
+function trimLeadingZeroes(value: string): string {
+  value = value.replace(/^0+/, '');
+  if (value === '') {
+      return '0';
+  }
+  return value;
+}
+
+const nearToDisplay = (num: string, pad = 20): string => {
+  if (!num) { return ''.padEnd(pad, '0'); }
+  num = num.replace(/,/g, '').trim();
+  const split = num.split('.');
+  const wholePart = split[0];
+  const fracPart = split[1] || '';
+  const tBN = new BN(trimLeadingZeroes(wholePart + fracPart.padEnd(18, '0')));
+  return tBN.toString(16).padStart(pad, '0');
+};
+
+export { publicKeyToAddress, getScriptAndArguments };
