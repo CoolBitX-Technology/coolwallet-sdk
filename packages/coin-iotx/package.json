@@ -1,0 +1,46 @@
+{
+  "name": "@coolwallet/iotx",
+  "version": "1.0.0",
+  "description": "Coolwallet IoTex sdk",
+  "main": "lib/index.js",
+  "author": "coolwallet-team",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "test": "jest --verbose"
+  },
+  "peerDependencies": {
+    "@coolwallet/core": "^1.0.14"
+  },
+  "dependencies": {
+    "bech32": "^2.0.0",
+    "bignumber.js": "^9.0.2",
+    "elliptic": "^6.5.1",
+    "eth-sig-util": "^2.5.3",
+    "protocol-buffers-encodings": "^1.1.1",
+    "regenerator-runtime": "^0.13.9"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-transform-runtime": "^7.16.5",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.0.14",
+    "@types/elliptic": "^6.4.14",
+    "@types/eth-sig-util": "^2.1.1",
+    "@types/node": "^14.0.13",
+    "jest": "^27.4.5",
+    "typescript": "^4.5.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  }
+}
