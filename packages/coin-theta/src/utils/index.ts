@@ -199,6 +199,22 @@ function v2Outputs(
   return [outArray, i2r(purpose), h2r(pubkey), h2r(pop), h2r(sig)];
 }
 
+function getSigWithParam(
+  txTypeBuf: Buffer,
+  rawTxBuf: Buffer,
+  publicKey: string,
+  sig: { r:string, s:string}
+) {
+  const chainIdBuf = rlp.encode('mainnet');
+  const rawData = rlp.encode(['','','',Buffer.from('0000000000000000000000000000000000000000','hex'),'',Buffer.concat([chainIdBuf, txTypeBuf, rawTxBuf])]);
+  console.log('rawData :', rawData.toString('hex'));
+  const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
+  const hashBuf = Buffer.from(handleHex(hash), 'hex');
+  const keyPair = ec.keyFromPublic(publicKey, 'hex');
+  const recoveryParam = ec.getKeyRecoveryParam(hashBuf, sig, keyPair.pub);
+  return sig.r + sig.s + recoveryParam.toString(16).padStart(2,'0');
+}
+
 export function getSignedTransaction(
   tx: Transaction,
   sig: { r:string, s:string },
@@ -206,60 +222,90 @@ export function getSignedTransaction(
   txType: TxTypes
 ) {
   const fromAddr = pubKeyToAddress(publicKey);
-  const signature = sig.r + sig.s;
+  let signature = '';
   let signedTx;
   switch (txType) {
     case TxTypes.Send: {
-      signedTx = rlp.encode(i2r(2)).toString('hex')
+      const txTypeBuf = rlp.encode(i2r(2));
       const { theta, tfuel, sequence, toAddr } = tx as SendTransaction;
-      const inArray = [input(fromAddr, theta, tfuel, params.FEE, sequence, signature)];
       const outArray = [output(toAddr, theta, tfuel)];
-      signedTx += rlp.encode([feeArray, inArray, outArray]).toString('hex')
+      let inArray = [input(fromAddr, theta, tfuel, params.FEE, sequence, signature)];
+      let rawTxBuf = rlp.encode([feeArray, inArray, outArray]);
+
+      signature = getSigWithParam(txTypeBuf, rawTxBuf, publicKey, sig);
+      inArray = [input(fromAddr, theta, tfuel, params.FEE, sequence, signature)];
+      rawTxBuf = rlp.encode([feeArray, inArray, outArray]);
+      signedTx = Buffer.concat([txTypeBuf, rawTxBuf]).toString('hex');
       break;
     }
     case TxTypes.StakeValidator: {
-      signedTx = rlp.encode(i2r(8)).toString('hex')
+      const txTypeBuf = rlp.encode(i2r(8));
       const { theta, sequence, toAddr } = tx as StakeValidatorTransaction;
-      const inArray = input(fromAddr, theta, 0, 0, sequence, signature);
       const outArray = output(toAddr, 0, 0);
       const purpose = i2r(0);
-      signedTx += rlp.encode([feeArray, inArray, outArray, purpose]).toString('hex')
+      let inArray = input(fromAddr, theta, 0, 0, sequence, signature);
+      let rawTxBuf = rlp.encode([feeArray, inArray, outArray, purpose]);
+
+      signature = getSigWithParam(txTypeBuf, rawTxBuf, publicKey, sig);
+      inArray = input(fromAddr, theta, 0, 0, sequence, signature);
+      rawTxBuf = rlp.encode([feeArray, inArray, outArray, purpose]);
+      signedTx = Buffer.concat([txTypeBuf, rawTxBuf]).toString('hex');
       break;
     }
     case TxTypes.StakeGuardian: {
-      signedTx = rlp.encode(i2r(10)).toString('hex')
+      const txTypeBuf = rlp.encode(i2r(10));
       const { theta, sequence, holderSummary } = tx as StakeGuardianTransaction;
-      const inArray = input(fromAddr, theta, 0, 0, sequence, signature);
       const outArrays = v2Outputs(holderSummary, 1);
-      signedTx += rlp.encode([feeArray, inArray, ...outArrays]).toString('hex')
+      let inArray = input(fromAddr, theta, 0, 0, sequence, signature);
+      let rawTxBuf = rlp.encode([feeArray, inArray, ...outArrays]);
+
+      signature = getSigWithParam(txTypeBuf, rawTxBuf, publicKey, sig);
+      inArray = input(fromAddr, theta, 0, 0, sequence, signature);
+      rawTxBuf = rlp.encode([feeArray, inArray, ...outArrays]);
+      signedTx = Buffer.concat([txTypeBuf, rawTxBuf]).toString('hex');
       break;
     }
     case TxTypes.StakeEdge: {
-      signedTx = rlp.encode(i2r(10)).toString('hex')
+      const txTypeBuf = rlp.encode(i2r(10));
       const { tfuel, sequence, holderSummary } = tx as StakeEdgeTransaction;
-      const inArray = input(fromAddr, 0, tfuel, 0, sequence, signature);
       const outArrays = v2Outputs(holderSummary, 2);
-      signedTx += rlp.encode([feeArray, inArray, ...outArrays]).toString('hex')
+      let inArray = input(fromAddr, 0, tfuel, 0, sequence, signature);
+      let rawTxBuf = rlp.encode([feeArray, inArray, ...outArrays]);
+
+      signature = getSigWithParam(txTypeBuf, rawTxBuf, publicKey, sig);
+      inArray = input(fromAddr, 0, tfuel, 0, sequence, signature);
+      rawTxBuf = rlp.encode([feeArray, inArray, ...outArrays]);
+      signedTx = Buffer.concat([txTypeBuf, rawTxBuf]).toString('hex');
       break;
     }
     case TxTypes.Withdraw: {
-      signedTx = rlp.encode(i2r(9)).toString('hex')
+      const txTypeBuf = rlp.encode(i2r(9));
       const { purpose: p, sequence, toAddr } = tx as WithdrawTransaction;
-      const inArray = input(fromAddr, 0, 0, 0, sequence, signature);
       const outArray = output(toAddr, 0, 0);
       const purpose = i2r(p);
-      signedTx += rlp.encode([feeArray, inArray, outArray, purpose]).toString('hex')
+      let inArray = input(fromAddr, 0, 0, 0, sequence, signature);
+      let rawTxBuf = rlp.encode([feeArray, inArray, outArray, purpose]);
+
+      signature = getSigWithParam(txTypeBuf, rawTxBuf, publicKey, sig);
+      inArray = input(fromAddr, 0, 0, 0, sequence, signature);
+      rawTxBuf = rlp.encode([feeArray, inArray, outArray, purpose]);
+      signedTx = Buffer.concat([txTypeBuf, rawTxBuf]).toString('hex');
       break;
     }
     case TxTypes.Smart: {
-      signedTx = rlp.encode(i2r(7)).toString('hex')
+      const txTypeBuf = rlp.encode(i2r(7));
       const { value, sequence, toAddr, gasLimit: g, data: d } = tx as SmartTransaction;
-      const inArray = input(fromAddr, 0, 0, 0, sequence, signature);
       const outArray = output(toAddr, 0, 0);
       const gasLimit = i2r(g);
       const data = h2r(d);
       const gasPrice = h2r('03a352944000');
-      signedTx += rlp.encode([inArray, outArray, gasLimit, gasPrice, data]).toString('hex')
+      let inArray = input(fromAddr, 0, 0, 0, sequence, signature);
+      let rawTxBuf = rlp.encode([inArray, outArray, gasLimit, gasPrice, data]);
+
+      signature = getSigWithParam(txTypeBuf, rawTxBuf, publicKey, sig);
+      inArray = input(fromAddr, 0, 0, 0, sequence, signature);
+      rawTxBuf = rlp.encode([inArray, outArray, gasLimit, gasPrice, data]);
+      signedTx = Buffer.concat([txTypeBuf, rawTxBuf]).toString('hex');
       break;
     }
     case TxTypes.Evm: {
