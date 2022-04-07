@@ -1,4 +1,4 @@
-const SE_UPDATE_VER = 322;
+const SE_UPDATE_VER = 323;
 
 const CHALLENGE_URL = 'https://ota.cbx.io/api/challenge';
 const CRYPTOGRAM_URL = 'https://ota.cbx.io/api/cryptogram';
