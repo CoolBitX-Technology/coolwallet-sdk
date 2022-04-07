@@ -79,9 +79,10 @@ function CoinTemplate(props: Props) {
       const decimals = '18';
       const symbol = 'LINK';
 
-      const amount = web3.utils
-        .toHex(Math.floor(+web3.utils.toWei(value.toString(), 'ether') * (10 ** +decimals)))
-        .slice(2);
+      const scale = 10 ** +decimals;
+
+      const amount = web3.utils.toHex(Math.floor(+value * scale)).slice(2);
+
       const erc20To = to.startsWith('0x') ? to.slice(2) : to;
       const erc20Data = `0xa9059cbb${erc20To.padStart(64, '0')}${amount.padStart(64, '0')}`;
       const contractAddress = '0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846'; // LINK 合約地址
