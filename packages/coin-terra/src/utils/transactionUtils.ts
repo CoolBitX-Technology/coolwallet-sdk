@@ -43,7 +43,7 @@ export const getDelegateTx = (
   const messageBuf = messages.MsgDelegate.encode({
     delegator_address: signData.delegatorAddress,
     validator_address: signData.validatorAddress,
-    amount: { denom: 'uluna', amount: signData.amount.toString() }
+    amount: { denom: signData.denom.unit, amount: signData.amount.toString() }
   });
 
   return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.DELEGATE, messageBuf);
@@ -57,7 +57,7 @@ export const getUndelegateTx = (
   const messageBuf = messages.MsgUndelegate.encode({
     delegator_address: signData.delegatorAddress,
     validator_address: signData.validatorAddress,
-    amount: { denom: 'uluna', amount: signData.amount.toString() }
+    amount: { denom: signData.denom.unit, amount: signData.amount.toString() }
   });
 
   return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.UNDELEGATE, messageBuf);
@@ -76,8 +76,26 @@ export const getWithdrawDelegatorRewardTx = (
   return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.WITHDRAW, messageBuf);
 }
 
+export const getSmartTx = (
+  signData: types.MsgExecuteContract,
+  signature: string,
+  publicKey: string
+): string => {
+  let funds = [];
+  if(signData.funds !== undefined){
+    funds.push({ denom: signData.funds.denom.unit, amount: signData.funds.amount.toString() });
+  }
+  const messageBuf = messages.MsgExecuteContract.encode({
+    sender: signData.senderAddress,
+    contract: signData.contractAddress,
+    msg: signData.execute_msg,
+    funds: funds
+  })
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SMART, messageBuf);
+}
+
 export const getTxProtobuf = (
-  signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward,
+  signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward | types.MsgExecuteContract,
   signature: string,
   publicKey: string,
   type_url: string,

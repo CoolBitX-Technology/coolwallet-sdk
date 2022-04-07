@@ -1,4 +1,4 @@
-import type { GetAddress } from './response';
+import type { GetAddress, AddressBalance, AddressDelegation } from './response';
 
 class Cosmos {
   url: string;
@@ -10,6 +10,28 @@ class Cosmos {
   getSequence(address: string): Promise<GetAddress> {
     return fetch(this.url + `cosmos/auth/v1beta1/accounts/${address}`).then((res) =>
       res.json().then(({ account }) => ({ sequence: account.sequence, account_number: account.account_number }))
+    );
+  }
+
+  getBalance(address: string): Promise<AddressBalance[]> {
+    return fetch(this.url + `cosmos/bank/v1beta1/balances/${address}`).then((res) =>
+      res.json().then(({ balances }) => ( balances ))
+    );
+  }
+
+  getValidators(address: string): Promise<AddressDelegation[]> {
+    return fetch(this.url + `cosmos/staking/v1beta1/delegations/${address}`).then((res) =>
+      res.json().then(({ delegation_responses }) => {
+        const delegationInfo:AddressDelegation[] = [];
+        delegation_responses.map(function(response){
+          delegationInfo.push({ 
+            validator_address: response.delegation.validator_address, 
+            denom: response.balance.denom, 
+            amount: response.balance.amount
+          });
+        });
+        return delegationInfo;
+      })
     );
   }
 
