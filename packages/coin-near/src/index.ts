@@ -12,7 +12,7 @@ export default class NEAR extends COIN.EDDSACoin implements COIN.Coin {
   getAddress = async(
     transport: types.Transport,
     appPrivateKey: string,
-    appId: string,
+    appId: string
   ): Promise<string> => {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId);
 

@@ -12,13 +12,14 @@ const publicKeyToAddress = (
   return base58.decode(publicKey);
 };
 
-const getScriptAndArguments = (
+const getScriptAndArguments = async (
   txn: types.Transaction
 ) => {
   const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = getTransferArgument(txn);
+  const argument = await getTransferArgument(txn);
 
-  console.log(argument);
+  console.log(script);
+  console.log(await argument);
   return {
     script: script,
     argument: argument,
@@ -30,8 +31,25 @@ const getTransferArgument = async (
 ) => {
 
   // constructs actions that will be passed to the createTransaction method below
-  const amount = nearAPI.utils.format.parseNearAmount(txn.amount);
-  const actions = [nearAPI.transactions.transfer(new BN(amount ? amount : '0'))];
+  const amount = nearAPI.utils.format.parseNearAmount(txn.action.amount);
+  
+  let actions: nearAPI.transactions.Action[];
+
+  switch(txn.action.txnType) { 
+    case types.TxnType.TRANSFER: { 
+      actions = [nearAPI.transactions.transfer(new BN(amount!))];
+      break;
+    } 
+    case types.TxnType.STAKE: { 
+      actions = [nearAPI.transactions.stake(new BN(amount!), nearAPI.utils.key_pair.PublicKey.from(txn.action.validatorPublicKey!))]; 
+      break; 
+    } 
+    case types.TxnType.SMART: { 
+      actions = [nearAPI.transactions.functionCall(txn.action.methodName!, txn.action.methodArgs!,
+        new BN(nearAPI.utils.format.parseNearAmount(txn.action.gas)!), new BN(amount!))];
+      break; 
+    } 
+  } 
   
   // create transaction
   const transaction = nearAPI.transactions.createTransaction(
@@ -48,7 +66,7 @@ const getTransferArgument = async (
     transaction
   );
 
-  const argument = nearToDisplay(txn.amount);
+  const argument = nearToDisplay(txn.action.amount);
 
   return await addPath(argument, 0) + Buffer.from(serializedTx).toString('hex');
 };
