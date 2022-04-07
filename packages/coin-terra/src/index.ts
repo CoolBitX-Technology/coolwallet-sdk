@@ -2,6 +2,7 @@ import { coin as COIN, Transport } from '@coolwallet/core';
 import * as params from './config/params';
 import * as txUtil from './utils/transactionUtils';
 import * as types from './config/types';
+import { DENOMTYPE } from './config/denomType';
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
@@ -55,6 +56,7 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         };
         break;
       case types.TX_TYPE.DELEGATE:
+        signData.transaction.denom = DENOMTYPE.LUNA;
         if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
           script = params.DELEGATE.script + params.DELEGATE.signature;
         else
@@ -65,6 +67,7 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         };
         break;
       case types.TX_TYPE.UNDELEGATE:
+        signData.transaction.denom = DENOMTYPE.LUNA;
         if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
           script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
         else
@@ -83,6 +86,16 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         genTx = (signature: string) => {
           return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
         };
+        break;
+      case types.TX_TYPE.SMART:
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.SMART.script + params.SMART.signature;
+        else
+          script = params.SMART.script_test + params.SMART.signature_test;
+        argument = scriptUtil.getTerraSmartArgument(publicKey, signData.transaction, addressIndex);
+        genTx = (signature: string) => {
+          return txUtil.getSmartTx(signData.transaction, signature, publicKey);
+        }
         break;
       default:
         throw new SDKError(this.signTERRATransaction.name, `not support input tx type`);

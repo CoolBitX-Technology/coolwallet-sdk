@@ -3,4 +3,15 @@ type GetAddress = {
     account_number: string;
 }
 
-export { GetAddress };
+type AddressBalance = {
+    denom: string;
+    amount: string;
+}
+
+type AddressDelegation = {
+    validator_address: string;
+    denom: string;
+    amount: string;
+}
+
+export { GetAddress, AddressBalance, AddressDelegation };
