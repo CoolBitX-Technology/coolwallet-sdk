@@ -3,7 +3,7 @@ import * as params from '../config/params';
 import * as stringUtil from './stringUtil';
 
 import base58 from 'bs58';
-import Message from './messageUtil';
+import Message from './Message';
 const BN = require('bn.js');
 
 export class TransferTx {

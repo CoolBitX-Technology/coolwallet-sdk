@@ -96,8 +96,7 @@ export default class Message {
             BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
             BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
           ]);
-      const length = instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
-      instructionBufferLength += length;
+      instructionBufferLength += instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
     });
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
 

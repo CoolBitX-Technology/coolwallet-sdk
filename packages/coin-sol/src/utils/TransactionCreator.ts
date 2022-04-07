@@ -29,9 +29,8 @@ export default class TransactionCreator {
   }
 
   static transferSplToken(
-    fromPubkey: types.Address,
+    signer: types.Address,
     fromTokenAccount: types.Address,
-    toPubkey: types.Address,
     toTokenAccount: types.Address,
     recentBlockhash: string,
     amount: number | string,
@@ -45,14 +44,14 @@ export default class TransactionCreator {
           accounts: [
             { pubkey: fromTokenAccount, isSigner: false, isWritable: true },
             { pubkey: toTokenAccount, isSigner: false, isWritable: true },
-            { pubkey: fromPubkey, isSigner: true, isWritable: true },
+            { pubkey: signer, isSigner: true, isWritable: true },
           ],
           programId: params.TOKEN_PROGRAM_ID,
-          data: stringUtil.splDataEncode(amount as string | number, decimalsNB),
+          data: stringUtil.splDataEncode(amount, decimalsNB),
         },
       ],
       recentBlockhash,
-      feePayer: fromPubkey,
+      feePayer: signer,
       showDecimals: decimalsNB,
     };
   }

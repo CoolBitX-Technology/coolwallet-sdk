@@ -215,7 +215,6 @@ function CoinSol(props: Props) {
         const token = new PublicKey(associateAccTx.token);
         const owner = new PublicKey(associateAccTx.owner);
         const associateAccount = await getAssociatedTokenAddr(token, owner);
-        console.log('🚀 ~ file: index.tsx ~ line 221 ~ associateAccount', associateAccount);
 
         const accountData = await connection.getAccountInfo(new PublicKey(associateAccount));
 

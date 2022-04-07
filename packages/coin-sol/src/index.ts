@@ -3,7 +3,7 @@ import { signTransaction } from './sign';
 import * as types from './config/types';
 import * as params from './config/params';
 import * as stringUtil from './utils/stringUtil';
-import TransactionCreator from './utils/txCreatorUtil';
+import TransactionCreator from './utils/TransactionCreator';
 
 export { types, TransactionCreator };
 

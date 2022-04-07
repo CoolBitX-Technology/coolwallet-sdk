@@ -1,6 +1,6 @@
 import { tx, apdu, utils } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtil';
-import { signTxType, TransactionArgs, TransferTransaction } from './config/types';
+import { signTxType } from './config/types';
 import { Transaction } from './utils/transactionUtil';
 import * as params from './config/params';
 
