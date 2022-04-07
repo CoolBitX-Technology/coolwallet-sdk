@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Transport } from '@coolwallet/core';
-import SOL from '@coolwallet/sol';
+import SOL, { TransactionCreator } from '@coolwallet/sol';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Container } from 'react-bootstrap';
 import Inputs from '../../Inputs';
@@ -27,7 +27,8 @@ function CoinSol(props: Props) {
   const [account, setAccount] = useState('');
 
   const [transaction, setTransaction] = useState({
-    to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
+    // to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
+    to: '8rzt5i6guiEgcRBgE5x5nmjPL97Ptcw76rnGTyehni7r',
     value: '0.1',
     result: '',
   });
@@ -43,6 +44,11 @@ function CoinSol(props: Props) {
     to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
     amount: '0.1',
     decimals: '9',
+    result: '',
+  });
+  const [associateAccTx, setAssociateAccTx] = useState({
+    token: 'mpRP1iZjbJm3BsTnkLPuamDbnELt6TSmtb5L1KRTUWG',
+    owner: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
     result: '',
   });
 
@@ -68,7 +74,7 @@ function CoinSol(props: Props) {
   };
 
   // for transfer spl-token
-  const getAssociatedTokenAddr = async (token: PublicKey, owner: PublicKey) => {
+  const getAssociatedTokenAddr = async (token: PublicKey, owner: PublicKey): Promise<string> => {
     const [address] = await PublicKey.findProgramAddress(
       [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), token.toBuffer()],
       ASSOCIATED_TOKEN_PROGRAM_ID
@@ -85,7 +91,7 @@ function CoinSol(props: Props) {
         const toPubkey = transaction.to;
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
-        const tx = { fromPubkey, toPubkey, recentBlockhash, amount: transaction.value };
+        const tx = TransactionCreator.transfer(fromPubkey, toPubkey, recentBlockhash, transaction.value);
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
@@ -169,16 +175,15 @@ function CoinSol(props: Props) {
 
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
-        const tx = {
-          fromPubkey: fromTokenAccount.toBase58(),
-          toPubkey: toTokenAccount.toBase58(),
+        const tx = TransactionCreator.transferSplToken(
+          account,
+          fromTokenAccount.toBase58(),
+          toAccount.toBase58(),
+          toTokenAccount.toBase58(),
           recentBlockhash,
-          amount: splTokenTransaction.amount,
-          options: {
-            owner: account,
-            decimals: splTokenTransaction.decimals,
-          },
-        };
+          splTokenTransaction.amount,
+          splTokenTransaction.decimals
+        );
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
@@ -202,6 +207,58 @@ function CoinSol(props: Props) {
       (result) => setSplTokenTransaction((prev: any) => ({ ...prev, result }))
     );
 
+  const signCreateAssociateAccount = async () => {
+    handleState(
+      async () => {
+        if (account.length < 1) throw new Error('please get account first');
+
+        const token = new PublicKey(associateAccTx.token);
+        const owner = new PublicKey(associateAccTx.owner);
+        const associateAccount = await getAssociatedTokenAddr(token, owner);
+        console.log('🚀 ~ file: index.tsx ~ line 221 ~ associateAccount', associateAccount);
+
+        const accountData = await connection.getAccountInfo(new PublicKey(associateAccount));
+
+        if (accountData) {
+          if (accountData.data.length > 0) {
+            const tokenExt = Buffer.from(accountData.data.slice(0, 32));
+            const ownerExt = Buffer.from(accountData.data.slice(32, 64));
+            if (tokenExt.equals(token.toBuffer()) && ownerExt.equals(owner.toBuffer()))
+              throw new Error('User already have associate account');
+            throw new Error('Fail to get Associate account: account owner or token is incorrect');
+          }
+          throw new Error('Fail to get Associate account: account data empty');
+        }
+
+        const tx = TransactionCreator.createAssociateAccount(
+          account,
+          owner.toString(),
+          associateAccount.toString(),
+          token.toString(),
+          (await connection.getRecentBlockhash()).blockhash
+        );
+
+        const appId = localStorage.getItem('appId');
+        if (!appId) throw new Error('No Appid stored, please register!');
+        const signedTx = await sol.signTransaction({
+          transport: transport as Transport,
+          appPrivateKey,
+          appId,
+          transaction: tx,
+        });
+
+        const recoveredTx = Transaction.from(signedTx);
+
+        const verifySig = recoveredTx.verifySignatures();
+
+        // signature need to be valid
+        if (!verifySig) throw new Error('Fail to verify signature');
+
+        return connection.sendRawTransaction(recoveredTx.serialize());
+      },
+      (result) => setAssociateAccTx((prev: any) => ({ ...prev, result }))
+    );
+  };
   return (
     // @ts-ignore
     <Container>
@@ -311,6 +368,35 @@ function CoinSol(props: Props) {
                 decimals,
               })),
             placeholder: 'decimals',
+          },
+        ]}
+      />
+      <Inputs
+        btnTitle='Sign'
+        title='Get Associate Account'
+        content={associateAccTx.result}
+        onClick={signCreateAssociateAccount}
+        disabled={disabled}
+        inputs={[
+          {
+            xs: 2,
+            value: associateAccTx.token,
+            onChange: (token: any) =>
+              setAssociateAccTx((prevState: any) => ({
+                ...prevState,
+                token,
+              })),
+            placeholder: 'token',
+          },
+          {
+            xs: 2,
+            value: associateAccTx.owner,
+            onChange: (owner: any) =>
+              setAssociateAccTx((prevState: any) => ({
+                ...prevState,
+                owner,
+              })),
+            placeholder: 'owner',
           },
         ]}
       />

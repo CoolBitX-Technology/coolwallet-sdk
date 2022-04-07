@@ -1,13 +1,15 @@
 import { Transport } from '@coolwallet/core';
 // export type Transport;
 
+export type Address = string | Buffer;
+
 /**
  * TransferTxOptions types
  * @param {owner} owner owner of from associate account when execute spl token transfer
  * @param {decimals} decimals spl token decimals
  */
 export type TransferTxOptions = {
-  owner: string | Buffer;
+  owner: Address;
   decimals?: number | string;
 };
 
@@ -20,8 +22,8 @@ export type TransferTxOptions = {
  * @param {options} TransactionOptions TransactionOptions for smart contract and spl token transfer
  */
 export type TransferTransaction = {
-  fromPubkey: string | Buffer;
-  toPubkey: string | Buffer;
+  fromPubkey: Address;
+  toPubkey: Address;
   recentBlockhash: string;
   amount: number | string;
   options?: TransferTxOptions;
@@ -34,7 +36,7 @@ export type TransferTransaction = {
  * @param {isWritable} isWritable is this account have permission to write or not ?
  */
 export type AccountMeta = {
-  pubkey: string | Buffer;
+  pubkey: Address;
   isSigner: boolean;
   isWritable: boolean;
 };
@@ -47,8 +49,8 @@ export type AccountMeta = {
  */
 export type TransactionInstruction = {
   accounts: AccountMeta[];
-  programId: string | Buffer;
-  data?: string | Buffer;
+  programId: Address;
+  data: string | Buffer;
 };
 
 /**
@@ -70,16 +72,18 @@ export type CompliedInstruction = {
  * @param {instructions} instructions list of instruction per transaction
  */
 export type TransactionArgs = {
-  feePayer: string | Buffer;
+  txType?: string;
+  feePayer: Address;
   recentBlockhash: string;
   instructions: TransactionInstruction[];
+  showDecimals?: number;
 };
 
 export type signTxType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  transaction: TransactionArgs | TransferTransaction;
+  transaction: TransactionArgs;
   confirmCB?(): void;
   authorizedCB?(): void;
 };

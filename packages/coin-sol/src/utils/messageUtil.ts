@@ -7,7 +7,9 @@ type MessageHeader = {
   numRequiredSignatures: number;
   numReadonlySignedAccounts: number;
   numReadonlyUnsignedAccounts: number;
+  numUnRequiredAccounts: number;
 };
+
 type MessageArgs = {
   header: MessageHeader;
   accountKeys: string[];
@@ -32,11 +34,12 @@ export default class Message {
     this.instructions = message.instructions;
   }
 
-  serialize(): string {
+  serialize(isPartialSerialize = true): string {
     // encode key count
     const numKeys = this.accountKeys.length;
+    const numUnRequireKeys = numKeys - this.header.numUnRequiredAccounts;
     let keyCount: number[] = [];
-    encodeLength(keyCount, numKeys);
+    encodeLength(keyCount, numUnRequireKeys);
 
     // extract input instructions to serialize instructions
     const instructions = this.instructions.map((instruction) => {
@@ -64,48 +67,70 @@ export default class Message {
 
     // encode instruction
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
-    Buffer.from(instructionCount).copy(instructionBuffer);
-    let instructionBufferLength = instructionCount.length;
+    if (!isPartialSerialize) Buffer.from(instructionCount).copy(instructionBuffer);
+    let instructionBufferLength = isPartialSerialize ? 0 : instructionCount.length;
 
     instructions.forEach((instruction) => {
-      const instructionLayout = BufferLayout.struct<
-        Readonly<{
-          data: number[];
-          dataLength: Uint8Array;
-          keyIndices: number[];
-          keyIndicesCount: Uint8Array;
-          programIdIndex: number;
-        }>
-      >([
-        BufferLayout.u8('programIdIndex'),
-        BufferLayout.blob(instruction.keyIndicesCount.length, 'keyIndicesCount'),
-        BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
-        BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
-        BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
-      ]);
+      const instructionLayout = isPartialSerialize
+        ? BufferLayout.struct<
+            Readonly<{
+              data: number[];
+              dataLength: Uint8Array;
+            }>
+          >([
+            BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
+            BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
+          ])
+        : BufferLayout.struct<
+            Readonly<{
+              data: number[];
+              dataLength: Uint8Array;
+              keyIndices: number[];
+              keyIndicesCount: Uint8Array;
+              programIdIndex: number;
+            }>
+          >([
+            BufferLayout.u8('programIdIndex'),
+            BufferLayout.blob(instruction.keyIndicesCount.length, 'keyIndicesCount'),
+            BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
+            BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
+            BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
+          ]);
       const length = instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
       instructionBufferLength += length;
     });
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
 
     // encode sign data
-    const signDataLayout = BufferLayout.struct<
-      Readonly<{
-        keyCount: Uint8Array;
-        keys: Uint8Array[];
-        numReadonlySignedAccounts: Uint8Array;
-        numReadonlyUnsignedAccounts: Uint8Array;
-        numRequiredSignatures: Uint8Array;
-        recentBlockhash: Uint8Array;
-      }>
-    >([
-      BufferLayout.blob(1, 'numRequiredSignatures'),
-      BufferLayout.blob(1, 'numReadonlySignedAccounts'),
-      BufferLayout.blob(1, 'numReadonlyUnsignedAccounts'),
-      BufferLayout.blob(keyCount.length, 'keyCount'),
-      BufferLayout.seq(publicKey('key'), numKeys, 'keys'),
-      publicKey('recentBlockhash'),
-    ]);
+    const signDataLayout = isPartialSerialize
+      ? BufferLayout.struct<
+          Readonly<{
+            keyCount: Uint8Array;
+            keys: Uint8Array[];
+            recentBlockhash: Uint8Array;
+          }>
+        >([
+          BufferLayout.blob(keyCount.length, 'keyCount'),
+          BufferLayout.seq(publicKey('key'), numKeys, 'keys'),
+          publicKey('recentBlockhash'),
+        ])
+      : BufferLayout.struct<
+          Readonly<{
+            keyCount: Uint8Array;
+            keys: Uint8Array[];
+            numReadonlySignedAccounts: Uint8Array;
+            numReadonlyUnsignedAccounts: Uint8Array;
+            numRequiredSignatures: Uint8Array;
+            recentBlockhash: Uint8Array;
+          }>
+        >([
+          BufferLayout.blob(1, 'numRequiredSignatures'),
+          BufferLayout.blob(1, 'numReadonlySignedAccounts'),
+          BufferLayout.blob(1, 'numReadonlyUnsignedAccounts'),
+          BufferLayout.blob(keyCount.length, 'keyCount'),
+          BufferLayout.seq(publicKey('key'), numKeys, 'keys'),
+          publicKey('recentBlockhash'),
+        ]);
     const transaction = {
       numRequiredSignatures: Buffer.from([this.header.numRequiredSignatures]),
       numReadonlySignedAccounts: Buffer.from([this.header.numReadonlySignedAccounts]),

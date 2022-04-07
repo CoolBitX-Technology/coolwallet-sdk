@@ -3,8 +3,9 @@ import { signTransaction } from './sign';
 import * as types from './config/types';
 import * as params from './config/params';
 import * as stringUtil from './utils/stringUtil';
+import TransactionCreator from './utils/txCreatorUtil';
 
-export { types };
+export { types, TransactionCreator };
 
 export default class SOL extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
@@ -26,10 +27,13 @@ export default class SOL extends COIN.EDDSACoin implements COIN.Coin {
 
   async signTransaction(signTxData: types.signTxType): Promise<Buffer> {
     const { transaction } = signTxData;
-    if ((transaction as types.TransactionArgs).instructions)
-      return signTransaction(signTxData, params.TRANSACTION_TYPE.SMART_CONTRACT);
-    if ((transaction as types.TransferTransaction).options)
-      return signTransaction(signTxData, params.TRANSACTION_TYPE.SPL_TOKEN);
-    return signTransaction(signTxData, params.TRANSACTION_TYPE.TRANSFER);
+    switch (transaction.txType) {
+      case params.TRANSACTION_TYPE.SPL_TOKEN:
+        return signTransaction(signTxData, params.TRANSACTION_TYPE.SPL_TOKEN);
+      case params.TRANSACTION_TYPE.TRANSFER:
+        return signTransaction(signTxData, params.TRANSACTION_TYPE.TRANSFER);
+      default:
+        return signTransaction(signTxData, params.TRANSACTION_TYPE.SMART_CONTRACT);
+    }
   }
 }

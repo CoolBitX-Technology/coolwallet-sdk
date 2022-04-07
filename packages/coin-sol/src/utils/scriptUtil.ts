@@ -7,11 +7,14 @@ import { Transaction, TransferTx } from './transactionUtil';
  * @param {TransferTx} TransferTx transaction with extracted fields from a regular sol transaction
  * @returns {Promise<string>}
  */
-export const getTransferArguments = async (rawTx: Transaction | TransferTx): Promise<string> => {
+export const getTransferArguments = async (
+  rawTx: Transaction | TransferTx,
+  isPartialArgs: boolean
+): Promise<string> => {
   const pathType = config.PathType.SLIP0010;
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
   const SEPath = `0D${path}`;
   console.debug('SEPath: ', SEPath);
 
-  return SEPath + rawTx.serializeArgument();
+  return SEPath + rawTx.serializeArgument(isPartialArgs);
 };

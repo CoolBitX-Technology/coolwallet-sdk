@@ -53,7 +53,7 @@ export class TransferTx {
     this.data = rawTx.data;
   }
 
-  transferDataEncode(amount: number | string, decimals: number = 9): string {
+  transferDataEncode(amount: number | string): string {
     const data = Buffer.alloc(12);
     const programIdIndexSpan = 4;
     data.writeUIntLE(2, 0, programIdIndexSpan);
@@ -84,7 +84,7 @@ export class TransferTx {
 
     data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
     this.data = data.toString('hex');
-    return data.toString('hex');
+    return decimals.toString(16) + data.toString('hex');
   }
 
   serialize(signature: string): string {
@@ -118,71 +118,6 @@ export class TransferTx {
     return this.keyCount + this.keys.join('') + this.recentBlockHash + this.dataLength + this.data;
   }
 }
-
-export function formTransferTx(transaction: types.TransferTransaction, signature?: string): TransferTx {
-  const { fromPubkey, toPubkey, recentBlockhash, amount, options } = transaction;
-
-  const fromAddress = stringUtil.formHex(fromPubkey);
-  const isTransferSelf = fromAddress === stringUtil.formHex(toPubkey);
-  const toAddress = isTransferSelf ? ''.padStart(64, '0') : stringUtil.formHex(toPubkey);
-
-  const keys = [fromAddress, toAddress, stringUtil.formHex(params.SYSTEM_PROGRAM_ID)];
-
-  const recentBH = base58.decode(recentBlockhash).toString('hex');
-
-  const rawTx = new TransferTx({
-    signature,
-    numberRequireSignature: '01',
-    numberReadonlySignedAccount: '00',
-    numberReadonlyUnSignedAccount: '01',
-    keyCount: '03',
-    keys,
-    recentBlockHash: recentBH,
-    instructionCount: '01',
-    programIdIndex: '02',
-    keyIndicesCount: '02',
-    keyIndices: '0001',
-    dataLength: '',
-    data: '',
-  });
-
-  if (options) {
-    rawTx.keys = [
-      stringUtil.formHex(options.owner),
-      toAddress,
-      fromAddress,
-      stringUtil.formHex(params.TOKEN_PROGRAM_ID),
-    ];
-    if (isTransferSelf) {
-      rawTx.keyCount = '03';
-      rawTx.programIdIndex = '02';
-      rawTx.keyIndicesCount = '03';
-      rawTx.keyIndices = '010100';
-    } else {
-      rawTx.keyCount = '04';
-      rawTx.programIdIndex = '03';
-      rawTx.keyIndicesCount = '03';
-      rawTx.keyIndices = '020100';
-    }
-    rawTx.splDataEncode(amount as string | number, Number(options.decimals || 9));
-  } else {
-    if (isTransferSelf) {
-      rawTx.keyCount = '02';
-      rawTx.programIdIndex = '01';
-      rawTx.keyIndicesCount = '02';
-      rawTx.keyIndices = '0000';
-    }
-    rawTx.transferDataEncode(amount as string | number);
-  }
-
-  let dataCount: number[] = [];
-  stringUtil.encodeLength(dataCount, rawTx.data.length / 2);
-
-  rawTx.dataLength = stringUtil.numberToStringHex(dataCount, 2);
-
-  return rawTx;
-}
-
 export class Transaction {
   feePayer: string | Buffer;
   recentBlockhash: string;
@@ -202,13 +137,13 @@ export class Transaction {
   }
   serialize(signature: string): string {
     this.signature = signature;
-    return '01' + this.signature + this.serializeArgument();
+    return '01' + this.signature + this.serializeArgument(false);
   }
-  serializeArgument(): string {
-    return this.complieMessage().serialize();
+  serializeArgument(isPartialSerialize = true): string {
+    return this.complieMessage(isPartialSerialize).serialize(isPartialSerialize);
   }
 
-  complieMessage(): Message {
+  complieMessage(isPartialCompile = false): Message {
     const { recentBlockhash, feePayer } = this;
     if (!recentBlockhash) {
       throw new Error('Transaction recentBlockhash required');
@@ -245,13 +180,16 @@ export class Transaction {
     });
 
     // Sort. Prioritizing first by signer, then by writable
-    accountMetas.sort((cur, next) => {
-      const pubkeySorting = (cur.pubkey as string) === (next.pubkey as string) ? 1 : 0;
-      const checkSigner = cur.isSigner === next.isSigner ? 0 : cur.isSigner ? -1 : 1;
-      const checkWritable = cur.isWritable === next.isWritable ? pubkeySorting : cur.isWritable ? -1 : 1;
+    accountMetas.sort((x, y) => {
+      const xBs58 = base58.encode(Buffer.from(x.pubkey as string, 'hex'));
+      const yBs58 = base58.encode(Buffer.from(y.pubkey as string, 'hex'));
+      const pubkeySorting = xBs58.localeCompare(yBs58);
+      const checkSigner = x.isSigner === y.isSigner ? 0 : x.isSigner ? -1 : 1;
+      const checkWritable = x.isWritable === y.isWritable ? pubkeySorting : x.isWritable ? -1 : 1;
       return checkSigner || checkWritable;
     });
 
+    let numUnRequiredAccounts = 0;
     // Cull duplicate account metas
     const uniqueMetas: types.AccountMeta[] = [];
     accountMetas.forEach((accountMeta) => {
@@ -259,7 +197,10 @@ export class Transaction {
         return e.pubkey === (accountMeta.pubkey as string);
       });
       if (uniqueIndex > -1) {
-        uniqueMetas[uniqueIndex].isWritable = uniqueMetas[uniqueIndex].isWritable || accountMeta.isWritable;
+        if (isPartialCompile) {
+          uniqueMetas.push({ ...accountMeta, pubkey: '' });
+          numUnRequiredAccounts += 1;
+        } else uniqueMetas[uniqueIndex].isWritable = uniqueMetas[uniqueIndex].isWritable || accountMeta.isWritable;
       } else {
         uniqueMetas.push(accountMeta);
       }
@@ -297,6 +238,9 @@ export class Transaction {
         if (!isWritable) {
           numReadonlySignedAccounts += 1;
         }
+      } else if (isPartialCompile) {
+        const pubkeyStr = pubkey.toString();
+        unsignedKeys.push(pubkeyStr.length < 1 ? ''.padStart(64, '0') : pubkeyStr);
       } else {
         unsignedKeys.push(pubkey.toString());
         if (!isWritable) {
@@ -327,6 +271,7 @@ export class Transaction {
         numRequiredSignatures,
         numReadonlySignedAccounts,
         numReadonlyUnsignedAccounts,
+        numUnRequiredAccounts,
       },
       accountKeys,
       recentBlockhash: this.recentBlockhash,
