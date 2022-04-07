@@ -41,7 +41,7 @@ function CoinTheta(props: Props) {
 
   // Address
   const [addressIndex, setAddressIndex] = useState(0);
-  const [address, setAddress] = useState('0x2E833968E5bB786Ae419c4d13189fB081Cc43bab');
+  const [address, setAddress] = useState('');
 
   // APIs
   const [accountInfo, setAccountInfo] = useState('');
@@ -93,7 +93,33 @@ function CoinTheta(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      return coin.getAddress(transport!, appPrivateKey, appId, addressIndex);
+      const addr = await coin.getAddress(transport!, appPrivateKey, appId, addressIndex);
+
+      const tempSendArgs = [...sendArgs];
+      tempSendArgs[3] = addr;
+      setSendArgs(tempSendArgs);
+
+      const tempStakeValidatorArgs = [...stakeValidatorArgs];
+      tempStakeValidatorArgs[2] = addr;
+      setStakeValidatorArgs(tempStakeValidatorArgs);
+
+      const tempStakeGuardianArgs = [...stakeGuardianArgs];
+      tempStakeGuardianArgs[2] = addr;
+      setStakeGuardianArgs(tempStakeGuardianArgs);
+
+      const tempStakeEdgeArgs = [...stakeEdgeArgs];
+      tempStakeEdgeArgs[2] = addr;
+      setStakeEdgeArgs(tempStakeEdgeArgs);
+
+      const tempWithdrawArgs = [...withdrawArgs];
+      tempWithdrawArgs[2] = addr;
+      setWithdrawArgs(tempWithdrawArgs);
+
+      const tempSmartArgs = [...smartArgs];
+      tempSmartArgs[2] = addr;
+      setSmartArgs(tempSmartArgs);
+
+      return addr;
     }, setAddress);
   };
 
@@ -105,6 +131,33 @@ function CoinTheta(props: Props) {
       const { thetawei, tfuelwei } = account.coins;
       const theta = new BigNumber(thetawei).shiftedBy(-18).toFixed();
       const tfuel = new BigNumber(tfuelwei).shiftedBy(-18).toFixed();
+
+      const usingSequence = (parseInt(sequence) + 1).toString();
+
+      const tempSendArgs = [...sendArgs];
+      tempSendArgs[2] = usingSequence;
+      setSendArgs(tempSendArgs);
+
+      const tempStakeValidatorArgs = [...stakeValidatorArgs];
+      tempStakeValidatorArgs[1] = usingSequence;
+      setStakeValidatorArgs(tempStakeValidatorArgs);
+
+      const tempStakeGuardianArgs = [...stakeGuardianArgs];
+      tempStakeGuardianArgs[1] = usingSequence;
+      setStakeGuardianArgs(tempStakeGuardianArgs);
+
+      const tempStakeEdgeArgs = [...stakeEdgeArgs];
+      tempStakeEdgeArgs[1] = usingSequence;
+      setStakeEdgeArgs(tempStakeEdgeArgs);
+
+      const tempWithdrawArgs = [...withdrawArgs];
+      tempWithdrawArgs[1] = usingSequence;
+      setWithdrawArgs(tempWithdrawArgs);
+
+      const tempSmartArgs = [...smartArgs];
+      tempSmartArgs[1] = usingSequence;
+      setSmartArgs(tempSmartArgs);
+
       return `sequence=${sequence}, theta=${theta}, tfuel=${tfuel}`;
     }, setAccountInfo);
   };
@@ -237,14 +290,14 @@ function CoinTheta(props: Props) {
         btnName='Get'
       />
       <NoInput
-        title='Guardian Nodes'
+        title='Guardian Nodes for Staking'
         content={guardianNodes}
         onClick={getGuardianNodes}
         disabled={disabled}
         btnName='Get'
       />
       <OneInput
-        title='Get Gas Used'
+        title='Get Gas Used for Smart Transaction'
         content={gasUsed}
         onClick={getGasUsed}
         disabled={disabled}

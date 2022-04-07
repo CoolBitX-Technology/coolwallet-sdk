@@ -27,6 +27,7 @@ async function post(url: string, method: string, params: any, additionalHeaders?
   const response = await fetch(url, options);
   if (!response.ok) throw new Error(await response.text());
   const { result, error } = await response.json();
+  console.log('api result :', result);
   if (error) throw new Error(error.message);
   return result;
 }
@@ -52,7 +53,8 @@ export async function callSmartContract(sctx_bytes: string) {
 
 // https://docs.thetatoken.org/docs/rpc-api-reference#broadcastrawtransactionasync
 export async function broadcastTx(tx_bytes: string) {
-  return post(rpcUrl, "theta.BroadcastRawTransactionAsync", [{tx_bytes}]);
+  const { hash } = await post(rpcUrl, "theta.BroadcastRawTransactionAsync", [{tx_bytes}]);
+  return hash;
 }
 
 export async function sendEvmTx(tx_bytes: string) {
