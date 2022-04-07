@@ -9,499 +9,496 @@ const createKeccakHash = require('keccak');
 const rlp = require('rlp');
 const Ajv = require('ajv');
 
-import { Transaction, handleHex, getRawTx, hexToBuffer, removeHex0x, asciiToHex } from './utils';
+import { Transaction, Erc20Transaction, handleHex, getRawTx, hexToBuffer, removeHex0x, asciiToHex } from './utils';
 
 export default class AVAXC implements COIN.Coin {
-	getPublicKey = async (
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		addressIndex: number
-	): Promise<string> => {
-		const path = utils.getFullPath({
-			pathType: config.PathType.BIP32,
-			pathString: `44'/${params.PathString}'/0'`,
-		});
+  getPublicKey = async (
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number
+  ): Promise<string> => {
+    const path = utils.getFullPath({
+      pathType: config.PathType.BIP32,
+      pathString: `44'/${params.PathString}'/0'`,
+    });
 
-		const accExtKey = await COIN.getPublicKeyByPath(transport, appId, appPrivateKey, path);
+    const accExtKey = await COIN.getPublicKeyByPath(transport, appId, appPrivateKey, path);
 
-		const accExtKeyBuf = Buffer.from(accExtKey, 'hex');
-		const accPublicKey = accExtKeyBuf.slice(0, 33);
-		const accChainCode = accExtKeyBuf.slice(33);
+    const accExtKeyBuf = Buffer.from(accExtKey, 'hex');
+    const accPublicKey = accExtKeyBuf.slice(0, 33);
+    const accChainCode = accExtKeyBuf.slice(33);
 
-		const accNode = bip32.fromPublicKey(accPublicKey, accChainCode);
-		const changeNode = accNode.derive(0);
-		const addressNode = changeNode.derive(addressIndex);
-		const publicKey = addressNode.publicKey.toString('hex');
-		return publicKey;
-	};
+    const accNode = bip32.fromPublicKey(accPublicKey, accChainCode);
+    const changeNode = accNode.derive(0);
+    const addressNode = changeNode.derive(addressIndex);
+    const publicKey = addressNode.publicKey.toString('hex');
+    return publicKey;
+  };
 
-	getAddress = async (
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		addressIndex: number
-	): Promise<string> => {
-		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+  getAddress = async (
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number
+  ): Promise<string> => {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-		const uncompressedKey = ec.keyFromPublic(publicKey, 'hex').getPublic(false, 'hex');
+    const uncompressedKey = ec.keyFromPublic(publicKey, 'hex').getPublic(false, 'hex');
 
-		const keyBuffer = Buffer.from(uncompressedKey.substr(2), 'hex');
+    const keyBuffer = Buffer.from(uncompressedKey.substr(2), 'hex');
 
-		const keyHash = createKeccakHash('keccak256').update(keyBuffer).digest('hex');
+    const keyHash = createKeccakHash('keccak256').update(keyBuffer).digest('hex');
 
-		const address = '0x'.concat(keyHash.substr(-40));
+    const address = '0x'.concat(keyHash.substr(-40));
 
-		return address;
-	};
+    return address;
+  };
 
-	signTransaction = async (
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		addressIndex: number,
-		transaction: Transaction
-	): Promise<string> => {
-		await apdu.tx.sendScript(transport, params.Transfer.script + params.Transfer.signature);
+  signTransaction = async (
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number,
+    transaction: Transaction
+  ): Promise<string> => {
+    await apdu.tx.sendScript(transport, params.Transfer.script + params.Transfer.signature);
 
-		const path = await utils.getFullPath({
-			pathType: config.PathType.BIP32,
-			pathString: `44'/${params.PathString}'/0'/0/0`,
-		});
+    const path = await utils.getFullPath({
+      pathType: config.PathType.BIP32,
+      pathString: `44'/${params.PathString}'/0'/0/0`,
+    });
 
-		const argument =
-			'15' +
-			path +
-			handleHex(transaction.to) +
-			handleHex(transaction.value).padStart(20, '0') +
-			handleHex(transaction.gasPrice).padStart(20, '0') +
-			handleHex(transaction.gasLimit).padStart(20, '0') +
-			handleHex(transaction.nonce).padStart(16, '0') +
-			handleHex(params.ChainId.toString(16)).padStart(4, '0') +
-			handleHex(transaction.data);
+    const argument =
+      '15' +
+      path +
+      handleHex(transaction.to) +
+      handleHex(transaction.value).padStart(20, '0') +
+      handleHex(transaction.gasPrice).padStart(20, '0') +
+      handleHex(transaction.gasLimit).padStart(20, '0') +
+      handleHex(transaction.nonce).padStart(16, '0') +
+      handleHex(params.ChainId.toString(16)).padStart(4, '0') +
+      handleHex(transaction.data);
 
-		const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
-		await apdu.tx.finishPrepare(transport);
+    await apdu.tx.finishPrepare(transport);
 
-		await apdu.tx.getTxDetail(transport);
+    await apdu.tx.getTxDetail(transport);
 
-		const decryptingKey = await apdu.tx.getSignatureKey(transport);
+    const decryptingKey = await apdu.tx.getSignatureKey(transport);
 
-		await apdu.tx.clearTransaction(transport);
+    await apdu.tx.clearTransaction(transport);
 
-		await apdu.mcu.control.powerOff(transport);
+    await apdu.mcu.control.powerOff(transport);
 
-		const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
 
-		const { signedTx } = await apdu.tx.getSignedHex(transport);
+    const { signedTx } = await apdu.tx.getSignedHex(transport);
 
-		const rawTx = getRawTx(transaction);
+    const rawTx = getRawTx(transaction);
 
-		const rawData = Buffer.from(rlp.encode(rawTx));
+    const rawData = Buffer.from(rlp.encode(rawTx));
 
-		if (rawData.toString('hex') !== signedTx) {
-			throw new Error('unexpected transaction format!');
-		}
+    if (rawData.toString('hex') !== signedTx) {
+      throw new Error('unexpected transaction format!');
+    }
 
-		const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
+    const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
 
-		const data = Buffer.from(handleHex(hash), 'hex');
+    const data = Buffer.from(handleHex(hash), 'hex');
 
-		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-		const keyPair = ec.keyFromPublic(publicKey, 'hex');
+    const keyPair = ec.keyFromPublic(publicKey, 'hex');
 
-		const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
+    const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
 
-		const v = recoveryParam + 27;
-		const { r, s } = sig as { r: string; s: string };
+    const v = recoveryParam + 27;
+    const { r, s } = sig as { r: string; s: string };
 
-		let vValue = v + params.ChainId * 2 + 8;
+    let vValue = v + params.ChainId * 2 + 8;
 
-		vValue = vValue.toString(16).padStart(6, '0');
+    vValue = vValue.toString(16).padStart(6, '0');
 
-		const signedTransaction = rawTx.slice(0, 6);
+    const signedTransaction = rawTx.slice(0, 6);
 
-		signedTransaction.push(Buffer.from(vValue, 'hex'), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
-		const serializedTx = Buffer.from(rlp.encode(signedTransaction));
+    signedTransaction.push(Buffer.from(vValue, 'hex'), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
+    const serializedTx = Buffer.from(rlp.encode(signedTransaction));
 
-		return `0x${serializedTx.toString('hex')}`;
-	};
+    return `0x${serializedTx.toString('hex')}`;
+  };
 
-	signERC20Transaction = async (
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		addressIndex: number,
-		transaction: Transaction
-	): Promise<string> => {
+  signERC20Transaction = async (
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number,
+    transaction: Erc20Transaction
+  ): Promise<string> => {
+    const upperCaseAddress = `${transaction.to}`.toUpperCase();
 
+    let token = {
+      contractAddress: upperCaseAddress,
+      symbol: transaction.symbol,
+      decimals: transaction.decimals,
+      signature: '',
+    };
 
-		let token = {
-			contractAddress: '',
-			symbol: '',
-			decimals: '',
-			signature: '',
-		}
+    for (const tokenInfo of params.Token) {
+      if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
+        token = tokenInfo;
+      }
+    }
+    if (token.symbol.length == 0) {
+      throw new Error('unexpected transaction format!');
+    }
 
+    await apdu.tx.sendScript(transport, params.Erc20.script + params.Erc20.signature);
 
-		const upperCaseAddress = `${transaction.to}`.toUpperCase();
-		for (const tokenInfo of params.Token) {
-			if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
-				token = tokenInfo;
-			}
-		}
-		if (token.symbol.length == 0) {
-			throw new Error('unexpected transaction format!');
-		}
+    const path = await utils.getFullPath({
+      pathType: config.PathType.BIP32,
+      pathString: `44'/${params.PathString}'/0'/0/0`,
+    });
 
+    let symbol = token.symbol;
+    const decimals = parseInt(token.decimals);
 
-		await apdu.tx.sendScript(transport, params.Erc20.script + params.Erc20.signature);
+    const unit = handleHex(decimals.toString(16));
+    if (symbol.length > 7) {
+      symbol = symbol.substring(0, 7);
+    }
+    const len = handleHex(symbol.length.toString(16));
+    const symb = handleHex(asciiToHex(symbol));
+    const tokenInfo = unit + len + symb.padEnd(14, '0') + removeHex0x(transaction.to);
 
-		const path = await utils.getFullPath({
-			pathType: config.PathType.BIP32,
-			pathString: `44'/${params.PathString}'/0'/0/0`,
-		});
+    const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, '');
+    const amount = transaction.data.slice(74).replace(/\b(0+)/gi, '');
 
-		let symbol = token.symbol;
-		const decimals = parseInt(token.decimals);
+    const tokenSignature = token.signature;
 
-		const unit = handleHex(decimals.toString(16));
-		if (symbol.length > 7) {
-			symbol = symbol.substring(0, 7);
-		}
-		const len = handleHex(symbol.length.toString(16));
-		const symb = handleHex(asciiToHex(symbol));
-		const tokenInfo = unit + len + symb.padEnd(14, '0') + removeHex0x(transaction.to);
+    const argument =
+      '15' +
+      path +
+      handleHex(toAddress).padStart(40, '0') +
+      handleHex(amount).padStart(24, '0') +
+      handleHex(transaction.gasPrice).padStart(20, '0') +
+      handleHex(transaction.gasLimit).padStart(20, '0') +
+      handleHex(transaction.nonce).padStart(16, '0') +
+      handleHex(params.ChainId.toString(16)).padStart(4, '0') +
+      tokenInfo +
+      tokenSignature.slice(58).padStart(144, '0');
 
-		const toAddress = transaction.data.slice(10, 74).replace(/\b(0+)/gi, '');
-		const amount = transaction.data.slice(74).replace(/\b(0+)/gi, '');
+    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
-		const tokenSignature = token.signature;
+    await apdu.tx.finishPrepare(transport);
 
-		const argument =
-			'15' +
-			path +
-			handleHex(toAddress).padStart(40, '0') +
-			handleHex(amount).padStart(24, '0') +
-			handleHex(transaction.gasPrice).padStart(20, '0') +
-			handleHex(transaction.gasLimit).padStart(20, '0') +
-			handleHex(transaction.nonce).padStart(16, '0') +
-			handleHex(params.ChainId.toString(16)).padStart(4, '0') +
-			tokenInfo +
-			tokenSignature.slice(58).padStart(144, '0');
+    await apdu.tx.getTxDetail(transport);
 
-		const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    const decryptingKey = await apdu.tx.getSignatureKey(transport);
 
-		await apdu.tx.finishPrepare(transport);
+    await apdu.tx.clearTransaction(transport);
 
-		await apdu.tx.getTxDetail(transport);
+    await apdu.mcu.control.powerOff(transport);
 
-		const decryptingKey = await apdu.tx.getSignatureKey(transport);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
 
-		await apdu.tx.clearTransaction(transport);
+    const { signedTx } = await apdu.tx.getSignedHex(transport);
 
-		await apdu.mcu.control.powerOff(transport);
+    const rawTx = getRawTx(transaction);
 
-		const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const rawData = Buffer.from(rlp.encode(rawTx));
 
-		const { signedTx } = await apdu.tx.getSignedHex(transport);
+    if (rawData.toString('hex') !== signedTx) {
+      throw new Error('unexpected transaction format!');
+    }
 
-		const rawTx = getRawTx(transaction);
+    const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
 
-		const rawData = Buffer.from(rlp.encode(rawTx));
+    const data = Buffer.from(handleHex(hash), 'hex');
 
-		if (rawData.toString('hex') !== signedTx) {
-			throw new Error('unexpected transaction format!');
-		}
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-		const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
+    const keyPair = ec.keyFromPublic(publicKey, 'hex');
 
-		const data = Buffer.from(handleHex(hash), 'hex');
+    const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
 
-		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const v = recoveryParam + 27;
+    const { r, s } = sig as { r: string; s: string };
 
-		const keyPair = ec.keyFromPublic(publicKey, 'hex');
+    let vValue = v + params.ChainId * 2 + 8;
 
-		const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
+    vValue = vValue.toString(16).padStart(6, '0');
 
-		const v = recoveryParam + 27;
-		const { r, s } = sig as { r: string; s: string };
+    const signedTransaction = rawTx.slice(0, 6);
 
-		let vValue = v + params.ChainId * 2 + 8;
+    signedTransaction.push(Buffer.from(vValue, 'hex'), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
+    const serializedTx = Buffer.from(rlp.encode(signedTransaction));
+    return `0x${serializedTx.toString('hex')}`;
+  };
 
-		vValue = vValue.toString(16).padStart(6, '0');
+  signSmartContractTransaction = async (
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number,
+    transaction: Transaction
+  ): Promise<string> => {
+    const path = await utils.getFullPath({
+      pathType: config.PathType.BIP32,
+      pathString: `44'/${params.PathString}'/0'/0/0`,
+    });
 
-		const signedTransaction = rawTx.slice(0, 6);
+    let scriptWithSignature = '';
+    let argument = '';
 
-		signedTransaction.push(Buffer.from(vValue, 'hex'), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
-		const serializedTx = Buffer.from(rlp.encode(signedTransaction));
-		return `0x${serializedTx.toString('hex')}`;
-	};
+    if (transaction.data.length > 8000) {
+      scriptWithSignature = params.SmartContractSegment.script + params.SmartContractSegment.signature;
 
-	signSmartContractTransaction = async (
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		addressIndex: number,
-		transaction: Transaction
-	): Promise<string> => {
-		const path = await utils.getFullPath({
-			pathType: config.PathType.BIP32,
-			pathString: `44'/${params.PathString}'/0'/0/0`,
-		});
+      argument =
+        '15' +
+        path +
+        handleHex(transaction.to) +
+        handleHex(transaction.value).padStart(20, '0') +
+        handleHex(transaction.gasPrice).padStart(20, '0') +
+        handleHex(transaction.gasLimit).padStart(20, '0') +
+        handleHex(transaction.nonce).padStart(16, '0') +
+        (handleHex(transaction.data).length / 2).toString(16).padStart(8, '0');
+    } else {
+      scriptWithSignature = params.SmartContract.script + params.SmartContract.signature;
 
-		let scriptWithSignature = '';
-		let argument = '';
+      argument =
+        '15' +
+        path +
+        handleHex(transaction.to) +
+        handleHex(transaction.value).padStart(20, '0') +
+        handleHex(transaction.gasPrice).padStart(20, '0') +
+        handleHex(transaction.gasLimit).padStart(20, '0') +
+        handleHex(transaction.nonce).padStart(16, '0') +
+        handleHex(params.ChainId.toString(16)).padStart(4, '0') +
+        handleHex(transaction.data);
+    }
 
-		if (transaction.data.length > 8000) {
-			scriptWithSignature = params.SmartContractSegment.script + params.SmartContractSegment.signature;
+    await apdu.tx.sendScript(transport, scriptWithSignature);
 
-			argument =
-				'15' +
-				path +
-				handleHex(transaction.to) +
-				handleHex(transaction.value).padStart(20, '0') +
-				handleHex(transaction.gasPrice).padStart(20, '0') +
-				handleHex(transaction.gasLimit).padStart(20, '0') +
-				handleHex(transaction.nonce).padStart(16, '0') +
-				(handleHex(transaction.data).length / 2).toString(16).padStart(8, '0');
-		} else {
-			scriptWithSignature = params.SmartContract.script + params.SmartContract.signature;
+    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
-			argument =
-				'15' +
-				path +
-				handleHex(transaction.to) +
-				handleHex(transaction.value).padStart(20, '0') +
-				handleHex(transaction.gasPrice).padStart(20, '0') +
-				handleHex(transaction.gasLimit).padStart(20, '0') +
-				handleHex(transaction.nonce).padStart(16, '0') +
-				handleHex(params.ChainId.toString(16)).padStart(4, '0') +
-				handleHex(transaction.data);
-		}
+    await apdu.tx.finishPrepare(transport);
 
-		await apdu.tx.sendScript(transport, scriptWithSignature);
+    await apdu.tx.getTxDetail(transport);
 
-		const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    const decryptingKey = await apdu.tx.getSignatureKey(transport);
 
-		await apdu.tx.finishPrepare(transport);
+    await apdu.tx.clearTransaction(transport);
 
-		await apdu.tx.getTxDetail(transport);
+    await apdu.mcu.control.powerOff(transport);
 
-		const decryptingKey = await apdu.tx.getSignatureKey(transport);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
 
-		await apdu.tx.clearTransaction(transport);
+    const { signedTx } = await apdu.tx.getSignedHex(transport);
 
-		await apdu.mcu.control.powerOff(transport);
+    const rawTx = getRawTx(transaction);
 
-		const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const rawData = Buffer.from(rlp.encode(rawTx));
 
-		const { signedTx } = await apdu.tx.getSignedHex(transport);
+    if (rawData.toString('hex') !== signedTx) {
+      throw new Error('unexpected transaction format!');
+    }
 
-		const rawTx = getRawTx(transaction);
+    const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
 
-		const rawData = Buffer.from(rlp.encode(rawTx));
+    const data = Buffer.from(handleHex(hash), 'hex');
 
-		if (rawData.toString('hex') !== signedTx) {
-			throw new Error('unexpected transaction format!');
-		}
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-		const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
+    const keyPair = ec.keyFromPublic(publicKey, 'hex');
 
-		const data = Buffer.from(handleHex(hash), 'hex');
+    const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
 
-		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const v = recoveryParam + 27;
+    const { r, s } = sig as { r: string; s: string };
 
-		const keyPair = ec.keyFromPublic(publicKey, 'hex');
+    let vValue = v + params.ChainId * 2 + 8;
 
-		const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
+    vValue = vValue.toString(16).padStart(6, '0');
 
-		const v = recoveryParam + 27;
-		const { r, s } = sig as { r: string; s: string };
+    const signedTransaction = rawTx.slice(0, 6);
 
-		let vValue = v + params.ChainId * 2 + 8;
+    signedTransaction.push(Buffer.from(vValue, 'hex'), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
+    const serializedTx = Buffer.from(rlp.encode(signedTransaction));
 
-		vValue = vValue.toString(16).padStart(6, '0');
+    return `0x${serializedTx.toString('hex')}`;
+  };
 
-		const signedTransaction = rawTx.slice(0, 6);
+  signMessage = async (
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number,
+    message: string
+  ): Promise<string> => {
+    await setting.auth.versionCheck(transport, 81);
 
-		signedTransaction.push(Buffer.from(vValue, 'hex'), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
-		const serializedTx = Buffer.from(rlp.encode(signedTransaction));
+    await apdu.tx.sendScript(transport, params.Message.script + params.Message.signature);
 
-		return `0x${serializedTx.toString('hex')}`;
-	};
+    const msgHex = handleHex(message);
 
-	signMessage = async (
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		addressIndex: number,
-		message: string
-	): Promise<string> => {
-		await setting.auth.versionCheck(transport, 81);
+    const path = await utils.getFullPath({
+      pathType: config.PathType.BIP32,
+      pathString: `44'/${params.PathString}'/0'/0/0`,
+    });
 
-		await apdu.tx.sendScript(transport, params.Message.script + params.Message.signature);
+    const argument = '15' + path + Buffer.from((msgHex.length / 2).toString()).toString('hex') + msgHex;
 
-		const msgHex = handleHex(message);
+    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
-		const path = await utils.getFullPath({
-			pathType: config.PathType.BIP32,
-			pathString: `44'/${params.PathString}'/0'/0/0`,
-		});
+    await apdu.tx.finishPrepare(transport);
 
-		const argument = '15' + path + Buffer.from((msgHex.length / 2).toString()).toString('hex') + msgHex;
+    await apdu.tx.getTxDetail(transport);
 
-		const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    const decryptingKey = await apdu.tx.getSignatureKey(transport);
 
-		await apdu.tx.finishPrepare(transport);
+    await apdu.tx.clearTransaction(transport);
 
-		await apdu.tx.getTxDetail(transport);
+    await apdu.mcu.control.powerOff(transport);
 
-		const decryptingKey = await apdu.tx.getSignatureKey(transport);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
 
-		await apdu.tx.clearTransaction(transport);
+    const { signedTx } = await apdu.tx.getSignedHex(transport);
 
-		await apdu.mcu.control.powerOff(transport);
+    const msgBuf = hexToBuffer(msgHex);
+    const lenBuf = Buffer.from(msgBuf.length.toString(), 'ascii');
 
-		const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const rawData = Buffer.concat([
+      Buffer.from('19', 'hex'),
+      Buffer.from('Ethereum Signed Message:', 'ascii'),
+      Buffer.from('0A', 'hex'),
+      lenBuf,
+      msgBuf,
+    ]);
 
-		const { signedTx } = await apdu.tx.getSignedHex(transport);
+    if (rawData.toString('hex') !== signedTx) {
+      throw new Error('unexpected transaction format!');
+    }
 
-		const msgBuf = hexToBuffer(msgHex);
-		const lenBuf = Buffer.from(msgBuf.length.toString(), 'ascii');
+    const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
 
-		const rawData = Buffer.concat([
-			Buffer.from('19', 'hex'),
-			Buffer.from('Ethereum Signed Message:', 'ascii'),
-			Buffer.from('0A', 'hex'),
-			lenBuf,
-			msgBuf,
-		]);
+    const data = Buffer.from(handleHex(hash), 'hex');
 
-		if (rawData.toString('hex') !== signedTx) {
-			throw new Error('unexpected transaction format!');
-		}
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-		const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
+    const keyPair = ec.keyFromPublic(publicKey, 'hex');
 
-		const data = Buffer.from(handleHex(hash), 'hex');
+    const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
 
-		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const v = (recoveryParam + 27).toString(16);
 
-		const keyPair = ec.keyFromPublic(publicKey, 'hex');
+    const { r, s } = sig as { r: string; s: string };
 
-		const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
+    return `0x${r}${s}${v}`;
+  };
 
-		const v = (recoveryParam + 27).toString(16);
+  signTypedData = async (
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number,
+    typedData: any
+  ): Promise<string> => {
+    await setting.auth.versionCheck(transport, 84);
 
-		const { r, s } = sig as { r: string; s: string };
+    await apdu.tx.sendScript(transport, params.TypedData.script + params.TypedData.signature);
 
-		return `0x${r}${s}${v}`;
-	};
+    const EIP712Schema = {
+      type: 'object',
+      properties: {
+        types: {
+          type: 'object',
+          properties: {
+            EIP712Domain: { type: 'array' },
+          },
+          additionalProperties: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                type: { type: 'string' },
+              },
+              required: ['name', 'type'],
+            },
+          },
+          required: ['EIP712Domain'],
+        },
+        primaryType: { type: 'string' },
+        domain: { type: 'object' },
+        message: { type: 'object' },
+      },
+      required: ['types', 'primaryType', 'domain', 'message'],
+    };
 
-	signTypedData = async (
-		transport: Transport,
-		appPrivateKey: string,
-		appId: string,
-		addressIndex: number,
-		typedData: any
-	): Promise<string> => {
-		await setting.auth.versionCheck(transport, 84);
+    const ajv = new Ajv();
 
-		await apdu.tx.sendScript(transport, params.TypedData.script + params.TypedData.signature);
+    if (!ajv.validate(EIP712Schema, typedData)) {
+      throw new Error(ajv.errorsText());
+    }
 
-		const EIP712Schema = {
-			type: 'object',
-			properties: {
-				types: {
-					type: 'object',
-					properties: {
-						EIP712Domain: { type: 'array' },
-					},
-					additionalProperties: {
-						type: 'array',
-						items: {
-							type: 'object',
-							properties: {
-								name: { type: 'string' },
-								type: { type: 'string' },
-							},
-							required: ['name', 'type'],
-						},
-					},
-					required: ['EIP712Domain'],
-				},
-				primaryType: { type: 'string' },
-				domain: { type: 'object' },
-				message: { type: 'object' },
-			},
-			required: ['types', 'primaryType', 'domain', 'message'],
-		};
+    const path = await utils.getFullPath({
+      pathType: config.PathType.BIP32,
+      pathString: `44'/${params.PathString}'/0'/0/0`,
+    });
 
-		const ajv = new Ajv();
+    const sanitizedData = typedDataUtils.sanitizeData(typedData);
 
-		if (!ajv.validate(EIP712Schema, typedData)) {
-			throw new Error(ajv.errorsText());
-		}
+    const encodedData = typedDataUtils.encodeData(
+      `${sanitizedData.primaryType}`,
+      sanitizedData.message,
+      sanitizedData.types
+    );
 
-		const path = await utils.getFullPath({
-			pathType: config.PathType.BIP32,
-			pathString: `44'/${params.PathString}'/0'/0/0`,
-		});
+    const domainSeparate = typedDataUtils.hashStruct('EIP712Domain', sanitizedData.domain, sanitizedData.types);
 
-		const sanitizedData = typedDataUtils.sanitizeData(typedData);
+    const argument =
+      '15' +
+      path +
+      handleHex(domainSeparate.toString('hex')).padStart(64, '0') +
+      handleHex(encodedData.toString('hex'));
 
-		const encodedData = typedDataUtils.encodeData(
-			`${sanitizedData.primaryType}`,
-			sanitizedData.message,
-			sanitizedData.types
-		);
+    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
-		const domainSeparate = typedDataUtils.hashStruct('EIP712Domain', sanitizedData.domain, sanitizedData.types);
+    await apdu.tx.finishPrepare(transport);
 
-		const argument =
-			'15' +
-			path +
-			handleHex(domainSeparate.toString('hex')).padStart(64, '0') +
-			handleHex(encodedData.toString('hex'));
+    await apdu.tx.getTxDetail(transport);
+    const decryptingKey = await apdu.tx.getSignatureKey(transport);
+    await apdu.tx.clearTransaction(transport);
 
-		const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    await apdu.mcu.control.powerOff(transport);
 
-		await apdu.tx.finishPrepare(transport);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
 
-		await apdu.tx.getTxDetail(transport);
-		const decryptingKey = await apdu.tx.getSignatureKey(transport);
-		await apdu.tx.clearTransaction(transport);
+    const { signedTx } = await apdu.tx.getSignedHex(transport);
 
-		await apdu.mcu.control.powerOff(transport);
+    const dataBuf = createKeccakHash('keccak256').update(encodedData).digest();
 
-		const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const rawData = Buffer.concat([Buffer.from('1901', 'hex'), domainSeparate, dataBuf]);
 
-		const { signedTx } = await apdu.tx.getSignedHex(transport);
+    if (rawData.toString('hex') !== signedTx) {
+      throw new Error('unexpected transaction format!');
+    }
 
-		const dataBuf = createKeccakHash('keccak256').update(encodedData).digest();
+    const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
 
-		const rawData = Buffer.concat([Buffer.from('1901', 'hex'), domainSeparate, dataBuf]);
+    const data = Buffer.from(handleHex(hash), 'hex');
 
-		if (rawData.toString('hex') !== signedTx) {
-			throw new Error('unexpected transaction format!');
-		}
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-		const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
+    const keyPair = ec.keyFromPublic(publicKey, 'hex');
 
-		const data = Buffer.from(handleHex(hash), 'hex');
+    const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
 
-		const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const v = (recoveryParam + 27).toString(16);
+    const { r, s } = sig as { r: string; s: string };
 
-		const keyPair = ec.keyFromPublic(publicKey, 'hex');
-
-		const recoveryParam = ec.getKeyRecoveryParam(data, sig, keyPair.pub);
-
-		const v = (recoveryParam + 27).toString(16);
-		const { r, s } = sig as { r: string; s: string };
-
-		return `0x${r}${s}${v}`;
-	};
+    return `0x${r}${s}${v}`;
+  };
 }
