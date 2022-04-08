@@ -47,6 +47,7 @@ export async function getAccount(address: string) {
 }
 
 // https://docs.thetatoken.org/docs/rpc-api-reference#callsmartcontract
+// The API simulates the smart contract execution, but the data needs to be signed.
 export async function callSmartContract(sctx_bytes: string) {
   return post(rpcUrl, "theta.CallSmartContract", [{sctx_bytes}]);
 }
@@ -60,4 +61,10 @@ export async function broadcastTx(tx_bytes: string) {
 export async function sendEvmTx(tx_bytes: string) {
   const url = 'https://eth-rpc-api.thetatoken.org/rpc';
   return post(url, "eth_sendRawTransaction", [tx_bytes]);
+}
+
+// The Ethereum style RPC API to estimateGas.
+export async function estimateGas(tx: { from:string, to:string, value:string, data:string }) {
+  const url = 'https://eth-rpc-api.thetatoken.org/rpc';
+  return post(url, "eth_estimateGas", [tx]);
 }

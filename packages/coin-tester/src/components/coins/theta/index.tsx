@@ -24,6 +24,7 @@ import {
   callSmartContract,
   broadcastTx,
   sendEvmTx,
+  estimateGas
 } from './utils/api';
 
 interface Props {
@@ -47,7 +48,6 @@ function CoinTheta(props: Props) {
   const [accountInfo, setAccountInfo] = useState('');
   const [guardianNodes, setGuardianNodes] = useState('');
   const [signedTx, setSignedTx] = useState('');
-  const [gasUsed, setGasUsed] = useState('');
 
   // Send Tx
   const [sendArgs, setSendArgs] = useState(sendValues);
@@ -155,7 +155,7 @@ function CoinTheta(props: Props) {
       setWithdrawArgs(tempWithdrawArgs);
 
       const tempSmartArgs = [...smartArgs];
-      tempSmartArgs[1] = usingSequence;
+      tempSmartArgs[1] = sequence;
       setSmartArgs(tempSmartArgs);
 
       return `sequence=${sequence}, theta=${theta}, tfuel=${tfuel}`;
@@ -258,12 +258,22 @@ function CoinTheta(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const options = { transport: transport!, appPrivateKey, appId };
-      let [value, sequence, fromAddr, toAddr, gasLimit, data] = smartArgs;
+      let [value, sequence, fromAddr, toAddr, data] = smartArgs;
       value = new BigNumber(value).shiftedBy(18).toFixed();
+      const gasLimit = await estimateGas({
+        from: fromAddr,
+        to: toAddr,
+        value: `0x${new BigNumber(value).toString(16)}`,
+        data
+      });
+      console.log('gasLimit :', gasLimit);
       const transaction = { value, sequence, fromAddr, toAddr, gasLimit, data };
       const signedTx = await coin.signEvmTransaction(transaction, options);
       console.log('signedTx :', signedTx);
       return sendEvmTx(signedTx);
+
+      // const signedTx = await coin.signSmartTransaction(transaction, options);
+      // return broadcastTx(signedTx);
     }, setSmartTx);
   };
 
@@ -295,17 +305,6 @@ function CoinTheta(props: Props) {
         onClick={getGuardianNodes}
         disabled={disabled}
         btnName='Get'
-      />
-      <OneInput
-        title='Get Gas Used for Smart Transaction'
-        content={gasUsed}
-        onClick={getGasUsed}
-        disabled={disabled}
-        btnName='Get'
-        value={`${signedTx}`}
-        setValue={setSignedTx}
-        placeholder={''}
-        inputSize={4}
       />
       <div className='title2'>Transactions</div>
       <ObjInputs

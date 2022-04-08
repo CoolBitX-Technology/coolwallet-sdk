@@ -87,7 +87,6 @@ export const smartKeys = [
   'Sequence',
   'From',
   'To',
-  'GasLimit',
   'Data',
 ];
 
@@ -96,6 +95,5 @@ export const smartValues = [
   '0',
   '',
   '',
-  '0',
   '',
 ];
