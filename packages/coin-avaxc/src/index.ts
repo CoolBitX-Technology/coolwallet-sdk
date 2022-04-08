@@ -285,8 +285,6 @@ export default class AVAXC implements COIN.Coin {
       encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
     }
 
-    await apdu.tx.sendScript(transport, scriptWithSignature);
-
     await apdu.tx.finishPrepare(transport);
 
     await apdu.tx.getTxDetail(transport);
