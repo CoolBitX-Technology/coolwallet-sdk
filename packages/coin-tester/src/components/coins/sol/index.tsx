@@ -4,6 +4,7 @@ import SOL, { TransactionCreator } from '@coolwallet/sol';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Container } from 'react-bootstrap';
 import Inputs from '../../Inputs';
+import * as borsh from 'borsh';
 
 interface Props {
   transport: Transport | null;
@@ -27,8 +28,7 @@ function CoinSol(props: Props) {
   const [account, setAccount] = useState('');
 
   const [transaction, setTransaction] = useState({
-    // to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
-    to: '8rzt5i6guiEgcRBgE5x5nmjPL97Ptcw76rnGTyehni7r',
+    to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
     value: '0.1',
     result: '',
   });
@@ -82,6 +82,65 @@ function CoinSol(props: Props) {
     return address;
   };
 
+  // for smart contract
+  const getOrCreateSmcAssociateAccount = async (owner: string, seed: string, programId: string): Promise<PublicKey> => {
+    const programIdToPK = new PublicKey(programId);
+    const address = await PublicKey.createWithSeed(new PublicKey(owner), seed, programIdToPK);
+    const accountData = await connection.getAccountInfo(new PublicKey(address));
+
+    if (accountData) {
+      return address;
+    }
+
+    class GreetingAccount {
+      counter = 0;
+      constructor(fields?: any) {
+        if (fields) {
+          this.counter = fields.counter;
+        }
+      }
+    }
+
+    const GreetingSchema = new Map([[GreetingAccount, { kind: 'struct', fields: [['counter', 'u32']] }]]);
+
+    const GREETING_SIZE = borsh.serialize(GreetingSchema, new GreetingAccount()).length;
+
+    const lamports = await connection.getMinimumBalanceForRentExemption(GREETING_SIZE);
+    const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+    const tx = TransactionCreator.createAccountWithSeed(
+      account,
+      address.toString(),
+      account,
+      seed,
+      lamports,
+      GREETING_SIZE,
+      programIdToPK.toString(),
+      recentBlockhash
+    );
+    const appId = localStorage.getItem('appId');
+    if (!appId) throw new Error('No Appid stored, please register!');
+    try {
+      const signedTx = await sol.signTransaction({
+        transport: transport as Transport,
+        appPrivateKey,
+        appId,
+        transaction: tx,
+      });
+      const recoveredTx = Transaction.from(signedTx);
+
+      const verifySig = recoveredTx.verifySignatures();
+
+      // signature need to be valid
+      if (!verifySig) throw new Error('Fail to verify signature');
+
+      await connection.sendRawTransaction(recoveredTx.serialize());
+    } catch (error) {
+      console.log(error);
+    } finally {
+      return address;
+    }
+  };
+
   const signTransaction = async () => {
     handleState(
       async () => {
@@ -117,11 +176,10 @@ function CoinSol(props: Props) {
     handleState(
       async () => {
         if (account.length < 1) throw new Error('please get account first');
-
-        const programId = new PublicKey(programTransaction.programId);
-
         const SEED = 'hello';
-        const greetedPubkey = await PublicKey.createWithSeed(new PublicKey(account), SEED, programId);
+
+        const greetedPubkey = await getOrCreateSmcAssociateAccount(account, SEED, programTransaction.programId);
+
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
         const tx = {

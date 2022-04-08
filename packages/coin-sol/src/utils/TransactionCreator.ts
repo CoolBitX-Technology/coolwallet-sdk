@@ -1,6 +1,8 @@
 import * as types from '../config/types';
 import * as params from '../config/params';
 import * as stringUtil from './stringUtil';
+import { encodeData, SystemProgramLayout } from './layoutUtil';
+import { Transaction } from './transactionUtil';
 
 export default class TransactionCreator {
   constructor() {}
@@ -11,6 +13,9 @@ export default class TransactionCreator {
     recentBlockhash: string,
     amount: number | string
   ): types.TransactionArgs {
+    const data = encodeData(SystemProgramLayout.Transfer, {
+      lamports: Number(amount) * params.LAMPORTS_PER_SOL,
+    });
     return {
       txType: params.TRANSACTION_TYPE.TRANSFER,
       instructions: [
@@ -20,7 +25,7 @@ export default class TransactionCreator {
             { pubkey: toPubkey, isSigner: false, isWritable: true },
           ],
           programId: params.SYSTEM_PROGRAM_ID,
-          data: stringUtil.transferDataEncode(amount),
+          data: data,
         },
       ],
       recentBlockhash,
@@ -55,7 +60,7 @@ export default class TransactionCreator {
       showDecimals: decimalsNB,
     };
   }
-  static createAssociateAccount(
+  static createTokenAssociateAccount(
     signer: types.Address,
     owner: types.Address,
     associateAccount: types.Address,
@@ -81,5 +86,44 @@ export default class TransactionCreator {
       recentBlockhash,
       feePayer: signer,
     };
+  }
+  static createAccountWithSeed(
+    fromPubkey: types.Address,
+    newAccountPubkey: types.Address,
+    basePubkey: types.Address,
+    seed: string,
+    lamports: number,
+    space: number,
+    programId: types.Address,
+    recentBlockhash: string
+  ): types.TransactionArgs {
+    const basePubkeyStr = stringUtil.formHex(basePubkey);
+    const fromPubkeyStr = stringUtil.formHex(fromPubkey);
+
+    const data = encodeData(SystemProgramLayout.createWithSeed, {
+      base: Buffer.from(basePubkeyStr, 'hex'),
+      seed: seed,
+      lamports: lamports,
+      space: space,
+      programId: Buffer.from(stringUtil.formHex(programId), 'hex'),
+    });
+    let keys = [
+      { pubkey: fromPubkeyStr, isSigner: true, isWritable: true },
+      { pubkey: stringUtil.formHex(newAccountPubkey), isSigner: false, isWritable: true },
+    ];
+    if (basePubkeyStr !== fromPubkeyStr) {
+      keys.push({ pubkey: basePubkeyStr, isSigner: true, isWritable: false });
+    }
+    return new Transaction({
+      instructions: [
+        {
+          accounts: keys,
+          programId: params.SYSTEM_PROGRAM_ID,
+          data,
+        },
+      ],
+      recentBlockhash,
+      feePayer: fromPubkey,
+    });
   }
 }
