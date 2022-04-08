@@ -249,12 +249,10 @@ export default class AVAXC implements COIN.Coin {
       pathString: `44'/${params.PathString}'/0'/0/0`,
     });
 
-    let scriptWithSignature = '';
     let argument = '';
+    let encryptedSig: string | undefined;
 
     if (transaction.data.length > 8000) {
-      scriptWithSignature = params.SmartContractSegment.script + params.SmartContractSegment.signature;
-
       argument =
         '15' +
         path +
@@ -264,9 +262,13 @@ export default class AVAXC implements COIN.Coin {
         handleHex(transaction.gasLimit).padStart(20, '0') +
         handleHex(transaction.nonce).padStart(16, '0') +
         (handleHex(transaction.data).length / 2).toString(16).padStart(8, '0');
-    } else {
-      scriptWithSignature = params.SmartContract.script + params.SmartContract.signature;
 
+      await apdu.tx.sendScript(transport, params.SmartContractSegment.script + params.SmartContractSegment.signature);
+
+      await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+
+      encryptedSig = await apdu.tx.executeSegmentScript(transport, appId, appPrivateKey, handleHex(transaction.data));
+    } else {
       argument =
         '15' +
         path +
@@ -277,6 +279,10 @@ export default class AVAXC implements COIN.Coin {
         handleHex(transaction.nonce).padStart(16, '0') +
         handleHex(params.ChainId.toString(16)).padStart(4, '0') +
         handleHex(transaction.data);
+
+      await apdu.tx.sendScript(transport, params.SmartContract.script + params.SmartContract.signature);
+
+      encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
     }
 
     await apdu.tx.sendScript(transport, scriptWithSignature);
@@ -295,14 +301,15 @@ export default class AVAXC implements COIN.Coin {
 
     const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
 
-    const { signedTx } = await apdu.tx.getSignedHex(transport);
-
     const rawTx = getRawTx(transaction);
 
     const rawData = Buffer.from(rlp.encode(rawTx));
 
-    if (rawData.toString('hex') !== signedTx) {
-      throw new Error('unexpected transaction format!');
+    if (transaction.data.length <= 8000) {
+      const { signedTx } = await apdu.tx.getSignedHex(transport);
+      if (rawData.toString('hex') !== signedTx) {
+        throw new Error('unexpected transaction format!');
+      }
     }
 
     const hash = createKeccakHash('keccak256').update(rawData).digest('hex');
