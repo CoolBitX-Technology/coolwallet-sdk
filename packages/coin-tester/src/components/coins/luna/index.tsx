@@ -32,6 +32,10 @@ function CoinLuna(props: Props) {
 
   const[signedWithdraw, setSignedWithdraw] = useState('');
 
+  const[signedSmartContract, setSignedSmartContract] = useState('');
+
+  const[signedCW20, setSignedCW20] = useState('');
+
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
 
@@ -225,9 +229,106 @@ const signWithdraw = async() =>{
   }, setSignedWithdraw);
 };
 
+const signSmartContract = async() =>{
+  handleState(async () => {
+    const { sequence, account_number } = await cosmosjs.getSequence(address);
+    // based on the structure of the smart contract- execute_msg may be different and funds may be undefined
+    const transaction = {
+      chainId: CHAIN_ID.LUNA,
+      senderAddress: address,
+      contractAddress: 'terra1tndcaqxkpc5ce9qee5ggqf430mr2z3pefe5wj6',
+      execute_msg: {
+        swap: {
+          offer_asset: {
+            info: {
+              native_token: {
+                denom: 'uluna'
+              }
+            },
+            amount: '1'
+          }
+        }
+      },
+      funds: {
+        denom: 'uluna', 
+        amount: new BigNumber(0.000001).multipliedBy(1000000).toNumber()
+      },
+      feeAmount: 3000,
+      gas: 180000,
+      accountNumber: account_number,
+      sequence,
+      memo: ''
+    }
+    console.log(transaction);
+    const appId = localStorage.getItem('appId');
+    if (!appId) throw new Error('No Appid stored, please register!');
+    const signTxData: SignDataType = {
+      txType: TX_TYPE.SMART,
+      transaction: transaction,
+      transport: transport!,
+      appPrivateKey,
+      appId,
+      addressIndex: 0,
+      confirmCB: undefined,
+      authorizedCB: undefined,
+    };
+    const signedTx = await luna.signTransaction(signTxData);
+    console.log("signedTx: " + signedTx);
+    const sendTx = await cosmosjs.broadcastGRPC(signedTx);
+    console.log("sendTx: " + sendTx);
+    return sendTx;
+  }, setSignedSmartContract);
+};
+
+const signCW20 = async() =>{
+  handleState(async () => {
+    const { sequence, account_number } = await cosmosjs.getSequence(address);
+    const transaction = {
+      chainId: CHAIN_ID.LUNA,
+      senderAddress: address,
+      contractAddress: 'terra14z56l0fp2lsf86zy3hty2z47ezkhnthtr9yq76',
+      execute_msg: {
+        transfer: {
+          amount: "1",
+          recipient: "terra1seckusy09dzgtyxtz9xqzg2x7xfgtf0lhyzmf9"
+        }
+      },
+      feeAmount: 3000,
+      gas: 180000,
+      accountNumber: account_number,
+      sequence,
+      memo: '',
+      option: {
+        info:{
+          symbol: "ANC",
+          decimals: "6"
+        }
+      }
+    }
+    console.log(transaction);
+    const appId = localStorage.getItem('appId');
+    if (!appId) throw new Error('No Appid stored, please register!');
+    const signTxData: SignDataType = {
+      txType: TX_TYPE.CW20,
+      transaction: transaction,
+      transport: transport!,
+      appPrivateKey,
+      appId,
+      addressIndex: 0,
+      confirmCB: undefined,
+      authorizedCB: undefined,
+    };
+    const signedTx = await luna.signTransaction(signTxData);
+    console.log("signedTx: " + signedTx);
+    const sendTx = await cosmosjs.broadcastGRPC(signedTx);
+    console.log("sendTx: " + sendTx);
+    return sendTx;
+  }, setSignedCW20);
+};
+
   return (
     <Container>
-      <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
+      <div className='title2'>These are basic methods are required to implement in a coin sdk.</div>
       <NoInput title='Get Address' content={address} onClick={getAddress} disabled={disabled} />
       <TwoInputs
         title='Sign Transaction'
@@ -272,6 +373,20 @@ const signWithdraw = async() =>{
         onClick={signWithdraw}
         disabled={disabled}
         btnName='Withdraw'
+      />}
+      {<NoInput
+        title='Smart Contract' 
+        content={signedSmartContract} 
+        onClick={signSmartContract}
+        disabled={disabled}
+        btnName='Smart Contract'
+      />}
+      {<NoInput
+        title='CW20' 
+        content={signedCW20} 
+        onClick={signCW20}
+        disabled={disabled}
+        btnName='CW20'
       />}
     </Container>
   );

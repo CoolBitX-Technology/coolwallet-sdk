@@ -29,5 +29,5 @@ export default [
   { path: 'xtz', Element: XTZ },
   { path: 'bsc', Element: BSC },
   { path: 'theta', Element: THETA },
-	{ path: 'avaxc', Element: AVAXC },
+  { path: 'avaxc', Element: AVAXC },
 ];

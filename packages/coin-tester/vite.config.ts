@@ -12,6 +12,7 @@ export default defineConfig({
   resolve: {
     preserveSymlinks: true,
     alias: {
+      https: require.resolve('agent-base'),
       process: require.resolve('process/browser'),
     },
   },

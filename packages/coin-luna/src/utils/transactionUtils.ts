@@ -76,8 +76,26 @@ export const getWithdrawDelegatorRewardTx = (
   return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.WITHDRAW, messageBuf);
 }
 
+export const getSmartTx = (
+  signData: types.MsgExecuteContract | types.MsgCW20,
+  signature: string,
+  publicKey: string
+): string => {
+  let funds = [];
+  if(signData.funds !== undefined){
+    funds.push({ denom: signData.funds.denom, amount: signData.funds.amount.toString() });
+  }
+  const messageBuf = messages.MsgExecuteContract.encode({
+    sender: signData.senderAddress,
+    contract: signData.contractAddress,
+    msg: JSON.stringify(signData.execute_msg),
+    funds: funds
+  })
+  return getTxProtobuf(signData, signature, publicKey, params.TX_TYPE_URL.SMART, messageBuf);
+}
+
 export const getTxProtobuf = (
-    signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward,
+    signData: types.MsgSend | types.MsgDelegate | types.MsgUndelegate | types.MsgWithdrawDelegationReward | types.MsgExecuteContract | types.MsgCW20,
     signature: string,
     publicKey: string,
     type_url: string,
@@ -121,5 +139,6 @@ export const getTxProtobuf = (
       auth_info_bytes: auth_info_bytes,
       signatures: [Buffer.from(signature, 'base64')],
     });
+    console.log(txRaw.toString('hex'));
     return Buffer.from(txRaw,'hex').toString('hex');
 }

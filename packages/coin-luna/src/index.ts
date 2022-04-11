@@ -5,6 +5,7 @@ import * as types from './config/types';
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
+import { TOKENTYPE } from './config/tokenType';
 
 export default class LUNA extends COIN.ECDSACoin implements COIN.Coin{
     public Types: any;
@@ -45,30 +46,55 @@ export default class LUNA extends COIN.ECDSACoin implements COIN.Coin{
         switch (signData.txType) {
           case types.TX_TYPE.SEND:
             script = params.TRANSFER.script + params.TRANSFER.signature;
-            argument = scriptUtil.getLunaSendArgement(publicKey, signData.transaction, addressIndex);
+            argument = scriptUtil.getLunaSendArgument(publicKey, signData.transaction, addressIndex);
             genTx = (signature: string) => {
               return txUtil.getSendTx(signData.transaction, signature, publicKey);
             };
             break;
           case types.TX_TYPE.DELEGATE:
             script = params.DELEGATE.script + params.DELEGATE.signature;
-            argument = scriptUtil.getLunaDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
+            argument = scriptUtil.getLunaDelgtOrUnDelArgument(publicKey, signData.transaction, addressIndex);
             genTx = (signature: string) => {
               return txUtil.getDelegateTx(signData.transaction, signature, publicKey);
             };
             break;
           case types.TX_TYPE.UNDELEGATE:
             script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
-            argument = scriptUtil.getLunaDelgtOrUnDelArgement(publicKey, signData.transaction, addressIndex);
+            argument = scriptUtil.getLunaDelgtOrUnDelArgument(publicKey, signData.transaction, addressIndex);
             genTx = (signature: string) => {
               return txUtil.getUndelegateTx(signData.transaction, signature, publicKey);
             };
             break;
           case types.TX_TYPE.WITHDRAW:
             script = params.WITHDRAW.script + params.WITHDRAW.signature;
-            argument = scriptUtil.getLunaWithdrawArgement(publicKey, signData.transaction, addressIndex);
+            argument = scriptUtil.getLunaWithdrawArgument(publicKey, signData.transaction, addressIndex);
             genTx = (signature: string) => {
               return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
+            };
+            break;
+          case types.TX_TYPE.SMART:
+            script = params.SMART.script + params.SMART.signature;
+            argument = scriptUtil.getLunaSmartArgument(publicKey, signData.transaction, addressIndex);
+            genTx = (signature: string) => {
+              return txUtil.getSmartTx(signData.transaction, signature, publicKey);
+            }
+            break;
+          case types.TX_TYPE.CW20:
+            const upperCaseAddress = signData.transaction.contractAddress.toUpperCase();
+            let tokenSignature = '';
+            for(const tokenInfo of TOKENTYPE){
+              // supported cw-20
+              if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
+                tokenSignature = tokenInfo.signature;
+                signData.transaction.option.info.symbol = tokenInfo.symbol;
+                signData.transaction.option.info.decimals = tokenInfo.unit;
+                break;
+              }
+            }
+            script = params.CW20.script + params.CW20.signature;
+            argument = scriptUtil.getCW20Argument(publicKey, signData.transaction, addressIndex, tokenSignature);
+            genTx = (signature: string) => {
+              return txUtil.getSmartTx(signData.transaction, signature, publicKey);
             };
             break;
           default:
