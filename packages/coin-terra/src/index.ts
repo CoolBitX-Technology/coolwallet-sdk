@@ -6,6 +6,7 @@ import { DENOMTYPE } from './config/denomType';
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
+import { TOKENTYPE } from './config/tokenType';
 
 export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
   public Types: any;
@@ -85,6 +86,27 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         argument = scriptUtil.getTerraWithdrawArgement(publicKey, signData.transaction, addressIndex);
         genTx = (signature: string) => {
           return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
+        };
+        break;
+      case types.TX_TYPE.CW20:
+        const upperCaseAddress = signData.transaction.contractAddress.toUpperCase();
+        let tokenSignature = '';
+        for(const tokenInfo of TOKENTYPE){
+          // supported cw-20
+          if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
+            tokenSignature = tokenInfo.signature;
+            signData.transaction.option.info.symbol = tokenInfo.symbol;
+            signData.transaction.option.info.decimals = tokenInfo.unit;
+            break;
+          }
+        }
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.CW20.script + params.CW20.signature;
+        else
+          script = params.CW20.script_test + params.CW20.signature_test;
+        argument = scriptUtil.getCW20Argument(publicKey, signData.transaction, addressIndex, tokenSignature);
+        genTx = (signature: string) => {
+          return txUtil.getSmartTx(signData.transaction, signature, publicKey);
         };
         break;
       case types.TX_TYPE.SMART:
