@@ -1,5 +1,4 @@
 .App {
-  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -79,4 +78,9 @@
 
 .drop-down {
 	padding-right: 0px;
+}
+
+.limited-dropdown {
+	height: 200px;
+	overflow-y: scroll;
 }
