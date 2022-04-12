@@ -1,4 +1,3 @@
-import { LAMPORTS_PER_SOL } from '../config/params';
 import base58 from 'bs58';
 const BN = require('bn.js');
 
