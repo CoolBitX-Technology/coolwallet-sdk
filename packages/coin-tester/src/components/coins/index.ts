@@ -11,6 +11,7 @@ import LUNA from './luna';
 import TERRA from './terra';
 import XTZ from './xtz';
 import BSC from './bsc';
+import VLX from './vlx';
 
 export default [
   { path: 'template', Element: TEMPLATE },
@@ -26,4 +27,5 @@ export default [
   { path: 'terra', Element: TERRA },
   { path: 'xtz', Element: XTZ },
   { path: 'bsc', Element: BSC },
+  { path: 'vlx', Element: VLX },
 ];
