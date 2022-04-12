@@ -1,23 +1,23 @@
 import * as BufferLayout from '@solana/buffer-layout';
 
-interface IInstructionInputData {
+interface InstructionInputData {
   readonly instruction: number;
 }
 
-type InstructionType<TInputData extends IInstructionInputData> = {
+type InstructionLayoutType<TInputData extends InstructionInputData> = {
   index: number;
   layout: BufferLayout.Layout<TInputData>;
 };
 
 type SystemInstructionInputData = {
-  CreateWithSeed: IInstructionInputData & {
+  CreateWithSeed: InstructionInputData & {
     base: Uint8Array;
     lamports: number;
     programId: Uint8Array;
     seed: string;
     space: number;
   };
-  Transfer: IInstructionInputData & {
+  Transfer: InstructionInputData & {
     lamports: number;
   };
 };
@@ -120,8 +120,8 @@ function getAlloc(type: any, fields: any): number {
   return alloc;
 }
 
-export function encodeData<TInputData extends IInstructionInputData>(
-  layoutType: InstructionType<TInputData>,
+export function encodeData<TInputData extends InstructionInputData>(
+  layoutType: InstructionLayoutType<TInputData>,
   fields?: any
 ): Buffer {
   const allocLength = layoutType.layout.span >= 0 ? layoutType.layout.span : getAlloc(layoutType, fields);

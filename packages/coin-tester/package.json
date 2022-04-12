@@ -22,6 +22,7 @@
     "@coolwallet/sol": "file:../coin-sol",
     "@coolwallet/template": "file:../coin-template",
     "@coolwallet/terra": "file:../coin-terra",
+    "@coolwallet/theta": "file:../coin-theta",
     "@coolwallet/transport-jre-http": "file:../transport-jre-http",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",
     "@coolwallet/xtz": "file:../coin-xtz",

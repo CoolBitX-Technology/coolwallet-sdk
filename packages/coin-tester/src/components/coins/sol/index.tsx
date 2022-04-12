@@ -82,6 +82,28 @@ function CoinSol(props: Props) {
     return address;
   };
 
+  // fir transfer spl-token
+  const checkAssociateTokenAccountValid = async (
+    account: PublicKey,
+    token: PublicKey,
+    owner: PublicKey
+  ): Promise<boolean> => {
+    const accountData = await connection.getAccountInfo(account);
+
+    if (accountData) {
+      if (accountData.data.length > 0) {
+        const tokenExt = Buffer.from(accountData.data.slice(0, 32));
+        const ownerExt = Buffer.from(accountData.data.slice(32, 64));
+        if (tokenExt.equals(token.toBuffer()) && ownerExt.equals(owner.toBuffer())) {
+          return true;
+        }
+        throw new Error('Fail to get Associate account: account owner or token is incorrect');
+      }
+      throw new Error('Fail to get Associate account: account data empty');
+    }
+    throw new Error(`Need to create associate token account for account ${owner}`);
+  };
+
   // for smart contract
   const getOrCreateSmcAssociateAccount = async (owner: string, seed: string, programId: string): Promise<PublicKey> => {
     const programIdToPK = new PublicKey(programId);
@@ -166,6 +188,7 @@ function CoinSol(props: Props) {
 
         // signature need to be valid
         if (!verifySig) throw new Error('Fail to verify signature');
+
         return connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setTransaction((prev: any) => ({ ...prev, result }))
@@ -228,8 +251,9 @@ function CoinSol(props: Props) {
         const toAccount = new PublicKey(splTokenTransaction.to);
 
         const fromTokenAccount = await getAssociatedTokenAddr(token, fromPubkey);
-
+        await checkAssociateTokenAccountValid(fromTokenAccount, token, fromPubkey);
         const toTokenAccount = await getAssociatedTokenAddr(token, toAccount);
+        await checkAssociateTokenAccountValid(toTokenAccount, token, toAccount);
 
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
@@ -273,6 +297,7 @@ function CoinSol(props: Props) {
         const owner = new PublicKey(associateAccTx.owner);
         const associateAccount = await getAssociatedTokenAddr(token, owner);
 
+        // check if associateAccount was not created
         const accountData = await connection.getAccountInfo(new PublicKey(associateAccount));
 
         if (accountData) {
@@ -286,7 +311,7 @@ function CoinSol(props: Props) {
           throw new Error('Fail to get Associate account: account data empty');
         }
 
-        const tx = TransactionCreator.createAssociateAccount(
+        const tx = TransactionCreator.createTokenAssociateAccount(
           account,
           owner.toString(),
           associateAccount.toString(),

@@ -76,8 +76,10 @@ export default class Message {
             Readonly<{
               data: number[];
               dataLength: Uint8Array;
+              keyIndices: number[];
             }>
           >([
+            BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
             BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
             BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
           ])

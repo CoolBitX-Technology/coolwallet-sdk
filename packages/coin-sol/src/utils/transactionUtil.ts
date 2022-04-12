@@ -6,118 +6,118 @@ import base58 from 'bs58';
 import Message from './Message';
 const BN = require('bn.js');
 
-export class TransferTx {
-  sigCount: string;
-  signature: string;
-  numberRequireSignature: string;
-  numberReadonlySignedAccount: string;
-  numberReadonlyUnSignedAccount: string;
-  keyCount: string;
-  keys: string[];
-  recentBlockHash: string;
-  instructionCount: string;
-  programIdIndex: string;
-  keyIndicesCount: string;
-  keyIndices: string;
-  dataLength: string;
-  data: string;
+// export class TransferTx {
+//   sigCount: string;
+//   signature: string;
+//   numberRequireSignature: string;
+//   numberReadonlySignedAccount: string;
+//   numberReadonlyUnSignedAccount: string;
+//   keyCount: string;
+//   keys: string[];
+//   recentBlockHash: string;
+//   instructionCount: string;
+//   programIdIndex: string;
+//   keyIndicesCount: string;
+//   keyIndices: string;
+//   dataLength: string;
+//   data: string;
 
-  constructor(rawTx: {
-    signature?: string;
-    numberRequireSignature: string;
-    numberReadonlySignedAccount: string;
-    numberReadonlyUnSignedAccount: string;
-    keyCount: string;
-    keys: string[];
-    recentBlockHash: string;
-    instructionCount: string;
-    programIdIndex: string;
-    keyIndicesCount: string;
-    keyIndices: string;
-    dataLength: string;
-    data: string;
-  }) {
-    this.sigCount = '01';
-    this.signature = rawTx.signature || '';
-    this.numberRequireSignature = rawTx.numberRequireSignature;
-    this.numberReadonlySignedAccount = rawTx.numberReadonlySignedAccount;
-    this.numberReadonlyUnSignedAccount = rawTx.numberReadonlyUnSignedAccount;
-    this.keyCount = rawTx.keyCount;
-    this.keys = rawTx.keys;
-    this.recentBlockHash = rawTx.recentBlockHash;
-    this.instructionCount = rawTx.instructionCount;
-    this.programIdIndex = rawTx.programIdIndex;
-    this.keyIndicesCount = rawTx.keyIndicesCount;
-    this.keyIndices = rawTx.keyIndices;
-    this.dataLength = rawTx.dataLength;
-    this.data = rawTx.data;
-  }
+//   constructor(rawTx: {
+//     signature?: string;
+//     numberRequireSignature: string;
+//     numberReadonlySignedAccount: string;
+//     numberReadonlyUnSignedAccount: string;
+//     keyCount: string;
+//     keys: string[];
+//     recentBlockHash: string;
+//     instructionCount: string;
+//     programIdIndex: string;
+//     keyIndicesCount: string;
+//     keyIndices: string;
+//     dataLength: string;
+//     data: string;
+//   }) {
+//     this.sigCount = '01';
+//     this.signature = rawTx.signature || '';
+//     this.numberRequireSignature = rawTx.numberRequireSignature;
+//     this.numberReadonlySignedAccount = rawTx.numberReadonlySignedAccount;
+//     this.numberReadonlyUnSignedAccount = rawTx.numberReadonlyUnSignedAccount;
+//     this.keyCount = rawTx.keyCount;
+//     this.keys = rawTx.keys;
+//     this.recentBlockHash = rawTx.recentBlockHash;
+//     this.instructionCount = rawTx.instructionCount;
+//     this.programIdIndex = rawTx.programIdIndex;
+//     this.keyIndicesCount = rawTx.keyIndicesCount;
+//     this.keyIndices = rawTx.keyIndices;
+//     this.dataLength = rawTx.dataLength;
+//     this.data = rawTx.data;
+//   }
 
-  transferDataEncode(amount: number | string): string {
-    const data = Buffer.alloc(12);
-    const programIdIndexSpan = 4;
-    data.writeUIntLE(2, 0, programIdIndexSpan);
-    const v2e32 = Math.pow(2, 32);
-    const value = Number(amount) * params.LAMPORTS_PER_SOL;
-    const hi32 = Math.floor(value / v2e32);
-    const lo32 = value - hi32 * v2e32;
-    data.writeUInt32LE(lo32, programIdIndexSpan);
-    data.writeInt32LE(hi32, programIdIndexSpan + 4);
-    this.data = data.toString('hex');
-    return data.toString('hex');
-  }
+//   transferDataEncode(amount: number | string): string {
+//     const data = Buffer.alloc(12);
+//     const programIdIndexSpan = 4;
+//     data.writeUIntLE(2, 0, programIdIndexSpan);
+//     const v2e32 = Math.pow(2, 32);
+//     const value = Number(amount) * params.LAMPORTS_PER_SOL;
+//     const hi32 = Math.floor(value / v2e32);
+//     const lo32 = value - hi32 * v2e32;
+//     data.writeUInt32LE(lo32, programIdIndexSpan);
+//     data.writeInt32LE(hi32, programIdIndexSpan + 4);
+//     this.data = data.toString('hex');
+//     return data.toString('hex');
+//   }
 
-  splDataEncode(amount: number | string, decimals: number = 9): string {
-    const data = Buffer.alloc(9);
-    const programIdIndexSpan = 1;
-    data.writeUIntLE(3, 0, programIdIndexSpan);
-    const [round, decimal] = amount.toString().split('.');
+//   splDataEncode(amount: number | string, decimals: number = 9): string {
+//     const data = Buffer.alloc(9);
+//     const programIdIndexSpan = 1;
+//     data.writeUIntLE(3, 0, programIdIndexSpan);
+//     const [round, decimal] = amount.toString().split('.');
 
-    let value = Number(round) > 0 ? round : '';
-    if (decimal) {
-      value += decimal.charAt(decimals) ? decimal.split('').slice(0, decimals).join('') : decimal.padEnd(decimals, '0');
-    } else {
-      value = value + ''.padEnd(decimals, '0');
-    }
-    const valueHex = new BN(value).toString(16, 8 * 2);
-    const valueBuf = Buffer.from(valueHex, 'hex').reverse();
+//     let value = Number(round) > 0 ? round : '';
+//     if (decimal) {
+//       value += decimal.charAt(decimals) ? decimal.split('').slice(0, decimals).join('') : decimal.padEnd(decimals, '0');
+//     } else {
+//       value = value + ''.padEnd(decimals, '0');
+//     }
+//     const valueHex = new BN(value).toString(16, 8 * 2);
+//     const valueBuf = Buffer.from(valueHex, 'hex').reverse();
 
-    data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
-    this.data = data.toString('hex');
-    return decimals.toString(16) + data.toString('hex');
-  }
+//     data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
+//     this.data = data.toString('hex');
+//     return decimals.toString(16) + data.toString('hex');
+//   }
 
-  serialize(signature: string): string {
-    this.signature = signature;
-    const keysLength = this.keys.length;
-    return (
-      this.sigCount +
-      this.signature +
-      this.numberRequireSignature +
-      this.numberReadonlySignedAccount +
-      this.numberReadonlyUnSignedAccount +
-      this.keyCount +
-      this.keys
-        .map((key, index) => {
-          if (key === ''.padStart(64, '0') && index !== keysLength - 1) {
-            return '';
-          }
-          return key;
-        })
-        .join('') +
-      this.recentBlockHash +
-      this.instructionCount +
-      this.programIdIndex +
-      this.keyIndicesCount +
-      this.keyIndices +
-      this.dataLength +
-      this.data
-    );
-  }
-  serializeArgument(): string {
-    return this.keyCount + this.keys.join('') + this.recentBlockHash + this.dataLength + this.data;
-  }
-}
+//   serialize(signature: string): string {
+//     this.signature = signature;
+//     const keysLength = this.keys.length;
+//     return (
+//       this.sigCount +
+//       this.signature +
+//       this.numberRequireSignature +
+//       this.numberReadonlySignedAccount +
+//       this.numberReadonlyUnSignedAccount +
+//       this.keyCount +
+//       this.keys
+//         .map((key, index) => {
+//           if (key === ''.padStart(64, '0') && index !== keysLength - 1) {
+//             return '';
+//           }
+//           return key;
+//         })
+//         .join('') +
+//       this.recentBlockHash +
+//       this.instructionCount +
+//       this.programIdIndex +
+//       this.keyIndicesCount +
+//       this.keyIndices +
+//       this.dataLength +
+//       this.data
+//     );
+//   }
+//   serializeArgument(): string {
+//     return this.keyCount + this.keys.join('') + this.recentBlockHash + this.dataLength + this.data;
+//   }
+// }
 export class Transaction {
   feePayer: string | Buffer;
   recentBlockhash: string;

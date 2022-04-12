@@ -456,7 +456,7 @@ function CoinTerra(props: Props) {
                 {denom.name}
               </Dropdown.Toggle>
             
-              <Dropdown.Menu>
+              <Dropdown.Menu className="limited-dropdown">
                 {Object.values(DENOMTYPE).map(function(denomT){
                   return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
                 })}
@@ -473,7 +473,7 @@ function CoinTerra(props: Props) {
                 {feeDenom.name}
               </Dropdown.Toggle>
             
-              <Dropdown.Menu>
+              <Dropdown.Menu className="limited-dropdown">
                 {Object.values(DENOMTYPE).map(function(denomT){
                   return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
                 })}
@@ -522,7 +522,7 @@ function CoinTerra(props: Props) {
                 {delegateFeeDenom.name}
               </Dropdown.Toggle>
             
-              <Dropdown.Menu>
+              <Dropdown.Menu className="limited-dropdown">
                 {Object.values(DENOMTYPE).map(function(denomT){
                   return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
                 })}
@@ -583,7 +583,7 @@ function CoinTerra(props: Props) {
                 {undelegateFeeDenom.name}
               </Dropdown.Toggle>
             
-              <Dropdown.Menu>
+              <Dropdown.Menu className="limited-dropdown">
                 {Object.values(DENOMTYPE).map(function(denomT){
                   return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
                 })}
@@ -628,7 +628,7 @@ function CoinTerra(props: Props) {
                 {withdrawFeeDenom.name}
               </Dropdown.Toggle>
             
-              <Dropdown.Menu>
+              <Dropdown.Menu className="limited-dropdown">
                 {Object.values(DENOMTYPE).map(function(denomT){
                   return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
                 })}
@@ -677,7 +677,7 @@ function CoinTerra(props: Props) {
                 {swapDenom.name}
               </Dropdown.Toggle>
             
-              <Dropdown.Menu>
+              <Dropdown.Menu className="limited-dropdown">
                 {Object.values(DENOMTYPE).map(function(denomT){
                   return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
                 })}
@@ -694,7 +694,7 @@ function CoinTerra(props: Props) {
                 {swapFeeDenom.name}
               </Dropdown.Toggle>
             
-              <Dropdown.Menu>
+              <Dropdown.Menu className="limited-dropdown">
                 {Object.values(DENOMTYPE).map(function(denomT){
                   return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
                 })}
@@ -743,7 +743,7 @@ function CoinTerra(props: Props) {
                 {ancFeeDenom.name}
               </Dropdown.Toggle>
             
-              <Dropdown.Menu>
+              <Dropdown.Menu className="limited-dropdown">
                 {Object.values(DENOMTYPE).map(function(denomT){
                   return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
                 })}
