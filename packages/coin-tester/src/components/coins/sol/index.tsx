@@ -141,26 +141,21 @@ function CoinSol(props: Props) {
     );
     const appId = localStorage.getItem('appId');
     if (!appId) throw new Error('No Appid stored, please register!');
-    try {
-      const signedTx = await sol.signTransaction({
-        transport: transport as Transport,
-        appPrivateKey,
-        appId,
-        transaction: tx,
-      });
-      const recoveredTx = Transaction.from(signedTx);
+    const signedTx = await sol.signTransaction({
+      transport: transport as Transport,
+      appPrivateKey,
+      appId,
+      transaction: tx,
+    });
+    const recoveredTx = Transaction.from(signedTx);
 
-      const verifySig = recoveredTx.verifySignatures();
+    const verifySig = recoveredTx.verifySignatures();
 
-      // signature need to be valid
-      if (!verifySig) throw new Error('Fail to verify signature');
+    // signature need to be valid
+    if (!verifySig) throw new Error('Fail to verify signature');
 
-      await connection.sendRawTransaction(recoveredTx.serialize());
-    } catch (error) {
-      console.log(error);
-    } finally {
-      return address;
-    }
+    await connection.sendRawTransaction(recoveredTx.serialize());
+    return address;
   };
 
   const signTransaction = async () => {
