@@ -4,7 +4,8 @@ import { Transaction } from './transactionUtil';
 
 /**
  * getTransferArguments
- * @param {TransferTx} TransferTx transaction with extracted fields from a regular sol transaction
+ * @param {Transaction} rawTx transaction with extracted fields from a regular sol transaction
+ * @param {boolean} isPartialArgs is getting full rawTx as argument or not
  * @returns {Promise<string>}
  */
 export const getTransferArguments = async (rawTx: Transaction, isPartialArgs: boolean): Promise<string> => {

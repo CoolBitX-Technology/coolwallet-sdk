@@ -25,7 +25,7 @@ export default [
   { path: 'cro', Element: CRO },
   { path: 'matic', Element: MATIC },
   { path: 'luna', Element: LUNA },
-  { path: 'SOL', Element: SOL },
+  { path: 'sol', Element: SOL },
   { path: 'terra', Element: TERRA },
   { path: 'xtz', Element: XTZ },
   { path: 'bsc', Element: BSC },
