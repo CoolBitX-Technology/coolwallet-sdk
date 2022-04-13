@@ -11,12 +11,12 @@ export interface SignTxType {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  transaction: Transaction;
+  transaction: TransactionType;
   confirmCB?(): void;
   authorizedCB?(): void;
 };
 
-export interface Transaction {
+export interface TransactionType {
   sender: string;
   publicKey: string; 
   receiver: string;

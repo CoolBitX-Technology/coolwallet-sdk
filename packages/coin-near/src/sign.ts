@@ -1,15 +1,16 @@
 import { tx, apdu/*, utils*/ } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtils';
 import * as types from './config/types';
+import * as nearAPI from 'near-api-js';
 
 export default async function signTransaction(
   signTxData: types.SignTxType
 ): Promise<string> {
 
-  const { script, argument } = await scriptUtil.getScriptAndArguments(signTxData.transaction);
+  const { script, argument } = await scriptUtil.getScriptArg(signTxData.transaction);
 
-  await apdu.tx.sendScript(signTxData.transport!, await script);
-  const encryptedSig = await apdu.tx.executeScript(signTxData.transport!, signTxData.appId, signTxData.appPrivateKey, await argument);
+  await apdu.tx.sendScript(signTxData.transport!, script);
+  const encryptedSig = await apdu.tx.executeScript(signTxData.transport!, signTxData.appId, signTxData.appPrivateKey, argument);
   await apdu.tx.finishPrepare(signTxData.transport!);
   await apdu.tx.getTxDetail(signTxData.transport!);
   const decryptingKey = await apdu.tx.getSignatureKey(signTxData.transport!);

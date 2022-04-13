@@ -3,34 +3,42 @@ import * as params from '../config/params';
 import * as types from '../config/types';
 import * as nearAPI from 'near-api-js';
 import { BN } from 'bn.js';
-const base58 = require('bs58');
 
+const getScriptArg = async (
+  txn: types.TransactionType
+) : Promise<{ script: string, argument: string }>=> {
+  let scrpt;
 
-const publicKeyToAddress = (
-  publicKey: string
-) => {
-  return base58.decode(publicKey);
-};
+  switch(txn.action.txnType) { 
+    case types.TxnType.TRANSFER: { 
+      scrpt = params.TRANSFER.script + params.TRANSFER.signature;
+      break;
+    } 
+    case types.TxnType.STAKE: { 
+      scrpt = params.STAKE.script + params.STAKE.signature;
+      break; 
+    } 
+    case types.TxnType.SMART: { 
+      scrpt = params.SMART.script + params.SMART.signature;
+      break; 
+    } 
+  } 
 
-const getScriptAndArguments = async (
-  txn: types.Transaction
-) => {
-  const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = await getTransferArgument(txn);
+  const argument = await getArgument(txn);
 
-  console.log(script);
-  console.log(await argument);
+  console.log(scrpt);
+  console.log(argument);
+  
   return {
-    script: script,
+    script: scrpt,
     argument: argument,
   };
 };
 
-const getTransferArgument = async (
-  txn: types.Transaction
-) => {
+const getArgument = async (
+  txn: types.TransactionType
+) : Promise<string> => {
 
-  // constructs actions that will be passed to the createTransaction method below
   const amount = nearAPI.utils.format.parseNearAmount(txn.action.amount);
   
   let actions: nearAPI.transactions.Action[];
@@ -72,7 +80,13 @@ const getTransferArgument = async (
 };
 
 const addPath = async (argument: string, addressIndex: number): Promise<string> => {
-	const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
+  
+  const pathType = config.PathType.SLIP0010;
+  const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
+
+  const SEPath = `0D${path}`;
+  console.debug('SEPath: ', SEPath);
+
 	return SEPath + argument;
 };
 
@@ -94,4 +108,4 @@ const nearToDisplay = (num: string, pad = 20): string => {
   return tBN.toString(16).padStart(pad, '0');
 };
 
-export { publicKeyToAddress, getScriptAndArguments };
+export { getScriptArg };
