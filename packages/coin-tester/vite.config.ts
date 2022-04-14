@@ -17,4 +17,15 @@ export default defineConfig({
     },
   },
   plugins: [optionalDeps({ enabledPackages }), react(), viteCommonjs({ skipPreBuild: true })],
+  server: {
+  proxy: {
+    '/rpc': {
+//         target: 'https://rpc.testnet.near.org',
+         target: 'https://rpc.mainnet.near.org', 
+         changeOrigin: true,
+         rewrite: (path) => path.replace(/^\/rpc/, '')
+    }
+  }
+  },
+
 });

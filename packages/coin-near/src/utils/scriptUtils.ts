@@ -13,22 +13,23 @@ const getScriptArg = async (
     case types.TxnType.TRANSFER: { 
       scrpt = params.TRANSFER.script + params.TRANSFER.signature;
       break;
-    } 
+    }
     case types.TxnType.STAKE: { 
       scrpt = params.STAKE.script + params.STAKE.signature;
       break; 
-    } 
+    }
     case types.TxnType.SMART: { 
       scrpt = params.SMART.script + params.SMART.signature;
       break; 
-    } 
+    }
+    case types.TxnType.SMARTNOAMOUNT: { 
+      scrpt = params.SMARTNOAMOUNT.script + params.SMARTNOAMOUNT.signature;
+      break; 
+    }
   } 
 
   const argument = await getArgument(txn);
 
-  console.log(scrpt);
-  console.log(argument);
-  
   return {
     script: scrpt,
     argument: argument,
@@ -52,29 +53,27 @@ const getArgument = async (
       actions = [nearAPI.transactions.stake(new BN(amount!), nearAPI.utils.key_pair.PublicKey.from(txn.action.validatorPublicKey!))]; 
       break; 
     } 
-    case types.TxnType.SMART: { 
+    case types.TxnType.SMART:
+    case types.TxnType.SMARTNOAMOUNT: { 
       actions = [nearAPI.transactions.functionCall(txn.action.methodName!, txn.action.methodArgs!,
         new BN(nearAPI.utils.format.parseNearAmount(txn.action.gas)!), new BN(amount!))];
       break; 
     } 
   } 
-  
   // create transaction
   const transaction = nearAPI.transactions.createTransaction(
-    txn.sender, 
-    nearAPI.utils.key_pair.PublicKey.from(txn.publicKey), 
-    txn.receiver, 
+    txn.sender!, 
+    nearAPI.utils.key_pair.PublicKey.from(txn.publicKey!), 
+    txn.receiver!, 
     txn.nonce, 
     actions, 
     nearAPI.utils.serialize.base_decode(txn.recentBlockHash)
   );
-
   const serializedTx = nearAPI.utils.serialize.serialize(
     nearAPI.transactions.SCHEMA, 
     transaction
   );
-
-  const argument = nearToDisplay(txn.action.amount);
+  const argument = txn.action.txnType != types.TxnType.SMARTNOAMOUNT ? nearToDisplay(txn.action.amount!) : '';
 
   return await addPath(argument, 0) + Buffer.from(serializedTx).toString('hex');
 };
@@ -85,7 +84,6 @@ const addPath = async (argument: string, addressIndex: number): Promise<string> 
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
 
   const SEPath = `0D${path}`;
-  console.debug('SEPath: ', SEPath);
 
 	return SEPath + argument;
 };

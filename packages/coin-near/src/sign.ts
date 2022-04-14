@@ -1,7 +1,6 @@
 import { tx, apdu/*, utils*/ } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtils';
 import * as types from './config/types';
-import * as nearAPI from 'near-api-js';
 
 export default async function signTransaction(
   signTxData: types.SignTxType

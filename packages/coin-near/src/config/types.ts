@@ -4,7 +4,8 @@ export { Transport };
 export enum TxnType {
   TRANSFER = 1,
   STAKE = 2,
-  SMART = 3
+  SMART = 3,
+  SMARTNOAMOUNT = 4
 }
 
 export interface SignTxType {
@@ -17,9 +18,9 @@ export interface SignTxType {
 };
 
 export interface TransactionType {
-  sender: string;
-  publicKey: string; 
-  receiver: string;
+  sender?: string;
+  publicKey?: string; 
+  receiver?: string;
   nonce: number;
   recentBlockHash: string;
   action: Action;
@@ -27,7 +28,7 @@ export interface TransactionType {
 
 export interface Action {
   txnType: TxnType;
-  amount: string;
+  amount?: string;
   // Stake txn
   validatorPublicKey?: string;
   // Smart contract txn
