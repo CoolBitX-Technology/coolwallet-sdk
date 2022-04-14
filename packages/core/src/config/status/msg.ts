@@ -25,6 +25,7 @@ export const MSG: CodeList = {
   _6BAC: '',
   _6ED1: 'the data decrypted an incorrect result (PKCS5 check failed, the key may be wrong)',
   _6D63: 'path length is incorrect',
+  _6D64: 'bip32Ed25519 seed is not initialized',
   _6D68: 'path is not standard',
   _6D6C: 'the path of SLIP10 contains non-harden index',
   _6D65: 'path uses unsupported scheme (limited to BIP32 or SLIP10)',
