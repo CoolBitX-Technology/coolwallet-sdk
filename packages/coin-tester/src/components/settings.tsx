@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import crypto from 'crypto';
+import { Container } from 'react-bootstrap';
 import { Transport, apdu, tx, utils, config } from '@coolwallet/core';
 import { NoInput, OneInput, ObjInputs } from '../utils/componentMaker';
 
@@ -26,6 +27,8 @@ function Settings(props: Props) {
   const [mnemonic, setMnemonic] = useState('');
   const [mnemonicInput, setMnemonicInput] = useState('');
   const [mnemonicStatus, setMnemonicStatus] = useState('');
+  const [mnemonicWithoutADAInput, setMnemonicWithoutADAInput] = useState('');
+  const [mnemonicWithoutADAStatus, setMnemonicWithoutADAStatus] = useState('');
 
   const [signingKeys, setSigningKeys] = useState(['Script', 'Arguments']);
   const [signingValues, setSigningValues] = useState(['', '']);
@@ -94,7 +97,7 @@ function Settings(props: Props) {
       if (!appId) throw new Error('No Appid stored, please register!');
       await apdu.ota.updateSE(
         transport!,
-        cardId,
+        Buffer.from(cardId, 'hex').toString(),
         appId,
         props.appPrivateKey,
         (number) => {
@@ -138,9 +141,7 @@ function Settings(props: Props) {
 
   const createMnemonic = async () => {
     handleState(async () => {
-      const crypto = require('crypto');
-      const mnemonic = await utils.createSeedByApp(12, crypto.randomBytes);
-      return mnemonic;
+      return utils.createSeedByApp(12, crypto.randomBytes);
     }, setMnemonic);
   };
 
@@ -153,6 +154,17 @@ function Settings(props: Props) {
       await utils.createWalletByMnemonic(transport!, appId, props.appPrivateKey, mnemonicInput, SEPublicKey);
       return 'success';
     }, setMnemonicStatus);
+  };
+
+  const recoverWalletWithoutADA = async () => {
+    handleState(async () => {
+      console.log('mnemonicInput :', mnemonicInput);
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const SEPublicKey = await config.getSEPublicKey(transport!);
+      await apdu.wallet.setSeed(transport!, appId, props.appPrivateKey, mnemonicInput, SEPublicKey);
+      return 'success';
+    }, setMnemonicWithoutADAStatus);
   };
 
   const sign = async () => {
@@ -214,6 +226,17 @@ function Settings(props: Props) {
         disabled={disabled}
         value={mnemonicInput}
         setValue={setMnemonicInput}
+        placeholder='mnemonic'
+        btnName='Recover'
+        inputSize={6}
+      />
+      <OneInput
+        title='Recover Wallet Without ADA'
+        content={mnemonicWithoutADAStatus}
+        onClick={recoverWalletWithoutADA}
+        disabled={disabled}
+        value={mnemonicWithoutADAInput}
+        setValue={setMnemonicWithoutADAInput}
         placeholder='mnemonic'
         btnName='Recover'
         inputSize={6}
