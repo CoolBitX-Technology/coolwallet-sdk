@@ -18,7 +18,6 @@
     "@coolwallet/cronos": "file:../coin-cronos",
     "@coolwallet/etc": "file:../coin-etc",
     "@coolwallet/eth": "file:../coin-eth",
-    "@coolwallet/luna": "file:../coin-luna",
     "@coolwallet/terra": "file:../coin-terra",
     "@coolwallet/matic": "file:../coin-matic",
     "@coolwallet/bsc": "file:../coin-bsc",
