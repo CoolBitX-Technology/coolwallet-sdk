@@ -1,4 +1,4 @@
-import { apdu, Transport, crypto, config, utils } from '@coolwallet/core';
+import { apdu, Transport, config, utils, crypto } from '@coolwallet/core';
 
 type Mandatory = {
   appPrivateKey: string;
@@ -26,4 +26,10 @@ async function initialize(transport: Transport, mnemonic: string): Promise<Manda
   };
 }
 
-export { initialize };
+async function getTxDetail(transport: Transport, appId: string): Promise<string> {
+  await apdu.general.hi(transport, appId);
+  await apdu.tx.finishPrepare(transport);
+  return apdu.tx.getExplicitTxDetail(transport);
+}
+
+export { initialize, getTxDetail };

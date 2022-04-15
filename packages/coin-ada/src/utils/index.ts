@@ -4,6 +4,7 @@ import { MajorType, Integer } from '../config/types';
 
 const bip32Edd25519 = require('bip32-ed25519');
 const blake2b = require('blake2b');
+const bs58 = require('bs58');
 
 export const derivePubKeyFromAccountToIndex = (
   accountPubKey: Buffer,
@@ -35,10 +36,27 @@ export const accountKeyToAddress = (accPubkey: Buffer, addrIndex: number) => {
   return address;
 };
 
-export const decodeAddress = (address: string): Buffer => {
-  const words = bech32.decode(address, 150).words;
-  const addressBuff = Buffer.from(bech32.fromWords(words));
-  return addressBuff;
+export const decodeAddress = (address: string)
+: { addressBuff: Buffer, addressEncodeType: number } => {
+  let addressBuff;
+  let addressEncodeType;
+  try {
+    const { prefix, words } = bech32.decode(address, 150);
+    addressBuff = Buffer.from(bech32.fromWords(words));
+    const dataLen = addressBuff.length;
+    if (prefix === 'addr' && dataLen === 57) addressEncodeType = 1;
+    if (prefix === 'addr' && dataLen === 29) addressEncodeType = 2;
+    if (prefix === 'stake' && dataLen === 29) addressEncodeType = 3;
+    if (!addressEncodeType) throw new Error('address not supported');
+  } catch(err) {
+    try {
+      addressBuff = bs58.decode(address);
+      addressEncodeType = 0;
+    } catch(_) {
+      throw new Error('address format not recognized');
+    }
+  }
+  return { addressBuff, addressEncodeType };
 };
 
 export const cborEncode = (majorType: MajorType, value: Integer): string => {

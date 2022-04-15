@@ -45,6 +45,13 @@ var MsgWithdrawDelegatorReward = exports.MsgWithdrawDelegatorReward = {
   decode: null
 }
 
+var MsgExecuteContract = exports.MsgExecuteContract = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
 var Fee = exports.Fee = {
   buffer: true,
   encodingLength: null,
@@ -112,6 +119,7 @@ defineMsgSend()
 defineMsgDelegate()
 defineMsgUndelegate()
 defineMsgWithdrawDelegatorReward()
+defineMsgExecuteContract()
 defineFee()
 defineCoin()
 defineTxBody()
@@ -457,6 +465,114 @@ function defineMsgWithdrawDelegatorReward () {
         obj.validator_address = encodings.string.decode(buf, offset)
         offset += encodings.string.decode.bytes
         found1 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineMsgExecuteContract () {
+  MsgExecuteContract.encodingLength = encodingLength
+  MsgExecuteContract.encode = encode
+  MsgExecuteContract.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (defined(obj.sender)) {
+      var len = encodings.string.encodingLength(obj.sender)
+      length += 1 + len
+    }
+    if (defined(obj.contract)) {
+      var len = encodings.string.encodingLength(obj.contract)
+      length += 1 + len
+    }
+    if (defined(obj.msg)) {
+      var len = encodings.bytes.encodingLength(obj.msg)
+      length += 1 + len
+    }
+    if (defined(obj.funds)) {
+      for (var i = 0; i < obj.funds.length; i++) {
+        if (!defined(obj.funds[i])) continue
+        var len = Coin.encodingLength(obj.funds[i])
+        length += varint.encodingLength(len)
+        length += 1 + len
+      }
+    }
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (defined(obj.sender)) {
+      buf[offset++] = 10
+      encodings.string.encode(obj.sender, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
+    if (defined(obj.contract)) {
+      buf[offset++] = 18
+      encodings.string.encode(obj.contract, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
+    if (defined(obj.msg)) {
+      buf[offset++] = 26
+      encodings.bytes.encode(obj.msg, buf, offset)
+      offset += encodings.bytes.encode.bytes
+    }
+    if (defined(obj.funds)) {
+      for (var i = 0; i < obj.funds.length; i++) {
+        if (!defined(obj.funds[i])) continue
+        buf[offset++] = 42
+        varint.encode(Coin.encodingLength(obj.funds[i]), buf, offset)
+        offset += varint.encode.bytes
+        Coin.encode(obj.funds[i], buf, offset)
+        offset += Coin.encode.bytes
+      }
+    }
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      sender: "",
+      contract: "",
+      msg: null,
+      funds: []
+    }
+    while (true) {
+      if (end <= offset) {
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.sender = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        break
+        case 2:
+        obj.contract = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        break
+        case 3:
+        obj.msg = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
+        break
+        case 5:
+        var len = varint.decode(buf, offset)
+        offset += varint.decode.bytes
+        obj.funds.push(Coin.decode(buf, offset, offset + len))
+        offset += Coin.decode.bytes
         break
         default:
         offset = skip(prefix & 7, buf, offset)

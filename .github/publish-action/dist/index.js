@@ -13270,7 +13270,19 @@ module.exports = {
     'big5hkscs': {
         type: '_dbcs',
         table: function() { return (__nccwpck_require__(9745).concat)(__nccwpck_require__(4439)) },
-        encodeSkipVals: [0xa2cc],
+        encodeSkipVals: [
+            // Although Encoding Standard says we should avoid encoding to HKSCS area (See Step 1 of
+            // https://encoding.spec.whatwg.org/#index-big5-pointer), we still do it to increase compatibility with ICU.
+            // But if a single unicode point can be encoded both as HKSCS and regular Big5, we prefer the latter.
+            0x8e69, 0x8e6f, 0x8e7e, 0x8eab, 0x8eb4, 0x8ecd, 0x8ed0, 0x8f57, 0x8f69, 0x8f6e, 0x8fcb, 0x8ffe,
+            0x906d, 0x907a, 0x90c4, 0x90dc, 0x90f1, 0x91bf, 0x92af, 0x92b0, 0x92b1, 0x92b2, 0x92d1, 0x9447, 0x94ca,
+            0x95d9, 0x96fc, 0x9975, 0x9b76, 0x9b78, 0x9b7b, 0x9bc6, 0x9bde, 0x9bec, 0x9bf6, 0x9c42, 0x9c53, 0x9c62,
+            0x9c68, 0x9c6b, 0x9c77, 0x9cbc, 0x9cbd, 0x9cd0, 0x9d57, 0x9d5a, 0x9dc4, 0x9def, 0x9dfb, 0x9ea9, 0x9eef,
+            0x9efd, 0x9f60, 0x9fcb, 0xa077, 0xa0dc, 0xa0df, 0x8fcc, 0x92c8, 0x9644, 0x96ed,
+
+            // Step 2 of https://encoding.spec.whatwg.org/#index-big5-pointer: Use last pointer for U+2550, U+255E, U+2561, U+256A, U+5341, or U+5345
+            0xa2a4, 0xa2a5, 0xa2a7, 0xa2a6, 0xa2cc, 0xa2ce,
+        ],
     },
 
     'cnbig5': 'big5hkscs',
@@ -15670,32 +15682,38 @@ function run() {
                     return [4 /*yield*/, checkAndPublish(context, 'packages/coin-eth')];
                 case 12:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-icx')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-evm')];
                 case 13:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ltc')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-icx')];
                 case 14:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-matic')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ltc')];
                 case 15:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-trx')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-matic')];
                 case 16:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-trx')];
                 case 17:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
                 case 18:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zen')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
                 case 19:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zen')];
                 case 20:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
                 case 21:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
+                case 22:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
+                case 23:
                     _a.sent();
                     return [2 /*return*/];
             }

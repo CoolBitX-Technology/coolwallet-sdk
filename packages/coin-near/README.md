@@ -9,6 +9,12 @@ Typescript library with support for the integration of NEAR for third party appl
 npm i @coolwallet/near
 ```
 
+## Near documentation
+
+https://nomicon.io/
+https://docs.near.org/docs 
+
+
 ## Usage
 
 ```javascript

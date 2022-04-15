@@ -58,9 +58,9 @@ export const executeScript = async (transport: Transport, appId: string, appPriv
 
 /**
  * Scriptable step 3.
- * 
+ *
  * Send smart contract data one by one and hash it in card.
- * 
+ *
  * @param transport Transport layer
  * @param appId application id
  * @param appPrivKey application private key
@@ -212,7 +212,7 @@ export const clearTransaction = async (transport: Transport): Promise<boolean> =
 };
 
 /**
- * get Transactino detail shown on hardware.
+ * get transaction detail shown on hardware.
  * @param {Transport} transport
  * @return {Promise<boolean>} true: success, false: canceled.
  */
@@ -226,13 +226,27 @@ export const getTxDetail = async (transport: Transport): Promise<boolean> => {
 };
 
 /**
+ * get transaction detail message and shown on hardware.
+ * @param {Transport} transport
+ * @return {Promise<boolean>} true: success, false: canceled.
+ */
+export const getExplicitTxDetail = async (transport: Transport): Promise<string> => {
+  const { statusCode, msg,outputData } = await executeCommand(transport, commands.GET_TX_DETAIL, target.SE);
+  if (statusCode === CODE._9000) {
+    return outputData;
+  } else {
+    throw new APDUError(commands.GET_TX_DETAIL, statusCode, msg);
+  }
+};
+
+/**
  * set built-in ERC20 token payload in CWS.
  * @param {Transport} transport
  * @param {string} payload
  * @param {number} sn 1: normal erc20, 2: second token in 0x.
  * @return {Promise<boolean>}
  */
-export const setToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
+export const setToken = async (transport: Transport, payload: string, sn = 1): Promise<boolean> => {
   const command = sn === 1 ? commands.SET_ERC20_TOKEN : commands.SET_SECOND_ERC20_TOKEN;
   const { statusCode, msg } = await executeCommand(transport, command, target.SE, payload);
   if (statusCode === CODE._9000) {
@@ -249,7 +263,7 @@ export const setToken = async (transport: Transport, payload: string, sn: number
  * @param {number} sn 1: normal erc20, 2: second token in 0x.
  * @return {Promise<boolean>}
  */
-export const setCustomToken = async (transport: Transport, payload: string, sn: number = 1): Promise<boolean> => {
+export const setCustomToken = async (transport: Transport, payload: string, sn = 1): Promise<boolean> => {
   const command = sn === 1 ? commands.SET_ERC20_TOKEN : commands.SET_SECOND_ERC20_TOKEN;
   const { statusCode, msg } = await executeCommand(transport, command, target.SE, payload, '04', '18');
   if (statusCode === CODE._9000) {

@@ -2,9 +2,11 @@ import { coin as COIN, Transport } from '@coolwallet/core';
 import * as params from './config/params';
 import * as txUtil from './utils/transactionUtils';
 import * as types from './config/types';
+import { DENOMTYPE } from './config/denomType';
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
+import { TOKENTYPE } from './config/tokenType';
 
 export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
   public Types: any;
@@ -55,6 +57,7 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         };
         break;
       case types.TX_TYPE.DELEGATE:
+        signData.transaction.denom = DENOMTYPE.LUNA;
         if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
           script = params.DELEGATE.script + params.DELEGATE.signature;
         else
@@ -65,6 +68,7 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         };
         break;
       case types.TX_TYPE.UNDELEGATE:
+        signData.transaction.denom = DENOMTYPE.LUNA;
         if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
           script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
         else
@@ -83,6 +87,37 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
         genTx = (signature: string) => {
           return txUtil.getWithdrawDelegatorRewardTx(signData.transaction, signature, publicKey);
         };
+        break;
+      case types.TX_TYPE.CW20:
+        const upperCaseAddress = signData.transaction.contractAddress.toUpperCase();
+        let tokenSignature = '';
+        for(const tokenInfo of TOKENTYPE){
+          // supported cw-20
+          if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
+            tokenSignature = tokenInfo.signature;
+            signData.transaction.option.info.symbol = tokenInfo.symbol;
+            signData.transaction.option.info.decimals = tokenInfo.unit;
+            break;
+          }
+        }
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.CW20.script + params.CW20.signature;
+        else
+          script = params.CW20.script_test + params.CW20.signature_test;
+        argument = scriptUtil.getCW20Argument(publicKey, signData.transaction, addressIndex, tokenSignature);
+        genTx = (signature: string) => {
+          return txUtil.getSmartTx(signData.transaction, signature, publicKey);
+        };
+        break;
+      case types.TX_TYPE.SMART:
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.SMART.script + params.SMART.signature;
+        else
+          script = params.SMART.script_test + params.SMART.signature_test;
+        argument = scriptUtil.getTerraSmartArgument(publicKey, signData.transaction, addressIndex);
+        genTx = (signature: string) => {
+          return txUtil.getSmartTx(signData.transaction, signature, publicKey);
+        }
         break;
       default:
         throw new SDKError(this.signTERRATransaction.name, `not support input tx type`);
