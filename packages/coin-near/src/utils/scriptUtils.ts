@@ -75,10 +75,10 @@ const getArgument = async (
   );
   const argument = txn.action.txnType != types.TxnType.SMARTNOAMOUNT ? nearToDisplay(txn.action.amount!) : '';
 
-  return await addPath(argument, 0) + Buffer.from(serializedTx).toString('hex');
+  return await addPath(argument) + Buffer.from(serializedTx).toString('hex');
 };
 
-const addPath = async (argument: string, addressIndex: number): Promise<string> => {
+const addPath = async (argument: string): Promise<string> => {
   
   const pathType = config.PathType.SLIP0010;
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);

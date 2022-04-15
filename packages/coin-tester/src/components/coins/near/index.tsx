@@ -7,12 +7,24 @@ import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 import * as nearAPI from 'near-api-js';
 import Near from '@coolwallet/near';
 import { SignTxData, TransactionType, Action, TxnType } from '@coolwallet/near/lib/config/types';
-const sha256 = require("js-sha256");
 import { BN } from 'bn.js';
 const base58 = require('bs58');
 
+
+// Add to coin-tester vite.config.ts
+// server: {
+//   proxy: {
+//     '/rpc': {
+//          target: 'https://rpc.testnet.near.org',
+// //         target: 'https://rpc.mainnet.near.org', 
+//          changeOrigin: true,
+//          rewrite: (path) => path.replace(/^\/rpc/, '')
+//     }
+//   }
+//   },
+
 const tstReceiver = '';
-const tstAmount = '0.5';
+const tstAmount = '0.05';
 const tstValidator = 'ydgzeXHJ5Xyt7M1gXLxqLBW1Ejx6scNV5Nx2pxFM8su';
 const tstGas = '0.00000000003';
 // const tstCallId = 'meerkat.stakewars.testnet';
@@ -24,8 +36,8 @@ const tstMethodArgs = Buffer.from(JSON.stringify({"account_id": "alice"}))
  
 // const networkId = "testnet";
 const networkId = "mainnet";
-// const rpcUrl = "https://rpc.testnet.near.org";
-const rpcUrl = "https://rpc.mainnet.near.org";
+const rpcUrl = "https://rpc.testnet.near.org";
+//const rpcUrl = "https://rpc.mainnet.near.org";
 
 interface Props {
   transport: Transport | null,
@@ -319,7 +331,7 @@ function CoinNear(props: Props) {
       // encodes signed transaction to serialized Borsh (required for all transactions)
       const signedSerializedTx = signedTransaction.encode();
       // sends transaction to NEAR blockchain via JSON RPC call and records the result
-          const provider = new nearAPI.providers.JsonRpcProvider(config.rpcUrl);
+      const provider = new nearAPI.providers.JsonRpcProvider(config.rpcUrl);
       const result = await provider.sendJsonRpc(
         'broadcast_tx_commit', 
         [Buffer.from(signedSerializedTx).toString('base64')]
