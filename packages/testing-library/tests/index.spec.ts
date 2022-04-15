@@ -21,7 +21,7 @@ describe('Test Custom HDWallet', () => {
       const publicKey = await wallet.masterNode.getPublicKeyHex();
       expect(publicKey).toEqual(base58KeyToHex(ECDSA.pubKey));
     });
-    it.each(ECDSA.paths)('deriving $path', async (expected) => {
+    it.each(ECDSA.paths)('deriving path $path', async (expected) => {
       const node = wallet.derivePath(expected.path);
       expect(node.getPrivateKeyHex()).toEqual(base58KeyToHex(expected.prvKey));
       const nodePublicKey = await node.getPublicKeyHex();
@@ -38,7 +38,7 @@ describe('Test Custom HDWallet', () => {
       const publicKey = await wallet.masterNode.getPublicKeyHex();
       expect(publicKey).toEqual(ED25519.pubKey);
     });
-    it.each(ED25519.paths)('deriving $path', async (expected) => {
+    it.each(ED25519.paths)('deriving path $path', async (expected) => {
       const node = wallet.derivePath(expected.path);
       expect(node.getPrivateKeyHex()).toEqual(expected.prvKey);
       const nodePublicKey = await node.getPublicKeyHex();

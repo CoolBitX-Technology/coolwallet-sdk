@@ -6,11 +6,11 @@ interface TokenProps {
   signature: string;
 }
 
-abstract class ChainProps<T extends string> {
+abstract class ChainProps {
   abstract readonly id: number;
   abstract readonly symbol: string;
   abstract readonly signature: string;
-  abstract readonly tokens: Record<T, TokenProps>;
+  abstract readonly tokens: Record<string, TokenProps>;
 
   getSignature() {
     return this.signature;
@@ -34,7 +34,7 @@ abstract class ChainProps<T extends string> {
     const buffer = Buffer.allocUnsafe(6);
     buffer.writeIntBE(this.id, 0, 6);
     // Remove leading zeros.
-    return buffer.toString('hex').replace(/^0+/, '');
+    return Buffer.from(buffer.filter((b) => b !== 0)).toString('hex');
   }
 }
 
