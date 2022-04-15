@@ -1,5 +1,7 @@
 import * as params from "../config/params";
 import * as types from "../config/types";
+import { Option } from '../config/types';
+import * as token from './tokenUtils';
 
 export function getTerraSendArgement(publicKey: string, terraData: types.MsgSend, addressIndex: number) {
   const pubKey = publicKey.padStart(66, '0');
@@ -96,7 +98,7 @@ export function getTerraSmartArgument(publicKey: string, terraData: types.MsgExe
   const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
   const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
   const memo = Buffer.from(terraData.memo, 'ascii').toString('hex').padStart(256, '0');
-  const execute_msg = Buffer.from(terraData.execute_msg).toString('hex');
+  const execute_msg = Buffer.from(JSON.stringify(terraData.execute_msg)).toString('hex');
   const feeDenomLabel = Buffer.from(terraData.feeDenom.name, 'ascii').toString('hex').padStart(16, '0');
   const feeDenom = terraData.feeDenom.protoUnit.padStart(16, '0');
   const feeDenomSignature = terraData.feeDenom.signature.slice(32).padStart(144, "0");
@@ -118,6 +120,38 @@ export function getTerraSmartArgument(publicKey: string, terraData: types.MsgExe
 
   console.debug('getTerraSmartArgument: ' + argument);
 
+  return addPath(argument, addressIndex);
+}
+
+export function getCW20Argument(publicKey: string, terraData: types.MsgCW20, addressIndex: number, tokenSignature: string){
+  const { amount, recipient } = terraData.execute_msg.transfer;
+  const pubKey = publicKey.padStart(66, '0');
+  const senderAddress = Buffer.from(terraData.senderAddress, 'ascii').toString('hex').padStart(128, '0');
+  const contractAddress = Buffer.from(terraData.contractAddress, 'ascii').toString('hex').padStart(128, '0');
+  const toAddress = Buffer.from(recipient, 'ascii').toString('hex').padStart(128, '0');
+  const value = parseInt(amount).toString(16).padStart(16, '0');
+  const feeDenomLabel = Buffer.from(terraData.feeDenom.name, 'ascii').toString('hex').padStart(16, '0');
+  const feeDenom = terraData.feeDenom.protoUnit.padStart(16, '0');
+  const feeDenomSignature = terraData.feeDenom.signature.slice(32).padStart(144, "0");
+  const feeAmount = terraData.feeAmount.toString(16).padStart(16, '0');
+  const gas = terraData.gas.toString(16).padStart(16, '0');
+  const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
+  const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
+  const memo = Buffer.from(terraData.memo, 'ascii').toString('hex').padStart(256, '0');
+
+  const txTokenInfo: Option = terraData.option;
+  const tokenInfo = token.getSetTokenPayload(
+    terraData.contractAddress,
+    txTokenInfo.info.symbol,
+    parseInt(txTokenInfo.info.decimals)
+  );
+  const signature = tokenSignature.slice(106).padStart(144, '0');
+
+  const execute_msg = Buffer.from(JSON.stringify(terraData.execute_msg)).toString('hex');
+
+  const argument = pubKey + senderAddress + contractAddress + toAddress + value  + feeDenomLabel + feeDenom + feeDenomSignature + feeAmount + gas + accountNumber + sequence + memo + tokenInfo + signature + execute_msg;
+
+  console.debug('getTerraCW20Argument: ' + argument);
   return addPath(argument, addressIndex);
 }
 

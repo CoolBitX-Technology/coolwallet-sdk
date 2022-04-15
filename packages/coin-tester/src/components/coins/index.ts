@@ -13,6 +13,7 @@ import TERRA from './terra';
 import XTZ from './xtz';
 import BSC from './bsc';
 import THETA from './theta';
+import AVAXC from './avaxc';
 
 export default [
   { path: 'template', Element: TEMPLATE },
@@ -30,4 +31,5 @@ export default [
   { path: 'xtz', Element: XTZ },
   { path: 'bsc', Element: BSC },
   { path: 'theta', Element: THETA },
+  { path: 'avaxc', Element: AVAXC },
 ];

@@ -4,6 +4,7 @@ import { Transport } from '@coolwallet/core';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 import { CHAIN_ID, TX_TYPE, SignDataType } from '@coolwallet/terra/lib/config/types';
 import { DENOMTYPE } from "@coolwallet/terra/lib/config/denomType";
+import { TOKENTYPE } from "@coolwallet/terra/lib/config/tokenType";
 import BigNumber from 'bignumber.js';
 
 //import cosmosjs from './cosmos';
@@ -18,11 +19,39 @@ interface Props {
   setIsLocked: (isLocked: boolean) => void;
 }
 
+const TOKENTYPEDEV = [
+  // ANC
+  {
+      name: "Anchor ANC Token",
+      symbol: "ANC",
+      unit: "6",
+      contractAddress: "terra1747mad58h0w4y589y3sk84r5efqdev9q4r02pc",
+      signature: "0603414E43000000007465727261313734376d6164353868307734793538397933736b3834723565667164657639713472303270633046022100B995F026DAA2D33960E339E2FBBA039E89E8D67EF4DEEB137CE0A07DBFAE63FC022100FC86C475A3A9972061DA285AFC729813ED9F7953413978812DAA0465AFC6D2EB"
+  },
+  // aUST
+  {
+      name: "Anchor aUST Token",
+      symbol: "aUST",
+      unit: "6",
+      contractAddress: "terra1ajt556dpzvjwl0kl5tzku3fc3p3knkg9mkv8jl",
+      signature: "060461555354000000746572726131616a7435353664707a766a776c306b6c35747a6b753366633370336b6e6b67396d6b76386a6c3046022100F043671FF10B1452408372714D4A4F9E14AD325FF5A1EB5884B4FCAB8B515807022100F0B5C1D65BC7959ED557AE1AAAE109381935FAB57F8CEBD3FD2783C4CDF2B52E"
+  },
+  // bLUNA
+  // {
+  //     name: "Anchor bLuna Token",
+  //     symbol: "bLuna",
+  //     unit: "6",
+  //     contractAddress: "terra1u0t35drzyy0mujj8rkdyzhe264uls4ug3wdp3x",
+  //     signature: "0605624C756E610000746572726131753074333564727a7979306d756a6a38726b64797a6865323634756c73347567337764703378304402207134CA1EA44A57921D33917C013C90710395D2A5A57611BBC961F79E8722F3290220790CD1B561E725EC279741C740A0459E37D2B658187193C256A6BCC0E34C2B5A"
+  // }
+]
+
 function CoinTerra(props: Props) {
   const terra = new Terra();
   const [address, setAddress] = useState('');
   const [chainId, setChainId] = useState(CHAIN_ID.TEST);
   const [netLabel, setNetLabel] = useState("Test Net");
+  const [txUrl, setTxUrl] = useState("https://finder.terra.money/testnet/tx/");
   const [cosmosjs, setNetwork] = useState(Testnet);
   const [balances, setBalances] = useState([]);
   const [validators, setValidators] = useState([]);
@@ -45,7 +74,7 @@ function CoinTerra(props: Props) {
   const [undelegateValue, setUndelegateValue] = useState('0');
   const [signedUndelegate, setSignedUndelegate] = useState('');
   const [undelegateValidator, setUndelegateValidator] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm');
-  const [undelegateFeeAmount, setUndelegateFeeAmount] = useState(0.006);
+  const [undelegateFeeAmount, setUndelegateFeeAmount] = useState(0.008);
   const [undelegateFeeDenom, setUndelegateFeeDenom] = useState(DENOMTYPE.LUNA);
 
   const [signedWithdraw, setSignedWithdraw] = useState('');
@@ -69,6 +98,15 @@ function CoinTerra(props: Props) {
   const [ancRecipient, setAncRecipient] = useState('terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv');
   const [ancFeeAmount, setAncFeeAmount] = useState(0.0015);
   const [ancFeeDenom, setAncFeeDenom] = useState(DENOMTYPE.LUNA);
+
+  const [cw20TokenType, setCw20TokenType] = useState(TOKENTYPEDEV);
+  const [cw20Value, setCw20Value] = useState('0');
+  const [cw20SignedSend, setCw20SignedSend] = useState('');
+  const [cw20Token, setCw20Token] = useState(TOKENTYPEDEV[0]);
+  const [cw20Recipient, setCw20Recipient] = useState('terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv');
+  //const [cw20FeeAmount, setCw20FeeAmount] = useState(0.0057); // bLuna
+  const [cw20FeeAmount, setCw20FeeAmount] = useState(0.0015);
+  const [cw20FeeDenom, setCw20FeeDenom] = useState(DENOMTYPE.LUNA);
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
@@ -102,12 +140,18 @@ function CoinTerra(props: Props) {
       setNetwork(Testnet);
       setChainId(CHAIN_ID.TEST);
       setAncAddress(ancTest);
+      setTxUrl("https://finder.terra.money/testnet/tx/");
+      setCw20TokenType(TOKENTYPEDEV);
+      setCw20Token(TOKENTYPEDEV[0]);
     }
     else{
       newNetwork = Mainnet;
       setNetwork(Mainnet);
       setChainId(CHAIN_ID.MAIN);
       setAncAddress(ancMain);
+      setTxUrl("https://finder.terra.money/mainnet/tx/");
+      setCw20TokenType(TOKENTYPE);
+      setCw20Token(TOKENTYPE[0]);
     }
     setNetLabel(e); 
     if(address.length > 0) {
@@ -127,198 +171,11 @@ function CoinTerra(props: Props) {
     }, setAddress);
   };
 
-  const signTransaction = async () => {
+  const signTransaction = async(_transaction, _transactionType, handleResponse: (response: string) => void) => {
     handleState(async () => {
       const { sequence, account_number } = await cosmosjs.getSequence(address);
       const transaction = {
         chainId: chainId,
-        fromAddress: address,
-        toAddress: to,
-        amount: new BigNumber(value).multipliedBy(1000000).toNumber(),
-        feeAmount: new BigNumber(feeAmount).multipliedBy(1000000).toNumber(),
-        gas: 85000,
-        accountNumber: account_number,
-        sequence,
-        feeDenom: feeDenom,
-        denom: denom,
-        memo: 'test signature',
-      };
-      console.log(transaction);
-      const appId = localStorage.getItem('appId');
-      if (!appId) throw new Error('No Appid stored, please register!');
-      const signTxData: SignDataType = {
-        txType: TX_TYPE.SEND,
-        transaction: transaction,
-        transport: transport!,
-        appPrivateKey,
-        appId,
-        addressIndex: 0,
-        confirmCB: undefined,
-        authorizedCB: undefined,
-      };
-      const signedTx = await terra.signTransaction(signTxData);
-      console.log('signedTx: ' + signedTx);
-      const sendTx = await cosmosjs.broadcastGRPC(signedTx);
-      console.log('sendTx: ' + sendTx);
-
-      updateAccStatus(cosmosjs, address);
-
-      return sendTx;
-    }, setSignedTransaction);
-  };
-
-  const signDelegate = async() => {
-    handleState(async () => {
-      const { sequence, account_number } = await cosmosjs.getSequence(address);
-      const transaction = {
-        chainId: chainId,
-        delegatorAddress: address,
-        validatorAddress: delegateValidator,
-        amount: new BigNumber(delegateValue).multipliedBy(1000000).toNumber(),
-        feeAmount: new BigNumber(delegateFeeAmount).multipliedBy(1000000).toNumber(),
-        feeDenom: delegateFeeDenom,
-        gas: 520000,
-        accountNumber: account_number,
-        sequence,
-        memo: '',
-      };
-      console.log("temp gas amount transaction: ");
-      console.log(transaction);
-      const appId = localStorage.getItem('appId');
-      if (!appId) throw new Error('No Appid stored, please register!');
-      const signTxData: SignDataType = {
-        txType: TX_TYPE.DELEGATE,
-        transaction: transaction,
-        transport: transport!,
-        appPrivateKey,
-        appId,
-        addressIndex: 0,
-        confirmCB: undefined,
-        authorizedCB: undefined,
-      }
-      // const tempSignedTx = await terra.signTransaction(signTxData);
-      // console.log("tempSignedTx: " + tempSignedTx);
-
-      // const getGas = await cosmosjs.getGas(tempSignedTx);
-      // transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
-      // transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
-      // console.log("new gas amount transaction: ");
-      // console.log(transaction);
-
-      const signedTx = await terra.signTransaction(signTxData);
-      console.log("signedTx: " + signedTx);
-      const sendTx = await cosmosjs.broadcastGRPC(signedTx);
-      console.log("sendTx: " + sendTx);
-
-      updateAccStatus(cosmosjs, address);
-
-      return sendTx;
-    }, setSignedDelegate);
-  };
-
-  const signUndelegate = async() => {
-    handleState(async () => {
-      const { sequence, account_number } = await cosmosjs.getSequence(address);
-      const transaction = {
-        chainId: chainId,
-        delegatorAddress: address,
-        validatorAddress: undelegateValidator,
-        amount: new BigNumber(undelegateValue).multipliedBy(1000000).toNumber(),
-        feeAmount: new BigNumber(undelegateFeeAmount).multipliedBy(1000000).toNumber(),
-        feeDenom: undelegateFeeDenom,
-        gas: 520000,
-        accountNumber: account_number,
-        sequence,
-        memo: '',
-      };
-      console.log("temp gas amount transaction: ");
-      console.log(transaction);
-      const appId = localStorage.getItem('appId');
-      if (!appId) throw new Error('No Appid stored, please register!');
-      const signTxData: SignDataType = {
-        txType: TX_TYPE.UNDELEGATE,
-        transaction: transaction,
-        transport: transport!,
-        appPrivateKey,
-        appId,
-        addressIndex: 0,
-        confirmCB: undefined,
-        authorizedCB: undefined,
-      }
-      // const tempSignedTx = await terra.signTransaction(signTxData);
-      // console.log("tempSignedTx: " + tempSignedTx);
-
-      // const getGas = await cosmosjs.getGas(tempSignedTx);
-      // transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
-      // transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
-      // console.log("new gas amount transaction: ");
-      // console.log(transaction);
-
-      const signedTx = await terra.signTransaction(signTxData);
-      console.log("signedTx: " + signedTx);
-      const sendTx = await cosmosjs.broadcastGRPC(signedTx);
-      console.log("sendTx: " + sendTx);
-
-      updateAccStatus(cosmosjs, address);
-
-      return sendTx;
-    }, setSignedUndelegate);
-  }
-
-  const signWithdraw = async() => {
-    handleState(async () => {
-      const { sequence, account_number } = await cosmosjs.getSequence(address);
-      const transaction = {
-        chainId: chainId,
-        delegatorAddress: address,
-        validatorAddress: withdrawValidator,
-        feeAmount: new BigNumber(withdrawFeeAmount).multipliedBy(1000000).toNumber(),
-        feeDenom: withdrawFeeDenom,
-        gas: 400000,
-        accountNumber: account_number,
-        sequence,
-        memo: '',
-      };
-      console.log("temp gas amount transaction: ");
-      console.log(transaction);
-      const appId = localStorage.getItem('appId');
-      if (!appId) throw new Error('No Appid stored, please register!');
-      const signTxData: SignDataType = {
-        txType: TX_TYPE.WITHDRAW,
-        transaction: transaction,
-        transport: transport!,
-        appPrivateKey,
-        appId,
-        addressIndex: 0,
-        confirmCB: undefined,
-        authorizedCB: undefined,
-      }
-      // const tempSignedTx = await terra.signTransaction(signTxData);
-      // console.log("tempSignedTx: " + tempSignedTx);
-
-      // const getGas = await cosmosjs.getGas(tempSignedTx);
-      // transaction.feeAmount = Math.round(parseFloat(getGas.slice(1, getGas.length - 1)) * 0.0134);
-      // transaction.gas = parseFloat(getGas.slice(1, getGas.length - 1));
-      // console.log("new gas amount transaction: ");
-      // console.log(transaction);
-
-      const signedTx = await terra.signTransaction(signTxData);
-      console.log("signedTx: " + signedTx);
-      const sendTx = await cosmosjs.broadcastGRPC(signedTx);
-      console.log("sendTx: " + sendTx);
-
-      updateAccStatus(cosmosjs, address);
-      
-      return sendTx;
-    }, setSignedWithdraw);
-  };
-
-  const signSmartContract = async(_transaction, handleResponse: (response: string) => void) => {
-    handleState(async () => {
-      const { sequence, account_number } = await cosmosjs.getSequence(address);
-      const transaction = {
-        chainId: chainId,
-        senderAddress: address,
         accountNumber: account_number,
         sequence,
         ..._transaction
@@ -327,7 +184,7 @@ function CoinTerra(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const signTxData: SignDataType = {
-        txType: TX_TYPE.SMART,
+        txType: _transactionType,
         transaction: transaction,
         transport: transport!,
         appPrivateKey,
@@ -340,9 +197,64 @@ function CoinTerra(props: Props) {
       console.log("signedTx: " + signedTx);
       const sendTx = await cosmosjs.broadcastGRPC(signedTx);
       console.log("sendTx: " + sendTx);
-      return sendTx;
+      return txUrl + sendTx.slice(1, -1);
     }, handleResponse);
+  };
 
+  const signSendTransaction = async () => {
+    const transaction = {
+      fromAddress: address,
+      toAddress: to,
+      amount: new BigNumber(value).multipliedBy(1000000).toNumber(),
+      feeAmount: new BigNumber(feeAmount).multipliedBy(1000000).toNumber(),
+      gas: 85000,
+      feeDenom: feeDenom,
+      denom: denom,
+      memo: 'test signature',
+    };
+    await signTransaction(transaction, TX_TYPE.SEND, setSignedTransaction);
+    updateAccStatus(cosmosjs, address);
+  };
+
+  const signDelegate = async() => {
+    const transaction = {
+      delegatorAddress: address,
+      validatorAddress: delegateValidator,
+      amount: new BigNumber(delegateValue).multipliedBy(1000000).toNumber(),
+      feeAmount: new BigNumber(delegateFeeAmount).multipliedBy(1000000).toNumber(),
+      feeDenom: delegateFeeDenom,
+      gas: 520000,
+      memo: '',
+    };
+    await signTransaction(transaction, TX_TYPE.DELEGATE, setSignedDelegate);
+    updateAccStatus(cosmosjs, address);
+  };
+
+  const signUndelegate = async() => {
+    const transaction = {
+      delegatorAddress: address,
+      validatorAddress: undelegateValidator,
+      amount: new BigNumber(undelegateValue).multipliedBy(1000000).toNumber(),
+      feeAmount: new BigNumber(undelegateFeeAmount).multipliedBy(1000000).toNumber(),
+      feeDenom: undelegateFeeDenom,
+      gas: 550000,
+      memo: '',
+    };
+    await signTransaction(transaction, TX_TYPE.UNDELEGATE, setSignedUndelegate);
+    updateAccStatus(cosmosjs, address);
+  }
+
+  const signWithdraw = async() => {
+    const transaction = {
+      delegatorAddress: address,
+      validatorAddress: withdrawValidator,
+      feeAmount: new BigNumber(withdrawFeeAmount).multipliedBy(1000000).toNumber(),
+      feeDenom: withdrawFeeDenom,
+      gas: 400000,
+      memo: '',
+    };
+    await signTransaction(transaction, TX_TYPE.WITHDRAW, setSignedWithdraw);
+    updateAccStatus(cosmosjs, address);
   };
 
   const signSmartSwap = async() => {
@@ -361,6 +273,7 @@ function CoinTerra(props: Props) {
     };
     
     const transaction = {
+      senderAddress: address,
       contractAddress: swapAddress,
       execute_msg: JSON.stringify(executeMsgObj),
       // funds: undefined,
@@ -375,7 +288,7 @@ function CoinTerra(props: Props) {
       memo: 'Swap test',
     };
 
-    return signSmartContract(transaction, setSignedSwap);
+    signTransaction(transaction, TX_TYPE.SMART, setSignedSwap);
   };
 
   const signSmartSendAnc = async() => {
@@ -388,6 +301,7 @@ function CoinTerra(props: Props) {
     };
     
     const transaction = {
+      senderAddress: address,
       contractAddress: ancAddress,
       execute_msg: JSON.stringify(executeMsgObj),
       funds: undefined,
@@ -397,12 +311,35 @@ function CoinTerra(props: Props) {
       memo: 'Send anc test',
     };
 
-    return signSmartContract(transaction, setSignedSendAnc);
+    signTransaction(transaction, TX_TYPE.SMART, setSignedSendAnc);
+  };
+
+  const signCw20Send = async() => {
+    const executeMsgObj = {
+      transfer: {
+        amount: new BigNumber(cw20Value).multipliedBy(1000000).toString(),
+        recipient: cw20Recipient
+      }
+    };
+    
+    const transaction = {
+      senderAddress: address,
+      contractAddress: cw20Token.contractAddress,
+      execute_msg: executeMsgObj,
+      funds: undefined,
+      feeDenom: cw20FeeDenom,
+      feeAmount: new BigNumber(cw20FeeAmount).multipliedBy(1000000).toNumber(),
+      //gas: 500000, // bLuna,
+      gas: 120000,
+      memo: 'Send cw20 test',
+    };
+
+    signTransaction(transaction, TX_TYPE.SMART, setCw20SignedSend);
   };
 
   return (
     <Container>
-      <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
+      <div className='title2'>Support: Normal transfer, Stacking and Smart Contract</div>
       <NoInput title='Get Address' content={address} onClick={getAddress} disabled={disabled} />
       {
         <Row style={{ marginBottom: '15px' }}>
@@ -429,9 +366,9 @@ function CoinTerra(props: Props) {
         </Row>
       }
       <TwoInputs
-        title='Sign Transaction'
+        title='Normal Transfer'
         content={signedTransaction}
-        onClick={signTransaction}
+        onClick={signSendTransaction}
         disabled={disabled}
         btnName='Sign'
         value={value}
@@ -448,7 +385,7 @@ function CoinTerra(props: Props) {
           <Col 
             xs={2}
             md={{ span: 1, offset: 2 }}
-          >Tx:</Col>
+          >Coin:</Col>
           <Col 
             xs={2}>
             <Dropdown onSelect={(e)=>{setDenom(DENOMTYPE[e])}}>
@@ -544,7 +481,7 @@ function CoinTerra(props: Props) {
         </Row>
       }
       {
-        <Row style={{ marginBottom: '15px' }}>
+        (validators.length > 0) ? (<Row style={{ marginBottom: '15px' }}>
           <Col 
             xs={2}>Validators:</Col>
           <Col
@@ -553,7 +490,7 @@ function CoinTerra(props: Props) {
               return <Badge bg="success" key={validator.validator_address}  style={{margin: '0 10px'}}>{validator.validator_address} = {validator.amount}{validator.denom}</Badge>;
             })}
           </Col>
-        </Row>
+        </Row>):<></>
       }
       {<TwoInputs
         title='Undelegate' 
@@ -759,6 +696,72 @@ function CoinTerra(props: Props) {
               value={ancFeeAmount}
               onChange={(event) => {
                 setAncFeeAmount(event.target.value);
+              }}
+            />
+          </Col>
+        </Row>
+      }
+      {<TwoInputs
+        title='CW20 Transfer' 
+        content={cw20SignedSend} 
+        onClick={signCw20Send}
+        disabled={disabled}
+        btnName='Sign'
+        value={cw20Value}
+        setValue={setCw20Value}
+        placeholder='cw20Value'
+        inputSize={1}
+        value2={cw20Recipient}
+        setValue2={setCw20Recipient}
+        placeholder2='cw20Recipient'
+        inputSize2={3}
+      />}
+      {
+        <Row style={{ marginBottom: '15px' }}>
+          <Col 
+            xs={2}
+            md={{ span: 1, offset: 2 }}
+          >Token:</Col>
+          <Col 
+            xs={2}>
+            <Dropdown onSelect={(e)=>{setCw20Token(cw20TokenType[parseInt(e)])}}>
+              <Dropdown.Toggle variant='success'>
+                {cw20Token.name}
+              </Dropdown.Toggle>
+            
+              <Dropdown.Menu>
+                {Object.values(cw20TokenType).map(function(token, index){
+                  return <Dropdown.Item key={token.name} eventKey={index}>{token.name}</Dropdown.Item>;
+                })}
+              </Dropdown.Menu>
+            </Dropdown>
+          </Col>
+          <Col 
+            xs={2}
+            md={1}>Fee:</Col>
+          <Col 
+            xs={2}>
+            <Dropdown onSelect={(e)=>{setCw20FeeDenom(DENOMTYPE[e])}}>
+              <Dropdown.Toggle variant='primary'>
+                {cw20FeeDenom.name}
+              </Dropdown.Toggle>
+            
+              <Dropdown.Menu>
+                {Object.values(DENOMTYPE).map(function(denomT){
+                  return <Dropdown.Item key={denomT.name} eventKey={denomT.name}>{denomT.name}</Dropdown.Item>;
+                })}
+              </Dropdown.Menu>
+            </Dropdown>
+          </Col>
+          <Col 
+            xs={3}
+            md={2}>
+            <Form.Control 
+              type='number'
+              placeholder='Fee Amount'
+              value={cw20FeeAmount}
+              onChange={(event) => {
+                setCw20FeeAmount(event.target.value);
               }}
             />
           </Col>
