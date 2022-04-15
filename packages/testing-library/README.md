@@ -2,7 +2,7 @@
 
 Testing library for CoolWallet SDKs.
 
-## API
+### API
 
 #### `initialize(transport: Transport, mnemonic: string)`
 

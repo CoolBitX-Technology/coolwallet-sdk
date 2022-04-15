@@ -37,13 +37,13 @@ const TOKENTYPEDEV = [
       signature: "060461555354000000746572726131616a7435353664707a766a776c306b6c35747a6b753366633370336b6e6b67396d6b76386a6c3046022100F043671FF10B1452408372714D4A4F9E14AD325FF5A1EB5884B4FCAB8B515807022100F0B5C1D65BC7959ED557AE1AAAE109381935FAB57F8CEBD3FD2783C4CDF2B52E"
   },
   // bLUNA
-  // {
-  //     name: "Anchor bLuna Token",
-  //     symbol: "bLuna",
-  //     unit: "6",
-  //     contractAddress: "terra1u0t35drzyy0mujj8rkdyzhe264uls4ug3wdp3x",
-  //     signature: "0605624C756E610000746572726131753074333564727a7979306d756a6a38726b64797a6865323634756c73347567337764703378304402207134CA1EA44A57921D33917C013C90710395D2A5A57611BBC961F79E8722F3290220790CD1B561E725EC279741C740A0459E37D2B658187193C256A6BCC0E34C2B5A"
-  // }
+  {
+      name: "Anchor bLuna Token",
+      symbol: "bLuna",
+      unit: "6",
+      contractAddress: "terra1u0t35drzyy0mujj8rkdyzhe264uls4ug3wdp3x",
+      signature: "0605624C756E610000746572726131753074333564727a7979306d756a6a38726b64797a6865323634756c73347567337764703378304402207134CA1EA44A57921D33917C013C90710395D2A5A57611BBC961F79E8722F3290220790CD1B561E725EC279741C740A0459E37D2B658187193C256A6BCC0E34C2B5A"
+  }
 ]
 
 function CoinTerra(props: Props) {
@@ -332,14 +332,19 @@ function CoinTerra(props: Props) {
       //gas: 500000, // bLuna,
       gas: 120000,
       memo: 'Send cw20 test',
+      option: {
+        info:{
+          symbol: "ANC",
+          decimals: "6"
+        }
+      }
     };
-
-    signTransaction(transaction, TX_TYPE.SMART, setCw20SignedSend);
+    signTransaction(transaction, TX_TYPE.CW20, setCw20SignedSend);
   };
 
   return (
     <Container>
-      <div className='title2'>Support: Normal transfer, Stacking and Smart Contract</div>
+      <div className='title2'>Support: Normal transfer, Stacking, Smart Contract, and CW20 Token Transfer</div>
       <NoInput title='Get Address' content={address} onClick={getAddress} disabled={disabled} />
       {
         <Row style={{ marginBottom: '15px' }}>
@@ -587,7 +592,7 @@ function CoinTerra(props: Props) {
         </Row>
       }
       {<TwoInputs
-        title='Smart: Swap' 
+        title='Smart Contract: Swap Luna to UST' 
         content={signedSwap} 
         onClick={signSmartSwap}
         disabled={disabled}
@@ -606,7 +611,7 @@ function CoinTerra(props: Props) {
           <Col 
             xs={2}
             md={{ span: 1, offset: 2 }}
-          >Source:</Col>
+          >Funds:</Col>
           <Col 
             xs={2}>
             <Dropdown onSelect={(e)=>{setSwapDenom(DENOMTYPE[e])}}>
@@ -653,7 +658,7 @@ function CoinTerra(props: Props) {
         </Row>
       }
       {<TwoInputs
-        title='Smart: ANC send' 
+        title='Smart Contract: ANC Transfer' 
         content={signedSendAnc} 
         onClick={signSmartSendAnc}
         disabled={disabled}

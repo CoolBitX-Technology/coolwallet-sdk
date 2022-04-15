@@ -177,7 +177,7 @@ async function signEIP712TypedDataTransaction(
   const rawPayload = getEIP712TypedDataRawHex(typedData);
 
   const { v, r, s } = await signSingleTransaction(client, script, argument, rawPayload, publicKey);
-  return `0x${r}${s}${(v + 27).toString(16)}`;
+  return `0x${r.padStart(64, '0')}${s.padStart(64, '0')}${(v + 27).toString(16)}`;
 }
 
 async function signEIP712MessageTransaction(
@@ -191,7 +191,7 @@ async function signEIP712MessageTransaction(
   const rawPayload = getEIP712MessageRawHex(message);
 
   const { v, r, s } = await signSingleTransaction(client, script, argument, rawPayload, publicKey);
-  return `0x${r}${s}${(v + 27).toString(16)}`;
+  return `0x${r.padStart(64, '0')}${s.padStart(64, '0')}${(v + 27).toString(16)}`;
 }
 
 async function signTransaction(
