@@ -3,6 +3,7 @@ import * as params from '../config/params';
 import * as stringUtil from './stringUtil';
 import { encodeData, SystemProgramLayout } from './layoutUtil';
 import { Transaction } from './transactionUtil';
+import { TOKEN_INFO } from '../config/tokenInfos';
 
 export default class TransactionCreator {
   constructor() {}
@@ -39,9 +40,38 @@ export default class TransactionCreator {
     toTokenAccount: types.Address,
     recentBlockhash: string,
     amount: number | string,
-    decimals: number | string
+    tokenInfo: {
+      name?: string;
+      symbol: string;
+      address?: string;
+      decimals?: number | string;
+      signature?: string;
+    }
   ): types.TransactionArgs {
-    const decimalsNB = Number(decimals);
+    // check is symbol is valid by length
+    if (tokenInfo.symbol.length > 7) throw new Error('Spl token symbol must have the length between 1 to 7 character');
+
+    // find token with match at least token symbol condition
+    const supportedToken = TOKEN_INFO.find((e) => {
+      const isEqualName = tokenInfo.name ? e.name === tokenInfo.name : true;
+      const isEqualAddress = tokenInfo.address ? e.address === tokenInfo.address : true;
+      const isEqualDecimals = tokenInfo.decimals ? e.decimals === Number(tokenInfo.decimals) : true;
+      const isEqualSymbol = e.symbol === tokenInfo.symbol.toUpperCase();
+      return isEqualName && isEqualSymbol && isEqualAddress && isEqualDecimals;
+    });
+
+    // valid token input is at least supported by coolX or have valid token address and decimal
+    if (!tokenInfo.address && !tokenInfo.decimals && !supportedToken)
+      throw new Error("Your spl token you provided was not supported by CoolX or didn't exist");
+
+    // if not supported by coolX, assign to user input
+    const tokenInfoArgs = supportedToken ? supportedToken : (tokenInfo as types.TokenInfo);
+
+    // token address must be in base58 format
+    if (!stringUtil.isBase58Format(tokenInfoArgs.address)) throw new Error('Spl token address must be base58 format');
+
+    // handle if user input was string
+    tokenInfoArgs.decimals = Number(tokenInfoArgs.decimals);
     return {
       txType: params.TRANSACTION_TYPE.SPL_TOKEN,
       instructions: [
@@ -52,12 +82,12 @@ export default class TransactionCreator {
             { pubkey: signer, isSigner: true, isWritable: true },
           ],
           programId: params.TOKEN_PROGRAM_ID,
-          data: stringUtil.splDataEncode(amount, decimalsNB),
+          data: stringUtil.splDataEncode(amount, tokenInfoArgs.decimals),
         },
       ],
       recentBlockhash,
       feePayer: signer,
-      showDecimals: decimalsNB,
+      showTokenInfo: tokenInfoArgs,
     };
   }
   static createTokenAssociateAccount(

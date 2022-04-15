@@ -1,7 +1,8 @@
 import base58 from 'bs58';
 const BN = require('bn.js');
 
-export const isBase58Format = (value: string): boolean => {
+export const isBase58Format = (value?: string): boolean => {
+  if (!value) return false;
   const match = value.match(/([G-Z])|([g-z])/g);
   return !!(match && match.length > 0);
 };

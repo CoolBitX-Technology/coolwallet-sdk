@@ -11,13 +11,13 @@ async function signTransaction(signTxData: signTxType, txType: string): Promise<
 
   const rawTx = new Transaction(transaction);
 
-  const showDecimals =
-    txType === params.TRANSACTION_TYPE.SPL_TOKEN && transaction.showDecimals
-      ? Buffer.from([transaction.showDecimals]).toString('hex')
+  const showTokenInfo =
+    txType === params.TRANSACTION_TYPE.SPL_TOKEN && transaction.showTokenInfo
+      ? scriptUtil.getTokenInfoArgs(transaction.showTokenInfo)
       : '';
 
   const argument =
-    (await scriptUtil.getTransferArguments(rawTx, txType !== params.TRANSACTION_TYPE.SMART_CONTRACT)) + showDecimals;
+    (await scriptUtil.getTransferArguments(rawTx, txType !== params.TRANSACTION_TYPE.SMART_CONTRACT)) + showTokenInfo;
 
   const script = params.SCRIPT[txType].getScript();
 

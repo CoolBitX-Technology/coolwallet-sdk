@@ -3,32 +3,13 @@ import { Transport } from '@coolwallet/core';
 
 export type Address = string | Buffer;
 
-/**
- * TransferTxOptions types
- * @param {owner} owner owner of from associate account when execute spl token transfer
- * @param {decimals} decimals spl token decimals
- */
-export type TransferTxOptions = {
-  owner: Address;
-  decimals?: number | string;
+export type TokenInfo = {
+  name?: string;
+  symbol: string;
+  address: string;
+  decimals: number;
+  signature?: string;
 };
-
-/**
- * TransferTransaction types for transfer transaction
- * @param {fromPubkey} fromPubkey from address or from associate account
- * @param {toPubkey} toPubkey to address or to associate account
- * @param {recentBlockhash} recentBlockhash recent blockHash, identification of new block alternative for nonce
- * @param {amount} amount amount of native token or sol want to transfer
- * @param {options} TransactionOptions TransactionOptions for smart contract and spl token transfer
- */
-export type TransferTransaction = {
-  fromPubkey: Address;
-  toPubkey: Address;
-  recentBlockhash: string;
-  amount: number | string;
-  options?: TransferTxOptions;
-};
-
 /**
  * AccountMeta types
  * @param {pubkey} pubkey account publickey could be either string or Buffer
@@ -67,16 +48,18 @@ export type CompliedInstruction = {
 
 /**
  * TransactionArgs types for transaction input
- * @param {feePayer} feePayer payer of this transaction
- * @param {recentBlockhash} recentBlockhash recent blockHash, identification of new block alternative for nonce
- * @param {instructions} instructions list of instruction per transaction
+ * @param {string} txType payer of this transaction
+ * @param {Address} feePayer payer of this transaction
+ * @param {string} recentBlockhash recent blockHash, identification of new block alternative for nonce
+ * @param {TransactionInstruction[]} instructions list of instruction per transaction
+ * @param {boolean} showTokenInfo list of instruction per transaction
  */
 export type TransactionArgs = {
   txType?: string;
   feePayer: Address;
   recentBlockhash: string;
   instructions: TransactionInstruction[];
-  showDecimals?: number;
+  showTokenInfo?: TokenInfo;
 };
 
 export type signTxType = {

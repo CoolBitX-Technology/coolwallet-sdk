@@ -252,13 +252,19 @@ function CoinSol(props: Props) {
 
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
+        const tokenInfo = {
+          symbol: 'LDK',
+          address: token.toString(),
+          decimals: splTokenTransaction.decimals,
+        };
+
         const tx = TransactionCreator.transferSplToken(
           account,
           fromTokenAccount.toString(),
           toTokenAccount.toString(),
           recentBlockhash,
           splTokenTransaction.amount,
-          splTokenTransaction.decimals
+          tokenInfo
         );
 
         const appId = localStorage.getItem('appId');
