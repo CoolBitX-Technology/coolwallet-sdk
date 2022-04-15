@@ -25,10 +25,10 @@ export class Transaction {
     return '01' + this.signature + this.serializeArgument(false);
   }
   serializeArgument(isPartialSerialize = true): string {
-    return this.complieMessage(isPartialSerialize).serialize(isPartialSerialize);
+    return this.compileMessage(isPartialSerialize).serialize(isPartialSerialize);
   }
 
-  complieMessage(isPartialCompile = false): Message {
+  compileMessage(isPartialCompile = false): Message {
     const { recentBlockhash, feePayer } = this;
     if (!recentBlockhash) {
       throw new Error('Transaction recentBlockhash required');

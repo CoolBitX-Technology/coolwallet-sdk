@@ -1,64 +1,122 @@
-# CoolWallet Stellar (XLM) SDK
-[![Version](https://img.shields.io/npm/v/@coolwallet/xlm)](https://www.npmjs.com/package/@coolwallet/xlm)
+# CoolWallet Solana (SOL) SDK
 
-Typescript library with support for the integration of Stella for third party application, include the functionalities of generation of addresses and signed transactions.
+[![Version](https://img.shields.io/npm/v/@coolwallet/sol)](https://www.npmjs.com/package/@coolwallet/sol)
+
+Typescript library with support for the integration of Solana for third party application, include the functionalities of generation of addresses and signed transactions.
 
 ## Install
 
 ```shell
-npm i @coolwallet/xlm
+npm i @coolwallet/sol
 ```
 
 ## Usage
 
+Normal transfer case, with sol token (native token on Solana)
+
 ```javascript
-import XLM from '@coolwallet/xlm'
-import { TransactionBuilder } from 'stellar-sdk';
-const xlm = new XLM(COIN_SPECIES); //COIN_SPECIES.XLM, COIN_SPECIES.KAU COIN_SPECIES.KAG
+import SOL from '@coolwallet/sol';
+import { Connection, Transaction } from '@solana/web3.js';
 
-const address = await xlm.getAddress(transport, appPrivateKey, appId)
-// GBKC7MNVXPYN75B6XB5BRBPXYXBDLKVEGJERPNQJPFOAGS2OFQICZBGG
+const sol = new SOL();
 
-const addressBip44 = await xlm.getAddress(transport, appPrivateKey, appId, 'BIP44');
-// GBE6DJHSIR6RLPCTJLIYBCA7VUOFNJ5YW6MSAOJL3QQ4E2BI3OA5EFP4
+const handleSign = async () => {
+  const fromPubkey = await xlm.getAddress(transport, appPrivateKey, appId);
+  // 28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x
 
+  const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
-const param = new TransactionBuilder(fundingAccount, {
-	fee: parseInt(moveDecimal(fee, 7), 10),
-	networkPassphrase: data.networkPassphrase,
-})
-	.addOperation(operation)
-	.setTimeout(TimeoutInfinite)
-	.addMemo(memo);
+  const tx = TransactionCreator.transfer(fromPubkey, toPubkey, recentBlockhash, 0.1);
 
-const tx = param.build();
-
-const txData = {
-	from: publicKey,
-	to: publicKey,
-	amount: value * 10000000,
-	fee: tx.fee,
-	sequence: tx.sequence,
-	minTime: tx.timeBounds.minTime,
-	maxTime: tx.timeBounds.maxTime,
-	memoType: memoType,
-	memo: "",
-	isCreate: true
-}
-
-const signTxData = {
+  const appId = localStorage.getItem('appId');
+  if (!appId) throw new Error('No Appid stored, please register!');
+  const signedTx = await sol.signTransaction({
     transport,
     appPrivateKey,
     appId,
-    transaction,
-    protocol
+    transaction: tx,
+  });
+  const recoveredTx = Transaction.from(signedTx);
+
+  const verifySig = recoveredTx.verifySignatures();
+
+  // signature need to be valid
+  if (!verifySig) throw new Error('Fail to verify signature');
+
+  return connection.sendRawTransaction(recoveredTx.serialize());
+};
+
+handleSign();
+```
+
+Other case we have similar workflow but using different input, following below:
+
+```javascript
+// transfer spl token
+const tokenInfo = {
+  symbol: TOKEN_NAME,
+  address: TOKEN_ADDRESS,
+  decimals: TOKEN_DECIMALS,
+};
+
+const tx = TransactionCreator.transferSplToken(
+  fromAccount,
+  fromTokenAccount,
+  toTokenAccount,
+  recentBlockhash,
+  0.1,
+  tokenInfo
+);
+
+// create associate token account
+const tx = TransactionCreator.createTokenAssociateAccount(signer, owner, associateAccount, token, recentBlockhash);
+
+// create account with seed
+const newAccountPubkey = await PublicKey.createWithSeed(new PublicKey(owner), seed, programId);
+
+class GreetingAccount {
+  counter = 0;
+  constructor(fields?: any) {
+    if (fields) {
+      this.counter = fields.counter;
+    }
+  }
 }
 
-const signatureTx = await xlm.signTransaction(signTxData)
+const GreetingSchema = new Map([[GreetingAccount, { kind: 'struct', fields: [['counter', 'u32']] }]]);
+
+const space = borsh.serialize(GreetingSchema, new GreetingAccount()).length;
+
+const lamports = await connection.getMinimumBalanceForRentExemption(space);
+
+const tx = TransactionCreator.createAccountWithSeed(
+  fromPubkey,
+  newAccountPubkey,
+  basePubkey,
+  seed,
+  lamports,
+  space,
+  programId,
+  recentBlockhash
+);
+
+// user defined instruction
+// associateProgramAccount is associate account with your account used for storing
+// data of interacting process with solana smart contract (or user defined program).
+const tx = {
+  instructions: [
+    {
+      accounts: [{ pubkey: associateProgramAccount, isSigner: false, isWritable: true }],
+      programId: programId,
+      data: data,
+    },
+  ],
+  recentBlockhash,
+  feePayer: signer,
+};
 ```
+
 In construct, you can choose the chain you want to implement.
-
-
 
 ## Methods
 
@@ -66,47 +124,80 @@ In construct, you can choose the chain you want to implement.
 
 #### Description
 
-CoolWallet currently support 2 derivation path, the default one is **SLIP0010**.
+The address generated is compatible to BIP44 with **account** 0 by following BIP44 path:
 
 ```none
-m/44'/94'/0'
+m/44'/501'/0'
 ```
-
-We call the fourth parameter **protocol**, which can only be either `'BIP44'` or `'SLIP0010'`. You will need to specify the protocol parameter when you're signing a transaction.
 
 ```javascript
 async getAddress(
-    transport: Transport, 
-    appPrivateKey: string, 
+    transport: Transport,
+    appPrivateKey: string,
     appId: string
-): Promise<string> 
+): Promise<string>
 ```
 
 #### Arguments
-|      Arg      |                  Description                 |    Type   | Required |
-|:-------------:|:--------------------------------------------:|:---------:|:--------:|
+
+|      Arg      |                 Description                  |   Type    | Required |
+| :-----------: | :------------------------------------------: | :-------: | :------: |
 |   transport   | Object to communicate with CoolWallet device | Transport |   TRUE   |
-| appPrivateKey |   Private key for the connected application  |   string  |   TRUE   |
-|     appId     |       ID for the connected application       |   string  |   TRUE   |
-|    protocol   |      Define the protocol you're signing      |  PROTOCOL |   FALSE  |
+| appPrivateKey |  Private key for the connected application   |  string   |   TRUE   |
+|     appId     |       ID for the connected application       |  string   |   TRUE   |
 
 ### signTransaction
 
 #### Description
 
-We expect you to build transactions with the [official stellar sdk](https://github.com/stellar/js-stellar-sdk). You can easily use the `.signatureBase()` method to get the buffer that CoolWallet needs for signing.
+You can use either solana **Transaction** object to form a transaction with user input and run `compileMessage()` function to extract needed input for signing process or you can use our `TransactionCreator` class to generate automatically transaction instruction.
 
 ```javascript
 async signTransaction(signTxData: signTxType):Promise<string>
 ```
+
 #### signTxType Arguments
 
-|      Arg      |                              Description                             |    Type   | Required |
-|:-------------:|:--------------------------------------------------------------------:|:---------:|:--------:|
+|      Arg      |                             Description                              |   Type    | Required |
+| :-----------: | :------------------------------------------------------------------: | :-------: | :------: |
 |   transport   |             Object to communicate with CoolWallet device             | Transport |   TRUE   |
-| appPrivateKey |               Private key for the connected application              |   string  |   TRUE   |
-|     appId     |                   ID for the connected application                   |   string  |   TRUE   |
-|  transaction  |          Essential information/property for XLM Transaction          |   Object  |   TRUE   |
-|    protocol   |                  Define the protocol you're signing                  |  PROTOCOL |   FALSE  |
-|   confirmCB   |      Callback of confirmation data to the connected application      |  Function |   FALSE  |
-|  authorizedCB | Callback of authorized transaction data to the connected application |  Function |   FALSE  |
+| appPrivateKey |              Private key for the connected application               |  string   |   TRUE   |
+|     appId     |                   ID for the connected application                   |  string   |   TRUE   |
+|  transaction  |          Essential information/property for XLM Transaction          |  Object   |   TRUE   |
+|   confirmCB   |      Callback of confirmation data to the connected application      | Function  |  FALSE   |
+| authorizedCB  | Callback of authorized transaction data to the connected application | Function  |  FALSE   |
+
+If you don't want to use solana web3 js to extract needed input, use can pass in manually instructions data for transaction by yourself, following by this logic:
+
+```javascript
+// user defined instruction
+// associateProgramAccount is associate account with your account used for storing
+// data of interacting process with solana smart contract (or user defined program).
+const tx = {
+  instructions: [
+    {
+      accounts: [{ pubkey: associateProgramAccount, isSigner: false, isWritable: true }],
+      programId: programId,
+      data: data,
+    },
+  ],
+  recentBlockhash,
+  feePayer: signer,
+};
+
+const signedTx = await sol.signTransaction({
+  transport,
+  appPrivateKey,
+  appId,
+  transaction,
+});
+
+const recoveredTx = Transaction.from(signedTx);
+
+const verifySig = recoveredTx.verifySignatures();
+
+// signature need to be valid
+if (!verifySig) throw new Error('Fail to verify signature');
+
+return connection.sendRawTransaction(recoveredTx.serialize());
+```
