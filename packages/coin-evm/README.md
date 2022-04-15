@@ -35,7 +35,6 @@ const transaction = {
   to: '0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C',
   value: '0x5af3107a4000',
   data: '0x00',
-  chainId: 1,
 };
 
 const signTxData = {
@@ -63,7 +62,6 @@ const erc20Transaction = {
   to: '0xe41d2489571d322189246dafa5ebde1f4699f498',
   value: '0x0',
   data: '0x00',
-  chainId: 1,
   option: {
     symbol: 'USDT',
     unit: '6',
