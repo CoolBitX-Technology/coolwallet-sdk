@@ -21,8 +21,8 @@ import { Connection, Transaction } from '@solana/web3.js';
 const sol = new SOL();
 
 const handleSign = async () => {
-  const fromPubkey = await xlm.getAddress(transport, appPrivateKey, appId);
-  // 28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x
+  const fromPubkey = await sol.getAddress(transport, appPrivateKey, appId);
+  // 8rzt5i6guiEgcRBgE5x5nmjPL97Ptcw76rnGTyehni7r
 
   const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
