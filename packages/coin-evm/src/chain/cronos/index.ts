@@ -1,7 +1,7 @@
 import { TOKENS } from './token';
 import { ChainProps } from '../types';
 
-class CronosChain extends ChainProps<keyof typeof TOKENS> {
+class CronosChain extends ChainProps {
   id = 25;
   symbol = 'CRO';
   signature =
