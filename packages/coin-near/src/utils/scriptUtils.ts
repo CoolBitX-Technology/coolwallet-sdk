@@ -1,4 +1,4 @@
-import { utils, config, tx } from '@coolwallet/core';
+import { utils, config } from '@coolwallet/core';
 import * as params from '../config/params';
 import * as types from '../config/types';
 import { BN } from 'bn.js';
@@ -25,8 +25,6 @@ const getScriptArg = async (
   } 
 
   const argument = await getArgument(txn);
-
-  scrpt = scrpt + params.TRANSFER.signature;
 
   return {
     script: scrpt,
@@ -67,7 +65,7 @@ const getArgument = async (
     txn.nonce.toString(16).padStart(16, '0') + 
     txn.receiver!.length.toString(16).padStart(2, '0') +
     Buffer.from(txn.receiver!).toString('hex').padEnd(136, '0') +
-    Buffer.from(base58.decode(txn.recentBlockHash!)).toString('hex') +
+    Buffer.from(base58.decode(txn.recentBlockHash)).toString('hex') +
     actions +
     getAmount(txn.action.amount!, 20, 10);
 
@@ -75,13 +73,9 @@ const getArgument = async (
 };
 
 const addPath = async (): Promise<string> => {
-  
   const pathType = config.PathType.SLIP0010;
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
-
-  const SEPath = `0D${path}`;
-
-	return SEPath;
+	return `0D${path}`;
 };
 
 function trimLeadingZeroes(value: string): string {

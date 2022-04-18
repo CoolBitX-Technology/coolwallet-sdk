@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Container } from 'react-bootstrap';
-import { Transport, apdu, utils, config } from '@coolwallet/core';
-import web3 from 'web3';
+import { Transport } from '@coolwallet/core';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 
 import * as nearAPI from 'near-api-js';
@@ -34,8 +33,8 @@ const tstCallId = 'cryptium.poolv1.near';
 const tstMethodName = 'get_account';
 const tstMethodArgs = Buffer.from(JSON.stringify({"account_id": "alice"}))
  
-// const networkId = "testnet";
-const networkId = "mainnet";
+const networkId = "testnet";
+// const networkId = "mainnet";
 const rpcUrl = "https://rpc.testnet.near.org";
 //const rpcUrl = "https://rpc.mainnet.near.org";
 
@@ -96,7 +95,7 @@ function CoinNear(props: Props) {
       if (!address) throw new Error('Get address first!');
       if (!transferTo) throw new Error('Enter receiver!');
 
-      const { keyStores, KeyPair } = nearAPI;
+      const { keyStores } = nearAPI;
       let config = {
         networkId: networkId,
         keyStore: new keyStores.InMemoryKeyStore(),
@@ -126,7 +125,7 @@ function CoinNear(props: Props) {
       console.log(txnTransfer);
 
       let signTxData: SignTxData = {
-        transport: transport!,
+        transport: transport,
         appPrivateKey: appPrivateKey,
         appId: appId,
         addressIndex: 0,
@@ -149,7 +148,7 @@ function CoinNear(props: Props) {
       if (!appId) throw new Error('No Appid stored, please register!');
       if (!address) throw new Error('Get address first!');
 
-      const { keyStores, KeyPair } = nearAPI;
+      const { keyStores } = nearAPI;
       let config = {
         networkId: networkId,
         keyStore: new keyStores.InMemoryKeyStore(),
@@ -179,7 +178,7 @@ function CoinNear(props: Props) {
       console.log(txnStake);
 
       const signTxData: SignTxData = {
-        transport: transport!,
+        transport: transport,
         appPrivateKey: appPrivateKey,
         appId: appId,
         addressIndex: 0,
@@ -204,7 +203,7 @@ function CoinNear(props: Props) {
       if (!tstCallId) throw new Error('Enter receiver!');
       if (!tstMethodName) throw new Error('Enter method name!');
 
-      const { keyStores, KeyPair } = nearAPI;
+      const { keyStores } = nearAPI;
       let config = {
         networkId: networkId,
         keyStore: new keyStores.InMemoryKeyStore(),
@@ -238,7 +237,7 @@ function CoinNear(props: Props) {
       console.log(txnSmart);
 
       const signTxData: SignTxData = {
-        transport: transport!,
+        transport: transport,
         appPrivateKey: appPrivateKey,
         appId: appId,
         addressIndex: 0,
@@ -293,17 +292,16 @@ function CoinNear(props: Props) {
   
     switch(txn.action.txnType) { 
       case TxnType.TRANSFER: { 
-        actions = [nearAPI.transactions.transfer(new BN(amount!))];
+        actions = [nearAPI.transactions.transfer(new BN(amount))];
         break;
       } 
       case TxnType.STAKE: { 
-        actions = [nearAPI.transactions.stake(new BN(amount!), nearAPI.utils.key_pair.PublicKey.from(txn.action.validatorPublicKey!))]; 
+        actions = [nearAPI.transactions.stake(new BN(amount), nearAPI.utils.key_pair.PublicKey.from(txn.action.validatorPublicKey!))]; 
         break; 
       } 
-      case TxnType.SMART:
-      case TxnType.SMARTNOAMOUNT: { 
+      case TxnType.SMART: { 
         actions = [nearAPI.transactions.functionCall(txn.action.methodName!, txn.action.methodArgs!,
-          new BN(nearAPI.utils.format.parseNearAmount(txn.action.gas)!), new BN(amount!))];
+          new BN(nearAPI.utils.format.parseNearAmount(txn.action.gas)!), new BN(amount))];
         break;  
       } 
     }

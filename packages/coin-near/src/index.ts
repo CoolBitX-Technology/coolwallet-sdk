@@ -1,5 +1,5 @@
 import { coin as COIN, error as ERROR, utils, config } from '@coolwallet/core';
-import signTransaction from './sign';
+import signTransaction from './signTransaction';
 import * as types from './config/types';
 import * as params from './config/params';
 import * as base58 from 'bs58';
