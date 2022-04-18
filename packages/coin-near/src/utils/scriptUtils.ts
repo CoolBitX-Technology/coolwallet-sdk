@@ -1,8 +1,8 @@
-import { utils, config } from '@coolwallet/core';
+import { utils, config, tx } from '@coolwallet/core';
 import * as params from '../config/params';
 import * as types from '../config/types';
-import * as nearAPI from 'near-api-js';
 import { BN } from 'bn.js';
+import * as base58 from 'bs58';
 
 const getScriptArg = async (
   txn: types.TransactionType
@@ -22,13 +22,11 @@ const getScriptArg = async (
       scrpt = params.SMART.script + params.SMART.signature;
       break; 
     }
-    case types.TxnType.SMARTNOAMOUNT: { 
-      scrpt = params.SMARTNOAMOUNT.script + params.SMARTNOAMOUNT.signature;
-      break; 
-    }
   } 
 
   const argument = await getArgument(txn);
+
+  scrpt = scrpt + params.TRANSFER.signature;
 
   return {
     script: scrpt,
@@ -40,52 +38,50 @@ const getArgument = async (
   txn: types.TransactionType
 ) : Promise<string> => {
 
-  const amount = nearAPI.utils.format.parseNearAmount(txn.action.amount);
-  
-  let actions: nearAPI.transactions.Action[];
+  let actions = '';
 
   switch(txn.action.txnType) { 
     case types.TxnType.TRANSFER: { 
-      actions = [nearAPI.transactions.transfer(new BN(amount!))];
+      actions = getAmount(txn.action.amount!);
       break;
     } 
     case types.TxnType.STAKE: { 
-      actions = [nearAPI.transactions.stake(new BN(amount!), nearAPI.utils.key_pair.PublicKey.from(txn.action.validatorPublicKey!))]; 
+      actions = getAmount(txn.action.amount!) + 
+      Buffer.from(base58.decode(txn.action.validatorPublicKey!)).toString('hex');
       break; 
     } 
-    case types.TxnType.SMART:
-    case types.TxnType.SMARTNOAMOUNT: { 
-      actions = [nearAPI.transactions.functionCall(txn.action.methodName!, txn.action.methodArgs!,
-        new BN(nearAPI.utils.format.parseNearAmount(txn.action.gas)!), new BN(amount!))];
+    case types.TxnType.SMART: { 
+      actions = txn.action.methodName!.length.toString(16).padStart(2, '0') +
+      Buffer.from(txn.action.methodName!).toString('hex').padEnd(136, '0') +
+      txn.action.methodArgs!.length.toString(16).padStart(2, '0') +
+      Buffer.from(txn.action.methodArgs!).toString('hex').padEnd(136, '0') +
+      getAmount(txn.action.gas!, 16) +
+      getAmount(txn.action.amount!);
       break; 
     } 
   } 
-  // create transaction
-  const transaction = nearAPI.transactions.createTransaction(
-    txn.sender!, 
-    nearAPI.utils.key_pair.PublicKey.from(txn.publicKey!), 
-    txn.receiver!, 
-    txn.nonce, 
-    actions, 
-    nearAPI.utils.serialize.base_decode(txn.recentBlockHash)
-  );
-  const serializedTx = nearAPI.utils.serialize.serialize(
-    nearAPI.transactions.SCHEMA, 
-    transaction
-  );
-  const argument = txn.action.txnType != types.TxnType.SMARTNOAMOUNT ? nearToDisplay(txn.action.amount!) : '';
 
-  return await addPath(argument) + Buffer.from(serializedTx).toString('hex');
+  const serializedTx = txn.sender!.length.toString(16).padStart(2, '0') +
+    Buffer.from(txn.sender!).toString('hex').padEnd(136, '0') + 
+    Buffer.from(base58.decode(txn.publicKey!)).toString('hex') +
+    txn.nonce.toString(16).padStart(16, '0') + 
+    txn.receiver!.length.toString(16).padStart(2, '0') +
+    Buffer.from(txn.receiver!).toString('hex').padEnd(136, '0') +
+    Buffer.from(base58.decode(txn.recentBlockHash!)).toString('hex') +
+    actions +
+    getAmount(txn.action.amount!, 20, 10);
+
+  return await addPath() + serializedTx;
 };
 
-const addPath = async (argument: string): Promise<string> => {
+const addPath = async (): Promise<string> => {
   
   const pathType = config.PathType.SLIP0010;
   const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
 
   const SEPath = `0D${path}`;
 
-	return SEPath + argument;
+	return SEPath;
 };
 
 function trimLeadingZeroes(value: string): string {
@@ -96,13 +92,13 @@ function trimLeadingZeroes(value: string): string {
   return value;
 }
 
-const nearToDisplay = (num: string, pad = 20): string => {
+const getAmount = (num: string, pad = 32, decimal = 24): string => {
   if (!num) { return ''.padEnd(pad, '0'); }
   num = num.replace(/,/g, '').trim();
   const split = num.split('.');
   const wholePart = split[0];
   const fracPart = split[1] || '';
-  const tBN = new BN(trimLeadingZeroes(wholePart + fracPart.padEnd(18, '0')));
+  const tBN = new BN(trimLeadingZeroes(wholePart + fracPart.padEnd(decimal, '0')));
   return tBN.toString(16).padStart(pad, '0');
 };
 

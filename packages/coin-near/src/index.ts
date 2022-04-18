@@ -42,7 +42,6 @@ export default class NEAR extends COIN.EDDSACoin implements COIN.Coin {
     if(signTxData.transaction.action.txnType === types.TxnType.SMART) {
 
       if(!signTxData.transaction.action.amount) {
-        signTxData.transaction.action.txnType = types.TxnType.SMARTNOAMOUNT;
         signTxData.transaction.action.amount = '0';
       }
     }

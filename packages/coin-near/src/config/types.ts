@@ -4,8 +4,7 @@ export { Transport };
 export enum TxnType {
   TRANSFER = 1,
   STAKE = 2,
-  SMART = 3,
-  SMARTNOAMOUNT = 4
+  SMART = 3
 }
 
 export interface SignTxType {
