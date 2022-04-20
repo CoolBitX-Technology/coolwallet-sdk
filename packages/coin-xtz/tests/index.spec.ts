@@ -3,7 +3,13 @@ import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolw
 import * as bip39 from 'bip39';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { localForger } from '@taquito/local-forging';
-import { OpKind, OperationContentsReveal } from '@taquito/rpc';
+import {
+  OpKind,
+  OperationContentsReveal,
+  OperationContentsTransaction,
+  OperationContentsDelegation
+} from '@taquito/rpc';
+
 import XTZ from '../src';
 import * as codecUtil from '../src/utils/codecUtil';
 import type {
@@ -33,7 +39,7 @@ describe('Test XTZ SDK', () => {
     await wallet.setMnemonic(mnemonic);
   });
 
-  it('XTZ: test get address 0', async () => {
+  it('XTZ: get address 0', async () => {
     const addressIndex = 0;
 
     // address from coolwallet
@@ -48,7 +54,7 @@ describe('Test XTZ SDK', () => {
     expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
   });
 
-  it('XTZ: test sign transaction', async () => {
+  it('XTZ: sign reveal', async () => {
     const addressIndex = 0;
     const node = wallet.derivePath(`m/44'/1729'/${addressIndex}'/0'`);
     const publicKey = await node.getPublicKey();
@@ -89,6 +95,61 @@ describe('Test XTZ SDK', () => {
       .messagePage('TEST')
       .messagePage('XTZ')
       .messagePage('Reveal')
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    console.log('expectedTxDetail :', expectedTxDetail);
+    expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('XTZ: sign transaction', async () => {
+    const addressIndex = 0;
+    const node = wallet.derivePath(`m/44'/1729'/${addressIndex}'/0'`);
+    const publicKey = await node.getPublicKey();
+    const public_key = codecUtil.pubKeyHexToStr(publicKey?.toString('hex') ?? '');
+    const address = codecUtil.pubKeyToAddress(publicKey?.toString('hex') ?? '');
+
+    const kind = OpKind.TRANSACTION;
+    const branch = 'BMHBtAaUv59LipV1czwZ5iQkxEktPJDE7A9sYXPkPeRzbBasNY8';
+    const source = address;
+    const fee = '1300';
+    const counter = '3325582';
+    const gas_limit = '10100';
+    const storage_limit = '1';
+    const amount = '3500000';
+    const destination = 'tz1YU2zoyCkXPKEA4jknSpCpMs7yUndVNe3S';
+
+    const operation: xtzTransaction = {
+      branch, source, fee, counter, gas_limit, storage_limit, amount, destination
+    };
+    const content: OperationContentsTransaction = {
+      kind, source, fee, counter, gas_limit, storage_limit, amount, destination
+    };
+
+    const { appPrivateKey, appId } = props;
+    const signTxData: SignTxData = {
+      transport,
+      appPrivateKey,
+      appId,
+      addressIndex,
+    };
+
+    // check signature
+    const signedTx = await xtz.signTransaction(signTxData, operation);
+    const txHex = await localForger.forge({ branch, contents: [content] });
+    const hashHex = blake2b(32).update(Buffer.from('03' + txHex, 'hex')).digest('hex');
+    const expectedSigUint8Array = await node.sign(hashHex);
+    const expectedTx = txHex + Buffer.from(expectedSigUint8Array??'').toString('hex');
+    expect(signedTx).toEqual(expectedTx);
+    console.log('signedTx :', signedTx);
+
+    // check screen display
+    const txDetail = await getTxDetail(transport, props.appId);
+    console.log('txDetail :', txDetail);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('XTZ')
+      .addressPage(destination)
+      .amountPage(0.000001 * parseInt(amount))
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     console.log('expectedTxDetail :', expectedTxDetail);
