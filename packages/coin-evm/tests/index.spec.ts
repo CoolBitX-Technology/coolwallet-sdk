@@ -73,7 +73,7 @@ describe('Test EVM SDK', () => {
       const expectedTxDetail = new DisplayBuilder()
         .messagePage('TEST')
         .messagePage(api.chain.symbol)
-        .addressPage(transaction.to)
+        .addressPage(transaction.to.toLowerCase())
         .amountPage(+transaction.value)
         .wrapPage('PRESS', 'BUTToN')
         .finalize();
@@ -108,7 +108,7 @@ describe('Test EVM SDK', () => {
         .messagePage('TEST')
         .messagePage(api.chain.symbol)
         .messagePage('USDT')
-        .addressPage(transaction.to)
+        .addressPage(transaction.to.toLowerCase())
         .amountPage(+tokenAmount)
         .wrapPage('PRESS', 'BUTToN')
         .finalize();
@@ -238,7 +238,7 @@ describe('Test EVM SDK', () => {
       const expectedTxDetail = new DisplayBuilder()
         .messagePage('TEST')
         .messagePage(api.chain.symbol)
-        .addressPage(transaction.to)
+        .addressPage(transaction.to.toLowerCase())
         .amountPage(+transaction.value)
         .wrapPage('PRESS', 'BUTToN')
         .finalize();
@@ -273,7 +273,7 @@ describe('Test EVM SDK', () => {
         .messagePage('TEST')
         .messagePage(api.chain.symbol)
         .messagePage('USDT')
-        .addressPage(transaction.to)
+        .addressPage(transaction.to.toLowerCase())
         .amountPage(+tokenAmount)
         .wrapPage('PRESS', 'BUTToN')
         .finalize();
