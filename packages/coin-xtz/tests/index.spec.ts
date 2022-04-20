@@ -155,5 +155,102 @@ describe('Test XTZ SDK', () => {
     console.log('expectedTxDetail :', expectedTxDetail);
     expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
   });
+
+  it('XTZ: sign delegation', async () => {
+    const addressIndex = 0;
+    const node = wallet.derivePath(`m/44'/1729'/${addressIndex}'/0'`);
+    const publicKey = await node.getPublicKey();
+    const public_key = codecUtil.pubKeyHexToStr(publicKey?.toString('hex') ?? '');
+    const address = codecUtil.pubKeyToAddress(publicKey?.toString('hex') ?? '');
+
+    const kind = OpKind.DELEGATION;
+    const branch = 'BMHBtAaUv59LipV1czwZ5iQkxEktPJDE7A9sYXPkPeRzbBasNY8';
+    const source = address;
+    const fee = '1300';
+    const counter = '3325582';
+    const gas_limit = '10100';
+    const storage_limit = '300';
+    const delegate = 'tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9';
+
+    const operation: xtzDelegation = { branch, source, fee, counter, gas_limit, storage_limit, delegate };
+    const content: OperationContentsDelegation = { kind, source, fee, counter, gas_limit, storage_limit, delegate };
+
+    const { appPrivateKey, appId } = props;
+    const signTxData: SignTxData = {
+      transport,
+      appPrivateKey,
+      appId,
+      addressIndex,
+    };
+
+    // check signature
+    const signedTx = await xtz.signDelegation(signTxData, operation);
+    const txHex = await localForger.forge({ branch, contents: [content] });
+    const hashHex = blake2b(32).update(Buffer.from('03' + txHex, 'hex')).digest('hex');
+    const expectedSigUint8Array = await node.sign(hashHex);
+    const expectedTx = txHex + Buffer.from(expectedSigUint8Array??'').toString('hex');
+    expect(signedTx).toEqual(expectedTx);
+    console.log('signedTx :', signedTx);
+
+    // check screen display
+    const txDetail = await getTxDetail(transport, props.appId);
+    console.log('txDetail :', txDetail);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('XTZ')
+      .messagePage('Delgt')
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    console.log('expectedTxDetail :', expectedTxDetail);
+    expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('XTZ: sign undelegation', async () => {
+    const addressIndex = 0;
+    const node = wallet.derivePath(`m/44'/1729'/${addressIndex}'/0'`);
+    const publicKey = await node.getPublicKey();
+    const public_key = codecUtil.pubKeyHexToStr(publicKey?.toString('hex') ?? '');
+    const address = codecUtil.pubKeyToAddress(publicKey?.toString('hex') ?? '');
+
+    const kind = OpKind.DELEGATION;
+    const branch = 'BMHBtAaUv59LipV1czwZ5iQkxEktPJDE7A9sYXPkPeRzbBasNY8';
+    const source = address;
+    const fee = '1300';
+    const counter = '3325582';
+    const gas_limit = '10100';
+    const storage_limit = '300';
+
+    const operation: xtzDelegation = { branch, source, fee, counter, gas_limit, storage_limit };
+    const content: OperationContentsDelegation = { kind, source, fee, counter, gas_limit, storage_limit };
+
+    const { appPrivateKey, appId } = props;
+    const signTxData: SignTxData = {
+      transport,
+      appPrivateKey,
+      appId,
+      addressIndex,
+    };
+
+    // check signature
+    const signedTx = await xtz.signUndelegation(signTxData, operation);
+    const txHex = await localForger.forge({ branch, contents: [content] });
+    const hashHex = blake2b(32).update(Buffer.from('03' + txHex, 'hex')).digest('hex');
+    const expectedSigUint8Array = await node.sign(hashHex);
+    const expectedTx = txHex + Buffer.from(expectedSigUint8Array??'').toString('hex');
+    expect(signedTx).toEqual(expectedTx);
+    console.log('signedTx :', signedTx);
+
+    // check screen display
+    const txDetail = await getTxDetail(transport, props.appId);
+    console.log('txDetail :', txDetail);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('XTZ')
+      .messagePage('UnDel')
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    console.log('expectedTxDetail :', expectedTxDetail);
+    expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+  });
 });
 
