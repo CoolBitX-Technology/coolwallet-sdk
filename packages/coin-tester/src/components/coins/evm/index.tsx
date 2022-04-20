@@ -40,6 +40,16 @@ const CHAINS = {
     properties: CHAIN.POLYGON,
     rpc_url: 'https://matic-mainnet.chainstacklabs.com',
   },
+  FANTOM: {
+    name: 'Fantom',
+    properties: CHAIN.FANTOM,
+    rpc_url: 'https://ftmscan.com/tx/',
+  },
+  VELAS: {
+    name: 'Velas',
+    properties: CHAIN.VELAS,
+    rpc_url: 'https://explorer.velas.com/rpc',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
