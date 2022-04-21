@@ -1,14 +1,14 @@
 import { TOKENS } from './token';
 import { ChainProps } from '../types';
 
-class ArbitrumChain extends ChainProps {
+class FantomChain extends ChainProps {
   id = 250;
   symbol = 'FTM';
-  signature = `3044022068280439c1764f3a176a4c4085d3e8a3783e9c434fe8350b4f3228a9845ff0a10220417d7b77f4c28e3bf521e836660cb7e5c43e44b3618495911f0f8652f4ed86b69000`.padStart(
+  signature = `304402203d1da6abd26d7d80999db165ae163f9ca3355aadc31e3f4eeb311bb67eaf84c20220324290bdacec652e9f2ca54607f4d1ab7449dc4297c3b76a183775cf8c5f0a0d`.padStart(
     144,
     '0'
   );
   tokens = TOKENS;
 }
 
-export default new ArbitrumChain();
+export default new FantomChain();
