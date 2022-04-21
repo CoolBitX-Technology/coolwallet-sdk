@@ -40,6 +40,16 @@ const CHAINS = {
     properties: CHAIN.POLYGON,
     rpc_url: 'https://matic-mainnet.chainstacklabs.com',
   },
+  FANTOM: {
+    name: 'Fantom',
+    properties: CHAIN.FANTOM,
+    rpc_url: 'https://rpcapi.fantom.network',
+  },
+  VELAS: {
+    name: 'Velas',
+    properties: CHAIN.VELAS,
+    rpc_url: 'https://evmexplorer.velas.com/rpc',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
@@ -155,7 +165,7 @@ const CoinEVM: React.FC<Props> = (props: Props) => {
             transaction = {
               ...transaction,
               value: web3.utils.toHex(web3.utils.toWei(data.value, 'ether')),
-              gasLimit: web3.utils.toHex(await web3.eth.estimateGas({ to: data.to, data: '' })),
+              gasLimit: web3.utils.toHex(await web3.eth.estimateGas({ to: data.to, data: '0x' })),
             };
             break;
           }
@@ -211,6 +221,7 @@ const CoinEVM: React.FC<Props> = (props: Props) => {
           transaction: transaction as LegacyTransaction['transaction'],
           addressIndex: 0,
         };
+        console.log(transaction);
         return sdk.signTransaction(signTxData);
       }, props).then((result) => {
         setter((prev) => ({ ...prev, result }));
