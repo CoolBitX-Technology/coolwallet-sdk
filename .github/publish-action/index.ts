@@ -52,6 +52,7 @@ async function run() {
   await checkAndPublish(context, 'packages/coin-ltc');
   await checkAndPublish(context, 'packages/coin-matic');
   await checkAndPublish(context, 'packages/coin-trx');
+  await checkAndPublish(context, 'packages/coin-terra');
   await checkAndPublish(context, 'packages/coin-xlm');
   await checkAndPublish(context, 'packages/coin-xrp');
   await checkAndPublish(context, 'packages/coin-zen');

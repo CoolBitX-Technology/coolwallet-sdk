@@ -4,7 +4,7 @@ import { Transport } from '@coolwallet/core';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 import { CHAIN_ID, TX_TYPE, SignDataType } from '@coolwallet/terra/lib/config/types';
 import { DENOMTYPE } from "@coolwallet/terra/lib/config/denomType";
-import { TOKENTYPE } from "@coolwallet/terra/lib/config/tokenType";
+import { TOKENTYPE, TOKENTYPEDEV } from "@coolwallet/terra/lib/config/tokenType";
 import BigNumber from 'bignumber.js';
 
 //import cosmosjs from './cosmos';
@@ -18,33 +18,6 @@ interface Props {
   isLocked: boolean;
   setIsLocked: (isLocked: boolean) => void;
 }
-
-const TOKENTYPEDEV = [
-  // ANC
-  {
-      name: "Anchor ANC Token",
-      symbol: "ANC",
-      unit: "6",
-      contractAddress: "terra1747mad58h0w4y589y3sk84r5efqdev9q4r02pc",
-      signature: "0603414E43000000007465727261313734376d6164353868307734793538397933736b3834723565667164657639713472303270633046022100B995F026DAA2D33960E339E2FBBA039E89E8D67EF4DEEB137CE0A07DBFAE63FC022100FC86C475A3A9972061DA285AFC729813ED9F7953413978812DAA0465AFC6D2EB"
-  },
-  // aUST
-  {
-      name: "Anchor aUST Token",
-      symbol: "aUST",
-      unit: "6",
-      contractAddress: "terra1ajt556dpzvjwl0kl5tzku3fc3p3knkg9mkv8jl",
-      signature: "060461555354000000746572726131616a7435353664707a766a776c306b6c35747a6b753366633370336b6e6b67396d6b76386a6c3046022100F043671FF10B1452408372714D4A4F9E14AD325FF5A1EB5884B4FCAB8B515807022100F0B5C1D65BC7959ED557AE1AAAE109381935FAB57F8CEBD3FD2783C4CDF2B52E"
-  },
-  // bLUNA
-  {
-      name: "Anchor bLuna Token",
-      symbol: "bLuna",
-      unit: "6",
-      contractAddress: "terra1u0t35drzyy0mujj8rkdyzhe264uls4ug3wdp3x",
-      signature: "0605624C756E610000746572726131753074333564727a7979306d756a6a38726b64797a6865323634756c73347567337764703378304402207134CA1EA44A57921D33917C013C90710395D2A5A57611BBC961F79E8722F3290220790CD1B561E725EC279741C740A0459E37D2B658187193C256A6BCC0E34C2B5A"
-  }
-]
 
 function CoinTerra(props: Props) {
   const terra = new Terra();
@@ -250,8 +223,8 @@ function CoinTerra(props: Props) {
       validatorAddress: withdrawValidator,
       feeAmount: new BigNumber(withdrawFeeAmount).multipliedBy(1000000).toNumber(),
       feeDenom: withdrawFeeDenom,
-      gas: 400000,
-      memo: '',
+      gas: 450000,
+      memo: 'withdraw test',
     };
     await signTransaction(transaction, TX_TYPE.WITHDRAW, setSignedWithdraw);
     updateAccStatus(cosmosjs, address);

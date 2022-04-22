@@ -63,7 +63,7 @@ class DisplayBuilder {
     this.response += convertToHex(totalLength);
     this.response += signal;
     this.response += TYPE.ADDR;
-    this.response += Buffer.from(address.toLowerCase()).toString('hex');
+    this.response += Buffer.from(address).toString('hex');
     return this;
   }
 

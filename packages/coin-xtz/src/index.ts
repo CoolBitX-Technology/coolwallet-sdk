@@ -17,7 +17,7 @@ export default class XTZ extends COIN.EDDSACoin implements COIN.Coin {
 
   pathStyle: PATH_STYLE;
 
-  constructor(pathType: PATH_STYLE = PATH_STYLE.CWT) {
+  constructor(pathType: PATH_STYLE = PATH_STYLE.XTZ) {
     super(params.COIN_TYPE);
     this.pathStyle = pathType;
   }
@@ -26,7 +26,7 @@ export default class XTZ extends COIN.EDDSACoin implements COIN.Coin {
    * Get Tezos (XTZ) public key with its default derivation path
    */
   async getPublicKeyByPathType(
-    transport: Transport, appPrivateKey: string, appId: string, addressIndex: number = 0
+    transport: Transport, appPrivateKey: string, appId: string, addressIndex = 0
   ) : Promise<string> {
     switch(this.pathStyle) {
       case PATH_STYLE.XTZ:
@@ -40,14 +40,14 @@ export default class XTZ extends COIN.EDDSACoin implements COIN.Coin {
   }
 
   async getPublicKeyHash(
-    transport: Transport, appPrivateKey: string, appId: string, addressIndex: number = 0
+    transport: Transport, appPrivateKey: string, appId: string, addressIndex = 0
   ): Promise<string> {
     const publicKey = await this.getPublicKeyByPathType(transport, appPrivateKey, appId, addressIndex);
     return codecUtil.pubKeyHexToStr(publicKey);
   }
 
   async getAddress(
-    transport: Transport, appPrivateKey: string, appId: string, addressIndex: number = 0
+    transport: Transport, appPrivateKey: string, appId: string, addressIndex = 0
   ): Promise<string> {
     const publicKey = await this.getPublicKeyByPathType(transport, appPrivateKey, appId, addressIndex);
     return codecUtil.pubKeyToAddress(publicKey);
