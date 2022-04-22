@@ -6,7 +6,7 @@ import { DENOMTYPE } from './config/denomType';
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
-import { TOKENTYPE } from './config/tokenType';
+import { TOKENTYPE, TOKENTYPEDEV } from './config/tokenType';
 
 export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
   public Types: any;
@@ -91,7 +91,14 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
       case types.TX_TYPE.CW20:
         const upperCaseAddress = signData.transaction.contractAddress.toUpperCase();
         let tokenSignature = '';
-        for(const tokenInfo of TOKENTYPE){
+        let tokentype = TOKENTYPE;
+        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
+          script = params.CW20.script + params.CW20.signature;
+        else{
+          script = params.CW20.script_test + params.CW20.signature_test;
+          tokentype = TOKENTYPEDEV
+        }
+        for(const tokenInfo of tokentype){
           // supported cw-20
           if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
             tokenSignature = tokenInfo.signature;
@@ -100,10 +107,6 @@ export default class TERRA extends COIN.ECDSACoin implements COIN.Coin{
             break;
           }
         }
-        if(signData.transaction.chainId === types.CHAIN_ID.MAIN)
-          script = params.CW20.script + params.CW20.signature;
-        else
-          script = params.CW20.script_test + params.CW20.signature_test;
         argument = scriptUtil.getCW20Argument(publicKey, signData.transaction, addressIndex, tokenSignature);
         genTx = (signature: string) => {
           return txUtil.getSmartTx(signData.transaction, signature, publicKey);
