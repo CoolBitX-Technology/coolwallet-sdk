@@ -1,9 +1,23 @@
 import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
-import { initialize, getTxDetail } from '@coolwallet/testing-library';
+import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import Terra from '../src';
 import { CHAIN_ID, TX_TYPE, SignDataType } from '../src/config/types';
-import { DENOMTYPE } from "../src/config/denomType";
+import { DENOMTYPE } from '../src/config/denomType';
+import { TOKENTYPE } from '../src/config/tokenType';
+import {
+  LCDClient,
+  Fee,
+  MnemonicKey,
+  Coin,
+  MsgSend,
+  MsgDelegate,
+  MsgUndelegate,
+  MsgWithdrawDelegatorReward,
+  MsgExecuteContract,
+} from '@terra-money/terra.js';
+
+const crypto = require('crypto');
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
@@ -12,6 +26,16 @@ const coinTerra = new Terra();
 const mnemonic = 'catalog inmate announce liar young avocado oval depth tag around sting soda';
 
 describe('Test Terra SDK', () => {
+  const denomArray = Object.values(DENOMTYPE);
+  const tokenArray = Object.values(TOKENTYPE);
+  const getRandInt = (max: number) => Math.floor(Math.random() * max);
+  const getRandDenom = () => denomArray[getRandInt(denomArray.length)];
+  const getRandToken = () => tokenArray[getRandInt(tokenArray.length)];
+  const getRandSequence = () => (getRandInt(1000) + 1).toString();
+  const getRandAccount = () => (getRandInt(1000000) + 1).toString();
+  const getRandWallet = () => 'terra1' + crypto.randomBytes(19).toString('hex');
+  const getRandValidator = () => 'terravaloper1' + crypto.randomBytes(19).toString('hex');
+
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
   let walletAddress = '';
@@ -21,163 +45,355 @@ describe('Test Terra SDK', () => {
     authorizedCB: undefined,
   };
 
+  const mainnet = new LCDClient({
+    URL: 'https://lcd.terra.dev',
+    chainID: 'columbus-5',
+  });
+  const mk = new MnemonicKey({ mnemonic });
+  const wallet = mainnet.wallet(mk);
+
   beforeAll(async () => {
     transport = (await createTransport())!;
     props = await initialize(transport, mnemonic);
-  });
-
-  it('Test Get Address', async () => {
-    const address = await coinTerra.getAddress(transport, props.appPrivateKey, props.appId, 0);
-    walletAddress = address;
     signTxData.transport = transport;
     signTxData.appPrivateKey = props.appPrivateKey;
     signTxData.appId = props.appId;
-    expect(address).toEqual('terra1uvh92fdu5pl2k4a3gwa2990cqphwxqwzkj2kvk');
+    const address = await coinTerra.getAddress(transport, props.appPrivateKey, props.appId, 0);
+    walletAddress = address;
+  });
+
+  it('Test Get Address', async () => {
+    expect(walletAddress).toEqual(wallet.key.accAddress);
   });
 
   it('Test Normal Transfer', async () => {
+    const denom = getRandDenom();
+    const feeDenom = getRandDenom();
     const transaction = {
       chainId: CHAIN_ID.MAIN,
-      accountNumber: "123456",
-      sequence: "789",
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
       fromAddress: walletAddress,
-      toAddress: "terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv",
-      amount: 1000000000,
-      denom: DENOMTYPE.KRT,
-      feeAmount: 90000,
-      feeDenom: DENOMTYPE.UST,
-      gas: 85000,
+      toAddress: getRandWallet(),
+      amount: getRandInt(1000000000) + 1,
+      denom,
+      feeAmount: getRandInt(90000) + 1,
+      feeDenom,
+      gas: getRandInt(85000) + 1,
       memo: 'test signature',
     };
     signTxData.txType = TX_TYPE.SEND;
     signTxData.transaction = transaction;
     const signedTx = await coinTerra.signTransaction(signTxData);
-    expect(signedTx).toEqual('CqMBCpABChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEnAKLHRlcnJhMXV2aDkyZmR1NXBsMms0YTNnd2EyOTkwY3FwaHd4cXd6a2oya3ZrEix0ZXJyYTF1MjlxdHdyMHU0cHN2OHoya24ydGd4YWxmNWVmdW5mcWozd2hqdhoSCgR1a3J3EgoxMDAwMDAwMDAwEg50ZXN0IHNpZ25hdHVyZRJoClEKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiECJFBUDl/ED1D9sun6qVgpSzsr/HYRaPLBLllI4fystRwSBAoCCAEYlQYSEwoNCgR1dXNkEgU5MDAwMBCImAUaQBPIckhSaSZNrwLFOU7h6mXxtY2PFSOTlVFKa4tfv14ZOcMPZvqqfCDOonULJve40DfrxIfqHY05VfgSzDvmlOQ=');  
-    //const display = await getTxDetail(transport, props.appId);
-    //expect(display).toEqual('what');
+
+    const send_tx = new MsgSend(wallet.key.accAddress, transaction.toAddress, { [denom.unit]: transaction.amount });
+    const sendOpt = {
+      msgs: [send_tx],
+      memo: transaction.memo,
+      accountNumber: parseInt(transaction.accountNumber),
+      sequence: parseInt(transaction.sequence),
+      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+    };
+    const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(sendOpt));
+
+    try {
+      expect(signedTx).toEqual(signedTxSDK);
+    } catch (e) {
+      console.error('Test Normal Transfer params', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage(coinTerra.constructor.name)
+      .messagePage(transaction.denom.name)
+      .addressPage(transaction.toAddress.toLowerCase())
+      .amountPage(+transaction.amount/1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
   it('Test Delegate', async () => {
+    const feeDenom = getRandDenom();
     const transaction = {
       chainId: CHAIN_ID.MAIN,
-      accountNumber: "123456",
-      sequence: "789",
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
       delegatorAddress: walletAddress,
-      validatorAddress: "terravaloper1259cmu5zyklsdkmgstxhwqpe0utfe5hhyty0at",
-      amount: 1000000,
-      feeAmount: 70000000,
-      gas: 520000,
-      feeDenom: DENOMTYPE.JPT,
+      validatorAddress: getRandValidator(),
+      amount: getRandInt(1000000) + 1,
+      feeAmount: getRandInt(70000000) + 1,
+      gas: getRandInt(520000) + 1,
+      feeDenom,
       memo: 'test delegate',
     };
     signTxData.txType = TX_TYPE.DELEGATE;
     signTxData.transaction = transaction;
     const signedTx = await coinTerra.signTransaction(signTxData);
-    expect(signedTx).toEqual('Cq4BCpwBCiMvY29zbW9zLnN0YWtpbmcudjFiZXRhMS5Nc2dEZWxlZ2F0ZRJ1Cix0ZXJyYTF1dmg5MmZkdTVwbDJrNGEzZ3dhMjk5MGNxcGh3eHF3emtqMmt2axIzdGVycmF2YWxvcGVyMTI1OWNtdTV6eWtsc2RrbWdzdHhod3FwZTB1dGZlNWhoeXR5MGF0GhAKBXVsdW5hEgcxMDAwMDAwEg10ZXN0IGRlbGVnYXRlEmsKUQpGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQIkUFQOX8QPUP2y6fqpWClLOyv8dhFo8sEuWUjh/Ky1HBIECgIIARiVBhIWChAKBHVqcHkSCDcwMDAwMDAwEMDeHxpAQciMb1JEQDdO1cH2dEcOkD43j8BuEI69Jo28Mr+W+nA0FVizomFa94TGEb0ZgiYg0kFGpP7VoDYNHXyOhFZMtA==');
+
+    const delegate_tx = new MsgDelegate(
+      wallet.key.accAddress,
+      transaction.validatorAddress,
+      new Coin('uluna', transaction.amount.toString())
+    );
+    const delegateOpt = {
+      msgs: [delegate_tx],
+      memo: transaction.memo,
+      accountNumber: parseInt(transaction.accountNumber),
+      sequence: parseInt(transaction.sequence),
+      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+    };
+    const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(delegateOpt));
+
+    try {
+      expect(signedTx).toEqual(signedTxSDK);
+    } catch (e) {
+      console.error('Test Delegate params', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage(coinTerra.constructor.name)
+      .messagePage('LUNA')
+      .messagePage('Delgt')
+      .addressPage(transaction.validatorAddress.toLowerCase())
+      .amountPage(+transaction.amount/1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
   it('Test Undelegate', async () => {
+    const feeDenom = getRandDenom();
     const transaction = {
       chainId: CHAIN_ID.MAIN,
-      accountNumber: "123456",
-      sequence: "789",
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
       delegatorAddress: walletAddress,
-      validatorAddress: "terravaloper1259cmu5zyklsdkmgstxhwqpe0utfe5hhyty0at",
-      amount: 1000000,
-      feeAmount: 700000,
-      feeDenom: DENOMTYPE.EUT,
-      gas: 550000,
+      validatorAddress: getRandValidator(),
+      amount: getRandInt(1000000) + 1,
+      feeAmount: getRandInt(700000) + 1,
+      feeDenom,
+      gas: getRandInt(550000) + 1,
       memo: 'test undelegate',
     };
     signTxData.txType = TX_TYPE.UNDELEGATE;
     signTxData.transaction = transaction;
     const signedTx = await coinTerra.signTransaction(signTxData);
-    expect(signedTx).toEqual('CrIBCp4BCiUvY29zbW9zLnN0YWtpbmcudjFiZXRhMS5Nc2dVbmRlbGVnYXRlEnUKLHRlcnJhMXV2aDkyZmR1NXBsMms0YTNnd2EyOTkwY3FwaHd4cXd6a2oya3ZrEjN0ZXJyYXZhbG9wZXIxMjU5Y211NXp5a2xzZGttZ3N0eGh3cXBlMHV0ZmU1aGh5dHkwYXQaEAoFdWx1bmESBzEwMDAwMDASD3Rlc3QgdW5kZWxlZ2F0ZRJpClEKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiECJFBUDl/ED1D9sun6qVgpSzsr/HYRaPLBLllI4fystRwSBAoCCAEYlQYSFAoOCgR1ZXVyEgY3MDAwMDAQ8MghGkA/R0vBr3zpzrbDvXiueLk00HFxHI/rWdWrsbCKua5ToQVB5vOY6Mrico7QeLX7H/qWw8jPpfNRGcJVeIzX5Z7n');
+
+    const undelegate_tx = new MsgUndelegate(
+      wallet.key.accAddress,
+      transaction.validatorAddress,
+      new Coin('uluna', transaction.amount.toString())
+    );
+    const undelegateOpt = {
+      msgs: [undelegate_tx],
+      memo: transaction.memo,
+      accountNumber: parseInt(transaction.accountNumber),
+      sequence: parseInt(transaction.sequence),
+      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+    };
+    const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(undelegateOpt));
+
+    try {
+      expect(signedTx).toEqual(signedTxSDK);
+    } catch (e) {
+      console.error('Test Undelegate params', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage(coinTerra.constructor.name)
+      .messagePage('LUNA')
+      .messagePage('UnDel')
+      .addressPage(transaction.validatorAddress.toLowerCase())
+      .amountPage(+transaction.amount/1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
   it('Test Withdraw', async () => {
+    const feeDenom = getRandDenom();
     const transaction = {
       chainId: CHAIN_ID.MAIN,
-      accountNumber: "123456",
-      sequence: "789",
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
       delegatorAddress: walletAddress,
-      validatorAddress: "terravaloper1259cmu5zyklsdkmgstxhwqpe0utfe5hhyty0at",
-      feeAmount: 1330000000,
-      feeDenom: DENOMTYPE.MNT,
-      gas: 400000,
+      validatorAddress: getRandValidator(),
+      feeAmount: getRandInt(1330000000) + 1,
+      feeDenom,
+      gas: getRandInt(400000) + 1,
       memo: 'test withdraw',
     };
     signTxData.txType = TX_TYPE.WITHDRAW;
     signTxData.transaction = transaction;
     const signedTx = await coinTerra.signTransaction(signTxData);
-    expect(signedTx).toEqual('CrABCp4BCjcvY29zbW9zLmRpc3RyaWJ1dGlvbi52MWJldGExLk1zZ1dpdGhkcmF3RGVsZWdhdG9yUmV3YXJkEmMKLHRlcnJhMXV2aDkyZmR1NXBsMms0YTNnd2EyOTkwY3FwaHd4cXd6a2oya3ZrEjN0ZXJyYXZhbG9wZXIxMjU5Y211NXp5a2xzZGttZ3N0eGh3cXBlMHV0ZmU1aGh5dHkwYXQSDXRlc3Qgd2l0aGRyYXcSbQpRCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAiRQVA5fxA9Q/bLp+qlYKUs7K/x2EWjywS5ZSOH8rLUcEgQKAggBGJUGEhgKEgoEdW1udBIKMTMzMDAwMDAwMBCAtRgaP+F/i+PwQVLI+2n3llwSPJrKCysWuewCOvTq67KK+80gR4OJ+K6FBGbFI4vm/uwcSKuqeZ65OsKSQvavXVBmfg==');
+
+    const withdraw_tx = new MsgWithdrawDelegatorReward(wallet.key.accAddress, transaction.validatorAddress);
+    const withdrawOpt = {
+      msgs: [withdraw_tx],
+      memo: transaction.memo,
+      accountNumber: parseInt(transaction.accountNumber),
+      sequence: parseInt(transaction.sequence),
+      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+    };
+    const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(withdrawOpt));
+
+    try {
+      expect(signedTx).toEqual(signedTxSDK);
+    } catch (e) {
+      console.error('Test Withdraw params', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage(coinTerra.constructor.name)
+      .messagePage('LUNA')
+      .messagePage('Reward')
+      .addressPage(transaction.validatorAddress.toLowerCase())
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
   it('Test Smart Contract: Luna to bLuna Swap', async () => {
+    const denom = getRandDenom();
+    const feeDenom = getRandDenom();
     const executeMsgObj = {
       swap: {
         offer_asset: {
           info: {
             native_token: {
-              denom: DENOMTYPE.LUNA.unit
-            }
+              denom: denom.unit,
+            },
           },
-          amount: "345000"
-        }
-      }
+          amount: (getRandInt(345000) + 1).toString(),
+        },
+      },
     };
     const transaction = {
       chainId: CHAIN_ID.MAIN,
-      accountNumber: "123456",
-      sequence: "789",
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
       senderAddress: walletAddress,
-      contractAddress: "terra19qx5xe6q9ll4w0890ux7lv2p4mf3csd4qvt3ex",
+      contractAddress: getRandWallet(),
       execute_msg: JSON.stringify(executeMsgObj),
       funds: {
-        amount: 345000,
-        denom: DENOMTYPE.LUNA
+        amount: parseInt(executeMsgObj.swap.offer_asset.amount),
+        denom,
       },
-      feeAmount: 200000,
-      feeDenom: DENOMTYPE.SDT,
-      gas: 250000,
+      feeAmount: getRandInt(200000) + 1,
+      feeDenom,
+      gas: getRandInt(250000) + 1,
       memo: 'Swap test',
     };
     signTxData.txType = TX_TYPE.SMART;
     signTxData.transaction = transaction;
     const signedTx = await coinTerra.signTransaction(signTxData);
-    expect(signedTx).toEqual('CpACCoICCiYvdGVycmEud2FzbS52MWJldGExLk1zZ0V4ZWN1dGVDb250cmFjdBLXAQosdGVycmExdXZoOTJmZHU1cGwyazRhM2d3YTI5OTBjcXBod3hxd3prajJrdmsSLHRlcnJhMTlxeDV4ZTZxOWxsNHcwODkwdXg3bHYycDRtZjNjc2Q0cXZ0M2V4Gmgie1wic3dhcFwiOntcIm9mZmVyX2Fzc2V0XCI6e1wiaW5mb1wiOntcIm5hdGl2ZV90b2tlblwiOntcImRlbm9tXCI6XCJ1bHVuYVwifX0sXCJhbW91bnRcIjpcIjM0NTAwMFwifX19IioPCgV1bHVuYRIGMzQ1MDAwEglTd2FwIHRlc3QSaQpRCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAiRQVA5fxA9Q/bLp+qlYKUs7K/x2EWjywS5ZSOH8rLUcEgQKAggBGJUGEhQKDgoEdXNkchIGMjAwMDAwEJChDxpAayWLE76FjspsEtGYIbPYdF8i88RdCSm6w/o5e1C1TkAkeNNFA/mxaRA+P4MC7uEuAGLsGMTsF/Jg9V/hdOAf9g==');
+
+    const smartSwap_tx = new MsgExecuteContract(
+      wallet.key.accAddress,
+      transaction.contractAddress,
+      JSON.stringify(executeMsgObj),
+      { [denom.unit]: transaction.funds.amount }
+    );
+    const smartSwapOpt = {
+      msgs: [smartSwap_tx],
+      memo: transaction.memo,
+      accountNumber: parseInt(transaction.accountNumber),
+      sequence: parseInt(transaction.sequence),
+      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+    };
+    const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(smartSwapOpt));
+
+    try {
+      expect(signedTx).toEqual(signedTxSDK);
+    } catch (e) {
+      console.error('Test Smart Contract: Luna to bLuna Swap params', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage(coinTerra.constructor.name)
+      .wrapPage('SMART', '')
+      .addressPage(transaction.contractAddress.toLowerCase())
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
   it('Test Send CW20 Transfer', async () => {
+    const token = getRandToken();
+    const feeDenom = getRandDenom();
     const executeMsgObj = {
-      
+      transfer: {
+        amount: (getRandInt(12000000) + 1).toString(),
+        recipient: getRandWallet(),
+      },
     };
     const transaction = {
       chainId: CHAIN_ID.MAIN,
-      accountNumber: "123456",
-      sequence: "789",
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
       senderAddress: walletAddress,
-      contractAddress: "terra14z56l0fp2lsf86zy3hty2z47ezkhnthtr9yq76",
-      execute_msg: {
-        transfer: {
-          amount: "12000000",
-          recipient: "terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv"
-        }
-      },
+      contractAddress: token.contractAddress,
+      execute_msg: executeMsgObj,
       option: {
         info: {
-          symbol: "ANC",
-          decimals: "6"
-        }
+          symbol: token.symbol,
+          decimals: token.unit,
+        },
       },
-      feeAmount: 5000000,
-      feeDenom: DENOMTYPE.THT,
-      gas: 120000,
+      feeAmount: getRandInt(5000000) + 1,
+      feeDenom,
+      gas: getRandInt(120000) + 1,
       memo: 'Send cw20 test',
     };
     signTxData.txType = TX_TYPE.CW20;
     signTxData.transaction = transaction;
     const signedTx = await coinTerra.signTransaction(signTxData);
-    expect(signedTx).toEqual('CvkBCuYBCiYvdGVycmEud2FzbS52MWJldGExLk1zZ0V4ZWN1dGVDb250cmFjdBK7AQosdGVycmExdXZoOTJmZHU1cGwyazRhM2d3YTI5OTBjcXBod3hxd3prajJrdmsSLHRlcnJhMTR6NTZsMGZwMmxzZjg2enkzaHR5Mno0N2V6a2hudGh0cjl5cTc2Gl17InRyYW5zZmVyIjp7ImFtb3VudCI6IjEyMDAwMDAwIiwicmVjaXBpZW50IjoidGVycmExdTI5cXR3cjB1NHBzdjh6MmtuMnRneGFsZjVlZnVuZnFqM3doanYifX0SDlNlbmQgY3cyMCB0ZXN0EmoKUQpGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQIkUFQOX8QPUP2y6fqpWClLOyv8dhFo8sEuWUjh/Ky1HBIECgIIARiVBhIVCg8KBHV0aGISBzUwMDAwMDAQwKkHGkC4TNWvgUqRTFg9yzrym079OPpwM9364ObohHrlIZUqcHX9USMml8WKeEqyjiXZe/UWzN+zMYQgaYXen4iuGAWD');
+
+    const cw20_tx = new MsgExecuteContract(
+      wallet.key.accAddress,
+      transaction.contractAddress,
+      executeMsgObj
+    );
+    const cw20Opt = {
+      msgs: [cw20_tx],
+      memo: transaction.memo,
+      accountNumber: parseInt(transaction.accountNumber),
+      sequence: parseInt(transaction.sequence),
+      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+    };
+    const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(cw20Opt));
+
+    try {
+      expect(signedTx).toEqual(signedTxSDK);
+    } catch (e) {
+      console.error('Test Send CW20 Transfer params', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage(coinTerra.constructor.name)
+      .messagePage(token.symbol)
+      .addressPage(executeMsgObj.transfer.recipient.toLowerCase())
+      .amountPage(+executeMsgObj.transfer.amount/1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 });
