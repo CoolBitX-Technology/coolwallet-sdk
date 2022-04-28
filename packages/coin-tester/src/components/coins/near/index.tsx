@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { Transport } from '@coolwallet/core';
-import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
+import { NoInput, OneInput, TwoInputs, ObjInputs } from '../../../utils/componentMaker';
 
 import * as nearAPI from 'near-api-js';
 import Near from '@coolwallet/near';
-import { SignTxData, TransactionType, Action, TxnType } from '@coolwallet/near/lib/config/types';
+import { SignTransferTxType, TransferTxType,
+         SignStakeTxType, StakeTxType,
+         SignSmartTxType, SmartTxType,
+         Action, TxnType } from '@coolwallet/near/lib/config/types';
 import { BN } from 'bn.js';
 const base58 = require('bs58');
 
@@ -29,9 +32,9 @@ const tstGas = '0.00000000003';
 // const tstCallId = 'meerkat.stakewars.testnet';
 // const tstMethodName = 'get_balance';
 // const tstMethodArgs = Buffer.from(JSON.stringify({}))
-const tstCallId = 'cryptium.poolv1.near';
-const tstMethodName = 'get_account';
-const tstMethodArgs = Buffer.from(JSON.stringify({"account_id": "alice"}))
+const tstCallId = 'leadnode.pool.f863973.m0'; //'cryptium.poolv1.near';
+const tstMethodName = 'deposit_and_stake'; //'get_account';
+const tstMethodArgs = {"amount": "100000000000000000000000"};
  
 const networkId = "testnet";
 // const networkId = "mainnet";
@@ -52,9 +55,11 @@ function CoinNear(props: Props) {
   const [signedTransaction, setSignedTransaction] = useState('');
   const [signedStakeTransaction, setSignedStakeTransaction] = useState('');
   const [signedSmartTransaction, setSignedSmartTransaction] = useState('');
-  const [callTo, setCallTo] = useState(tstCallId);
-  const [callMethod, setCallMethod] = useState(tstMethodName);
+  const [stakeAmount, setStakeAmount] = useState(tstAmount);
   const [transferTo, setTransferTo] = useState(tstReceiver);
+  const [smartKeys, setSmartKeys] = useState(['Address', 'Method', 'Arguments', 'Amount']);
+  const [smartValues, setSmartValues] = useState([tstCallId, tstMethodName, JSON.stringify(tstMethodArgs), tstAmount]);
+
 
   const { transport, appPrivateKey} = props;
   const disabled = !transport || props.isLocked;
@@ -81,9 +86,7 @@ function CoinNear(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
 
-      const publicKey = await nearCoin.getAddress(transport!, appPrivateKey, appId);
-
-      return publicKey;
+      return await nearCoin.getAddress(transport!, appPrivateKey, appId);
     }, setAddress);
   };
 
@@ -110,32 +113,28 @@ function CoinNear(props: Props) {
 
       const { nonce, blockHash } = await prepareSenderAccData(config, address, publicKey);
 
-      let actionTransfer: Action = {
-        txnType: TxnType.TRANSFER,
-        amount: tstAmount
-      };
-
-      let txnTransfer: TransactionType = {
+      let txnTransfer: TransferTxType = {
         receiver: transferTo,
         nonce: nonce,
         recentBlockHash: blockHash,
-        action: actionTransfer
+        amount: tstAmount
       };
       
       console.log(txnTransfer);
 
-      let signTxData: SignTxData = {
-        transport: transport,
+      let signTxData: SignTransferTxType = {
+        transport: transport!,
         appPrivateKey: appPrivateKey,
         appId: appId,
-        addressIndex: 0,
         transaction: txnTransfer
       }
-
-      const signedTx = await nearCoin.signTransaction(signTxData);
+      
+      const signedTx = await nearCoin.signTransferTransaction(signTxData);
       console.log(signedTx);
 
-      await propagateTxn(config, txnTransfer, signedTx);
+      txnTransfer.sender = address;
+      txnTransfer.publicKey = publicKey;
+      await propagateTxn(config, txnTransfer, TxnType.TRANSFER, signedTx);
 
       return signedTx;
     }, setSignedTransaction);
@@ -146,7 +145,7 @@ function CoinNear(props: Props) {
 
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      if (!address) throw new Error('Get address first!');
+      if (!address) throw new Error('Get addramountess first!');
 
       const { keyStores } = nearAPI;
       let config = {
@@ -163,32 +162,30 @@ function CoinNear(props: Props) {
 
       const { nonce, blockHash } = await prepareSenderAccData(config, address, publicKey);
 
-      const actionStake: Action = {
-        txnType: TxnType.STAKE,
-        amount: tstAmount,
-        validatorPublicKey: tstValidator
-      };
-
-      const txnStake: TransactionType = {
+      const txnStake: StakeTxType = {
         nonce: nonce,
         recentBlockHash: blockHash,
-        action: actionStake
+        amount: stakeAmount,
+        validatorPublicKey: tstValidator
       };
 
       console.log(txnStake);
 
-      const signTxData: SignTxData = {
-        transport: transport,
+      const signTxData: SignStakeTxType = {
+        transport: transport!,
         appPrivateKey: appPrivateKey,
         appId: appId,
-        addressIndex: 0,
         transaction: txnStake
       }
 
-      const signedTx = await nearCoin.signTransaction(signTxData);
+      const signedTx = Number(txnStake.amount) != 0 ?
+       await nearCoin.signStakeTransaction(signTxData) :
+       await nearCoin.signUnstakeTransaction(signTxData);
       console.log(signedTx);
 
-      await propagateTxn(config, txnStake, signedTx);
+      txnStake.sender = txnStake.receiver = address;
+      txnStake.publicKey = publicKey;
+      await propagateTxn(config, txnStake, TxnType.STAKE, signedTx);
 
       return signedTx;
     }, setSignedStakeTransaction);
@@ -200,8 +197,8 @@ function CoinNear(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!address) throw new Error('Get address first!');
       if (!appId) throw new Error('No Appid stored, please register!');
-      if (!tstCallId) throw new Error('Enter receiver!');
-      if (!tstMethodName) throw new Error('Enter method name!');
+      if (!smartValues[0]) throw new Error('Enter receiver!');
+      if (!smartValues[1]) throw new Error('Enter method name!');
 
       const { keyStores } = nearAPI;
       let config = {
@@ -218,36 +215,53 @@ function CoinNear(props: Props) {
 
       const { nonce, blockHash } = await prepareSenderAccData(config, address, publicKey);
 
-      const actionSmart: Action = {
-        txnType: TxnType.SMART,
-//        amount: tstAmount,
-        gas: tstGas,
-        methodName: callMethod,
-        methodArgs: tstMethodArgs
-      };
-
-
-      const txnSmart: TransactionType = {
-        receiver: callTo,
+      const txnSmart: SmartTxType = {
+        receiver: smartValues[0],
         nonce: nonce,
         recentBlockHash: blockHash,
-        action: actionSmart
+        amount: smartValues[3],
+        gas: tstGas,
+        methodName: smartValues[1],
+        methodArgs: Buffer.from(smartValues[2])
       };
       
       console.log(txnSmart);
 
-      const signTxData: SignTxData = {
-        transport: transport,
+      txnSmart.sender = address;
+      txnSmart.publicKey = publicKey;
+      if(!txnSmart.amount) {
+        txnSmart.amount = '0';
+      }
+      const signTxData: SignSmartTxType = {
+        transport: transport!,
         appPrivateKey: appPrivateKey,
         appId: appId,
-        addressIndex: 0,
         transaction: txnSmart
       }
 
-      const signedTx = await nearCoin.signTransaction(signTxData);
+      let signedTx = '';
+      switch (txnSmart.methodName) {
+        case "deposit_and_stake":
+          signedTx = await nearCoin.signSCStakeTransaction(signTxData);
+          break;
+        case "unstake":
+          signedTx = await nearCoin.signSCUnstakeTransaction(signTxData);
+          break;
+        case "unstake_all":
+          signedTx = await nearCoin.signSCUnstakeAllTransaction(signTxData);
+          break;
+        case "withdraw":
+          signedTx = await nearCoin.signSCWithdrawTransaction(signTxData);
+          break;
+        case "withdraw_all":
+          signedTx = await nearCoin.signSCWithdrawAllTransaction(signTxData);
+          break;
+        default:
+          signedTx = await nearCoin.signSmartTransaction(signTxData);
+      }
       console.log(signedTx);
 
-      await propagateTxn(config, txnSmart, signedTx);
+      await propagateTxn(config, txnSmart, TxnType.SMART, signedTx);
 
       return signedTx;
     }, setSignedSmartTransaction);
@@ -267,7 +281,7 @@ function CoinNear(props: Props) {
       throw new Error('Create sender account!');
     }
     const provider = new nearAPI.providers.JsonRpcProvider(config.rpcUrl);
-
+    setTransferTo
     const accessKey = await provider.query(
       `access_key/${sender}/${publicKey}`, ''
     );
@@ -283,25 +297,26 @@ function CoinNear(props: Props) {
   const propagateTxn = async (
     config: any,
     txn: any,
+    txnType: TxnType,
     sign: any
   ) => {
 
-    const amount = nearAPI.utils.format.parseNearAmount(txn.action.amount);
+    const amount = nearAPI.utils.format.parseNearAmount(txn.amount);
   
     let actions: nearAPI.transactions.Action[];
   
-    switch(txn.action.txnType) { 
+    switch(txnType) { 
       case TxnType.TRANSFER: { 
         actions = [nearAPI.transactions.transfer(new BN(amount))];
         break;
       } 
       case TxnType.STAKE: { 
-        actions = [nearAPI.transactions.stake(new BN(amount), nearAPI.utils.key_pair.PublicKey.from(txn.action.validatorPublicKey!))]; 
+        actions = [nearAPI.transactions.stake(new BN(amount), nearAPI.utils.key_pair.PublicKey.from(txn.validatorPublicKey!))]; 
         break; 
       } 
-      case TxnType.SMART: { 
-        actions = [nearAPI.transactions.functionCall(txn.action.methodName!, txn.action.methodArgs!,
-          new BN(nearAPI.utils.format.parseNearAmount(txn.action.gas)!), new BN(amount))];
+      case TxnType.SMART: {
+        actions = [nearAPI.transactions.functionCall(txn.methodName!, txn.methodArgs!,
+          new BN(nearAPI.utils.format.parseNearAmount(txn.gas)!), new BN(amount))];
         break;  
       } 
     }
@@ -316,7 +331,7 @@ function CoinNear(props: Props) {
       nearAPI.utils.serialize.base_decode(txn.recentBlockHash)
     );
 
-    const signedTransaction = new nearAPI.transactions.SignedTransaction({
+    const sgnTransaction = new nearAPI.transactions.SignedTransaction({
       transaction: transaction,
       signature: new nearAPI.transactions.Signature({ 
         keyType: 0, 
@@ -327,7 +342,7 @@ function CoinNear(props: Props) {
     // send the transaction!
     try {
       // encodes signed transaction to serialized Borsh (required for all transactions)
-      const signedSerializedTx = signedTransaction.encode();
+      const signedSerializedTx = sgnTransaction.encode();
       // sends transaction to NEAR blockchain via JSON RPC call and records the result
       const provider = new nearAPI.providers.JsonRpcProvider(config.rpcUrl);
       const result = await provider.sendJsonRpc(
@@ -367,27 +382,28 @@ function CoinNear(props: Props) {
         placeholder='transfer to'
         inputSize={3}
       />
-      <NoInput
+      <OneInput
         title='Sign Stake'
         content={signedStakeTransaction}
         onClick={signStakeTransaction}
         disabled={disabled}
         btnName='Sign'
+        value={stakeAmount}
+        setValue={setStakeAmount}
+        placeholder='amount'
+        inputSize={1}
       />
-      <TwoInputs
+      <br/>
+      <h4 style={{ color: 'orange' }}>Smart Contract Based Staking methods: deposit_and_stake, unstake, unstake_all, withdraw and withdraw_all</h4>
+      <ObjInputs
         title='Sign Smart Contract'
         content={signedSmartTransaction}
         onClick={signSmartTransaction}
         disabled={disabled}
+        keys={smartKeys}
+        values={smartValues}
+        setValues={setSmartValues}
         btnName='Sign'
-        value={callTo}
-        setValue={setCallTo}
-        placeholder='account id'
-        inputSize={2}
-        value2={callMethod}
-        setValue2={setCallMethod}
-        placeholder2='method'
-        inputSize2={2}
       />
     </Container>
   );

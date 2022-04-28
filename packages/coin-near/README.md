@@ -37,24 +37,48 @@ const sender = "sender_account";
 const receiver = "receiver_account";
 const amount = '1.5'; // in NEAR
 
-let actionTransfer: Action = {
-  txnType: TxnType.TRANSFER,
-  amount: tstAmount
-};
+// There are 3 type of transactions:
 
-let txnTransfer: TransactionType = {
-  receiver: transferTo,
-  nonce: nonce,
-  recentBlockHash: blockHash,
-  action: actionTransfer
-};
+// Transfer
+type TransferTxType = {
+  sender?: string;
+  publicKey?: string; 
+  receiver: string;
+  nonce: number;
+  recentBlockHash: string;
+  amount: string;
+}
+
+// Stake
+type StakeTxType = {
+  sender?: string;
+  publicKey?: string; 
+  receiver?: string;
+  nonce: number;
+  recentBlockHash: string;
+  amount: string;
+  validatorPublicKey: string;
+}
+
+// Smart
+type SmartTxType = {
+  sender?: string;
+  publicKey?: string; 
+  receiver: string;
+  nonce: number;
+  recentBlockHash: string;
+  amount?: string;
+  gas?: string;
+  methodName: string;
+  methodArgs: Uint8Array;
+}
       
 let signTxData: SignTxData = {
   transport: transport!,
   appPrivateKey: appPrivateKey,
   appId: appId,
   addressIndex: addressIndex,
-  transaction: txnTransfer
+  transaction: txnTransfer //or txnStake or txnSmart
 }
 
 // sets up a NEAR API/RPC provider to interact with the blockchain
@@ -71,8 +95,23 @@ const accessKey = await provider.query(
 const nonce = ++accessKey.nonce;
 const recentBlockHash = nearAPI.utils.serialize.base_decode(accessKey.block_hash);
 
-const signature = await near.signTransaction(signTxData)
 
+// Transfer
+const signature = near.signTransferTransaction(signTxData)
+
+// Staking
+// const signature = near.signStakeTransaction(signTxData);
+// const signature = near.signUnstakeTransaction(signTxData);
+
+// Smart contract
+// const signature = near.signSmartTransaction(signTxData);
+
+// Smart contract based staking
+// const signature = near.signSCStakeTransaction(signTxData);
+// const signature = near.signSCUnstakeTransaction(signTxData);
+// const signature = near.signSCUnstakeAllTransaction(signTxData);
+// const signature = near.signSCWithdrawTransaction(signTxData);
+// const signature = near.signSCWithdrawAllTransaction(signTxData);
 
 ## Methods
 

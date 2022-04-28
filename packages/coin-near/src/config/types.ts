@@ -1,22 +1,82 @@
 import { Transport } from '@coolwallet/core';
 export { Transport };
 
-export enum TxnType {
-  TRANSFER = 1,
-  STAKE = 2,
-  SMART = 3
+// Transfer
+
+export type SignTransferTxType = {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  transaction: TransferTxType;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 }
 
-export interface SignTxType {
+export type TransferTxType = {
+  sender?: string;
+  publicKey?: string; 
+  receiver: string;
+  nonce: number;
+  recentBlockHash: string;
+  amount: string;
+}
+
+// Stake
+
+export type SignStakeTxType = {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  transaction: StakeTxType;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+}
+
+export type StakeTxType = {
+  sender?: string;
+  publicKey?: string; 
+  receiver?: string;
+  nonce: number;
+  recentBlockHash: string;
+  amount: string;
+  validatorPublicKey: string;
+}
+
+// Smart
+
+export type SignSmartTxType = {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  transaction: SmartTxType;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+}
+
+export type SmartTxType = {
+  sender?: string;
+  publicKey?: string; 
+  receiver: string;
+  nonce: number;
+  recentBlockHash: string;
+  amount?: string;
+  gas?: string;
+  methodName: string;
+  methodArgs: Uint8Array;
+}
+
+// General
+
+export type SignTxType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
   transaction: TransactionType;
   confirmCB?(): void;
   authorizedCB?(): void;
-};
+}
 
-export interface TransactionType {
+export type TransactionType = {
   sender?: string;
   publicKey?: string; 
   receiver?: string;
@@ -25,7 +85,7 @@ export interface TransactionType {
   action: Action;
 }
 
-export interface Action {
+export type Action = {
   txnType: TxnType;
   amount?: string;
   // Stake txn
@@ -35,6 +95,11 @@ export interface Action {
   methodName?: string;
   methodArgs?: Uint8Array;
 }
-export interface TransferTransaction2 {
-  amount: string;
+
+export enum TxnType {
+  TRANSFER = 1,
+  STAKE = 2,
+  SMART = 3,
+  SCSTAKE = 4,
+  SCSTAKENOAMOUNT = 5
 }
