@@ -83,9 +83,16 @@ export const executeSegmentScript = async (
     if (version < 320) throw new Error('argument too long, try updating to support the longer data');
   }
 
-  const p2 = (args.length - 1).toString().padStart(2, '0');
+  const total = args.length - 1;
   for (const [i, v] of args.entries()) {
-    const p1 = i.toString().padStart(2, '0');
+    let counter = i;
+    // P1 and P2 is a single byte, if `i` is greater than 255, it will overflow to '100'
+    // which is not safe to use it. So if `i` is greater than 255 iterate again from 1.
+    if (i > 255) {
+      counter -= 255;
+    }
+    const p1 = counter.toString(16).padStart(2, '0');
+    const p2 = (counter + 1).toString(16).padStart(2, '0');
     const signature = await getCommandSignature(
       transport,
       appId,
@@ -103,7 +110,7 @@ export const executeSegmentScript = async (
       p1,
       p2
     );
-    if (p1 === p2) {
+    if (i === total) {
       if (outputData) {
         return outputData;
       } else {
@@ -231,7 +238,7 @@ export const getTxDetail = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<boolean>} true: success, false: canceled.
  */
 export const getExplicitTxDetail = async (transport: Transport): Promise<string> => {
-  const { statusCode, msg,outputData } = await executeCommand(transport, commands.GET_TX_DETAIL, target.SE);
+  const { statusCode, msg, outputData } = await executeCommand(transport, commands.GET_TX_DETAIL, target.SE);
   if (statusCode === CODE._9000) {
     return outputData;
   } else {
