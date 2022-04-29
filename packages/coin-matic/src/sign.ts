@@ -1,4 +1,5 @@
 import Web3Utils from 'web3-utils';
+import createKeccakHash from 'keccak';
 import * as rlp from 'rlp';
 import { TypedDataUtils as typedDataUtils } from 'eth-sig-util';
 import Ajv from 'ajv';
@@ -298,10 +299,9 @@ export const signTypedData = async (
 
   const prefix = Buffer.from('1901', 'hex');
 
-  const dataBuf = Buffer.from(Web3Utils.sha3(encodedData.toString('hex'))?.substr(2) ?? '', 'hex');
+  const dataBuf = createKeccakHash('keccak256').update(encodedData).digest();
 
   const payload = Buffer.concat([prefix, domainSeparate, dataBuf]);
-
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await polyUtil.genPolySigFromSESig(canonicalSignature, payload, publicKey);
     const signature = `0x${r}${s}${v.toString(16)}`;
