@@ -1,5 +1,14 @@
 export const TOKENTYPE = [
   {
+    name: 'USD Coin',
+    symbol: 'USDC',
+    decimals: '6',
+    contractAddress: '3487b63d30b5b2c87fb7ffa8bcfade38eaac1abe',
+    paylaod: '0604555344430000003487b63d30b5b2c87fb7ffa8bcfade38eaac1abe',
+    signature: 
+      '304502200F4013E35088931BCE0EAA281A9B30697E876F678CD36CE4832BDB72F10893380221008F638481A72A6B9E89924879E9E7A626704864B92A62D19EC99E7BD7EA3E5A71'
+  },
+  {
     name: 'Tether USD',
     symbol: 'USDT',
     decimals: '6',
