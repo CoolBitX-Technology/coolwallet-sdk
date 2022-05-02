@@ -1,52 +1,157 @@
-# CoolWallet Coin Template
+# CoolWallet IoTex SDK
 
-This is a template for developers who want to implement a new CoolWallet Coin SDK. Please list all the methods and describe what they supposedly be used for.
-
+This is a typescript library with support for the integration of IoTex for third party application, include the functionalities of generation of addresses and signed transactions. 
 
 ## Install
 
 ```shell
-npm install @coolwallet/template
+npm install @coolwallet/iotx
 ```
 
 ## Usage
 
-```javascript
-import Template from '@coolwallet/template'
-const template = new Template(transport, appPrivateKey, appId)
+```typescript
+import Iotx, { Options } from '@coolwallet/iotx';
+import { crypto } from '@coolwallet/core';
+import { createTransport } from '@coolwallet/transport-web-ble';
+
+const appId = 'appId that had been registered by wallet';
+const transport = await createTransport();
+const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
+
+// Initialize
+const iotx = new Iotx();
+
+// Get Address
+const addressIndex = 0;
+const address = await iotx.getAddress(transport, appPrivateKey, appId, addressIndex);
+
+// Sign Transaction
+const options: Options = { transport, appPrivateKey, appId };
+const transaction = {
+  addressIndex,
+  nonce: 1,
+  gasLimit: 10000,
+  gasPrice: '1000000000000',
+  amount: '10000000000000000',
+  recipient: 'io13nq26mfmse47uk8rgakld34yqrghgnl5hklnnc',
+};
+const signedTx = await iotx.signTransaction(transaction, options);
 ```
+
+## Methods
 
 ### getAddress
 
-Get address by address index.
-
-```javascript
-const address = await template.getAddress(0)
-```
-
-The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of folllowing BIP44 path:
+The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress` with `addressIndex = i` will get the address of folllowing BIP44 path:
 
 ```none
-m/44'/60'/0'/0/{i}
+m/44'/304'/0'/0/{i}
 ```
-
-In the design of current hardware, we only support path `m/44'/60'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
+```javascript
+async getAddress(
+    transport: types.Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number
+): Promise<string>
+```
 
 ### signTransaction
 
-Sign Ethereum Transaction. If the transaction has non-empty `data` field, the card will display `SMART` instead of transfering amount.
+For transferring IOTX tokens.
 
-```javascript
-const tx = {
-    nonce: "0x21d",
-    gasPrice: "0x59682f00",
-    gasLimit: "0x5208",
-    to: "0x81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C",
-    value: "0x5af3107a4000",
-    data: "0x00",
-    chainId: 1
+```typescript
+type Integer = string | number;
+
+interface Options {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  confirmCB?: Function;
+  authorizedCB?: Function;
 }
-// sign with address index 0
-const signedTx = await template.signTransaction(tx, 0)
+
+interface BaseTransaction {
+  addressIndex: number;
+  nonce: Integer;
+  gasLimit: Integer;
+  gasPrice: Integer;
+}
+
+interface Transfer extends BaseTransaction {
+  amount: Integer;
+  recipient: string;
+  payload?: string;
+}
+
+async signTransaction(
+  transaction: Transfer,
+  options: Options
+): Promise<string> {
+```
+
+### signExecution
+
+For EVM transaction.
+
+```typescript
+interface Execution extends BaseTransaction {
+  amount: Integer;
+  contract: string;
+  data?: string;
+}
+
+async signExecution(
+  transaction: Execution,
+  options: Options
+): Promise<string> {
+```
+
+### signStakeCreate
+
+For creating bucket for voting.
+
+```typescript
+interface StakeCreate extends BaseTransaction {
+  candidateName: string;
+  amount: Integer;
+  duration: Integer;
+  isAuto: boolean;
+}
+
+async signStakeCreate(
+  transaction: StakeCreate,
+  options: Options
+): Promise<string> {
+```
+### signStakeUnstake
+
+For releasing a over-time bucket.
+
+```typescript
+interface StakeUnstake extends BaseTransaction {
+  bucketIndex: Integer;
+}
+
+async signStakeUnstake(
+  transaction: StakeUnstake,
+  options: Options
+): Promise<string> {
+```
+
+### signStakeWithdraw
+
+For withdraw IOTX from a released bucket
+
+```typescript
+interface StakeWithdraw extends BaseTransaction {
+  bucketIndex: Integer;
+}
+
+async signStakeWithdraw(
+  transaction: StakeWithdraw,
+  options: Options
+): Promise<string> {
 ```
 
