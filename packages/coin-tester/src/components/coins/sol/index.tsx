@@ -69,7 +69,7 @@ function CoinSol(props: Props) {
     handleState(() => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      return sol.getAddress(transport!, appPrivateKey, appId);
+      return sol.getAddress(transport!, appPrivateKey, appId, 0);
     }, setAccount);
   };
 
