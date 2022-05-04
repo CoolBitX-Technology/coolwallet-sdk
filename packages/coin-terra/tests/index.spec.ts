@@ -1,10 +1,8 @@
+import crypto from 'node:crypto';
 import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
-import Terra from '../src';
-import { CHAIN_ID, TX_TYPE, SignDataType } from '../src/config/types';
-import { DENOMTYPE } from '../src/config/denomType';
-import { TOKENTYPE } from '../src/config/tokenType';
+import Terra, { DENOMTYPE, TOKENTYPE, CHAIN_ID, SignDataType } from '../src';
 import {
   LCDClient,
   Fee,
@@ -16,8 +14,7 @@ import {
   MsgWithdrawDelegatorReward,
   MsgExecuteContract,
 } from '@terra-money/terra.js';
-
-const crypto = require('crypto');
+import { txParamParser } from './utils';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
@@ -39,11 +36,6 @@ describe('Test Terra SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
   let walletAddress = '';
-  let signTxData: SignDataType = {
-    addressIndex: 0,
-    confirmCB: undefined,
-    authorizedCB: undefined,
-  };
 
   const mainnet = new LCDClient({
     URL: 'https://lcd.terra.dev',
@@ -55,9 +47,6 @@ describe('Test Terra SDK', () => {
   beforeAll(async () => {
     transport = (await createTransport())!;
     props = await initialize(transport, mnemonic);
-    signTxData.transport = transport;
-    signTxData.appPrivateKey = props.appPrivateKey;
-    signTxData.appId = props.appId;
     const address = await coinTerra.getAddress(transport, props.appPrivateKey, props.appId, 0);
     walletAddress = address;
   });
@@ -75,24 +64,35 @@ describe('Test Terra SDK', () => {
       sequence: getRandSequence(),
       fromAddress: walletAddress,
       toAddress: getRandWallet(),
-      amount: getRandInt(1000000000) + 1,
-      denom,
-      feeAmount: getRandInt(90000) + 1,
-      feeDenom,
-      gas: getRandInt(85000) + 1,
+      coin: {
+        denom,
+        amount: getRandInt(1000000000) + 1,
+      },
+      fee: {
+        gas_limit: getRandInt(85000) + 1,
+        denom: feeDenom,
+        amount: getRandInt(90000) + 1,
+      },
       memo: 'test signature',
     };
-    signTxData.txType = TX_TYPE.SEND;
-    signTxData.transaction = transaction;
-    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signTxData: SignDataType = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signTransferTransaction(signTxData);
 
-    const send_tx = new MsgSend(wallet.key.accAddress, transaction.toAddress, { [denom.unit]: transaction.amount });
+    const send_tx = new MsgSend(wallet.key.accAddress, transaction.toAddress, {
+      [denom.unit]: transaction.coin.amount,
+    });
     const sendOpt = {
       msgs: [send_tx],
       memo: transaction.memo,
       accountNumber: parseInt(transaction.accountNumber),
       sequence: parseInt(transaction.sequence),
-      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+      fee: new Fee(transaction.fee.gas_limit, { [feeDenom.unit]: transaction.fee.amount }, '', ''),
     };
     const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(sendOpt));
 
@@ -106,10 +106,10 @@ describe('Test Terra SDK', () => {
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
-      .messagePage(coinTerra.constructor.name)
-      .messagePage(transaction.denom.name)
+      .messagePage('TERRA')
+      .messagePage(transaction.coin.denom.name)
       .addressPage(transaction.toAddress.toLowerCase())
-      .amountPage(+transaction.amount/1000000)
+      .amountPage(+transaction.coin.amount / 1000000)
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
@@ -123,27 +123,36 @@ describe('Test Terra SDK', () => {
       sequence: getRandSequence(),
       delegatorAddress: walletAddress,
       validatorAddress: getRandValidator(),
-      amount: getRandInt(1000000) + 1,
-      feeAmount: getRandInt(70000000) + 1,
-      gas: getRandInt(520000) + 1,
-      feeDenom,
+      coin: {
+        amount: getRandInt(1000000) + 1,
+      },
+      fee: {
+        gas_limit: getRandInt(520000) + 1,
+        denom: feeDenom,
+        amount: getRandInt(70000000) + 1,
+      },
       memo: 'test delegate',
     };
-    signTxData.txType = TX_TYPE.DELEGATE;
-    signTxData.transaction = transaction;
-    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signDelegateTransaction(signTxData);
 
     const delegate_tx = new MsgDelegate(
       wallet.key.accAddress,
       transaction.validatorAddress,
-      new Coin('uluna', transaction.amount.toString())
+      new Coin('uluna', transaction.coin.amount)
     );
     const delegateOpt = {
       msgs: [delegate_tx],
       memo: transaction.memo,
       accountNumber: parseInt(transaction.accountNumber),
       sequence: parseInt(transaction.sequence),
-      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+      fee: new Fee(transaction.fee.gas_limit, { [feeDenom.unit]: transaction.fee.amount }, '', ''),
     };
     const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(delegateOpt));
 
@@ -157,11 +166,11 @@ describe('Test Terra SDK', () => {
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
-      .messagePage(coinTerra.constructor.name)
+      .messagePage('TERRA')
       .messagePage('LUNA')
       .messagePage('Delgt')
       .addressPage(transaction.validatorAddress.toLowerCase())
-      .amountPage(+transaction.amount/1000000)
+      .amountPage(+transaction.coin.amount / 1000000)
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
@@ -175,27 +184,36 @@ describe('Test Terra SDK', () => {
       sequence: getRandSequence(),
       delegatorAddress: walletAddress,
       validatorAddress: getRandValidator(),
-      amount: getRandInt(1000000) + 1,
-      feeAmount: getRandInt(700000) + 1,
-      feeDenom,
-      gas: getRandInt(550000) + 1,
+      coin: {
+        amount: getRandInt(1000000) + 1,
+      },
+      fee: {
+        gas_limit: getRandInt(520000) + 1,
+        denom: feeDenom,
+        amount: getRandInt(70000000) + 1,
+      },
       memo: 'test undelegate',
     };
-    signTxData.txType = TX_TYPE.UNDELEGATE;
-    signTxData.transaction = transaction;
-    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signUndelegateTransaction(signTxData);
 
     const undelegate_tx = new MsgUndelegate(
       wallet.key.accAddress,
       transaction.validatorAddress,
-      new Coin('uluna', transaction.amount.toString())
+      new Coin('uluna', transaction.coin.amount.toString())
     );
     const undelegateOpt = {
       msgs: [undelegate_tx],
       memo: transaction.memo,
       accountNumber: parseInt(transaction.accountNumber),
       sequence: parseInt(transaction.sequence),
-      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+      fee: new Fee(transaction.fee.gas_limit, { [feeDenom.unit]: transaction.fee.amount }, '', ''),
     };
     const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(undelegateOpt));
 
@@ -209,11 +227,11 @@ describe('Test Terra SDK', () => {
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
-      .messagePage(coinTerra.constructor.name)
+      .messagePage('TERRA')
       .messagePage('LUNA')
       .messagePage('UnDel')
       .addressPage(transaction.validatorAddress.toLowerCase())
-      .amountPage(+transaction.amount/1000000)
+      .amountPage(+transaction.coin.amount / 1000000)
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
@@ -227,14 +245,21 @@ describe('Test Terra SDK', () => {
       sequence: getRandSequence(),
       delegatorAddress: walletAddress,
       validatorAddress: getRandValidator(),
-      feeAmount: getRandInt(1330000000) + 1,
-      feeDenom,
-      gas: getRandInt(400000) + 1,
+      fee: {
+        gas_limit: getRandInt(400000) + 1,
+        denom: feeDenom,
+        amount: getRandInt(1330000000) + 1,
+      },
       memo: 'test withdraw',
     };
-    signTxData.txType = TX_TYPE.WITHDRAW;
-    signTxData.transaction = transaction;
-    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signWithdrawTransaction(signTxData);
 
     const withdraw_tx = new MsgWithdrawDelegatorReward(wallet.key.accAddress, transaction.validatorAddress);
     const withdrawOpt = {
@@ -242,7 +267,7 @@ describe('Test Terra SDK', () => {
       memo: transaction.memo,
       accountNumber: parseInt(transaction.accountNumber),
       sequence: parseInt(transaction.sequence),
-      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+      fee: new Fee(transaction.fee.gas_limit, { [feeDenom.unit]: transaction.fee.amount }, '', ''),
     };
     const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(withdrawOpt));
 
@@ -256,7 +281,7 @@ describe('Test Terra SDK', () => {
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
-      .messagePage(coinTerra.constructor.name)
+      .messagePage('TERRA')
       .messagePage('LUNA')
       .messagePage('Reward')
       .addressPage(transaction.validatorAddress.toLowerCase())
@@ -286,32 +311,36 @@ describe('Test Terra SDK', () => {
       sequence: getRandSequence(),
       senderAddress: walletAddress,
       contractAddress: getRandWallet(),
-      execute_msg: JSON.stringify(executeMsgObj),
+      execute_msg: executeMsgObj,
       funds: {
-        amount: parseInt(executeMsgObj.swap.offer_asset.amount),
+        amount: +executeMsgObj.swap.offer_asset.amount,
         denom,
       },
-      feeAmount: getRandInt(200000) + 1,
-      feeDenom,
-      gas: getRandInt(250000) + 1,
+      fee: {
+        gas_limit: getRandInt(250000) + 1,
+        amount: getRandInt(200000) + 1,
+        denom: feeDenom,
+      },
       memo: 'Swap test',
     };
-    signTxData.txType = TX_TYPE.SMART;
-    signTxData.transaction = transaction;
-    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signMsgExecuteContractTransaction(signTxData);
 
-    const smartSwap_tx = new MsgExecuteContract(
-      wallet.key.accAddress,
-      transaction.contractAddress,
-      JSON.stringify(executeMsgObj),
-      { [denom.unit]: transaction.funds.amount }
-    );
+    const smartSwap_tx = new MsgExecuteContract(wallet.key.accAddress, transaction.contractAddress, executeMsgObj, {
+      [denom.unit]: transaction.funds.amount,
+    });
     const smartSwapOpt = {
       msgs: [smartSwap_tx],
       memo: transaction.memo,
       accountNumber: parseInt(transaction.accountNumber),
       sequence: parseInt(transaction.sequence),
-      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+      fee: new Fee(transaction.fee.gas_limit, { [feeDenom.unit]: transaction.fee.amount }),
     };
     const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(smartSwapOpt));
 
@@ -325,7 +354,73 @@ describe('Test Terra SDK', () => {
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
-      .messagePage(coinTerra.constructor.name)
+      .messagePage('TERRA')
+      .wrapPage('SMART', '')
+      .addressPage(transaction.contractAddress.toLowerCase())
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Smart Contract Without Funds: Luna to bLuna Swap', async () => {
+    const denom = getRandDenom();
+    const feeDenom = getRandDenom();
+    const executeMsgObj = {
+      swap: {
+        offer_asset: {
+          info: {
+            native_token: {
+              denom: denom.unit,
+            },
+          },
+          amount: (getRandInt(345000) + 1).toString(),
+        },
+      },
+    };
+    const transaction = {
+      chainId: CHAIN_ID.MAIN,
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
+      senderAddress: walletAddress,
+      contractAddress: getRandWallet(),
+      execute_msg: executeMsgObj,
+      fee: {
+        gas_limit: getRandInt(250000) + 1,
+        amount: getRandInt(200000) + 1,
+        denom: feeDenom,
+      },
+      memo: 'Swap test',
+    };
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signMsgExecuteContractTransaction(signTxData);
+
+    const smartSwap_tx = new MsgExecuteContract(wallet.key.accAddress, transaction.contractAddress, executeMsgObj);
+    const smartSwapOpt = {
+      msgs: [smartSwap_tx],
+      memo: transaction.memo,
+      accountNumber: parseInt(transaction.accountNumber),
+      sequence: parseInt(transaction.sequence),
+      fee: new Fee(transaction.fee.gas_limit, { [feeDenom.unit]: transaction.fee.amount }),
+    };
+    const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(smartSwapOpt));
+
+    try {
+      expect(signedTx).toEqual(signedTxSDK);
+    } catch (e) {
+      console.error('Test Smart Contract: Luna to bLuna Swap params', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('TERRA')
       .wrapPage('SMART', '')
       .addressPage(transaction.contractAddress.toLowerCase())
       .wrapPage('PRESS', 'BUTToN')
@@ -355,26 +450,29 @@ describe('Test Terra SDK', () => {
           decimals: token.unit,
         },
       },
-      feeAmount: getRandInt(5000000) + 1,
-      feeDenom,
-      gas: getRandInt(120000) + 1,
+      fee: {
+        gas_limit: getRandInt(120000) + 1,
+        denom: feeDenom,
+        amount: getRandInt(5000000) + 1,
+      },
       memo: 'Send cw20 test',
     };
-    signTxData.txType = TX_TYPE.CW20;
-    signTxData.transaction = transaction;
-    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signMsgCW20Transaction(signTxData);
 
-    const cw20_tx = new MsgExecuteContract(
-      wallet.key.accAddress,
-      transaction.contractAddress,
-      executeMsgObj
-    );
+    const cw20_tx = new MsgExecuteContract(wallet.key.accAddress, transaction.contractAddress, executeMsgObj);
     const cw20Opt = {
       msgs: [cw20_tx],
       memo: transaction.memo,
       accountNumber: parseInt(transaction.accountNumber),
       sequence: parseInt(transaction.sequence),
-      fee: new Fee(transaction.gas, { [feeDenom.unit]: transaction.feeAmount }, '', ''),
+      fee: new Fee(transaction.fee.gas_limit, { [feeDenom.unit]: transaction.fee.amount }, '', ''),
     };
     const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(cw20Opt));
 
@@ -388,10 +486,459 @@ describe('Test Terra SDK', () => {
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
-      .messagePage(coinTerra.constructor.name)
+      .messagePage('TERRA')
       .messagePage(token.symbol)
       .addressPage(executeMsgObj.transfer.recipient.toLowerCase())
-      .amountPage(+executeMsgObj.transfer.amount/1000000)
+      .amountPage(+executeMsgObj.transfer.amount / 1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Wallet Connect MsgSend', async () => {
+    const denom = getRandDenom();
+    const feeDenom = getRandDenom();
+    const accountNumber = getRandAccount();
+    const sequence = getRandSequence();
+    const toAddress = getRandWallet();
+    const coinAmount = getRandInt(1000000000) + 1;
+    const params = {
+      msgs: [
+        {
+          '@type': '/cosmos.bank.v1beta1.MsgSend',
+          amount: [{ amount: coinAmount, denom: denom.unit }],
+          from_address: walletAddress,
+          to_address: toAddress,
+        },
+      ],
+      fee: {
+        amount: [{ amount: '' + getRandInt(5000000) + 1, denom: feeDenom.unit }],
+        gas_limit: '' + getRandInt(250000) + 1,
+        granter: '',
+        payer: '',
+      },
+      memo: 'Send wallet connect MsgSend test',
+      accountNumber: +accountNumber,
+      sequence: +sequence,
+      signMode: 1,
+    };
+    const transaction = {
+      chainId: CHAIN_ID.MAIN,
+      accountNumber,
+      sequence,
+      msgs: params.msgs,
+      fee: params.fee,
+      memo: params.memo,
+    };
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK = await wallet.createAndSignTx(txParamParser(params));
+
+    try {
+      expect(signedTx).toEqual(mainnet.tx.encode(signedTxSDK));
+    } catch (e) {
+      console.error('Test Wallet Connect MsgSend', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('TERRA')
+      .messagePage(denom.name)
+      .addressPage(toAddress.toLowerCase())
+      .amountPage(+coinAmount / 1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Wallet Connect MsgDelegate', async () => {
+    const feeDenom = getRandDenom();
+    const accountNumber = getRandAccount();
+    const sequence = getRandSequence();
+    const validatorAddress = getRandWallet();
+    const coinAmount = getRandInt(1000000000) + 1;
+    const params = {
+      msgs: [
+        {
+          '@type': '/cosmos.staking.v1beta1.MsgDelegate',
+          delegator_address: walletAddress,
+          validator_address: validatorAddress,
+          amount: { amount: coinAmount, denom: 'uluna' },
+        },
+      ],
+      fee: {
+        amount: [{ amount: '' + getRandInt(5000000) + 1, denom: feeDenom.unit }],
+        gas_limit: '' + getRandInt(250000) + 1,
+        granter: '',
+        payer: '',
+      },
+      memo: 'Send wallet connect MsgDelegate test',
+      accountNumber: +accountNumber,
+      sequence: +sequence,
+      signMode: 1,
+    };
+    const transaction = {
+      chainId: CHAIN_ID.MAIN,
+      accountNumber,
+      sequence,
+      msgs: params.msgs,
+      fee: params.fee,
+      memo: params.memo,
+    };
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK = await wallet.createAndSignTx(txParamParser(params));
+
+    try {
+      expect(signedTx).toEqual(mainnet.tx.encode(signedTxSDK));
+    } catch (e) {
+      console.error('Test Wallet Connect MsgDelegate', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('TERRA')
+      .messagePage('LUNA')
+      .messagePage('Delgt')
+      .addressPage(validatorAddress.toLowerCase())
+      .amountPage(+coinAmount / 1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Wallet Connect MsgUndelegate', async () => {
+    const feeDenom = getRandDenom();
+    const accountNumber = getRandAccount();
+    const sequence = getRandSequence();
+    const validatorAddress = getRandWallet();
+    const coinAmount = getRandInt(1000000000) + 1;
+    const params = {
+      msgs: [
+        {
+          '@type': '/cosmos.staking.v1beta1.MsgUndelegate',
+          delegator_address: walletAddress,
+          validator_address: validatorAddress,
+          amount: { amount: coinAmount, denom: 'uluna' },
+        },
+      ],
+      fee: {
+        amount: [{ amount: '' + getRandInt(5000000) + 1, denom: feeDenom.unit }],
+        gas_limit: '' + getRandInt(250000) + 1,
+        granter: '',
+        payer: '',
+      },
+      memo: 'Send wallet connect MsgUndelegate test',
+      accountNumber: +accountNumber,
+      sequence: +sequence,
+      signMode: 1,
+    };
+    const transaction = {
+      chainId: CHAIN_ID.MAIN,
+      accountNumber,
+      sequence,
+      msgs: params.msgs,
+      fee: params.fee,
+      memo: params.memo,
+    };
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK = await wallet.createAndSignTx(txParamParser(params));
+
+    try {
+      expect(signedTx).toEqual(mainnet.tx.encode(signedTxSDK));
+    } catch (e) {
+      console.error('Test Wallet Connect MsgUndelegate params', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('TERRA')
+      .messagePage('LUNA')
+      .messagePage('UnDel')
+      .addressPage(validatorAddress.toLowerCase())
+      .amountPage(+coinAmount / 1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Wallet Connect MsgWithdrawDelegatorReward', async () => {
+    const feeDenom = getRandDenom();
+    const accountNumber = getRandAccount();
+    const sequence = getRandSequence();
+    const validatorAddress = getRandWallet();
+    const params = {
+      msgs: [
+        {
+          '@type': '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
+          delegator_address: walletAddress,
+          validator_address: validatorAddress,
+        },
+      ],
+      fee: {
+        amount: [{ amount: '' + getRandInt(5000000) + 1, denom: feeDenom.unit }],
+        gas_limit: '' + getRandInt(250000) + 1,
+        granter: '',
+        payer: '',
+      },
+      memo: 'Send wallet connect MsgWithdrawDelegatorReward test',
+      accountNumber: +accountNumber,
+      sequence: +sequence,
+      signMode: 1,
+    };
+    const transaction = {
+      chainId: CHAIN_ID.MAIN,
+      accountNumber,
+      sequence,
+      msgs: params.msgs,
+      fee: params.fee,
+      memo: params.memo,
+    };
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK = await wallet.createAndSignTx(txParamParser(params));
+
+    try {
+      expect(signedTx).toEqual(mainnet.tx.encode(signedTxSDK));
+    } catch (e) {
+      console.error('Test Wallet Connect MsgWithdrawDelegatorReward', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('TERRA')
+      .messagePage('LUNA')
+      .messagePage('Reward')
+      .addressPage(validatorAddress.toLowerCase())
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Wallet Connect MsgCW20', async () => {
+    const token = getRandToken();
+    const feeDenom = getRandDenom();
+    const accountNumber = getRandAccount();
+    const sequence = getRandSequence();
+    const executeMsgObj = {
+      transfer: {
+        amount: (getRandInt(12000000) + 1).toString(),
+        recipient: getRandWallet(),
+      },
+    };
+    const params = {
+      msgs: [
+        {
+          '@type': '/terra.wasm.v1beta1.MsgExecuteContract',
+          sender: walletAddress,
+          contract: token.contractAddress,
+          execute_msg: executeMsgObj,
+        },
+      ],
+      fee: {
+        amount: [{ amount: '' + getRandInt(5000000) + 1, denom: feeDenom.unit }],
+        gas_limit: '' + getRandInt(250000) + 1,
+        granter: '',
+        payer: '',
+      },
+      memo: 'Send wallet connect MsgCW20 test',
+      accountNumber: +accountNumber,
+      sequence: +sequence,
+      signMode: 1,
+    };
+    const transaction = {
+      chainId: CHAIN_ID.MAIN,
+      accountNumber,
+      sequence,
+      msgs: params.msgs,
+      fee: params.fee,
+      memo: params.memo,
+    };
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK = await wallet.createAndSignTx(txParamParser(params));
+
+    try {
+      expect(signedTx).toEqual(mainnet.tx.encode(signedTxSDK));
+    } catch (e) {
+      console.error('Test Wallet Connect MsgCW20', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('TERRA')
+      .messagePage(token.symbol)
+      .addressPage(executeMsgObj.transfer.recipient.toLowerCase())
+      .amountPage(+executeMsgObj.transfer.amount / 1000000)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Wallet Connect Multiple MsgSend', async () => {
+    const denom = getRandDenom();
+    const denom1 = getRandDenom();
+    const feeDenom = getRandDenom();
+    const accountNumber = getRandAccount();
+    const sequence = getRandSequence();
+    const toAddress = getRandWallet();
+    const coinAmount = getRandInt(1000000000) + 1;
+    const coinAmount1 = getRandInt(1000000000) + 1;
+    const params = {
+      msgs: [
+        {
+          '@type': '/cosmos.bank.v1beta1.MsgSend',
+          amount: [{ amount: coinAmount, denom: denom.unit }],
+          from_address: walletAddress,
+          to_address: toAddress,
+        },
+        {
+          '@type': '/cosmos.bank.v1beta1.MsgSend',
+          amount: [{ amount: coinAmount1, denom: denom1.unit }],
+          from_address: walletAddress,
+          to_address: toAddress,
+        },
+      ],
+      fee: {
+        amount: [{ amount: '' + getRandInt(5000000) + 1, denom: feeDenom.unit }],
+        gas_limit: '' + getRandInt(250000) + 1,
+        granter: '',
+        payer: '',
+      },
+      memo: 'Send wallet connect Multiple MsgSend test',
+      accountNumber: +accountNumber,
+      sequence: +sequence,
+      signMode: 1,
+    };
+    const transaction = {
+      chainId: CHAIN_ID.MAIN,
+      accountNumber,
+      sequence,
+      msgs: params.msgs,
+      fee: params.fee,
+      memo: params.memo,
+    };
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK = await wallet.createAndSignTx(txParamParser(params));
+
+    try {
+      expect(signedTx).toEqual(mainnet.tx.encode(signedTxSDK));
+    } catch (e) {
+      console.error('Test Wallet Connect Multiple MsgSend', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('TERRA')
+      .wrapPage('SMART', '')
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Wallet Connect Many Many MsgSend', async () => {
+    const feeDenom = getRandDenom();
+    const accountNumber = getRandAccount();
+    const sequence = getRandSequence();
+    const msgs = Array.from({ length: 2000 }, () => ({
+      '@type': '/cosmos.bank.v1beta1.MsgSend',
+      amount: [{ amount: getRandInt(1000000000) + 1, denom: getRandDenom().unit }],
+      from_address: walletAddress,
+      to_address: getRandWallet(),
+    }));
+    const params = {
+      msgs,
+      fee: {
+        amount: [{ amount: '' + getRandInt(5000000) + 1, denom: feeDenom.unit }],
+        gas_limit: '' + getRandInt(250000) + 1,
+        granter: '',
+        payer: '',
+      },
+      memo: 'Send wallet connect Many Many  MsgSend test',
+      accountNumber: +accountNumber,
+      sequence: +sequence,
+      signMode: 1,
+    };
+    const transaction = {
+      chainId: CHAIN_ID.MAIN,
+      accountNumber,
+      sequence,
+      msgs: params.msgs,
+      fee: params.fee,
+      memo: params.memo,
+    };
+    const signTxData = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+    const signedTx = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK = await wallet.createAndSignTx(txParamParser(params));
+
+    try {
+      expect(signedTx).toEqual(mainnet.tx.encode(signedTxSDK));
+    } catch (e) {
+      console.error('Test Wallet Connect Many Many  MsgSend', transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('TERRA')
+      .wrapPage('SMART', '')
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
