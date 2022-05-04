@@ -80,11 +80,6 @@
   padding-right: 0px;
 }
 
-.amount-adjustment {
-  display: flex;
-  flex: 1;
-}
-
 .limited-dropdown {
   height: 200px;
   overflow-y: scroll;
