@@ -31,6 +31,5 @@ export function createMsgTx(
 ): Tx {
   const txBody = new TxBody(msgs, transaction.memo);
   const authInfo = createAuthInfo(publicKey, transaction);
-  const tx = new Tx(txBody, authInfo, [signature]);
-  return tx;
+  return new Tx(txBody, authInfo, [signature]);
 }
