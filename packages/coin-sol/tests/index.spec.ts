@@ -3,7 +3,6 @@ import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolwallet/testing-library';
 import { Connection, Keypair, Transaction, SystemProgram, PublicKey } from '@solana/web3.js';
 import { createAssociatedTokenAccountInstruction, createTransferInstruction } from '@solana/spl-token';
-import * as bip39 from 'bip39';
 import SOL, { types, TransactionCreator } from '../src';
 import * as params from '../src/config/params';
 import * as stringUtil from '../src/utils/stringUtil';
@@ -136,22 +135,7 @@ describe('Test Solana SDK', () => {
     const message = sdkTransaction.compileMessage();
     const expectedSigUint8Array = await node.sign(message.serialize().toString('hex'));
     sdkTransaction.addSignature(sdkWallet.publicKey, expectedSigUint8Array);
-
-    //console.error(recoveredTx);
-    //console.error(sdkTransaction);
-    //console.error(recoveredTx.instructions[0]);
-    //console.error(sdkTransaction.instructions[0]);
-    //console.error(recoveredTx.instructions[0].keys);
-    //console.error(sdkTransaction.instructions[0].keys);
-    //console.error(recoveredTx._message);
-    //console.error(message);
-
-    //recoveredTx.instructions[0].keys.forEach(element => console.error("[rec]",element.pubkey.toString()));
-    //sdkTransaction.instructions[0].keys.forEach(element => console.error("[sdk]",element.pubkey.toString()));
-
-    // const result = await connection.sendRawTransaction(sdkTransaction.serialize());
-    // console.error("Uplink:", result);
-
+    
     try {
       expect(recoveredTx.verifySignatures()).toEqual(true);
       expect(sdkTransaction.verifySignatures()).toEqual(true);
@@ -223,8 +207,5 @@ describe('Test Solana SDK', () => {
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
-  });
-
-  it('Test SPL Token Transaction', async () => {
   });
 });
