@@ -5,6 +5,7 @@ import { Transaction } from './transactionUtil';
 import { TOKEN_INFO } from '../config/tokenInfos';
 import { isBase58Format } from './stringUtil';
 import base58 from 'bs58';
+import { PathType } from '@coolwallet/core/lib/config';
 
 /**
  * getTransferArguments
@@ -13,9 +14,8 @@ import base58 from 'bs58';
  * @returns {Promise<string>}
  */
 export const getTransferArguments = async (rawTx: Transaction, isPartialArgs: boolean): Promise<string> => {
-  const pathType = config.PathType.SLIP0010;
-  const path = await utils.getPath(params.COIN_TYPE, 0, 3, pathType);
-  const SEPath = `0D${path}`;
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/0'/0'` });
+  const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
 
   return SEPath + rawTx.serializeArgument(isPartialArgs);

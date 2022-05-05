@@ -1,9 +1,10 @@
-import { coin as COIN, error as ERROR, Transport } from '@coolwallet/core';
+import { coin as COIN, error as ERROR, Transport, utils } from '@coolwallet/core';
 import { signTransaction } from './sign';
 import * as types from './config/types';
 import * as params from './config/params';
 import * as stringUtil from './utils/stringUtil';
 import TransactionCreator from './utils/TransactionCreator';
+import { PathType } from '@coolwallet/core/lib/config';
 
 export { types, TransactionCreator };
 
@@ -12,9 +13,10 @@ export default class SOL extends COIN.EDDSACoin implements COIN.Coin {
     super(params.COIN_TYPE);
   }
 
-  async getAddress(transport: Transport, appPrivateKey: string, appId: string): Promise<string> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, true);
-
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+    const publicKey = await COIN.getPublicKeyByPath(transport, appId, appPrivateKey, path);
+    console.log('Public Key:', publicKey);
     if (!publicKey) {
       throw new ERROR.SDKError(this.getAddress.name, 'public key is undefined');
     }
