@@ -1,12 +1,12 @@
 import Path from 'path';
 import { exec } from './utils';
 import Package from '../../package.json';
-import enabledPackages from '../../coin.config.json';
 
 // These coolwallet packages is mandatory to use coin-tester, should not be optional.
 const MANDATORY = ['@coolwallet/core', '@coolwallet/transport-jre-http', '@coolwallet/transport-web-ble'];
 
 async function buildCoinLibrary() {
+  const enabledPackages = (await import('../../coin.config.json')).default;
   const coinPackages = Object.keys(Package.dependencies).filter(
     (k) => k.startsWith('@coolwallet') && !MANDATORY.includes(k)
   );
