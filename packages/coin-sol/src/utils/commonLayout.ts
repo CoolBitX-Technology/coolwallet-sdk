@@ -1,25 +1,35 @@
 import * as BufferLayout from '@solana/buffer-layout';
 
-interface InstructionInputData {
-  readonly instruction: number;
-}
-
-type InstructionLayoutType<TInputData extends InstructionInputData> = {
-  index: number;
-  layout: BufferLayout.Layout<TInputData>;
+/**
+ * Layout for a PublicKey type
+ */
+const publicKey = (property = 'publicKey') => {
+  return BufferLayout.blob(32, property);
 };
 
-type SystemInstructionInputData = {
-  CreateWithSeed: InstructionInputData & {
-    base: Uint8Array;
-    lamports: number;
-    programId: Uint8Array;
-    seed: string;
-    space: number;
-  };
-  Transfer: InstructionInputData & {
-    lamports: number;
-  };
+/**
+ * Layout for an Authorized object
+ */
+const authorized = (property = 'authorized') => {
+  return BufferLayout.struct<
+    Readonly<{
+      staker: Uint8Array;
+      withdrawer: Uint8Array;
+    }>
+  >([publicKey('staker'), publicKey('withdrawer')], property);
+};
+
+/**
+ * Layout for a Lockup object
+ */
+const lockup = (property = 'lockup') => {
+  return BufferLayout.struct<
+    Readonly<{
+      custodian: Uint8Array;
+      epoch: number;
+      unixTimestamp: number;
+    }>
+  >([BufferLayout.ns64('unixTimestamp'), BufferLayout.ns64('epoch'), publicKey('custodian')], property);
 };
 
 interface IRustStringShim
@@ -40,15 +50,9 @@ interface IRustStringShim
 }
 
 /**
- * Layout for a PublicKey type
- */
-const publicKey = (property: string = 'publicKey') => {
-  return BufferLayout.blob(32, property);
-};
-/**
  * Layout for a Rust String type
  */
-const rustString = (property: string = 'string'): BufferLayout.Layout<string> => {
+const rustString = (property = 'string'): BufferLayout.Layout<string> => {
   const rsl = BufferLayout.struct<
     Readonly<{
       length?: number;
@@ -87,27 +91,6 @@ const rustString = (property: string = 'string'): BufferLayout.Layout<string> =>
   return rslShim;
 };
 
-export const SystemProgramLayout = {
-  Transfer: {
-    index: 2,
-    layout: BufferLayout.struct<SystemInstructionInputData['Transfer']>([
-      BufferLayout.u32('instruction'),
-      BufferLayout.ns64('lamports'),
-    ]),
-  },
-  createWithSeed: {
-    index: 3,
-    layout: BufferLayout.struct<SystemInstructionInputData['CreateWithSeed']>([
-      BufferLayout.u32('instruction'),
-      publicKey('base'),
-      rustString('seed'),
-      BufferLayout.ns64('lamports'),
-      BufferLayout.ns64('space'),
-      publicKey('programId'),
-    ]),
-  },
-};
-
 function getAlloc(type: any, fields: any): number {
   let alloc = 0;
   type.layout.fields.forEach((item: any) => {
@@ -120,13 +103,4 @@ function getAlloc(type: any, fields: any): number {
   return alloc;
 }
 
-export function encodeData<TInputData extends InstructionInputData>(
-  layoutType: InstructionLayoutType<TInputData>,
-  fields?: any
-): Buffer {
-  const allocLength = layoutType.layout.span >= 0 ? layoutType.layout.span : getAlloc(layoutType, fields);
-  const data = Buffer.alloc(allocLength);
-  const layoutFields = Object.assign({ instruction: layoutType.index }, fields);
-  layoutType.layout.encode(layoutFields, data);
-  return data;
-}
+export { publicKey, authorized, lockup, rustString, getAlloc };

@@ -12,7 +12,6 @@
     "@coolwallet/xtz": "file:../coin-xtz",
     "@coolwallet/ada": "file:../coin-ada",
     "@coolwallet/bnb": "file:../coin-bnb",
-    "@coolwallet/evm": "file:../coin-evm",
     "@coolwallet/bsc": "file:../coin-bsc",
     "@coolwallet/core": "file:../core",
     "@coolwallet/cro": "file:../coin-cro",
