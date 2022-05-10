@@ -10,3 +10,7 @@ console.log('Arbitrum Chain Information', CHAIN.ARBITRUM.toHexChainInfo());
 console.log('Arbitrum Chain Signature', CHAIN.ARBITRUM.getSignature());
 console.log('Avax C Chain Information', CHAIN.AVAXC.toHexChainInfo());
 console.log('Avax C Chain Signature', CHAIN.AVAXC.getSignature());
+console.log('Velas Information', CHAIN.VELAS.toHexChainInfo());
+console.log('Velas Signature', CHAIN.VELAS.getSignature());
+console.log('Fantom Information', CHAIN.FANTOM.toHexChainInfo());
+console.log('Fantom Signature', CHAIN.FANTOM.getSignature());

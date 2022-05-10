@@ -17,6 +17,7 @@ async function initialize(transport: Transport, mnemonic: string): Promise<Manda
   const SEPublicKey = await config.getSEPublicKey(transport);
   const appId = await apdu.pair.register(transport, appPublicKey, password, name, SEPublicKey);
   await utils.createWalletByMnemonic(transport, appId, appPrivateKey, mnemonic, SEPublicKey);
+  await apdu.info.toggleDisplayAddress(transport, appId, appPrivateKey, true);
 
   return {
     appPrivateKey,

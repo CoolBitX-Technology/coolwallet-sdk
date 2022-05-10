@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/terra",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Coolwallet Terra sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -8,19 +8,27 @@
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx,.js\" --source-maps inline",
-    "build": "npm run build:types && npm run build:ts",
-    "test": "jest --verbose"
+    "build:proto": "babel-node -x \".ts\" tools/index.ts",
+    "move:terra": "cp ./src/terra/@terra-core.d.ts lib/terra/@terra-core.d.ts",
+    "build": "npm run build:types && npm run build:ts && npm run move:terra",
+    "test": "jest --runInBand --testTimeout=50000"
+  },
+  "peerDependencies": {
+    "@coolwallet/core": "^1.1.8"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",
     "@babel/core": "^7.16.7",
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/node": "^7.16.8",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.0.14",
-    "@types/eth-sig-util": "^2.1.1",
+    "@babel/types": "^7.17.0",
+    "@coolwallet/core": "1.1.8",
+    "@terra-money/terra.js": "^3.0.8",
     "@types/node": "^14.0.13",
-    "typescript": "^4.4.3"
+    "esbuild": "^0.14.38",
+    "simple-git": "^3.7.1",
+    "typescript": "^4.6.2"
   },
   "repository": {
     "type": "git",
@@ -29,10 +37,5 @@
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
-  "homepage": "https://github.com/CoolBitX-Technology/coolwallet3-sdk#readme",
-  "dependencies": {
-    "bech32": "^2.0.0",
-    "protocol-buffers": "^4.2.0",
-    "protocol-buffers-encodings": "^1.1.1"
-  }
+  "homepage": "https://github.com/CoolBitX-Technology/coolwallet3-sdk#readme"
 }

@@ -1,87 +1,86 @@
 import { Transport } from '@coolwallet/core';
-import { DenomInfo } from "../config/denomType";
+import { DenomInfo } from '../config/denomType';
 
-export type SignDataType = 
-  SignMsgSendType | 
-  SignMsgDelegateType | 
-  SignMsgUndelegateType | 
-  SignMsgWithdrawDelegationRewardType | 
-  SignMsgExecuteContractType | 
-  SignMsgCW20Type;
-
-interface SignType {
-  transport: Transport,
-  appPrivateKey: string,
-  appId: string,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
+interface SignType<
+  T extends MsgSend | MsgDelegate | MsgUndelegate | MsgWithdrawDelegatorReward | MsgExecuteContract | MsgCW20 | MsgBlind
+> {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  addressIndex: number;
+  transaction: T;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 }
 
-export interface SignMsgSendType extends SignType {
-  txType: TX_TYPE.SEND,
-  transaction: MsgSend
-}
-export interface SignMsgDelegateType extends SignType {
-  txType: TX_TYPE.DELEGATE,
-  transaction: MsgDelegate
-}
-export interface SignMsgUndelegateType extends SignType {
-  txType: TX_TYPE.UNDELEGATE, 
-  transaction: MsgUndelegate
-}
-export interface SignMsgWithdrawDelegationRewardType extends SignType {
-  txType: TX_TYPE.WITHDRAW,
-  transaction: MsgWithdrawDelegationReward
-}
-export interface SignMsgExecuteContractType extends SignType{
-  txType: TX_TYPE.SMART,
-  transaction: MsgExecuteContract
-}
+export type SignMsgSendType = SignType<MsgSend>;
+export type SignMsgDelegateType = SignType<MsgDelegate>;
+export type SignMsgUndelegateType = SignType<MsgUndelegate>;
+export type SignMsgWithdrawDelegatorRewardType = SignType<MsgWithdrawDelegatorReward>;
+export type SignMsgExecuteContractType = SignType<MsgExecuteContract>;
+export type SignMsgCW20Type = SignType<MsgCW20>;
+export type SignMsgBlindType = SignType<MsgBlind>;
 
-export interface SignMsgCW20Type extends SignType {
-  txType: TX_TYPE.CW20,
-  transaction: MsgCW20
-}
+export type SignDataType =
+  | SignMsgSendType
+  | SignMsgDelegateType
+  | SignMsgUndelegateType
+  | SignMsgWithdrawDelegatorRewardType
+  | SignMsgExecuteContractType
+  | SignMsgCW20Type;
 
 type Terra = {
-  chainId: CHAIN_ID,
-  denom: DenomInfo,
-  feeAmount: number,
-  feeDenom: DenomInfo,
-  gas: number,
-  accountNumber: string,
-  sequence: string,
-  memo: string,
-}
+  chainId: CHAIN_ID;
+  accountNumber: string;
+  sequence: string;
+  memo: string;
+  fee: {
+    gas_limit: number;
+    denom: DenomInfo;
+    amount: number;
+  };
+};
 
 export interface MsgSend extends Terra {
-  fromAddress: string,
-  toAddress: string,
-  amount: number,
+  fromAddress: string;
+  toAddress: string;
+  coin: {
+    denom: DenomInfo;
+    amount: number;
+  };
 }
 
 export interface MsgDelegate extends Terra {
   delegatorAddress: string;
   validatorAddress: string;
-  amount: number;
+  coin: {
+    denom?: DenomInfo;
+    amount: number;
+  };
 }
-  
-export interface MsgUndelegate extends MsgDelegate {}
-  
-export interface MsgWithdrawDelegationReward extends Terra {
+
+export interface MsgUndelegate extends Terra {
+  delegatorAddress: string;
+  validatorAddress: string;
+  coin: {
+    denom?: DenomInfo;
+    amount: number;
+  };
+}
+
+export interface MsgWithdrawDelegatorReward extends Terra {
   delegatorAddress: string;
   validatorAddress: string;
 }
 
 export interface MsgExecuteContract extends Terra {
-  senderAddress: string,
-  contractAddress: string,
-  execute_msg: Uint8Array,
+  senderAddress: string;
+  contractAddress: string;
+  execute_msg: string | Record<string, any>;
   funds?: {
-    denom: DenomInfo,
-    amount: number
-  }
+    denom: DenomInfo;
+    amount: number;
+  };
 }
 
 export interface MsgCW20 extends Terra {
@@ -91,10 +90,24 @@ export interface MsgCW20 extends Terra {
     transfer: {
       amount: string;
       recipient: string;
-    }
-  }
-  funds: undefined;
-  option: Option;
+    };
+  };
+  option?: Option;
+}
+
+export interface MsgBlind {
+  chainId: CHAIN_ID;
+  accountNumber: string;
+  sequence: string;
+  memo?: string;
+  msgs: Record<string, any>[];
+  fee: {
+    amount: {
+      amount: string;
+      denom: string;
+    }[];
+    gas_limit: string;
+  };
 }
 
 export type Option = {
@@ -107,13 +120,4 @@ export type Option = {
 export enum CHAIN_ID {
   MAIN = 'columbus-5',
   TEST = 'bombay-12',
-}
-
-export enum TX_TYPE {
-  SEND = 'MsgSend',
-  DELEGATE = 'MsgDelegate',
-  UNDELEGATE = 'MsgUndelegate',
-  WITHDRAW = 'MsgWithdrawDelegationReward',
-  SMART = 'MsgExecuteContract',
-  CW20 = 'MsgCW20'
 }

@@ -8,6 +8,7 @@ import ETH from './eth';
 import CRO from './cro';
 import MATIC from './matic';
 import LUNA from './luna';
+import SOL from './sol';
 import TERRA from './terra';
 import XTZ from './xtz';
 import BSC from './bsc';
@@ -26,6 +27,7 @@ export default [
   { path: 'cro', Element: CRO },
   { path: 'matic', Element: MATIC },
   { path: 'luna', Element: LUNA },
+  { path: 'sol', Element: SOL },
   { path: 'terra', Element: TERRA },
   { path: 'xtz', Element: XTZ },
   { path: 'bsc', Element: BSC },

@@ -15697,23 +15697,26 @@ function run() {
                     return [4 /*yield*/, checkAndPublish(context, 'packages/coin-trx')];
                 case 17:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-terra')];
                 case 18:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
                 case 19:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zen')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
                 case 20:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zen')];
                 case 21:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
                 case 22:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
                 case 23:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
+                case 24:
                     _a.sent();
                     return [2 /*return*/];
             }

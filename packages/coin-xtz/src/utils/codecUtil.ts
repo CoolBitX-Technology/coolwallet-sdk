@@ -26,7 +26,7 @@ export function pubKeyToAddress(compressedPubkey: hexString): string {
  * @param {string} address - address (b58c)
  * @returns {hexString} - address (hex)
  */
- export function addressStrToHex(addressHash: string): hexString {
+export function addressStrToHex(addressHash: string): hexString {
   const addressHex = forger.getCodec(forger.CODEC.ADDRESS, ProtocolHash).encoder(addressHash);
   return addressHex;
 }
@@ -37,7 +37,7 @@ export function pubKeyToAddress(compressedPubkey: hexString): string {
  * @param {hexString} compressedPubkey - public key (hex)
  * @returns {string} public key (b58c)
  */
- export function pubKeyHexToStr(compressedPubkey: hexString): string {
+export function pubKeyHexToStr(compressedPubkey: hexString): string {
   const pubkeyStr = forger.getCodec(forger.CODEC.PUBLIC_KEY, ProtocolHash).decoder('00'.concat(compressedPubkey));
   return pubkeyStr;
 }
@@ -47,7 +47,7 @@ export function pubKeyToAddress(compressedPubkey: hexString): string {
  * @param {string} pubKeyHash - public key (b58c)
  * @returns {string} public key (hex)
  */
- export function pubKeyStrToHex(pubKeyHash: string): hexString {
+export function pubKeyStrToHex(pubKeyHash: string): hexString {
   const pubKeyHex = forger.getCodec(forger.CODEC.PUBLIC_KEY, ProtocolHash).encoder(pubKeyHash);
   return pubKeyHex;
 }
@@ -57,7 +57,7 @@ export function pubKeyToAddress(compressedPubkey: hexString): string {
  * @param {string} branchStr - branch (b58c)
  * @returns {string} branch (hex)
  */
- export function branchHashToHex(branchStr: string): hexString {
+export function branchHashToHex(branchStr: string): hexString {
   const branchHex = forger.getCodec(forger.CODEC.BRANCH, ProtocolHash).encoder(branchStr);
   return branchHex;
 }

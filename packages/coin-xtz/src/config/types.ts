@@ -13,8 +13,8 @@ export type SignTxData = {
   appPrivateKey: string,
   appId: string,
   addressIndex: number,
-  confirmCB: () => void | undefined,
-  authorizedCB: () => void | undefined
+  confirmCB?: () => void,
+  authorizedCB?: () => void
 }
 
 export type formatTxData = {
