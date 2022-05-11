@@ -1,20 +1,18 @@
-import { tx, apdu/*, utils*/ } from '@coolwallet/core';
-import * as scriptUtil from './utils/scriptUtils';
+import { tx, apdu /*, utils*/ } from '@coolwallet/core';
+import { getScriptArg, getSignedTx } from './utils';
 import * as types from './config/types';
 
-export default async function signTransaction(
-  signTxData: types.SignTxType
-): Promise<string> {
+export default async function signTransaction(signTxData: types.SignTxType): Promise<string> {
+  const { transport, transaction } = signTxData;
+  const { script, argument } = await getScriptArg(transaction);
 
-  const { script, argument } = await scriptUtil.getScriptArg(signTxData.transaction);
-
-  await apdu.tx.sendScript(signTxData.transport, script);
-  const encryptedSig = await apdu.tx.executeScript(signTxData.transport, signTxData.appId, signTxData.appPrivateKey, argument);
-  await apdu.tx.finishPrepare(signTxData.transport);
-  await apdu.tx.getTxDetail(signTxData.transport);
-  const decryptingKey = await apdu.tx.getSignatureKey(signTxData.transport);
-  await apdu.tx.clearTransaction(signTxData.transport);
-  await apdu.mcu.control.powerOff(signTxData.transport);
-  const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, true, false);
-  return sig.toString('hex');
+  await apdu.tx.sendScript(transport, script);
+  const encryptedSig = await apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
+  await apdu.tx.finishPrepare(transport);
+  await apdu.tx.getTxDetail(transport);
+  const decryptingKey = await apdu.tx.getSignatureKey(transport);
+  await apdu.tx.clearTransaction(transport);
+  await apdu.mcu.control.powerOff(transport);
+  const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, true, false) as Buffer;
+  return getSignedTx(transaction, sig);
 }
