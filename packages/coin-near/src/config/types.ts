@@ -100,6 +100,5 @@ export enum TxnType {
   TRANSFER = 1,
   STAKE = 2,
   SMART = 3,
-  SCSTAKE = 4,
-  SCSTAKENOAMOUNT = 5
+  SCSTAKE = 4
 }

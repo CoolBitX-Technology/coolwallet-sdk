@@ -22,8 +22,7 @@ const getScriptArg = async (
       scrpt = params.SMART.script + params.SMART.signature;
       break; 
     }
-    case types.TxnType.SCSTAKE:
-    case types.TxnType.SCSTAKENOAMOUNT: { 
+    case types.TxnType.SCSTAKE: { 
         scrpt = params.SCSTAKE.script + params.SCSTAKE.signature;
       break; 
     }
@@ -54,16 +53,13 @@ const getArgument = async (
       break; 
     } 
     case types.TxnType.SMART:
-    case types.TxnType.SCSTAKE:
-    case types.TxnType.SCSTAKENOAMOUNT: { 
+    case types.TxnType.SCSTAKE: { 
       actions = txn.action.methodName!.length.toString(16).padStart(2, '0') +
         Buffer.from(txn.action.methodName!).toString('hex').padEnd(136, '0') +
         txn.action.methodArgs!.length.toString(16).padStart(2, '0') +
         Buffer.from(txn.action.methodArgs!).toString('hex').padEnd(136, '0') +
         getAmount(txn.action.gas!, 16) +
-        (txn.action.txnType !== types.TxnType.SCSTAKENOAMOUNT ?
-          getAmount(txn.action.amount!) :
-          getAmount('0'));
+        getAmount(txn.action.amount!);
       break; 
     } 
   } 
@@ -75,8 +71,7 @@ const getArgument = async (
     txn.receiver!.length.toString(16).padStart(2, '0') +
     Buffer.from(txn.receiver!).toString('hex').padEnd(136, '0') +
     Buffer.from(base58.decode(txn.recentBlockHash)).toString('hex') +
-    actions +
-    getAmount(txn.action.amount!, 20, 10);
+    actions;
 
   return await addPath() + serializedTx;
 };

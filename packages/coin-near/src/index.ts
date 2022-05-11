@@ -147,8 +147,8 @@ export default class NEAR extends COIN.EDDSACoin implements COIN.Coin {
 
     signSmartTxData.transaction.methodName = 'unstake';
     signSmartTxData.transaction.methodArgs = Buffer.from(JSON.stringify({"amount": scriptUtil.convertNear(signSmartTxData.transaction.amount!)}));
-    const sign = await this.signSmartTransaction(signSmartTxData, types.TxnType.SCSTAKENOAMOUNT);
     signSmartTxData.transaction.amount = '0';
+    const sign = await this.signSmartTransaction(signSmartTxData, types.TxnType.SCSTAKE);
     return sign;
   }
 
@@ -158,7 +158,7 @@ export default class NEAR extends COIN.EDDSACoin implements COIN.Coin {
 
     signSmartTxData.transaction.methodName = 'unstake_all';
     signSmartTxData.transaction.amount = '0';
-    return await this.signSmartTransaction(signSmartTxData, types.TxnType.SCSTAKENOAMOUNT);
+    return await this.signSmartTransaction(signSmartTxData, types.TxnType.SCSTAKE);
   }
 
   signSCWithdrawTransaction = async(
@@ -167,8 +167,8 @@ export default class NEAR extends COIN.EDDSACoin implements COIN.Coin {
 
     signSmartTxData.transaction.methodName = 'withdraw'
     signSmartTxData.transaction.methodArgs = Buffer.from(JSON.stringify({"amount": scriptUtil.convertNear(signSmartTxData.transaction.amount!)}));
-    const sign = await this.signSmartTransaction(signSmartTxData, types.TxnType.SCSTAKENOAMOUNT);
     signSmartTxData.transaction.amount = '0';
+    const sign = await this.signSmartTransaction(signSmartTxData, types.TxnType.SCSTAKE);
     return sign;
   }
 
@@ -178,7 +178,7 @@ export default class NEAR extends COIN.EDDSACoin implements COIN.Coin {
 
     signSmartTxData.transaction.methodName = 'withdraw_all'
     signSmartTxData.transaction.amount = '0';
-    return await this.signSmartTransaction(signSmartTxData, types.TxnType.SCSTAKENOAMOUNT);
+    return await this.signSmartTransaction(signSmartTxData, types.TxnType.SCSTAKE);
   }
   
   signTransaction = async(
