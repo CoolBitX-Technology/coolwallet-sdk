@@ -61,7 +61,12 @@ type StakeInstructionInputData = {
     authorized: AuthorizedRaw;
     lockup: LockupRaw;
   }>;
+  Deactivate: InstructionInputData;
   Delegate: InstructionInputData;
+  Withdraw: Readonly<{
+    instruction: number;
+    lamports: number;
+  }>;
 };
 
 export const StakeProgramLayout = {
@@ -77,10 +82,21 @@ export const StakeProgramLayout = {
     index: 2,
     layout: BufferLayout.struct<StakeInstructionInputData['Delegate']>([BufferLayout.u32('instruction')]),
   },
+  Withdraw: {
+    index: 4,
+    layout: BufferLayout.struct<StakeInstructionInputData['Withdraw']>([
+      BufferLayout.u32('instruction'),
+      BufferLayout.ns64('lamports'),
+    ]),
+  },
+  Deactivate: {
+    index: 5,
+    layout: BufferLayout.struct<StakeInstructionInputData['Deactivate']>([BufferLayout.u32('instruction')]),
+  },
 };
 
-export function encodeData<TInputData extends InstructionInputData>(
-  layoutType: InstructionLayoutType<TInputData>,
+export function encodeData<T extends InstructionInputData>(
+  layoutType: InstructionLayoutType<T>,
   fields?: any
 ): Buffer {
   const allocLength = layoutType.layout.span >= 0 ? layoutType.layout.span : getAlloc(layoutType, fields);
