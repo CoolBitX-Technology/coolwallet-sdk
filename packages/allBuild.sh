@@ -23,7 +23,9 @@ cd ../cws-qkc
 ../build.sh
 cd ../cws-xlm
 ../build.sh
-cd ../cws-xrp
+# cd ../cws-xrp
+# ../build.sh
+cd ../cws-mina
 ../build.sh
 cd ../cws-zen
 ../build.sh
