@@ -26,6 +26,10 @@ import type {
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
+function isEmpty(str) {
+  return !str || str.length === 0;
+}
+
 const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS) };
 const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
 const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
@@ -70,13 +74,25 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .addressPage(transaction.to.toLowerCase())
-        .amountPage(+transaction.value)
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -104,14 +120,27 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .messagePage('USDT')
-        .addressPage(transaction.to.toLowerCase())
-        .amountPage(+tokenAmount)
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      let expectedTxDetail;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .messagePage('USDT')
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+tokenAmount)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .messagePage('USDT')
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+tokenAmount)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -133,12 +162,23 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .wrapPage('SMART', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -160,12 +200,24 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .wrapPage('SMART', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -184,12 +236,23 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signTypedData(client.typedData);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .wrapPage('EIP712', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('EIP712', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('EIP712', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -208,12 +271,24 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signMessage(client.message);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .wrapPage('MESSAGE', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('MESSAGE', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('MESSAGE', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -235,13 +310,25 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .addressPage(transaction.to.toLowerCase())
-        .amountPage(+transaction.value)
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -269,14 +356,27 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .messagePage('USDT')
-        .addressPage(transaction.to.toLowerCase())
-        .amountPage(+tokenAmount)
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .messagePage('USDT')
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+tokenAmount)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .messagePage('USDT')
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+tokenAmount)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -298,12 +398,23 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .wrapPage('SMART', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -325,12 +436,23 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .wrapPage('SMART', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
