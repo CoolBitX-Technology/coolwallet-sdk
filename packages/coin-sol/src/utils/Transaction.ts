@@ -1,13 +1,14 @@
-import * as types from '../config/types';
+import { SDKError } from '@coolwallet/core/lib/error';
 import * as stringUtil from './stringUtil';
-
-import base58 from 'bs58';
 import Message from './Message';
-export class Transaction {
-  feePayer: string | Buffer;
+import * as types from '../config/types';
+
+export default class Transaction {
+  feePayer: string;
   recentBlockhash: string;
   instructions: types.TransactionInstruction[];
   signature?: string;
+
   constructor(tx: types.TransactionArgs) {
     this.feePayer = stringUtil.formHex(tx.feePayer);
     this.recentBlockhash = stringUtil.formHex(tx.recentBlockhash);
@@ -20,36 +21,45 @@ export class Transaction {
       })),
     }));
   }
-  serialize(signature: string): string {
-    this.signature = signature;
-    return '01' + this.signature + this.serializeArgument(false);
-  }
-  serializeArgument(isPartialSerialize = true): string {
-    return this.compileMessage(isPartialSerialize).serialize(isPartialSerialize);
+
+  add(instruction: types.TransactionInstruction) {
+    this.instructions.push(instruction);
   }
 
-  compileMessage(isPartialCompile = false): Message {
-    const { recentBlockhash, feePayer } = this;
+  /**
+   * Compile transaction data
+   */
+  compileMessage(): Message {
+    const { recentBlockhash } = this;
     if (!recentBlockhash) {
-      throw new Error('Transaction recentBlockhash required');
+      throw new SDKError(this.compileMessage.name, 'Transaction recentBlockhash required');
     }
 
     if (this.instructions.length < 1) {
       console.warn('No instructions provided');
     }
 
-    if (!feePayer || feePayer.length < 1) {
+    let feePayer: string;
+    if (this.feePayer) {
+      feePayer = this.feePayer;
+    } else {
       throw new Error('Transaction fee payer required');
+    }
+
+    for (let i = 0; i < this.instructions.length; i++) {
+      if (this.instructions[i].programId === undefined) {
+        throw new Error(`Transaction instruction index ${i} has undefined program id`);
+      }
     }
 
     const programIds: string[] = [];
     const accountMetas: types.AccountMeta[] = [];
     this.instructions.forEach((instruction) => {
       instruction.accounts.forEach((accountMeta) => {
-        accountMetas.push(accountMeta);
+        accountMetas.push({ ...accountMeta });
       });
-      let programId = stringUtil.formHex(instruction.programId);
 
+      const programId = instruction.programId.toString();
       if (!programIds.includes(programId)) {
         programIds.push(programId);
       }
@@ -65,35 +75,29 @@ export class Transaction {
     });
 
     // Sort. Prioritizing first by signer, then by writable
-    accountMetas.sort((x, y) => {
-      const xBs58 = base58.encode(Buffer.from(x.pubkey as string, 'hex'));
-      const yBs58 = base58.encode(Buffer.from(y.pubkey as string, 'hex'));
-      const pubkeySorting = xBs58.localeCompare(yBs58);
+    accountMetas.sort(function (x, y) {
+      const pubkeySorting = stringUtil.toBase58(x.pubkey).localeCompare(stringUtil.toBase58(y.pubkey));
       const checkSigner = x.isSigner === y.isSigner ? 0 : x.isSigner ? -1 : 1;
       const checkWritable = x.isWritable === y.isWritable ? pubkeySorting : x.isWritable ? -1 : 1;
       return checkSigner || checkWritable;
     });
 
-    let numUnRequiredAccounts = 0;
     // Cull duplicate account metas
     const uniqueMetas: types.AccountMeta[] = [];
     accountMetas.forEach((accountMeta) => {
-      const uniqueIndex = uniqueMetas.findIndex((e) => {
-        return e.pubkey === (accountMeta.pubkey as string);
+      const uniqueIndex = uniqueMetas.findIndex((x) => {
+        return x.pubkey === accountMeta.pubkey;
       });
       if (uniqueIndex > -1) {
-        if (isPartialCompile) {
-          uniqueMetas.push({ ...accountMeta, pubkey: '' });
-          numUnRequiredAccounts += 1;
-        } else uniqueMetas[uniqueIndex].isWritable = uniqueMetas[uniqueIndex].isWritable || accountMeta.isWritable;
+        uniqueMetas[uniqueIndex].isWritable = uniqueMetas[uniqueIndex].isWritable || accountMeta.isWritable;
       } else {
         uniqueMetas.push(accountMeta);
       }
     });
 
     // Move fee payer to the front
-    const feePayerIndex = uniqueMetas.findIndex((e) => {
-      return e.pubkey === feePayer;
+    const feePayerIndex = uniqueMetas.findIndex((x) => {
+      return stringUtil.toPublicKey(x.pubkey) === feePayer;
     });
     if (feePayerIndex > -1) {
       const [payerMeta] = uniqueMetas.splice(feePayerIndex, 1);
@@ -108,7 +112,6 @@ export class Transaction {
       });
     }
 
-    // transaction header data
     let numRequiredSignatures = 0;
     let numReadonlySignedAccounts = 0;
     let numReadonlyUnsignedAccounts = 0;
@@ -123,9 +126,6 @@ export class Transaction {
         if (!isWritable) {
           numReadonlySignedAccounts += 1;
         }
-      } else if (isPartialCompile) {
-        const pubkeyStr = pubkey.toString();
-        unsignedKeys.push(pubkeyStr.length < 1 ? ''.padStart(64, '0') : pubkeyStr);
       } else {
         unsignedKeys.push(pubkey.toString());
         if (!isWritable) {
@@ -138,29 +138,32 @@ export class Transaction {
     const instructions: types.CompliedInstruction[] = this.instructions.map((instruction) => {
       const { data, programId } = instruction;
       return {
-        programIdIndex: accountKeys.indexOf(programId as string),
-        accounts: instruction.accounts.map((meta) => accountKeys.indexOf(meta.pubkey as string)),
+        programIdIndex: accountKeys.indexOf(programId.toString()),
+        accounts: instruction.accounts.map((meta) => accountKeys.indexOf(meta.pubkey.toString())),
         data: stringUtil.formHex(data),
       };
     });
 
-    instructions.forEach((instruction) => {
-      if (instruction.programIdIndex < 0) throw new Error('Assertion failed');
-
-      instruction.accounts.forEach((keyIndex) => {
-        if (keyIndex < 0) throw new Error('Assertion failed');
-      });
-    });
     return new Message({
       header: {
         numRequiredSignatures,
         numReadonlySignedAccounts,
         numReadonlyUnsignedAccounts,
-        numUnRequiredAccounts,
       },
       accountKeys,
-      recentBlockhash: this.recentBlockhash,
+      recentBlockhash,
       instructions,
     });
+  }
+
+  /**
+   * Return sendable tx string with given signature.
+   *
+   * @param signature signature generated by CoolWallet Pro
+   * @returns
+   */
+  toTxString(signature: string): string {
+    this.signature = signature;
+    return '01' + this.signature + this.compileMessage().serialize();
   }
 }

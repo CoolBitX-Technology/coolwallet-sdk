@@ -1,11 +1,34 @@
 import base58 from 'bs58';
-const BN = require('bn.js');
+import BN from 'bn.js';
+import * as types from '../config/types';
+
+const HEX_REGEX = /[0-9A-Fa-f]{6}/g;
+const BS58_REGEX = /([G-Z])|([g-z])/g;
 
 export const isBase58Format = (value?: string): boolean => {
   if (!value) return false;
-  const match = value.match(/([G-Z])|([g-z])/g);
+  const match = value.match(BS58_REGEX);
   return !!(match && match.length > 0);
 };
+
+function isHexFormat(value: string): boolean {
+  const match = value.match(HEX_REGEX);
+  return !!match;
+}
+
+export function toBase58(publicKey: types.Address): string {
+  if (typeof publicKey === 'string') {
+    if (isBase58Format(publicKey)) return publicKey;
+    if (isHexFormat(publicKey)) return base58.encode(Buffer.from(publicKey, 'hex'));
+    return publicKey;
+  }
+  return base58.encode(publicKey);
+}
+
+export function toPublicKey(publicKey: string | Buffer): string {
+  if (typeof publicKey === 'string') return publicKey;
+  return base58.encode(publicKey);
+}
 
 export function pubKeyToAddress(publicKey: string): string {
   const pubKeyBuf = Buffer.from(publicKey, 'hex');
@@ -41,7 +64,7 @@ export const encodeLength = (bytes: number[], len: number): void => {
   }
 };
 
-export function splDataEncode(amount: number | string, decimals: number = 9): string {
+export function splDataEncode(amount: number | string, decimals = 9): Buffer {
   const data = Buffer.alloc(9);
   const programIdIndexSpan = 1;
   data.writeUIntLE(3, 0, programIdIndexSpan);
@@ -57,5 +80,5 @@ export function splDataEncode(amount: number | string, decimals: number = 9): st
   const valueBuf = Buffer.from(valueHex, 'hex').reverse();
 
   data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
-  return data.toString('hex');
+  return data;
 }

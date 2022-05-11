@@ -16,37 +16,40 @@ Normal transfer case, with sol token (native token on Solana)
 
 ```javascript
 import SOL from '@coolwallet/sol';
-import { Connection, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/web3.js';
+import base58 from 'bs58';
+
+const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+const address = await sol.getAddress(transport, appPrivateKey, appId, 0);
+const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
 const sol = new SOL();
 
-const handleSign = async () => {
-  const fromPubkey = await sol.getAddress(transport, appPrivateKey, appId);
-  // 8rzt5i6guiEgcRBgE5x5nmjPL97Ptcw76rnGTyehni7r
+const toPubKey = 'destination address';
+const amount = 0.000001; // transfer amount
 
-  const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-
-  const tx = TransactionCreator.transfer(fromPubkey, toPubkey, recentBlockhash, 0.1);
-
-  const appId = localStorage.getItem('appId');
-  if (!appId) throw new Error('No Appid stored, please register!');
-  const signedTx = await sol.signTransaction({
-    transport,
-    appPrivateKey,
-    appId,
-    transaction: tx,
-  });
-  const recoveredTx = Transaction.from(signedTx);
-
-  const verifySig = recoveredTx.verifySignatures();
-
-  // signature need to be valid
-  if (!verifySig) throw new Error('Fail to verify signature');
-
-  return connection.sendRawTransaction(recoveredTx.serialize());
+const transaction = {
+  toPubKey,
+  recentBlockhash,
+  amount,
 };
 
-handleSign();
+const appId = localStorage.getItem('appId');
+if (!appId) throw new Error('No Appid stored, please register!');
+const signedTx = await sol.signTransaction({
+  transport,
+  appPrivateKey,
+  appId,
+  transaction,
+});
+const recoveredTx = Transaction.from(signedTx);
+
+const verifySig = recoveredTx.verifySignatures();
+
+// signature need to be valid
+if (!verifySig) throw new Error('Fail to verify signature');
+
+return connection.sendRawTransaction(recoveredTx.serialize());
 ```
 
 Other case we have similar workflow but using different input, following below:
@@ -59,60 +62,27 @@ const tokenInfo = {
   decimals: TOKEN_DECIMALS,
 };
 
-const tx = TransactionCreator.transferSplToken(
-  fromAccount,
+const tx = {
+  walletAddress,
   fromTokenAccount,
   toTokenAccount,
   recentBlockhash,
-  0.1,
-  tokenInfo
+  amount: 0.1,
+  tokenInfo,
+};
+
+// Get associateAccount address.
+const [associateAccount] = await PublicKey.findProgramAddress(
+  [base58.decode(address), TOKEN_PROGRAM_ID.toBuffer(), base58.decode(tokenInfo.address)],
+  ASSOCIATED_TOKEN_PROGRAM_ID
 );
 
 // create associate token account
-const tx = TransactionCreator.createTokenAssociateAccount(signer, owner, associateAccount, token, recentBlockhash);
-
-// create account with seed
-const newAccountPubkey = await PublicKey.createWithSeed(new PublicKey(owner), seed, programId);
-
-class GreetingAccount {
-  counter = 0;
-  constructor(fields?: any) {
-    if (fields) {
-      this.counter = fields.counter;
-    }
-  }
-}
-
-const GreetingSchema = new Map([[GreetingAccount, { kind: 'struct', fields: [['counter', 'u32']] }]]);
-
-const space = borsh.serialize(GreetingSchema, new GreetingAccount()).length;
-
-const lamports = await connection.getMinimumBalanceForRentExemption(space);
-
-const tx = TransactionCreator.createAccountWithSeed(
-  fromPubkey,
-  newAccountPubkey,
-  basePubkey,
-  seed,
-  lamports,
-  space,
-  programId,
-  recentBlockhash
-);
-
-// user defined instruction
-// associateProgramAccount is associate account with your account used for storing
-// data of interacting process with solana smart contract (or user defined program).
 const tx = {
-  instructions: [
-    {
-      accounts: [{ pubkey: associateProgramAccount, isSigner: false, isWritable: true }],
-      programId: programId,
-      data: data,
-    },
-  ],
+  owner: address,
+  associateAccount,
   recentBlockhash,
-  feePayer: signer,
+  token: tokenInfo.address,
 };
 ```
 

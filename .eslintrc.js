@@ -30,7 +30,11 @@ module.exports = {
     // note you must disable the base rule as it can report incorrect errors
     'no-unused-expressions': 'off',
     indent: 'off',
-    '@typescript-eslint/indent': ['error', 2, { SwitchCase: 1, ignoredNodes: ['ConditionalExpression'] }],
+    '@typescript-eslint/indent': [
+      'error',
+      2,
+      { SwitchCase: 1, ignoredNodes: ['ConditionalExpression', 'TSTypeParameterInstantiation'] },
+    ],
     '@typescript-eslint/no-unused-expressions': ['error'],
     '@typescript-eslint/no-use-before-define': ['error'],
     'react/destructuring-assignment': 0,

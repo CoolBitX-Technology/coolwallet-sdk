@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Transport } from '@coolwallet/core';
-import SOL, { TransactionCreator } from '@coolwallet/sol';
+import SOL from '@coolwallet/sol';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Container } from 'react-bootstrap';
 import Inputs from '../../Inputs';
-import * as borsh from 'borsh';
 
 interface Props {
   transport: Transport | null;
@@ -19,7 +18,7 @@ const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
 function CoinSol(props: Props) {
-  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+  const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
   const sol = new SOL();
 
   const { transport, appPrivateKey } = props;
@@ -28,27 +27,21 @@ function CoinSol(props: Props) {
   const [account, setAccount] = useState('');
 
   const [transaction, setTransaction] = useState({
-    to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
-    value: '0.1',
-    result: '',
-  });
-
-  const [programTransaction, setProgramTransaction] = useState({
-    programId: 'BJ1UbRs1usobCHy3Hdd1PWWQ5796xPdvKujTqhDRybri',
-    data: '',
+    to: 'AnJZ8PLH3YZVJRifPb2jLXDwaKXtScHrQmpCiQ3vS8jm',
+    value: '0.000001',
     result: '',
   });
 
   const [splTokenTransaction, setSplTokenTransaction] = useState({
-    token: 'mpRP1iZjbJm3BsTnkLPuamDbnELt6TSmtb5L1KRTUWG',
-    to: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
-    amount: '0.1',
-    decimals: '9',
+    token: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+    to: 'eMisCj89rxrvPPPGqWAA6VK72W2b8Y4WogR1MP3KVvF',
+    amount: '0.000001',
+    decimals: '6',
     result: '',
   });
   const [associateAccTx, setAssociateAccTx] = useState({
-    token: 'mpRP1iZjbJm3BsTnkLPuamDbnELt6TSmtb5L1KRTUWG',
-    owner: '28Ba9GWMXbiYndh5uVZXAJqsfZHCjvQYWTatNePUCE6x',
+    token: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+    owner: 'AnJZ8PLH3YZVJRifPb2jLXDwaKXtScHrQmpCiQ3vS8jm',
     result: '',
   });
 
@@ -84,11 +77,11 @@ function CoinSol(props: Props) {
 
   // fir transfer spl-token
   const checkAssociateTokenAccountValid = async (
-    account: PublicKey,
+    associatedAccount: PublicKey,
     token: PublicKey,
     owner: PublicKey
   ): Promise<boolean> => {
-    const accountData = await connection.getAccountInfo(account);
+    const accountData = await connection.getAccountInfo(associatedAccount);
 
     if (accountData) {
       if (accountData.data.length > 0) {
@@ -104,70 +97,13 @@ function CoinSol(props: Props) {
     throw new Error(`Need to create associate token account for account ${owner}`);
   };
 
-  // for smart contract
-  const getOrCreateSmcAssociateAccount = async (owner: string, seed: string, programId: string): Promise<PublicKey> => {
-    const programIdToPK = new PublicKey(programId);
-    const address = await PublicKey.createWithSeed(new PublicKey(owner), seed, programIdToPK);
-    const accountData = await connection.getAccountInfo(new PublicKey(address));
-
-    if (accountData) {
-      return address;
-    }
-
-    class GreetingAccount {
-      counter = 0;
-      constructor(fields?: any) {
-        if (fields) {
-          this.counter = fields.counter;
-        }
-      }
-    }
-
-    const GreetingSchema = new Map([[GreetingAccount, { kind: 'struct', fields: [['counter', 'u32']] }]]);
-
-    const GREETING_SIZE = borsh.serialize(GreetingSchema, new GreetingAccount()).length;
-
-    const lamports = await connection.getMinimumBalanceForRentExemption(GREETING_SIZE);
-    const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-    const tx = TransactionCreator.createAccountWithSeed(
-      account,
-      address.toString(),
-      account,
-      seed,
-      lamports,
-      GREETING_SIZE,
-      programIdToPK.toString(),
-      recentBlockhash
-    );
-    const appId = localStorage.getItem('appId');
-    if (!appId) throw new Error('No Appid stored, please register!');
-    const signedTx = await sol.signTransaction({
-      transport: transport as Transport,
-      appPrivateKey,
-      appId,
-      transaction: tx,
-    });
-    const recoveredTx = Transaction.from(signedTx);
-
-    const verifySig = recoveredTx.verifySignatures();
-
-    // signature need to be valid
-    if (!verifySig) throw new Error('Fail to verify signature');
-
-    await connection.sendRawTransaction(recoveredTx.serialize());
-    return address;
-  };
-
   const signTransaction = async () => {
     handleState(
       async () => {
         if (account.length < 1) throw new Error('please get account first');
 
-        const fromPubkey = account;
-        const toPubkey = transaction.to;
+        const toPubKey = transaction.to;
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-
-        const tx = TransactionCreator.transfer(fromPubkey, toPubkey, recentBlockhash, transaction.value);
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
@@ -175,9 +111,14 @@ function CoinSol(props: Props) {
           transport: transport as Transport,
           appPrivateKey,
           appId,
-          transaction: tx,
+          addressIndex: 0,
+          transaction: {
+            toPubKey,
+            recentBlockhash,
+            amount: transaction.value,
+          },
         });
-        const recoveredTx = Transaction.from(signedTx);
+        const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
 
         const verifySig = recoveredTx.verifySignatures();
 
@@ -187,50 +128,6 @@ function CoinSol(props: Props) {
         return connection.sendRawTransaction(recoveredTx.serialize());
       },
       (result) => setTransaction((prev: any) => ({ ...prev, result }))
-    );
-  };
-
-  const signSmartContractTransaction = async () => {
-    handleState(
-      async () => {
-        if (account.length < 1) throw new Error('please get account first');
-        const SEED = 'hello';
-
-        const greetedPubkey = await getOrCreateSmcAssociateAccount(account, SEED, programTransaction.programId);
-
-        const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-
-        const tx = {
-          instructions: [
-            {
-              accounts: [{ pubkey: greetedPubkey.toBase58(), isSigner: false, isWritable: true }],
-              programId: programTransaction.programId,
-              data: programTransaction.data,
-            },
-          ],
-          recentBlockhash,
-          feePayer: account,
-        };
-
-        const appId = localStorage.getItem('appId');
-        if (!appId) throw new Error('No Appid stored, please register!');
-        const signedTx = await sol.signTransaction({
-          transport: transport as Transport,
-          appPrivateKey,
-          appId,
-          transaction: tx,
-        });
-
-        const recoveredTx = Transaction.from(signedTx);
-
-        const verifySig = recoveredTx.verifySignatures();
-
-        // signature need to be valid
-        if (!verifySig) throw new Error('Fail to verify signature');
-
-        return connection.sendRawTransaction(recoveredTx.serialize());
-      },
-      (result) => setProgramTransaction((prev: any) => ({ ...prev, result }))
     );
   };
 
@@ -258,14 +155,14 @@ function CoinSol(props: Props) {
           decimals: splTokenTransaction.decimals,
         };
 
-        const tx = TransactionCreator.transferSplToken(
+        const tx = {
           account,
-          fromTokenAccount.toString(),
-          toTokenAccount.toString(),
+          fromTokenAccount: fromTokenAccount.toString(),
+          toTokenAccount: toTokenAccount.toString(),
           recentBlockhash,
-          splTokenTransaction.amount,
-          tokenInfo
-        );
+          amount: splTokenTransaction.amount,
+          tokenInfo,
+        };
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
@@ -274,10 +171,11 @@ function CoinSol(props: Props) {
           transport: transport as Transport,
           appPrivateKey,
           appId,
+          addressIndex: 0,
           transaction: tx,
         });
 
-        const recoveredTx = Transaction.from(signedTx);
+        const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
 
         const verifySig = recoveredTx.verifySignatures();
 
@@ -312,24 +210,26 @@ function CoinSol(props: Props) {
           throw new Error('Fail to get Associate account: account data empty');
         }
 
-        const tx = TransactionCreator.createTokenAssociateAccount(
-          account,
-          owner.toString(),
-          associateAccount.toString(),
-          token.toString(),
-          (await connection.getRecentBlockhash()).blockhash
-        );
+        const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+
+        const tx = {
+          owner: owner.toString(),
+          associateAccount: associateAccount.toString(),
+          token: token.toString(),
+          recentBlockhash,
+        };
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
         const signedTx = await sol.signTransaction({
           transport: transport as Transport,
           appPrivateKey,
+          addressIndex: 0,
           appId,
           transaction: tx,
         });
 
-        const recoveredTx = Transaction.from(signedTx);
+        const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
 
         const verifySig = recoveredTx.verifySignatures();
 
@@ -342,7 +242,6 @@ function CoinSol(props: Props) {
     );
   };
   return (
-    // @ts-ignore
     <Container>
       <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
       <Inputs btnTitle='Get' title='Get Address' content={account} onClick={getAddress} disabled={disabled} />
@@ -372,35 +271,6 @@ function CoinSol(props: Props) {
                 to,
               })),
             placeholder: 'to',
-          },
-        ]}
-      />
-      <Inputs
-        btnTitle='Sign'
-        title='Sign Smart Contract Transaction'
-        content={programTransaction.result}
-        onClick={signSmartContractTransaction}
-        disabled={disabled}
-        inputs={[
-          {
-            xs: 2,
-            value: programTransaction.data,
-            onChange: (data: any) =>
-              setProgramTransaction((prevState: any) => ({
-                ...prevState,
-                data,
-              })),
-            placeholder: 'data',
-          },
-          {
-            xs: 2,
-            value: programTransaction.programId,
-            onChange: (programId: any) =>
-              setProgramTransaction((prevState: any) => ({
-                ...prevState,
-                programId,
-              })),
-            placeholder: 'programId',
           },
         ]}
       />
