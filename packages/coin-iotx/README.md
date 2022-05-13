@@ -1,6 +1,6 @@
 # CoolWallet IoTex SDK
 
-This is a typescript library with support for the integration of IoTex for third party application, include the functionalities of generation of addresses and signed transactions. 
+This is a typescript library with support for the integration of IoTex for third party application, include the functionalities of generation of addresses and signed transactions.
 
 ## Install
 
@@ -48,6 +48,7 @@ The address generated is compatible to BIP44 with **account** and **change** set
 ```none
 m/44'/304'/0'/0/{i}
 ```
+
 ```javascript
 async getAddress(
     transport: types.Transport,
@@ -125,6 +126,7 @@ async signStakeCreate(
   options: Options
 ): Promise<string> {
 ```
+
 ### signStakeUnstake
 
 For releasing a over-time bucket.
@@ -154,4 +156,3 @@ async signStakeWithdraw(
   options: Options
 ): Promise<string> {
 ```
-

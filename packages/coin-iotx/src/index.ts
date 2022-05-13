@@ -9,60 +9,28 @@ import type {
   Execution,
   StakeCreate,
   StakeUnstake,
-  StakeWithdraw
+  StakeWithdraw,
 } from './config/types';
-export type {
-  Options,
-  Transaction,
-  Transfer,
-  Execution,
-  StakeCreate,
-  StakeUnstake,
-  StakeWithdraw
-};
+export type { Options, Transaction, Transfer, Execution, StakeCreate, StakeUnstake, StakeWithdraw };
 
 export default class IOTX extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
     super(params.COIN_TYPE);
   }
 
-  async getAddress(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    addressIndex: number
-  ): Promise<string> {
-    const publicKey = await this.getPublicKey(
-      transport,
-      appPrivateKey,
-      appId,
-      addressIndex);
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return utils.pubKeyToAddress(publicKey);
   }
 
-  getAddressByAccountKey(
-    accPublicKey: string,
-    accChainCode: string,
-    addressIndex: number
-  ): string {
-    const publicKey = this.getAddressPublicKey(
-      accPublicKey,
-      accChainCode,
-      addressIndex);
+  getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): string {
+    const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     return utils.pubKeyToAddress(publicKey);
   }
 
-  async signTransactionBase(
-    transaction: Transaction,
-    options: Options,
-    txType: TxTypes
-  ): Promise<string> {
+  async signTransactionBase(transaction: Transaction, options: Options, txType: TxTypes): Promise<string> {
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
-    const publicKey = await this.getPublicKey(
-      transport,
-      appPrivateKey,
-      appId,
-      transaction.addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, transaction.addressIndex);
 
     // prepare data
 
@@ -73,11 +41,7 @@ export default class IOTX extends COIN.ECDSACoin implements COIN.Coin {
     // request CoolWallet to sign tx
 
     await apdu.tx.sendScript(transport, signScript);
-    const encryptedSig = await apdu.tx.executeScript(
-      transport,
-      appId,
-      appPrivateKey,
-      signArguments);
+    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, signArguments);
     if (!encryptedSig) throw new Error('executeScript fails to return signature');
 
     // const { signedTx } = await apdu.tx.getSignedHex(transport);
@@ -91,47 +55,27 @@ export default class IOTX extends COIN.ECDSACoin implements COIN.Coin {
     await apdu.tx.clearTransaction(transport);
     await apdu.mcu.control.powerOff(transport);
     const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
-    const signedTx = utils.getSignedTransaction(
-      transaction,
-      sig as { r:string, s:string },
-      publicKey,
-      txType);
+    const signedTx = utils.getSignedTransaction(transaction, sig as { r: string; s: string }, publicKey, txType);
     return signedTx;
   }
 
-  async signTransaction(
-    transaction: Transfer,
-    options: Options
-  ): Promise<string> {
+  async signTransaction(transaction: Transfer, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.Transfer);
   }
 
-  async signExecution(
-    transaction: Execution,
-    options: Options
-  ): Promise<string> {
+  async signExecution(transaction: Execution, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.Execution);
   }
 
-  async signStakeCreate(
-    transaction: StakeCreate,
-    options: Options
-  ): Promise<string> {
+  async signStakeCreate(transaction: StakeCreate, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.StakeCreate);
   }
 
-  async signStakeUnstake(
-    transaction: StakeUnstake,
-    options: Options
-  ): Promise<string> {
+  async signStakeUnstake(transaction: StakeUnstake, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.StakeUnstake);
   }
 
-  async signStakeWithdraw(
-    transaction: StakeWithdraw,
-    options: Options
-  ): Promise<string> {
+  async signStakeWithdraw(transaction: StakeWithdraw, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.StakeWithdraw);
   }
 }
-

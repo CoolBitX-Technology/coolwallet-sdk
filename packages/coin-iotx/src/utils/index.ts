@@ -1,6 +1,6 @@
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
-const createKeccakHash = require('keccak')
+const createKeccakHash = require('keccak');
 const pbEncoder = require('protocol-buffers-encodings');
 
 import { utils, config } from '@coolwallet/core';
@@ -16,11 +16,11 @@ import type {
   Execution,
   StakeCreate,
   StakeUnstake,
-  StakeWithdraw
+  StakeWithdraw,
 } from '../config/types';
 
 export function pubKeyToAddress(compressedPubkey: string): string {
-  const uncompressedKey = ec.keyFromPublic(compressedPubkey, "hex").getPublic(false, 'hex');
+  const uncompressedKey = ec.keyFromPublic(compressedPubkey, 'hex').getPublic(false, 'hex');
   const keyBuffer = Buffer.from(uncompressedKey.substr(2), 'hex');
   const keyHash = createKeccakHash('keccak256').update(keyBuffer).digest('hex');
   const data = keyHash.substr(-40);
@@ -50,18 +50,18 @@ const checkHexChar = (hex: string) => {
 const evenHexDigit = (hex: string) => (hex.length % 2 !== 0 ? `0${hex}` : hex);
 const removeHex0x = (hex: string) => (hex.startsWith('0x') ? hex.slice(2) : hex);
 const handleHex = (hex: string) => checkHexChar(evenHexDigit(removeHex0x(hex)));
-const bnToHex = (bn: BigNumber, padBytes=0) => {
+const bnToHex = (bn: BigNumber, padBytes = 0) => {
   const hex = bn.toString(16);
   if (typeof padBytes === 'number' && padBytes > 0) {
-    if (padBytes*2 < hex.length) throw new Error('argument is overlong!');
-    return hex.padStart(padBytes*2, '0');
+    if (padBytes * 2 < hex.length) throw new Error('argument is overlong!');
+    return hex.padStart(padBytes * 2, '0');
   }
   if (hex === '0') return '';
   return handleHex(hex);
 };
-const intToHex = (i: Integer, padBytes=0) => bnToHex(new BigNumber(i), padBytes);
-const intToNum = (i: Integer) => (new BigNumber(i)).toNumber();
-const intToStr = (i: Integer) => (new BigNumber(i)).toFixed();
+const intToHex = (i: Integer, padBytes = 0) => bnToHex(new BigNumber(i), padBytes);
+const intToNum = (i: Integer) => new BigNumber(i).toNumber();
+const intToStr = (i: Integer) => new BigNumber(i).toFixed();
 
 export function getArguments(tx: Transaction, txType: TxTypes) {
   const { addressIndex, nonce, gasLimit, gasPrice } = tx;
@@ -75,27 +75,27 @@ export function getArguments(tx: Transaction, txType: TxTypes) {
   result += intToHex(gasPrice, 12);
   switch (txType) {
     case TxTypes.Transfer: {
-      const { amount, recipient, payload='' } = tx as Transfer;
+      const { amount, recipient, payload = '' } = tx as Transfer;
       if (recipient.length != 41) throw new Error('address length invalid');
       result += intToHex(amount, 12);
       result += Buffer.from(recipient).toString('hex');
       const payloadHex = handleHex(payload);
-      result += (payloadHex === '') ? '00' : '01' + payloadHex;
+      result += payloadHex === '' ? '00' : '01' + payloadHex;
       break;
     }
     case TxTypes.Execution: {
-      const { amount, contract, data='' } = tx as Execution;
+      const { amount, contract, data = '' } = tx as Execution;
       if (contract.length != 41) throw new Error('address length invalid');
       result += intToHex(amount, 12);
       result += Buffer.from(contract).toString('hex');
       const dataHex = handleHex(data);
-      result += (dataHex === '') ? '00' : '01' + dataHex;
+      result += dataHex === '' ? '00' : '01' + dataHex;
       break;
     }
     case TxTypes.StakeCreate: {
       const { candidateName, amount, duration, isAuto } = tx as StakeCreate;
       if (!candidateName) throw new Error('candidate name is required');
-      result += Buffer.from(candidateName).toString('hex').padStart(40,'0');
+      result += Buffer.from(candidateName).toString('hex').padStart(40, '0');
       result += intToHex(amount, 12);
       result += intToHex(duration, 8);
       result += isAuto ? '01' : '00';
@@ -173,54 +173,54 @@ function genRawTransaction(tx: Transaction, txType: TxTypes): Buffer {
     { prefix: '08', value: 1 }, // version
     { prefix: '10', value: intToNum(nonce) },
     { prefix: '18', value: intToNum(gasLimit) },
-    { prefix: '22', value: intToStr(gasPrice) }
+    { prefix: '22', value: intToStr(gasPrice) },
   ];
   switch (txType) {
     case TxTypes.Transfer: {
-      const { amount, recipient, payload='' } = tx as Transfer;
-      rawTx.push(
-        { prefix: '52', array: [
+      const { amount, recipient, payload = '' } = tx as Transfer;
+      rawTx.push({
+        prefix: '52',
+        array: [
           { prefix: '0a', value: intToStr(amount) },
           { prefix: '12', value: recipient },
-          { prefix: '1a', value: Buffer.from(handleHex(payload),'hex') },
-        ]});
+          { prefix: '1a', value: Buffer.from(handleHex(payload), 'hex') },
+        ],
+      });
       break;
     }
     case TxTypes.Execution: {
-      const { amount, contract, data='' } = tx as Execution;
-      rawTx.push(
-        { prefix: '62', array: [
+      const { amount, contract, data = '' } = tx as Execution;
+      rawTx.push({
+        prefix: '62',
+        array: [
           { prefix: '0a', value: intToStr(amount) },
           { prefix: '12', value: contract },
-          { prefix: '1a', value: Buffer.from(handleHex(data),'hex') },
-        ]});
+          { prefix: '1a', value: Buffer.from(handleHex(data), 'hex') },
+        ],
+      });
       break;
     }
     case TxTypes.StakeCreate: {
       const { candidateName, amount, duration, isAuto } = tx as StakeCreate;
-      rawTx.push(
-        { prefix: 'c202', array: [
+      rawTx.push({
+        prefix: 'c202',
+        array: [
           { prefix: '0a', value: candidateName },
           { prefix: '12', value: intToStr(amount) },
           { prefix: '18', value: intToNum(duration) },
           { prefix: '20', value: isAuto },
-        ]});
+        ],
+      });
       break;
     }
     case TxTypes.StakeUnstake: {
       const { bucketIndex } = tx as StakeUnstake;
-      rawTx.push(
-        { prefix: 'ca02', array: [
-          { prefix: '08', value: intToNum(bucketIndex) },
-        ]});
+      rawTx.push({ prefix: 'ca02', array: [{ prefix: '08', value: intToNum(bucketIndex) }] });
       break;
     }
     case TxTypes.StakeWithdraw: {
       const { bucketIndex } = tx as StakeWithdraw;
-      rawTx.push(
-        { prefix: 'd202', array: [
-          { prefix: '08', value: intToNum(bucketIndex) },
-        ]});
+      rawTx.push({ prefix: 'd202', array: [{ prefix: '08', value: intToNum(bucketIndex) }] });
       break;
     }
     default:
@@ -229,31 +229,27 @@ function genRawTransaction(tx: Transaction, txType: TxTypes): Buffer {
   return encodeTx(rawTx);
 }
 
-function getSigWithParam(
-  rawTxBuf: Buffer,
-  publicKey: string,
-  sig: { r:string, s:string}
-) {
+function getSigWithParam(rawTxBuf: Buffer, publicKey: string, sig: { r: string; s: string }) {
   const hash = createKeccakHash('keccak256').update(rawTxBuf).digest('hex');
   const hashBuf = Buffer.from(handleHex(hash), 'hex');
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
   const recoveryParam = ec.getKeyRecoveryParam(hashBuf, sig, keyPair.pub);
-  return sig.r + sig.s + recoveryParam.toString(16).padStart(2,'0');
+  return sig.r + sig.s + recoveryParam.toString(16).padStart(2, '0');
 }
 
 export function getSignedTransaction(
   tx: Transaction,
-  sig: { r:string, s:string },
+  sig: { r: string; s: string },
   publicKey: string,
   txType: TxTypes
 ) {
   const rawTxBuf = genRawTransaction(tx, txType);
   const signature = getSigWithParam(rawTxBuf, publicKey, sig);
-  const uncompressedKey = ec.keyFromPublic(publicKey, "hex").getPublic(false, 'array');
+  const uncompressedKey = ec.keyFromPublic(publicKey, 'hex').getPublic(false, 'array');
   const signedTx = [
     { prefix: '0a', value: rawTxBuf },
     { prefix: '12', value: Buffer.from(uncompressedKey) },
-    { prefix: '1a', value: Buffer.from(signature, 'hex') }
+    { prefix: '1a', value: Buffer.from(signature, 'hex') },
   ];
   return encodeTx(signedTx).toString('hex');
 }

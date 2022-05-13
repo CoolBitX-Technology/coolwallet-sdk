@@ -15,15 +15,10 @@ export enum TxTypes {
   Execution,
   StakeCreate,
   StakeUnstake,
-  StakeWithdraw
+  StakeWithdraw,
 }
 
-export type Transaction =
-  Transfer |
-  Execution |
-  StakeCreate |
-  StakeUnstake |
-  StakeWithdraw;
+export type Transaction = Transfer | Execution | StakeCreate | StakeUnstake | StakeWithdraw;
 
 export interface BaseTransaction {
   addressIndex: number;
