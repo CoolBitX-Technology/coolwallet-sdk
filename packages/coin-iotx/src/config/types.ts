@@ -13,12 +13,14 @@ export interface Options {
 export enum TxTypes {
   Transfer,
   Execution,
+  XRC20Token,
   StakeCreate,
   StakeUnstake,
   StakeWithdraw,
+  StakeDeposit,
 }
 
-export type Transaction = Transfer | Execution | StakeCreate | StakeUnstake | StakeWithdraw;
+export type Transaction = Transfer | Execution | XRC20Token | StakeCreate | StakeUnstake | StakeWithdraw | StakeDeposit;
 
 export interface BaseTransaction {
   addressIndex: number;
@@ -39,17 +41,35 @@ export interface Execution extends BaseTransaction {
   data?: string;
 }
 
+export interface XRC20Token extends BaseTransaction {
+  amount: Integer;
+  recipient: string;
+  tokenDecimals: Integer;
+  tokenSymbol: string;
+  tokenAddress: string;
+  tokenSignature?: string;
+}
+
 export interface StakeCreate extends BaseTransaction {
   candidateName: string;
   amount: Integer;
   duration: Integer;
   isAuto: boolean;
+  payload?: string;
 }
 
 export interface StakeUnstake extends BaseTransaction {
   bucketIndex: Integer;
+  payload?: string;
 }
 
 export interface StakeWithdraw extends BaseTransaction {
   bucketIndex: Integer;
+  payload?: string;
+}
+
+export interface StakeDeposit extends BaseTransaction {
+  bucketIndex: Integer;
+  amount: Integer;
+  payload?: string;
 }

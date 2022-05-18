@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import BigNumber from 'bignumber.js';
+import { bech32 } from 'bech32';
 import { Transport, apdu, utils, config } from '@coolwallet/core';
 import Iotx, { Options, Transfer } from '@coolwallet/iotx';
 import { NoInput, OneInput, TwoInputs, ObjInputs } from '../../../utils/componentMaker';
@@ -11,12 +12,16 @@ import {
   transferValues,
   executionKeys,
   executionValues,
+  xrc20TokenKeys,
+  xrc20TokenValues,
   stakeCreateKeys,
   stakeCreateValues,
   stakeUnstakeKeys,
   stakeUnstakeValues,
   stakeWithdrawKeys,
   stakeWithdrawValues,
+  stakeDepositKeys,
+  stakeDepositValues,
 } from './utils/defaultArguments';
 import {
   getAccount,
@@ -99,6 +104,12 @@ function CoinIotx(props: Props) {
   const [executionTx, setExecutionTx] = useState('');
   const [executionResult, setExecutionResult] = useState('');
 
+  // Xrc20Token Tx
+  const [xrc20TokenArgs, setXrc20TokenArgs] = useState(xrc20TokenValues);
+  const [xrc20TokenPrepare, setXrc20TokenPrepare] = useState('');
+  const [xrc20TokenTx, setXrc20TokenTx] = useState('');
+  const [xrc20TokenResult, setXrc20TokenResult] = useState('');
+
   // StakeCreate Tx
   const [stakeCreateArgs, setStakeCreateArgs] = useState(stakeCreateValues);
   const [stakeCreatePrepare, setStakeCreatePrepare] = useState('');
@@ -116,6 +127,12 @@ function CoinIotx(props: Props) {
   const [stakeWithdrawPrepare, setStakeWithdrawPrepare] = useState('');
   const [stakeWithdrawTx, setStakeWithdrawTx] = useState('');
   const [stakeWithdrawResult, setStakeWithdrawResult] = useState('');
+
+  // StakeDeposit Tx
+  const [stakeDepositArgs, setStakeDepositArgs] = useState(stakeDepositValues);
+  const [stakeDepositPrepare, setStakeDepositPrepare] = useState('');
+  const [stakeDepositTx, setStakeDepositTx] = useState('');
+  const [stakeDepositResult, setStakeDepositResult] = useState('');
 
   const handleState = async (
     request: () => Promise<string>,
@@ -212,7 +229,7 @@ function CoinIotx(props: Props) {
         payload: Buffer.from(handleHex(transferArgs[5]), 'hex'),
       });
       setTransferArgs(args);
-      return `nonce: ${args[0]}, gasPrice: ${args[1]}, gasLimit: ${args[2]}`;
+      return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
     }, setTransferPrepare);
   };
 
@@ -251,7 +268,7 @@ function CoinIotx(props: Props) {
         data: Buffer.from(handleHex(executionArgs[5]), 'hex'),
       });
       setExecutionArgs(args);
-      return `nonce: ${args[0]}, gasPrice: ${args[1]}, gasLimit: ${args[2]}`;
+      return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
     }, setExecutionPrepare);
   };
 
@@ -278,6 +295,72 @@ function CoinIotx(props: Props) {
     }, setExecutionResult);
   };
 
+  // Xrc20Token Tx
+
+  const decodeAddr = (a: string) => {
+    const decoded = bech32.decode(a, 50);
+    const recovered = bech32.fromWords(decoded.words);
+    return handleHex(Buffer.from(recovered).toString('hex'));
+  };
+
+  const bnToHex = (bn: BigNumber, padBytes = 0) => {
+    const hex = bn.toString(16);
+    if (typeof padBytes === 'number' && padBytes > 0) {
+      if (padBytes * 2 < hex.length) throw new Error('argument is overlong!');
+      return hex.padStart(padBytes * 2, '0');
+    }
+    if (hex === '0') return '';
+    return handleHex(hex);
+  };
+
+  type Integer = string | number;
+
+  const intToHex = (i: Integer, padBytes = 0) => bnToHex(new BigNumber(i), padBytes);
+
+  const prepareXrc20Token = async () => {
+    handleState(async () => {
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      let [nonce, gasLimit, gasPrice, amount, recipient, tokenDecimals, tokenSymbol, tokenAddress] = xrc20TokenArgs;
+      const tokenAmount = new BigNumber(amount).shiftedBy(parseInt(tokenDecimals, 10)).toFixed();
+      const data = 'a9059cbb000000000000000000000000' + decodeAddr(recipient)
+        + '0000000000000000000000000000000000000000' + intToHex(tokenAmount, 12)
+      const args = await prepareTx(address, xrc20TokenArgs, 'execution', {
+        amount: '0',
+        contract: tokenAddress,
+        data,
+      });
+      setXrc20TokenArgs(args);
+    return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
+    }, setXrc20TokenPrepare);
+  };
+
+  const signXrc20Token = async () => {
+    handleState(async () => {
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const options = { transport: transport!, appPrivateKey, appId };
+      let [nonce, gasLimit, gasPrice, amount, recipient, tokenDecimals, tokenSymbol, tokenAddress] = xrc20TokenArgs;
+      gasPrice = new BigNumber(gasPrice).shiftedBy(18).toFixed();
+      amount = new BigNumber(amount).shiftedBy(parseInt(tokenDecimals, 10)).toFixed();
+      console.log('amount :', amount);
+      const transaction = {
+        addressIndex, nonce, gasLimit, gasPrice, amount, recipient, tokenDecimals, tokenSymbol, tokenAddress
+      };
+      const signedTx = await iotx.signXRC20Token(transaction, options);
+      console.log('signedTx :', signedTx);
+      return signedTx;
+    }, setXrc20TokenTx);
+  };
+
+  const sendXrc20Token = async () => {
+    handleState(async () => {
+      if (!xrc20TokenTx) new Error('No signed tx, please sign tx!');
+      const actionHash = await sendTx(xrc20TokenTx, 'execution');
+      return actionHash;
+    }, setXrc20TokenResult);
+  };
+
   // StakeCreate Tx
 
   const prepareStakeCreate = async () => {
@@ -286,7 +369,7 @@ function CoinIotx(props: Props) {
       if (!appId) throw new Error('No Appid stored, please register!');
       const args = await prepareTx(address, stakeCreateArgs);
       setStakeCreateArgs(args);
-      return `nonce: ${args[0]}, gasPrice: ${args[1]}, gasLimit: ${args[2]}`;
+      return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
     }, setStakeCreatePrepare);
   };
 
@@ -295,11 +378,11 @@ function CoinIotx(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const options = { transport: transport!, appPrivateKey, appId };
-      let [nonce, gasLimit, gasPrice, candidateName, amount, duration] = stakeCreateArgs;
+      let [nonce, gasLimit, gasPrice, candidateName, amount, duration, payload] = stakeCreateArgs;
       gasPrice = new BigNumber(gasPrice).shiftedBy(18).toFixed();
       amount = new BigNumber(amount).shiftedBy(18).toFixed();
       const transaction = {
-        addressIndex, nonce, gasLimit, gasPrice, candidateName, amount, duration, isAuto:false
+        addressIndex, nonce, gasLimit, gasPrice, candidateName, amount, duration, isAuto:false , payload
       };
       const signedTx = await iotx.signStakeCreate(transaction, options);
       console.log('signedTx :', signedTx);
@@ -323,7 +406,7 @@ function CoinIotx(props: Props) {
       if (!appId) throw new Error('No Appid stored, please register!');
       const args = await prepareTx(address, stakeUnstakeArgs);
       setStakeUnstakeArgs(args);
-      return `nonce: ${args[0]}, gasPrice: ${args[1]}, gasLimit: ${args[2]}`;
+      return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
     }, setStakeUnstakePrepare);
   };
 
@@ -332,9 +415,9 @@ function CoinIotx(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const options = { transport: transport!, appPrivateKey, appId };
-      let [nonce, gasLimit, gasPrice, bucketIndex] = stakeUnstakeArgs;
+      let [nonce, gasLimit, gasPrice, bucketIndex, payload] = stakeUnstakeArgs;
       gasPrice = new BigNumber(gasPrice).shiftedBy(18).toFixed();
-      const transaction = { addressIndex, nonce, gasLimit, gasPrice, bucketIndex };
+      const transaction = { addressIndex, nonce, gasLimit, gasPrice, bucketIndex, payload };
       const signedTx = await iotx.signStakeUnstake(transaction, options);
       console.log('signedTx :', signedTx);
       return signedTx;
@@ -357,7 +440,7 @@ function CoinIotx(props: Props) {
       if (!appId) throw new Error('No Appid stored, please register!');
       const args = await prepareTx(address, stakeWithdrawArgs);
       setStakeWithdrawArgs(args);
-      return `nonce: ${args[0]}, gasPrice: ${args[1]}, gasLimit: ${args[2]}`;
+      return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
     }, setStakeWithdrawPrepare);
   };
 
@@ -366,9 +449,9 @@ function CoinIotx(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const options = { transport: transport!, appPrivateKey, appId };
-      let [nonce, gasLimit, gasPrice, bucketIndex] = stakeWithdrawArgs;
+      let [nonce, gasLimit, gasPrice, bucketIndex, payload] = stakeWithdrawArgs;
       gasPrice = new BigNumber(gasPrice).shiftedBy(18).toFixed();
-      const transaction = { addressIndex, nonce, gasLimit, gasPrice, bucketIndex };
+      const transaction = { addressIndex, nonce, gasLimit, gasPrice, bucketIndex, payload };
       const signedTx = await iotx.signStakeWithdraw(transaction, options);
       console.log('signedTx :', signedTx);
       return signedTx;
@@ -381,6 +464,41 @@ function CoinIotx(props: Props) {
       const actionHash = await sendTx(stakeWithdrawTx, 'stakeWithdraw');
       return actionHash;
     }, setStakeWithdrawResult);
+  };
+
+  // StakeDeposit Tx
+
+  const prepareStakeDeposit = async () => {
+    handleState(async () => {
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const args = await prepareTx(address, stakeDepositArgs);
+      setStakeDepositArgs(args);
+      return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
+    }, setStakeDepositPrepare);
+  };
+
+  const signStakeDeposit = async () => {
+    handleState(async () => {
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const options = { transport: transport!, appPrivateKey, appId };
+      let [nonce, gasLimit, gasPrice, bucketIndex, amount, payload] = stakeDepositArgs;
+      gasPrice = new BigNumber(gasPrice).shiftedBy(18).toFixed();
+      amount = new BigNumber(amount).shiftedBy(18).toFixed();
+      const transaction = { addressIndex, nonce, gasLimit, gasPrice, bucketIndex, amount, payload };
+      const signedTx = await iotx.signStakeDeposit(transaction, options);
+      console.log('signedTx :', signedTx);
+      return signedTx;
+    }, setStakeDepositTx);
+  };
+
+  const sendStakeDeposit = async () => {
+    handleState(async () => {
+      if (!stakeDepositTx) new Error('No signed tx, please sign tx!');
+      const actionHash = await sendTx(stakeDepositTx, 'stakeDeposit');
+      return actionHash;
+    }, setStakeDepositResult);
   };
 
   return (
@@ -496,6 +614,32 @@ function CoinIotx(props: Props) {
         btnName='Send'
       />
 
+      <div className='title2'>XRC20Token</div>
+      <ObjInputs
+        title='Estimate Gas'
+        content={`${xrc20TokenPrepare}`}
+        onClick={prepareXrc20Token}
+        disabled={disabled}
+        keys={xrc20TokenKeys}
+        values={xrc20TokenArgs}
+        setValues={setXrc20TokenArgs}
+        btnName='Estimate'
+      />
+      <NoInput
+        title='Sign Transaction'
+        content={xrc20TokenTx}
+        onClick={signXrc20Token}
+        disabled={disabled}
+        btnName='Sign'
+      />
+      <NoInput
+        title='Send Transaction'
+        content={xrc20TokenResult}
+        onClick={sendXrc20Token}
+        disabled={disabled}
+        btnName='Send'
+      />
+
       <div className='title2'>StakeCreate</div>
       <ObjInputs
         title='Estimate Gas'
@@ -570,6 +714,32 @@ function CoinIotx(props: Props) {
         title='Send Transaction'
         content={stakeWithdrawResult}
         onClick={sendStakeWithdraw}
+        disabled={disabled}
+        btnName='Send'
+      />
+
+      <div className='title2'>StakeDeposit</div>
+      <ObjInputs
+        title='Estimate Gas'
+        content={`${stakeDepositPrepare}`}
+        onClick={prepareStakeDeposit}
+        disabled={disabled}
+        keys={stakeDepositKeys}
+        values={stakeDepositArgs}
+        setValues={setStakeDepositArgs}
+        btnName='Estimate'
+      />
+      <NoInput
+        title='Sign Transaction'
+        content={`${stakeDepositTx}`}
+        onClick={signStakeDeposit}
+        disabled={disabled}
+        btnName='Sign'
+      />
+      <NoInput
+        title='Send Transaction'
+        content={stakeDepositResult}
+        onClick={sendStakeDeposit}
         disabled={disabled}
         btnName='Send'
       />

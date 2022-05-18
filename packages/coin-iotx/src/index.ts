@@ -6,10 +6,12 @@ import type {
   Options,
   Transaction,
   Transfer,
+  XRC20Token,
   Execution,
   StakeCreate,
   StakeUnstake,
   StakeWithdraw,
+  StakeDeposit,
 } from './config/types';
 export type { Options, Transaction, Transfer, Execution, StakeCreate, StakeUnstake, StakeWithdraw };
 
@@ -63,6 +65,10 @@ export default class IOTX extends COIN.ECDSACoin implements COIN.Coin {
     return this.signTransactionBase(transaction, options, TxTypes.Transfer);
   }
 
+  async signXRC20Token(transaction: XRC20Token, options: Options): Promise<string> {
+    return this.signTransactionBase(transaction, options, TxTypes.XRC20Token);
+  }
+
   async signExecution(transaction: Execution, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.Execution);
   }
@@ -77,5 +83,9 @@ export default class IOTX extends COIN.ECDSACoin implements COIN.Coin {
 
   async signStakeWithdraw(transaction: StakeWithdraw, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.StakeWithdraw);
+  }
+
+  async signStakeDeposit(transaction: StakeDeposit, options: Options): Promise<string> {
+    return this.signTransactionBase(transaction, options, TxTypes.StakeDeposit);
   }
 }
