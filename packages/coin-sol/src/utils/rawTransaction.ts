@@ -3,7 +3,6 @@ import * as params from '../config/params';
 import * as stringUtil from './stringUtil';
 import { StakeProgramLayout, SystemProgramLayout } from './programLayout';
 import { encodeData } from './commonLayout';
-import Transaction from './Transaction';
 import * as instructions from './instructions';
 import { TOKEN_INFO } from '../config/tokenInfos';
 
