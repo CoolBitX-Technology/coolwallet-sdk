@@ -1,5 +1,6 @@
 import * as BufferLayout from '@solana/buffer-layout';
-import { publicKey, rustString, authorized, lockup, getAlloc } from './commonLayout';
+import * as types from '../config/types';
+import { publicKey, rustString, authorized, lockup } from './commonLayout';
 
 interface InstructionInputData {
   readonly instruction: number;
@@ -23,7 +24,7 @@ type SystemInstructionInputData = {
   };
 };
 
-export const SystemProgramLayout = {
+const SystemProgramLayout = {
   Transfer: {
     index: 2,
     layout: BufferLayout.struct<SystemInstructionInputData['Transfer']>([
@@ -34,32 +35,21 @@ export const SystemProgramLayout = {
   createWithSeed: {
     index: 3,
     layout: BufferLayout.struct<SystemInstructionInputData['CreateWithSeed']>([
-      BufferLayout.u32('instruction'),
-      publicKey('base'),
-      rustString('seed'),
-      BufferLayout.ns64('lamports'),
-      BufferLayout.ns64('space'),
-      publicKey('programId'),
+      BufferLayout.u32('instruction'), // 4
+      publicKey('base'), // 32
+      rustString('seed'), // 8 + variant
+      BufferLayout.ns64('lamports'), // 8
+      BufferLayout.ns64('space'), // 8
+      publicKey('programId'), // 32
     ]),
   },
 };
 
-type LockupRaw = Readonly<{
-  custodian: Uint8Array;
-  epoch: number;
-  unixTimestamp: number;
-}>;
-
-type AuthorizedRaw = Readonly<{
-  staker: Uint8Array;
-  withdrawer: Uint8Array;
-}>;
-
 type StakeInstructionInputData = {
   Initialize: Readonly<{
     instruction: number;
-    authorized: AuthorizedRaw;
-    lockup: LockupRaw;
+    authorized: types.AuthorizedRaw;
+    lockup: types.LockupRaw;
   }>;
   Deactivate: InstructionInputData;
   Delegate: InstructionInputData;
@@ -69,13 +59,13 @@ type StakeInstructionInputData = {
   }>;
 };
 
-export const StakeProgramLayout = {
+const StakeProgramLayout = {
   Initialize: {
     index: 0,
     layout: BufferLayout.struct<StakeInstructionInputData['Initialize']>([
-      BufferLayout.u32('instruction'),
-      authorized(),
-      lockup(),
+      BufferLayout.u32('instruction'), // 4
+      authorized(), // 64
+      lockup(), // 48
     ]),
   },
   Delegate: {
@@ -95,13 +85,11 @@ export const StakeProgramLayout = {
   },
 };
 
-export function encodeData<T extends InstructionInputData>(
-  layoutType: InstructionLayoutType<T>,
-  fields?: any
-): Buffer {
-  const allocLength = layoutType.layout.span >= 0 ? layoutType.layout.span : getAlloc(layoutType, fields);
-  const data = Buffer.alloc(allocLength);
-  const layoutFields = Object.assign({ instruction: layoutType.index }, fields);
-  layoutType.layout.encode(layoutFields, data);
-  return data;
-}
+export {
+  InstructionInputData,
+  InstructionLayoutType,
+  SystemInstructionInputData,
+  StakeInstructionInputData,
+  SystemProgramLayout,
+  StakeProgramLayout,
+};

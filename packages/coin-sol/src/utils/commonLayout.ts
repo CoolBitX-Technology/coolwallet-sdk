@@ -1,4 +1,5 @@
 import * as BufferLayout from '@solana/buffer-layout';
+import { InstructionInputData, InstructionLayoutType } from './programLayout';
 
 /**
  * Layout for a PublicKey type
@@ -61,9 +62,9 @@ const rustString = (property = 'string'): BufferLayout.Layout<string> => {
     }>
   >(
     [
-      BufferLayout.u32('length'),
-      BufferLayout.u32('lengthPadding'),
-      BufferLayout.blob(BufferLayout.offset(BufferLayout.u32(), -8), 'chars'),
+      BufferLayout.u32('length'), // 4
+      BufferLayout.u32('lengthPadding'), // 4
+      BufferLayout.blob(BufferLayout.offset(BufferLayout.u32(), -8), 'chars'), // data length
     ],
     property
   );
@@ -103,4 +104,12 @@ function getAlloc(type: any, fields: any): number {
   return alloc;
 }
 
-export { publicKey, authorized, lockup, rustString, getAlloc };
+function encodeData<T extends InstructionInputData>(layoutType: InstructionLayoutType<T>, fields?: any): Buffer {
+  const allocLength = layoutType.layout.span >= 0 ? layoutType.layout.span : getAlloc(layoutType, fields);
+  const data = Buffer.alloc(allocLength);
+  const layoutFields = Object.assign({ instruction: layoutType.index }, fields);
+  layoutType.layout.encode(layoutFields, data);
+  return data;
+}
+
+export { publicKey, authorized, lockup, rustString, encodeData };

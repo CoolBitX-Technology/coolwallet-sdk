@@ -9,6 +9,17 @@ export type TokenInfo = {
   signature?: string;
 };
 
+export type LockupRaw = Readonly<{
+  custodian: Uint8Array;
+  epoch: number;
+  unixTimestamp: number;
+}>;
+
+export type AuthorizedRaw = Readonly<{
+  staker: Uint8Array;
+  withdrawer: Uint8Array;
+}>;
+
 /**
  * AccountMeta types
  *
@@ -76,9 +87,9 @@ export type TransactionArgs = {
 };
 
 export type TransferTransaction = {
-  toPubKey: Address;
+  toPubkey: Address;
   recentBlockhash: string;
-  amount: number | string;
+  lamports: number | string;
 };
 
 export type TransferSplTokenTransaction = {
@@ -101,6 +112,27 @@ export type AssociateTokenAccountTransaction = {
   recentBlockhash: string;
 };
 
+export type Delegate = {
+  stakePubkey: Address;
+  authorizedPubkey: Address;
+  votePubkey: Address;
+  recentBlockhash: string;
+};
+
+export type Undelegate = {
+  stakePubkey: Address;
+  authorizedPubkey: Address;
+  recentBlockhash: string;
+};
+
+export type DelegateAndCreateAccountWithSeed = {
+  newAccountPubkey: Address;
+  votePubkey: Address;
+  seed: string;
+  lamports: string | number;
+  recentBlockhash: string;
+};
+
 type Mandatory<T> = {
   transport: Transport;
   appPrivateKey: string;
@@ -119,8 +151,17 @@ export type signTransferSplTokenTransactionType = Mandatory<TransferSplTokenTran
 
 export type signAssociateTokenAccountTransactionType = Mandatory<AssociateTokenAccountTransaction>;
 
+export type signDelegateType = Mandatory<Delegate>;
+
+export type signUndelegateType = Mandatory<Undelegate>;
+
+export type signDelegateAndCreateAccountWithSeedType = Mandatory<DelegateAndCreateAccountWithSeed>;
+
 export type signTxType =
   | signTransactionType
   | signTransferTransactionType
   | signTransferSplTokenTransactionType
-  | signAssociateTokenAccountTransactionType;
+  | signAssociateTokenAccountTransactionType
+  | signDelegateType
+  | signUndelegateType
+  | signDelegateAndCreateAccountWithSeedType;

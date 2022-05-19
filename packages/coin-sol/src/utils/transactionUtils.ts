@@ -6,7 +6,7 @@ function hasOwnProperty(o: Record<string, any>, prop: string) {
 
 function isTransfer(p: signTxType) {
   const { transaction } = p;
-  return hasOwnProperty(transaction, 'toPubKey') && hasOwnProperty(transaction, 'amount');
+  return hasOwnProperty(transaction, 'toPubkey') && hasOwnProperty(transaction, 'lamports');
 }
 
 function isTransferSPLToken(p: signTxType) {
@@ -27,4 +27,28 @@ function isAssociateTokenAccount(p: signTxType) {
   );
 }
 
-export { isTransfer, isTransferSPLToken, isAssociateTokenAccount };
+function isDelegate(p: signTxType) {
+  const { transaction } = p;
+  return (
+    hasOwnProperty(transaction, 'stakePubkey') &&
+    hasOwnProperty(transaction, 'votePubkey') &&
+    hasOwnProperty(transaction, 'authorizedPubkey')
+  );
+}
+
+function isUndelegate(p: signTxType) {
+  const { transaction } = p;
+  return hasOwnProperty(transaction, 'stakePubkey') && hasOwnProperty(transaction, 'authorizedPubkey');
+}
+
+function isDelegateAndCreateAccountWithSeed(p: signTxType) {
+  const { transaction } = p;
+  return (
+    hasOwnProperty(transaction, 'newAccountPubkey') &&
+    hasOwnProperty(transaction, 'basePubkey') &&
+    hasOwnProperty(transaction, 'votePubkey') &&
+    hasOwnProperty(transaction, 'seed')
+  );
+}
+
+export { isTransfer, isTransferSPLToken, isAssociateTokenAccount, isDelegate, isDelegateAndCreateAccountWithSeed };

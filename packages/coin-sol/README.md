@@ -25,11 +25,11 @@ const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
 const sol = new SOL();
 
-const toPubKey = 'destination address';
+const toPubkey = 'destination address';
 const amount = 0.000001; // transfer amount
 
 const transaction = {
-  toPubKey,
+  toPubkey,
   recentBlockhash,
   amount,
 };

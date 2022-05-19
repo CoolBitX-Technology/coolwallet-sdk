@@ -1,34 +1,36 @@
 import * as types from '../config/types';
 import * as params from '../config/params';
 import * as stringUtil from './stringUtil';
-import { encodeData, SystemProgramLayout } from './programLayout';
+import { StakeProgramLayout, SystemProgramLayout } from './programLayout';
+import { encodeData } from './commonLayout';
 import Transaction from './Transaction';
+import * as instructions from './instructions';
 import { TOKEN_INFO } from '../config/tokenInfos';
 
 function compileTransferTransaction(transaction: {
-  fromPubKey: types.Address;
-  toPubKey: types.Address;
+  fromPubkey: types.Address;
+  toPubkey: types.Address;
   recentBlockhash: string;
-  amount: number | string;
+  lamports: number | string;
 }): types.TransactionArgs {
-  const { fromPubKey, toPubKey, recentBlockhash, amount } = transaction;
+  const { fromPubkey, toPubkey, recentBlockhash, lamports } = transaction;
   const data = encodeData(SystemProgramLayout.Transfer, {
-    lamports: +amount * params.LAMPORTS_PER_SOL,
+    lamports,
   });
 
   return {
     instructions: [
       {
         accounts: [
-          { pubkey: fromPubKey, isSigner: true, isWritable: true },
-          { pubkey: toPubKey, isSigner: false, isWritable: true },
+          { pubkey: fromPubkey, isSigner: true, isWritable: true },
+          { pubkey: toPubkey, isSigner: false, isWritable: true },
         ],
         programId: params.SYSTEM_PROGRAM_ID,
         data,
       },
     ],
     recentBlockhash,
-    feePayer: fromPubKey,
+    feePayer: fromPubkey,
   };
 }
 
@@ -71,7 +73,7 @@ function compileSplTokenTransaction(transaction: {
           { pubkey: signer, isSigner: true, isWritable: true },
         ],
         programId: params.TOKEN_PROGRAM_ID,
-        data: stringUtil.splDataEncode(amount, tokenInfoArgs.decimals),
+        data: stringUtil.splDataEncode(amount),
       },
     ],
     recentBlockhash,
@@ -110,51 +112,90 @@ function compileAssociateTokenAccount(transaction: {
   };
 }
 
-function compileCreateAccountWithSeed(transaction: {
-  fromPubkey: types.Address;
-  newAccountPubkey: types.Address;
-  basePubkey: types.Address;
-  seed: string;
-  lamports: number;
-  space: number;
-  programId: types.Address;
+function compileDelegate(transaction: {
+  feePayer: types.Address;
   recentBlockhash: string;
+  stakePubkey: types.Address;
+  authorizedPubkey: types.Address;
+  votePubkey: types.Address;
 }): types.TransactionArgs {
-  const { fromPubkey, basePubkey, seed, space, lamports, programId, recentBlockhash, newAccountPubkey } = transaction;
-  const basePubkeyStr = stringUtil.formHex(basePubkey);
-  const fromPubkeyStr = stringUtil.formHex(fromPubkey);
+  const { feePayer, recentBlockhash } = transaction;
+  const delegateInstruction = instructions.delegate(transaction);
+  return {
+    instructions: [delegateInstruction],
+    recentBlockhash,
+    feePayer,
+  };
+}
 
-  const data = encodeData(SystemProgramLayout.createWithSeed, {
-    base: Buffer.from(basePubkeyStr, 'hex'),
-    seed,
-    lamports,
-    space,
-    programId: Buffer.from(stringUtil.formHex(programId), 'hex'),
-  });
-  const keys = [
-    { pubkey: fromPubkeyStr, isSigner: true, isWritable: true },
-    { pubkey: stringUtil.formHex(newAccountPubkey), isSigner: false, isWritable: true },
-  ];
-  if (basePubkeyStr !== fromPubkeyStr) {
-    keys.push({ pubkey: basePubkeyStr, isSigner: true, isWritable: false });
-  }
-
-  return new Transaction({
+function compileUndelegate(transaction: {
+  feePayer: types.Address;
+  recentBlockhash: string;
+  stakePubkey: types.Address;
+  authorizedPubkey: types.Address;
+}): types.TransactionArgs {
+  const { stakePubkey, authorizedPubkey, feePayer, recentBlockhash } = transaction;
+  const data = encodeData(StakeProgramLayout.Deactivate);
+  return {
     instructions: [
       {
-        accounts: keys,
-        programId: params.SYSTEM_PROGRAM_ID,
+        accounts: [
+          { pubkey: stakePubkey, isSigner: false, isWritable: true },
+          { pubkey: params.SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
+          { pubkey: authorizedPubkey, isSigner: true, isWritable: false },
+        ],
+        programId: params.STAKE_PROGRAM_ID,
         data,
       },
     ],
+    feePayer,
+    recentBlockhash,
+  };
+}
+
+function compileDelegateAndCreateAccountWithSeed(transaction: {
+  fromPubkey: types.Address;
+  newAccountPubkey: types.Address;
+  basePubkey: types.Address;
+  votePubkey: types.Address;
+  seed: string;
+  lamports: string | number;
+  recentBlockhash: string;
+}): types.TransactionArgs {
+  const { fromPubkey, newAccountPubkey, basePubkey, seed, lamports, recentBlockhash, votePubkey } = transaction;
+  const createAccountWithSeedInstructions = instructions.createAccountWithSeed({
+    fromPubkey,
+    newAccountPubkey,
+    basePubkey,
+    seed,
+    space: 200,
+    lamports,
+    programId: params.STAKE_PROGRAM_ID,
+  });
+  const initializeInstruction = instructions.initialize({
+    stakePubkey: newAccountPubkey,
+    authorized: {
+      staker: Buffer.from(stringUtil.formHex(fromPubkey), 'hex'),
+      withdrawer: Buffer.from(stringUtil.formHex(fromPubkey), 'hex'),
+    },
+  });
+  const delegateInstruction = instructions.delegate({
+    stakePubkey: newAccountPubkey,
+    authorizedPubkey: fromPubkey,
+    votePubkey,
+  });
+  return {
+    instructions: [createAccountWithSeedInstructions, initializeInstruction, delegateInstruction],
     recentBlockhash,
     feePayer: fromPubkey,
-  });
+  };
 }
 
 export {
   compileTransferTransaction,
   compileSplTokenTransaction,
   compileAssociateTokenAccount,
-  compileCreateAccountWithSeed,
+  compileDelegate,
+  compileUndelegate,
+  compileDelegateAndCreateAccountWithSeed,
 };
