@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolwallet/testing-library';
-import { Keypair, Transaction, SystemProgram, PublicKey } from '@solana/web3.js';
+import { Keypair, Transaction, StakeProgram, SystemProgram, PublicKey } from '@solana/web3.js';
 import { createAssociatedTokenAccountInstruction, createTransferInstruction } from '@solana/spl-token';
 import SOL from '../src';
 import * as params from '../src/config/params';
@@ -207,6 +207,8 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
+    console.error('Transaction:', sdkTransaction);
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -268,6 +270,58 @@ describe('Test Solana SDK', () => {
       .messagePage('SOL')
       .addressPage(toPubKey)
       .amountPage(+amount)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Staking Withdraw', async () => {
+    const amount = (getRandInt(10000000) + 1) / 10000000.0;
+    const recentBlockhash = getRandWallet();
+    const stakePubkey = getRandWallet();
+
+    const signTxData = {
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      transaction: {
+        stakePubkey,
+        withdrawToPubKey: sdkWallet.publicKey,
+        recentBlockhash,
+        amount,
+      },
+      addressIndex: 0,
+    };
+
+    const signedTx = await sol.signTransaction(signTxData);
+    const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+
+    const sdkTransaction = StakeProgram.withdraw({
+      authorizedPubkey: sdkWallet.publicKey,
+      lamports: amount * params.LAMPORTS_PER_SOL,
+      stakePubkey: new PublicKey(stakePubkey),
+      toPubkey: sdkWallet.publicKey,
+    });
+    sdkTransaction.feePayer = sdkWallet.publicKey;
+    sdkTransaction.recentBlockhash = recentBlockhash;
+    const message = sdkTransaction.compileMessage();
+    const expectedSigUint8Array = await node.sign(message.serialize().toString('hex'));
+    sdkTransaction.addSignature(sdkWallet.publicKey, expectedSigUint8Array);
+
+    try {
+      expect(recoveredTx.verifySignatures()).toEqual(true);
+      expect(sdkTransaction.verifySignatures()).toEqual(true);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(sdkTransaction.serialize().toString('hex'));
+    } catch (e) {
+      console.error('Test Staking Withdraw params', signTxData.transaction);
+      throw e;
+    }
+    
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('SOL')
+      .messagePage('Reward')
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
