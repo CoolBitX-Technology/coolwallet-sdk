@@ -101,6 +101,14 @@ export type AssociateTokenAccountTransaction = {
   recentBlockhash: string;
 };
 
+export type StakingWithdrawTransaction = {
+  authorizedPubkey: Address;
+  stakePubkey: Address;
+  withdrawToPubKey: Address;
+  recentBlockhash: string;
+  amount: number | string;
+};
+
 type Mandatory<T> = {
   transport: Transport;
   appPrivateKey: string;
@@ -119,8 +127,11 @@ export type signTransferSplTokenTransactionType = Mandatory<TransferSplTokenTran
 
 export type signAssociateTokenAccountTransactionType = Mandatory<AssociateTokenAccountTransaction>;
 
+export type signStakingWithdrawType = Mandatory<StakingWithdrawTransaction>;
+
 export type signTxType =
   | signTransactionType
   | signTransferTransactionType
   | signTransferSplTokenTransactionType
-  | signAssociateTokenAccountTransactionType;
+  | signAssociateTokenAccountTransactionType
+  | signStakingWithdrawType;
