@@ -207,8 +207,6 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    console.error('Transaction:', sdkTransaction);
-
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -279,6 +277,7 @@ describe('Test Solana SDK', () => {
     const amount = (getRandInt(10000000) + 1) / 10000000.0;
     const recentBlockhash = getRandWallet();
     const stakePubkey = getRandWallet();
+    const withdrawToPubKey = new PublicKey(walletAddress);
 
     const signTxData = {
       transport,
@@ -286,7 +285,7 @@ describe('Test Solana SDK', () => {
       appId: props.appId,
       transaction: {
         stakePubkey,
-        withdrawToPubKey: sdkWallet.publicKey,
+        withdrawToPubKey,
         recentBlockhash,
         amount,
       },
@@ -322,6 +321,8 @@ describe('Test Solana SDK', () => {
       .messagePage('TEST')
       .messagePage('SOL')
       .messagePage('Reward')
+      .addressPage(stakePubkey)
+      .amountPage(+amount)
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
