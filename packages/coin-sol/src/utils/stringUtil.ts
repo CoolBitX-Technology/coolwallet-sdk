@@ -25,6 +25,15 @@ export function toBase58(publicKey: types.Address): string {
   return base58.encode(publicKey);
 }
 
+export function toBase58Buffer(publicKey: types.Address): Buffer {
+  if (typeof publicKey === 'string') {
+    if (isBase58Format(publicKey)) return base58.decode(publicKey);
+    if (isHexFormat(publicKey)) return Buffer.from(publicKey, 'hex');
+    return Buffer.from(publicKey);
+  }
+  return publicKey;
+}
+
 export function toPublicKey(publicKey: string | Buffer): string {
   if (typeof publicKey === 'string') return publicKey;
   return base58.encode(publicKey);
@@ -64,19 +73,12 @@ export const encodeLength = (bytes: number[], len: number): void => {
   }
 };
 
-export function splDataEncode(amount: number | string, decimals = 9): Buffer {
+export function splDataEncode(amount: number | string): Buffer {
   const data = Buffer.alloc(9);
   const programIdIndexSpan = 1;
   data.writeUIntLE(3, 0, programIdIndexSpan);
-  const [round, decimal] = amount.toString().split('.');
 
-  let value = Number(round) > 0 ? round : '';
-  if (decimal) {
-    value += decimal.charAt(decimals) ? decimal.split('').slice(0, decimals).join('') : decimal.padEnd(decimals, '0');
-  } else {
-    value = value + ''.padEnd(decimals, '0');
-  }
-  const valueHex = new BN(value).toString(16, 8 * 2);
+  const valueHex = new BN(amount).toString(16, 8 * 2);
   const valueBuf = Buffer.from(valueHex, 'hex').reverse();
 
   data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');

@@ -58,6 +58,30 @@ function getAssociateTokenAccount(rawTx: Transaction, addressIndex: number): str
   return SEPath + rawTx.compileMessage().serializeAssociateTokenAccount();
 }
 
+function getDelegateArguments(rawTx: Transaction, addressIndex: number): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+
+  return SEPath + rawTx.compileMessage().serializeDelegate();
+}
+
+function getUndelegateArguments(rawTx: Transaction, addressIndex: number): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+
+  return SEPath + rawTx.compileMessage().serializeUndelegate();
+}
+
+function getDelegateAndCreateAccountArguments(rawTx: Transaction, addressIndex: number): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+
+  return SEPath + rawTx.compileMessage().serializeDelegateAndCreateAccountWithSeed();
+}
+
 function getSmartContractArguments(rawTx: Transaction, addressIndex: number): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
@@ -71,7 +95,7 @@ function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number):
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
 
-  return SEPath + rawTx.compileMessage().serializeTransferMessage();
+  return SEPath + rawTx.compileMessage().serializeStakingWithdraw();
 }
 
 export {
@@ -79,5 +103,8 @@ export {
   getSplTokenTransferArguments,
   getTransferArguments,
   getSmartContractArguments,
+  getDelegateArguments,
+  getUndelegateArguments,
+  getDelegateAndCreateAccountArguments,
   getStackingWithdrawArguments,
 };

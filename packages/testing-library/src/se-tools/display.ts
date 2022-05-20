@@ -1,5 +1,5 @@
 import printf from 'printf';
-import round from 'lodash/round';
+import floor from 'lodash/floor';
 
 enum TYPE {
   ASC = '00',
@@ -53,7 +53,7 @@ class DisplayBuilder {
     this.response += convertToHex(totalLength);
     this.response += signal;
     this.response += TYPE.BCD;
-    const number = printf('%017.8f', round(amount, 8));
+    const number = printf('%017.8f', floor(amount, 8));
     this.response += number.substring(0, 8) + number.substring(9, 17);
     return this;
   }
