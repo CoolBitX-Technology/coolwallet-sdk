@@ -444,4 +444,116 @@ describe('Test Solana SDK', () => {
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
+
+  it('Test Staking Withdraw with different toPubkey', async () => {
+    const lamports = ((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL;
+    const recentBlockhash = getRandWallet();
+    const stakePubkey = getRandWallet();
+    const withdrawToPubKey = getRandWallet();
+
+    const signTxData = {
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      transaction: {
+        stakePubkey,
+        withdrawToPubKey,
+        recentBlockhash,
+        lamports,
+      },
+      addressIndex: 0,
+    };
+
+    const signedTx = await sol.signTransaction(signTxData);
+    const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+
+    const sdkTransaction = StakeProgram.withdraw({
+      authorizedPubkey: sdkWallet.publicKey,
+      lamports,
+      stakePubkey: new PublicKey(stakePubkey),
+      toPubkey: new PublicKey(withdrawToPubKey),
+    });
+    sdkTransaction.feePayer = sdkWallet.publicKey;
+    sdkTransaction.recentBlockhash = recentBlockhash;
+    const message = sdkTransaction.compileMessage();
+    const expectedSigUint8Array = await node.sign(message.serialize().toString('hex'));
+    sdkTransaction.addSignature(sdkWallet.publicKey, expectedSigUint8Array);
+
+    try {
+      expect(recoveredTx.verifySignatures()).toEqual(true);
+      expect(sdkTransaction.verifySignatures()).toEqual(true);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(sdkTransaction.serialize().toString('hex'));
+    } catch (e) {
+      console.error('Test Staking Withdraw params', signTxData.transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    console.log(lamports / LAMPORTS_PER_SOL);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('SOL')
+      .messagePage('Reward')
+      .addressPage(withdrawToPubKey)
+      .amountPage(+lamports / LAMPORTS_PER_SOL)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Staking Withdraw with Same toPubkey', async () => {
+    const lamports = ((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL;
+    const recentBlockhash = getRandWallet();
+    const stakePubkey = getRandWallet();
+    const withdrawToPubKey = sdkWallet.publicKey;
+
+    const signTxData = {
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      transaction: {
+        stakePubkey,
+        withdrawToPubKey: withdrawToPubKey.toString(),
+        recentBlockhash,
+        lamports,
+      },
+      addressIndex: 0,
+    };
+
+    const signedTx = await sol.signTransaction(signTxData);
+    const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+
+    const sdkTransaction = StakeProgram.withdraw({
+      authorizedPubkey: withdrawToPubKey,
+      lamports,
+      stakePubkey: new PublicKey(stakePubkey),
+      toPubkey: withdrawToPubKey,
+    });
+    sdkTransaction.feePayer = sdkWallet.publicKey;
+    sdkTransaction.recentBlockhash = recentBlockhash;
+    const message = sdkTransaction.compileMessage();
+    const expectedSigUint8Array = await node.sign(message.serialize().toString('hex'));
+    sdkTransaction.addSignature(sdkWallet.publicKey, expectedSigUint8Array);
+
+    try {
+      expect(recoveredTx.verifySignatures()).toEqual(true);
+      expect(sdkTransaction.verifySignatures()).toEqual(true);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(sdkTransaction.serialize().toString('hex'));
+    } catch (e) {
+      console.error('Test Staking Withdraw params', signTxData.transaction);
+      throw e;
+    }
+
+    const display = await getTxDetail(transport, props.appId);
+    console.log(lamports / LAMPORTS_PER_SOL);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('SOL')
+      .messagePage('Reward')
+      .addressPage(withdrawToPubKey.toString())
+      .amountPage(+lamports / LAMPORTS_PER_SOL)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
 });

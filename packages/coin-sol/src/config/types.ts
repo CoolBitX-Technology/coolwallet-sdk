@@ -133,6 +133,13 @@ export type DelegateAndCreateAccountWithSeed = {
   recentBlockhash: string;
 };
 
+export type StakingWithdrawTransaction = {
+  stakePubkey: Address;
+  withdrawToPubKey: Address;
+  recentBlockhash: string;
+  lamports: number | string;
+};
+
 type Mandatory<T> = {
   transport: Transport;
   appPrivateKey: string;
@@ -157,6 +164,8 @@ export type signUndelegateType = Mandatory<Undelegate>;
 
 export type signDelegateAndCreateAccountWithSeedType = Mandatory<DelegateAndCreateAccountWithSeed>;
 
+export type signStakingWithdrawType = Mandatory<StakingWithdrawTransaction>;
+
 export type signTxType =
   | signTransactionType
   | signTransferTransactionType
@@ -164,4 +173,5 @@ export type signTxType =
   | signAssociateTokenAccountTransactionType
   | signDelegateType
   | signUndelegateType
-  | signDelegateAndCreateAccountWithSeedType;
+  | signDelegateAndCreateAccountWithSeedType
+  | signStakingWithdrawType;

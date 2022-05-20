@@ -190,6 +190,43 @@ function compileDelegateAndCreateAccountWithSeed(transaction: {
   };
 }
 
+function compileStakingWithdraw(transaction: {
+  authorizedPubkey: types.Address;
+  stakePubkey: types.Address;
+  withdrawToPubKey: types.Address;
+  recentBlockhash: string;
+  lamports: number | string;
+}): types.TransactionArgs {
+  const { authorizedPubkey, stakePubkey, withdrawToPubKey, recentBlockhash, lamports } = transaction;
+  const data = encodeData(StakeProgramLayout.Withdraw, {
+    lamports: +lamports,
+  });
+
+  const accounts = [
+    { pubkey: stakePubkey, isSigner: false, isWritable: true },
+    { pubkey: withdrawToPubKey, isSigner: false, isWritable: true },
+    { pubkey: params.SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
+    {
+      pubkey: params.SYSVAR_STAKE_HISTORY_PUBKEY,
+      isSigner: false,
+      isWritable: false,
+    },
+    { pubkey: authorizedPubkey, isSigner: true, isWritable: false },
+  ];
+
+  return {
+    instructions: [
+      {
+        accounts,
+        programId: params.STAKE_PROGRAM_ID,
+        data,
+      },
+    ],
+    recentBlockhash,
+    feePayer: authorizedPubkey,
+  };
+}
+
 export {
   compileTransferTransaction,
   compileSplTokenTransaction,
@@ -197,4 +234,5 @@ export {
   compileDelegate,
   compileUndelegate,
   compileDelegateAndCreateAccountWithSeed,
+  compileStakingWithdraw,
 };

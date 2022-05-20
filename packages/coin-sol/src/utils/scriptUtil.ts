@@ -90,6 +90,14 @@ function getSmartContractArguments(rawTx: Transaction, addressIndex: number): st
   return SEPath + rawTx.compileMessage().serialize();
 }
 
+function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+
+  return SEPath + rawTx.compileMessage().serializeStakingWithdraw();
+}
+
 export {
   getAssociateTokenAccount,
   getSplTokenTransferArguments,
@@ -98,4 +106,5 @@ export {
   getDelegateArguments,
   getUndelegateArguments,
   getDelegateAndCreateAccountArguments,
+  getStackingWithdrawArguments,
 };

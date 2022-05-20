@@ -382,6 +382,56 @@ class Message {
 
     return signData.slice(0, length + instructionBuffer.length).toString('hex');
   }
+
+  serializeStakingWithdraw(): string {
+    const { keyCount, instructions } = this.encodedLength();
+    const [instruction] = instructions;
+    let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
+    const instructionLayout = BufferLayout.struct<
+      Readonly<{
+        data: number[];
+        dataLength: Uint8Array;
+        keyIndices: number[];
+        programIdIndex: number;
+      }>
+    >([
+      BufferLayout.u8('programIdIndex'),
+      BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
+      BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
+      BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
+    ]);
+    const instructionBufferLength = instructionLayout.encode(instruction, instructionBuffer);
+    instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
+    let accountKeys;
+    if (this.accountKeys.length === 5) {
+      // Padding argument.
+      accountKeys = [...this.accountKeys, Buffer.alloc(32).toString('hex')];
+    } else {
+      accountKeys = this.accountKeys;
+    }
+    const signDataLayout = BufferLayout.struct<
+      Readonly<{
+        keyCount: Uint8Array;
+        keys: Uint8Array[];
+        recentBlockhash: Uint8Array;
+      }>
+    >([
+      BufferLayout.blob(keyCount.length, 'keyCount'),
+      BufferLayout.seq(publicKey('key'), accountKeys.length, 'keys'),
+      publicKey('recentBlockhash'),
+    ]);
+    const transaction = {
+      keyCount: Buffer.from(keyCount),
+      keys: accountKeys.map((key) => Buffer.from(key, 'hex')),
+      recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
+    };
+    const signData = Buffer.alloc(2048); // sign data max length
+    const length = signDataLayout.encode(transaction, signData);
+
+    instructionBuffer.copy(signData, length);
+
+    return signData.slice(0, length + instructionBuffer.length).toString('hex');
+  }
 }
 
 export default Message;

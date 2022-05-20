@@ -51,4 +51,21 @@ function isDelegateAndCreateAccountWithSeed(p: signTxType) {
   );
 }
 
-export { isTransfer, isTransferSPLToken, isAssociateTokenAccount, isDelegate, isDelegateAndCreateAccountWithSeed };
+function isStakingWithdraw(p: signTxType) {
+  const { transaction } = p;
+  return (
+    hasOwnProperty(transaction, 'lamports') &&
+    hasOwnProperty(transaction, 'stakePubkey') &&
+    hasOwnProperty(transaction, 'withdrawToPubKey')
+  );
+}
+
+export {
+  isTransfer,
+  isTransferSPLToken,
+  isAssociateTokenAccount,
+  isDelegate,
+  isDelegateAndCreateAccountWithSeed,
+  isUndelegate,
+  isStakingWithdraw,
+};

@@ -54,6 +54,13 @@ function CoinSol(props: Props) {
     result: '',
   });
 
+  const [stakingWithdraw, setStakingWithdraw] = useState({
+    value: '0',
+    seed: 'stake:0',
+    toPubkey: 'AnJZ8PLH3YZVJRifPb2jLXDwaKXtScHrQmpCiQ3vS8jm',
+    result: '',
+  });
+
   const [txString, setTxString] = useState('');
 
   const [txResult, setTxResult] = useState('');
@@ -173,7 +180,7 @@ function CoinSol(props: Props) {
           fromTokenAccount: fromTokenAccount.toString(),
           toTokenAccount: toTokenAccount.toString(),
           recentBlockhash,
-          amount: splTokenTransaction.amount,
+          amount: +splTokenTransaction.amount * 10 ** +splTokenTransaction.decimals,
           tokenInfo,
         };
 
@@ -258,11 +265,7 @@ function CoinSol(props: Props) {
   const signUndelegate = () =>
     handleState(
       async () => {
-        const stakePubkey = await sol.createWithSeed(
-          account,
-          undelegate.seed,
-          StakeProgram.programId.toString()
-        );
+        const stakePubkey = await sol.createWithSeed(account, undelegate.seed, StakeProgram.programId.toString());
         // check if associateAccount was not created
         const accountData = await connection.getAccountInfo(new PublicKey(stakePubkey));
         if (!accountData) {
@@ -350,7 +353,51 @@ function CoinSol(props: Props) {
 
         return recoveredTx.serialize().toString('hex');
       },
-      (result) => setDelegateAndCreateAccountWithSeed((prev) => ({ ...prev, result }))
+      (result) => setDelegateAndCreateAccountWithSeed((prev: any) => ({ ...prev, result }))
+    );
+
+  const signStakingWithdraw = () =>
+    handleState(
+      async () => {
+        if (account.length < 1) throw new Error('please get account first');
+
+        const appId = localStorage.getItem('appId');
+        if (!appId) throw new Error('No Appid stored, please register!');
+
+        const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+
+        const stakePubkey = await sol.createWithSeed(
+          account,
+          delegateAndCreateAccountWithSeed.seed,
+          StakeProgram.programId.toString()
+        );
+
+        const signTxData = {
+          transport: transport as Transport,
+          appPrivateKey,
+          appId,
+          transaction: {
+            stakePubkey,
+            withdrawToPubKey: stakingWithdraw.toPubkey,
+            recentBlockhash,
+            lamports: +stakingWithdraw.value * LAMPORTS_PER_SOL,
+          },
+          addressIndex: 0,
+        };
+
+        console.log('TX:', signTxData);
+
+        const signedTx = await sol.signStackingWithdrawTransaction(signTxData);
+        const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+
+        const verifySig = recoveredTx.verifySignatures();
+
+        // signature need to be valid
+        if (!verifySig) throw new Error('Fail to verify signature');
+
+        return recoveredTx.serialize().toString('hex');
+      },
+      (result) => setStakingWithdraw((prev) => ({ ...prev, result }))
     );
 
   const sendTransaction = () =>
@@ -505,6 +552,45 @@ function CoinSol(props: Props) {
                 vote,
               })),
             placeholder: 'validator',
+          },
+        ]}
+      />
+      <Inputs
+        btnTitle='Sign'
+        title='Staking Withdraw'
+        content={stakingWithdraw.result}
+        onClick={signStakingWithdraw}
+        disabled={disabled}
+        inputs={[
+          {
+            xs: 1,
+            value: stakingWithdraw.seed,
+            onChange: (seed) =>
+              setStakingWithdraw((prevState) => ({
+                ...prevState,
+                seed,
+              })),
+            placeholder: 'seed',
+          },
+          {
+            xs: 2,
+            value: stakingWithdraw.value,
+            onChange: (value: any) =>
+              setStakingWithdraw((prevState: any) => ({
+                ...prevState,
+                value,
+              })),
+            placeholder: 'Withdraw value',
+          },
+          {
+            xs: 2,
+            value: stakingWithdraw.toPubkey,
+            onChange: (toPubkey: any) =>
+              setStakingWithdraw((prevState: any) => ({
+                ...prevState,
+                toPubkey,
+              })),
+            placeholder: 'toPubkey',
           },
         ]}
       />
