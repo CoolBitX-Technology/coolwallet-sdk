@@ -1,7 +1,7 @@
 import * as types from '../config/types';
 import * as params from '../config/params';
 import * as stringUtil from './stringUtil';
-import { encodeData, SystemProgramLayout } from './programLayout';
+import { encodeData, SystemProgramLayout, StakeProgramLayout } from './programLayout';
 import Transaction from './Transaction';
 import { TOKEN_INFO } from '../config/tokenInfos';
 
@@ -152,9 +152,47 @@ function compileCreateAccountWithSeed(transaction: {
   });
 }
 
+function compileStakingWithdraw(transaction: {
+  authorizedPubkey: types.Address;
+  stakePubkey: types.Address;
+  withdrawToPubKey: types.Address;
+  recentBlockhash: string;
+  amount: number | string;
+}): types.TransactionArgs {
+  const { authorizedPubkey, stakePubkey, withdrawToPubKey, recentBlockhash, amount } = transaction;
+  const data = encodeData(StakeProgramLayout.Withdraw, {
+    lamports: +amount * params.LAMPORTS_PER_SOL,
+  });
+
+  const accounts = [
+    { pubkey: stakePubkey, isSigner: false, isWritable: true },
+    { pubkey: withdrawToPubKey, isSigner: false, isWritable: true },
+    { pubkey: params.SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
+    {
+      pubkey: params.SYSVAR_STAKE_HISTORY_PUBKEY,
+      isSigner: false,
+      isWritable: false,
+    },
+    { pubkey: authorizedPubkey, isSigner: true, isWritable: false },
+  ];
+
+  return new Transaction({
+    instructions: [
+      {
+        accounts,
+        programId: params.STAKE_PROGRAM_ID,
+        data,
+      }
+    ],
+    recentBlockhash,
+    feePayer: authorizedPubkey,
+  });
+}
+
 export {
   compileTransferTransaction,
   compileSplTokenTransaction,
   compileAssociateTokenAccount,
   compileCreateAccountWithSeed,
+  compileStakingWithdraw,
 };

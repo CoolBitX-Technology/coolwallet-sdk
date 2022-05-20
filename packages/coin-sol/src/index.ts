@@ -10,6 +10,7 @@ import {
   compileAssociateTokenAccount,
   compileSplTokenTransaction,
   compileTransferTransaction,
+  compileStakingWithdraw,
 } from './utils/rawTransaction';
 import * as txUtils from './utils/transactionUtils';
 import Transaction from './utils/Transaction';
@@ -68,6 +69,17 @@ export default class Solana extends COIN.EDDSACoin implements COIN.Coin {
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
 
+  async signStackingWithdrawTransaction(signTxData: types.signStakingWithdrawType): Promise<string> {
+    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
+    const authorizedPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
+    const script = SCRIPT.STAKING_WITHDRAW.scriptWithSignature;
+    const rawTransaction = compileStakingWithdraw({ ...signTxData.transaction, authorizedPubkey });
+    const transactionInstruction = new Transaction(rawTransaction);
+    const argument = scriptUtil.getStackingWithdrawArguments(transactionInstruction, addressIndex);
+
+    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+  }
+
   async signTransaction(signTxData: types.signTxType): Promise<string> {
     // Specific which kind of transaction automatically
     if (txUtils.isTransfer(signTxData))
@@ -76,6 +88,8 @@ export default class Solana extends COIN.EDDSACoin implements COIN.Coin {
       return this.signTransferSplTokenTransaction(signTxData as types.signTransferSplTokenTransactionType);
     if (txUtils.isAssociateTokenAccount(signTxData))
       return this.signAssociateTokenAccount(signTxData as types.signAssociateTokenAccountTransactionType);
+    if (txUtils.isStakingWithdraw(signTxData))
+      return this.signStackingWithdrawTransaction(signTxData as types.signStakingWithdrawType);
 
     // Blind signing
     const script = SCRIPT.SMART_CONTRACT.scriptWithSignature;

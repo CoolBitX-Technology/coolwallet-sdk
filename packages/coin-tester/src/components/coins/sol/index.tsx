@@ -18,7 +18,8 @@ const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
 function CoinSol(props: Props) {
-  const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+  //const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
   const sol = new SOL();
 
   const { transport, appPrivateKey } = props;
@@ -42,6 +43,12 @@ function CoinSol(props: Props) {
   const [associateAccTx, setAssociateAccTx] = useState({
     token: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
     owner: 'AnJZ8PLH3YZVJRifPb2jLXDwaKXtScHrQmpCiQ3vS8jm',
+    result: '',
+  });
+
+  const [stakingWithdraw, setStakingWithdraw] = useState({
+    value: '0',
+    stakingAcc: 'AnJZ8PLH3YZVJRifPb2jLXDwaKXtScHrQmpCiQ3vS8jm',
     result: '',
   });
 
@@ -241,6 +248,44 @@ function CoinSol(props: Props) {
       (result) => setAssociateAccTx((prev: any) => ({ ...prev, result }))
     );
   };
+  const signStakingWithdraw = async () => {
+    handleState(
+      async () => {
+        if (account.length < 1) throw new Error('please get account first');
+
+        const appId = localStorage.getItem('appId');
+        if (!appId) throw new Error('No Appid stored, please register!');
+
+        const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+
+        const signTxData = {
+          transport: transport as Transport,
+          appPrivateKey,
+          appId,
+          transaction: {
+            stakePubkey: stakingWithdraw.stakingAcc,
+            withdrawToPubKey: account,
+            recentBlockhash,
+            amount: stakingWithdraw.value,
+          },
+          addressIndex: 0,
+        };
+
+        console.log('TX:', signTxData)
+
+        const signedTx = await sol.signTransaction(signTxData);
+        const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+
+        const verifySig = recoveredTx.verifySignatures();
+
+        // signature need to be valid
+        if (!verifySig) throw new Error('Fail to verify signature');
+
+        return connection.sendRawTransaction(recoveredTx.serialize());
+      },
+      (result) => setStakingWithdraw((prev: any) => ({ ...prev, result }))
+    );
+  };
   return (
     <Container>
       <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
@@ -349,6 +394,35 @@ function CoinSol(props: Props) {
                 owner,
               })),
             placeholder: 'owner',
+          },
+        ]}
+      />
+      <Inputs
+        btnTitle='Withdraw'
+        title='Staking Withdraw'
+        content={stakingWithdraw.result}
+        onClick={signStakingWithdraw}
+        disabled={disabled}
+        inputs={[
+          {
+            xs: 2,
+            value: stakingWithdraw.value,
+            onChange: (value: any) =>
+              setStakingWithdraw((prevState: any) => ({
+                ...prevState,
+                value,
+              })),
+            placeholder: 'Withdraw value',
+          },
+          {
+            xs: 2,
+            value: stakingWithdraw.stakingAcc,
+            onChange: (stakingAcc: any) =>
+              setStakingWithdraw((prevState: any) => ({
+                ...prevState,
+                stakingAcc,
+              })),
+            placeholder: 'Staking account',
           },
         ]}
       />

@@ -27,4 +27,13 @@ function isAssociateTokenAccount(p: signTxType) {
   );
 }
 
-export { isTransfer, isTransferSPLToken, isAssociateTokenAccount };
+function isStakingWithdraw(p: signTxType) {
+  const { transaction } = p;
+  return (
+    hasOwnProperty(transaction, 'amount') &&
+    hasOwnProperty(transaction, 'stakePubkey') &&
+    hasOwnProperty(transaction, 'withdrawToPubKey')
+  );
+}
+
+export { isTransfer, isTransferSPLToken, isAssociateTokenAccount, isStakingWithdraw };
