@@ -133,3 +133,27 @@ export const getUndelegationArgument = async (
    const argument: hexString = branch + sourceAddressType + sourceAddress + fee + counter + gas_limit + storage_limit;
    return addPathByType(pathType, argument, addressIndex);
 };
+
+export const getSmartArgument = async (
+   pathType: types.PATH_STYLE,
+   rawData: types.xtzSmart,
+   addressIndex: number
+): Promise<hexString> => {
+   const branch = stringUtil.handleHex(codecUtil.branchHashToHex(rawData.branch));
+   const source  = codecUtil.addressStrToHex(rawData.source);
+   const sourceAddressType  = source.substring(2, 4);
+   const sourceAddress  = source.substring(4);
+   const fee = parseInt(rawData.fee).toString(16).padStart(20, '0');
+   const counter = parseInt(rawData.counter).toString(16).padStart(20, '0'); 
+   const gas_limit = parseInt(rawData.gas_limit).toString(16).padStart(20, '0');
+   const storage_limit = parseInt(rawData.storage_limit).toString(16).padStart(20, '0');
+   const amount = parseInt(rawData.amount).toString(16).padStart(20, '0');
+   const destination = codecUtil.addressStrToHex(rawData.destination);
+   const destinationAccountType = destination.substring(0, 2);
+   const destinationAddressType = destination.substring(42);
+   const destinationAddress = destination.substring(2, 42);
+   const parameters = codecUtil.parameterToHex(rawData.parameters);
+
+   const argument: hexString = branch + sourceAddressType + sourceAddress + fee + counter + gas_limit + storage_limit + amount + destinationAccountType + destinationAddressType + destinationAddress + parameters;
+   return addPathByType(pathType, argument, addressIndex);
+};

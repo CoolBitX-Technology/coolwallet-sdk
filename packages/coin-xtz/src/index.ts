@@ -159,4 +159,25 @@ export default class XTZ extends COIN.EDDSACoin implements COIN.Coin {
     return txUtil.getSubmitTransaction(formatTxData, signature);
   }
 
+  async signSmartContract(
+    signTxData: types.SignTxData,
+    operation: types.xtzSmart
+  ) {
+    const {
+      transport, appPrivateKey, appId, addressIndex
+    } = signTxData;
+
+    const script = params.SMART.script + params.SMART.signature;
+    const argument = await argUtil.getSmartArgument(this.pathStyle, operation, addressIndex);
+    const publicKey = await this.getPublicKeyByPathType(transport, appPrivateKey, appId, addressIndex);
+
+    const signature = await xtzSign.signTransaction(
+      signTxData,
+      script,
+      argument,
+      publicKey
+    );
+    const formatTxData = await xtzUtil.getFormatSmart(operation); 
+    return txUtil.getSubmitTransaction(formatTxData, signature);
+  }
 }

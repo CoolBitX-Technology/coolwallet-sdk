@@ -97,3 +97,27 @@ export async function getFormatUndelegation(rawData: types.xtzDelegation): Promi
   const rawTx = await forger.localForger.forge(tx);
   return rawTx;
 }
+
+export async function getFormatSmart(rawData: types.xtzSmart): Promise<hexString> {
+  let tx: ForgeParams = {
+    branch: rawData.branch,
+    contents: [
+      {
+        kind: OpKind.TRANSACTION,
+        source: rawData.source,
+        counter: rawData.counter,
+        fee: rawData.fee,
+        gas_limit: rawData.gas_limit,
+        storage_limit: rawData.storage_limit,
+        amount: rawData.amount,
+        destination: rawData.destination,
+        parameters: {
+          entrypoint: rawData.parameters.entrypoint,
+          value: rawData.parameters.value
+        }
+      }
+    ]
+  }; 
+  const rawTx = await forger.localForger.forge(tx);
+  return rawTx;
+}
