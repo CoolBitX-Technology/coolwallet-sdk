@@ -1,5 +1,7 @@
 import { coin as COIN, error as ERROR, Transport, utils } from '@coolwallet/core';
+import { SDKError } from '@coolwallet/core/lib/error';
 import { PathType } from '@coolwallet/core/lib/config';
+import base58 from 'bs58';
 import { sha256 } from 'js-sha256';
 import * as types from './config/types';
 import * as params from './config/params';
@@ -17,8 +19,7 @@ import {
 } from './utils/rawTransaction';
 import * as txUtils from './utils/transactionUtils';
 import Transaction from './utils/Transaction';
-import { SDKError } from '@coolwallet/core/lib/error';
-import base58 from 'bs58';
+import { createProgramAddressSync } from './utils/account';
 
 class Solana extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
@@ -44,6 +45,25 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const hash = sha256.create();
     hash.update(buffer);
     return base58.encode(Buffer.from(hash.hex(), 'hex'));
+  }
+
+  findProgramAddress(seeds: Array<Buffer | Uint8Array>, programId: types.Address): [string, number] {
+    let nonce = 255;
+    let address;
+    while (nonce !== 0) {
+      try {
+        const seedsWithNonce = seeds.concat(Buffer.from([nonce]));
+        address = createProgramAddressSync(seedsWithNonce, programId);
+      } catch (err) {
+        if (err instanceof TypeError) {
+          throw err;
+        }
+        nonce -= 1;
+        continue;
+      }
+      return [address, nonce];
+    }
+    throw new Error(`Unable to find a viable program address nonce`);
   }
 
   async signTransferTransaction(signTxData: types.signTransferTransactionType): Promise<string> {

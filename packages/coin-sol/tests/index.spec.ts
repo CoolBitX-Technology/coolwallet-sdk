@@ -1,11 +1,15 @@
 import crypto from 'node:crypto';
 import * as bip39 from 'bip39';
+import base58 from 'bs58';
 import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolwallet/testing-library';
 import { Keypair, Transaction, SystemProgram, PublicKey, StakeProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { createAssociatedTokenAccountInstruction, createTransferInstruction } from '@solana/spl-token';
-import SOL from '../src';
+import {
+  createAssociatedTokenAccountInstruction,
+  createTransferInstruction,
+} from '@solana/spl-token';
+import SOL, { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../src';
 import * as stringUtil from '../src/utils/stringUtil';
 import { TOKEN_INFO } from '../src/config/tokenInfos';
 
@@ -47,6 +51,20 @@ describe('Test Solana SDK', () => {
     const publicKey = await node.getPublicKey();
     expect(walletAddress).toEqual(stringUtil.pubKeyToAddress(publicKey.toString('hex')));
     expect(walletAddress).toEqual(sdkWallet.publicKey.toString());
+  });
+
+  it('Test Get Token Address', async () => {
+    const fromPubkey = getRandWallet();
+    const token = getRandWallet();
+    const [result] = sol.findProgramAddress(
+      [base58.decode(fromPubkey), TOKEN_PROGRAM_ID, base58.decode(token)],
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+    const [expected] = PublicKey.findProgramAddressSync(
+      [base58.decode(fromPubkey), TOKEN_PROGRAM_ID, base58.decode(token)],
+      new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID)
+    );
+    expect(result).toEqual(expected.toString());
   });
 
   it('Test Normal Transfer', async () => {
@@ -307,7 +325,6 @@ describe('Test Solana SDK', () => {
       expect(sdkTransaction.verifySignatures()).toEqual(true);
       expect(recoveredTx.serialize().toString('hex')).toEqual(sdkTransaction.serialize().toString('hex'));
     } catch (e) {
-      console.log(recoveredTx.compileMessage());
       console.error('Test Undelegate params', signTxData.transaction);
       throw e;
     }

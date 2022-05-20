@@ -88,11 +88,11 @@ function CoinSol(props: Props) {
 
   // for transfer spl-token
   const getAssociatedTokenAddr = async (token: PublicKey, owner: PublicKey): Promise<PublicKey> => {
-    const [address] = await PublicKey.findProgramAddress(
+    const [address] = await sol.findProgramAddress(
       [owner.toBuffer(), TOKEN_PROGRAM_ID, token.toBuffer()],
-      new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID)
+      ASSOCIATED_TOKEN_PROGRAM_ID
     );
-    return address;
+    return new PublicKey(address);
   };
 
   // for transfer spl-token
@@ -180,7 +180,7 @@ function CoinSol(props: Props) {
           fromTokenAccount: fromTokenAccount.toString(),
           toTokenAccount: toTokenAccount.toString(),
           recentBlockhash,
-          amount: +splTokenTransaction.amount * 10 ** +splTokenTransaction.decimals,
+          amount: +splTokenTransaction.amount * (10 ** +splTokenTransaction.decimals),
           tokenInfo,
         };
 

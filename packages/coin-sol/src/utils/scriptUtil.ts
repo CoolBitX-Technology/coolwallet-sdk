@@ -70,7 +70,7 @@ function getUndelegateArguments(rawTx: Transaction, addressIndex: number): strin
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
-  console.log(rawTx.compileMessage().serializeUndelegate());
+
   return SEPath + rawTx.compileMessage().serializeUndelegate();
 }
 
