@@ -1,6 +1,7 @@
 import protobuf from 'protobufjs';
 import BigNumber from 'bignumber.js';
 import Antenna from 'iotex-antenna';
+import { XRC20 } from "iotex-antenna/lib/token/xrc20.js";
 import {
   Envelop,
   SealedEnvelop
@@ -119,5 +120,21 @@ export async function sendTx(signedTxHex: string, actName: string) {
   const action = { core, senderPubKey, signature };
   const { actionHash } = await antenna.iotx.sendAction({ action });
   return actionHash;
+}
+
+export async function getTokenInfoAndBalance(tokenContract: string, tokenOwner: string) {
+  const token = new XRC20(tokenContract, {
+    provider: antenna.iotx
+  });
+  const name = await token.name();
+  const symbol = await token.symbol();
+  const decimals = await token.decimals();
+  const balance = await token.balanceOf(tokenOwner);
+  return {
+    name,
+    symbol,
+    decimals: decimals.toFixed(),
+    balance: balance.shiftedBy(-decimals.toNumber()).toFixed()
+  };
 }
 

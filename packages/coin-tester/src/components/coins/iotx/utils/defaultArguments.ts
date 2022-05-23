@@ -29,9 +29,9 @@ export const executionValues = [
   '0',
   '0',
   '0',
-  '34.5678',
-  'io13nq26mfmse47uk8rgakld34yqrghgnl5hklnnc',
-  'a9059cbb0000000000000000000000008cc0ad6d3b866bee58e3476df6c6a400d1744ff400000000000000000000000000000000000000000000006c6b935b8bbd400000',
+  '0',
+  'io1asn64genenelqkh5xvqczx28t6lehzyekcsjt9',
+  'a9059cbb0000000000000000000000008cc0ad6d3b866bee58e3476df6c6a400d1744ff4000000000000000000000000000000000000000000000006b14bd1e6eea00000',
 ];
 
 export const xrc20TokenKeys = [
@@ -52,8 +52,8 @@ export const xrc20TokenValues = [
   '123.456',
   'io13nq26mfmse47uk8rgakld34yqrghgnl5hklnnc',
   '18',
-  'VITA',
-  'io1hy9w96v7gz7mqquyyacfhtqn6r0yasnsqrjk9h',
+  'TEST',
+  'io1asn64genenelqkh5xvqczx28t6lehzyekcsjt9',
 ];
 
 export const stakeCreateKeys = [

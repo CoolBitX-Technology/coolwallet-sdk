@@ -33,6 +33,7 @@ import {
   getTxByHash,
   getTxHashByAddress,
   sendTx,
+  getTokenInfoAndBalance,
 } from './utils/api';
 
 interface Props {
@@ -91,6 +92,9 @@ function CoinIotx(props: Props) {
   const [txHashes, setTxHashes] = useState('');
   const [actionHash, setActionHash] = useState('');
   const [actionInfo, setActionInfo] = useState('');
+  const [tokenContract, setTokenContract] = useState('io1asn64genenelqkh5xvqczx28t6lehzyekcsjt9');
+  const [tokenOwner, setTokenOwner] = useState('');
+  const [tokenInfo, setTokenInfo] = useState('');
 
   // Transfer Tx
   const [transferArgs, setTransferArgs] = useState(transferValues);
@@ -159,6 +163,7 @@ function CoinIotx(props: Props) {
       let tempArgs = [...transferArgs];
       tempArgs[4] = toAddr;
       setTransferArgs(tempArgs);
+      setTokenOwner(fromAddr);
       return fromAddr;
     }, setAddress);
   };
@@ -217,6 +222,15 @@ function CoinIotx(props: Props) {
     }, setActionInfo);
   };
 
+  const getTokenInfo = async () => {
+    handleState(async () => {
+      if (!tokenContract) throw new Error('need tokenContract!');
+      if (!tokenOwner) throw new Error('need tokenOwner!');
+      const tokenInfo = await getTokenInfoAndBalance(tokenContract, tokenOwner);
+      return JSON.stringify(tokenInfo);
+    }, setTokenInfo);
+  };
+
   // Transfer Tx
 
   const prepareTransaction = async () => {
@@ -263,7 +277,7 @@ function CoinIotx(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const args = await prepareTx(address, executionArgs, 'execution', {
-        amount: new BigNumber(transferArgs[3]).shiftedBy(18).toFixed(),
+        amount: new BigNumber(executionArgs[3]).shiftedBy(18).toFixed(),
         contract: executionArgs[4],
         data: Buffer.from(handleHex(executionArgs[5]), 'hex'),
       });
@@ -328,7 +342,7 @@ function CoinIotx(props: Props) {
       const args = await prepareTx(address, xrc20TokenArgs, 'execution', {
         amount: '0',
         contract: tokenAddress,
-        data,
+        data: Buffer.from(data, 'hex'),
       });
       setXrc20TokenArgs(args);
     return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
@@ -560,6 +574,19 @@ function CoinIotx(props: Props) {
         value={`${actionHash}`}
         setValue={setActionHash}
         placeholder={''}
+      />
+      <TwoInputs
+        title='Get Token Info'
+        content={tokenInfo}
+        onClick={getTokenInfo}
+        disabled={disabled}
+        btnName='Get'
+        value={`${tokenContract}`}
+        setValue={setTokenContract}
+        placeholder={'contract'}
+        value2={`${tokenOwner}`}
+        setValue2={setTokenOwner}
+        placeholder2={'owner'}
       />
 
       <div className='title2'>Transfer</div>
