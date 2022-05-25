@@ -14,6 +14,7 @@ import BSC from './bsc';
 import NEAR from './near';
 import THETA from './theta';
 import AVAXC from './avaxc';
+import IOTX from './iotx';
 
 export default [
   { path: 'template', Element: TEMPLATE },
@@ -32,4 +33,5 @@ export default [
   { path: 'near', Element: NEAR },
   { path: 'theta', Element: THETA },
   { path: 'avaxc', Element: AVAXC },
+  { path: 'iotx', Element: IOTX },
 ];
