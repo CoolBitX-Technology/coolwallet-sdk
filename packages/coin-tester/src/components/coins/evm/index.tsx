@@ -55,6 +55,11 @@ const CHAINS = {
     properties: CHAIN.CELO,
     rpc_url: 'https://forno.celo.org',
   },
+  CELO_TEST: {
+    name: 'CeloTest',
+    properties: CHAIN.CELO_TEST,
+    rpc_url: 'https://alfajores-forno.celo-testnet.org',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
@@ -207,10 +212,6 @@ const CoinEVM: React.FC<Props> = (props: Props) => {
 
         const appId = useAppId();
         const price = web3.utils.toHex(await web3.eth.getGasPrice());
-        console.log('gas price:', web3.utils.toNumber(price));
-        console.log('gas limit:', web3.utils.toNumber(transaction.gasLimit));
-        console.log('value:', web3.utils.toNumber(transaction.value));
-        console.log('acc:', await web3.eth.getAccounts());
         if (isEIP1559) {
           transaction = { ...transaction, gasFeeCap: price, gasTipCap: price } as EIP1559Transaction['transaction'];
           const signTxData = {
@@ -230,7 +231,6 @@ const CoinEVM: React.FC<Props> = (props: Props) => {
           transaction: transaction as LegacyTransaction['transaction'],
           addressIndex: 0,
         };
-        console.log("tx", transaction);
         return sdk.signTransaction(signTxData);
       }, props).then((result) => {
         setter((prev) => ({ ...prev, result }));
