@@ -50,6 +50,11 @@ const CHAINS = {
     properties: CHAIN.VELAS,
     rpc_url: 'https://evmexplorer.velas.com/rpc',
   },
+  CELO: {
+    name: 'Celo',
+    properties: CHAIN.CELO,
+    rpc_url: 'https://forno.celo.org',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
