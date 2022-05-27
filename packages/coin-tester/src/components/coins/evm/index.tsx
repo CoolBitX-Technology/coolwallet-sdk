@@ -50,6 +50,11 @@ const CHAINS = {
     properties: CHAIN.VELAS,
     rpc_url: 'https://evmexplorer.velas.com/rpc',
   },
+  IOTX: {
+    name: 'IoTex',
+    properties: CHAIN.IOTX,
+    rpc_url: 'https://babel-api.mainnet.iotex.one',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
