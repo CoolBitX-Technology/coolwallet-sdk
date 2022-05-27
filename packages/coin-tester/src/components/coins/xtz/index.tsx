@@ -11,7 +11,7 @@ import {
   WalletDelegateParams, WalletOriginateParams, WalletTransferParams, 
   createTransferOperation, createSetDelegateOperation, createOriginationOperation 
 } from '@taquito/taquito';
-import { SignTxData, xtzReveal, xtzTransaction, xtzDelegation, xtzSmart } from '@coolwallet/xtz/lib/config/types';
+import { SignTxData, xtzReveal, xtzTransaction, xtzDelegation, xtzSmart, xtzToken } from '@coolwallet/xtz/lib/config/types';
 import axios from 'axios';
 import { resolvePreset } from '@babel/core';
 
@@ -68,6 +68,9 @@ function CoinXTZ(props: Props) {
   const [baker, setBaker] = useState('tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9');
   const [signedUndelegation, setSignedUndelegation] = useState('');
   const [signedSmartContract, setSignedSmartContract] = useState('');
+  const [signedToken, setSignedToken] = useState('');
+  const [tokenValue, setTokenValue] = useState('0');
+  const [toAddress, setToAddress] = useState('tz1Wd6o3nazvTzXLAASRvupUaJirSiHhnnQh');
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
@@ -418,21 +421,6 @@ function CoinXTZ(props: Props) {
         storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), 
         amount: '1',
         destination: 'KT1DVdhAfvqkznzCZhRvW1s9sSMGERshBLbb',
-        // parameters: { 
-        //   entrypoint: 'transfer', 
-        //   value: [
-        //     {
-        //       from_: address,
-        //       txs:[
-        //         {
-        //           to_: "tz1Wd6o3nazvTzXLAASRvupUaJirSiHhnnQh",
-        //           amount: 1,
-        //           token_id: 676
-        //         }
-        //       ]
-        //     }
-        //   ]
-        // }
         parameters: { 
           entrypoint: "transfer", 
           value: [ 
@@ -479,6 +467,65 @@ function CoinXTZ(props: Props) {
       else
         return 'https://tzkt.io/' + txId;
     }, setSignedSmartContract);
+  }
+
+  const signToken = async () => {
+    handleState(async () => {
+ 
+      if(address == '' || value == '' || to == '') {
+        return 'Get address and check amount and destination first';
+      }
+      const Tezos = new TezosToolkit(selectedNode);
+      // For validation
+      let estimateFee = DEFAULT_FEE.TRANSFER;
+      let estimateGasLimit = DEFAULT_GAS_LIMIT.TRANSFER;
+      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.TRANSFER*/;
+
+      if(useDefaultEstimate == false) {
+        Tezos.setProvider({ wallet: new mockCoolWallet() });
+        const est = await Tezos.estimate.transfer({to: to, amount: parseInt(value), mutez: true}); 
+        estimateFee = est.suggestedFeeMutez;
+        estimateGasLimit = est.gasLimit;
+        estimateStorageLimit = est.storageLimit;
+      }
+      const operation: xtzToken = {
+        branch: await Tezos.rpc.getBlockHash(),
+        source: address,
+        fee: '5000', //estimateFee.toString(),
+        counter: await getCounter(selectedNode, address),
+        gas_limit: '10000',//estimateGasLimit.toString(),
+        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), 
+        amount: tokenValue,
+        contractAddress: 'KT1DVdhAfvqkznzCZhRvW1s9sSMGERshBLbb',
+        toAddress: toAddress,
+        token_id: '662',
+        option: {
+          info: {
+            symbol: 'HHT',
+            decimals: '6'
+          }
+        }
+      };
+
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+
+      const signTxData: SignTxData = {
+        transport: transport!,
+        appPrivateKey,
+        appId,
+        addressIndex: selectedIndex
+      };
+
+      const signedTx = await xtz.signTokenTransfer(signTxData, operation);
+      console.debug('Transaction Submit Operation\n', signedTx);
+      //return signedTx;
+      const txId = await Tezos.rpc.injectOperation(signedTx);
+      if(node == 'https://hangzhounet.smartpy.io/')
+        return 'https://hangzhou2net.tzkt.io/' + txId;
+      else
+        return 'https://tzkt.io/' + txId;
+    }, setSignedToken);
   }
 
   return (
@@ -578,6 +625,21 @@ function CoinXTZ(props: Props) {
         onClick={signSmartContract}
         disabled={disabled}
         btnName='Smart'
+      />
+      <TwoInputs
+        title='Token Transfer'
+        content={signedToken}
+        onClick={signToken}
+        disabled={disabled}
+        btnName='Token'
+        value={tokenValue}
+        setValue={setTokenValue}
+        placeholder='tokenValue'
+        inputSize={1}
+        value2={toAddress}
+        setValue2={setToAddress}
+        placeholder2='toAddress'
+        inputSize2={3}
       />
     </Container>
   );

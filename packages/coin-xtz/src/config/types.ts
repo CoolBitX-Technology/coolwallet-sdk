@@ -66,7 +66,23 @@ export interface xtzSmart extends xtzOperation {
   parameters: smartParam;
 }
 
-export interface smartParam extends xtzSmart{
+export interface smartParam {
   entrypoint: string,
   value: MichelsonData
 }
+
+export interface xtzToken extends xtzOperation {
+  amount: string, 
+  contractAddress: string,
+  toAddress: string,
+  tokenId: string,
+  tokenSymbol: string,
+  tokenDecimals: string
+}
+
+export type Option = {
+  info: {
+    symbol: string;
+    decimals: string;
+  };
+};
