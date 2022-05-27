@@ -14,8 +14,8 @@ import {
 
 const root = await protobuf.Root.fromJSON(require("./proto.json"));
 const Action = root.lookupType("iotextypes.Action");
-const antenna = new Antenna("https://api.testnet.iotex.one");
-// const antenna = new Antenna.default("https://api.iotex.one");
+// const antenna = new Antenna("https://api.testnet.iotex.one");
+const antenna = new Antenna("https://api.iotex.one");
 const pagination = { offset: 0, limit: 10 };
 
 export async function getAccount(address: string) {

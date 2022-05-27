@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import BigNumber from 'bignumber.js';
-import { bech32 } from 'bech32';
-import { Transport, apdu, utils, config } from '@coolwallet/core';
-import Iotx, { Options, Transfer } from '@coolwallet/iotx';
+import { Transport } from '@coolwallet/core';
+import Iotx from '@coolwallet/iotx';
+import { encodeXRC20TokenInfo } from "@coolwallet/iotx/lib/utils/index.js";
 import { NoInput, OneInput, TwoInputs, ObjInputs } from '../../../utils/componentMaker';
 import {
   transferKeys,
@@ -37,11 +37,11 @@ import {
 } from './utils/api';
 
 interface Props {
-  transport: Transport | null,
-  appPrivateKey: string,
-  appPublicKey: string,
-  isLocked: boolean,
-  setIsLocked: (isLocked:boolean) => void,
+  transport: Transport | null;
+  appPrivateKey: string;
+  appPublicKey: string;
+  isLocked: boolean;
+  setIsLocked: (isLocked: boolean) => void;
 }
 
 const re = /^([0-9A-Fa-f]{2})+$/;
@@ -138,10 +138,7 @@ function CoinIotx(props: Props) {
   const [stakeDepositTx, setStakeDepositTx] = useState('');
   const [stakeDepositResult, setStakeDepositResult] = useState('');
 
-  const handleState = async (
-    request: () => Promise<string>,
-    handleResponse: (response: string) => void
-  ) => {
+  const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
     try {
       const response = await request();
@@ -159,7 +156,7 @@ function CoinIotx(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const fromAddr = await iotx.getAddress(transport!, appPrivateKey, appId, addressIndex);
-      const toAddr = await iotx.getAddress(transport!, appPrivateKey, appId, (addressIndex === 0) ? 1 : 0);
+      const toAddr = await iotx.getAddress(transport!, appPrivateKey, appId, addressIndex === 0 ? 1 : 0);
       let tempArgs = [...transferArgs];
       tempArgs[4] = toAddr;
       setTransferArgs(tempArgs);
@@ -309,43 +306,20 @@ function CoinIotx(props: Props) {
     }, setExecutionResult);
   };
 
-  // Xrc20Token Tx
-
-  const decodeAddr = (a: string) => {
-    const decoded = bech32.decode(a, 50);
-    const recovered = bech32.fromWords(decoded.words);
-    return handleHex(Buffer.from(recovered).toString('hex'));
-  };
-
-  const bnToHex = (bn: BigNumber, padBytes = 0) => {
-    const hex = bn.toString(16);
-    if (typeof padBytes === 'number' && padBytes > 0) {
-      if (padBytes * 2 < hex.length) throw new Error('argument is overlong!');
-      return hex.padStart(padBytes * 2, '0');
-    }
-    if (hex === '0') return '';
-    return handleHex(hex);
-  };
-
-  type Integer = string | number;
-
-  const intToHex = (i: Integer, padBytes = 0) => bnToHex(new BigNumber(i), padBytes);
-
   const prepareXrc20Token = async () => {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       let [nonce, gasLimit, gasPrice, amount, recipient, tokenDecimals, tokenSymbol, tokenAddress] = xrc20TokenArgs;
       const tokenAmount = new BigNumber(amount).shiftedBy(parseInt(tokenDecimals, 10)).toFixed();
-      const data = 'a9059cbb000000000000000000000000' + decodeAddr(recipient)
-        + '0000000000000000000000000000000000000000' + intToHex(tokenAmount, 12)
+      const data = encodeXRC20TokenInfo(recipient, tokenAmount);
       const args = await prepareTx(address, xrc20TokenArgs, 'execution', {
         amount: '0',
         contract: tokenAddress,
         data: Buffer.from(data, 'hex'),
       });
       setXrc20TokenArgs(args);
-    return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
+      return `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
     }, setXrc20TokenPrepare);
   };
 
@@ -359,7 +333,15 @@ function CoinIotx(props: Props) {
       amount = new BigNumber(amount).shiftedBy(parseInt(tokenDecimals, 10)).toFixed();
       console.log('amount :', amount);
       const transaction = {
-        addressIndex, nonce, gasLimit, gasPrice, amount, recipient, tokenDecimals, tokenSymbol, tokenAddress
+        addressIndex,
+        nonce,
+        gasLimit,
+        gasPrice,
+        amount,
+        recipient,
+        tokenDecimals,
+        tokenSymbol,
+        tokenAddress,
       };
       const signedTx = await iotx.signXRC20Token(transaction, options);
       console.log('signedTx :', signedTx);
@@ -396,7 +378,15 @@ function CoinIotx(props: Props) {
       gasPrice = new BigNumber(gasPrice).shiftedBy(18).toFixed();
       amount = new BigNumber(amount).shiftedBy(18).toFixed();
       const transaction = {
-        addressIndex, nonce, gasLimit, gasPrice, candidateName, amount, duration, isAuto:false , payload
+        addressIndex,
+        nonce,
+        gasLimit,
+        gasPrice,
+        candidateName,
+        amount,
+        duration,
+        isAuto: false,
+        payload,
       };
       const signedTx = await iotx.signStakeCreate(transaction, options);
       console.log('signedTx :', signedTx);
@@ -530,13 +520,7 @@ function CoinIotx(props: Props) {
         inputSize={1}
       />
       <div className='title2'>APIs</div>
-      <NoInput
-        title='Account Info'
-        content={accountInfo}
-        onClick={getAccountInfo}
-        disabled={disabled}
-        btnName='Get'
-      />
+      <NoInput title='Account Info' content={accountInfo} onClick={getAccountInfo} disabled={disabled} btnName='Get' />
       <NoInput
         title='Get Candidates'
         content={candidates}
@@ -551,13 +535,7 @@ function CoinIotx(props: Props) {
         disabled={disabled}
         btnName='Get'
       />
-      <NoInput
-        title='Get Buckets'
-        content={buckets}
-        onClick={getBucketsInfo}
-        disabled={disabled}
-        btnName='Get'
-      />
+      <NoInput title='Get Buckets' content={buckets} onClick={getBucketsInfo} disabled={disabled} btnName='Get' />
       <NoInput
         title='Get TxHashes By Address'
         content={txHashes}

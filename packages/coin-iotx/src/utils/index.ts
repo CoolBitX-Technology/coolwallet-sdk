@@ -205,7 +205,7 @@ function encodeTx(tx: any) {
   return Buffer.concat(bufferList);
 }
 
-function encodeXRC20TokenInfo(recipient: string, amount: Integer): Buffer {
+export function encodeXRC20TokenInfo(recipient: string, amount: Integer): Buffer {
   const data = 'a9059cbb000000000000000000000000' + decodeAddr(recipient)
     + '0000000000000000000000000000000000000000' + intToHex(amount, 12);
   return Buffer.from(data, 'hex');
