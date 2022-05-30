@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         token: ${{ secrets.DEVOPS_CW_SDK_DEVELOPMENT_TOKEN }}
 
@@ -20,11 +20,10 @@ jobs:
         git config --global user.name 'coolwallet team'
         git config --global user.email 'cw.tech@coolbitx.com'
 
-    - name: Use Node.js 12.x
-      uses: actions/setup-node@v1
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
       with:
-        node-version: 12.x
-        registry-url: 'https://registry.npmjs.org'
+        node-version: 16
 
     - name: Publish action
       uses: ./.github/publish-action
