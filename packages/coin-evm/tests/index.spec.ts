@@ -33,12 +33,11 @@ function isEmpty(str) {
 const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS) };
 const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
 const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
-const coinIoTex = { name: 'IoTex', api: new EVM(CHAIN.IOTX) };
 // Layer 2
 const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
 
-const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinIoTex];
+const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism];
 
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
