@@ -49,12 +49,15 @@ async function run() {
   await checkAndPublish(context, 'packages/coin-eth');
   await checkAndPublish(context, 'packages/coin-evm');
   await checkAndPublish(context, 'packages/coin-icx');
+  await checkAndPublish(context, 'packages/coin-iotx');
   await checkAndPublish(context, 'packages/coin-ltc');
   await checkAndPublish(context, 'packages/coin-matic');
-  await checkAndPublish(context, 'packages/coin-trx');
   await checkAndPublish(context, 'packages/coin-terra');
+  await checkAndPublish(context, 'packages/coin-theta');
+  await checkAndPublish(context, 'packages/coin-trx');
   await checkAndPublish(context, 'packages/coin-xlm');
   await checkAndPublish(context, 'packages/coin-xrp');
+  await checkAndPublish(context, 'packages/coin-xtz');
   await checkAndPublish(context, 'packages/coin-zen');
   await checkAndPublish(context, 'packages/transport-web-ble');
   await checkAndPublish(context, 'packages/transport-jre-http');
