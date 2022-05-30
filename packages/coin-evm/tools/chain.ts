@@ -14,3 +14,5 @@ console.log('Velas Information', CHAIN.VELAS.toHexChainInfo());
 console.log('Velas Signature', CHAIN.VELAS.getSignature());
 console.log('Fantom Information', CHAIN.FANTOM.toHexChainInfo());
 console.log('Fantom Signature', CHAIN.FANTOM.getSignature());
+console.log('Celo Information', CHAIN.CELO.toHexChainInfo());
+console.log('Celo Signature', CHAIN.CELO.getSignature());

@@ -5,3 +5,4 @@ export { default as OPTIMISM } from './optimism';
 export { default as AVAXC } from './avaxc';
 export { default as FANTOM } from './fantom';
 export { default as VELAS } from './velas';
+export { CELO, CELO_TEST } from './celo';
