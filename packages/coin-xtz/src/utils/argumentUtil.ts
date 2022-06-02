@@ -192,11 +192,10 @@ export const getTokenArgument = async (
       toAddress = toAddr.substring(2, 42);
    }
 
-   const txTokenInfo = rawData.option;
    const tokenInfo = token.getSetTokenPayload(
       rawData.contractAddress,
-      txTokenInfo?.info.symbol ?? '',
-      parseInt(txTokenInfo?.info.decimals ?? '')
+      rawData.tokenSymbol ?? '',
+      parseInt(rawData.tokenDecimals ?? '')
    )
    const signature = tokenSignature.slice(90).padStart(144, '0');
    const parameters = codecUtil.parameterToHex(param);

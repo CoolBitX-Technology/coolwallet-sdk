@@ -55,8 +55,8 @@ function CoinXTZ(props: Props) {
   
   const [index, setIndex] = useState('0');
   const [selectedIndex, setSelectedIndex] = useState('0');
-  const [selectedNode, setSelectedNode] = useState('https://hangzhounet.smartpy.io/');
-  const [node, setNode] = useState('https://hangzhounet.smartpy.io/');
+  const [selectedNode, setSelectedNode] = useState('https://ithacanet.smartpy.io/');
+  const [node, setNode] = useState('https://ithacanet.smartpy.io/');
   const [pubkeyhash, setPubkeyHash] = useState('');
   const [address, setAddress] = useState('');
   const [revealNeeded, checkRevealNeeded] = useState('');
@@ -92,8 +92,8 @@ function CoinXTZ(props: Props) {
   };
 
   const getCounter = async (node: string, address: string)  => {
-    if(node == 'https://hangzhounet.smartpy.io/') {
-      const url = 'https://api.hangzhou2net.tzkt.io/v1/accounts/' + address + '/counter';
+    if(node == 'https://ithacanet.smartpy.io/') {
+      const url = 'https://api.ithacanet.tzkt.io/v1/accounts/' + address + '/counter';
       const response = await axios.get(url);
       console.log(response.data);
       return (parseInt(response.data)+1).toString();
@@ -194,8 +194,8 @@ function CoinXTZ(props: Props) {
       console.debug('Reveal Submit Operation\n', signedTx);
 
       const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.smartpy.io/')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
       else
         return 'https://tzkt.io/' + txId;
     }, setSignedReveal);
@@ -258,12 +258,12 @@ function CoinXTZ(props: Props) {
 
       const signedTx = await xtz.signTransaction(signTxData, operation);
       console.debug('Transaction Submit Operation\n', signedTx);
-
-      const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.smartpy.io/')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
-      else
-        return 'https://tzkt.io/' + txId;
+      return signedTx;
+      // const txId = await Tezos.rpc.injectOperation(signedTx);
+      // if(node == 'https://ithacanet.smartpy.io/')
+      //   return 'https://ithacanet.tzkt.io/' + txId;
+      // else
+      //   return 'https://tzkt.io/' + txId;
     }, setSignedTransaction);
   };
 
@@ -324,8 +324,8 @@ function CoinXTZ(props: Props) {
       console.debug('Delegation Submit Operation\n', signedTx);     
 
       const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.smartpy.io/')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
       else
         return 'https://tzkt.io/' + txId;
     }, setSignedDelegation);
@@ -386,8 +386,8 @@ function CoinXTZ(props: Props) {
       console.debug('Undelegation Submit Operation\n', signedTx);
 
       const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.smartpy.io/')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
       else
         return 'https://tzkt.io/' + txId;
     }, setSignedUndelegation);
@@ -415,34 +415,57 @@ function CoinXTZ(props: Props) {
       const operation: xtzSmart= {
         branch: await Tezos.rpc.getBlockHash(),
         source: address,
-        fee: '800',//estimateFee.toString(),
+        fee: estimateFee.toString(), //'30000',
         counter: await getCounter(selectedNode, address),
-        gas_limit: '2500',//estimateGasLimit.toString(),
-        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), 
-        amount: '1',
-        destination: 'KT1DVdhAfvqkznzCZhRvW1s9sSMGERshBLbb',
+        gas_limit: estimateGasLimit.toString(), //'5000',
+        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), //67
+        amount: '0',
+        destination: 'KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV',
         parameters: { 
-          entrypoint: "transfer", 
-          value: [ 
-            { "prim": "Pair", 
-              "args": [ 
-                { "string": "tz1NRxnGNwDZzmfoKNx3BG6Zy1XAQHtzKk3d" }, 
-                [ 
-                  { "prim": "Pair", 
-                    "args": [ 
-                      { "string": "tz1Wd6o3nazvTzXLAASRvupUaJirSiHhnnQh" }, 
-                      { "prim": "Pair", 
-                        "args": [ 
-                          { "int": "673" }, 
-                          { "int": "1" } 
-                        ] 
-                      } 
-                    ] 
-                  } 
-                ] 
-              ] 
-            } 
-          ] 
+          // entrypoint: "transfer", 
+          // value: [ 
+          //   { "prim": "Pair", 
+          //     "args": [ 
+          //       { "string": "tz1NRxnGNwDZzmfoKNx3BG6Zy1XAQHtzKk3d" }, 
+          //       [ 
+          //         { "prim": "Pair", 
+          //           "args": [ 
+          //             { "string": "tz1Wd6o3nazvTzXLAASRvupUaJirSiHhnnQh" }, 
+          //             { "prim": "Pair", 
+          //               "args": [ 
+          //                 { "int": "18" }, 
+          //                 { "int": "1" } 
+          //               ] 
+          //             } 
+          //           ] 
+          //         } 
+          //       ] 
+          //     ] 
+          //   } 
+          // ]
+
+
+          
+          "entrypoint": "transfer",
+          "value": {
+            "prim": "Pair",
+            "args": [
+              {
+                "string": "tz1crCM3DFMDWqcmn3VjPdHZHk4PsXBLKUN4"
+              },
+              {
+                "prim": "Pair",
+                "args": [
+                  {
+                    "string": "tz1QovT56et9ZvpXyYLchq5oejuBRauHoUEF"
+                  },
+                  {
+                    "int": "1000000000000"
+                  }
+                ]
+              }
+            ]
+          } 
         }
       };
 
@@ -460,12 +483,12 @@ function CoinXTZ(props: Props) {
 
       const signedTx = await xtz.signSmartContract(signTxData, operation);
       console.debug('Transaction Submit Operation\n', signedTx);
-      //return signedTx;
-      const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.smartpy.io/')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
-      else
-        return 'https://tzkt.io/' + txId;
+      return signedTx;
+      // const txId = await Tezos.rpc.injectOperation(signedTx);
+      // if(node == 'https://ithacanet.smartpy.io/')
+      //   return 'https://ithacanet.tzkt.io/' + txId;
+      // else
+      //   return 'https://tzkt.io/' + txId;
     }, setSignedSmartContract);
   }
 
@@ -491,20 +514,16 @@ function CoinXTZ(props: Props) {
       const operation: xtzToken = {
         branch: await Tezos.rpc.getBlockHash(),
         source: address,
-        fee: '5000', //estimateFee.toString(),
+        fee: '1000',//estimateFee.toString(),
         counter: await getCounter(selectedNode, address),
-        gas_limit: '10000',//estimateGasLimit.toString(),
+        gas_limit: '4000', //estimateGasLimit.toString(),
         storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), 
-        amount: tokenValue,
-        contractAddress: 'KT1DVdhAfvqkznzCZhRvW1s9sSMGERshBLbb',
+        amount: '1',
+        contractAddress: 'KT1P6owrsdvgLCHaio7z5dVRmjjhUMhJBcYd',
         toAddress: toAddress,
-        token_id: '662',
-        option: {
-          info: {
-            symbol: 'HHT',
-            decimals: '6'
-          }
-        }
+        tokenId: '18',
+        tokenSymbol: 'ERT',
+        tokenDecimals: '6'
       };
 
       const appId = localStorage.getItem('appId');
@@ -519,12 +538,12 @@ function CoinXTZ(props: Props) {
 
       const signedTx = await xtz.signTokenTransfer(signTxData, operation);
       console.debug('Transaction Submit Operation\n', signedTx);
-      //return signedTx;
-      const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.smartpy.io/')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
-      else
-        return 'https://tzkt.io/' + txId;
+      return signedTx;
+      // const txId = await Tezos.rpc.injectOperation(signedTx);
+      // if(node == 'https://ithacanet.smartpy.io/')
+      //   return 'https://ithacanet.tzkt.io/' + txId;
+      // else
+      //   return 'https://tzkt.io/' + txId;
     }, setSignedToken);
   }
 
@@ -559,7 +578,7 @@ function CoinXTZ(props: Props) {
       <div className='title2'>
         Set Node<br></br>
         Mainnet URL: https://mainnet.api.tez.ie<br></br>
-        Testnet URL: https://hangzhounet.smartpy.io/
+        Testnet URL: https://ithacanet.smartpy.io/
       </div>
       <OneInput
         title='setnode'

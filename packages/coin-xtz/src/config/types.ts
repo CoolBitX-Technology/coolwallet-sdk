@@ -76,13 +76,6 @@ export interface xtzToken extends xtzOperation {
   contractAddress: string,
   toAddress: string,
   tokenId: string,
-  tokenSymbol: string,
-  tokenDecimals: string
+  tokenSymbol?: string,
+  tokenDecimals?: string
 }
-
-export type Option = {
-  info: {
-    symbol: string;
-    decimals: string;
-  };
-};
