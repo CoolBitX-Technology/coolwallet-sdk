@@ -118,6 +118,8 @@ export type Option = {
 };
 
 export enum CHAIN_ID {
-  MAIN = 'columbus-5',
-  TEST = 'bombay-12',
+  MAIN = 'phoenix-1',
+  TEST = 'pisco-1',
+  CLASSIC = 'columbus-5',
+  CLASSIC_TEST = 'bombay-12',
 }
