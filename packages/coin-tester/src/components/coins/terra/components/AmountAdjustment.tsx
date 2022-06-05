@@ -3,6 +3,7 @@ import { Col, Dropdown, Form } from 'react-bootstrap';
 
 interface Props {
   title: string;
+  denomType: typeof DENOMTYPE;
   denom: DenomInfo;
   setDenom(denom: DenomInfo): void;
   hideAmount?: boolean;
@@ -18,14 +19,14 @@ const AmountAdjustment = (props: Props) => (
     <Col xs={2}>
       <Dropdown
         onSelect={(e) => {
-          const selectedItem = e as keyof typeof DENOMTYPE;
-          props.setDenom(DENOMTYPE[selectedItem]);
+          const selectedItem = e as keyof typeof props.denomType;
+          props.setDenom(props.denomType[selectedItem]);
         }}
       >
         <Dropdown.Toggle variant='primary'>{props.denom.name}</Dropdown.Toggle>
 
         <Dropdown.Menu className='limited-dropdown'>
-          {Object.values(DENOMTYPE).map(function (denomT) {
+          {Object.values(props.denomType).map(function (denomT) {
             return (
               <Dropdown.Item key={denomT.name} eventKey={denomT.name}>
                 {denomT.name}
