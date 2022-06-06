@@ -38,7 +38,7 @@ describe('Test Terra SDK', () => {
   let transport: Transport;
   let walletAddress = '';
 
-  const chain = CHAIN_ID.TEST;
+  const chain = CHAIN_ID.MAIN;
   const mainnet = new LCDClient({
     URL: 'https://lcd.terra.dev',
     chainID: chain,
