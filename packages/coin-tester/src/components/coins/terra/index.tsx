@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { Container, Row, Col, Dropdown, Form, Badge, Button } from 'react-bootstrap';
 import { Transport } from '@coolwallet/core';
-import Terra, { CHAIN_ID, DENOMTYPE, TOKENTYPE } from '@coolwallet/terra';
-import { TOKENTYPEDEV } from '@coolwallet/terra/lib/config/tokenType';
+import Terra, {
+  CHAIN_ID,
+  DENOMTYPE,
+  DENOMTYPE_CLASSIC,
+  TOKENTYPE,
+  TOKENTYPEDEV,
+  TOKENTYPE_CLASSIC,
+} from '@coolwallet/terra';
 import BigNumber from 'bignumber.js';
-import cosmos, { Testnet, Mainnet } from './cosmos';
+import cosmos, { Testnet, Mainnet, Classic } from './cosmos';
 import { AddressBalance, AddressDelegation } from './cosmos/response';
 import { useAppId } from '../../../utils/hooks';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
@@ -30,6 +36,8 @@ const DEFAULT_BLIND_ARGS = {
   },
 };
 
+//CqEBCo4BChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEm4KLHRlcnJhMWNqMjJybHNwZGcwdDU4eTc5cW5rOTc0cWhjOWVnZWE0ZWtyOHhzEix0ZXJyYTFhbW1sbmVtcWs4cXh4YzdhdDM0emNuOTRzcGd1Mm51eWt0ZHZtbBoQCgV1bHVuYRIHMTAwMDAwMBIOdGVzdCBzaWduYXR1cmUSagpRCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohA0KrQmH8A4KMYc+36u6QM/Tq/Foo87Bk+W9XjGL1ANlZEgQKAggBGJQBEhUKDwoFdWx1bmESBjUwMDAwMBCImAUaQPTAQuO3aEQxYjVyCMd6x4yyXmczvRzrHMBLXRva6XRMU10jhUmoFIkDq8uV3bqKCYsSNngkhRiHpcP0A/Bfhxk=
+
 function CoinTerra(props: Props) {
   const terra = new Terra();
   const [address, setAddress] = useState('');
@@ -39,49 +47,51 @@ function CoinTerra(props: Props) {
   const [cosmosjs, setNetwork] = useState(Testnet);
   const [balances, setBalances] = useState<AddressBalance[]>([]);
   const [validators, setValidators] = useState<AddressDelegation[]>([]);
+  const [currentDenomType, setCurrentDenomType] = useState(DENOMTYPE);
 
   const [signedTransaction, setSignedTransaction] = useState('');
   const [value, setValue] = useState('0');
   //const [to, setTo] = useState('terra1seckusy09dzgtyxtz9xqzg2x7xfgtf0lhyzmf9');
   const [to, setTo] = useState('terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv'); // Testnet - Wallet
-  const [denom, setDenom] = useState(DENOMTYPE.LUNA);
+  const [denom, setDenom] = useState(currentDenomType.LUNA);
   const [feeAmount, setFeeAmount] = useState('0.001');
-  const [feeDenom, setFeeDenom] = useState(DENOMTYPE.LUNA);
+  const [feeDenom, setFeeDenom] = useState(currentDenomType.LUNA);
 
   const [delegateValue, setDelegateValue] = useState('0');
   const [signedDelegate, setSignedDelegate] = useState('');
-  //const [delegateValidator, setDelegateValidator] = useState('terravaloper1259cmu5zyklsdkmgstxhwqpe0utfe5hhyty0at');
-  const [delegateValidator, setDelegateValidator] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm'); // Testnet - Accomplice Blockchain
+  //const [delegateValidator, setDelegateValidator] = useState('terravaloper1ygwhuksjq3nymd9n8kmceaxd3vxv97u7ja33aj'); // Mainnet - FreshLUNA.com
+  const [delegateValidator, setDelegateValidator] = useState('terravaloper1gtw2uxdkdt3tvq790ckjz8jm8qgwkdw3uptstn'); // Testnet - Terran One
   const [delegateFeeAmount, setDelegateFeeAmount] = useState('0.006');
-  const [delegateFeeDenom, setDelegateFeeDenom] = useState(DENOMTYPE.LUNA);
+  const [delegateFeeDenom, setDelegateFeeDenom] = useState(currentDenomType.LUNA);
 
   const [undelegateValue, setUndelegateValue] = useState('0');
   const [signedUndelegate, setSignedUndelegate] = useState('');
-  const [undelegateValidator, setUndelegateValidator] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm');
+  const [undelegateValidator, setUndelegateValidator] = useState('terravaloper1gtw2uxdkdt3tvq790ckjz8jm8qgwkdw3uptstn');
   const [undelegateFeeAmount, setUndelegateFeeAmount] = useState('0.008');
-  const [undelegateFeeDenom, setUndelegateFeeDenom] = useState(DENOMTYPE.LUNA);
+  const [undelegateFeeDenom, setUndelegateFeeDenom] = useState(currentDenomType.LUNA);
 
   const [signedWithdraw, setSignedWithdraw] = useState('');
-  const [withdrawValidator, setWithdrawValidator] = useState('terravaloper15fl0fcnzreazj50x25rvyvr0rtn0nq2n742cxm');
+  const [withdrawValidator, setWithdrawValidator] = useState('terravaloper1gtw2uxdkdt3tvq790ckjz8jm8qgwkdw3uptstn');
   const [withdrawFeeAmount, setWithdrawFeeAmount] = useState('0.005');
-  const [withdrawFeeDenom, setWithdrawFeeDenom] = useState(DENOMTYPE.LUNA);
+  const [withdrawFeeDenom, setWithdrawFeeDenom] = useState(currentDenomType.LUNA);
 
   const [swapValue, setSwapValue] = useState('0');
   const [signedSwap, setSignedSwap] = useState('');
   //const [swapAddress, setSwapAddress] = useState('terra1tndcaqxkpc5ce9qee5ggqf430mr2z3pefe5wj6'); // mainnet luna2ust
-  const [swapAddress, setSwapAddress] = useState('terra156v8s539wtz0sjpn8y8a8lfg8fhmwa7fy22aff'); // testnet luna2ust
-  const [swapDenom, setSwapDenom] = useState(DENOMTYPE.LUNA);
+  const [swapAddress, setSwapAddress] = useState('terra1dyw9wrmqd6z4jw69jf6e77ynlckmk2305ny8w9wtmq6xg02yvphqqdg3dr'); // testnet luna2usdt
+  const [swapDenom, setSwapDenom] = useState(currentDenomType.LUNA);
   const [swapFeeAmount, setSwapFeeAmount] = useState('0.003');
-  const [swapFeeDenom, setSwapFeeDenom] = useState(DENOMTYPE.LUNA);
+  const [swapFeeDenom, setSwapFeeDenom] = useState(currentDenomType.LUNA);
 
-  const ancMain = 'terra14z56l0fp2lsf86zy3hty2z47ezkhnthtr9yq76'; // mainnet ANC
-  const ancTest = 'terra1747mad58h0w4y589y3sk84r5efqdev9q4r02pc'; // testnet ANC
+  const ancMain = ''; // mainnet
+  const ancTest = 'terra1dwtyvyrkw0s7e0rucwgfwypr4m4emshvsf56nmjn3gertd2jwdzsjt33nl'; // testnet USDT
+  const ancClassic = 'terra14z56l0fp2lsf86zy3hty2z47ezkhnthtr9yq76'; // classic
   const [ancValue, setAncValue] = useState('0');
   const [signedSendAnc, setSignedSendAnc] = useState('');
   const [ancAddress, setAncAddress] = useState(ancTest);
   const [ancRecipient, setAncRecipient] = useState('terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv');
   const [ancFeeAmount, setAncFeeAmount] = useState('0.0015');
-  const [ancFeeDenom, setAncFeeDenom] = useState(DENOMTYPE.LUNA);
+  const [ancFeeDenom, setAncFeeDenom] = useState(currentDenomType.LUNA);
 
   const [cw20TokenType, setCw20TokenType] = useState(TOKENTYPEDEV);
   const [cw20Value, setCw20Value] = useState('0');
@@ -90,10 +100,10 @@ function CoinTerra(props: Props) {
   const [cw20Recipient, setCw20Recipient] = useState('terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv');
   //const [cw20FeeAmount, setCw20FeeAmount] = useState(0.0057); // bLuna
   const [cw20FeeAmount, setCw20FeeAmount] = useState('0.0015');
-  const [cw20FeeDenom, setCw20FeeDenom] = useState(DENOMTYPE.LUNA);
+  const [cw20FeeDenom, setCw20FeeDenom] = useState(currentDenomType.LUNA);
   const [blindArguments, setBlindArguments] = useState([DEFAULT_BLIND_ARGS]);
   const [blindSignedSend, setBlindSignedSend] = useState('');
-  const [blindFeeDenom, setBlindFeeDenom] = useState(DENOMTYPE.LUNA);
+  const [blindFeeDenom, setBlindFeeDenom] = useState(currentDenomType.LUNA);
   const [blindFeeAmount, setBlindFeeAmount] = useState('0.001');
 
   const [txResult, setTxResult] = useState('');
@@ -131,14 +141,25 @@ function CoinTerra(props: Props) {
       newNetwork = Testnet;
       setNetwork(Testnet);
       setChainId(CHAIN_ID.TEST);
+      setCurrentDenomType(DENOMTYPE);
       setAncAddress(ancTest);
       setTxUrl('https://finder.terra.money/testnet/tx/');
       setCw20TokenType(TOKENTYPEDEV);
       setCw20Token(TOKENTYPEDEV[0]);
+    } else if ('Classic' === e) {
+      newNetwork = Classic;
+      setNetwork(Classic);
+      setChainId(CHAIN_ID.CLASSIC);
+      setCurrentDenomType(DENOMTYPE_CLASSIC);
+      setAncAddress(ancClassic);
+      setTxUrl('https://finder.terra.money/classic/tx/');
+      setCw20TokenType(TOKENTYPE_CLASSIC);
+      setCw20Token(TOKENTYPE_CLASSIC[0]);
     } else {
       newNetwork = Mainnet;
       setNetwork(Mainnet);
       setChainId(CHAIN_ID.MAIN);
+      setCurrentDenomType(DENOMTYPE);
       setAncAddress(ancMain);
       setTxUrl('https://finder.terra.money/mainnet/tx/');
       setCw20TokenType(TOKENTYPE);
@@ -192,6 +213,7 @@ function CoinTerra(props: Props) {
       transaction,
       transport: transport!,
     };
+    console.log('Sign Param:', signTxData);
     const signature = await terra.signTransferTransaction(signTxData);
     setSignedTransaction(signature);
     updateAccStatus(cosmosjs, address);
@@ -204,7 +226,7 @@ function CoinTerra(props: Props) {
       accountNumber: account_number,
       sequence,
       delegatorAddress: address,
-      validatorAddress: to,
+      validatorAddress: delegateValidator,
       coin: {
         amount: new BigNumber(delegateValue).multipliedBy(1000000).toNumber(),
       },
@@ -222,6 +244,9 @@ function CoinTerra(props: Props) {
       transaction,
       transport: transport!,
     };
+
+    console.log('Sign Param:', transaction);
+
     const signature = await terra.signDelegateTransaction(signTxData);
     setSignedDelegate(signature);
     updateAccStatus(cosmosjs, address);
@@ -243,7 +268,7 @@ function CoinTerra(props: Props) {
         denom: undelegateFeeDenom,
         amount: new BigNumber(undelegateFeeAmount).multipliedBy(1000000).toNumber(),
       },
-      memo: '',
+      memo: 'Undelegate test',
     };
     const signTxData = {
       appPrivateKey: props.appPrivateKey,
@@ -252,6 +277,7 @@ function CoinTerra(props: Props) {
       transaction,
       transport: transport!,
     };
+    console.log('Sign Param:', transaction);
     const signature = await terra.signUndelegateTransaction(signTxData);
     setSignedUndelegate(signature);
     updateAccStatus(cosmosjs, address);
@@ -312,7 +338,7 @@ function CoinTerra(props: Props) {
         amount: new BigNumber(swapValue).multipliedBy(1000000).toNumber(),
       },
       fee: {
-        gas_limit: 250000,
+        gas_limit: 400000,
         denom: swapFeeDenom,
         amount: new BigNumber(swapFeeAmount).multipliedBy(1000000).toNumber(),
       },
@@ -348,7 +374,7 @@ function CoinTerra(props: Props) {
       contractAddress: ancAddress,
       execute_msg: executeMsgObj,
       fee: {
-        gas_limit: 120000,
+        gas_limit: 200000,
         denom: ancFeeDenom,
         amount: new BigNumber(ancFeeAmount).multipliedBy(1000000).toNumber(),
       },
@@ -361,6 +387,8 @@ function CoinTerra(props: Props) {
       transaction,
       transport: transport!,
     };
+
+    console.log('Sign Param:', transaction);
 
     const signature = await terra.signMsgExecuteContractTransaction(signTxData);
     setSignedSendAnc(signature);
@@ -403,6 +431,8 @@ function CoinTerra(props: Props) {
       transport: transport!,
     };
 
+    console.log('Sign Param:', transaction);
+
     const signature = await terra.signMsgCW20Transaction(signTxData);
     setCw20SignedSend(signature);
   };
@@ -426,7 +456,7 @@ function CoinTerra(props: Props) {
       })),
       fee: {
         amount: [{ amount: new BigNumber(blindFeeAmount).multipliedBy(1000000).toString(), denom: blindFeeDenom.unit }],
-        gas_limit: '85000',
+        gas_limit: '200000',
       },
       memo: 'test multiple signature',
     };
@@ -454,6 +484,7 @@ function CoinTerra(props: Props) {
               <Dropdown.Menu>
                 <Dropdown.Item eventKey='Test Net'>Test Net</Dropdown.Item>
                 <Dropdown.Item eventKey='Main Net'>Main Net</Dropdown.Item>
+                <Dropdown.Item eventKey='Classic'>Classic</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </Col>
@@ -487,9 +518,10 @@ function CoinTerra(props: Props) {
       {
         <Row style={{ marginBottom: '15px' }}>
           <Col xs={2} />
-          <AmountAdjustment hideAmount title='Coin' denom={denom} setDenom={setDenom} />
+          <AmountAdjustment hideAmount title='Coin' denomType={currentDenomType} denom={denom} setDenom={setDenom} />
           <AmountAdjustment
             title='Fee'
+            denomType={currentDenomType}
             denom={feeDenom}
             amount={feeAmount}
             setDenom={setFeeDenom}
@@ -519,6 +551,7 @@ function CoinTerra(props: Props) {
           <Col xs={5} />
           <AmountAdjustment
             title='Fee'
+            denomType={currentDenomType}
             denom={delegateFeeDenom}
             amount={delegateFeeAmount}
             setDenom={setDelegateFeeDenom}
@@ -565,6 +598,7 @@ function CoinTerra(props: Props) {
           <Col xs={5} />
           <AmountAdjustment
             title='Fee'
+            denomType={currentDenomType}
             denom={undelegateFeeDenom}
             amount={undelegateFeeAmount}
             setDenom={setUndelegateFeeDenom}
@@ -590,6 +624,7 @@ function CoinTerra(props: Props) {
           <Col xs={5} />
           <AmountAdjustment
             title='Fee'
+            denomType={currentDenomType}
             denom={withdrawFeeDenom}
             amount={withdrawFeeAmount}
             setDenom={setWithdrawFeeDenom}
@@ -617,9 +652,10 @@ function CoinTerra(props: Props) {
       {
         <Row style={{ marginBottom: '15px' }}>
           <Col xs={2} />
-          <AmountAdjustment title='Funds' hideAmount denom={swapDenom} setDenom={setSwapDenom} />
+          <AmountAdjustment title='Funds' hideAmount denomType={currentDenomType} denom={swapDenom} setDenom={setSwapDenom} />
           <AmountAdjustment
             title='Fee'
+            denomType={currentDenomType}
             denom={swapFeeDenom}
             amount={swapFeeAmount}
             setDenom={setSwapFeeDenom}
@@ -648,6 +684,7 @@ function CoinTerra(props: Props) {
         <Col xs={5} />
         <AmountAdjustment
           title='Fee'
+          denomType={currentDenomType}
           denom={ancFeeDenom}
           amount={ancFeeAmount}
           setDenom={setAncFeeDenom}
@@ -697,6 +734,7 @@ function CoinTerra(props: Props) {
           </Col>
           <AmountAdjustment
             title='Fee'
+            denomType={currentDenomType}
             denom={cw20FeeDenom}
             setDenom={setCw20FeeDenom}
             amount={cw20FeeAmount}
@@ -730,6 +768,7 @@ function CoinTerra(props: Props) {
             </Col>
             <AmountAdjustment
               title='Coin'
+              denomType={currentDenomType}
               denom={b.coin.denom}
               setDenom={(result) => {
                 setBlindArguments((prev) =>
@@ -771,6 +810,7 @@ function CoinTerra(props: Props) {
         <Row style={{ marginBottom: '15px' }}>
           <AmountAdjustment
             title='Fee'
+            denomType={currentDenomType}
             denom={blindFeeDenom}
             amount={blindFeeAmount}
             setDenom={setBlindFeeDenom}

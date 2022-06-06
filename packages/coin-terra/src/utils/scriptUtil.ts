@@ -10,6 +10,8 @@ function addPath(argument: string, addressIndex: number) {
   return SEPath + argument;
 }
 
+//TODO FIX:empty memo is handled as empty string, but TERRA SDK handeld it as undefined, causing invalid signature. 
+
 export function getTerraSendArgument(publicKey: string, terraData: types.MsgSend, addressIndex: number) {
   const pubKey = publicKey.padStart(66, '0');
   const from = Buffer.from(terraData.fromAddress, 'ascii').toString('hex').padStart(128, '0');

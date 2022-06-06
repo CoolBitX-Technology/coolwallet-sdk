@@ -4,7 +4,7 @@ import * as txUtil from './utils/transactionUtils';
 import * as msgUtil from './utils/msgUtils';
 import * as jsonUtil from './utils/jsonUtils';
 import * as types from './config/types';
-import { DENOMTYPE, DenomInfo } from './config/denomType';
+import { DENOMTYPE, DENOMTYPE_CLASSIC, DenomInfo } from './config/denomType';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
 import {
@@ -17,7 +17,7 @@ import {
   MsgWithdrawDelegatorReward,
   TxBody,
 } from './terra/@terra-core';
-import { TOKENTYPE } from './config/tokenType';
+import { TOKENTYPE, TOKENTYPEDEV, TOKENTYPE_CLASSIC } from './config/tokenType';
 import { COIN_TYPE } from './config/params';
 import { handleHex } from './utils/stringUtils';
 
@@ -100,6 +100,8 @@ class Terra extends COIN.ECDSACoin implements COIN.Coin {
     // Determine using testnet script or mainnet
     let script: string;
     if (transaction.chainId === types.CHAIN_ID.MAIN) script = params.TRANSFER.script + params.TRANSFER.signature;
+    else if (transaction.chainId === types.CHAIN_ID.CLASSIC)
+      script = params.TRANSFER.script_classic + params.TRANSFER.signature_classic;
     else script = params.TRANSFER.script_test + params.TRANSFER.signature_test;
     // Prepare script argument
     const argument = scriptUtil.getTerraSendArgument(publicKey, transaction, addressIndex);
@@ -129,6 +131,8 @@ class Terra extends COIN.ECDSACoin implements COIN.Coin {
     // Determine using testnet script or mainnet
     let script: string;
     if (transaction.chainId === types.CHAIN_ID.MAIN) script = params.DELEGATE.script + params.DELEGATE.signature;
+    else if (transaction.chainId === types.CHAIN_ID.CLASSIC)
+      script = params.DELEGATE.script_classic + params.DELEGATE.signature_classic;
     else script = params.DELEGATE.script_test + params.DELEGATE.signature_test;
     // Prepare script argument
     const argument = scriptUtil.getTerraStakingArgument(publicKey, transaction, addressIndex);
@@ -161,6 +165,8 @@ class Terra extends COIN.ECDSACoin implements COIN.Coin {
     // Determine using testnet script or mainnet
     let script: string;
     if (transaction.chainId === types.CHAIN_ID.MAIN) script = params.UNDELEGATE.script + params.UNDELEGATE.signature;
+    else if (transaction.chainId === types.CHAIN_ID.CLASSIC)
+      script = params.UNDELEGATE.script_classic + params.UNDELEGATE.signature_classic;
     else script = params.UNDELEGATE.script_test + params.UNDELEGATE.signature_test;
     // Prepare script argument
     const argument = scriptUtil.getTerraStakingArgument(publicKey, transaction, addressIndex);
@@ -186,6 +192,8 @@ class Terra extends COIN.ECDSACoin implements COIN.Coin {
     // Determine using testnet script or mainnet
     let script: string;
     if (transaction.chainId === types.CHAIN_ID.MAIN) script = params.WITHDRAW.script + params.WITHDRAW.signature;
+    else if (transaction.chainId === types.CHAIN_ID.CLASSIC)
+      script = params.WITHDRAW.script_classic + params.WITHDRAW.signature_classic;
     else script = params.WITHDRAW.script_test + params.WITHDRAW.signature_test;
     // Prepare script argument
     const argument = scriptUtil.getMsgWithdrawDelegatorRewardArgument(publicKey, transaction, addressIndex);
@@ -216,6 +224,8 @@ class Terra extends COIN.ECDSACoin implements COIN.Coin {
     // Determine using testnet script or mainnet
     let script: string;
     if (transaction.chainId === types.CHAIN_ID.MAIN) script = params.SMART.script + params.SMART.signature;
+    else if (transaction.chainId === types.CHAIN_ID.CLASSIC)
+      script = params.SMART.script_classic + params.SMART.signature_classic;
     else script = params.SMART.script_test + params.SMART.signature_test;
     // Prepare script argument
     const argument = scriptUtil.getTerraSmartArgument(publicKey, transaction, addressIndex);
@@ -262,6 +272,8 @@ class Terra extends COIN.ECDSACoin implements COIN.Coin {
     // Determine using testnet script or mainnet
     let script: string;
     if (transaction.chainId === types.CHAIN_ID.MAIN) script = params.CW20.script + params.CW20.signature;
+    else if (transaction.chainId === types.CHAIN_ID.CLASSIC)
+      script = params.CW20.script_classic + params.CW20.signature_classic;
     else script = params.CW20.script_test + params.CW20.signature_test;
     // Prepare script argument
     const argument = scriptUtil.getCW20Argument(publicKey, transaction, addressIndex, tokenSignature);
@@ -292,6 +304,8 @@ class Terra extends COIN.ECDSACoin implements COIN.Coin {
     // Determine using testnet script or mainnet
     let script: string;
     if (chainId === types.CHAIN_ID.MAIN) script = params.BLIND.script + params.BLIND.signature;
+    else if (chainId === types.CHAIN_ID.CLASSIC)
+      script = params.BLIND.script_classic + params.BLIND.signature_classic;
     else script = params.BLIND.script_test + params.BLIND.signature_test;
     // Get TxBodyBytes
     const txBody = TxBody.fromData({ messages: msgs, memo });
@@ -301,6 +315,6 @@ class Terra extends COIN.ECDSACoin implements COIN.Coin {
   }
 }
 
-export { DENOMTYPE, TOKENTYPE, DenomInfo };
+export { DENOMTYPE, DENOMTYPE_CLASSIC, TOKENTYPE, TOKENTYPEDEV, TOKENTYPE_CLASSIC, DenomInfo };
 export * from './config/types';
 export default Terra;

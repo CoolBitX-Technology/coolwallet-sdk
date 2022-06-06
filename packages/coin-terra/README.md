@@ -4,6 +4,14 @@
 
 Typescript library with support for the integration of Terra for third party application, include the functionalities of generation of addresses and signed transactions.
 
+## What's new?
+
+Added `CHAIN_ID.CLASSIC`, `DENOMTYPE_CLASSIC` and `TOKENTYPE_CLASSIC` for Terra Classic. `CHAIN_ID.MAIN`, `DENOMTYPE` and `TOKENTYPE` are used for Terra 2.0.
+
+## Limitation
+
+For Terra Classic, currently only normal transfer is fully tested and guaranteed to be working. CW20 for Terra 2.0 is still under development.
+
 ## Install
 
 ```shell
