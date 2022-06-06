@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@coolwallet/ada": "file:../coin-ada",
+    "@coolwallet/algo": "file:../coin-algo",
     "@coolwallet/avaxc": "file:../coin-avaxc",
     "@coolwallet/bnb": "file:../coin-bnb",
     "@coolwallet/bsc": "file:../coin-bsc",
@@ -38,6 +39,7 @@
     "@types/react-router-bootstrap": "^0.24.5",
     "@vitejs/plugin-react": "^1.0.0",
     "agent-base": "^6.0.2",
+    "algosdk": "^1.17.0",
     "axios": "^0.24.0",
     "bech32": "^2.0.0",
     "bignumber.js": "^9.0.2",
@@ -58,6 +60,7 @@
     "mnemonic-to-key-pair": "^1.0.0",
     "mnemonic-to-private-key": "^0.4.1",
     "near-api-js": "^0.44.2",
+    "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "react": "^17.0.0",
     "react-bootstrap": "^2.0.2",

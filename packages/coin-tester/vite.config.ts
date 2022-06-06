@@ -14,6 +14,7 @@ export default defineConfig({
     alias: {
       https: require.resolve('agent-base'),
       process: require.resolve('process/browser'),
+      path: "path-browserify",
     },
   },
   plugins: [optionalDeps({ enabledPackages }), react(), viteCommonjs({ skipPreBuild: true })],
