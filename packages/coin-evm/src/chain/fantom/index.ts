@@ -9,6 +9,7 @@ class FantomChain extends ChainProps {
     '0'
   );
   tokens = TOKENS;
+  stakingContract = "0xfc00face00000000000000000000000000000000";
 }
 
 export default new FantomChain();
