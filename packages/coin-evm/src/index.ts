@@ -95,11 +95,15 @@ class Evm extends COIN.ECDSACoin {
     }
 
     let script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
+    let argument = "";
     // Staking contract for Fantom
     if(this.chain.id === FANTOM.id && client.transaction.to.toLowerCase() === FANTOM.stakingContract.toLowerCase()){
       script = SCRIPTS.signStakingTransaction.scriptWithSignature;
+      argument = await SEArguments.getSELegacyStakingTransaction(client, this.chain, this.coinType);
     }
-    const argument = await SEArguments.getSELegacySmartContractTransaction(client, this.chain, this.coinType);
+    else {
+      argument = await SEArguments.getSELegacySmartContractTransaction(client, this.chain, this.coinType);
+    }
     return sign.signTransaction(client, script, argument, this.chain.id, publicKey);
   }
 
