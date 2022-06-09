@@ -211,38 +211,13 @@ function CoinXTZ(props: Props) {
 
       const Tezos = new TezosToolkit(selectedNode);
 
-      // For verification
-      // const operation: xtzTransaction = {
-      //   branch: 'BKiXcfN1ZTXnNNbTWSRArSWzVFc6om7radWq5mTqGX6rY4P2Uhe',
-      //   source: address,
-      //   fee: "1300",
-      //   counter: "3325582",
-      //   gas_limit: "10100",
-      //   storage_limit: "1",
-      //   amount: "3000000",
-      //   destination: "tz1erET3QwafBppScF62xX8NzNBTbw1SUaNb"
-      // };
-
-      // For validation
-      let estimateFee = DEFAULT_FEE.TRANSFER;
-      let estimateGasLimit = DEFAULT_GAS_LIMIT.TRANSFER;
-      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.TRANSFER*/;
-
-      if(useDefaultEstimate == false) {
-        Tezos.setProvider({ wallet: new mockCoolWallet() });
-        const est = await Tezos.estimate.transfer({to: to, amount: parseInt(value), mutez: true}); 
-        estimateFee = est.suggestedFeeMutez;
-        estimateGasLimit = est.gasLimit;
-        estimateStorageLimit = est.storageLimit;
-      }
-
       const operation: xtzTransaction = {
         branch: await Tezos.rpc.getBlockHash(),
         source: address,
-        fee: estimateFee.toString(),
+        fee: '20000',
         counter: await getCounter(selectedNode, address),
-        gas_limit: estimateGasLimit.toString(),
-        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), 
+        gas_limit: '10000',
+        storage_limit: '1',
         amount: value,
         destination: to
       };
@@ -259,12 +234,11 @@ function CoinXTZ(props: Props) {
 
       const signedTx = await xtz.signTransaction(signTxData, operation);
       console.debug('Transaction Submit Operation\n', signedTx);
-      return signedTx;
-      // const txId = await Tezos.rpc.injectOperation(signedTx);
-      // if(node == 'https://ithacanet.smartpy.io/')
-      //   return 'https://ithacanet.tzkt.io/' + txId;
-      // else
-      //   return 'https://tzkt.io/' + txId;
+      const txId = await Tezos.rpc.injectOperation(signedTx);
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
+      else
+        return 'https://tzkt.io/' + txId;
     }, setSignedTransaction);
   };
 
