@@ -194,7 +194,6 @@ export default class XTZ extends COIN.EDDSACoin implements COIN.Coin {
     const upperCaseAddress = contractAddress.toUpperCase();
     let tokenSignature = '';
     for (const tokenInfo of TOKENTYPE) {
-      // Assign symbol with contract Address
       if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress && tokenInfo.token_id === tokenId) {
         tokenSignature = tokenInfo.signature;
         operation.tokenSymbol = tokenInfo.symbol;

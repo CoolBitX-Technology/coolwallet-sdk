@@ -174,12 +174,12 @@ export const getTokenArgument = async (
    const counter = parseInt(rawData.counter).toString(16).padStart(20, '0'); 
    const gas_limit = parseInt(rawData.gas_limit).toString(16).padStart(20, '0');
    const storage_limit = parseInt(rawData.storage_limit).toString(16).padStart(20, '0');
-   const amount = parseInt(rawData.amount).toString(16).padStart(20, '0');
+   const amount = '00';
+   const tokenAmount = parseInt(rawData.tokenAmount).toString(16).padStart(20, '0');
    const contract = codecUtil.addressStrToHex(rawData.contractAddress);
    const contractAccountType = contract.substring(0, 2);
    const contractAddressType = contract.substring(42);
    const contractAddress = contract.substring(2, 42);
-   
    const toAddr = codecUtil.addressStrToHex(rawData.toAddress);
    const toAddressAccountType = toAddr.substring(0, 2);
    let toAddressType: hexString;
@@ -191,7 +191,6 @@ export const getTokenArgument = async (
       toAddressType = toAddr.substring(42);
       toAddress = toAddr.substring(2, 42);
    }
-
    const tokenInfo = token.getSetTokenPayload(
       rawData.contractAddress,
       rawData.tokenSymbol ?? '',
@@ -200,6 +199,6 @@ export const getTokenArgument = async (
    const signature = tokenSignature.slice(90).padStart(144, '0');
    const parameters = codecUtil.parameterToHex(param);
    
-   const argument: hexString = branch + sourceAddressType + sourceAddress + fee + counter + gas_limit + storage_limit + amount + contractAccountType + contractAddressType + contractAddress + toAddressAccountType + toAddressType + toAddress + tokenInfo + signature + parameters;
+   const argument: hexString = branch + sourceAddressType + sourceAddress + fee + counter + gas_limit + storage_limit + amount + tokenAmount + contractAccountType + contractAddressType + contractAddress + toAddressAccountType + toAddressType + toAddress + tokenInfo + signature + parameters;
    return addPathByType(pathType, argument, addressIndex);
 }

@@ -14,6 +14,7 @@ import {
 import { SignTxData, xtzReveal, xtzTransaction, xtzDelegation, xtzSmart, xtzToken } from '@coolwallet/xtz/lib/config/types';
 import axios from 'axios';
 import { resolvePreset } from '@babel/core';
+import BigNumber from 'bignumber.js';
 
 interface Props {
   transport: Transport | null,
@@ -55,8 +56,8 @@ function CoinXTZ(props: Props) {
   
   const [index, setIndex] = useState('0');
   const [selectedIndex, setSelectedIndex] = useState('0');
-  const [selectedNode, setSelectedNode] = useState('https://ithacanet.smartpy.io/');
-  const [node, setNode] = useState('https://ithacanet.smartpy.io/');
+  const [selectedNode, setSelectedNode] = useState('https://mainnet.api.tez.ie');
+  const [node, setNode] = useState('https://mainnet.api.tez.ie');
   const [pubkeyhash, setPubkeyHash] = useState('');
   const [address, setAddress] = useState('');
   const [revealNeeded, checkRevealNeeded] = useState('');
@@ -70,7 +71,7 @@ function CoinXTZ(props: Props) {
   const [signedSmartContract, setSignedSmartContract] = useState('');
   const [signedToken, setSignedToken] = useState('');
   const [tokenValue, setTokenValue] = useState('0');
-  const [toAddress, setToAddress] = useState('tz1Wd6o3nazvTzXLAASRvupUaJirSiHhnnQh');
+  const [toAddress, setToAddress] = useState('tz1QovT56et9ZvpXyYLchq5oejuBRauHoUEF');
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
@@ -400,52 +401,17 @@ function CoinXTZ(props: Props) {
         return 'Get address and check amount and destination first';
       }
       const Tezos = new TezosToolkit(selectedNode);
-      // For validation
-      let estimateFee = DEFAULT_FEE.TRANSFER;
-      let estimateGasLimit = DEFAULT_GAS_LIMIT.TRANSFER;
-      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.TRANSFER*/;
-
-      if(useDefaultEstimate == false) {
-        Tezos.setProvider({ wallet: new mockCoolWallet() });
-        const est = await Tezos.estimate.transfer({to: to, amount: parseInt(value), mutez: true}); 
-        estimateFee = est.suggestedFeeMutez;
-        estimateGasLimit = est.gasLimit;
-        estimateStorageLimit = est.storageLimit;
-      }
+      
       const operation: xtzSmart= {
         branch: await Tezos.rpc.getBlockHash(),
         source: address,
-        fee: estimateFee.toString(), //'30000',
+        fee: '20000',
         counter: await getCounter(selectedNode, address),
-        gas_limit: estimateGasLimit.toString(), //'5000',
-        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), //67
+        gas_limit: '10000', 
+        storage_limit: '1',
         amount: '0',
         destination: 'KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV',
         parameters: { 
-          // entrypoint: "transfer", 
-          // value: [ 
-          //   { "prim": "Pair", 
-          //     "args": [ 
-          //       { "string": "tz1NRxnGNwDZzmfoKNx3BG6Zy1XAQHtzKk3d" }, 
-          //       [ 
-          //         { "prim": "Pair", 
-          //           "args": [ 
-          //             { "string": "tz1Wd6o3nazvTzXLAASRvupUaJirSiHhnnQh" }, 
-          //             { "prim": "Pair", 
-          //               "args": [ 
-          //                 { "int": "18" }, 
-          //                 { "int": "1" } 
-          //               ] 
-          //             } 
-          //           ] 
-          //         } 
-          //       ] 
-          //     ] 
-          //   } 
-          // ]
-
-
-          
           "entrypoint": "transfer",
           "value": {
             "prim": "Pair",
@@ -483,12 +449,11 @@ function CoinXTZ(props: Props) {
 
       const signedTx = await xtz.signSmartContract(signTxData, operation);
       console.debug('Transaction Submit Operation\n', signedTx);
-      return signedTx;
-      // const txId = await Tezos.rpc.injectOperation(signedTx);
-      // if(node == 'https://ithacanet.smartpy.io/')
-      //   return 'https://ithacanet.tzkt.io/' + txId;
-      // else
-      //   return 'https://tzkt.io/' + txId;
+      const txId = await Tezos.rpc.injectOperation(signedTx);
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
+      else
+        return 'https://tzkt.io/' + txId;
     }, setSignedSmartContract);
   }
 
@@ -499,33 +464,23 @@ function CoinXTZ(props: Props) {
         return 'Get address and check amount and destination first';
       }
       const Tezos = new TezosToolkit(selectedNode);
-      // For validation
-      let estimateFee = DEFAULT_FEE.TRANSFER;
-      let estimateGasLimit = DEFAULT_GAS_LIMIT.TRANSFER;
-      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.TRANSFER*/;
 
-      if(useDefaultEstimate == false) {
-        Tezos.setProvider({ wallet: new mockCoolWallet() });
-        const est = await Tezos.estimate.transfer({to: to, amount: parseInt(value), mutez: true}); 
-        estimateFee = est.suggestedFeeMutez;
-        estimateGasLimit = est.gasLimit;
-        estimateStorageLimit = est.storageLimit;
-      }
       const operation: xtzToken = {
         branch: await Tezos.rpc.getBlockHash(),
         source: address,
-        fee: '1000',//estimateFee.toString(),
+        fee: '20000',
         counter: await getCounter(selectedNode, address),
-        gas_limit: '4000', //estimateGasLimit.toString(),
-        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), 
-        amount: '1',
-        contractAddress: 'KT1P6owrsdvgLCHaio7z5dVRmjjhUMhJBcYd',
+        gas_limit: '10000', 
+        storage_limit: '0',
+        tokenAmount: new BigNumber(tokenValue).multipliedBy(10 ** 18).toString(),
+        contractAddress: 'KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV',
         toAddress: toAddress,
-        tokenId: '18',
-        tokenSymbol: 'ERT',
-        tokenDecimals: '6'
+        tokenId: '0',
+        tokenSymbol: 'kUSD',
+        tokenDecimals: '18'
       };
-
+      console.log("Token Transfer:")
+      console.log(operation);
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
 
@@ -538,19 +493,18 @@ function CoinXTZ(props: Props) {
 
       const signedTx = await xtz.signTokenTransfer(signTxData, operation);
       console.debug('Transaction Submit Operation\n', signedTx);
-      return signedTx;
-      // const txId = await Tezos.rpc.injectOperation(signedTx);
-      // if(node == 'https://ithacanet.smartpy.io/')
-      //   return 'https://ithacanet.tzkt.io/' + txId;
-      // else
-      //   return 'https://tzkt.io/' + txId;
+      const txId = await Tezos.rpc.injectOperation(signedTx);
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
+      else
+        return 'https://tzkt.io/' + txId;
     }, setSignedToken);
   }
 
   return (
     <Container>
       <div className='title2'>
-        These two basic methods are required to implement in a coin sdk.
+        These basic methods are required to implement in a coin sdk.
       </div>
       <OneInput
         title='Index'

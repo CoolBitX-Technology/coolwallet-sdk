@@ -133,7 +133,7 @@ export async function getFormatToken(rawData: types.xtzToken, param: any): Promi
         fee: rawData.fee,
         gas_limit: rawData.gas_limit,
         storage_limit: rawData.storage_limit,
-        amount: rawData.amount,
+        amount: '0',
         destination: rawData.contractAddress,
         parameters: param
       }

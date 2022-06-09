@@ -72,7 +72,7 @@ export interface smartParam {
 }
 
 export interface xtzToken extends xtzOperation {
-  amount: string, 
+  tokenAmount: string, 
   contractAddress: string,
   toAddress: string,
   tokenId: string,
