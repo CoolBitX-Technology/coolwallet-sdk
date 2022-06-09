@@ -244,12 +244,38 @@ describe('Test EVM SDK', () => {
       expect(signature).toEqual(expectedSignature);
       const txDetail = await getTxDetail(transport, props.appId);
 
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage(api.chain.symbol)
-        .wrapPage('STAKE', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+      const validatorId = parseInt(transaction.data.slice(10, 74), 16);
+      const validatorDisplay = 'ID ' + validatorId;
+
+      let expectedTxDetail = '';
+      const programId = transaction.data.slice(0, 10);
+      if (programId.toLowerCase() === api.chain.delegateProgram) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Delgt', '')
+          .messagePage(validatorDisplay)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (programId.toLowerCase() === api.chain.withdrawProgram) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Withdr', '')
+          .messagePage(validatorDisplay)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (programId.toLowerCase() === api.chain.undelegateProgram) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Undelgt', '')
+          .messagePage(validatorDisplay)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        throw new Error("Staking test error: Unrecognized program id for staking contract.");
+      }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
