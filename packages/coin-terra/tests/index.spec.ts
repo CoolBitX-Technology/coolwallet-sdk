@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
-import Terra, { DENOMTYPE, TOKENTYPE, CHAIN_ID, SignDataType } from '../src';
+import Terra, { DENOMTYPE, DENOMTYPE_CLASSIC, TOKENTYPE, CHAIN_ID, SignDataType } from '../src';
 import {
   LCDClient,
   Fee,
@@ -24,6 +24,7 @@ const mnemonic = 'catalog inmate announce liar young avocado oval depth tag arou
 
 describe('Test Terra SDK', () => {
   const denomArray = Object.values(DENOMTYPE);
+  const denomClassicArray =Object.values(DENOMTYPE_CLASSIC);
   const tokenArray = Object.values(TOKENTYPE);
   const getRandInt = (max: number) => Math.floor(Math.random() * max);
   const getRandDenom = () => denomArray[getRandInt(denomArray.length)];
@@ -37,9 +38,10 @@ describe('Test Terra SDK', () => {
   let transport: Transport;
   let walletAddress = '';
 
+  const chain = CHAIN_ID.MAIN;
   const mainnet = new LCDClient({
     URL: 'https://lcd.terra.dev',
-    chainID: 'columbus-5',
+    chainID: chain,
   });
   const mk = new MnemonicKey({ mnemonic });
   const wallet = mainnet.wallet(mk);
@@ -55,11 +57,91 @@ describe('Test Terra SDK', () => {
     expect(walletAddress).toEqual(wallet.key.accAddress);
   });
 
+  it('Test Denoms', async () => {
+    const denom = getRandDenom();
+    const feeDenom = getRandDenom();
+    const transaction = {
+      chainId: chain,
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
+      fromAddress: walletAddress,
+      toAddress: getRandWallet(),
+      coin: {
+        denom,
+        amount: getRandInt(1000000000) + 1,
+      },
+      fee: {
+        gas_limit: getRandInt(85000) + 1,
+        denom: feeDenom,
+        amount: getRandInt(90000) + 1,
+      },
+      memo: 'test signature',
+    };
+    const signTxData: SignDataType = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+
+    for(let i = 0, j = denomArray.length - 1; i <= j; ++i, --j) {
+      signTxData.transaction.coin.denom = denomArray[i];
+      signTxData.transaction.fee.denom = denomArray[j];
+      try {
+        await coinTerra.signTransferTransaction(signTxData);
+      } catch (e) {
+        console.error('Test Classic Denoms fail at: ', [denomArray[i], denomArray[j]]);
+        throw e;
+      }
+    }
+  });
+
+  it('Test Classic Denoms', async () => {
+    const denom = getRandDenom();
+    const feeDenom = getRandDenom();
+    const transaction = {
+      chainId: chain,
+      accountNumber: getRandAccount(),
+      sequence: getRandSequence(),
+      fromAddress: walletAddress,
+      toAddress: getRandWallet(),
+      coin: {
+        denom,
+        amount: getRandInt(1000000000) + 1,
+      },
+      fee: {
+        gas_limit: getRandInt(85000) + 1,
+        denom: feeDenom,
+        amount: getRandInt(90000) + 1,
+      },
+      memo: 'test signature',
+    };
+    const signTxData: SignDataType = {
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      addressIndex: 0,
+      transaction,
+      transport,
+    };
+
+    for(let i = 0; i < denomClassicArray.length; ++i) {
+      signTxData.transaction.coin.denom = denomClassicArray[i];
+      signTxData.transaction.fee.denom = denomClassicArray[i];
+      try {
+        await coinTerra.signTransferTransaction(signTxData);
+      } catch (e) {
+        console.error('Test Classic Denoms fail at: ', denomClassicArray[i]);
+        throw e;
+      }
+    }
+  });
+
   it('Test Normal Transfer', async () => {
     const denom = getRandDenom();
     const feeDenom = getRandDenom();
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber: getRandAccount(),
       sequence: getRandSequence(),
       fromAddress: walletAddress,
@@ -118,7 +200,7 @@ describe('Test Terra SDK', () => {
   it('Test Delegate', async () => {
     const feeDenom = getRandDenom();
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber: getRandAccount(),
       sequence: getRandSequence(),
       delegatorAddress: walletAddress,
@@ -179,18 +261,18 @@ describe('Test Terra SDK', () => {
   it('Test Undelegate', async () => {
     const feeDenom = getRandDenom();
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
-      accountNumber: getRandAccount(),
-      sequence: getRandSequence(),
+      chainId: chain,
+      accountNumber: "2343", //getRandAccount(),
+      sequence: "16", //getRandSequence(),
       delegatorAddress: walletAddress,
-      validatorAddress: getRandValidator(),
+      validatorAddress: "terravaloper1gtw2uxdkdt3tvq790ckjz8jm8qgwkdw3uptstn", //getRandValidator(),
       coin: {
-        amount: getRandInt(1000000) + 1,
+        amount: 10000, //getRandInt(1000000) + 1,
       },
       fee: {
-        gas_limit: getRandInt(520000) + 1,
+        gas_limit: 550000, //getRandInt(520000) + 1,
         denom: feeDenom,
-        amount: getRandInt(70000000) + 1,
+        amount: 83000, //getRandInt(70000000) + 1,
       },
       memo: 'test undelegate',
     };
@@ -217,6 +299,8 @@ describe('Test Terra SDK', () => {
     };
     const signedTxSDK = mainnet.tx.encode(await wallet.createAndSignTx(undelegateOpt));
 
+    console.error('TX', signedTxSDK);
+
     try {
       expect(signedTx).toEqual(signedTxSDK);
     } catch (e) {
@@ -240,7 +324,7 @@ describe('Test Terra SDK', () => {
   it('Test Withdraw', async () => {
     const feeDenom = getRandDenom();
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber: getRandAccount(),
       sequence: getRandSequence(),
       delegatorAddress: walletAddress,
@@ -290,7 +374,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Smart Contract: Luna to bLuna Swap', async () => {
+  it('Test Smart Contract: Luna to ERC20 Token Swap', async () => {
     const denom = getRandDenom();
     const feeDenom = getRandDenom();
     const executeMsgObj = {
@@ -306,7 +390,7 @@ describe('Test Terra SDK', () => {
       },
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber: getRandAccount(),
       sequence: getRandSequence(),
       senderAddress: walletAddress,
@@ -321,7 +405,7 @@ describe('Test Terra SDK', () => {
         amount: getRandInt(200000) + 1,
         denom: feeDenom,
       },
-      memo: 'Swap test',
+      memo: 'To Token swap test',
     };
     const signTxData = {
       appPrivateKey: props.appPrivateKey,
@@ -347,7 +431,11 @@ describe('Test Terra SDK', () => {
     try {
       expect(signedTx).toEqual(signedTxSDK);
     } catch (e) {
-      console.error('Test Smart Contract: Luna to bLuna Swap params', transaction);
+      console.error('Test Smart Contract: Luna to ERC20 Token Swap params', transaction);
+      console.error(
+        'Is content equal:',
+        JSON.stringify(mainnet.tx.decode(signedTx)) === JSON.stringify(mainnet.tx.decode(signedTxSDK))
+      );
       throw e;
     }
 
@@ -362,7 +450,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Smart Contract Without Funds: Luna to bLuna Swap', async () => {
+  it('Test Smart Contract Without Funds: ERC20 Token to Luna Swap', async () => {
     const denom = getRandDenom();
     const feeDenom = getRandDenom();
     const executeMsgObj = {
@@ -378,7 +466,7 @@ describe('Test Terra SDK', () => {
       },
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber: getRandAccount(),
       sequence: getRandSequence(),
       senderAddress: walletAddress,
@@ -389,7 +477,7 @@ describe('Test Terra SDK', () => {
         amount: getRandInt(200000) + 1,
         denom: feeDenom,
       },
-      memo: 'Swap test',
+      memo: 'To Luna swap test',
     };
     const signTxData = {
       appPrivateKey: props.appPrivateKey,
@@ -413,7 +501,11 @@ describe('Test Terra SDK', () => {
     try {
       expect(signedTx).toEqual(signedTxSDK);
     } catch (e) {
-      console.error('Test Smart Contract: Luna to bLuna Swap params', transaction);
+      console.error('Test Smart Contract: ERC20 Token to Luna Swap params', transaction);
+      console.error(
+        'Is content equal:',
+        JSON.stringify(mainnet.tx.decode(signedTx)) === JSON.stringify(mainnet.tx.decode(signedTxSDK))
+      );
       throw e;
     }
 
@@ -433,14 +525,14 @@ describe('Test Terra SDK', () => {
     const feeDenom = getRandDenom();
     const executeMsgObj = {
       transfer: {
-        amount: (getRandInt(12000000) + 1).toString(),
-        recipient: getRandWallet(),
+        amount: "100000", //(getRandInt(12000000) + 1).toString(),
+        recipient: "terra1u29qtwr0u4psv8z2kn2tgxalf5efunfqj3whjv" //getRandWallet(),
       },
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
-      accountNumber: getRandAccount(),
-      sequence: getRandSequence(),
+      chainId: chain,
+      accountNumber: "2343", //getRandAccount(),
+      sequence: "5", //getRandSequence(),
       senderAddress: walletAddress,
       contractAddress: token.contractAddress,
       execute_msg: executeMsgObj,
@@ -451,9 +543,9 @@ describe('Test Terra SDK', () => {
         },
       },
       fee: {
-        gas_limit: getRandInt(120000) + 1,
+        gas_limit: 120000, //getRandInt(120000) + 1,
         denom: feeDenom,
-        amount: getRandInt(5000000) + 1,
+        amount: 18000, //getRandInt(5000000) + 1,
       },
       memo: 'Send cw20 test',
     };
@@ -523,7 +615,7 @@ describe('Test Terra SDK', () => {
       signMode: 1,
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber,
       sequence,
       msgs: params.msgs,
@@ -586,7 +678,7 @@ describe('Test Terra SDK', () => {
       signMode: 1,
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber,
       sequence,
       msgs: params.msgs,
@@ -650,7 +742,7 @@ describe('Test Terra SDK', () => {
       signMode: 1,
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber,
       sequence,
       msgs: params.msgs,
@@ -712,7 +804,7 @@ describe('Test Terra SDK', () => {
       signMode: 1,
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber,
       sequence,
       msgs: params.msgs,
@@ -762,10 +854,11 @@ describe('Test Terra SDK', () => {
     const params = {
       msgs: [
         {
-          '@type': '/terra.wasm.v1beta1.MsgExecuteContract',
+          '@type': '/cosmwasm.wasm.v1.MsgExecuteContract',
           sender: walletAddress,
           contract: token.contractAddress,
-          execute_msg: executeMsgObj,
+          msg: executeMsgObj,
+          //execute_msg: executeMsgObj,
         },
       ],
       fee: {
@@ -780,7 +873,7 @@ describe('Test Terra SDK', () => {
       signMode: 1,
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber,
       sequence,
       msgs: params.msgs,
@@ -795,12 +888,18 @@ describe('Test Terra SDK', () => {
       transport,
     };
     const signedTx = await coinTerra.signTransaction(signTxData);
-    const signedTxSDK = await wallet.createAndSignTx(txParamParser(params));
+    const temp = txParamParser(params);
+    console.error('Temp', temp);
+    const signedTxSDK = await wallet.createAndSignTx(temp);
 
     try {
       expect(signedTx).toEqual(mainnet.tx.encode(signedTxSDK));
     } catch (e) {
       console.error('Test Wallet Connect MsgCW20', transaction);
+      console.error(
+        'Is content equal:',
+        JSON.stringify(mainnet.tx.decode(signedTx)) === JSON.stringify(signedTxSDK)
+      );
       throw e;
     }
 
@@ -852,7 +951,7 @@ describe('Test Terra SDK', () => {
       signMode: 1,
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber,
       sequence,
       msgs: params.msgs,
@@ -910,7 +1009,7 @@ describe('Test Terra SDK', () => {
       signMode: 1,
     };
     const transaction = {
-      chainId: CHAIN_ID.MAIN,
+      chainId: chain,
       accountNumber,
       sequence,
       msgs: params.msgs,

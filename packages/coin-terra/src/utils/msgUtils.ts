@@ -1,5 +1,5 @@
 import { SDKError } from '@coolwallet/core/lib/error';
-import { DenomInfo, DENOMTYPE } from '../config/denomType';
+import { DenomInfo, DENOMTYPE, DENOMTYPE_CLASSIC } from '../config/denomType';
 import * as types from '../config/types';
 import {
   Coins,
@@ -11,9 +11,15 @@ import {
   MsgWithdrawDelegatorReward,
 } from '../terra/@terra-core';
 
-function getDenomFromFee(fee: types.MsgBlind['fee'], name: string): DenomInfo {
-  const feeDenom = Object.values(DENOMTYPE).find((d) => d.unit === fee.amount[0].denom);
+function denomFromUnit(unit: string, name: string): DenomInfo {
+  let feeDenom = Object.values(DENOMTYPE).find((d) => d.unit === unit);
+  if (!feeDenom) feeDenom = Object.values(DENOMTYPE_CLASSIC).find((d) => d.unit === unit);
   if (!feeDenom) throw new SDKError(name, 'Cannot find given fee denom');
+  return feeDenom;
+}
+
+function getDenomFromFee(fee: types.MsgBlind['fee'], name: string): DenomInfo {
+  const feeDenom = denomFromUnit(fee.amount[0].denom, name);
   return feeDenom;
 }
 
@@ -21,8 +27,7 @@ function createMsgSend(signData: types.SignMsgBlindType, msg: Msg, fee: types.Ms
   const msgSend = msg as MsgSend;
   const coin = msgSend.amount as Coins;
   const [denom] = coin.denoms();
-  const coinDenom = Object.values(DENOMTYPE).find((d) => d.unit === denom);
-  if (!coinDenom) throw new SDKError(createMsgSend.name, 'Cannot find given coin denom');
+  const coinDenom = denomFromUnit(denom, createMsgSend.name);
   const feeDenom = getDenomFromFee(fee, 'createMsgSend');
   return {
     ...signData,
@@ -51,8 +56,7 @@ function createMsgDelegate(
 ): types.SignMsgDelegateType {
   const msgDelegate = msg as MsgDelegate;
   const coin = msgDelegate.amount;
-  const coinDenom = Object.values(DENOMTYPE).find((d) => d.unit === coin.denom);
-  if (!coinDenom) throw new SDKError(createMsgDelegate.name, 'Cannot find given coin denom');
+  const coinDenom = denomFromUnit(coin.denom, createMsgDelegate.name);
   const feeDenom = getDenomFromFee(fee, 'createMsgDelegate');
   return {
     ...signData,
@@ -82,8 +86,7 @@ function createMsgUnDelegate(
   const msgUndelegate = msg as MsgUndelegate;
   const coin = msgUndelegate.amount;
   const feeDenom = getDenomFromFee(fee, 'createMsgUnDelegate');
-  const coinDenom = Object.values(DENOMTYPE).find((d) => d.unit === coin.denom);
-  if (!coinDenom) throw new SDKError(createMsgUnDelegate.name, 'Cannot find given coin denom');
+  const coinDenom = denomFromUnit(coin.denom, createMsgUnDelegate.name);
   return {
     ...signData,
     transaction: {
@@ -139,8 +142,7 @@ function createMsgExecuteContract(
     throw new SDKError(createMsgExecuteContract.name, 'Cannot support multiple denom when signing MsgExecuteContract.');
   let funds;
   if (fundsDenom[0]) {
-    const fundDenom = Object.values(DENOMTYPE).find((d) => d.unit === fundsDenom[0]);
-    if (!fundDenom) throw new SDKError(createMsgExecuteContract.name, 'Cannot find given fund denom');
+    const fundDenom = denomFromUnit(fundsDenom[0], createMsgExecuteContract.name);
     funds = {
       denom: fundDenom,
       amount: +msgExecuteContract.coins.get(fundsDenom[0]).amount,

@@ -50,6 +50,16 @@ const CHAINS = {
     properties: CHAIN.VELAS,
     rpc_url: 'https://evmexplorer.velas.com/rpc',
   },
+  CELO: {
+    name: 'Celo',
+    properties: CHAIN.CELO,
+    rpc_url: 'https://forno.celo.org',
+  },
+  CELO_TEST: {
+    name: 'CeloTest',
+    properties: CHAIN.CELO_TEST,
+    rpc_url: 'https://alfajores-forno.celo-testnet.org',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
@@ -221,7 +231,6 @@ const CoinEVM: React.FC<Props> = (props: Props) => {
           transaction: transaction as LegacyTransaction['transaction'],
           addressIndex: 0,
         };
-        console.log(transaction);
         return sdk.signTransaction(signTxData);
       }, props).then((result) => {
         setter((prev) => ({ ...prev, result }));

@@ -68,6 +68,8 @@ class Cosmos {
   }
 }
 
-export default new Cosmos('https://lcd.terra.dev/');
-export const Mainnet = new Cosmos('https://lcd.terra.dev/');
-export const Testnet = new Cosmos('https://bombay-lcd.terra.dev/');
+export default new Cosmos('https://phoenix-lcd.terra.dev/');
+export const Mainnet = new Cosmos('https://phoenix-lcd.terra.dev/');
+export const Testnet = new Cosmos('https://pisco-lcd.terra.dev/');
+export const Classic = new Cosmos('https://columbus-lcd.terra.dev/');
+export const Classic_Testnet = new Cosmos('https://bombay-lcd.terra.dev/');

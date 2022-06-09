@@ -5,9 +5,9 @@ import { getOfficialTokenByContractAddress } from '../utils/token';
 import { TRANSACTION_TYPE } from './constants';
 import type { EIP1559Transaction, LegacyTransaction } from './types';
 
-function isSmartContract(value: string, data: string): boolean {
+function isERC20Transaction(value: string, data: string): boolean {
   const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-  return (isEmpty(value) || value === '0x0') && (functionHash === 'a9059cbb' || functionHash === '095ea7b3');
+  return (isEmpty(value) || value === '0x0') && (functionHash === 'a9059cbb');
 }
 
 function getTransactionType(client: LegacyTransaction | EIP1559Transaction, chain: ChainProps): TRANSACTION_TYPE {
@@ -19,7 +19,7 @@ function getTransactionType(client: LegacyTransaction | EIP1559Transaction, chai
     return TRANSACTION_TYPE.TRANSFER;
   }
 
-  if (isSmartContract(value, data)) {
+  if (isERC20Transaction(value, data)) {
     const official = getOfficialTokenByContractAddress(to, chain);
     if (!isNil(official)) {
       client.transaction.option = {
