@@ -15,11 +15,7 @@ class AvaxCChain extends ChainProps {
 class AvaxCTestChain extends ChainProps {
   id = 43113;
   symbol = 'AVAX';
-  signature =
-    `FA`.padEnd(
-      144,
-      '0'
-    );
+  signature = `FA`.padEnd(144, '0');
   tokens = TEST_TOKENS;
 }
 
