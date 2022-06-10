@@ -61,3 +61,8 @@ export function branchHashToHex(branchStr: string): hexString {
   const branchHex = forger.getCodec(forger.CODEC.BRANCH, ProtocolHash).encoder(branchStr);
   return branchHex;
 }
+
+export function parameterToHex(parameter: any): hexString {
+  const parameterHex = forger.getCodec(forger.CODEC.PARAMETERS, ProtocolHash).encoder(parameter);
+  return parameterHex;
+}
