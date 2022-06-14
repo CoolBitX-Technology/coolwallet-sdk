@@ -1,0 +1,48 @@
+{
+  "name": "@coolwallet/vet",
+  "version": "1.1.2",
+  "description": "CoolWallet Icon sdk",
+  "main": "lib/index.js",
+  "scripts": {
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+  },
+  "keywords": [
+    "vet",
+    "icon",
+    "hardwarewallet",
+    "coolwallet",
+    "javascript",
+    "transaction",
+    "signing",
+    "cryptocurrency"
+  ],
+  "author": "coolwallet-team",
+  "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.1.1"
+  },
+  "dependencies": {
+    "blakejs": "^1.2.1",
+    "elliptic": "^6.5.1",
+    "icon-sdk-js": "0.0.18",
+    "js-sha3": "^0.8.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  }
+}
