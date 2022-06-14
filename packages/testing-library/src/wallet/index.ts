@@ -54,6 +54,7 @@ class Node {
 
 class HDWallet {
   public masterNode?: Node;
+  private seed?: Buffer;
   private curve: CURVE;
 
   constructor(curve: CURVE) {
@@ -63,10 +64,12 @@ class HDWallet {
   setMnemonic(mnemonic: string, iter = 2048, length = 64) {
     const mnemonicBuffer = Buffer.from(mnemonic, 'utf-8');
     const seed = Buffer.from(pbkdf2(sha512, mnemonicBuffer, 'mnemonic', { c: iter, dkLen: length }));
+    this.seed = seed;
     this.setSeed(seed);
   }
 
   setSeed(seed: Buffer) {
+    this.seed = seed;
     const I = hmac(sha512, Buffer.from(this.curve, 'utf-8'), seed);
     const IL = Buffer.from(I.slice(0, 32));
     const IR = Buffer.from(I.slice(32));
@@ -118,6 +121,13 @@ class HDWallet {
       const index = isHardened ? parseInt(indexStr.slice(0, -1), 10) : parseInt(indexStr, 10);
       return this.derive(index, isHardened, prevHd);
     }, this.masterNode!);
+  }
+
+  deriveCurve25519PublicKey() {
+    if (this.seed) {
+      return ed25519.curve25519.scalarMultBase(this.seed.slice(0, 32));
+    }
+    return null;
   }
 }
 export { CURVE };
