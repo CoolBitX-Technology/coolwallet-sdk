@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/terra",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Coolwallet Terra sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",

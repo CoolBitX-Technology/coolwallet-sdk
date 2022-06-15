@@ -31,7 +31,8 @@ export function getTerraSendArgument(publicKey: string, terraData: types.MsgSend
   const feeDenom = fee.denom.protoUnit.padStart(16, '0');
   const feeDenomSignature = fee.denom.signature.slice(32).padStart(144, '0');
 
-  const memo = Buffer.from(terraData.memo, 'ascii').toString('hex');
+  const isMemoEmpty = terraData.memo.length === 0 ? "01" : "00";
+  const memo = Buffer.from(terraData.memo, 'ascii').toString('hex').padStart(256, '0');
 
   const argument =
     pubKey +
@@ -48,6 +49,7 @@ export function getTerraSendArgument(publicKey: string, terraData: types.MsgSend
     feeDenomLabel +
     feeDenom +
     feeDenomSignature +
+    isMemoEmpty +
     memo;
 
   console.debug(getTerraSendArgument.name, argument);
@@ -76,7 +78,8 @@ export function getTerraStakingArgument(
   const gas = fee.gas_limit.toString(16).padStart(16, '0');
   const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
   const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
-  const memo = Buffer.from(terraData.memo, 'ascii').toString('hex');
+  const isMemoEmpty = terraData.memo.length === 0 ? "01" : "00";
+  const memo = Buffer.from(terraData.memo, 'ascii').toString('hex').padStart(256, '0');
   // Encoding Fee denom
   const feeDenomLabel = Buffer.from(fee.denom.name, 'ascii').toString('hex').padStart(16, '0');
   const feeDenom = fee.denom.protoUnit.padStart(16, '0');
@@ -90,7 +93,7 @@ export function getTerraStakingArgument(
     const denomSignature = coin.denom.signature.slice(32).padStart(144, '0');
     argument += denomLabel + denom + denomSignature;
   }
-  argument += feeDenomLabel + feeDenom + feeDenomSignature + memo;
+  argument += feeDenomLabel + feeDenom + feeDenomSignature + isMemoEmpty + memo;
 
   console.debug(getTerraStakingArgument.name, argument);
 
@@ -117,7 +120,8 @@ export function getMsgWithdrawDelegatorRewardArgument(
   const gas = fee.gas_limit.toString(16).padStart(16, '0');
   const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
   const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
-  const memo = Buffer.from(terraData.memo, 'ascii').toString('hex');
+  const isMemoEmpty = terraData.memo.length === 0 ? "01" : "00";
+  const memo = Buffer.from(terraData.memo, 'ascii').toString('hex').padStart(256, '0');
   // Encoding Fee denom
   const feeDenomLabel = Buffer.from(fee.denom.name, 'ascii').toString('hex').padStart(16, '0');
   const feeDenom = fee.denom.protoUnit.padStart(16, '0');
@@ -134,6 +138,7 @@ export function getMsgWithdrawDelegatorRewardArgument(
     feeDenomLabel +
     feeDenom +
     feeDenomSignature +
+    isMemoEmpty +
     memo;
 
   console.debug(getMsgWithdrawDelegatorRewardArgument.name, argument);
@@ -164,6 +169,7 @@ export function getTerraSmartArgument(publicKey: string, terraData: types.MsgExe
   const feeDenomSignature = fee.denom.signature.slice(32).padStart(144, '0');
   const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
   const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
+  const isMemoEmpty = terraData.memo.length === 0 ? "01" : "00";
   const memo = Buffer.from(terraData.memo, 'ascii').toString('hex').padStart(256, '0');
   const execute_msg = Buffer.from(JSON.stringify(terraData.execute_msg), 'utf-8').toString('hex');
 
@@ -181,6 +187,7 @@ export function getTerraSmartArgument(publicKey: string, terraData: types.MsgExe
     gas +
     accountNumber +
     sequence +
+    isMemoEmpty + 
     memo +
     execute_msg;
 
@@ -209,6 +216,7 @@ export function getCW20Argument(
   const gas = fee.gas_limit.toString(16).padStart(16, '0');
   const accountNumber = parseInt(terraData.accountNumber).toString(16).padStart(16, '0');
   const sequence = parseInt(terraData.sequence).toString(16).padStart(16, '0');
+  const isMemoEmpty = terraData.memo.length === 0 ? "01" : "00";
   const memo = Buffer.from(terraData.memo, 'ascii').toString('hex').padStart(256, '0');
 
   const txTokenInfo = terraData.option;
@@ -234,6 +242,7 @@ export function getCW20Argument(
     gas +
     accountNumber +
     sequence +
+    isMemoEmpty + 
     memo +
     tokenInfo +
     signature +
