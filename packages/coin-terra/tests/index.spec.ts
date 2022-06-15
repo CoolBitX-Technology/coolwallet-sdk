@@ -38,10 +38,11 @@ describe('Test Terra SDK', () => {
   let transport: Transport;
   let walletAddress = '';
 
-  const chain = CHAIN_ID.TEST;
+  const chain = CHAIN_ID.MAIN;
   const mainnet = new LCDClient({
     URL: 'https://lcd.terra.dev',
     chainID: chain,
+    isClassic: chain === CHAIN_ID.CLASSIC,
   });
   const mk = new MnemonicKey({ mnemonic });
   const wallet = mainnet.wallet(mk);
