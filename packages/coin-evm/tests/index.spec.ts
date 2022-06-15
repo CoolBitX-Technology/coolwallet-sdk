@@ -274,7 +274,13 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       } else {
-        throw new Error("Staking test error: Unrecognized program id for staking contract.");
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Stake', '')
+          .messagePage(validatorDisplay)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
       }
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
