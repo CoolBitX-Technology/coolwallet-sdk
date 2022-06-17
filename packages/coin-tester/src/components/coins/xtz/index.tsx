@@ -11,9 +11,10 @@ import {
   WalletDelegateParams, WalletOriginateParams, WalletTransferParams, 
   createTransferOperation, createSetDelegateOperation, createOriginationOperation 
 } from '@taquito/taquito';
-import { SignTxData, xtzReveal, xtzTransaction, xtzDelegation, } from '@coolwallet/xtz/lib/config/types';
+import { SignTxData, xtzReveal, xtzTransaction, xtzDelegation, xtzSmart, xtzToken } from '@coolwallet/xtz/lib/config/types';
 import axios from 'axios';
 import { resolvePreset } from '@babel/core';
+import BigNumber from 'bignumber.js';
 
 interface Props {
   transport: Transport | null,
@@ -55,8 +56,8 @@ function CoinXTZ(props: Props) {
   
   const [index, setIndex] = useState('0');
   const [selectedIndex, setSelectedIndex] = useState('0');
-  const [selectedNode, setSelectedNode] = useState('https://hangzhounet.api.tez.ie');
-  const [node, setNode] = useState('https://hangzhounet.api.tez.ie');
+  const [selectedNode, setSelectedNode] = useState('https://mainnet.api.tez.ie');
+  const [node, setNode] = useState('https://mainnet.api.tez.ie');
   const [pubkeyhash, setPubkeyHash] = useState('');
   const [address, setAddress] = useState('');
   const [revealNeeded, checkRevealNeeded] = useState('');
@@ -67,6 +68,10 @@ function CoinXTZ(props: Props) {
   const [signedDelegation, setSignedDelegation] = useState('');
   const [baker, setBaker] = useState('tz1aWXP237BLwNHJcCD4b3DutCevhqq2T1Z9');
   const [signedUndelegation, setSignedUndelegation] = useState('');
+  const [signedSmartContract, setSignedSmartContract] = useState('');
+  const [signedToken, setSignedToken] = useState('');
+  const [tokenValue, setTokenValue] = useState('0');
+  const [toAddress, setToAddress] = useState('tz1QovT56et9ZvpXyYLchq5oejuBRauHoUEF');
 
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
@@ -88,8 +93,8 @@ function CoinXTZ(props: Props) {
   };
 
   const getCounter = async (node: string, address: string)  => {
-    if(node == 'https://hangzhounet.api.tez.ie') {
-      const url = 'https://api.hangzhou2net.tzkt.io/v1/accounts/' + address + '/counter';
+    if(node == 'https://ithacanet.smartpy.io/') {
+      const url = 'https://api.ithacanet.tzkt.io/v1/accounts/' + address + '/counter';
       const response = await axios.get(url);
       console.log(response.data);
       return (parseInt(response.data)+1).toString();
@@ -190,8 +195,8 @@ function CoinXTZ(props: Props) {
       console.debug('Reveal Submit Operation\n', signedTx);
 
       const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.api.tez.ie')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
       else
         return 'https://tzkt.io/' + txId;
     }, setSignedReveal);
@@ -206,38 +211,13 @@ function CoinXTZ(props: Props) {
 
       const Tezos = new TezosToolkit(selectedNode);
 
-      // For verification
-      // const operation: xtzTransaction = {
-      //   branch: 'BKiXcfN1ZTXnNNbTWSRArSWzVFc6om7radWq5mTqGX6rY4P2Uhe',
-      //   source: address,
-      //   fee: "1300",
-      //   counter: "3325582",
-      //   gas_limit: "10100",
-      //   storage_limit: "1",
-      //   amount: "3000000",
-      //   destination: "tz1erET3QwafBppScF62xX8NzNBTbw1SUaNb"
-      // };
-
-      // For validation
-      let estimateFee = DEFAULT_FEE.TRANSFER;
-      let estimateGasLimit = DEFAULT_GAS_LIMIT.TRANSFER;
-      let estimateStorageLimit = 1/*DEFAULT_STORAGE_LIMIT.TRANSFER*/;
-
-      if(useDefaultEstimate == false) {
-        Tezos.setProvider({ wallet: new mockCoolWallet() });
-        const est = await Tezos.estimate.transfer({to: to, amount: parseInt(value), mutez: true}); 
-        estimateFee = est.suggestedFeeMutez;
-        estimateGasLimit = est.gasLimit;
-        estimateStorageLimit = est.storageLimit;
-      }
-
       const operation: xtzTransaction = {
         branch: await Tezos.rpc.getBlockHash(),
         source: address,
-        fee: estimateFee.toString(),
+        fee: '20000',
         counter: await getCounter(selectedNode, address),
-        gas_limit: estimateGasLimit.toString(),
-        storage_limit: estimateStorageLimit == 0 ? "1" : estimateStorageLimit.toString(), 
+        gas_limit: '10000',
+        storage_limit: '1',
         amount: value,
         destination: to
       };
@@ -254,10 +234,9 @@ function CoinXTZ(props: Props) {
 
       const signedTx = await xtz.signTransaction(signTxData, operation);
       console.debug('Transaction Submit Operation\n', signedTx);
-      
       const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.api.tez.ie')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
       else
         return 'https://tzkt.io/' + txId;
     }, setSignedTransaction);
@@ -320,8 +299,8 @@ function CoinXTZ(props: Props) {
       console.debug('Delegation Submit Operation\n', signedTx);     
 
       const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.api.tez.ie')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
       else
         return 'https://tzkt.io/' + txId;
     }, setSignedDelegation);
@@ -382,17 +361,124 @@ function CoinXTZ(props: Props) {
       console.debug('Undelegation Submit Operation\n', signedTx);
 
       const txId = await Tezos.rpc.injectOperation(signedTx);
-      if(node == 'https://hangzhounet.api.tez.ie')
-        return 'https://hangzhou2net.tzkt.io/' + txId;
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
       else
         return 'https://tzkt.io/' + txId;
     }, setSignedUndelegation);
   };
 
+  const signSmartContract = async () => {
+    handleState(async () => {
+ 
+      if(address == '' || value == '' || to == '') {
+        return 'Get address and check amount and destination first';
+      }
+      const Tezos = new TezosToolkit(selectedNode);
+      
+      const operation: xtzSmart= {
+        branch: await Tezos.rpc.getBlockHash(),
+        source: address,
+        fee: '20000',
+        counter: await getCounter(selectedNode, address),
+        gas_limit: '10000', 
+        storage_limit: '1',
+        amount: '0',
+        destination: 'KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV',
+        parameters: { 
+          "entrypoint": "transfer",
+          "value": {
+            "prim": "Pair",
+            "args": [
+              {
+                "string": "tz1crCM3DFMDWqcmn3VjPdHZHk4PsXBLKUN4"
+              },
+              {
+                "prim": "Pair",
+                "args": [
+                  {
+                    "string": "tz1QovT56et9ZvpXyYLchq5oejuBRauHoUEF"
+                  },
+                  {
+                    "int": "1000000000000"
+                  }
+                ]
+              }
+            ]
+          } 
+        }
+      };
+
+      console.log("Smart Operation:")
+      console.log(operation);
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+
+      const signTxData: SignTxData = {
+        transport: transport!,
+        appPrivateKey,
+        appId,
+        addressIndex: selectedIndex
+      };
+
+      const signedTx = await xtz.signSmartContract(signTxData, operation);
+      console.debug('Transaction Submit Operation\n', signedTx);
+      const txId = await Tezos.rpc.injectOperation(signedTx);
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
+      else
+        return 'https://tzkt.io/' + txId;
+    }, setSignedSmartContract);
+  }
+
+  const signToken = async () => {
+    handleState(async () => {
+ 
+      if(address == '' || value == '' || to == '') {
+        return 'Get address and check amount and destination first';
+      }
+      const Tezos = new TezosToolkit(selectedNode);
+
+      const operation: xtzToken = {
+        branch: await Tezos.rpc.getBlockHash(),
+        source: address,
+        fee: '20000',
+        counter: await getCounter(selectedNode, address),
+        gas_limit: '10000', 
+        storage_limit: '0',
+        tokenAmount: new BigNumber(tokenValue).multipliedBy(10 ** 18).toString(),
+        contractAddress: 'KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV',
+        toAddress: toAddress,
+        tokenId: '0',
+        tokenSymbol: 'kUSD',
+        tokenDecimals: '18'
+      };
+      console.log("Token Transfer:")
+      console.log(operation);
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+
+      const signTxData: SignTxData = {
+        transport: transport!,
+        appPrivateKey,
+        appId,
+        addressIndex: selectedIndex
+      };
+
+      const signedTx = await xtz.signTokenTransfer(signTxData, operation);
+      console.debug('Transaction Submit Operation\n', signedTx);
+      const txId = await Tezos.rpc.injectOperation(signedTx);
+      if(node == 'https://ithacanet.smartpy.io/')
+        return 'https://ithacanet.tzkt.io/' + txId;
+      else
+        return 'https://tzkt.io/' + txId;
+    }, setSignedToken);
+  }
+
   return (
     <Container>
       <div className='title2'>
-        These two basic methods are required to implement in a coin sdk.
+        These basic methods are required to implement in a coin sdk.
       </div>
       <OneInput
         title='Index'
@@ -420,7 +506,7 @@ function CoinXTZ(props: Props) {
       <div className='title2'>
         Set Node<br></br>
         Mainnet URL: https://mainnet.api.tez.ie<br></br>
-        Testnet URL: https://hangzhounet.api.tez.ie
+        Testnet URL: https://ithacanet.smartpy.io/
       </div>
       <OneInput
         title='setnode'
@@ -479,6 +565,28 @@ function CoinXTZ(props: Props) {
         onClick={setUndelegation}
         disabled={disabled}
         btnName='Undelegate'
+      />
+      <NoInput
+        title='Smart Contract'
+        content={signedSmartContract}
+        onClick={signSmartContract}
+        disabled={disabled}
+        btnName='Smart'
+      />
+      <TwoInputs
+        title='Token Transfer'
+        content={signedToken}
+        onClick={signToken}
+        disabled={disabled}
+        btnName='Token'
+        value={tokenValue}
+        setValue={setTokenValue}
+        placeholder='tokenValue'
+        inputSize={1}
+        value2={toAddress}
+        setValue2={setToAddress}
+        placeholder2='toAddress'
+        inputSize2={3}
       />
     </Container>
   );

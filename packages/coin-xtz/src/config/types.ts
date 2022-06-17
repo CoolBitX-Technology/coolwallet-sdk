@@ -1,4 +1,5 @@
 import { Transport } from '@coolwallet/core';
+import { MichelsonData } from '@taquito/michel-codec';
 
 export type transport = Transport;
 
@@ -57,4 +58,24 @@ export interface xtzDelegation extends xtzOperation {
   // With, override the previous delegate account
   // Without, undelegate
   delegate?: string
+}
+
+export interface xtzSmart extends xtzOperation {
+  amount: string,
+  destination: string,
+  parameters: smartParam;
+}
+
+export interface smartParam {
+  entrypoint: string,
+  value: MichelsonData
+}
+
+export interface xtzToken extends xtzOperation {
+  tokenAmount: string, 
+  contractAddress: string,
+  toAddress: string,
+  tokenId: string,
+  tokenSymbol?: string,
+  tokenDecimals?: string
 }

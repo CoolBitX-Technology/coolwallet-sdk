@@ -1,44 +1,32 @@
-import { MCU, MockedTransport } from './__mocks__';
-import mitt from 'mitt';
-import { apdu } from '../src';
-import type { IPC } from './__mocks__/IPC';
+import { Transport, coin, config } from '../src';
+import * as bip39 from 'bip39';
+import { createTransport } from '@coolwallet/transport-jre-http';
+import { initialize, HDWallet, CURVE } from '@coolwallet/testing-library';
 
-const ipc: IPC = mitt();
-const mcu = new MCU(ipc);
-const transport = new MockedTransport(ipc);
+type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
-beforeAll(() => {
-  mcu.process();
-});
+const mnemonic = bip39.generateMnemonic();
+const wallet = new HDWallet(CURVE.ED25519);
 
-describe('Test apdu general', () => {
-  it('getNonce', async () => {
-    const nonce = await apdu.general.getNonce(transport);
-    expect(nonce).toHaveLength(16);
+describe('Test CoolWallet SDK Core Functional', () => {
+  let props: PromiseValue<ReturnType<typeof initialize>>;
+  let transport: Transport;
+
+  beforeAll(async () => {
+    transport = (await createTransport())!;
+    props = await initialize(transport, mnemonic);
+    wallet.setMnemonic(mnemonic);
   });
 
-  it('getSEVersion', async () => {
-    const version = await apdu.general.getSEVersion(transport);
-    expect(version).toEqual(9999);
-  });
+  it('Test derive Curve25519 publicKey', async () => {
+    const publicKey = await coin.getPublicKeyByPath(
+      transport,
+      props.appId,
+      props.appPrivateKey,
+      config.PathType.CURVE25519
+    );
+    const expectedPublicKey = Buffer.from(wallet.deriveCurve25519PublicKey()).toString('hex');
 
-  it('echo', async () => {
-    const message = Buffer.from(
-      'Hello,World'
-    ).toString('hex');
-    const echo = await apdu.general.echo(transport, message);
-    expect(echo).toBe(message);
+    expect(publicKey).toEqual(expectedPublicKey);
   });
-
-  it('echo with long length', async () => {
-    const message = Buffer.from(
-      'Hello,World12345412i320-1i2190ri0-iw0if-qwfowqjrio2jio4j12iorjioqwjfioawgiowioqjeioqwjeioqwjioejoij'
-    ).toString('hex');
-    const echo = await apdu.general.echo(transport, message);
-    expect(echo).toBe(message);
-  });
-});
-
-afterAll(() => {
-  mcu.close();
 });
