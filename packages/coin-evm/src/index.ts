@@ -10,7 +10,6 @@ import { pubKeyToAddress } from './utils/address';
 import * as SEArguments from './utils/arguments';
 import type { ChainProps } from './chain/types';
 import type * as Transaction from './transaction/types';
-import { FANTOM } from './chain';
 
 class Evm extends COIN.ECDSACoin {
   chain: ChainProps;
@@ -94,16 +93,9 @@ class Evm extends COIN.ECDSACoin {
       );
     }
 
-    let script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
-    let argument = "";
-    // Staking contract for Fantom
-    if(this.chain.id === FANTOM.id && client.transaction.to.toLowerCase() === FANTOM.stakingContract.toLowerCase()){
-      script = SCRIPTS.signStakingTransaction.scriptWithSignature;
-      argument = await SEArguments.getSELegacyStakingTransaction(client, this.chain, this.coinType);
-    }
-    else {
-      argument = await SEArguments.getSELegacySmartContractTransaction(client, this.chain, this.coinType);
-    }
+    const script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
+    const argument = await SEArguments.getSELegacySmartContractTransaction(client, this.chain, this.coinType);
+    
     return sign.signTransaction(client, script, argument, this.chain.id, publicKey);
   }
 

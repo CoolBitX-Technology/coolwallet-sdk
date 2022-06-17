@@ -1,4 +1,4 @@
-import { utils, config, error } from '@coolwallet/core';
+import { utils, config } from '@coolwallet/core';
 import { TypedDataUtils, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { formatHex, ToHex } from './string';
 import * as Encoder from './encoder';
@@ -49,35 +49,23 @@ async function getSELegacySmartContractTransaction(
   const chainInfo = chain.toHexChainInfo();
   const chainSignature = chain.getSignature();
 
-  return '15' + path + encoded + chainInfo + chainSignature + formatHex(transaction.data);
-}
-
-async function getSELegacyStakingTransaction(
-  client: LegacyTransaction,
-  chain: ChainProps,
-  coinType: string
-): Promise<string> {
-  const { transaction } = client;
-  const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
-  const encoded = Encoder.encodeLegacyTransactionToSE(transaction);
-  const chainInfo = chain.toHexChainInfo();
-  const chainSignature = chain.getSignature();
-
-  const programId = transaction.data.slice(0, 10);
-  let stakingCode = '';
-  if (programId.toLowerCase() === FANTOM.delegateProgram) {
-    stakingCode = '01';
-  } else if (programId.toLowerCase() === FANTOM.withdrawProgram) {
-    stakingCode = '02';
-  } else if (programId.toLowerCase() === FANTOM.undelegateProgram) {
-    stakingCode = '03';
-  } else {
-    throw new error.SDKError(getSELegacyStakingTransaction.name, 'Unrecognized program id for staking contract.');
+  let stakingCode = '00'; // Non-staking smart contract
+  if(chain.id === FANTOM.id && client.transaction.to.toLowerCase() === FANTOM.stakingContract.toLowerCase()){
+    const programId = transaction.data.slice(0, 10);
+    if (programId.toLowerCase() === FANTOM.delegateProgram) {
+      stakingCode = '01';
+    } else if (programId.toLowerCase() === FANTOM.withdrawProgram) {
+      stakingCode = '02';
+    } else if (programId.toLowerCase() === FANTOM.undelegateProgram) {
+      //const parsedVal = parseInt(transaction.data.slice(138, 202), 16);
+      //transaction.value = w3Utils.toHex(parsedVal);
+      stakingCode = '03';
+    } else { // Other staking function
+      stakingCode = '99';
+    }
   }
 
-  return (
-    '15' + path + encoded + chainInfo + chainSignature + stakingCode + formatHex(transaction.data)
-  );
+  return '15' + path + encoded + chainInfo + chainSignature  + stakingCode + formatHex(transaction.data);
 }
 
 async function getSELegacySmartContractSegmentTransaction(
@@ -213,7 +201,6 @@ export {
   getSELegacyERC20Transaction,
   getSELegacySmartContractTransaction,
   getSELegacySmartContractSegmentTransaction,
-  getSELegacyStakingTransaction,
   getSEEIP712MessageTransaction,
   getSEEIP712TypedDataTransaction,
   getSEEIP1559Transaction,
