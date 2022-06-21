@@ -16,3 +16,5 @@ console.log('Fantom Information', CHAIN.FANTOM.toHexChainInfo());
 console.log('Fantom Signature', CHAIN.FANTOM.getSignature());
 console.log('Celo Information', CHAIN.CELO.toHexChainInfo());
 console.log('Celo Signature', CHAIN.CELO.getSignature());
+console.log('Aurora Information', CHAIN.AURORA.toHexChainInfo());
+console.log('Aurora Signature', CHAIN.AURORA.getSignature());
