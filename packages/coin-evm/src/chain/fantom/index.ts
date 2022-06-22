@@ -9,11 +9,6 @@ class FantomChain extends ChainProps {
     '0'
   );
   tokens = TOKENS;
-
-  stakingContract = "0xfc00face00000000000000000000000000000000";
-  delegateProgram = "0x9fa6dd35";
-  withdrawProgram = "0x0962ef79";
-  undelegateProgram = "0x4f864df4";
 }
 
 export default new FantomChain();

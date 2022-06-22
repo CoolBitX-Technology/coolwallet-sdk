@@ -49,23 +49,10 @@ async function getSELegacySmartContractTransaction(
   const chainInfo = chain.toHexChainInfo();
   const chainSignature = chain.getSignature();
 
-  let stakingCode = '00'; // Non-staking smart contract
-  if(chain.id === FANTOM.id && client.transaction.to.toLowerCase() === FANTOM.stakingContract.toLowerCase()){
-    const programId = transaction.data.slice(0, 10);
-    if (programId.toLowerCase() === FANTOM.delegateProgram) {
-      stakingCode = '01';
-    } else if (programId.toLowerCase() === FANTOM.withdrawProgram) {
-      stakingCode = '02';
-    } else if (programId.toLowerCase() === FANTOM.undelegateProgram) {
-      //const parsedVal = parseInt(transaction.data.slice(138, 202), 16);
-      //transaction.value = w3Utils.toHex(parsedVal);
-      stakingCode = '03';
-    } else { // Other staking function
-      stakingCode = '99';
-    }
-  }
+  // Ensure lowercase to be detected by card
+  transaction.to = transaction.to.toLowerCase();
 
-  return '15' + path + encoded + chainInfo + chainSignature  + stakingCode + formatHex(transaction.data);
+  return '15' + path + encoded + chainInfo + chainSignature + formatHex(transaction.data);
 }
 
 async function getSELegacySmartContractSegmentTransaction(
