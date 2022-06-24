@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/core",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "Core library for other CoolWallet SDKs.",
   "main": "lib/index.js",
   "scripts": {
@@ -44,6 +44,8 @@
     "@babel/plugin-transform-runtime": "^7.16.5",
     "@babel/preset-env": "^7.8.0",
     "@babel/preset-typescript": "^7.8.0",
+    "@noble/hashes": "^1.1.2",
+    "@noble/secp256k1": "^1.6.0",
     "babel-jest": "^27.4.5",
     "del-cli": "^4.0.1",
     "jest": "^27.4.5",
