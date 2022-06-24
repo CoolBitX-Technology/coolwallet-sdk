@@ -249,7 +249,8 @@ describe('Test EVM SDK', () => {
 
       let expectedTxDetail = '';
       const programId = transaction.data.slice(0, 10);
-      if (programId.toLowerCase() === api.chain.delegateProgram) {
+      console.error("ProgramID:", programId);
+      if (programId.toLowerCase() === api.chain.stakingInfo.delegate) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
@@ -258,7 +259,7 @@ describe('Test EVM SDK', () => {
           .amountPage(+transaction.value)
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
-      } else if (programId.toLowerCase() === api.chain.withdrawProgram) {
+      } else if (programId.toLowerCase() === api.chain.stakingInfo.withdraw) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
@@ -266,7 +267,7 @@ describe('Test EVM SDK', () => {
           .messagePage(validatorDisplay)
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
-      } else if (programId.toLowerCase() === api.chain.undelegateProgram) {
+      } else if (programId.toLowerCase() === api.chain.stakingInfo.undelegate) {
         const parsedVal = parseInt(transaction.data.slice(138, 202), 16);
         const scale = 10 ** -18;
         expectedTxDetail = new DisplayBuilder()
@@ -282,7 +283,6 @@ describe('Test EVM SDK', () => {
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
           .wrapPage('SMART', '')
-          .messagePage(validatorDisplay)
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
