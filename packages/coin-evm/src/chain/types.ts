@@ -12,6 +12,12 @@ abstract class ChainProps {
   readonly layer2: string = '';
   abstract readonly signature: string;
   abstract readonly tokens: Record<string, TokenProps>;
+  readonly stakingInfo = {
+    contractAddress: '',
+    delegate: '',
+    withdraw: '',
+    undelegate: '',
+  };
 
   getSignature() {
     return this.signature;

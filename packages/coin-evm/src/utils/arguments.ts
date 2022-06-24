@@ -49,9 +49,6 @@ async function getSELegacySmartContractTransaction(
   const chainInfo = chain.toHexChainInfo();
   const chainSignature = chain.getSignature();
 
-  // Ensure lowercase to be detected by card
-  transaction.to = transaction.to.toLowerCase();
-
   return '15' + path + encoded + chainInfo + chainSignature + formatHex(transaction.data);
 }
 

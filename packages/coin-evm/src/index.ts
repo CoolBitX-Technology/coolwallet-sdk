@@ -93,9 +93,19 @@ class Evm extends COIN.ECDSACoin {
       );
     }
 
-    const script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
+    let script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
+    if (this.chain.symbol === 'FTM' && this.chain.stakingInfo.contractAddress === transaction.to.toLowerCase()) {
+      const programId = transaction.data.slice(0, 10);
+      if (
+        programId.toLowerCase() === this.chain.stakingInfo.delegate ||
+        programId.toLowerCase() === this.chain.stakingInfo.withdraw ||
+        programId.toLowerCase() === this.chain.stakingInfo.undelegate
+      ) {
+        script = SCRIPTS.signStakingTransaction.scriptWithSignature;
+      }
+    }
     const argument = await SEArguments.getSELegacySmartContractTransaction(client, this.chain, this.coinType);
-    
+
     return sign.signTransaction(client, script, argument, this.chain.id, publicKey);
   }
 
