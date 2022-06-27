@@ -14,6 +14,7 @@ import {
   MESSAGE_TRANSACTION,
   SMART_CONTRACT_SEGMENT_TRANSACTION,
   SMART_CONTRACT_TRANSACTION,
+  STAKING_TRANSACTION,
   TRANSFER_TRANSACTION,
   TYPED_DATA_TRANSACTION,
 } from './fixtures/transaction';
@@ -34,11 +35,12 @@ const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS) };
 const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
 const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
 const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO) };
+const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM) };
 // Layer 2
 const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
 
-const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinCelo];
+const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinCelo, coinFantom];
 
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
@@ -180,6 +182,7 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+      console.error('Transaction:', transaction);
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
@@ -214,6 +217,69 @@ describe('Test EVM SDK', () => {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    }
+  });
+
+  it.each([coinFantom])('$name test staking transaction', async ({ api }) => {
+    for (const transaction of STAKING_TRANSACTION) {
+      const client: LegacyTransaction = {
+        transaction: {
+          ...transaction,
+          value: utils.toHex(utils.toWei(transaction.value, 'ether')),
+        },
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+      };
+
+      const signature = await api.signTransaction(client);
+      const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
+      expect(signature).toEqual(expectedSignature);
+      const txDetail = await getTxDetail(transport, props.appId);
+
+      const validatorId = parseInt(transaction.data.slice(10, 74), 16);
+      const validatorDisplay = 'ID ' + validatorId;
+
+      let expectedTxDetail = '';
+      const programId = transaction.data.slice(0, 10);
+      if (programId.toLowerCase() === api.chain.stakingInfo.delegate) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Delgt', '')
+          .messagePage(validatorDisplay)
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (programId.toLowerCase() === api.chain.stakingInfo.withdraw) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Withdr', '')
+          .messagePage(validatorDisplay)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (programId.toLowerCase() === api.chain.stakingInfo.undelegate) {
+        const parsedVal = parseInt(transaction.data.slice(138, 202), 16);
+        const scale = 10 ** -18;
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Undelgt', '')
+          .messagePage(validatorDisplay)
+          .amountPage(+(parsedVal * scale))
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
           .messagePage(api.chain.symbol)
           .wrapPage('SMART', '')
           .wrapPage('PRESS', 'BUTToN')

@@ -9,6 +9,7 @@ import type {
   EIP712TypedDataTransaction,
   LegacyTransaction,
 } from '../transaction/types';
+import { FANTOM } from '../chain';
 import type { ChainProps } from '../chain/types';
 
 async function getSELegacyTransaction(client: LegacyTransaction, chain: ChainProps, coinType: string): Promise<string> {
