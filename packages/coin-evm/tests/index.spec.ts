@@ -249,7 +249,6 @@ describe('Test EVM SDK', () => {
 
       let expectedTxDetail = '';
       const programId = transaction.data.slice(0, 10);
-      console.error("ProgramID:", programId);
       if (programId.toLowerCase() === api.chain.stakingInfo.delegate) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
