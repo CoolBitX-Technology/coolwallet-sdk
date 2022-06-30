@@ -1,7 +1,5 @@
 import { Transport } from '@coolwallet/core';
 
-export { Transport };
-
 export type Clause = {
   /**
    * destination address where transfer token to, or invoke contract method on.
@@ -39,13 +37,13 @@ export type Record = {
     features?: number;
     unused?: Buffer[];
   };
-}
+};
 
 export type signTxType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  transaction: Record<string, any>;
+  transaction: Record;
   addressIndex: number;
   confirmCB?(): void;
   authorizedCB?(): void;
@@ -55,7 +53,7 @@ export type signCertType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  transaction: Record<string, any>;
+  transaction: Record;
   addressIndex: number;
   confirmCB?(): void;
   authorizedCB?(): void;

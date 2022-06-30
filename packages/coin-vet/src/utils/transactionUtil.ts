@@ -1,6 +1,6 @@
 import * as stringUtil from './stringUtil';
 import { keccak256 } from '../vet/keccak';
-
+const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
 

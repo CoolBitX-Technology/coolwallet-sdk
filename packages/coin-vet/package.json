@@ -25,6 +25,7 @@
     "@coolwallet/core": "^1.1.1"
   },
   "dependencies": {
+    "bignumber.js": "^9.0.2",
     "blakejs": "^1.2.1",
     "elliptic": "^6.5.1",
     "icon-sdk-js": "0.0.18",

@@ -1,4 +1,4 @@
-import { coin as COIN } from '@coolwallet/core';
+import { coin as COIN, Transport } from '@coolwallet/core';
 import { signTransaction, signCertificate } from './sign';
 import * as txUtil from './utils/transactionUtil';
 import * as params from './config/params';
@@ -13,7 +13,7 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
    * Get VET address by index
    */
   async getAddress(
-    transport: types.Transport,
+    transport: Transport,
     appPrivateKey: string,
     appId: string,
     addressIndex: number
@@ -29,8 +29,8 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
 
   /**
    * Sign VET VIP191 Transaction.
-  */
-   async signVIP191Transaction(signTxData: types.signTxType) {
+   */
+  async signVIP191Transaction(signTxData: types.signTxType): Promise<string> {
     const publicKey = await this.getPublicKey(
       signTxData.transport,
       signTxData.appPrivateKey,
@@ -43,10 +43,9 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
 
   /**
    * Sign VET Transaction.
-  */
-  async signTransaction(signTxData: types.signTxType) {
-
-    const { delegator } = signTxData.transaction;
+   */
+  async signTransaction(signTxData: types.signTxType): Promise<string> {
+    const { reserved } = signTxData.transaction;
 
     const publicKey = await this.getPublicKey(
       signTxData.transport,
@@ -55,19 +54,17 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
       signTxData.addressIndex
     );
 
-    if(delegator) {
+    if (reserved != null) {
       return this.signVIP191Transaction(signTxData);
     }
 
     return signTransaction(signTxData, publicKey);
   }
 
-
-
   /**
    * Sign VET Certificate.
    */
-  async signCertificate(signTxData: types.signCertType) {
+  async signCertificate(signTxData: types.signCertType): Promise<string> {
     const publicKey = await this.getPublicKey(
       signTxData.transport,
       signTxData.appPrivateKey,

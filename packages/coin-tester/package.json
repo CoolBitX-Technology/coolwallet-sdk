@@ -27,6 +27,7 @@
     "@coolwallet/theta": "file:../coin-theta",
     "@coolwallet/transport-jre-http": "file:../transport-jre-http",
     "@coolwallet/transport-web-ble": "file:../transport-web-ble",
+    "@coolwallet/vet": "file:../coin-vet",
     "@coolwallet/xtz": "file:../coin-xtz",
     "@cosmostation/cosmosjs": "^0.11.1",
     "@ethersproject/bignumber": "^5.5.0",
