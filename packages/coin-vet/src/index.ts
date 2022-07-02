@@ -1,5 +1,5 @@
 import { coin as COIN, Transport } from '@coolwallet/core';
-import { signTransaction, signCertificate } from './sign';
+import { signTransaction, signCertificate, signTransaction2 } from './sign';
 import * as txUtil from './utils/transactionUtil';
 import * as params from './config/params';
 import * as types from './config/types';
@@ -45,6 +45,7 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
    * Sign VET Transaction.
    */
   async signTransaction(signTxData: types.signTxType): Promise<string> {
+    console.log('signing transaction');
     const { reserved } = signTxData.transaction;
 
     const publicKey = await this.getPublicKey(
@@ -59,6 +60,27 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
     }
 
     return signTransaction(signTxData, publicKey);
+  }
+
+  /**
+   * Sign VET Transaction.
+   */
+  async signTransaction2(signTxData: types.signTxType): Promise<string> {
+    console.log('signing transaction2');
+    const { reserved } = signTxData.transaction;
+
+    const publicKey = await this.getPublicKey(
+      signTxData.transport,
+      signTxData.appPrivateKey,
+      signTxData.appId,
+      signTxData.addressIndex
+    );
+
+    if (reserved != null) {
+      return this.signVIP191Transaction(signTxData);
+    }
+
+    return signTransaction2(signTxData, publicKey);
   }
 
   /**

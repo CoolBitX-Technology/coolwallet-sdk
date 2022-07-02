@@ -18,6 +18,7 @@ function CoinVet(props: Props) {
   const temp = new VET();
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
+  const [signedTransaction2, setSignedTransaction2] = useState('');
   const [value, setValue] = useState('0');
   const [to, setTo] = useState('0x7567d83b7b8d80addcb281a71d54fc7b3364ffed');
 
@@ -63,7 +64,42 @@ function CoinVet(props: Props) {
         gasPriceCoef: 128,
         gas: 21000,
         dependsOn: null,
-        nonce: 12345678,
+        nonce: "0xf2ed7cd2567c6dd4",
+      }
+      const signTxData = {
+        transport,
+        appPrivateKey,
+        transaction,
+        appId: "",
+        addressIndex: 0,
+      }
+
+      const appId = localStorage.getItem('appId');
+      // const appId = "";
+      if (!appId) throw new Error('No Appid stored, please register!');
+      signTxData.appId = appId;
+      console.log("signning transaction...");
+      const signedTx = await temp.signTransaction(signTxData);
+      console.log("signining done....")
+      return signedTx;
+    }, setSignedTransaction);
+  };
+
+  const signTransaction2 = async () => {
+    handleState(async () => {
+      const transaction = {
+        chainTag: 1,
+        blockRef: '0x00000000aabbccdd',
+        expiration: 32,
+        clauses: [{
+            to: '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed',
+            value: 10000,
+            data: '0x000000606060'
+        }],
+        gasPriceCoef: 128,
+        gas: 21000,
+        dependsOn: null,
+        nonce: "0xf2ed7cd2567c6dd4",
       }
       const signTxData = {
         transport,
@@ -76,9 +112,11 @@ function CoinVet(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       signTxData.appId = appId;
-      const signedTx = await temp.signTransaction(signTxData);
+      console.log("signning transaction2...");
+      const signedTx = await temp.signTransaction2(signTxData);
+      console.log("signining2 done....")
       return signedTx;
-    }, setSignedTransaction);
+    }, setSignedTransaction2);
   };
 
   return (
@@ -96,6 +134,21 @@ function CoinVet(props: Props) {
         title='Sign Transaction'
         content={signedTransaction}
         onClick={signTransaction}
+        disabled={disabled}
+        btnName='Sign'
+        value={value}
+        setValue={setValue}
+        placeholder='value'
+        inputSize={1}
+        value2={to}
+        setValue2={setTo}
+        placeholder2='to'
+        inputSize2={3}
+      />
+      <TwoInputs
+        title='Sign Transaction without reserved'
+        content={signedTransaction2}
+        onClick={signTransaction2}
         disabled={disabled}
         btnName='Sign'
         value={value}
