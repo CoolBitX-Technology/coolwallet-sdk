@@ -73,7 +73,7 @@ export const getERC20Argument = async (
  */
 export const getSmartArgument = async (transaction: EIP1559Transaction, addressIndex: number): Promise<string> => {
   const argument =
-    (transaction.to !== undefined ? handleHex(transaction.to) : "".padEnd(40, '0')) + // Has to address
+    ((transaction.to !== undefined && transaction.to !== "") ? handleHex(transaction.to) : "".padEnd(40, '0')) + // Has to address
     handleHex(transaction.value).padStart(20, '0') +
     handleHex(transaction.gasTipCap).padStart(20, '0') + // maxPriorityFeePerGas
     handleHex(transaction.gasFeeCap).padStart(20, '0') + // maxFeePerGas
@@ -99,7 +99,7 @@ export const getSmartArgumentSegment = async (
   addressIndex: number
 ): Promise<string> => {
   const argument =
-    (transaction.to !== undefined ? handleHex(transaction.to) : "".padEnd(40, '0')) + // Has to address
+    ((transaction.to !== undefined && transaction.to !== "") ? handleHex(transaction.to) : "".padEnd(40, '0')) + // Has to address
     handleHex(transaction.value).padStart(20, '0') +
     handleHex(transaction.gasTipCap).padStart(20, '0') +
     handleHex(transaction.gasFeeCap).padStart(20, '0') +
