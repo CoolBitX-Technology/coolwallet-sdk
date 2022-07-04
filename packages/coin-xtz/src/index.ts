@@ -10,6 +10,8 @@ import * as params from './config/params';
 import * as argUtil from './utils/argumentUtil';
 import * as xtzSign from './sign';
 import * as cryptoUtil from './utils/cryptoUtil';
+import { TOKENTYPE } from './config/tokenType';
+import * as paramUtil from './utils/parametersUtil';
 
 export { PATH_STYLE };
 
@@ -159,4 +161,58 @@ export default class XTZ extends COIN.EDDSACoin implements COIN.Coin {
     return txUtil.getSubmitTransaction(formatTxData, signature);
   }
 
+  async signSmartContract(
+    signTxData: types.SignTxData,
+    operation: types.xtzSmart
+  ) {
+    const {
+      transport, appPrivateKey, appId, addressIndex
+    } = signTxData;
+
+    const script = params.SMART.script + params.SMART.signature;
+    const argument = await argUtil.getSmartArgument(this.pathStyle, operation, addressIndex);
+    const publicKey = await this.getPublicKeyByPathType(transport, appPrivateKey, appId, addressIndex);
+
+    const signature = await xtzSign.signTransaction(
+      signTxData,
+      script,
+      argument,
+      publicKey
+    );
+    const formatTxData = await xtzUtil.getFormatSmart(operation); 
+    return txUtil.getSubmitTransaction(formatTxData, signature);
+  }
+
+  async signTokenTransfer(
+    signTxData: types.SignTxData,
+    operation: types.xtzToken
+  ){
+    const {
+      transport, appPrivateKey, appId, addressIndex
+    } = signTxData;
+    const { contractAddress, tokenId } = operation;
+    const upperCaseAddress = contractAddress.toUpperCase();
+    let tokenSignature = '';
+    for (const tokenInfo of TOKENTYPE) {
+      if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress && tokenInfo.token_id === tokenId) {
+        tokenSignature = tokenInfo.signature;
+        operation.tokenSymbol = tokenInfo.symbol;
+        operation.tokenDecimals = tokenInfo.unit;
+        break;
+      }
+    }
+    const parameters = await paramUtil.getTokenParameters(operation);
+    const script = params.TOKEN.script + params.TOKEN.signature;
+    const argument = await argUtil.getTokenArgument(this.pathStyle, operation, addressIndex, parameters, tokenSignature);
+    const publicKey = await this.getPublicKeyByPathType(transport, appPrivateKey, appId, addressIndex);
+
+    const signature = await xtzSign.signTransaction(
+      signTxData,
+      script,
+      argument,
+      publicKey
+    );
+    const formatTxData = await xtzUtil.getFormatToken(operation, parameters); 
+    return txUtil.getSubmitTransaction(formatTxData, signature);
+  }
 }

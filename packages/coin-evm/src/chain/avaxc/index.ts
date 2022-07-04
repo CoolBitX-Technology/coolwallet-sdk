@@ -1,4 +1,4 @@
-import { TOKENS } from './token';
+import { TOKENS, TEST_TOKENS } from './token';
 import { ChainProps } from '../types';
 
 class AvaxCChain extends ChainProps {
@@ -12,4 +12,12 @@ class AvaxCChain extends ChainProps {
   tokens = TOKENS;
 }
 
-export default new AvaxCChain();
+class AvaxCTestChain extends ChainProps {
+  id = 43113;
+  symbol = 'AVAX';
+  signature = `FA`.padEnd(144, '0');
+  tokens = TEST_TOKENS;
+}
+
+export const AVAXC = new AvaxCChain();
+export const AVAXC_TEST = new AvaxCTestChain();

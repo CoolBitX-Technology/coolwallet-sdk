@@ -3,7 +3,7 @@ export enum target{
 }
 
 export enum PathType {
-  BIP32 = '32', SLIP0010 = '10', BIP32EDDSA = '42', BIP32ED25519 = '17',
+  BIP32 = '32', SLIP0010 = '10', BIP32EDDSA = '42', BIP32ED25519 = '17', CURVE25519 = '19',
 }
 
 export const SE_KEY_PARAM = {

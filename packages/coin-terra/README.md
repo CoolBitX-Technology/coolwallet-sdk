@@ -10,7 +10,8 @@ Added `CHAIN_ID.CLASSIC`, `DENOMTYPE_CLASSIC` and `TOKENTYPE_CLASSIC` for Terra 
 
 ## Limitation
 
-For Terra Classic, currently only normal transfer is fully tested and guaranteed to be working. CW20 for Terra 2.0 is still under development.
+* Transaction memo is limited to 128 Bytes. 
+* Smart contract and CW20 token for Terra 2.0 is still under development.
 
 ## Install
 

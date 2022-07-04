@@ -89,5 +89,8 @@
     "inquirer": "^8.2.1",
     "log-symbols": "^4.1.0",
     "typescript": "^4.3.2"
+  },
+  "overrides": {
+    "grpc": "@grpc/grpc-js"
   }
 }

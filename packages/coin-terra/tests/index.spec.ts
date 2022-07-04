@@ -42,6 +42,7 @@ describe('Test Terra SDK', () => {
   const mainnet = new LCDClient({
     URL: 'https://lcd.terra.dev',
     chainID: chain,
+    isClassic: chain === CHAIN_ID.CLASSIC,
   });
   const mk = new MnemonicKey({ mnemonic });
   const wallet = mainnet.wallet(mk);
@@ -185,6 +186,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    signTxData.transaction.sequence = "0";
+    sendOpt.sequence = 0;
+    const signedTx0 = await coinTerra.signTransferTransaction(signTxData);
+    const signedTxSDK0 = mainnet.tx.encode(await wallet.createAndSignTx(sendOpt));
+    expect(signedTx0).toEqual(signedTxSDK0);
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    sendOpt.memo = "";
+    const signedTxE = await coinTerra.signTransferTransaction(signTxData);
+    const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(sendOpt));
+    expect(signedTxE).toEqual(signedTxSDKE);
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -244,6 +259,20 @@ describe('Test Terra SDK', () => {
       console.error('Test Delegate params', transaction);
       throw e;
     }
+
+    // Sequence 0 test
+    transaction.sequence = "0";
+    delegateOpt.sequence = 0;
+    const signedTx0 = await coinTerra.signDelegateTransaction(signTxData);
+    const signedTxSDK0 = mainnet.tx.encode(await wallet.createAndSignTx(delegateOpt));
+    expect(signedTx0).toEqual(signedTxSDK0);
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    delegateOpt.memo = "";
+    const signedTxE = await coinTerra.signDelegateTransaction(signTxData);
+    const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(delegateOpt));
+    expect(signedTxE).toEqual(signedTxSDKE);
 
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
@@ -308,6 +337,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    transaction.sequence = "0";
+    undelegateOpt.sequence = 0;
+    const signedTx0 = await coinTerra.signUndelegateTransaction(signTxData);
+    const signedTxSDK0 = mainnet.tx.encode(await wallet.createAndSignTx(undelegateOpt));
+    expect(signedTx0).toEqual(signedTxSDK0);
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    undelegateOpt.memo = "";
+    const signedTxE = await coinTerra.signUndelegateTransaction(signTxData);
+    const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(undelegateOpt));
+    expect(signedTxE).toEqual(signedTxSDKE);
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -361,6 +404,20 @@ describe('Test Terra SDK', () => {
       console.error('Test Withdraw params', transaction);
       throw e;
     }
+
+    // Sequence 0 test
+    transaction.sequence = "0";
+    withdrawOpt.sequence = 0;
+    const signedTx0 = await coinTerra.signWithdrawTransaction(signTxData);
+    const signedTxSDK0 = mainnet.tx.encode(await wallet.createAndSignTx(withdrawOpt));
+    expect(signedTx0).toEqual(signedTxSDK0);
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    withdrawOpt.memo = "";
+    const signedTxE = await coinTerra.signWithdrawTransaction(signTxData);
+    const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(withdrawOpt));
+    expect(signedTxE).toEqual(signedTxSDKE);
 
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
@@ -439,6 +496,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    transaction.sequence = "0";
+    smartSwapOpt.sequence = 0;
+    const signedTx0 = await coinTerra.signMsgExecuteContractTransaction(signTxData);
+    const signedTxSDK0 = mainnet.tx.encode(await wallet.createAndSignTx(smartSwapOpt));
+    expect(signedTx0).toEqual(signedTxSDK0);
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    smartSwapOpt.memo = "";
+    const signedTxE = await coinTerra.signMsgExecuteContractTransaction(signTxData);
+    const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(smartSwapOpt));
+    expect(signedTxE).toEqual(signedTxSDKE);
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -509,6 +580,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    transaction.sequence = "0";
+    smartSwapOpt.sequence = 0;
+    const signedTx0 = await coinTerra.signMsgExecuteContractTransaction(signTxData);
+    const signedTxSDK0 = mainnet.tx.encode(await wallet.createAndSignTx(smartSwapOpt));
+    expect(signedTx0).toEqual(signedTxSDK0);
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    smartSwapOpt.memo = "";
+    const signedTxE = await coinTerra.signMsgExecuteContractTransaction(signTxData);
+    const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(smartSwapOpt));
+    expect(signedTxE).toEqual(signedTxSDKE);
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -575,6 +660,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    transaction.sequence = "0";
+    cw20Opt.sequence = 0;
+    const signedTx0 = await coinTerra.signMsgCW20Transaction(signTxData);
+    const signedTxSDK0 = mainnet.tx.encode(await wallet.createAndSignTx(cw20Opt));
+    expect(signedTx0).toEqual(signedTxSDK0);
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    cw20Opt.memo = "";
+    const signedTxE = await coinTerra.signMsgCW20Transaction(signTxData);
+    const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(cw20Opt));
+    expect(signedTxE).toEqual(signedTxSDKE);
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -639,6 +738,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    signTxData.transaction.sequence = "0";
+    params.sequence = 0;
+    const signedTx0 = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK0 = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTx0).toEqual(mainnet.tx.encode(signedTxSDK0));
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    params.memo = "";
+    const signedTxE = await coinTerra.signTransaction(signTxData);
+    const signedTxSDKE = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTxE).toEqual(mainnet.tx.encode(signedTxSDKE));
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -701,6 +814,20 @@ describe('Test Terra SDK', () => {
       console.error('Test Wallet Connect MsgDelegate', transaction);
       throw e;
     }
+
+    // Sequence 0 test
+    signTxData.transaction.sequence = "0";
+    params.sequence = 0;
+    const signedTx0 = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK0 = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTx0).toEqual(mainnet.tx.encode(signedTxSDK0));
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    params.memo = "";
+    const signedTxE = await coinTerra.signTransaction(signTxData);
+    const signedTxSDKE = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTxE).toEqual(mainnet.tx.encode(signedTxSDKE));
 
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
@@ -766,6 +893,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    signTxData.transaction.sequence = "0";
+    params.sequence = 0;
+    const signedTx0 = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK0 = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTx0).toEqual(mainnet.tx.encode(signedTxSDK0));
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    params.memo = "";
+    const signedTxE = await coinTerra.signTransaction(signTxData);
+    const signedTxSDKE = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTxE).toEqual(mainnet.tx.encode(signedTxSDKE));
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -827,6 +968,20 @@ describe('Test Terra SDK', () => {
       console.error('Test Wallet Connect MsgWithdrawDelegatorReward', transaction);
       throw e;
     }
+
+    // Sequence 0 test
+    signTxData.transaction.sequence = "0";
+    params.sequence = 0;
+    const signedTx0 = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK0 = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTx0).toEqual(mainnet.tx.encode(signedTxSDK0));
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    params.memo = "";
+    const signedTxE = await coinTerra.signTransaction(signTxData);
+    const signedTxSDKE = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTxE).toEqual(mainnet.tx.encode(signedTxSDKE));
 
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
@@ -903,6 +1058,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    signTxData.transaction.sequence = "0";
+    params.sequence = 0;
+    const signedTx0 = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK0 = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTx0).toEqual(mainnet.tx.encode(signedTxSDK0));
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    params.memo = "";
+    const signedTxE = await coinTerra.signTransaction(signTxData);
+    const signedTxSDKE = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTxE).toEqual(mainnet.tx.encode(signedTxSDKE));
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -975,6 +1144,20 @@ describe('Test Terra SDK', () => {
       throw e;
     }
 
+    // Sequence 0 test
+    signTxData.transaction.sequence = "0";
+    params.sequence = 0;
+    const signedTx0 = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK0 = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTx0).toEqual(mainnet.tx.encode(signedTxSDK0));
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    params.memo = "";
+    const signedTxE = await coinTerra.signTransaction(signTxData);
+    const signedTxSDKE = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTxE).toEqual(mainnet.tx.encode(signedTxSDKE));
+
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -1032,6 +1215,20 @@ describe('Test Terra SDK', () => {
       console.error('Test Wallet Connect Many Many  MsgSend', transaction);
       throw e;
     }
+
+    // Sequence 0 test
+    signTxData.transaction.sequence = "0";
+    params.sequence = 0;
+    const signedTx0 = await coinTerra.signTransaction(signTxData);
+    const signedTxSDK0 = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTx0).toEqual(mainnet.tx.encode(signedTxSDK0));
+
+    // Empty memo test
+    signTxData.transaction.memo = "";
+    params.memo = "";
+    const signedTxE = await coinTerra.signTransaction(signTxData);
+    const signedTxSDKE = await wallet.createAndSignTx(txParamParser(params));
+    expect(signedTxE).toEqual(mainnet.tx.encode(signedTxSDKE));
 
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
