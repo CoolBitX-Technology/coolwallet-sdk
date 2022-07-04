@@ -1,5 +1,5 @@
 import { utils, config } from "@coolwallet/core";
-import { transactionFields, keyLength } from "../config/transactionConfig";
+import { transactionFields, keyLength } from "../config/transaction";
 import * as types from '../config/types';
 const ERROR_CONTAINS_EMPTY_STRING = 'The object contains empty or 0 values. First empty or 0 value encountered during encoding: ';
 
@@ -52,7 +52,7 @@ const objectArguments = (subValue: any, allValueTypes: any, key: string | number
     let argument = '';
     let isPresent = subValue ? '01' : '00';
     argument += isPresent;
-    argument += fieldToHex(key, 'String', keyLength);
+    // argument += fieldToHex(key, 'String', keyLength); // To be removed
     const subValueType = allValueTypes[key];
     argument += fieldToHex(subValue, subValueType.type, subValueType.padding);
     return argument;
@@ -111,9 +111,7 @@ const transactionKeyArguments = (field: string, value: any, valueType: any) => {
     let argument = '';
     let isPresent = (value && value !== {}) ? '01' : '00';
     argument += isPresent;
-
-    let fieldValue = Buffer.from(field, 'ascii').toString('hex').padStart(16, '0');
-    argument += fieldValue;
+    // argument += Buffer.from(field, 'ascii').toString('hex').padStart(keyLength, '0'); // To be removed
     return argument;
 }
 

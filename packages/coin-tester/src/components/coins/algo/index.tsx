@@ -36,16 +36,9 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
   const [assetAmount, setAssetAmount] = useState('0');
   const [assetId, setAssetId] = useState('82200197');
   const [appId, setAppId] = useState('82200197');
-  const [appArgs, setAppArgs] = useState([]);
-  const [foreignApps, setForeignApps] = useState([4, 5, 6]);
-  const [foreignAssets, setForeignAssets] = useState([1, 2]);
-  const [accounts, setAccounts] = useState([]);
   const [assetName, setAssetName] = useState('coolbitx');
   const [total, setTotal] = useState("1000");
   const [defaultFrozen, setDefaultFrozen] = useState(true);
-  const [unitName, setUnitName] = useState('COOL');
-  const [decimals, setDecimals] = useState("4");
-  const [assetUrl, setAssetUrl] = useState('http://someurl');
   const [assetFreeze, setAssetFreeze] = useState(true);
   const [freezeAddress, setFreezeAddress] = useState('5B3X56E3KVGS3D5263AWYWMUFBJUX7IZ3OYBUYVH6AB4ZDNJSGT4MQAG2U');
   const [freezeAssetId, setFreezeAssetId] = useState('82200197');
@@ -57,6 +50,10 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       return coinALGO.getAddress(props.transport!, props.appPrivateKey, appId);
     }, props).then(setAddress);
   };
+
+  const stringToBytes = (value: any) => {
+    return new Uint8Array(Buffer.from(value));
+  }
 
   const signTransaction = async (transaction: any) => {
     const appId = localStorage.getItem('appId');
@@ -151,9 +148,9 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         from: address,
         total: Number(total),
         defaultFrozen: defaultFrozen,
-        unitName: unitName,
-        decimals: Number(decimals),
-        assetURL: assetUrl,
+        unitName: "COOL",
+        decimals: 4,
+        assetURL: 'http://someurl',
         suggestedParams: params,
         note: note,
         manager: address,
@@ -196,7 +193,15 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
   };
 
   const signApplicationCallTransaction = async () => {
-    let params = await algodClient.getTransactionParams().do();
+    // let params = await algodClient.getTransactionParams().do();
+    let params = {
+      flatFee: false,
+      fee: 0,
+      firstRound: 21656557,
+      lastRound: 21657557,
+      genesisID: 'testnet-v1.0',
+      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
+  }
     const enc = new TextEncoder();
     const note = enc.encode("Application Call Transaction");
 
@@ -205,10 +210,10 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         from: address,
         appIndex: Number(appId),
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
-        appArgs: appArgs,
-        foreignApps: foreignApps,
-        foreignAssets: foreignAssets,
-        accounts: accounts,
+        appArgs: [stringToBytes("first argument"), stringToBytes("second argument"), algosdk.encodeUint64(125)],
+        foreignApps: [1, 2, 3],
+        foreignAssets: [1, 2, 3],
+        accounts: ["5B3X56E3KVGS3D5263AWYWMUFBJUX7IZ3OYBUYVH6AB4ZDNJSGT4MQAG2U", "5B3X56E3KVGS3D5263AWYWMUFBJUX7IZ3OYBUYVH6AB4ZDNJSGT4MQAG2U"],
         suggestedParams: params,
         note: note,
       });
@@ -341,16 +346,6 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
             value: appId,
             onChange: setAppId,
             placeholder: 'App ID',
-          },
-          {
-            value: assetAmount,
-            onChange: setAssetAmount,
-            placeholder: 'amount',
-          },
-          {
-            value: assetId,
-            onChange: setAssetId,
-            placeholder: 'Asset Id',
           },
         ]}
       />

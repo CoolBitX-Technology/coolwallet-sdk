@@ -22,7 +22,7 @@ export enum TransactionType {
   APPLICATION_CALL = "appl"
 }
 
-export declare enum OnApplicationComplete {
+export enum OnApplicationComplete {
   NoOpOC = 0,
   OptInOC = 1,
   CloseOutOC = 2,

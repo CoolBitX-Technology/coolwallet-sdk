@@ -75,9 +75,22 @@ const getAssetFreezeArgument = async (
 const getApplicationCallArgument = async (
   transaction: types.Transaction
 ): Promise<string> => {
-  const fields = ['apaa', 'apan', 'apap', 'apas', 'apat', 'apep', 'apfa', 'apid',
-    'apls', 'apgs', 'apsu', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note',
-    'rekey', 'snd', 'type'];
+  let fields;
+  console.log("apan :", transaction.apan);
+  if (!transaction.apan && !transaction.apid) {
+    console.log("Inside NoOpOC- creation");
+    // NoOp - Creation
+    fields = ['apaa', 'apan', 'apap', 'apas', 'apat', 'apep', 'apfa', 'apls', 'apgs', 'apsu', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note', 'rekey', 'snd', 'type'];
+  } else if (transaction.apan && transaction.apan == types.OnApplicationComplete.UpdateApplicationOC) {
+    console.log("Inside UpdateApplication");
+    // UpdateApplication
+    fields = ['apaa', 'apan', 'apap', 'apas', 'apat', 'apep', 'apfa', 'apid', 'apsu', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note', 'rekey', 'snd', 'type'];
+  } else {
+    console.log("Inside OtherOC");
+    // NoOp - General, OptIn, CloseOut, ClearState, DeleteApplication
+    fields = ['apaa', 'apan', 'apas', 'apat', 'apfa', 'apid', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note', 'rekey', 'snd', 'type'];
+  }
+
   const argument = getTransactionArgument(transaction, fields);
   return argument;
 };

@@ -10,7 +10,8 @@ export const transactionFields: types.FieldType = {
     aclose: { type: 'Buffer', padding: bufferLength },
     afrz: { type: 'Boolean', padding: booleanLength },
     amt: { type: 'Number', padding: numberLength },
-    apaa: { type: 'Array', padding: 4096, length: 8, subType: 'Buffer' }, // Max size 2048 Bytes
+    // apaa: { type: 'Array', padding: 4096, length: 8, subType: 'Buffer' }, // Max size 2048 Bytes
+    apaa: { type: 'Array', padding: 2048, length: 6, subType: 'Buffer' }, // Max size 2048 Bytes
     apan: { type: 'Number', padding: numberLength },
     apap: { type: 'Buffer', padding: 16384 }, // 1 + 3 (MAX EXTRA PAGE) * 2048 Bytes
     apar: {
@@ -29,10 +30,13 @@ export const transactionFields: types.FieldType = {
             un: { type: 'String', padding: 16 },
         }
     },
-    apas: { type: 'Array', padding: numberLength, length: 8, subType: 'Number' },
-    apat: { type: 'Array', padding: bufferLength, length: 8, subType: 'Buffer' },
+    // apas: { type: 'Array', padding: numberLength, length: 8, subType: 'Number' },
+    apas: { type: 'Array', padding: numberLength, length: 6, subType: 'Number' },
+    // apat: { type: 'Array', padding: bufferLength, length: 8, subType: 'Buffer' },
+    apat: { type: 'Array', padding: bufferLength, length: 6, subType: 'Buffer' },
     apep: { type: 'Number', padding: numberLength },
-    apfa: { type: 'Array', padding: numberLength, length: 8, subType: 'Number' },
+    // apfa: { type: 'Array', padding: numberLength, length: 8, subType: 'Number' },
+    apfa: { type: 'Array', padding: numberLength, length: 6, subType: 'Number' },
     apid: { type: 'Number', padding: numberLength },
     apls: {
         type: 'Object', padding: bufferLength, length: 2,
