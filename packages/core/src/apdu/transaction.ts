@@ -1,8 +1,9 @@
+import * as RLP from 'rlp';
 import { executeCommand } from './execute/execute';
 import { getCommandSignature } from '../setting/auth';
 import Transport from '../transport';
 import { commands } from './execute/command';
-import { APDUError } from '../error/errorHandle';
+import { APDUError, SDKError } from '../error/errorHandle';
 import { CODE } from '../config/status/code';
 import { target } from '../config/param';
 import { getSEVersion } from './general';
@@ -158,6 +159,33 @@ export const executeUtxoScript = async (
   } else {
     throw new APDUError(commands.EXECUTE_UTXO_SCRIPT, statusCode, msg);
   }
+};
+
+/**
+ * Scriptable step 4:
+ *
+ * Execute a script which have rlp items
+ *
+ * @param {Transport} transport
+ * @param {string} appId
+ * @param {string} appPrivKey
+ * @param {string} path CoolWallet specific path string
+ * @param {(Buffer | string)[]} rlpItems rlp array with buffer and string
+ * @param {string?} argument
+ * @returns
+ */
+export const executeRlpScript = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  path: string,
+  rlpItems: (Buffer | string)[],
+  argument?: string
+) => {
+  if (rlpItems.length > 64) throw new SDKError(executeRlpScript.name, 'rlp items should be less than 64');
+  const encodedRlp = RLP.encode(rlpItems).toString('hex');
+
+  return executeScript(transport, appId, appPrivKey, path + encodedRlp + (argument ?? ''));
 };
 
 /**
