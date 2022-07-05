@@ -35,10 +35,6 @@ class Structure {
     return this.fields
       .map((field) => {
         const value = properties[field.property];
-        // Use 20B of zeroes to represent empty address
-        if(field.property === 'to'){
-          return (value !== undefined && value !== "") ? field?.encode(value) : field?.encode(0);
-        }
         return field?.encode(value);
       })
       .filter((e) => e) as Buffer[];
@@ -60,7 +56,18 @@ function encodeLegacyTransactionToSE(transaction: LegacyTransaction['transaction
     new Layout('nonce', 8),
   ]);
 
-  return LegacyTransferTransactionStructure.encodeToHex(omit(transaction, 'option'));
+  return LegacyTransferTransactionStructure.encodeToHex(omit(transaction, ['option']));
+}
+
+function encodeLegacySmartContractToSE(transaction: LegacyTransaction['transaction']) {
+  const LegacyTransferTransactionStructure = new Structure([
+    new Layout('value', 10),
+    new Layout('gasPrice', 10),
+    new Layout('gasLimit', 10),
+    new Layout('nonce', 8),
+  ]);
+
+  return LegacyTransferTransactionStructure.encodeToHex(omit(transaction, ['option', 'to']));
 }
 
 function encodeLegacyERC20TransactionToSE(transaction: LegacyTransaction['transaction']) {
@@ -88,7 +95,6 @@ function encodeLegacySmartContractSegmentTransactionToSE(transaction: LegacyTran
   };
 
   const LegacySmartContractTransactionStructure = new Structure([
-    new Layout('to', 20),
     new Layout('value', 10),
     new Layout('gasPrice', 10),
     new Layout('gasLimit', 10),
@@ -96,7 +102,7 @@ function encodeLegacySmartContractSegmentTransactionToSE(transaction: LegacyTran
     new Layout('data', 4),
   ]);
 
-  return LegacySmartContractTransactionStructure.encodeToHex(omit(segmentTransaction, 'option'));
+  return LegacySmartContractTransactionStructure.encodeToHex(omit(segmentTransaction, ['option', 'to']));
 }
 
 function encodeEIP1559TransactionToSE(transaction: EIP1559Transaction['transaction']) {
@@ -110,6 +116,18 @@ function encodeEIP1559TransactionToSE(transaction: EIP1559Transaction['transacti
   ]);
 
   return EIP1559TransferTransactionStructure.encodeToHex(omit(transaction, 'option'));
+}
+
+function encodeEIP1559SmartContractToSE(transaction: EIP1559Transaction['transaction']) {
+  const EIP1559TransferTransactionStructure = new Structure([
+    new Layout('value', 10),
+    new Layout('gasTipCap', 10),
+    new Layout('gasFeeCap', 10),
+    new Layout('gasLimit', 10),
+    new Layout('nonce', 8),
+  ]);
+
+  return EIP1559TransferTransactionStructure.encodeToHex(omit(transaction, ['option', 'to']));
 }
 
 function encodeEIP1559ERC20TransactionToSE(transaction: EIP1559Transaction['transaction']) {
@@ -137,7 +155,6 @@ function encodeEIP1559SmartContractSegmentTransactionToSE(transaction: EIP1559Tr
     data: formatHex(transaction.data).length / 2,
   };
   const EIP1559SmartContractTransactionStructure = new Structure([
-    new Layout('to', 20),
     new Layout('value', 10),
     new Layout('gasTipCap', 10),
     new Layout('gasFeeCap', 10),
@@ -146,14 +163,16 @@ function encodeEIP1559SmartContractSegmentTransactionToSE(transaction: EIP1559Tr
     new Layout('data', 4),
   ]);
 
-  return EIP1559SmartContractTransactionStructure.encodeToHex(omit(segmentTransaction, 'option'));
+  return EIP1559SmartContractTransactionStructure.encodeToHex(omit(segmentTransaction, ['option', 'to']));
 }
 
 export {
   encodeLegacyTransactionToSE,
   encodeLegacyERC20TransactionToSE,
+  encodeLegacySmartContractToSE,
   encodeLegacySmartContractSegmentTransactionToSE,
   encodeEIP1559TransactionToSE,
   encodeEIP1559ERC20TransactionToSE,
+  encodeEIP1559SmartContractToSE,
   encodeEIP1559SmartContractSegmentTransactionToSE,
 };
