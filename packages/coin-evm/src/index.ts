@@ -94,7 +94,11 @@ class Evm extends COIN.ECDSACoin {
     }
 
     let script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
-    if (this.chain.symbol === 'FTM' && this.chain.stakingInfo.contractAddress === transaction.to.toLowerCase()) {
+    if (
+      transaction.to !== undefined &&
+      this.chain.symbol === 'FTM' &&
+      this.chain.stakingInfo.contractAddress === transaction.to.toLowerCase()
+    ) {
       const programId = transaction.data.slice(0, 10);
       if (
         programId.toLowerCase() === this.chain.stakingInfo.delegate ||
