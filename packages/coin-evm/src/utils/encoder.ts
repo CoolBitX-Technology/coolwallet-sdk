@@ -35,6 +35,10 @@ class Structure {
     return this.fields
       .map((field) => {
         const value = properties[field.property];
+        // Use 20B of zeroes to represent empty address
+        if(field.property === 'to'){
+          return (value !== undefined && value !== "") ? field?.encode(value) : field?.encode(0);
+        }
         return field?.encode(value);
       })
       .filter((e) => e) as Buffer[];
