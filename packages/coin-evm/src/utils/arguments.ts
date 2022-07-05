@@ -1,4 +1,5 @@
 import { utils, config } from '@coolwallet/core';
+import isNil from 'lodash/isNil';
 import { TypedDataUtils, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { formatHex, ToHex } from './string';
 import * as Encoder from './encoder';
@@ -28,6 +29,9 @@ async function getSELegacyERC20Transaction(
   coinType: string
 ): Promise<string> {
   const { transaction } = client;
+  if (isNil(transaction.to)) {
+    transaction.to = '';
+  }
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
   const encoded = Encoder.encodeLegacyERC20TransactionToSE(client.transaction);
   const chainInfo = chain.toHexChainInfo();
@@ -45,12 +49,11 @@ async function getSELegacySmartContractTransaction(
 ): Promise<string> {
   const { transaction } = client;
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
-  const to = (transaction.to !== undefined && transaction.to !== "") ? formatHex(transaction.to) : "".padEnd(40, '0');
-  const encoded = Encoder.encodeLegacySmartContractToSE(transaction);
+  const encoded = Encoder.encodeLegacyTransactionToSE(transaction);
   const chainInfo = chain.toHexChainInfo();
   const chainSignature = chain.getSignature();
 
-  return '15' + path + to + encoded + chainInfo + chainSignature + formatHex(transaction.data);
+  return '15' + path + encoded + chainInfo + chainSignature + formatHex(transaction.data);
 }
 
 async function getSELegacySmartContractSegmentTransaction(
@@ -60,12 +63,11 @@ async function getSELegacySmartContractSegmentTransaction(
 ): Promise<string> {
   const { transaction } = client;
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
-  const to = (transaction.to !== undefined && transaction.to !== "") ? formatHex(transaction.to) : "".padEnd(40, '0');
   const encoded = Encoder.encodeLegacySmartContractSegmentTransactionToSE(transaction);
   const chainInfo = chain.toHexChainInfo();
   const chainSignature = chain.getSignature();
 
-  return '15' + path + to + encoded + chainInfo + chainSignature;
+  return '15' + path + encoded + chainInfo + chainSignature;
 }
 
 async function getSEEIP712MessageTransaction(
@@ -144,6 +146,9 @@ async function getSEEIP1559ERC20Transaction(
   coinType: string
 ): Promise<string> {
   const { transaction } = client;
+  if (isNil(transaction.to)) {
+    transaction.to = '';
+  }
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
   const encoded = Encoder.encodeEIP1559ERC20TransactionToSE(transaction);
   const chainInfo = chain.toHexChainInfo();
@@ -161,12 +166,11 @@ async function getSEEIP1559SmartContractTransaction(
 ): Promise<string> {
   const { transaction } = client;
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
-  const to = (transaction.to !== undefined && transaction.to !== "") ? formatHex(transaction.to) : "".padEnd(40, '0');
-  const encoded = Encoder.encodeEIP1559SmartContractToSE(transaction);
+  const encoded = Encoder.encodeEIP1559TransactionToSE(transaction);
   const chainInfo = chain.toHexChainInfo();
   const chainSignature = chain.getSignature();
 
-  return '15' + path + to + encoded + chainInfo + chainSignature + formatHex(transaction.data);
+  return '15' + path + encoded + chainInfo + chainSignature + formatHex(transaction.data);
 }
 
 async function getSEEIP1559SmartContractSegmentTransaction(
@@ -176,12 +180,11 @@ async function getSEEIP1559SmartContractSegmentTransaction(
 ): Promise<string> {
   const { transaction } = client;
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
-  const to = (transaction.to !== undefined && transaction.to !== "") ? formatHex(transaction.to) : "".padEnd(40, '0');
   const encoded = Encoder.encodeEIP1559SmartContractSegmentTransactionToSE(transaction);
   const chainInfo = chain.toHexChainInfo();
   const chainSignature = chain.getSignature();
 
-  return '15' + path + to + encoded + chainInfo + chainSignature;
+  return '15' + path + encoded + chainInfo + chainSignature;
 }
 
 export {

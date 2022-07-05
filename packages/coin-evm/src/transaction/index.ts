@@ -19,8 +19,11 @@ function getTransactionType(client: LegacyTransaction | EIP1559Transaction, chai
     return TRANSACTION_TYPE.TRANSFER;
   }
 
-  if (isERC20Transaction(value, data)) {
-    const official = getOfficialTokenByContractAddress(to, chain);
+  if (isERC20Transaction (value, data)) {
+    let official = null;
+    if(!isNil(to)) {
+      official = getOfficialTokenByContractAddress(to, chain);
+    }
     if (!isNil(official)) {
       client.transaction.option = {
         info: {

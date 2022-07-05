@@ -23,7 +23,7 @@ interface LegacyTransaction extends BaseTransaction {
     nonce: string;
     gasPrice: string;
     gasLimit: string;
-    to: string;
+    to?: string;
     value: string;
     data: string;
     option?: Option;
@@ -36,7 +36,7 @@ interface EIP1559Transaction extends BaseTransaction {
     gasTipCap: string;
     gasFeeCap: string;
     gasLimit: string;
-    to: string;
+    to?: string;
     value: string;
     data: string;
     option?: Option;
