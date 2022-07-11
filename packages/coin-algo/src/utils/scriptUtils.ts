@@ -1,6 +1,8 @@
+import { error as ERROR } from '@coolwallet/core';
 import nacl from "tweetnacl";
 import base32 from "hi-base32";
 import sha512 from "js-sha512";
+import * as params from '../config/params';
 import * as types from '../config/types';
 import { getTransactionArgument } from "./transactionUtils";
 
@@ -32,62 +34,21 @@ const pubKeyToAddress = async (publicKey: string) => {
   return addr.toString().slice(0, ALGORAND_ADDRESS_LENGTH);
 }
 
-const getPaymentArgument = async (
+const getScriptAndArgument = (
   transaction: types.Transaction
-): Promise<string> => {
-  const fields = ['amt', 'close', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note', 'rcv', 'rekey', 'snd', 'type'];
+): { script: string; argument: Buffer[] } => {
+  const signature = params[transaction.type].signature;
+  const script = params[transaction.type].script;
+  const fields = params[transaction.type].fields;
+  if (!(script && signature && fields)) throw new ERROR.SDKError(getScriptAndArgument.name, `Transaction type ${transaction.type} is not supported`)
   const argument = getTransactionArgument(transaction, fields);
-  return argument;
+  const newArgument = argument.map(item => item.toString('hex'))
+  console.log("Script \n", script)
+  console.log("Argument \n", newArgument)
+  return { script: script + signature, argument };
 };
-
-const getKeyRegistrationArgument = async (
-  transaction: types.Transaction
-): Promise<string> => {
-  const fields = ['fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'nonpart', 'note', 'rekey', 'selkey', 'sprfkey', 'snd', 'type', 'votefst', 'votekd', 'votekey', 'votelst'];
-  const argument = getTransactionArgument(transaction, fields);
-  return argument;
-};
-
-const getAssetConfigArgument = async (
-  transaction: types.Transaction
-): Promise<string> => {
-  const fields = ['apar', 'caid', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note', 'rekey', 'snd', 'type'];
-  const argument = getTransactionArgument(transaction, fields);
-  return argument;
-};
-
-const getAssetTransferArgument = async (
-  transaction: types.Transaction
-): Promise<string> => {
-  const fields = ['aamt', 'aclose', 'arcv', 'asnd', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note', 'rekey', 'snd', 'type', 'xaid'];
-  const argument = getTransactionArgument(transaction, fields);
-  return argument;
-};
-
-const getAssetFreezeArgument = async (
-  transaction: types.Transaction
-): Promise<string> => {
-  const fields = ['afrz', 'fadd', 'faid', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note', 'rekey', 'snd', 'type'];
-  const argument = getTransactionArgument(transaction, fields);
-  return argument;
-};
-
-const getApplicationCallArgument = async (
-  transaction: types.Transaction
-): Promise<string> => {
-  let fields;
-  fields = ['apaa', 'apan', 'apap', 'apas', 'apat', 'apep', 'apfa', 'apls', 'apgs', 'apid', 'apsu', 'fee', 'fv', 'gen', 'grp', 'gh', 'lv', 'lx', 'note', 'rekey', 'snd', 'type'];
-  const argument = getTransactionArgument(transaction, fields);
-  return argument;
-};
-
 
 export {
   pubKeyToAddress,
-  getPaymentArgument,
-  getAssetTransferArgument,
-  getAssetConfigArgument,
-  getAssetFreezeArgument,
-  getApplicationCallArgument,
-  getKeyRegistrationArgument
+  getScriptAndArgument
 };

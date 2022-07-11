@@ -1,21 +1,33 @@
 
-import { tx, apdu } from '@coolwallet/core';
+import { tx, apdu, utils, config } from '@coolwallet/core';
 import * as types from './config/types';
+
+const getSEPath = () => {
+    const path = utils.getFullPath({
+        pathType: config.PathType.SLIP0010,
+        pathString: "44'/283'/0'/0'/0'",
+    });
+    return `15${path}`;
+}
 
 const signTransaction = async (
     signTxData: types.SignTxType,
     script: string,
-    argument: string
+    argument: (Buffer | string)[]
 ): Promise<string> => {
-    await apdu.tx.sendScript(signTxData.transport!, script);
-    const encryptedSig = await apdu.tx.executeScript(signTxData.transport!, signTxData.appId, signTxData.appPrivateKey, argument);
-    await apdu.tx.finishPrepare(signTxData.transport!);
-    await apdu.tx.getTxDetail(signTxData.transport!);
-    const decryptingKey = await apdu.tx.getSignatureKey(signTxData.transport!);
-    await apdu.tx.clearTransaction(signTxData.transport!);
+    const path = getSEPath();
+    const sent = () => apdu.tx.sendScript(signTxData.transport, script);
+    const executeRlpScript = () => apdu.tx.executeRlpScript(signTxData.transport, signTxData.appId, signTxData.appPrivateKey, path, argument);
+    const sig = (await tx.flow.getSingleSignatureFromCoolWallet(
+        signTxData.transport,
+        [sent],
+        executeRlpScript,
+        true
+    )) as Buffer;
+
     await apdu.mcu.control.powerOff(signTxData.transport!);
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, true, false);
     return sig.toString('hex');
 }
 
 export { signTransaction }
+

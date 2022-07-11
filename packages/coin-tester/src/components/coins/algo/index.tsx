@@ -94,7 +94,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
   const signPaymentTransaction = async () => {
     let params = await algodClient.getTransactionParams().do();
     const enc = new TextEncoder();
-    const note = enc.encode("Payment Transaction");
+    const note = enc.encode("PaymentTransaction");
 
     useRequest(async () => {
       let transactionObject = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
@@ -193,15 +193,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
   };
 
   const signApplicationCallTransaction = async () => {
-    // let params = await algodClient.getTransactionParams().do();
-    let params = {
-      flatFee: false,
-      fee: 0,
-      firstRound: 21656557,
-      lastRound: 21657557,
-      genesisID: 'testnet-v1.0',
-      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
-  }
+    let params = await algodClient.getTransactionParams().do();
     const enc = new TextEncoder();
     const note = enc.encode("Application Call Transaction");
 

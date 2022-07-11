@@ -14,12 +14,12 @@ interface CoolWalletTxn {
 }
 
 export enum TransactionType {
-  PAYMENT = "pay",
-  KEY_REGISTRATION = "keyreg",
-  ASSET_CONFIG = "acfg",
-  ASSET_TRANSFER = "axfer",
-  ASSET_FREEZE = "afrz",
-  APPLICATION_CALL = "appl"
+  pay = "pay",
+  keyreg = "keyreg",
+  acfg = "acfg",
+  axfer = "axfer",
+  afrz = "afrz",
+  appl = "appl"
 }
 
 export enum OnApplicationComplete {
@@ -278,73 +278,73 @@ export interface Transaction {
 }
 
 export interface FieldType {
-  aamt: { type: String, padding: number },
-  aclose: { type: String, padding: number },
-  afrz: { type: String, padding: number },
-  amt: { type: String, padding: number },
-  apaa: { type: String, padding: number, length: number, subType: String },
-  apan: { type: String, padding: number },
-  apap: { type: String, padding: number },
+  aamt: { type: String },
+  aclose: { type: String },
+  afrz: { type: String },
+  amt: { type: String },
+  apaa: { type: String, length: number, subType: String },
+  apan: { type: String },
+  apap: { type: String },
   apar: {
-    type: String, padding: number, length: number,
+    type: String, length: number,
     subFields: {
-      am: { type: String, padding: number },
-      an: { type: String, padding: number },
-      au: { type: String, padding: number },
-      c: { type: String, padding: number },
-      dc: { type: String, padding: number },
-      df: { type: String, padding: number },
-      f: { type: String, padding: number },
-      m: { type: String, padding: number },
-      r: { type: String, padding: number },
-      t: { type: String, padding: number },
-      un: { type: String, padding: number }
+      am: { type: String },
+      an: { type: String },
+      au: { type: String },
+      c: { type: String },
+      dc: { type: String },
+      df: { type: String },
+      f: { type: String },
+      m: { type: String },
+      r: { type: String },
+      t: { type: String },
+      un: { type: String }
     }
   },
-  apas: { type: String, padding: number, length: number, subType: String },
-  apat: { type: String, padding: number, length: number, subType: String },
-  apep: { type: String, padding: number },
-  apfa: { type: String, padding: number, length: number, subType: String },
-  apid: { type: String, padding: number },
+  apas: { type: String, length: number, subType: String },
+  apat: { type: String, length: number, subType: String },
+  apep: { type: String },
+  apfa: { type: String, length: number, subType: String },
+  apid: { type: String },
   apls: {
-    type: String, padding: number, length: number,
+    type: String, length: number,
     subFields: {
-      nbs: { type: String, padding: number },
-      nui: { type: String, padding: number }
+      nbs: { type: String },
+      nui: { type: String }
     }
   },
   apgs: {
-    type: String, padding: number, length: number,
+    type: String, length: number,
     subFields: {
-      nbs: { type: String, padding: number },
-      nui: { type: String, padding: number }
+      nbs: { type: String },
+      nui: { type: String }
     }
   },
-  apsu: { type: String, padding: number },
-  arcv: { type: String, padding: number },
-  asnd: { type: String, padding: number },
-  caid: { type: String, padding: number },
-  close: { type: String, padding: number },
-  fadd: { type: String, padding: number },
-  fee: { type: String, padding: number },
-  faid: { type: String, padding: number },
-  fv: { type: String, padding: number },
-  gen: { type: String, padding: number },
-  grp: { type: String, padding: number },
-  gh: { type: String, padding: number },
-  lv: { type: String, padding: number },
-  lx: { type: String, padding: number },
-  nonpart: { type: String, padding: number },
-  note: { type: String, padding: number },
-  rcv: { type: String, padding: number },
-  rekey: { type: String, padding: number },
-  selkey: { type: String, padding: number },
-  sprfkey: { type: String, padding: number },
-  snd: { type: String, padding: number },
-  type: { type: String, padding: number },
-  votefst: { type: String, padding: number },
-  votekd: { type: String, padding: number },
-  votekey: { type: String, padding: number },
-  votelst: { type: String, padding: number },
-  xaid: { type: String, padding: number }
+  apsu: { type: String },
+  arcv: { type: String },
+  asnd: { type: String },
+  caid: { type: String },
+  close: { type: String },
+  fadd: { type: String },
+  fee: { type: String },
+  faid: { type: String },
+  fv: { type: String },
+  gen: { type: String },
+  grp: { type: String },
+  gh: { type: String },
+  lv: { type: String },
+  lx: { type: String },
+  nonpart: { type: String },
+  note: { type: String },
+  rcv: { type: String },
+  rekey: { type: String },
+  selkey: { type: String },
+  sprfkey: { type: String },
+  snd: { type: String },
+  type: { type: String },
+  votefst: { type: String },
+  votekd: { type: String },
+  votekey: { type: String },
+  votelst: { type: String },
+  xaid: { type: String }
 }
