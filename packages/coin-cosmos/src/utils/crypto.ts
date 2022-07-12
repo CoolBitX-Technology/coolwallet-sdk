@@ -2,13 +2,11 @@ import crypto from 'crypto';
 import { bech32 } from 'bech32';
 
 function sha256(data: Buffer): Buffer {
-  const sha256Hash = crypto.createHash('SHA256').update(data).digest();
-  return sha256Hash;
+  return crypto.createHash('SHA256').update(data).digest();
 }
 
 function ripemd160(data: Buffer): Buffer {
-  const ripemd160hash = crypto.createHash('ripemd160').update(data).digest();
-  return ripemd160hash;
+  return crypto.createHash('ripemd160').update(data).digest();
 }
 
 function decodeBech32(data: string): Buffer {

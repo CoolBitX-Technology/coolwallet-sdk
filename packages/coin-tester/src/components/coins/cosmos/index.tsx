@@ -126,8 +126,7 @@ const Cosmos = (props: Props) => {
   const getAddress = () =>
     useRequest(async () => {
       const appId = useAppId();
-      const sdkAddress = sdk.current.getAddress(transport, appPrivateKey, appId, 0);
-      return sdkAddress;
+      return sdk.current.getAddress(transport, appPrivateKey, appId, 0);
     }, props).then(setAddress);
 
   const signTransferTransaction = () =>

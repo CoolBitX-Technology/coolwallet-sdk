@@ -6,9 +6,9 @@ import {
   AuthInfo as AuthInfoPb,
   ModeInfo as ModeInfoPb,
   SignerInfo as SignerInfoPb,
+  Fee as FeePb,
 } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { PubKey as PubKeyPb } from 'cosmjs-types/cosmos/crypto/secp256k1/keys';
-import { Fee as FeePb } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { Any } from 'cosmjs-types/google/protobuf/any';
 import { Msg } from './msg';
 import { Coin } from './coin';
