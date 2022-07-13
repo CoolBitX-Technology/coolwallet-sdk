@@ -15,8 +15,11 @@ export const getRawHex = (transaction: EIP1559Transaction): Array<Buffer | Buffe
   rawData.push(transaction.gasTipCap);
   rawData.push(transaction.gasFeeCap);
   rawData.push(transaction.gasLimit);
-  if (transaction.to !== undefined) rawData.push(transaction.to);
-  else rawData.push('');
+  if (transaction.to !== undefined) {
+    rawData.push(transaction.to);
+  } else {
+    rawData.push('');
+  }
   rawData.push(transaction.value);
   rawData.push(transaction.data);
   const raw: Array<Buffer | Buffer[]> = rawData.map((d) => {

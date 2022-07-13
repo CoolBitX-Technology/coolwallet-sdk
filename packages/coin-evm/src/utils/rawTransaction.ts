@@ -25,8 +25,11 @@ function getLegacyRawHex(transaction: LegacyTransaction['transaction'], chainId:
   rawData.push(transaction.nonce);
   rawData.push(transaction.gasPrice);
   rawData.push(transaction.gasLimit);
-  if (transaction.to !== undefined) rawData.push(transaction.to);
-  else rawData.push('');
+  if (transaction.to !== undefined) {
+    rawData.push(transaction.to);
+  } else {
+    rawData.push('');
+  }
   rawData.push(transaction.value);
   rawData.push(transaction.data);
   const raw = rawData.map((d) => {
@@ -51,8 +54,11 @@ function getEIP1559RawHex(transaction: EIP1559Transaction['transaction'], chainI
   rawData.push(transaction.gasTipCap);
   rawData.push(transaction.gasFeeCap);
   rawData.push(transaction.gasLimit);
-  if (transaction.to !== undefined) rawData.push(transaction.to);
-  else rawData.push('');
+  if (transaction.to !== undefined) {
+    rawData.push(transaction.to);
+  } else {
+    rawData.push('');
+  }
   rawData.push(transaction.value);
   rawData.push(transaction.data);
   const raw: (Buffer | Buffer[])[] = rawData.map((d) => {
