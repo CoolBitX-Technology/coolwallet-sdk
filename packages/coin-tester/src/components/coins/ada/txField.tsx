@@ -47,6 +47,20 @@ function TxField(props: Props) {
       ttl,
     };
 
+    // // Custom multi-inputs examples
+    //
+    // const tx: RawTransaction = {
+    //   addrIndexes: [0,1],
+    //   inputs: [{
+    //     txId: 'd2583a077b5e78251154d24573e3b7455bd785d08073ca77c6497d7da421e1f2',
+    //     index: '0', // 2980375
+    //   }, {
+    //     txId: '943dc0b875ef4de46fcfac39995a5d1129dc9da70694d61b407fd860a99c040d',
+    //     index: '1', // 999999
+    //   }],
+    //   ttl,
+    // };
+
     if (parseInt(changeAmount) > 0) tx.change = {
       address: changeAddress,
       amount: changeAmount,
