@@ -40,7 +40,7 @@ const processArray = (values: any, valueType: any) => {
 const objectArguments = (subValue: any, allValueTypes: any, key: string | number) => {
     let argument: any[] = [];
     const subValueType = allValueTypes[key];
-    argument = [...argument, processValue(subValue, subValueType.type)];
+    argument = [processValue(subValue, subValueType.type)];
     return argument;
 }
 
