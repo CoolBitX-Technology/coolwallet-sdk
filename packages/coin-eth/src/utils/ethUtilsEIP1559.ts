@@ -10,11 +10,13 @@ const ec = new elliptic.ec('secp256k1');
 export const getRawHex = (transaction: EIP1559Transaction): Array<Buffer | Buffer[]> => {
   const rawData = [];
   rawData.push('01'); // chainId
+  //rawData.push('03'); // Ropsten chainId
   rawData.push(transaction.nonce);
   rawData.push(transaction.gasTipCap);
   rawData.push(transaction.gasFeeCap);
   rawData.push(transaction.gasLimit);
-  rawData.push(transaction.to);
+  if (transaction.to !== undefined) rawData.push(transaction.to);
+  else rawData.push('');
   rawData.push(transaction.value);
   rawData.push(transaction.data);
   const raw: Array<Buffer | Buffer[]> = rawData.map((d) => {
