@@ -1,0 +1,48 @@
+{
+  "name": "@coolwallet/cosmos",
+  "version": "1.0.0",
+  "description": "Coolwallet Cosmos SDK",
+  "main": "lib/index.js",
+  "scripts": {
+    "list:chain": "babel-node -x \".ts\" tools/chain.ts",
+    "gen:scripts": "babel-node -x \".ts\" tools/scripts/gen-scripts.ts",
+    "sign:scripts": "babel-node -x \".ts\" tools/scripts/signing-scripts.ts",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts\" --source-maps inline",
+    "build": "del-cli lib && npm run build:types && npm run build:ts",
+    "test": "jest --runInBand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "author": "coolwallet-team",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "homepage": "https://github.com/CoolBitX-Technology/coolwallet3-sdk#readme",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.1.10"
+  },
+  "dependencies": {
+    "bech32": "^2.0.0",
+    "cosmjs-types": "^0.5.0",
+    "lodash": "^4.17.21",
+    "protobufjs": "^6.11.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.5",
+    "@babel/node": "^7.16.8",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@coolwallet/core": "^1.1.10",
+    "@cosmjs/crypto": "^0.28.9",
+    "@cosmjs/proto-signing": "^0.28.9",
+    "@cosmjs/stargate": "^0.28.9",
+    "bip39": "^3.0.4",
+    "del-cli": "^4.0.1",
+    "typescript": "^4.7.2"
+  }
+}

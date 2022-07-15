@@ -84,3 +84,8 @@
   height: 200px;
   overflow-y: scroll;
 }
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}

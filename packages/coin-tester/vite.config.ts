@@ -14,6 +14,7 @@ export default defineConfig({
     alias: {
       https: require.resolve('agent-base'),
       process: require.resolve('process/browser'),
+      'safer-buffer': require.resolve('safe-buffer')
     },
   },
   plugins: [optionalDeps({ enabledPackages }), react(), viteCommonjs({ skipPreBuild: true })],
