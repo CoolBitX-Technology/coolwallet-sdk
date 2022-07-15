@@ -1,41 +1,30 @@
-import { decodeAddress, cborEncode } from './index';
-import {
-  MajorType,
-  Integer,
-  Input,
-  Output,
-  Witness,
-  Transfer,
-  TransferWithoutFee
-} from '../config/types';
+import { derivePubKeyFromAccountToIndex, blake2b224, decodeAddress, cborEncode } from './index';
+import { MajorType, Integer, Input, Output, Witness, TxTypes, Transaction } from '../config/types';
 
 export const genInputs = (inputs: Input[]): string => {
   let result = '00' + cborEncode(MajorType.Array, inputs.length);
-  for (let { txId, index } of inputs) {
-    txId = txId.startsWith('0x') ? txId.substr(2) : txId;
-    if (txId.length != 64) throw new Error('txId length is invalid');
-    result += '825820' + txId + cborEncode(MajorType.Uint, index);
+  for (const input of inputs) {
+    const txId = input.txId.startsWith('0x') ? input.txId.substr(2) : input.txId;
+    if (txId.length !== 64) throw new Error('txId length is invalid');
+    result += '825820' + txId + cborEncode(MajorType.Uint, input.index);
   }
   return result;
 };
 
-export const genOutputs = (output: Output, change?: Output): string => {
-  const outputCount = change ? 2 : 1;
-  let result = '01' + cborEncode(MajorType.Array, outputCount);
-  // output
-  result += '82';
-  let addressBuff = decodeAddress(output.address).addressBuff;
+const genOutputsPrefix = (output?: Output, change?: Output) => {
+  let outputCount = 0;
+  if (output) outputCount += 1;
+  if (change) outputCount += 1;
+  return '01' + cborEncode(MajorType.Array, outputCount);
+};
+
+export const genOutput = (output?: Output): string => {
+  if (!output) return '';
+  let result = '82';
+  const addressBuff = decodeAddress(output.address).addressBuff;
   result += cborEncode(MajorType.Byte, addressBuff.length);
   result += addressBuff.toString('hex');
   result += cborEncode(MajorType.Uint, output.amount)
-  // change
-  if (change) {
-    result += '82';
-    addressBuff = decodeAddress(change.address).addressBuff;
-    result += cborEncode(MajorType.Byte, addressBuff.length);
-    result += addressBuff.toString('hex');
-    result += cborEncode(MajorType.Uint, change.amount)
-  }
   return result;
 };
 
@@ -51,39 +40,79 @@ export const genTtl = (value: Integer): string => {
   return result;
 };
 
-export const genFakeWitness = (addressIndexes: number[]): string => {
-  let result = 'a100' + cborEncode(
-    MajorType.Array,
-    addressIndexes.length
-  );
-  for (let index of addressIndexes) {
-    result += '825820' + '0'.repeat(64);
-    result += '5840' + '0'.repeat(128);
-  }
+export const genFakeWitness = (addressIndexes: number[], txType: TxTypes): string => {
+  const count = addressIndexes.length + (txType === TxTypes.Transfer ? 0 : 1);
+  let result = 'a100' + cborEncode(MajorType.Array, count);
+  // for (const index of addressIndexes) {
+  //   result += '825820' + '0'.repeat(64);
+  //   result += '5840' + '0'.repeat(128);
+  // }
+  result += '0'.repeat(202*count);
   return result;
 };
 
 export const genWitness = (witnesses: Witness[]): string => {
   let result = 'a100' + cborEncode(MajorType.Array, witnesses.length);
-  for (let witness of witnesses) {
+  for (const witness of witnesses) {
     const { vkey, sig } = witness;
-    if (vkey.length != 64) throw new Error('vkey length is invalid');
-    if (sig.length != 128) throw new Error('signature length is invalid');
+    if (vkey.length !== 64) throw new Error('vkey length is invalid');
+    if (sig.length !== 128) throw new Error('signature length is invalid');
     result += '825820' + vkey;
     result += '5840' + sig;
   }
   return result;
 };
 
-export const genTransferTxBody = (data: Transfer | TransferWithoutFee) => {
-  let tx = 'a4';
-  tx += genInputs(data.inputs);
-  tx += genOutputs(data.output, data.change);
-  if (!(data as Transfer).fee) {
-    tx += genFee(170000);
-  } else {
-    tx += genFee((data as Transfer).fee);
+const genTxBodyPrefix = (txType: TxTypes) => {
+  if (txType === TxTypes.Transfer) return 'a4';
+  return 'a5';
+};
+
+export const genFakeTxBody = (tx: Transaction, txType: TxTypes) => {
+  let result = genTxBodyPrefix(txType);
+  result += genInputs(tx.inputs);
+  result += genOutputsPrefix(tx.output, tx.change);
+  result += genOutput(tx.output);
+  result += genOutput(tx.change);
+  result += genFee(tx.fee);
+  result += genTtl(tx.ttl);
+
+  if (txType === TxTypes.StakeRegister) result += '0'.repeat(72);
+  if (txType === TxTypes.StakeDeregister) result += '0'.repeat(72);
+  if (txType === TxTypes.StakeDelegate) result += '0'.repeat(132);
+  if (txType === TxTypes.StakeWithdraw) {
+    if (!tx.withdrawAmount) throw new Error('withdrawAmount is required');
+    result += '0'.repeat(66) + cborEncode(MajorType.Uint, tx.withdrawAmount);
   }
-  tx += genTtl(data.ttl);
-  return tx;
+
+  return result;
+};
+
+export const genTxBody = (tx: Transaction, accPubKey: string, txType: TxTypes) => {
+  let result = genTxBodyPrefix(txType);
+  result += genInputs(tx.inputs);
+  result += genOutputsPrefix(tx.output, tx.change);
+  result += genOutput(tx.output);
+  result += genOutput(tx.change);
+  result += genFee(tx.fee);
+  result += genTtl(tx.ttl);
+
+  if (txType === TxTypes.Transfer) return result;
+
+  const accPubKeyBuff = Buffer.from(accPubKey, 'hex');
+  const stakeKeyBuff = derivePubKeyFromAccountToIndex(accPubKeyBuff, 2, 0);
+  const stakeKeyHash = blake2b224(stakeKeyBuff).toString('hex').padStart(56, '0');
+
+  if (txType === TxTypes.StakeRegister) result += '048182008200581c' + stakeKeyHash;
+  if (txType === TxTypes.StakeDeregister) result += '048182018200581c' + stakeKeyHash;
+  if (txType === TxTypes.StakeDelegate) {
+    if (!tx.poolKeyHash) throw new Error('poolKeyHash is required');
+    result += '048183028200581c' + stakeKeyHash + '581c' + tx.poolKeyHash;
+  }
+  if (txType === TxTypes.StakeWithdraw) {
+    if (!tx.withdrawAmount) throw new Error('withdrawAmount is required');
+    result += '05a1581de1' + stakeKeyHash + cborEncode(MajorType.Uint, tx.withdrawAmount);
+  }
+
+  return result;
 };

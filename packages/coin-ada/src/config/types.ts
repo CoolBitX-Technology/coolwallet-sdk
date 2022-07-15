@@ -8,6 +8,14 @@ export enum MajorType {
 
 export type Integer = string | number;
 
+export enum TxTypes {
+  Transfer,
+  StakeRegister,
+  StakeDelegate,
+  StakeDeregister,
+  StakeWithdraw,
+}
+
 export interface Options {
   transport: Transport;
   appPrivateKey: string;
@@ -32,14 +40,16 @@ export interface Witness {
   sig: string;
 }
 
-export interface TransferWithoutFee {
+export interface RawTransaction {
   addrIndexes: number[];
   inputs: Input[];
-  output: Output;
   change?: Output;
   ttl: Integer;
+  output?: Output;
+  poolKeyHash?: string;
+  withdrawAmount?: Integer;
 }
 
-export interface Transfer extends TransferWithoutFee {
+export interface Transaction extends RawTransaction {
   fee: Integer;
 }

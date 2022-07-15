@@ -1,10 +1,29 @@
 /* eslint-disable no-param-reassign */
 import { coin as COIN, Transport, utils, config, apdu, tx } from '@coolwallet/core';
-import { accountKeyToAddress, genTransferTxBody, genFakeWitness, genWitness, getTransferArgument } from './utils';
-import * as params from './config/params';
+import {
+  accountKeyToAddress,
+  genFakeTxBody,
+  genTxBody,
+  genFakeWitness,
+  genWitness,
+  getScript,
+  getArguments,
+} from './utils';
 
-import type { Options, TransferWithoutFee, Transfer } from './config/types';
-export type { Options, TransferWithoutFee, Transfer };
+import { TxTypes } from './config/types';
+export { TxTypes };
+
+import type {
+  Options,
+  RawTransaction,
+  Transaction,
+} from './config/types';
+
+export type {
+  Options,
+  RawTransaction,
+  Transaction,
+};
 
 export default class ADA implements COIN.Coin {
   // implement this because of not extending ECDSACoin
@@ -23,26 +42,46 @@ export default class ADA implements COIN.Coin {
   }
 
   async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
-    const accPubkey = await this.getAccountPubKey(transport, appPrivateKey, appId);
-    const address = this.getAddressByAccountKey(accPubkey, addressIndex);
+    const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
+    const address = this.getAddressByAccountKey(accPubKey, addressIndex);
     return address;
   }
 
-  getTransactionSize(transaction: TransferWithoutFee): number {
-    const { addrIndexes } = transaction;
-    const estimatedTx = '83' + genTransferTxBody(transaction) + genFakeWitness(addrIndexes) + 'f6';
-    return estimatedTx.length / 2;
+  getTransactionSize(transaction: RawTransaction, txType = TxTypes.Transfer): number {
+    const internalTx = { ...transaction, fee: 170000 };
+    const txHex = '83' + genFakeTxBody(internalTx, txType) + genFakeWitness(internalTx.addrIndexes, txType) + 'f6';
+    return txHex.length / 2;
   }
 
-  async signTransaction(transaction: Transfer, options: Options): Promise<string> {
+  getTransferSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.Transfer);
+  }
+
+  getStakeRegisterSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeRegister);
+  }
+
+  getStakeDeregisterSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeDeregister);
+  }
+
+  getStakeDelegateSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeDelegate);
+  }
+
+  getStakeWithdrawSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeWithdraw);
+  }
+
+  async signTransaction(transaction: Transaction, options: Options, txType = TxTypes.Transfer): Promise<string> {
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
-    const { inputs, output, change, fee, ttl } = transaction;
+    const internalTx = { ...transaction };
 
     // prepare data
 
-    const script = params.TRANSFER.script + params.TRANSFER.signature;
-    const accPubkey = await this.getAccountPubKey(transport, appPrivateKey, appId);
-    const witnesses = await getTransferArgument(transaction, accPubkey);
+    const script = getScript(txType);
+    const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
+    const witnesses = getArguments(internalTx, accPubKey, txType);
 
     // request CoolWallet to sign tx
 
@@ -77,9 +116,29 @@ export default class ADA implements COIN.Coin {
 
     // construct the signed transaction
 
-    const signedTx = '83' + genTransferTxBody(transaction) + genWitness(witnesses) + 'f6';
+    const signedTx = '83' + genTxBody(internalTx, accPubKey, txType) + genWitness(witnesses) + 'f6';
 
     // const { signedTx: verifyTxBody } = await apdu.tx.getSignedHex(transport);
     return signedTx;
+  }
+
+  async signTransfer(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.Transfer);
+  }
+
+  async signStakeRegister(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeRegister);
+  }
+
+  async signStakeDeregister(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeDeregister);
+  }
+
+  async signStakeDelegate(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeDelegate);
+  }
+
+  async signStakeWithdraw(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeWithdraw);
   }
 }
