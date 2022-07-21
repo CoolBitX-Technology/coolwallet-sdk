@@ -5,6 +5,7 @@ import web3 from 'web3';
 import { NoInput, TwoInputs } from '../../../utils/componentMaker';
 
 import VET from '@coolwallet/vet'
+import { useRequest } from '../../../utils/hooks';
 
 interface Props {
   transport: Transport | null,
@@ -19,11 +20,11 @@ function CoinVet(props: Props) {
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
   const [signedTransaction2, setSignedTransaction2] = useState('');
-  const [value, setValue] = useState('0');
+  const [value, setValue] = useState('2');
   const [to, setTo] = useState('0x7567d83b7b8d80addcb281a71d54fc7b3364ffed');
 
   const { appPrivateKey } = props;
-  const transport = props.transport as Transport;
+  const transport = props.transport;
   const disabled = !transport || props.isLocked;
 
   const handleState = async (
@@ -46,7 +47,7 @@ function CoinVet(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      return await temp.getAddress(transport, appPrivateKey, appId, 0);
+      return await temp.getAddress(transport!, appPrivateKey, appId, 0);
     }, setAddress);
   };
 
@@ -85,15 +86,15 @@ function CoinVet(props: Props) {
     }, setSignedTransaction);
   };
 
-  const signTransaction2 = async () => {
-    handleState(async () => {
+  const signTransaction2 = () => {
+    useRequest(async () => {
       const transaction = {
         chainTag: 1,
         blockRef: '0x00000000aabbccdd',
         expiration: 32,
         clauses: [{
             to: '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed',
-            value: 10000,
+            value: `0x${parseInt(value).toString(16)}`,
             data: '0x000000606060'
         }],
         gasPriceCoef: 128,
@@ -112,11 +113,11 @@ function CoinVet(props: Props) {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       signTxData.appId = appId;
-      console.log("signning transaction2...");
+      console.log("signning transaction2...", transaction.clauses[0].value);
       const signedTx = await temp.signTransaction2(signTxData);
       console.log("signining2 done....")
       return signedTx;
-    }, setSignedTransaction2);
+    }, props).then(setSignedTransaction2);
   };
 
   return (

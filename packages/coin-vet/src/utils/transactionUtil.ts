@@ -1,5 +1,6 @@
 import * as stringUtil from './stringUtil';
 import { keccak256 } from '../vet/keccak';
+import * as types from '../config/types';
 const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
@@ -148,6 +149,40 @@ export const generateRawTx = async (
   else transaction = JSON.parse(payload);
   transaction.signature = b64encoded;
   return transaction;
+};
+
+export const getRawTx = (transaction: types.Record): Array<Buffer> => {
+  let rawData = [];
+
+  rawData.push(transaction.blockRef);
+  let clause = transaction.clauses[0];
+  if (clause.to === null) {
+    rawData.push('');
+  } else {
+    rawData.push(clause.to.toString());
+  }
+  rawData.push(clause.value.toString());
+  rawData.push(clause.data);
+  if (transaction.dependsOn === null) {
+    rawData.push('');
+  } else {
+    rawData.push(transaction.dependsOn.toString());
+  }
+  rawData.push(transaction.nonce.toString());
+  
+  rawData = rawData.map((d) => {
+    const hex = stringUtil.handleHex(d);
+    if (hex === '00' || hex === '') {
+      return Buffer.allocUnsafe(0);
+    }
+    return Buffer.from(hex, 'hex');
+  });
+  rawData[6] = Buffer.from([transaction.chainTag]);
+  rawData[7] = Buffer.from([transaction.expiration]);
+  rawData[8] = Buffer.from([transaction.gasPriceCoef]);
+  rawData[9] = Buffer.from([transaction.gas]);
+  
+  return rawData;
 };
 
 

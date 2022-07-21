@@ -26,7 +26,7 @@ export type Record = {
   /** coef applied to base gas price [0,255] */
   gasPriceCoef: number;
   /** max gas provided for execution */
-  gas: string | number;
+  gas: number;
   /** ID of another tx that is depended */
   dependsOn: string | null;
   /** nonce value for various purposes */
