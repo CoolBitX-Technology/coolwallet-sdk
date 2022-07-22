@@ -14,6 +14,7 @@ function isTransferSPLToken(p: signTxType) {
   return (
     hasOwnProperty(transaction, 'fromTokenAccount') &&
     hasOwnProperty(transaction, 'toTokenAccount') &&
+    !hasOwnProperty(transaction, 'toPubkey') &&
     hasOwnProperty(transaction, 'amount')
   );
 }
@@ -24,6 +25,16 @@ function isAssociateTokenAccount(p: signTxType) {
     hasOwnProperty(transaction, 'owner') &&
     hasOwnProperty(transaction, 'associateAccount') &&
     hasOwnProperty(transaction, 'token')
+  );
+}
+
+function isCreateAndTransferSPLToken(p: signTxType) {
+  const { transaction } = p;
+  return (
+    hasOwnProperty(transaction, 'fromTokenAccount') &&
+    hasOwnProperty(transaction, 'toPubkey') &&
+    hasOwnProperty(transaction, 'toTokenAccount') &&
+    hasOwnProperty(transaction, 'amount')
   );
 }
 
@@ -64,6 +75,7 @@ export {
   isTransfer,
   isTransferSPLToken,
   isAssociateTokenAccount,
+  isCreateAndTransferSPLToken,
   isDelegate,
   isDelegateAndCreateAccountWithSeed,
   isUndelegate,

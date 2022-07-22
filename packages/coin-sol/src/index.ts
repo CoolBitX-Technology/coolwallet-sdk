@@ -103,6 +103,29 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
 
+  async signCreateAndTransferSPLToken(signTxData: types.signCreateAndTransferSplTokenTransaction): Promise<string> {
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
+    const script = params.SCRIPT.CREATE_AND_SPL_TOKEN.scriptWithSignature;
+    const associateAccountInstruction = compileAssociateTokenAccount({
+      ...transaction,
+      signer,
+      owner: transaction.toPubkey,
+      associateAccount: transaction.toTokenAccount,
+      token: transaction.tokenInfo.address,
+    });
+    const [transferInstruction] = compileSplTokenTransaction({ ...signTxData.transaction, signer }).instructions;
+    associateAccountInstruction.instructions.push(transferInstruction);
+    const transactionInstruction = new Transaction(associateAccountInstruction);
+    const argument = scriptUtil.getCreateAndTransferSPLToken(
+      transactionInstruction,
+      addressIndex,
+      transaction.tokenInfo
+    );
+
+    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+  }
+
   async signDelegate(signTxData: types.signDelegateType): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex } = signTxData;
     const feePayer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
@@ -144,7 +167,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
 
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
-  
+
   async signStackingWithdrawTransaction(signTxData: types.signStakingWithdrawType): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex } = signTxData;
     const authorizedPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
@@ -164,6 +187,8 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       return this.signTransferSplTokenTransaction(signTxData as types.signTransferSplTokenTransactionType);
     if (txUtils.isAssociateTokenAccount(signTxData))
       return this.signAssociateTokenAccount(signTxData as types.signAssociateTokenAccountTransactionType);
+    if (txUtils.isCreateAndTransferSPLToken(signTxData))
+      return this.signCreateAndTransferSPLToken(signTxData as types.signCreateAndTransferSplTokenTransaction);
     if (txUtils.isDelegate(signTxData)) return this.signDelegate(signTxData as types.signDelegateType);
     if (txUtils.isDelegateAndCreateAccountWithSeed(signTxData))
       return this.signDelegateAndCreateAccountWithSeed(signTxData as types.signDelegateAndCreateAccountWithSeedType);

@@ -165,7 +165,13 @@ function CoinSol(props: Props) {
         const fromTokenAccount = await getAssociatedTokenAddr(token, fromPubkey);
         await checkAssociateTokenAccountValid(fromTokenAccount, token, fromPubkey);
         const toTokenAccount = await getAssociatedTokenAddr(token, toAccount);
-        await checkAssociateTokenAccountValid(toTokenAccount, token, toAccount);
+        let createTokenAccount = false;
+        try {
+          await checkAssociateTokenAccountValid(toTokenAccount, token, toAccount);
+        } catch (e) {
+          console.error(e);
+          createTokenAccount = true;
+        }
 
         const recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
 
@@ -180,9 +186,13 @@ function CoinSol(props: Props) {
           fromTokenAccount: fromTokenAccount.toString(),
           toTokenAccount: toTokenAccount.toString(),
           recentBlockhash,
-          amount: +splTokenTransaction.amount * (10 ** +splTokenTransaction.decimals),
+          amount: +splTokenTransaction.amount * 10 ** +splTokenTransaction.decimals,
           tokenInfo,
         };
+
+        if (createTokenAccount) {
+          (tx as any).toPubkey = splTokenTransaction.to;
+        }
 
         const appId = localStorage.getItem('appId');
         if (!appId) throw new Error('No Appid stored, please register!');
@@ -194,7 +204,6 @@ function CoinSol(props: Props) {
           addressIndex: 0,
           transaction: tx,
         });
-
         const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
 
         const verifySig = recoveredTx.verifySignatures();
@@ -407,8 +416,9 @@ function CoinSol(props: Props) {
 
   return (
     <Container>
-      <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
+      <div className='title2'>1. Get Address</div>
       <Inputs btnTitle='Get' title='Get Address' content={account} onClick={getAddress} disabled={disabled} />
+      <div className='title2'>2. Signing transaction</div>
       <Inputs
         btnTitle='Sign'
         title='Sign Transaction'
@@ -613,7 +623,7 @@ function CoinSol(props: Props) {
           },
         ]}
       />
-      <div className='title2'>Send Tx</div>
+      <div className='title2'>3. Send Tx</div>
       <Inputs
         btnTitle='Send'
         title='Send Transaction'
