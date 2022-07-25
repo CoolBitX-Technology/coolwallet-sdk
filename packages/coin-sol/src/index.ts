@@ -157,15 +157,21 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const { transport, appPrivateKey, appId, addressIndex } = signTxData;
     const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script = params.SCRIPT.DELEGATE_AND_CREATE_ACCOUNT_WITH_SEED.scriptWithSignature;
-    const rawTransaction = compileDelegateAndCreateAccountWithSeed({
+    let newAccountPubkey = signTxData.transaction.newAccountPubkey;
+    if (!newAccountPubkey) {
+      newAccountPubkey = await this.createWithSeed(fromPubkey, signTxData.transaction.seed, params.STAKE_PROGRAM_ID);
+    }
+    const transaction = {
       ...signTxData.transaction,
+      newAccountPubkey,
       fromPubkey,
       basePubkey: fromPubkey,
-    });
+    };
+    const rawTransaction = compileDelegateAndCreateAccountWithSeed(transaction);
     const transactionInstruction = new Transaction(rawTransaction);
     const argument = scriptUtil.getDelegateAndCreateAccountArguments(transactionInstruction, addressIndex);
 
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+    return sign.signTransaction({ ...signTxData, transaction }, transactionInstruction, script, argument);
   }
 
   async signStackingWithdrawTransaction(signTxData: types.signStakingWithdrawType): Promise<string> {

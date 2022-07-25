@@ -140,7 +140,7 @@ export type Undelegate = {
 };
 
 export type DelegateAndCreateAccountWithSeed = {
-  newAccountPubkey: Address;
+  newAccountPubkey?: Address;
   votePubkey: Address;
   seed: string;
   lamports: string | number;
