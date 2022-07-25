@@ -89,7 +89,7 @@ function CoinVet(props: Props) {
   const signTransaction2 = () => {
     useRequest(async () => {
       const transaction = {
-        chainTag: '0x0001',
+        chainTag: web3.utils.toHex(1),
         blockRef: '0x00000000aabbccdd',
         expiration: web3.utils.toHex(32),
         clauses: [

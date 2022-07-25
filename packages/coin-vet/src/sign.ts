@@ -2,11 +2,13 @@ import { apdu, error, tx } from '@coolwallet/core';
 import * as txUtil from './utils/transactionUtil';
 import * as scriptUtil from './utils/scriptUtil';
 import * as types from './config/types';
+import { handleHex } from './utils/stringUtil';
 
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
 const rlp = require('rlp');
 const blake = require('blakejs');
+const blake2b = require('blake2b');
 
 /**
  * Sign VeChain Transaction
@@ -63,33 +65,15 @@ export async function signTransaction2(
 
   const { script, argument } = await scriptUtil.getScriptAndArguments2(addressIndex, transaction);
 
-  // const sendScript =  () => {
-  //   console.log("sending script...")
-  //   apdu.tx.sendScript(transport, script);
-  // };
-  // preActions.push(sendScript);
-
-  // const sendArgument = async () => {
-  //   console.log("executing script....")
-  //   await apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
-  //   console.log(`after execute`);
-  // };
-  console.log("transport: ", transport);
-  console.log("appID: ", signTxData.appId);
-  console.log("appPrivateKey: ", signTxData.appPrivateKey);
-  console.log("argument: ", argument);
-  console.log("script: ", script);
-  
-
   const sendScript = () => apdu.tx.sendScript(transport, script);
   preActions.push(sendScript);
-  // const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
-  const action = () => {
-    console.log("executing")
-    const es =  apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
-    console.log("after", es)
-    return es
-  }
+  const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
+  // const action = () => {
+  //   console.log("executing")
+  //   const es =  apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
+  //   console.log("after", es)
+  //   return es
+  // }
 
   console.log("getting single signature from cool wallet....")
   const signature = await tx.flow.getSingleSignatureFromCoolWallet(
@@ -109,13 +93,16 @@ export async function signTransaction2(
 
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
+  console.log("rawdata: ", rawData);
+  console.log("signedTx rlp: ", rlp.encode(signedTx));
   console.log("rawdata hex", rawData.toString('hex'));
 
   // if (rawData.toString('hex') !== signedTx) {
   //   throw new Error('unexpected transaction format!');
   // }
 
-  const data = blake2b256(signedTx)
+  const hash = blake2b(32).update(rlp.encode(signedTx)).digest('hex')
+  const data = Buffer.from(handleHex(hash), 'hex')
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
   console.log("hex data: ", data);
   console.log("public key: ", publicKey);
@@ -166,19 +153,23 @@ export async function signCertificate(
   return signature.toString('hex');;
 }
 
-/**
- * computes blake2b 256bit hash of given data
- * @param data one or more Buffer | string
- */
- export function blake2b256(...data: Array<Buffer | string>) {
-  const ctx = blake.blake2bInit(32, null)
-  data.forEach(d => {
-      if (Buffer.isBuffer(d)) {
-          blake.blake2bUpdate(ctx, d)
-      } else {
-          blake.blake2bUpdate(ctx, Buffer.from(d, 'utf8'))
-      }
-  })
-  // return Buffer.from(blake.blake2bFinal(ctx))
-  return blake.blake2bFinal(ctx)
+// /**
+//  * computes blake2b 256bit hash of given data
+//  * @param data one or more Buffer | string
+//  */
+//  export function blake2b256(...data: Array<Buffer | string>) {
+//   const ctx = blake.blake2bInit(32, null)
+//   data.forEach(d => {
+//       if (Buffer.isBuffer(d)) {
+//           blake.blake2bUpdate(ctx, d)
+//       } else {
+//           blake.blake2bUpdate(ctx, Buffer.from(d, 'utf8'))
+//       }
+//   })
+//   return Buffer.from(blake.blake2bFinal(ctx), 'hex')
+//   // return blake.blake2bFinal(ctx)
+// }
+
+export const blake2b256 = (input: Buffer) => {
+  return Buffer.from(blake2b(32).update(input).digest())
 }
