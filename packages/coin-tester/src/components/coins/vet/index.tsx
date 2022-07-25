@@ -104,17 +104,18 @@ function CoinVet(props: Props) {
         dependsOn: null,
         nonce: '0xf2ed7cd2567c6dd4',
       };
+
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
       const signTxData = {
         transport,
         appPrivateKey,
         transaction,
-        appId: "",
+        appId,
         addressIndex: 0,
       }
+      console.log("signTxData: ", {signTxData});
 
-      const appId = localStorage.getItem('appId');
-      if (!appId) throw new Error('No Appid stored, please register!');
-      signTxData.appId = appId;
       console.log("signning transaction2...", transaction.clauses[0].value);
       const signedTx = await temp.signTransaction2(signTxData);
       console.log("signining2 done....")
