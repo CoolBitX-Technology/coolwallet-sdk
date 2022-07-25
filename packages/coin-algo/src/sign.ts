@@ -25,7 +25,6 @@ const signTransaction = async (
         true
     )) as Buffer;
 
-    // await apdu.mcu.control.powerOff(signTxData.transport!);
     return sig.toString('hex');
 }
 

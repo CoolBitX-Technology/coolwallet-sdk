@@ -6,6 +6,7 @@ import Inputs from '../../Inputs';
 import { useRequest } from '../../../utils/hooks';
 import type { FC } from 'react';
 import algosdk from "algosdk";
+import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 const msgpack = require('algo-msgpack-with-bigint');
 
 interface Props {
@@ -144,7 +145,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
     const note = enc.encode("Asset Config Transaction");
 
     useRequest(async () => {
-      let transactionObject = await algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
+      let transactionObject = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
         from: address,
         total: Number(total),
         defaultFrozen: defaultFrozen,
@@ -175,7 +176,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
     const note = enc.encode("Asset Freeze Transaction");
 
     useRequest(async () => {
-      let transactionObject = await algosdk.makeAssetFreezeTxnWithSuggestedParamsFromObject({
+      let transactionObject = algosdk.makeAssetFreezeTxnWithSuggestedParamsFromObject({
         from: address,
         freezeState: assetFreeze,
         freezeTarget: freezeAddress,
@@ -199,7 +200,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
     const note = enc.encode("Application Call Transaction");
 
     useRequest(async () => {
-      let transactionObject = await algosdk.makeApplicationCallTxnFromObject({
+      let transactionObject = algosdk.makeApplicationCallTxnFromObject({
         from: address,
         appIndex: Number(appId),
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
@@ -210,6 +211,31 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         suggestedParams: params,
         note: note,
       });
+
+      let transaction = transactionObject.get_obj_for_encoding();
+      setTransaction(transaction);
+      console.log("Transaction Object : ", transaction);
+
+      const signature = await signTransaction(transaction);
+      return signature;
+    }, props).then(setSignature);
+  };
+
+  const signCustomTransaction = async () => {
+    let params = {
+      flatFee: false,
+      fee: 0,
+      firstRound: 23051653,
+      lastRound: 23052653,
+      genesisID: 'testnet-v1.0',
+      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
+    }
+
+    const index = 100932848
+    const sender = "PG62AH3JJUKGTMKGCHRC6RQG4WBIQGJ4ZOR4BFPHOR3VY3BK2ZLBHVEHCE";
+
+    useRequest(async () => {
+      let transactionObject = algosdk.makeApplicationDeleteTxn(sender, params, index);
 
       let transaction = transactionObject.get_obj_for_encoding();
       setTransaction(transaction);
@@ -341,6 +367,14 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
             placeholder: 'App ID',
           },
         ]}
+      />
+      <Inputs
+        btnTitle='Sign Custom Transaction'
+        title='Custom Transaction'
+        content={""}
+        onClick={signCustomTransaction}
+        disabled={disabled}
+        inputs={[]}
       />
     </Container>
   );

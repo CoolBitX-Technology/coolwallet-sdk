@@ -21,7 +21,7 @@ const validTransaction = (transaction: types.Transaction) => {
 }
 
 const arrayArguments = (length: number, values: any, valueType: any) => {
-    let argument: any[] = [];
+    let argument: Buffer[] = [];
     [...Array(length)].forEach((_, i) => {
         let value = null;
         if (values && (values[i] || values[i] === 0)) value = values[i];
@@ -31,21 +31,21 @@ const arrayArguments = (length: number, values: any, valueType: any) => {
 }
 
 const processArray = (values: any, valueType: any) => {
-    let argument: any[] = [];
+    let argument: Buffer[] = [];
     if (values) argument = arrayArguments(valueType.length, values, valueType);
     else argument = arrayArguments(valueType.length, null, valueType);
     return argument;
 }
 
 const objectArguments = (subValue: any, allValueTypes: any, key: string | number) => {
-    let argument: any[] = [];
+    let argument: Buffer[] = [];
     const subValueType = allValueTypes[key];
     argument = [processValue(subValue, subValueType.type)];
     return argument;
 }
 
 const processObject = (valueObject: any, valueType: any) => {
-    let argument: any[] = [];
+    let argument: Buffer[] = [];
     const allValueTypes = valueType['subFields'];
     const allSubFieldKeys = Object.keys(allValueTypes);
     if (valueObject) {
@@ -90,7 +90,7 @@ const processValue = (value: any, type: String) => {
 }
 
 const transactionFieldPresent = (value: any, valueType: any) => {
-    let argument = [];
+    let argument: Buffer[] = [];
     if (valueType.type == "Object" || valueType.type == "Array") {
         let isPresent = (value && value !== {}) ? Buffer.from('01', 'hex') : Buffer.alloc(0);
         argument.push(isPresent)
@@ -119,7 +119,7 @@ const transactionValueArguments = (value: any, valueType: any) => {
 
 const getTransactionArgument = (transaction: types.Transaction, fields: string[]) => {
     validTransaction(transaction);
-    let argument: any[] = [];
+    let argument: Buffer[] = [];
     fields.forEach((field) => {
         let value = transaction[field as keyof types.FieldType];
         const valueType = transactionFields[field as keyof types.FieldType];
