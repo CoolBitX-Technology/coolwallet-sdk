@@ -89,19 +89,21 @@ function CoinVet(props: Props) {
   const signTransaction2 = () => {
     useRequest(async () => {
       const transaction = {
-        chainTag: 1,
+        chainTag: '0x0001',
         blockRef: '0x00000000aabbccdd',
-        expiration: 32,
-        clauses: [{
+        expiration: web3.utils.toHex(32),
+        clauses: [
+          {
             to: '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed',
-            value: `0x${parseInt(value).toString(16)}`,
-            data: '0x000000606060'
-        }],
-        gasPriceCoef: 128,
-        gas: 21000,
+            value: web3.utils.toHex(web3.utils.toWei(value, 'ether')),
+            data: '0x000000606060',
+          },
+        ],
+        gasPriceCoef: web3.utils.toHex(128),
+        gas: web3.utils.toHex(21000),
         dependsOn: null,
-        nonce: "0xf2ed7cd2567c6dd4",
-      }
+        nonce: '0xf2ed7cd2567c6dd4',
+      };
       const signTxData = {
         transport,
         appPrivateKey,

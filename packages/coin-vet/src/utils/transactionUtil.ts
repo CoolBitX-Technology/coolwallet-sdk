@@ -154,7 +154,9 @@ export const generateRawTx = async (
 export const getRawTx = (transaction: types.Record): Array<Buffer> => {
   let rawData = [];
 
+  rawData.push(transaction.chainTag);
   rawData.push(transaction.blockRef);
+  rawData.push(transaction.expiration);
   let clause = transaction.clauses[0];
   if (clause.to === null) {
     rawData.push('');
@@ -163,6 +165,8 @@ export const getRawTx = (transaction: types.Record): Array<Buffer> => {
   }
   rawData.push(clause.value.toString());
   rawData.push(clause.data);
+  rawData.push(transaction.gasPriceCoef);
+  rawData.push(transaction.gas);
   if (transaction.dependsOn === null) {
     rawData.push('');
   } else {
@@ -170,19 +174,15 @@ export const getRawTx = (transaction: types.Record): Array<Buffer> => {
   }
   rawData.push(transaction.nonce.toString());
   
-  rawData = rawData.map((d) => {
+  const raw = rawData.map((d) => {
     const hex = stringUtil.handleHex(d);
     if (hex === '00' || hex === '') {
       return Buffer.allocUnsafe(0);
     }
     return Buffer.from(hex, 'hex');
   });
-  rawData[6] = Buffer.from([transaction.chainTag]);
-  rawData[7] = Buffer.from([transaction.expiration]);
-  rawData[8] = Buffer.from([transaction.gasPriceCoef]);
-  rawData[9] = Buffer.from([transaction.gas]);
   
-  return rawData;
+  return raw;
 };
 
 

@@ -16,21 +16,21 @@ export type Clause = {
 
 export type Record = {
   /** last byte of genesis block ID */
-  chainTag: number;
+  chainTag: string;
   /** 8 bytes prefix of some block's ID */
   blockRef: string;
   /** constraint of time bucket */
-  expiration: number;
+  expiration: string;
   /** array of clauses */
   clauses: Clause[];
   /** coef applied to base gas price [0,255] */
-  gasPriceCoef: number;
+  gasPriceCoef: string;
   /** max gas provided for execution */
-  gas: number;
+  gas: string;
   /** ID of another tx that is depended */
-  dependsOn: string | null;
+  dependsOn: string;
   /** nonce value for various purposes */
-  nonce: string | number;
+  nonce: string;
 
   reserved?: {
     /** tx feature bits */
