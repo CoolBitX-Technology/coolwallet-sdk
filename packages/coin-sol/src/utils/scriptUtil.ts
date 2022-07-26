@@ -58,6 +58,16 @@ function getAssociateTokenAccount(rawTx: Transaction, addressIndex: number): str
   return SEPath + rawTx.compileMessage().serializeAssociateTokenAccount();
 }
 
+function getCreateAndTransferSPLToken(rawTx: Transaction, addressIndex: number, tokenInfo?: types.TokenInfo): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+  let tokenInfoArgs = '';
+  if (tokenInfo) tokenInfoArgs = getTokenInfoArgs(tokenInfo);
+
+  return SEPath + rawTx.compileMessage().serializeCreateAndTransferSPLToken() + tokenInfoArgs;
+}
+
 function getDelegateArguments(rawTx: Transaction, addressIndex: number): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
@@ -101,6 +111,7 @@ function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number):
 export {
   getAssociateTokenAccount,
   getSplTokenTransferArguments,
+  getCreateAndTransferSPLToken,
   getTransferArguments,
   getSmartContractArguments,
   getDelegateArguments,

@@ -112,6 +112,20 @@ export type AssociateTokenAccountTransaction = {
   recentBlockhash: string;
 };
 
+export type CreateAndTransferSplTokenTransaction = {
+  fromTokenAccount: Address;
+  toPubkey: Address;
+  toTokenAccount: Address;
+  recentBlockhash: string;
+  amount: number | string;
+  tokenInfo: {
+    symbol: string;
+    decimals: number | string;
+    address: string;
+    signature?: string;
+  };
+};
+
 export type Delegate = {
   stakePubkey: Address;
   authorizedPubkey: Address;
@@ -126,7 +140,7 @@ export type Undelegate = {
 };
 
 export type DelegateAndCreateAccountWithSeed = {
-  newAccountPubkey: Address;
+  newAccountPubkey?: Address;
   votePubkey: Address;
   seed: string;
   lamports: string | number;
@@ -158,6 +172,8 @@ export type signTransferSplTokenTransactionType = Mandatory<TransferSplTokenTran
 
 export type signAssociateTokenAccountTransactionType = Mandatory<AssociateTokenAccountTransaction>;
 
+export type signCreateAndTransferSplTokenTransaction = Mandatory<CreateAndTransferSplTokenTransaction>;
+
 export type signDelegateType = Mandatory<Delegate>;
 
 export type signUndelegateType = Mandatory<Undelegate>;
@@ -169,6 +185,7 @@ export type signStakingWithdrawType = Mandatory<StakingWithdrawTransaction>;
 export type signTxType =
   | signTransactionType
   | signTransferTransactionType
+  | signCreateAndTransferSplTokenTransaction
   | signTransferSplTokenTransactionType
   | signAssociateTokenAccountTransactionType
   | signDelegateType
