@@ -15,6 +15,7 @@ export default defineConfig({
       https: require.resolve('agent-base'),
       process: require.resolve('process/browser'),
       path: "path-browserify",
+      'safer-buffer': require.resolve('safe-buffer')
     },
   },
   plugins: [optionalDeps({ enabledPackages }), react(), viteCommonjs({ skipPreBuild: true })],

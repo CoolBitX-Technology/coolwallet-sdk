@@ -46,7 +46,7 @@ export const decodeAddress = (address: string)
     const dataLen = addressBuff.length;
     if (prefix === 'addr' && dataLen === 57) addressEncodeType = 1;
     if (prefix === 'addr' && dataLen === 29) addressEncodeType = 2;
-    if (prefix === 'stake' && dataLen === 29) addressEncodeType = 3;
+    // not support staking address
     if (!addressEncodeType) throw new Error('address not supported');
   } catch(err) {
     try {
@@ -86,15 +86,14 @@ export const cborEncode = (majorType: MajorType, value: Integer): string => {
 };
 
 export {
-  genTransferTxBody,
+  genFakeTxBody,
+  genTxBody,
   genFakeWitness,
   genWitness,
   genInputs,
-  genOutputs,
-  genFee,
-  genTtl,
 } from './transactionUtil';
 
 export {
-  getTransferArgument
+  getScript,
+  getArguments,
 } from './scriptUtil';

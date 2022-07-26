@@ -19,11 +19,17 @@ interface Input {
   onChange(value: string): void;
 }
 
+interface ReactElement {
+  xs?: number;
+  element: JSX.Element;
+}
+
 interface Props {
   title: string;
   content: string;
   onClick(): void;
   inputs?: Input[];
+  elements?: ReactElement[];
   btnTitle?: string;
   variant?: string;
   disabled?: boolean;
@@ -44,6 +50,11 @@ const ButtonInputs: FC<Props> = (props: Props) => {
           />
         </Col>
       ))}
+      {props.elements?.map((element, i) => (
+        <Col xs={element.xs ?? 2} key={'' + i + ''} className={inputCol}>
+          {element.element}
+        </Col>
+      ))}
       <Col className={textArea}>{props.content}</Col>
       <Col xs={2}>
         <ButtonGroup className={buttonGroup}>
@@ -56,6 +67,6 @@ const ButtonInputs: FC<Props> = (props: Props) => {
   );
 };
 
-ButtonInputs.defaultProps = { disabled: false, variant: 'outline-light', btnTitle: 'Get', inputs: [] };
+ButtonInputs.defaultProps = { disabled: false, variant: 'outline-light', btnTitle: 'Get', inputs: [], elements: [] };
 
 export default memo(ButtonInputs);
