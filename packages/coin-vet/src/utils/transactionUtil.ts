@@ -152,9 +152,7 @@ export const generateRawTx = async (
 };
 
 export const getRawTx = (transaction: types.Record): Array<Buffer> => {
-  let rawData = [];
-
-  rawData.push(transaction.chainTag);
+  const rawData = [];
   rawData.push(transaction.blockRef);
   rawData.push(transaction.expiration);
   let clause = transaction.clauses[0];
@@ -173,6 +171,7 @@ export const getRawTx = (transaction: types.Record): Array<Buffer> => {
     rawData.push(transaction.dependsOn.toString());
   }
   rawData.push(transaction.nonce.toString());
+  rawData.push(transaction.chainTag);
   
   const raw = rawData.map((d) => {
     const hex = stringUtil.handleHex(d);
@@ -181,6 +180,9 @@ export const getRawTx = (transaction: types.Record): Array<Buffer> => {
     }
     return Buffer.from(hex, 'hex');
   });
+  // r,s
+  raw.push(Buffer.allocUnsafe(0));
+  raw.push(Buffer.allocUnsafe(0));
   
   return raw;
 };
