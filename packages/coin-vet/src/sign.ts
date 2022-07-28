@@ -93,15 +93,13 @@ export async function signTransaction2(
 
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
-  console.log("rawdata: ", rawData);
-  console.log("signedTx rlp: ", rlp.encode(signedTx));
-  console.log("rawdata hex", rawData.toString('hex'));
+  console.log("rawdata", rawData.toString('hex'));
 
   // if (rawData.toString('hex') !== signedTx) {
   //   throw new Error('unexpected transaction format!');
   // }
 
-  const hash = blake2b(32).update(rlp.encode(signedTx)).digest('hex')
+  const hash = blake2b(32).update(rawData).digest('hex')
   const data = Buffer.from(handleHex(hash), 'hex')
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
   console.log("hex data: ", data);

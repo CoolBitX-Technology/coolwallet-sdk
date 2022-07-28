@@ -165,11 +165,7 @@ export const getRawTx = (transaction: types.Record): Array<Buffer> => {
   rawData.push(clause.data);
   rawData.push(transaction.gasPriceCoef);
   rawData.push(transaction.gas);
-  if (transaction.dependsOn === null) {
-    rawData.push('');
-  } else {
-    rawData.push(transaction.dependsOn.toString());
-  }
+  rawData.push(transaction.dependsOn);
   rawData.push(transaction.nonce.toString());
   rawData.push(transaction.chainTag);
   

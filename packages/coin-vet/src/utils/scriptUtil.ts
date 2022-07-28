@@ -9,7 +9,7 @@ const getTransferArgument = (transaction: types.Record) => {
   const chainTag = stringUtil.handleHex(transaction.chainTag.toString()).padStart(2, '0');
   console.log(`chainTag: ${transaction.chainTag} hex: ${chainTag}`);
 
-  const blockRef = stringUtil.handleHex(transaction.blockRef).slice(2);
+  const blockRef = stringUtil.handleHex(transaction.blockRef);
   console.log(`blockRef: ${transaction.blockRef} hex: ${blockRef}`);
 
   const expiration = stringUtil.handleHex(transaction.expiration.toString()).padStart(8, '0');
@@ -20,7 +20,7 @@ const getTransferArgument = (transaction: types.Record) => {
   if (clause.to == null) {
     to = "".padStart(40, '0');
   } else {
-    to = stringUtil.handleHex(clause.to.toString()).slice(2);
+    to = stringUtil.handleHex(clause.to.toString());
   }
   console.log(`to: ${clause.to} hex: ${to}`);
 
@@ -36,12 +36,14 @@ const getTransferArgument = (transaction: types.Record) => {
   const gas = stringUtil.handleHex(transaction.gas.toString()).padStart(16, '0');
   console.log(`gas: ${transaction.gas} hex: ${gas}`);
 
-  let dependsOn: string;
-  if (transaction.dependsOn == null) {
-    dependsOn = ''.padStart(64, '0');
-  } else {
-    dependsOn = stringUtil.handleHex(transaction.dependsOn).padStart(64, '0');
-  }
+  const dependsOn = stringUtil.handleHex(transaction.dependsOn);
+  // let dependsOn: string;
+  // if (transaction.dependsOn != null) {
+    // dependsOn = stringUtil.handleHex(transaction.dependsOn);
+  // } else {
+  //   dependsOn = '';
+  // }
+  
   console.log(`dependsOn: ${transaction.dependsOn} dependsOn: ${dependsOn}`);
 
   const nonce = stringUtil.handleHex(transaction.nonce.toString()).padStart(16, '0');
@@ -52,6 +54,8 @@ const getTransferArgument = (transaction: types.Record) => {
   // stringUtil.handleHex(clause.value).padStart(20, '0') +
   // stringUtil.handleHex(transaction.timestamp).padStart(20, '0') +
   // stringUtil.handleHex(transaction.nid.toString(16)).padStart(4, '0');
+  console.log("argument: ", argument);
+  
   return argument;
 };
 /**
@@ -85,7 +89,7 @@ export const getScriptAndArguments2 = async (addressIndex: number, transaction: 
 
   const script =
     // '03040E01C7070000000332A00700C2A0D700FFFFCAA1C70008C2ACD70009FFFCA00700CAAC27000DC2ACD70021FFE0CAAC970041BE0710C2ADD7002750FFFFC2ADD7002751FFF8CAAD57002759C2ADD7002779FFF8BE0710DC07C003564554D207CC05065052455353425554546F4E' +
-    '03040E01C7070000000332A00700CAA1C70008C2ACD70009FFFCCC071094CAAC27000DC2ACD70021FFE0CAAC970041C2ADD7002750FFFFC2ADD7002751FFF8CAAD57002759C2ADD7002779FFF8C2A0D700FFFFCC07C0028080BE0710DC07C003564554DAACD7C021FFE012D207CC05065052455353425554546F4E' +
+    '03050E01C7070000000332A00700C2A1C70008C2ACD70009FFFCCC071094CAAC27000DC2ACD70021FFE0C2AC970041CC071081CAADD7002750FFFFC2ADD7002751FFF8C4AD57002759C2ADD7002779FFF8C2A0D700FFFFCC07C0028080BE0710DC07C003564554CC0FC0023078BAAC2F6C0D0E04DDF09700DAACD7C021FFE012D207CC05065052455353425554546F4E' +
     params.TRANSFER.signature;
   const argument = getTransferArgument(transaction);
   const finalArgument = SEPath + argument;

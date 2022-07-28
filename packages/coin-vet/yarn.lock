@@ -1075,6 +1075,11 @@
     "minimalistic-assert" "^1.0.0"
     "safer-buffer" "^2.1.0"
 
+"b4a@^1.0.1":
+  "integrity" "sha512-1aCQIzQJK7G0z1Una75tWMlwVAR8o+QHoAlnWc5XAxRVBESY9WsitfBgM5nPyDBP5HrhPU1Np4Pq2Y7CJQ+tVw=="
+  "resolved" "https://registry.npmjs.org/b4a/-/b4a-1.5.3.tgz"
+  "version" "1.5.3"
+
 "babel-plugin-dynamic-import-node@^2.3.3":
   "integrity" "sha512-jZVI+s9Zg3IqA/kdi0i6UDCybUI3aSBLnglhYbSSjKlV7yF1F/5LWv8MakQmvYpnbJDS6fcBL2KzHSxNCMtWSQ=="
   "resolved" "https://registry.npmjs.org/babel-plugin-dynamic-import-node/-/babel-plugin-dynamic-import-node-2.3.3.tgz"
@@ -1169,6 +1174,22 @@
   "version" "1.1.5"
   dependencies:
     "safe-buffer" "^5.0.1"
+
+"blake2b-wasm@^2.4.0":
+  "integrity" "sha512-S1kwmW2ZhZFFFOghcx73+ZajEfKBqhP82JMssxtLVMxlaPea1p9uoLiUZ5WYyHn0KddwbLc+0vh4wR0KBNoT5w=="
+  "resolved" "https://registry.npmjs.org/blake2b-wasm/-/blake2b-wasm-2.4.0.tgz"
+  "version" "2.4.0"
+  dependencies:
+    "b4a" "^1.0.1"
+    "nanoassert" "^2.0.0"
+
+"blake2b@^2.1.4":
+  "integrity" "sha512-AyBuuJNI64gIvwx13qiICz6H6hpmjvYS5DGkG6jbXMOT8Z3WUJ3V1X0FlhIoT1b/5JtHE3ki+xjtMvu1nn+t9A=="
+  "resolved" "https://registry.npmjs.org/blake2b/-/blake2b-2.1.4.tgz"
+  "version" "2.1.4"
+  dependencies:
+    "blake2b-wasm" "^2.4.0"
+    "nanoassert" "^2.0.0"
 
 "blakejs@^1.2.1":
   "integrity" "sha512-QXUSXI3QVc/gJME0dBpXrag1kbzOqCjCX8/b54ntNyW6sjtoqxqRk3LTmXzaJoh71zMsDCjM+47jS7XiwN/+fQ=="
@@ -1693,6 +1714,11 @@
   "integrity" "sha512-UdAqHyFngu7TfQKsCBgAA6pWDkT8MAO7d0jyOecVhN5354xbLqdn8mV9Tat9gepAupm0bt2DbeaSC8vS52MuFA=="
   "resolved" "https://registry.npmjs.org/nan/-/nan-2.16.0.tgz"
   "version" "2.16.0"
+
+"nanoassert@^2.0.0":
+  "integrity" "sha512-7vO7n28+aYO4J+8w96AzhmU8G+Y/xpPDJz/se19ICsqj/momRbb9mh9ZUtkoJ5X3nTnPdhEJyc0qnM6yAsHBaA=="
+  "resolved" "https://registry.npmjs.org/nanoassert/-/nanoassert-2.0.0.tgz"
+  "version" "2.0.0"
 
 "node-releases@^2.0.3":
   "integrity" "sha512-U9h1NLROZTq9uE1SNffn6WuPDg8icmi3ns4rEl/oTfIle4iLjTliCzgTsbaIFMq/Xn078/lfY/BL0GWZ+psK4Q=="

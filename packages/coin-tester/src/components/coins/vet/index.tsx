@@ -101,7 +101,7 @@ function CoinVet(props: Props) {
         ],
         gasPriceCoef: web3.utils.toHex(128),
         gas: web3.utils.toHex(21000),
-        dependsOn: null,
+        dependsOn: '0x',
         nonce: '0xf2ed7cd2567c6dd4',
       };
 
