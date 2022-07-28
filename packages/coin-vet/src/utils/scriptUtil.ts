@@ -36,17 +36,17 @@ const getTransferArgument = (transaction: types.Record) => {
   const gas = stringUtil.handleHex(transaction.gas.toString()).padStart(16, '0');
   console.log(`gas: ${transaction.gas} hex: ${gas}`);
 
-  const dependsOn = stringUtil.handleHex(transaction.dependsOn);
+  const dependsOn = "".padStart(64, '0');
   // let dependsOn: string;
-  // if (transaction.dependsOn != null) {
-    // dependsOn = stringUtil.handleHex(transaction.dependsOn);
+  // if (transaction.dependsOn != "0x") {
+  //   dependsOn = stringUtil.handleHex(transaction.dependsOn);
   // } else {
-  //   dependsOn = '';
+  //   dependsOn = "".padStart(64, '0');
   // }
   
   console.log(`dependsOn: ${transaction.dependsOn} dependsOn: ${dependsOn}`);
 
-  const nonce = stringUtil.handleHex(transaction.nonce.toString()).padStart(16, '0');
+  const nonce = stringUtil.handleHex(transaction.nonce).padStart(16, '0');
   console.log(`nonce: ${transaction.nonce} hex: ${nonce}`);
 
   const argument = chainTag+blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce;
@@ -89,7 +89,7 @@ export const getScriptAndArguments2 = async (addressIndex: number, transaction: 
 
   const script =
     // '03040E01C7070000000332A00700C2A0D700FFFFCAA1C70008C2ACD70009FFFCA00700CAAC27000DC2ACD70021FFE0CAAC970041BE0710C2ADD7002750FFFFC2ADD7002751FFF8CAAD57002759C2ADD7002779FFF8BE0710DC07C003564554D207CC05065052455353425554546F4E' +
-    '03050E01C7070000000332A00700C2A1C70008C2ACD70009FFFCCC071094CAAC27000DC2ACD70021FFE0C2AC970041CC071081CAADD7002750FFFFC2ADD7002751FFF8C4AD57002759C2ADD7002779FFF8C2A0D700FFFFCC07C0028080BE0710DC07C003564554CC0FC0023078BAAC2F6C0D0E04DDF09700DAACD7C021FFE012D207CC05065052455353425554546F4E' +
+    '03040E01C7070000000332A00700C2A1C70008C2ACD70009FFFCCC071094CAAC27000DC2ACD70021FFE0C2ACC7004106CC071081CAACD70047FFFFC2ACD70048FFF8CC071080C2ACD70070FFF8C2A0D700FFFFCC07C0028080BE0710DC07C003564554CC0FC0023078BAAC2F6C0D0E04DDF09700DAACD7C021FFE012D207CC05065052455353425554546F4E' +
     params.TRANSFER.signature;
   const argument = getTransferArgument(transaction);
   const finalArgument = SEPath + argument;
