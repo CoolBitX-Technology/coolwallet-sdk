@@ -30,7 +30,8 @@
     "blakejs": "^1.2.1",
     "elliptic": "^6.5.1",
     "icon-sdk-js": "0.0.18",
-    "js-sha3": "^0.8.0"
+    "js-sha3": "^0.8.0",
+    "web3": "^1.7.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",

@@ -7,8 +7,8 @@ import { handleHex } from './utils/stringUtil';
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
 const rlp = require('rlp');
-const blake = require('blakejs');
 const blake2b = require('blake2b');
+
 
 /**
  * Sign VeChain Transaction
@@ -17,65 +17,16 @@ export async function signTransaction(
   signTxData: types.signTxType,
   publicKey: string
 ): Promise<string> {
-  console.log("signing transaction...");
   const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
 
   const preActions = [];
 
   const { script, argument } = await scriptUtil.getScriptAndArguments(addressIndex, transaction);
 
-  console.log("sending script...")
-  const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
-  };
-  preActions.push(sendScript);
-
-  console.log("executing script....")
-  const sendArgument = async () => {
-    return await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
-  };
-
-  console.log("getting single signature from cool wallet....")
-  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
-    transport,
-    preActions,
-    sendArgument,
-    false,
-    confirmCB,
-    authorizedCB,
-    true
-  );
-
-  console.log(`retuning signature: ${signature.toString('hex')}`)
-
-  return signature.toString('hex');;
-}
-
-/**
- * Sign VeChain Transaction
- */
-export async function signTransaction2(
-  signTxData: types.signTxType,
-  publicKey: string
-): Promise<string> {
-  console.log('signing transaction without reserved...');
-  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
-
-  const preActions = [];
-
-  const { script, argument } = await scriptUtil.getScriptAndArguments2(addressIndex, transaction);
-
   const sendScript = () => apdu.tx.sendScript(transport, script);
   preActions.push(sendScript);
   const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
-  // const action = () => {
-  //   console.log("executing")
-  //   const es =  apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
-  //   console.log("after", es)
-  //   return es
-  // }
 
-  console.log("getting single signature from cool wallet....")
   const signature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
     preActions,
@@ -93,27 +44,17 @@ export async function signTransaction2(
 
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
-  console.log("rawdata", rawData.toString('hex'));
-
-  // if (rawData.toString('hex') !== signedTx) {
-  //   throw new Error('unexpected transaction format!');
-  // }
 
   const hash = blake2b(32).update(rawData).digest('hex')
   const data = Buffer.from(handleHex(hash), 'hex')
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
-  console.log("hex data: ", data);
-  console.log("public key: ", publicKey);
-  console.log("key pair", keyPair);
   
   const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
-  const v = recoveryParam + 27;
+  const v = recoveryParam;
   const { r, s } = signature as {r: string, s: string};
-
-  // const vValue = v + transaction.chainTag * 2 + 8;
-  const signedTransaction = [Buffer.from([v]), Buffer.from(r, 'hex'), Buffer.from(s, 'hex')]
-  const serializedTx = rlp.encode(signedTransaction);
-  return `0x${serializedTx.toString('hex')}`;
+  const signedTransaction = Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]);
+  
+  return `0x${signedTransaction.toString('hex')}`;
 }
 
 /** 

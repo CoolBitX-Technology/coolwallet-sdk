@@ -64,6 +64,8 @@ export namespace secp256k1 {
 
         const r = Buffer.from(sig.r.toArray('be', 32))
         const s = Buffer.from(sig.s.toArray('be', 32))
+        console.log("thor-r: ", r)
+        console.log("thor-s: ", s)
 
         return Buffer.concat([r, s, Buffer.from([sig.recoveryParam!])])
     }
