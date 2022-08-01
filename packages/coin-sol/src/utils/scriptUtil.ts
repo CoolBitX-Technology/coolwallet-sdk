@@ -1,5 +1,6 @@
 import { utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
+import base58 from 'bs58';
 import * as types from '../config/types';
 import Transaction from './Transaction';
 
@@ -22,8 +23,9 @@ function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
   const signature = tokenInfo.signature ?? '';
   const tokenInfoToHex = Buffer.from([+tokenInfo.decimals, tokenInfo.symbol.length]).toString('hex');
   const tokenSymbol = Buffer.from(tokenInfo.symbol.toUpperCase()).toString('hex').padEnd(14, '0');
+  const tokenPublicKey = Buffer.from(base58.decode(tokenInfo.address)).toString('hex');
 
-  return tokenInfoToHex + tokenSymbol + signature;
+  return tokenInfoToHex + tokenSymbol + tokenPublicKey + signature;
 }
 
 /**
