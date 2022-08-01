@@ -55,7 +55,6 @@ function isUndelegate(p: signTxType) {
 function isDelegateAndCreateAccountWithSeed(p: signTxType) {
   const { transaction } = p;
   return (
-    hasOwnProperty(transaction, 'newAccountPubkey') &&
     hasOwnProperty(transaction, 'basePubkey') &&
     hasOwnProperty(transaction, 'votePubkey') &&
     hasOwnProperty(transaction, 'seed')

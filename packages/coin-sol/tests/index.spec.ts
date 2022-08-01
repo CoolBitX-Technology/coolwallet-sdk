@@ -45,6 +45,13 @@ describe('Test Solana SDK', () => {
     const publicKey = await node.getPublicKey();
     expect(walletAddress).toEqual(stringUtil.pubKeyToAddress(publicKey?.toString('hex') ?? ''));
     expect(walletAddress).toEqual(expected.publicKey.toString());
+    expect(sol.isValidPublicKey(publicKey ?? '')).toBeTruthy();
+    const token = getRandWallet();
+    const [token_account] = sol.findProgramAddress(
+      [publicKey!, TOKEN_PROGRAM_ID, base58.decode(token)],
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+    expect(sol.isValidPublicKey(token_account)).toBeFalsy();
   });
 
   it('Test Get Token Address', async () => {
@@ -295,7 +302,7 @@ describe('Test Solana SDK', () => {
           new PublicKey(fromTokenAccount),
           new PublicKey(toTokenAccount),
           new PublicKey(FROM_PUBKEY!),
-          amount,
+          amount
         )
       );
 
