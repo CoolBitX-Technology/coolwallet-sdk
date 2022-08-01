@@ -2,6 +2,7 @@ import { coin as COIN, error as ERROR, Transport, utils } from '@coolwallet/core
 import { SDKError } from '@coolwallet/core/lib/error';
 import { PathType } from '@coolwallet/core/lib/config';
 import base58 from 'bs58';
+import BN from 'bn.js';
 import { sha256 } from 'js-sha256';
 import * as types from './config/types';
 import * as params from './config/params';
@@ -20,10 +21,26 @@ import {
 import * as txUtils from './utils/transactionUtils';
 import Transaction from './utils/Transaction';
 import { createProgramAddressSync } from './utils/account';
+import { is_on_curve } from './utils/ed25519';
 
 class Solana extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
     super(params.COIN_TYPE);
+  }
+
+  isValidPublicKey(publicKey: types.Address): boolean {
+    let buffer: Buffer;
+    if (typeof publicKey === 'string') {
+      try {
+        buffer = base58.decode(publicKey);
+      } catch (e) {
+        return false;
+      }
+    } else {
+      buffer = publicKey;
+    }
+    const publicKeyBytes = new BN(buffer, 16).toArray(undefined, 32);
+    return is_on_curve(publicKeyBytes) === 1;
   }
 
   async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
