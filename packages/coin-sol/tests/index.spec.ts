@@ -238,8 +238,8 @@ describe('Test Solana SDK', () => {
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
-      .wrapPage('SOL', 'SPL')
-      .messagePage('@' + tokenInfo.symbol)
+      .messagePage('SOL')
+      .messagePage(tokenInfo.symbol)
       .addressPage(toTokenAccount)
       .amountPage(amount / 10 ** tokenInfo.decimals)
       .wrapPage('PRESS', 'BUTToN')
@@ -337,8 +337,8 @@ describe('Test Solana SDK', () => {
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
-      .wrapPage('SOL', 'SPL')
-      .messagePage('@' + tokenInfo.symbol)
+      .messagePage('SOL')
+      .messagePage(tokenInfo.symbol)
       .addressPage(TO_PUBKEY)
       .amountPage(amount / 10 ** tokenInfo.decimals)
       .wrapPage('PRESS', 'BUTToN')
