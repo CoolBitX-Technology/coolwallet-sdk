@@ -6,7 +6,6 @@ import Inputs from '../../Inputs';
 import { useRequest } from '../../../utils/hooks';
 import type { FC } from 'react';
 import algosdk from "algosdk";
-import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 const msgpack = require('algo-msgpack-with-bigint');
 
 interface Props {
@@ -106,12 +105,11 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         suggestedParams: params
       });
 
-      let transaction = transactionObject.get_obj_for_encoding();
-      setTransaction(transaction);
-      console.log("Transaction Object : ", transaction);
+      const transactionForSDK = transactionObject.get_obj_for_encoding();
+      setTransaction(transactionForSDK);
+      console.log("Transaction Object : ", transactionForSDK);
 
-      const signature = await signTransaction(transaction);
-      return signature;
+      return await signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -130,12 +128,11 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         suggestedParams: params
       });
 
-      let transaction = transactionObject.get_obj_for_encoding();
-      setTransaction(transaction);
-      console.log("Transaction Object : ", transaction);
+      const transactionForSDK = transactionObject.get_obj_for_encoding();
+      setTransaction(transactionForSDK);
+      console.log("Transaction Object : ", transactionForSDK);
 
-      const signature = await signTransaction(transaction);
-      return signature;
+      return await signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -152,7 +149,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         unitName: assetName,
         assetName: assetName,
         decimals: 4,
-        assetURL: 'http://someurl',
+        assetURL: 'https://someurl',
         suggestedParams: params,
         note: note,
         manager: address,
@@ -161,12 +158,11 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         reserve: address,
       });
 
-      let transaction = transactionObject.get_obj_for_encoding();
-      setTransaction(transaction);
-      console.log("Transaction Object : ", transaction);
+      const transactionForSDK = transactionObject.get_obj_for_encoding();
+      setTransaction(transactionForSDK);
+      console.log("Transaction Object : ", transactionForSDK);
 
-      const signature = await signTransaction(transaction);
-      return signature;
+      return await signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -185,12 +181,11 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         note: note,
       });
 
-      let transaction = transactionObject.get_obj_for_encoding();
-      setTransaction(transaction);
-      console.log("Transaction Object : ", transaction);
+      const transactionForSDK = transactionObject.get_obj_for_encoding();
+      setTransaction(transactionForSDK);
+      console.log("Transaction Object : ", transactionForSDK);
 
-      const signature = await signTransaction(transaction);
-      return signature;
+      return await signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -212,12 +207,11 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         note: note,
       });
 
-      let transaction = transactionObject.get_obj_for_encoding();
-      setTransaction(transaction);
-      console.log("Transaction Object : ", transaction);
+      const transactionForSDK = transactionObject.get_obj_for_encoding();
+      setTransaction(transactionForSDK);
+      console.log("Transaction Object : ", transactionForSDK);
 
-      const signature = await signTransaction(transaction);
-      return signature;
+      return await signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -237,13 +231,15 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
     useRequest(async () => {
       let transactionObject = algosdk.makeApplicationDeleteTxn(sender, params, index);
 
-      let transaction = transactionObject.get_obj_for_encoding();
-      setTransaction(transaction);
-      console.log("Transaction Object : ", transaction);
+      const transactionForSDK = transactionObject.get_obj_for_encoding();
+      setTransaction(transactionForSDK);
+      console.log("Transaction Object : ", transactionForSDK);
 
-      const signature = await signTransaction(transaction);
-      return signature;
+      return await signTransaction(transactionForSDK);
     }, props).then(setSignature);
+  };
+
+  const empty = () => {
   };
 
   return (
@@ -253,7 +249,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       <Inputs
         title='Signature'
         content={signature}
-        onClick={() => { }}
+        onClick={() => empty()}
         disabled={true}
         inputs={[]}
       />
