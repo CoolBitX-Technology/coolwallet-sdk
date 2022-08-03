@@ -210,6 +210,51 @@ class Message {
     return signData.slice(0, length + instructionBuffer.length).toString('hex');
   }
 
+  serializeCreateAndTransferSPLToken(): string {
+    const { instructions } = this.encodedLength();
+    let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
+    const [associateAccount, tokenTransfer] = instructions;
+    const associateAccountLayout = BufferLayout.struct<
+      Readonly<{
+        programIdIndex: number;
+        keyIndices: number[];
+      }>
+    >([
+      BufferLayout.u8('programIdIndex'),
+      BufferLayout.seq(BufferLayout.u8('keyIndex'), associateAccount.keyIndices.length, 'keyIndices'),
+    ]);
+    let instructionBufferLength = associateAccountLayout.encode(associateAccount, instructionBuffer, 0);
+    const tokenTransferLayout = BufferLayout.struct<
+      Readonly<{
+        programIdIndex: number;
+        keyIndices: number[];
+        data: number[];
+      }>
+    >([
+      BufferLayout.u8('programIdIndex'),
+      BufferLayout.seq(BufferLayout.u8('keyIndex'), tokenTransfer.keyIndices.length, 'keyIndices'),
+      BufferLayout.seq(BufferLayout.u8('userdatum'), tokenTransfer.data.length, 'data'),
+    ]);
+    instructionBufferLength += tokenTransferLayout.encode(tokenTransfer, instructionBuffer, instructionBufferLength);
+    instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
+
+    const signDataLayout = BufferLayout.struct<
+      Readonly<{
+        keys: Uint8Array[];
+        recentBlockhash: Uint8Array;
+      }>
+    >([BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'), publicKey('recentBlockhash')]);
+    const transaction = {
+      keys: this.accountKeys.map((key) => Buffer.from(key, 'hex')),
+      recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
+    };
+    const signData = Buffer.alloc(2048); // sign data max length
+    const length = signDataLayout.encode(transaction, signData);
+    instructionBuffer.copy(signData, length);
+
+    return signData.slice(0, length + instructionBuffer.length).toString('hex');
+  }
+
   serializeDelegate(): string {
     const { instructions } = this.encodedLength();
     const [instruction] = instructions;
