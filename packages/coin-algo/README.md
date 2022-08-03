@@ -24,15 +24,13 @@ const { privateKey: appPrivateKey } = crypto.key.generateKeyPair();
 
 const appId = 'appId that had been registered by wallet';
 
-const addressIndex = 0;
-
 const address = await algo.getAddress(transport, appPrivateKey, appId);
 
 const enc = new TextEncoder();
 const note = enc.encode("Payment Transaction");
 let params = await algodClient.getTransactionParams().do();
 let transactionObject = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: "PG62AH3JJUKGTMKGCHRC6RQG4WBIQGJ4ZOR4BFPHOR3VY3BK2ZLBHVEHCE",
+        from: address,
         to: "5B3X56E3KVGS3D5263AWYWMUFBJUX7IZ3OYBUYVH6AB4ZDNJSGT4MQAG2U",
         amount: 100000,
         note: note,
@@ -52,3 +50,6 @@ const signTxData = {
 const signature = await algo.signTransaction(signTxData);
 ```
 
+# Official Documentation
+
+https://developer.algorand.org/docs/
