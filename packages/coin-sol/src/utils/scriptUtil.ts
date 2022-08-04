@@ -1,6 +1,7 @@
 import { utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
 import base58 from 'bs58';
+import { TOKEN_INFO } from '../config/tokenInfos';
 import * as types from '../config/types';
 import Transaction from './Transaction';
 
@@ -20,11 +21,13 @@ function getTransferArguments(rawTx: Transaction, addressIndex: number): string 
 }
 
 function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
-  const tokenSignature = tokenInfo.signature ?? '';
+  // If given token address can be found in official token list, use it instead of the user given one.
+  const token = TOKEN_INFO.find((tok) => tok.address === tokenInfo.address) ?? tokenInfo;
+  const tokenSignature = token.signature ?? '';
   const signature = tokenSignature.slice(82).padStart(144, '0');
-  const tokenInfoToHex = Buffer.from([+tokenInfo.decimals, tokenInfo.symbol.length]).toString('hex');
-  const tokenSymbol = Buffer.from(tokenInfo.symbol.toUpperCase()).toString('hex').padEnd(14, '0');
-  const tokenPublicKey = Buffer.from(base58.decode(tokenInfo.address)).toString('hex');
+  const tokenInfoToHex = Buffer.from([+token.decimals, token.symbol.length]).toString('hex');
+  const tokenSymbol = Buffer.from(token.symbol.toUpperCase()).toString('hex').padEnd(14, '0');
+  const tokenPublicKey = Buffer.from(base58.decode(token.address)).toString('hex');
 
   return tokenInfoToHex + tokenSymbol + tokenPublicKey + signature;
 }
