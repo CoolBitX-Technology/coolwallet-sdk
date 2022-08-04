@@ -1,6 +1,7 @@
 import { utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
 import base58 from 'bs58';
+import { TOKEN_INFO } from '../config/tokenInfos';
 import * as types from '../config/types';
 import Transaction from './Transaction';
 

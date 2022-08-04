@@ -39,30 +39,8 @@ function compileSplTokenTransaction(transaction: {
   toTokenAccount: types.Address;
   recentBlockhash: string;
   amount: number | string;
-  tokenInfo: {
-    symbol: string;
-    decimals: number | string;
-    address: string;
-    signature?: string;
-  };
 }): types.TransactionArgs {
-  const { signer, fromTokenAccount, toTokenAccount, amount, tokenInfo, recentBlockhash } = transaction;
-
-  // find token with match at least token symbol condition
-  const supportedToken = TOKEN_INFO.find((e) => e.address === tokenInfo.address);
-
-  // valid token input is at least supported by coolX or have valid token address and decimal
-  if (!tokenInfo?.symbol && !tokenInfo?.decimals) throw new Error('Please provide spl token symbol and decimals');
-
-  // if not supported by coolX, assign to user input
-  const tokenInfoArgs = supportedToken ?? tokenInfo;
-
-  // handle if user input was string
-  tokenInfoArgs.decimals = +tokenInfoArgs.decimals;
-
-  // token address must be in base58 format
-  if (!stringUtil.isBase58Format(tokenInfoArgs.address)) throw new Error('Spl token address must be base58 format');
-
+  const { signer, fromTokenAccount, toTokenAccount, amount, recentBlockhash } = transaction;
   return {
     instructions: [
       {
@@ -77,7 +55,6 @@ function compileSplTokenTransaction(transaction: {
     ],
     recentBlockhash,
     feePayer: signer,
-    showTokenInfo: tokenInfoArgs,
   };
 }
 

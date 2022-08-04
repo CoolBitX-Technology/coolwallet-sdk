@@ -17,10 +17,20 @@ const sol = new SOL();
 
 const mnemonic = bip39.generateMnemonic();
 
+function omit<T extends Record<string, any>>(obj: T, key: keyof T) {
+  return Object.keys(obj).reduce((o, k) => {
+    if (k === key) return o;
+    return {
+      ...o,
+      [k]: obj[k],
+    };
+  }, {} as T);
+}
+
 describe('Test Solana SDK', () => {
   const tokens = Object.values(TOKEN_INFO);
   const getRandInt = (max: number) => Math.floor(Math.random() * max);
-  const getRandToken = () => tokens[getRandInt(tokens.length)];
+  const getRandToken = () => omit(tokens[getRandInt(tokens.length)], 'signature');
   const getRandWallet = () => stringUtil.pubKeyToAddress(crypto.randomBytes(32).toString('hex'));
 
   let props: PromiseValue<ReturnType<typeof initialize>>;

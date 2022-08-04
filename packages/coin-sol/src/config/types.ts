@@ -77,13 +77,11 @@ export type SerializedInstruction = {
  * @param {Address} feePayer payer of this transaction
  * @param {string} recentBlockhash recent blockHash, identification of new block alternative for nonce
  * @param {TransactionInstruction[]} instructions list of instruction per transaction
- * @param {boolean} showTokenInfo list of instruction per transaction
  */
 export type TransactionArgs = {
   feePayer: Address;
   recentBlockhash: string;
   instructions: TransactionInstruction[];
-  showTokenInfo?: TokenInfo;
 };
 
 export type TransferTransaction = {

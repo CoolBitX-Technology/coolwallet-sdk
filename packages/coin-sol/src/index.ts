@@ -9,6 +9,7 @@ import * as params from './config/params';
 import * as stringUtil from './utils/stringUtil';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
+import { TOKEN_INFO } from './config/tokenInfos';
 import {
   compileAssociateTokenAccount,
   compileDelegate,
@@ -95,16 +96,15 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
   }
 
   async signTransferSplTokenTransaction(signTxData: types.signTransferSplTokenTransactionType): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
+    const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script = params.SCRIPT.SPL_TOKEN.scriptWithSignature;
-    const rawTransaction = compileSplTokenTransaction({ ...signTxData.transaction, signer });
+    // If given token address can be found in official token list, use it instead of the user given one.
+    const tokenInfo: types.TokenInfo =
+      TOKEN_INFO.find((tok) => tok.address === transaction.tokenInfo.address) ?? transaction.tokenInfo;
+    const rawTransaction = compileSplTokenTransaction({ ...transaction, signer });
     const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getSplTokenTransferArguments(
-      transactionInstruction,
-      addressIndex,
-      rawTransaction.showTokenInfo
-    );
+    const argument = scriptUtil.getSplTokenTransferArguments(transactionInstruction, addressIndex, tokenInfo);
 
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
@@ -124,21 +124,20 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script = params.SCRIPT.CREATE_AND_SPL_TOKEN.scriptWithSignature;
+    // If given token address can be found in official token list, use it instead of the user given one.
+    const tokenInfo: types.TokenInfo =
+      TOKEN_INFO.find((tok) => tok.address === transaction.tokenInfo.address) ?? transaction.tokenInfo;
     const associateAccountInstruction = compileAssociateTokenAccount({
       ...transaction,
       signer,
       owner: transaction.toPubkey,
       associateAccount: transaction.toTokenAccount,
-      token: transaction.tokenInfo.address,
+      token: tokenInfo.address,
     });
     const [transferInstruction] = compileSplTokenTransaction({ ...signTxData.transaction, signer }).instructions;
     associateAccountInstruction.instructions.push(transferInstruction);
     const transactionInstruction = new Transaction(associateAccountInstruction);
-    const argument = scriptUtil.getCreateAndTransferSPLToken(
-      transactionInstruction,
-      addressIndex,
-      transaction.tokenInfo
-    );
+    const argument = scriptUtil.getCreateAndTransferSPLToken(transactionInstruction, addressIndex, tokenInfo);
 
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
