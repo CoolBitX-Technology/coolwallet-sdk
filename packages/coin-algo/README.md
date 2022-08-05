@@ -47,7 +47,11 @@ const signTxData = {
     addressIndex
 }
 
-const signature = await algo.signTransaction(signTxData);
+const signedTransactionFromCard = await algo.signTransaction(signTxData);
+
+const signedTransactionFinal = Uint8Array.from(Buffer.from(signature, 'hex'))
+
+await algodClient.sendRawTransaction(signedTransactionFinal).do()
 ```
 
 # Official Documentation
