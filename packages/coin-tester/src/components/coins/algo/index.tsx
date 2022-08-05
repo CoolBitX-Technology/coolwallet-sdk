@@ -119,7 +119,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       const transactionForSDK = transactionObject.get_obj_for_encoding();
       console.log("Transaction Object : ", transactionForSDK);
 
-      return await signTransaction(transactionForSDK);
+      return signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
