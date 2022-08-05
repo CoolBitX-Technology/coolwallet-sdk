@@ -33,7 +33,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
   const [amount, setAmount] = useState('100000');
   const [assetAmount, setAssetAmount] = useState('0');
   const [assetId, setAssetId] = useState('82200197');
-  const [appId, setAppId] = useState('82200197');
+  const [appIndex, setAppIndex] = useState('82200197');
   const [assetName, setAssetName] = useState('coolbitx');
   const [total, setTotal] = useState("1000");
   const [freezeAddress, setFreezeAddress] = useState('5B3X56E3KVGS3D5263AWYWMUFBJUX7IZ3OYBUYVH6AB4ZDNJSGT4MQAG2U');
@@ -182,7 +182,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
     useRequest(async () => {
       let transactionObject = algosdk.makeApplicationCallTxnFromObject({
         from: address,
-        appIndex: Number(appId),
+        appIndex: Number(appIndex),
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
         appArgs: [stringToBytes("first argument"), stringToBytes("second argument"), algosdk.encodeUint64(125)],
         foreignApps: [1, 2, 3],
@@ -330,8 +330,8 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         disabled={disabled}
         inputs={[
           {
-            value: appId,
-            onChange: setAppId,
+            value: appIndex,
+            onChange: setAppIndex,
             placeholder: 'App ID',
           },
         ]}
