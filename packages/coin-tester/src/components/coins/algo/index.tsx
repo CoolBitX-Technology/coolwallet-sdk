@@ -6,7 +6,6 @@ import Inputs from '../../Inputs';
 import { useRequest } from '../../../utils/hooks';
 import type { FC } from 'react';
 import algosdk from "algosdk";
-const msgpack = require('algo-msgpack-with-bigint');
 
 interface Props {
   transport: Transport | null;
@@ -26,7 +25,6 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
   const coinALGO = new CoinALGO();
   const disabled = !props.transport || props.isLocked;
 
-  const [transaction, setTransaction] = useState({});
   const [payload, setPayload] = useState('');
   const [result, setResult] = useState('');
   const [address, setAddress] = useState('');
@@ -80,33 +78,26 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
     }
   };
 
-  const sendTransaction = async (signature: string, transaction: any) => {
-    let signedTransaction = {
-      sig: Buffer.from(signature, 'hex'),
-      txn: transaction,
-    };
-
-    const options = { sortKeys: true };
-    let encodedSignedTransaction = new Uint8Array(msgpack.encode(signedTransaction, options))
-    setResult((await algodClient.sendRawTransaction(encodedSignedTransaction).do()).txId);
+  const sendTransaction = async (signature: string) => {
+    const signedTransaction = Uint8Array.from(Buffer.from(signature, 'hex'))
+    setResult((await algodClient.sendRawTransaction(signedTransaction).do()).txId);
   }
 
   const signPaymentTransaction = async () => {
     let params = await algodClient.getTransactionParams().do();
     const enc = new TextEncoder();
-    const note = enc.encode("PaymentTransaction");
+    const note = enc.encode("Payment Transaction");
 
     useRequest(async () => {
       let transactionObject = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: address,
-        to: receiver,
+        from: receiver,
+        to: address,
         amount: Number(amount),
         note: note,
         suggestedParams: params
       });
 
       const transactionForSDK = transactionObject.get_obj_for_encoding();
-      setTransaction(transactionForSDK);
       console.log("Transaction Object : ", transactionForSDK);
 
       return await signTransaction(transactionForSDK);
@@ -129,7 +120,6 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       });
 
       const transactionForSDK = transactionObject.get_obj_for_encoding();
-      setTransaction(transactionForSDK);
       console.log("Transaction Object : ", transactionForSDK);
 
       return await signTransaction(transactionForSDK);
@@ -159,7 +149,6 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       });
 
       const transactionForSDK = transactionObject.get_obj_for_encoding();
-      setTransaction(transactionForSDK);
       console.log("Transaction Object : ", transactionForSDK);
 
       return await signTransaction(transactionForSDK);
@@ -182,7 +171,6 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       });
 
       const transactionForSDK = transactionObject.get_obj_for_encoding();
-      setTransaction(transactionForSDK);
       console.log("Transaction Object : ", transactionForSDK);
 
       return await signTransaction(transactionForSDK);
@@ -208,7 +196,6 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       });
 
       const transactionForSDK = transactionObject.get_obj_for_encoding();
-      setTransaction(transactionForSDK);
       console.log("Transaction Object : ", transactionForSDK);
 
       return await signTransaction(transactionForSDK);
@@ -216,15 +203,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
   };
 
   const signCustomTransaction = async () => {
-    let params = {
-      flatFee: false,
-      fee: 0,
-      firstRound: 23051653,
-      lastRound: 23052653,
-      genesisID: 'testnet-v1.0',
-      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
-    }
-
+    let params = await algodClient.getTransactionParams().do();
     const index = 100932848
     const sender = "PG62AH3JJUKGTMKGCHRC6RQG4WBIQGJ4ZOR4BFPHOR3VY3BK2ZLBHVEHCE";
 
@@ -232,7 +211,6 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       let transactionObject = algosdk.makeApplicationDeleteTxn(sender, params, index);
 
       const transactionForSDK = transactionObject.get_obj_for_encoding();
-      setTransaction(transactionForSDK);
       console.log("Transaction Object : ", transactionForSDK);
 
       return await signTransaction(transactionForSDK);
@@ -247,7 +225,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       <div className='title2'>These two basic methods are required to implement in a coin sdk.</div>
       <Inputs btnTitle='Get Address' title='Address' content={address} onClick={getAddress} disabled={disabled} />
       <Inputs
-        title='Signature'
+        title='Signed Transaction'
         content={signature}
         onClick={() => empty()}
         disabled={true}
@@ -265,7 +243,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         btnTitle='Send Transaction'
         title='Transaction Hash'
         content={result}
-        onClick={() => sendTransaction(signature, transaction)}
+        onClick={() => sendTransaction(signature)}
         disabled={disabled}
         inputs={[]}
       />

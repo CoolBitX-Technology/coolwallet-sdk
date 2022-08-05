@@ -1,10 +1,11 @@
-import { error as ERROR } from '@coolwallet/core';
+import { coin as COIN, error as ERROR, utils, config } from '@coolwallet/core';
 import nacl from "tweetnacl";
 import base32 from "hi-base32";
 import sha512 from "js-sha512";
 import * as params from '../config/params';
 import * as types from '../config/types';
 import { getTransactionArgument } from "./transactionUtils";
+const msgpack = require('algo-msgpack-with-bigint');
 
 const PUBLIC_KEY_LENGTH = nacl.sign.publicKeyLength;
 const ALGORAND_ADDRESS_LENGTH = 58;
@@ -42,13 +43,35 @@ const getScriptAndArgument = (
   const fields = params[transaction.type].fields;
   if (!(script && signature && fields)) throw new ERROR.SDKError(getScriptAndArgument.name, `Transaction type ${transaction.type} is not supported`)
   const argument = getTransactionArgument(transaction, fields);
-  const newArgument = argument.map(item => item.toString('hex'))
-  console.log("Script \n", script)
-  console.log("Argument \n", newArgument)
   return { script: script + signature, argument };
+};
+
+const getSignedTransaction = async (
+  signTxData: types.SignTxType,
+  sig: Buffer
+) => {
+  const path = utils.getFullPath({
+    pathType: config.PathType.SLIP0010,
+    pathString: "44'/283'/0'/0'/0'",
+  });
+  const publicKey = await COIN.getPublicKeyByPath(signTxData.transport, signTxData.appId, signTxData.appPrivateKey, path);
+
+  const signedTransaction: types.AlgorandRawTransactionStruct = {
+    sig: sig,
+    txn: signTxData.transaction,
+  };
+
+  const sender = signTxData.transaction.snd.toString("hex")
+
+  if (publicKey !== sender) {
+    signedTransaction.sgnr = Buffer.from(publicKey, 'hex');
+  }
+  const options = { sortKeys: true };
+  return Buffer.from(msgpack.encode(signedTransaction, options)).toString("hex")
 };
 
 export {
   pubKeyToAddress,
-  getScriptAndArgument
+  getScriptAndArgument,
+  getSignedTransaction
 };

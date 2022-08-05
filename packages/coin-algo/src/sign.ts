@@ -1,6 +1,7 @@
 
 import { tx, apdu, utils, config } from '@coolwallet/core';
 import * as types from './config/types';
+import * as scriptUtils from './utils/scriptUtils'
 
 const getSEPath = () => {
     const path = utils.getFullPath({
@@ -24,8 +25,7 @@ const signTransaction = async (
         executeRlpScript,
         true
     )) as Buffer;
-
-    return sig.toString('hex');
+    return await scriptUtils.getSignedTransaction(signTxData, sig)
 }
 
 export { signTransaction }

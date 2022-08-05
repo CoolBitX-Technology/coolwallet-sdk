@@ -29,6 +29,7 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
   "dependencies": {
+    "algo-msgpack-with-bigint": "^2.1.1",
     "bn.js": "^5.2.1",
     "hi-base32": "^0.5.1",
     "js-sha512": "^0.8.0",
