@@ -36,8 +36,6 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
   const [appId, setAppId] = useState('82200197');
   const [assetName, setAssetName] = useState('coolbitx');
   const [total, setTotal] = useState("1000");
-  const [defaultFrozen, setDefaultFrozen] = useState(true);
-  const [assetFreeze, setAssetFreeze] = useState(true);
   const [freezeAddress, setFreezeAddress] = useState('5B3X56E3KVGS3D5263AWYWMUFBJUX7IZ3OYBUYVH6AB4ZDNJSGT4MQAG2U');
   const [freezeAssetId, setFreezeAssetId] = useState('82200197');
 
@@ -65,8 +63,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       addressIndex: 0,
     };
 
-    const signature = await coinALGO.signTransaction(signTxData);
-    return signature;
+    return coinALGO.signTransaction(signTxData);
   }
 
   const getTransaction = async () => {
@@ -78,7 +75,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
     }
   };
 
-  const sendTransaction = async (signature: string) => {
+  const sendTransaction = async () => {
     const signedTransaction = Uint8Array.from(Buffer.from(signature, 'hex'))
     setResult((await algodClient.sendRawTransaction(signedTransaction).do()).txId);
   }
@@ -90,8 +87,8 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
 
     useRequest(async () => {
       let transactionObject = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: receiver,
-        to: address,
+        from: address,
+        to: receiver,
         amount: Number(amount),
         note: note,
         suggestedParams: params
@@ -100,7 +97,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       const transactionForSDK = transactionObject.get_obj_for_encoding();
       console.log("Transaction Object : ", transactionForSDK);
 
-      return await signTransaction(transactionForSDK);
+      return signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -135,7 +132,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       let transactionObject = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
         from: address,
         total: Number(total),
-        defaultFrozen: defaultFrozen,
+        defaultFrozen: true,
         unitName: assetName,
         assetName: assetName,
         decimals: 4,
@@ -151,7 +148,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       const transactionForSDK = transactionObject.get_obj_for_encoding();
       console.log("Transaction Object : ", transactionForSDK);
 
-      return await signTransaction(transactionForSDK);
+      return signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -163,7 +160,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
     useRequest(async () => {
       let transactionObject = algosdk.makeAssetFreezeTxnWithSuggestedParamsFromObject({
         from: address,
-        freezeState: assetFreeze,
+        freezeState: true,
         freezeTarget: freezeAddress,
         assetIndex: Number(freezeAssetId),
         suggestedParams: params,
@@ -173,7 +170,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       const transactionForSDK = transactionObject.get_obj_for_encoding();
       console.log("Transaction Object : ", transactionForSDK);
 
-      return await signTransaction(transactionForSDK);
+      return signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -198,7 +195,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       const transactionForSDK = transactionObject.get_obj_for_encoding();
       console.log("Transaction Object : ", transactionForSDK);
 
-      return await signTransaction(transactionForSDK);
+      return signTransaction(transactionForSDK);
     }, props).then(setSignature);
   };
 
@@ -213,11 +210,8 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       const transactionForSDK = transactionObject.get_obj_for_encoding();
       console.log("Transaction Object : ", transactionForSDK);
 
-      return await signTransaction(transactionForSDK);
+      return signTransaction(transactionForSDK);
     }, props).then(setSignature);
-  };
-
-  const empty = () => {
   };
 
   return (
@@ -227,7 +221,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
       <Inputs
         title='Signed Transaction'
         content={signature}
-        onClick={() => empty()}
+        onClick={() => { }}
         disabled={true}
         inputs={[]}
       />
@@ -243,7 +237,7 @@ const CoinAlgoPage: FC<Props> = (props: Props) => {
         btnTitle='Send Transaction'
         title='Transaction Hash'
         content={result}
-        onClick={() => sendTransaction(signature)}
+        onClick={() => sendTransaction()}
         disabled={disabled}
         inputs={[]}
       />

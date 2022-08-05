@@ -25,7 +25,7 @@ const signTransaction = async (
         executeRlpScript,
         true
     )) as Buffer;
-    return await scriptUtils.getSignedTransaction(signTxData, sig)
+    return scriptUtils.getSignedTransaction(signTxData, sig)
 }
 
 export { signTransaction }

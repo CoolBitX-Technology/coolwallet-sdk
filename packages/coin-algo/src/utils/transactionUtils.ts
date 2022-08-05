@@ -61,7 +61,7 @@ const processObject = (valueObject: any, valueType: any) => {
     return argument;
 }
 
-const fieldToBuffer = (value: any, type: String) => {
+const fieldToBuffer = (value: any, type: string) => {
     let result = null;
     switch (type) {
         case 'Number': {
@@ -85,7 +85,7 @@ const fieldToBuffer = (value: any, type: String) => {
     return result;
 }
 
-const processValue = (value: any, type: String) => {
+const processValue = (value: any, type: string) => {
     return value ? fieldToBuffer(value, type) : Buffer.alloc(0);
 }
 
