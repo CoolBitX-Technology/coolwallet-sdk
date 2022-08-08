@@ -110,7 +110,7 @@ const getDelegatorTransferArgument = (transaction: types.DelegatorRecord) => {
 export const getDelegatorScriptAndArguments = async (addressIndex: number, transaction: types.DelegatorRecord) => {
   const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
 
-  const script = params.TRANSFER.scriptWithSignature;
+  const script = params.TRANSFER_DELEGATOR.scriptWithSignature;
   const argument = getDelegatorTransferArgument(transaction);
   return {
     script,

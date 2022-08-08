@@ -4,7 +4,11 @@ const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
 import Web3 from 'web3';
+import { RLP } from '../vet/rlp';
 
+
+const rlp = require('rlp');
+const blake2b = require('blake2b');
 /**
  * @description Trim Hex for Address
  * @param {string} hexString expect 32 bytes address in topics
@@ -193,6 +197,7 @@ export const getRawTx = (transaction: types.Record): any => {
   raw.push(rawArrayClauseData)
 
   const rawData2 = []
+  console.log("transaction.gasPriceCoef",transaction.gasPriceCoef)
   rawData2.push(transaction.gasPriceCoef);
   rawData2.push(transaction.gas);
   rawData2.push(transaction.dependsOn);
@@ -221,3 +226,51 @@ const toRaw = (value: string[]): Array<Buffer> => {
     return Buffer.from(hex, 'hex');
   })
 }
+
+export const getRawDelegatorTx = (transaction: types.DelegatorRecord): any => {
+  const raw = []
+  const rawData1 = [];
+  rawData1.push(transaction.chainTag);
+  rawData1.push(transaction.blockRef);
+  rawData1.push(transaction.expiration);
+  rawData1.map((d) => {
+    const hex = stringUtil.handleHex(d);
+    if (hex === '00' || hex === '') {
+      raw.push(Buffer.allocUnsafe(0))
+      return
+    }
+    raw.push(Buffer.from(hex, 'hex'));
+  });
+
+  const rawArrayClauseData = transaction.clauses.map((clause, i) => {
+    const rawClauseData = []
+    if (clause.to === null) {
+      rawClauseData.push('');
+    } else {
+      rawClauseData.push(clause.to);
+    }
+    rawClauseData.push(clause.value.toString())
+    rawClauseData.push(clause.data)
+    return toRaw(rawClauseData)
+  })
+  raw.push(rawArrayClauseData)
+
+  const rawData2 = []
+  rawData2.push(transaction.gasPriceCoef);
+  rawData2.push(transaction.gas);
+  rawData2.push(transaction.dependsOn);
+  rawData2.push(transaction.nonce);
+
+  rawData2.map((d) => {
+
+    const hex = stringUtil.handleHex(d);
+    if (hex === '00' || hex === '') {
+      raw.push(Buffer.allocUnsafe(0))
+      return
+    }
+    raw.push(Buffer.from(hex, 'hex'));
+  });
+  raw.push([transaction.reserved?.features])
+  // raw.push(Buffer.from(stringUtil.handleHex(transaction.nonce), 'hex'))
+  return raw;
+};

@@ -3,6 +3,7 @@ import * as txUtil from './utils/transactionUtil';
 import * as scriptUtil from './utils/scriptUtil';
 import * as types from './config/types';
 import { handleHex } from './utils/stringUtil';
+import { blake2b256 } from './vet/blake2b';
 
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
@@ -43,7 +44,7 @@ export async function signTransaction(
 
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
-
+  console.log("rawData: ", rawData.toString('hex'))
   const hash = blake2b(32).update(rawData).digest('hex')
   const data = Buffer.from(handleHex(hash), 'hex')
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
@@ -85,11 +86,26 @@ export async function signDelegatorTransaction(signTxData: types.signDelegatorTx
   const { signedTx } = await apdu.tx.getSignedHex(transport);
   console.log('signedTx: ', signedTx);
 
-  const rawTx = txUtil.getRawTx(transaction);
+  const rawTx = txUtil.getRawDelegatorTx(transaction);
   const rawData = rlp.encode(rawTx);
-
+  console.log("rawData: ", rawData.toString('hex'))
+  // const hash = blake2b(32).update(rawData).digest('hex');
   const hash = blake2b(32).update(rawData).digest('hex');
-  const data = Buffer.from(handleHex(hash), 'hex');
+  console.log("hash: ", hash);
+  console.log("vhash:", blake2b256(Buffer.from(rawData)).toString('hex'))
+  
+  const delegatorFor = handleHex(transaction.delegatorFor)
+  console.log("delegatorFor: ", delegatorFor);
+  
+  const finalHash = blake2b(32).update(Buffer.from(hash, 'hex')).update(Buffer.from(delegatorFor, 'hex')).digest('hex');
+  // const finalHash = blake2b(32).update(Buffer.from(hash, 'hex')).digest('hex');
+  console.log("finalHash:", finalHash)
+  console.log("try hash:", blake2b256(Buffer.from(hash + delegatorFor, 'hex')).toString('hex'));
+  console.log("vechain try hash:", blake2b256(Buffer.from(hash + delegatorFor, 'hex')).toString('hex'));
+  console.log("vechain hash:", blake2b256(Buffer.from(hash, 'hex'), Buffer.from(delegatorFor, 'hex')).toString('hex'));
+  // console.log("vechain hash:", blake2b256(Buffer.from(hash, 'hex')).toString('hex'));
+  
+  const data = Buffer.from(handleHex(finalHash), 'hex');
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
 
   const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
