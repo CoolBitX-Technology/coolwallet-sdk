@@ -1,4 +1,5 @@
 import TEMPLATE from './template';
+import ALGO from './algo';
 import BNB from './bnb';
 import ADA from './ada';
 import COSMOS from './cosmos';
@@ -19,6 +20,7 @@ import IOTX from './iotx';
 
 export default [
   { path: 'template', Element: TEMPLATE },
+  { path: 'algo', Element: ALGO },
   { path: 'bnb', Element: BNB },
   { path: 'ada', Element: ADA },
   { path: 'eth', Element: ETH },

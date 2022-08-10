@@ -14,6 +14,7 @@ export default defineConfig({
     alias: {
       https: require.resolve('agent-base'),
       process: require.resolve('process/browser'),
+      path: "path-browserify",
       'safer-buffer': require.resolve('safe-buffer')
     },
   },
