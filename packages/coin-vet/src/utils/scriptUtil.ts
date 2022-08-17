@@ -42,7 +42,6 @@ const getTransferArgument = (transaction: types.Record) => {
   }
 
   const argument = chainTag+blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+reserved;
-  console.log("argument: ", argument)
   
   return argument;
 };
@@ -106,7 +105,6 @@ const getDelegatorTransferArgument = (transaction: types.DelegatorRecord) => {
 
   const argument =
     chainTag + blockRef + expiration + to + value + data + gasPriceCoef + gas + dependsOn + nonce + reserved + delegatorFor;
-  console.log('argument: ', argument);
 
   return argument;
 };
