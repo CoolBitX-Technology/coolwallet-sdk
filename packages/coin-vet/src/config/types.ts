@@ -86,11 +86,25 @@ export type signDelegatorTxType = {
   authorizedCB?(): void;
 };
 
+export type Certificate = {
+  purpose: string;
+  payload: {
+    type: string;
+    content: string;
+  };
+
+  domain: string;
+  timestamp: number;
+  signer: string;
+
+  signature?: string;
+}
+
 export type signCertType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  transaction: Record;
+  certificate: Certificate;
   addressIndex: number;
   confirmCB?(): void;
   authorizedCB?(): void;

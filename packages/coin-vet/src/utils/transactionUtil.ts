@@ -4,8 +4,10 @@ const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
 import Web3 from 'web3';
+import Web3Utils from 'web3-utils';
 import { RLP } from '../vet/rlp';
-
+import { safeToLowerCase } from './scriptUtil';
+const fastJsonStableStringify = require('fast-json-stable-stringify')
 
 const rlp = require('rlp');
 const blake2b = require('blake2b');
@@ -197,7 +199,6 @@ export const getRawTx = (transaction: types.Record): any => {
   raw.push(rawArrayClauseData)
 
   const rawData2 = []
-  console.log("transaction.gasPriceCoef",transaction.gasPriceCoef)
   rawData2.push(transaction.gasPriceCoef);
   rawData2.push(transaction.gas);
   rawData2.push(transaction.dependsOn);
@@ -212,7 +213,12 @@ export const getRawTx = (transaction: types.Record): any => {
     }
     raw.push(Buffer.from(hex, 'hex'));
   });
-  raw.push([])
+
+  if (transaction.reserved != null && transaction.reserved.features == 1) {
+    raw.push([transaction.reserved.features]);
+  } else {
+    raw.push([])
+  }
 
   return raw;
 };
@@ -273,4 +279,9 @@ export const getRawDelegatorTx = (transaction: types.DelegatorRecord): any => {
   raw.push([transaction.reserved?.features])
   // raw.push(Buffer.from(stringUtil.handleHex(transaction.nonce), 'hex'))
   return raw;
+};
+
+export const getCertificateHex = (certificate: types.Certificate): any => {
+  const msgHex = fastJsonStableStringify({...certificate, signer: safeToLowerCase(certificate.signer)})
+  return stringUtil.handleHex(Web3Utils.toHex(msgHex))
 };

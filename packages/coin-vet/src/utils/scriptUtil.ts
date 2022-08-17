@@ -2,6 +2,9 @@ import { utils } from '@coolwallet/core';
 import * as params from '../config/params';
 import * as types from '../config/types';
 import * as stringUtil from './stringUtil';
+import Web3Utils from 'web3-utils';
+
+const fastJsonStableStringify = require('fast-json-stable-stringify')
 
 const getTransferArgument = (transaction: types.Record) => {
 
@@ -51,8 +54,13 @@ const getTransferArgument = (transaction: types.Record) => {
 export const getScriptAndArguments = async (addressIndex: number, transaction: types.Record) => {
   const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
 
-  const script =
-    params.TRANSFER.scriptWithSignature;
+  let script: string
+  if (transaction.reserved != null && transaction.reserved.features == 1) {
+    script = params.TRANSFER_ORIGIN.scriptWithSignature;
+  } else {
+    script = params.TRANSFER.scriptWithSignature;
+  }
+
   const argument = getTransferArgument(transaction);
   return {
     script,
@@ -117,3 +125,23 @@ export const getDelegatorScriptAndArguments = async (addressIndex: number, trans
     argument: SEPath + argument,
   };
 };
+
+/**
+ * @param {number} addressIndex
+ * @param {*} ceritficate
+ */
+ export const getCertificateScriptAndArgument = async (addressIndex: number, certificate: types.Certificate) => {
+  const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
+
+  const script = params.CERT.scriptWithSignature;
+  const msgHex = fastJsonStableStringify({...certificate, signer: safeToLowerCase(certificate.signer)})
+  const argument = stringUtil.handleHex(Web3Utils.toHex(msgHex));
+  return {
+    script,
+    argument: SEPath + argument,
+  };
+};
+
+export const safeToLowerCase = (str: string) => {
+  return typeof str === 'string' ? str.toLowerCase() : str
+}
