@@ -33,10 +33,12 @@ function CoinVet(props: Props) {
   const temp = new VET();
   const [address, setAddress] = useState('');
   const [signedTransaction, setSignedTransaction] = useState('');
+  const [signedToken, setSignedToken] = useState('');
   const [signedVIP191TransactionOrigin, setSignedVIP191TransactionOrigin] = useState('');
   // const [signedVIP191TransactionDelegator, setSignedVIP191TransactionDelegator] = useState('');
   const [signedCertificate, setSignedCertificate] = useState('');
   const [value, setValue] = useState('0.001');
+  const [token, setToken] = useState('1');
   const [to, setTo] = useState('0x7567d83b7b8d80addcb281a71d54fc7b3364ffed');
   // const [delegatorFor, setDelegatorFor] = useState('0x8a02ef4030f5e4602030dfadaf91827c1db31dcf');
 
@@ -74,13 +76,13 @@ function CoinVet(props: Props) {
     useRequest(async () => {
       const transaction = {
         chainTag: '0x27',
-        blockRef: web3.utils.toHex(55771463398518112),
-        expiration: web3.utils.toHex(30 * 8640),
+        blockRef: web3.utils.toHex(connex.thor.status.head.id),
+        expiration: web3.utils.toHex(32),
         clauses: [
           {
             to: to,
             value: web3.utils.toHex(web3.utils.toWei(value, 'ether')),
-            data: '0xa9059cbb0000000000000000000000007c5Bc2EB55cE9f4Bf9BE2BBEFa1a3c79c8e11AC500000000000000000000000000000000000000000000000002c68af0bb140000',
+            data: '0x',
           },
         ],
         gasPriceCoef: web3.utils.toHex(128),
@@ -128,11 +130,73 @@ function CoinVet(props: Props) {
     }, props).then(setSignedTransaction);
   }
 
+  const signToken = () => {
+    useRequest(async () => {
+      const transaction = {
+        chainTag: '0x27',
+        blockRef: web3.utils.toHex(connex.thor.status.head.id),
+        expiration: web3.utils.toHex(32),
+        clauses: [
+          {
+            to: '0xf40402347a21913468882260f87D640e910C404c',
+            value: web3.utils.toHex(web3.utils.toWei(value, 'ether')),
+            data: '0xa9059cbb0000000000000000000000007c5Bc2EB55cE9f4Bf9BE2BBEFa1a3c79c8e11AC500000000000000000000000000000000000000000000000002c68af0bb140000',
+          },
+        ],
+        gasPriceCoef: web3.utils.toHex(128),
+        gas: web3.utils.toHex(10000000),
+        dependsOn: '0x',
+        nonce: '0xf2ed7cd2567cabb5',
+      };
+
+      const appId = localStorage.getItem('appId');
+      if (!appId) throw new Error('No Appid stored, please register!');
+      const signTxData = {
+        transport,
+        appPrivateKey,
+        transaction,
+        appId,
+        addressIndex: 0,
+      };
+      console.log('signTxData: ', { signTxData });
+
+      const signedTx = await temp.signTransaction(signTxData);
+
+      const rawTx = getRawTx(transaction);
+      rawTx.push(Buffer.from(handleHex(signedTx), 'hex'));
+      const rawData = rlp.encode(rawTx);
+      console.log('rawData to sync-testnet', '0x' + rawData.toString('hex'));
+
+      // Submit the raw transaction by hand to the test-net.
+      const url = 'https://testnet.veblocks.net/transactions';
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          raw: '0x' + rawData.toString('hex'),
+        }),
+      })
+        .then((response) => {
+          response.text().then((r) => {
+            console.log(r);
+          });
+        })
+        .catch((err) => {
+          console.log('err', err);
+        });
+
+      return signedTx;
+    }, props).then(setSignedToken);
+  };
+
   const signVIP191TransactionOrigin = () => {
     useRequest(async () => {
       const transaction = {
         chainTag: web3.utils.toHex(39),
-        blockRef: connex.thor.status.head.id.slice(4, 18),
+        blockRef: web3.utils.toHex(connex.thor.status.head.id),
         expiration: web3.utils.toHex(32),
         clauses: [
           {
@@ -216,97 +280,6 @@ function CoinVet(props: Props) {
     }, props).then(setSignedVIP191TransactionOrigin);
   }
 
-  // const signVIP191TransactionDelegator = () => {
-  //   useRequest(async () => {
-  //     // const priv1 = secp256k1.generatePrivateKey()
-  //     // const addr1 = vaddress.fromPublicKey(secp256k1.derivePublicKey(priv1))
-  //     // console.log("addr1: ", addr1)
-
-  //     const transaction = {
-  //       chainTag: web3.utils.toHex(39),
-  //       blockRef: connex.thor.status.head.id.slice(4, 18),
-  //       expiration: web3.utils.toHex(32),
-  //       clauses: [
-  //         {
-  //           to: '0x8384738c995d49c5b692560ae688fc8b51af1059', // smart contract address
-  //           value: web3.utils.toHex(web3.utils.toWei(value, 'ether')),
-  //           data: '0xd09de08a' // smart contract function
-  //         },
-  //       ],
-  //       gasPriceCoef: web3.utils.toHex(128),
-  //       gas: web3.utils.toHex(10000000),
-  //       dependsOn: '0x',
-  //       nonce: '0xf2ed7cd2567c7456',
-  //       reserved: {
-  //         features: 1
-  //       },
-  //       delegatorFor: to
-  //     };
-
-  //     const appId = localStorage.getItem('appId');
-  //     if (!appId) throw new Error('No Appid stored, please register!');
-  //     const signTxData = {
-  //       transport,
-  //       appPrivateKey,
-  //       transaction,
-  //       appId,
-  //       addressIndex: 0,
-  //     }
-  //     console.log("signTxData: ", { signTxData });
-
-  //     const signedTx = await temp.signVIP191TransactionDelegator(signTxData);
-
-  //     console.log("blockREf: [0x00c646824835b43b]", web3.utils.toHex(55809570759881787));
-
-
-  //     const delegated = new Transaction({
-  //       chainTag: 27,
-  //       blockRef: '0x00c66981c3d8750b',
-  //       expiration: 30 * 8640,
-  //       clauses: [{
-  //         to: '0xD4f02E8D5A56F271dAAD21DeC47d7151ca2FD111',
-  //         value: '0x10000000000',
-  //         data: '0x2e64cec1'
-  //       }],
-  //       gasPriceCoef: 128,
-  //       gas: web3.utils.toHex(10000000),
-  //       dependsOn: null,
-  //       nonce: '0xf2ed7cd2567c7cc5',
-  //       reserved: {
-  //         features: 1
-  //       }
-  //     })
-  //     const hash = delegated.signingHash()
-
-
-  //     const rawTx = getRawDelegatorTx(transaction)
-  //     const sig = Buffer.concat([
-  //       secp256k1.sign(hash, priv1),
-  //       Buffer.from(handleHex(signedTx), 'hex')
-  //     ])
-  //     rawTx.push(sig)
-  //     const rawData = rlp.encode(rawTx)
-  //     console.log("rawData to sync-testnet", '0x' + rawData.toString('hex'))
-
-  //     // Submit the raw transaction by hand to the test-net.
-  //     const url = 'https://sync-testnet.vechain.org/transactions'
-  //     fetch(url, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Accept': 'application/json',
-  //         'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify({ 'raw': '0x' + rawData.toString('hex') })
-  //     }).then(response => {
-  //       response.text().then(r => { console.log(r) })
-  //     }).catch(err => {
-  //       console.log('err', err)
-  //     })
-
-  //     return signedTx;
-  //   }, props).then(setSignedVIP191TransactionDelegator);
-  // };
-
   const signCertificate = () => {
     useRequest(async () => {
       const certificate = {
@@ -329,7 +302,7 @@ function CoinVet(props: Props) {
         appId,
         addressIndex: 0,
       }
-      console.log("signTsignCertDataxData: ", { signCertData });
+      console.log("signCertData: ", { signCertData });
 
       const signedTx = await temp.signCertificate(signCertData);
 
@@ -338,8 +311,8 @@ function CoinVet(props: Props) {
 
       const sig = Buffer.from(signedTx.slice(2), 'hex')
       const recovery = sig[64]
-      const r = sig.slice(0, 32)
-      const s = sig.slice(32, 64)
+      const r = sig.subarray(0, 32);
+      const s = sig.subarray(32, 64);
 
       const pubKey = Buffer.from(ec.recoverPubKey(
         signingHash, 
@@ -347,14 +320,16 @@ function CoinVet(props: Props) {
         recovery
       ).encode('array', false))
 
-      const addr = '0x' + Buffer.from(createKeccakHash('keccak256').update(pubKey.slice(1)).digest()).slice(12).toString('hex')
+      const addr =
+        '0x' +
+        Buffer.from(createKeccakHash('keccak256').update(pubKey.subarray(1)).digest())
+          .subarray(12)
+          .toString('hex');
       console.log("addr", addr)
       console.log("signer", certificate.signer)
       if (addr == safeToLowerCase(certificate.signer)) {
         console.log("verify done");
       }
-
-      // console.log("verify: ", Certificate.verify({...certificate, signature: signedTx}))
 
       return signedTx;
     }, props).then(setSignedCertificate);
@@ -380,6 +355,18 @@ function CoinVet(props: Props) {
         inputSize2={3}
       />
 
+      <OneInput
+        title='Sign VTHO token'
+        content={signedToken}
+        onClick={signToken}
+        disabled={disabled}
+        btnName='Sign Token'
+        value={token}
+        setValue={setToken}
+        placeholder='50 VTHO'
+        inputSize={3}
+      />
+
       <TwoInputs
         title='Sign VIP191 Transaction Origin (user)'
         content={signedVIP191TransactionOrigin}
@@ -395,18 +382,6 @@ function CoinVet(props: Props) {
         placeholder2='to'
         inputSize2={3}
       />
-
-      {/* <OneInput
-        title='Sign VIP191 Transaction Delegator (sponsor)'
-        content={signedVIP191TransactionDelegator}
-        onClick={signVIP191TransactionDelegator}
-        disabled={disabled}
-        btnName='Sign'
-        value={delegatorFor}
-        setValue={setDelegatorFor}
-        placeholder='delegatorFor'
-        inputSize={3}
-      /> */}
 
       <OneInput
         title='Sign Certificate'
