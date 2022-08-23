@@ -38,12 +38,100 @@ export async function signTransaction(
     true
   );
 
-  // const { signedTx } = await apdu.tx.getSignedHex(transport);
-  // console.log('signedTx: ', signedTx);
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
+
 
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
-  // console.log("rawData: ", rawData.toString('hex'))
+ 
+  const hash = blake2b(32).update(rawData).digest('hex')
+  const data = Buffer.from(handleHex(hash), 'hex')
+  const keyPair = ec.keyFromPublic(publicKey, 'hex');
+  
+  const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
+  const v = recoveryParam;
+  const { r, s } = signature as {r: string, s: string};
+  const signedTransaction = Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]);
+  
+  return `0x${signedTransaction.toString('hex')}`;
+}
+
+/**
+ * Sign VeChain Token
+ */
+ export async function signToken(
+  signTxData: types.signTxType,
+  publicKey: string
+): Promise<string> {
+  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
+
+  const preActions = [];
+
+  const { script, argument } = await scriptUtil.getVTHOScriptAndArguments(addressIndex, transaction);
+
+  const sendScript = () => apdu.tx.sendScript(transport, script);
+  preActions.push(sendScript);
+  const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    action,
+    false,
+    confirmCB,
+    authorizedCB,
+    true
+  );
+
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
+
+
+  const rawTx = txUtil.getRawTx(transaction);
+  const rawData = rlp.encode(rawTx);
+  const hash = blake2b(32).update(rawData).digest('hex')
+  const data = Buffer.from(handleHex(hash), 'hex')
+  const keyPair = ec.keyFromPublic(publicKey, 'hex');
+  
+  const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
+  const v = recoveryParam;
+  const { r, s } = signature as {r: string, s: string};
+  const signedTransaction = Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]);
+  
+  return `0x${signedTransaction.toString('hex')}`;
+}
+
+/**
+ * Sign VIP191 Smart Contract
+ */
+ export async function signVIP191(
+  signTxData: types.signTxType,
+  publicKey: string
+): Promise<string> {
+  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
+
+  const preActions = [];
+
+  const { script, argument } = await scriptUtil.getVIP191ScriptAndArguments(addressIndex, transaction);
+
+  const sendScript = () => apdu.tx.sendScript(transport, script);
+  preActions.push(sendScript);
+  const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    action,
+    false,
+    confirmCB,
+    authorizedCB,
+    true
+  );
+
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
+
+
+  const rawTx = txUtil.getRawTx(transaction);
+  const rawData = rlp.encode(rawTx);
   const hash = blake2b(32).update(rawData).digest('hex')
   const data = Buffer.from(handleHex(hash), 'hex')
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
@@ -80,12 +168,9 @@ export async function signDelegatorTransaction(signTxData: types.signDelegatorTx
     true
   );
 
-  // const { signedTx } = await apdu.tx.getSignedHex(transport);
-  // console.log('signedTx: ', signedTx);
-  
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
   const rawTx = txUtil.getRawDelegatorTx(transaction);
   const rawData = rlp.encode(rawTx);
-  // console.log("rawData: ", rawData.toString('hex'))
   const hash = blake2b(32).update(rawData).digest('hex');
   
   const delegatorFor = handleHex(transaction.delegatorFor)
@@ -137,11 +222,10 @@ export async function signCertificate(
   
   const msgJson = fastJsonStableStringify({...certificate, signer: scriptUtil.safeToLowerCase(certificate.signer)})
   const msgHex = handleHex(Web3Utils.toHex(msgJson))
-
   const hash = blake2b(32).update(Buffer.from(msgHex, 'hex')).digest('hex')
   const data = Buffer.from(handleHex(hash), 'hex')
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
-  
+
   const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
   const v = recoveryParam;
   const { r, s } = signature as {r: string, s: string};

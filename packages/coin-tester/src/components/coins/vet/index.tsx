@@ -76,7 +76,7 @@ function CoinVet(props: Props) {
     useRequest(async () => {
       const transaction = {
         chainTag: '0x27',
-        blockRef: web3.utils.toHex(connex.thor.status.head.id),
+        blockRef: connex.thor.status.head.id.slice(4, 18),
         expiration: web3.utils.toHex(32),
         clauses: [
           {
@@ -134,13 +134,13 @@ function CoinVet(props: Props) {
     useRequest(async () => {
       const transaction = {
         chainTag: '0x27',
-        blockRef: web3.utils.toHex(connex.thor.status.head.id),
+        blockRef: connex.thor.status.head.id.slice(4, 18),
         expiration: web3.utils.toHex(32),
         clauses: [
           {
-            to: '0xf40402347a21913468882260f87D640e910C404c',
-            value: web3.utils.toHex(web3.utils.toWei(value, 'ether')),
-            data: '0xa9059cbb0000000000000000000000007c5Bc2EB55cE9f4Bf9BE2BBEFa1a3c79c8e11AC500000000000000000000000000000000000000000000000002c68af0bb140000',
+            to: '0x0000000000000000000000000000456E65726779',
+            value: '0x',//this stands for vet, vtho transaction will ignore vet value
+            data: '0xa9059cbb0000000000000000000000007c5Bc2EB55cE9f4Bf9BE2BBEFa1a3c79c8e11AC1000000000000000000000000000000000000000000000000016345785D8A0000',
           },
         ],
         gasPriceCoef: web3.utils.toHex(128),
@@ -160,7 +160,7 @@ function CoinVet(props: Props) {
       };
       console.log('signTxData: ', { signTxData });
 
-      const signedTx = await temp.signTransaction(signTxData);
+      const signedTx = await temp.signToken(signTxData);
 
       const rawTx = getRawTx(transaction);
       rawTx.push(Buffer.from(handleHex(signedTx), 'hex'));
@@ -196,7 +196,7 @@ function CoinVet(props: Props) {
     useRequest(async () => {
       const transaction = {
         chainTag: web3.utils.toHex(39),
-        blockRef: web3.utils.toHex(connex.thor.status.head.id),
+        blockRef: connex.thor.status.head.id.slice(4, 18),
         expiration: web3.utils.toHex(32),
         clauses: [
           {
