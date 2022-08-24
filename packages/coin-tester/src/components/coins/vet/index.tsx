@@ -140,7 +140,7 @@ function CoinVet(props: Props) {
           {
             to: '0x0000000000000000000000000000456E65726779',
             value: '0x',//this stands for vet, vtho transaction will ignore vet value
-            data: '0xa9059cbb0000000000000000000000007c5Bc2EB55cE9f4Bf9BE2BBEFa1a3c79c8e11AC1000000000000000000000000000000000000000000000000016345785D8A0000',
+            data: '0xa9059cbb0000000000000000000000007c5Bc2EB55cE9f4Bf9BE2BBEFa1a3c79c8e11AC1' + web3.utils.toHex(web3.utils.toWei(token, 'ether')).slice(2).padStart(64,'0'),
           },
         ],
         gasPriceCoef: web3.utils.toHex(128),
