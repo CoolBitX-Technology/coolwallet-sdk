@@ -13,15 +13,22 @@ import { sig_A as SigA } from '../script/dfuScript/sig_A';
 import { sig_B as SigB } from '../script/dfuScript/sig_B';
 import { assemblyDFUcommand } from './utils';
 
-import type { MCUInfo, UpdateInfo } from './types';
+import type { MCUInfo, MCUVersion, UpdateInfo } from './types';
 
 const MCU_UPDATE_VER = '150B0909';
 
 const getMCUVersion = async (transport: Transport): Promise<MCUInfo> => {
-  const { outputData } = await executeCommand(transport, commands.GET_MCU_VERSION, target.MCU);
+  const { outputData } = await executeCommand(transport, commands.CHECK_MCU_BOOT_BLOCK, target.MCU);
   const fwStatus = outputData.slice(0, 4); // 3900
   const cardMCUVersion = outputData.slice(4, 12).toUpperCase();
   return { fwStatus, cardMCUVersion };
+};
+
+const getMCUVersionForSmartDisplay = async (transport: Transport): Promise<MCUVersion> => {
+  const { outputData } = await executeCommand(transport, commands.GET_MCU_VERSION, target.MCU);
+  const firmwareVersion = Buffer.from(outputData.slice(0, 12), 'hex').toString('ascii');
+  const MCUVersion = Buffer.from(outputData.slice(12, 46), 'hex').toString('ascii');
+  return { firmwareVersion, MCUVersion };
 };
 
 const getFWStatus = async (transport: Transport): Promise<MCUInfo> => {
@@ -129,4 +136,14 @@ const updateMCU = async (
   }
 };
 
-export { getMCUVersion, getFWStatus, checkUpdate, sendFWsign, resetFW, updateFW, updateMCU, executeDFU };
+export {
+  getMCUVersion,
+  getMCUVersionForSmartDisplay,
+  getFWStatus,
+  checkUpdate,
+  sendFWsign,
+  resetFW,
+  updateFW,
+  updateMCU,
+  executeDFU,
+};

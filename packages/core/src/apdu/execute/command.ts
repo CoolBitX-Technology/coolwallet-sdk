@@ -240,9 +240,15 @@ export const commands = {
     P1: '12',
     P2: '34',
   },
-  GET_MCU_VERSION: {
+  CHECK_MCU_BOOT_BLOCK: {
     CLA: 'FF',
     INS: '70',
+    P1: '00',
+    P2: '00',
+  },
+  GET_MCU_VERSION: {
+    CLA: '7F',
+    INS: 'B0',
     P1: '00',
     P2: '00',
   },
