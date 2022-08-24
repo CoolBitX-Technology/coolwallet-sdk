@@ -79,7 +79,6 @@ function Settings(props: Props) {
   const getMCUVersion = async () => {
     handleState(async () => {
       const data = await apdu.mcu.dfu.getMCUVersionForSmartDisplay(transport!);
-      console.log(JSON.stringify(data));
       return data.MCUVersion;
     }, setMCUVersion);
   };
