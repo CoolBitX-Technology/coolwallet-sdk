@@ -240,13 +240,13 @@ export const commands = {
     P1: '12',
     P2: '34',
   },
-  CHECK_MCU_BOOT_BLOCK: {
+  GET_MCU_VERSION: {
     CLA: 'FF',
     INS: '70',
     P1: '00',
     P2: '00',
   },
-  GET_MCU_VERSION: {
+  GET_MCU_INFO: {
     CLA: '7F',
     INS: 'B0',
     P1: '00',
@@ -273,12 +273,6 @@ export const commands = {
   CANCEL_APDU: {
     CLA: '7F',
     INS: '00',
-    P1: '00',
-    P2: '00',
-  },
-  CHECK_FW_STATUS: {
-    CLA: 'FF',
-    INS: '70',
     P1: '00',
     P2: '00',
   },

@@ -17,25 +17,32 @@ import type { MCUInfo, MCUVersion, UpdateInfo } from './types';
 
 const MCU_UPDATE_VER = '150B0909';
 
-const getMCUVersion = async (transport: Transport): Promise<MCUInfo> => {
-  const { outputData } = await executeCommand(transport, commands.CHECK_MCU_BOOT_BLOCK, target.MCU);
-  const fwStatus = outputData.slice(0, 4); // 3900
-  const cardMCUVersion = outputData.slice(4, 12).toUpperCase();
-  return { fwStatus, cardMCUVersion };
-};
-
-const getMCUVersionForSmartDisplay = async (transport: Transport): Promise<MCUVersion> => {
+const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
+  // Data[0..2]: Command echo
+  // Data[3..4]: Block Mark
+  // Data[5]: Year
+  // Data[6]: Month
+  // Data[7]: Day
+  // Data[8]: Hour
+  // Data[9]: Data[0..9] XOR
   const { outputData } = await executeCommand(transport, commands.GET_MCU_VERSION, target.MCU);
-  const firmwareVersion = Buffer.from(outputData.slice(0, 12), 'hex').toString('ascii');
-  const MCUVersion = Buffer.from(outputData.slice(12, 46), 'hex').toString('ascii');
-  return { firmwareVersion, MCUVersion };
+  const blockMark = outputData.slice(4, 10); // 3900
+  const cardMCUVersion = outputData.slice(10, 18).toUpperCase();
+  return { fwStatus: blockMark, cardMCUVersion };
 };
 
-const getFWStatus = async (transport: Transport): Promise<MCUInfo> => {
-  const { outputData } = await executeCommand(transport, commands.CHECK_FW_STATUS, target.MCU);
-  const fwStatus = outputData.slice(0, 4); // 3900
-  const cardMCUVersion = outputData.slice(4, 12).toUpperCase();
-  return { fwStatus, cardMCUVersion };
+const getMCUInfo = async (transport: Transport): Promise<MCUInfo> => {
+  // HW_Version[9]
+  // FW_Version[17]
+  // Device_ID_Length[20](Not fixed, ex. CoolWallet CWP000000)
+  // HW Status[3]
+  // Mode[1]
+  // Battery[1]
+  const { outputData } = await executeCommand(transport, commands.GET_MCU_INFO, target.MCU);
+  const hardwareVersion = Buffer.from(outputData.slice(0, 18), 'hex').toString('ascii');
+  const firmwareVersion = Buffer.from(outputData.slice(18, 52), 'hex').toString('ascii');
+  const battery = parseInt(outputData.slice(-2), 16).toString() + '%';
+  return { hardwareVersion, firmwareVersion, battery };
 };
 
 const checkUpdate = async (transport: Transport): Promise<UpdateInfo> => {
@@ -136,14 +143,4 @@ const updateMCU = async (
   }
 };
 
-export {
-  getMCUVersion,
-  getMCUVersionForSmartDisplay,
-  getFWStatus,
-  checkUpdate,
-  sendFWsign,
-  resetFW,
-  updateFW,
-  updateMCU,
-  executeDFU,
-};
+export { getMCUVersion, getMCUInfo, checkUpdate, sendFWsign, resetFW, updateFW, updateMCU, executeDFU };

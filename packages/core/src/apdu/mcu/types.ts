@@ -1,11 +1,12 @@
-interface MCUInfo {
+interface MCUVersion {
   fwStatus: string;
   cardMCUVersion: string;
 }
 
-interface MCUVersion {
+interface MCUInfo {
+  hardwareVersion: string;
   firmwareVersion: string;
-  MCUVersion: string;
+  battery: string;
 }
 
 interface UpdateInfo {
