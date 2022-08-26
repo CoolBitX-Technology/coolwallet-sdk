@@ -18,6 +18,8 @@ function Settings(props: Props) {
 
   const [isAppletExist, setIsAppletExist] = useState('');
   const [SEVersion, setSEVersion] = useState('');
+  const [MCUVersion, setMCUVersion] = useState('');
+  const [battery, setBattery] = useState('');
   const [cardInfo, setCardInfo] = useState('');
   const [cardMode, setCardMode] = useState('');
   const [progress, setProgress] = useState('');
@@ -73,6 +75,20 @@ function Settings(props: Props) {
       const data = await apdu.general.getSEVersion(transport!);
       return data.toString();
     }, setSEVersion);
+  };
+
+  const getMCUVersion = async () => {
+    handleState(async () => {
+      const data = await apdu.mcu.dfu.getMCUInfo(transport!);
+      return data.firmwareVersion;
+    }, setMCUVersion);
+  };
+
+  const getBattery = async () => {
+    handleState(async () => {
+      const data = await apdu.mcu.dfu.getMCUInfo(transport!);
+      return data.battery;
+    }, setBattery);
   };
 
   const getCardInfo = async () => {
@@ -191,6 +207,8 @@ function Settings(props: Props) {
       <div className='title2'>Using these commands to check the state of CoolWallet Pro.</div>
       <NoInput title='Firmware Exist' content={isAppletExist} onClick={checkApplet} disabled={disabled} />
       <NoInput title='Firmware Version' content={SEVersion} onClick={getSEVersion} disabled={disabled} />
+      <NoInput title='MCU Version' content={MCUVersion} onClick={getMCUVersion} disabled={disabled} />
+      <NoInput title='Battery' content={battery} onClick={getBattery} disabled={disabled} />
       <NoInput title='Card Information' content={cardInfo} onClick={getCardInfo} disabled={disabled} />
       <NoInput title='Card Mode' content={cardMode} onClick={getCardMode} disabled={disabled} />
       <NoInput title='Upgrade SE' content={progress} onClick={upgradeSE} disabled={disabled} />

@@ -1,6 +1,12 @@
-interface MCUInfo {
+interface MCUVersion {
   fwStatus: string;
   cardMCUVersion: string;
+}
+
+interface MCUInfo {
+  hardwareVersion: string;
+  firmwareVersion: string;
+  battery: string;
 }
 
 interface UpdateInfo {
@@ -14,4 +20,4 @@ interface DFUCommand {
   packetNums: number;
 }
 
-export { MCUInfo, UpdateInfo, DFUCommand };
+export { MCUInfo, MCUVersion, UpdateInfo, DFUCommand };
