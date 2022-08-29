@@ -100,6 +100,62 @@ describe('Test EVM SDK', () => {
     }
   });
 
+  it.each(TEST_COINS)('$name test tokens signature', async ({ name, api }) => {
+    if(api.chain.tokens){
+      const transaction = ERC20_TRANSACTION[0];
+      for (const token of Object.values(api.chain.tokens)) {
+        if (token.signature.length < 1){
+          console.error(`${name} token ${token.symbol} is not yet signed`);
+          continue;
+        }
+        const scale = 10 ** +token.unit;
+        const tokenAmount = 1;
+        const amount = (tokenAmount * scale).toString(16);
+        const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+        const client: LegacyTransaction = {
+          transaction: {
+            ...transaction,
+            to: token.contractAddress,
+            data: erc20Data,
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+        const signature = await api.signTransaction(client);
+        const txDetail = await getTxDetail(transport, props.appId);
+        let expectedTxDetail;
+        if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(token.symbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(token.symbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        }
+        try {
+          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        } catch (e) {
+          console.error(`${name} token ${token.symbol} signature failed`);
+          throw e;
+        }
+      }
+    }
+  });
+
   it.each([coinCronos])('$name test sign erc20 transaction', async ({ api }) => {
     for (const transaction of ERC20_TRANSACTION) {
       const token = api.chain.tokens?.USDT;
