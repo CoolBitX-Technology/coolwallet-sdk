@@ -130,7 +130,7 @@ export interface Transaction {
   /**
    * type
    */
-  type: TransactionType;
+  type: string;
   /**
    * genesisID
    */
