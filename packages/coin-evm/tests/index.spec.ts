@@ -1,6 +1,7 @@
 import { Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import * as bip39 from 'bip39';
+import isEmpty from 'lodash/isEmpty';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import * as utils from 'web3-utils';
 import EVM, { CHAIN } from '../src';
@@ -27,10 +28,6 @@ import type {
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
-function isEmpty(str) {
-  return !str || str.length === 0;
-}
-
 const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS) };
 const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
 const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
@@ -53,6 +50,8 @@ describe('Test EVM SDK', () => {
     props = await initialize(transport, mnemonic);
     await wallet.setMnemonic(mnemonic);
   });
+
+  beforeEach(async () => new Promise((resolve) => setTimeout(resolve, 1000)));
 
   it.each(TEST_COINS)('$name: test get address 0', async ({ api }) => {
     const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
@@ -100,51 +99,53 @@ describe('Test EVM SDK', () => {
     }
   });
 
-  it.each([coinCronos])('$name test sign erc20 transaction', async ({ api }) => {
+  it.each(TEST_COINS)('$name test sign erc20 transaction', async ({ api }) => {
     for (const transaction of ERC20_TRANSACTION) {
-      const token = api.chain.tokens?.USDT;
-      const scale = 10 ** +token.unit;
-      const tokenAmount = +transaction.amount;
-      const amount = (tokenAmount * scale).toString(16);
-      const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
-      const client: LegacyTransaction = {
-        transaction: {
-          ...transaction,
-          to: token.contractAddress,
-          data: erc20Data,
-        },
-        transport,
-        appPrivateKey: props.appPrivateKey,
-        appId: props.appId,
-        addressIndex: 0,
-      };
-
-      const signature = await api.signTransaction(client);
-      const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
-      expect(signature).toEqual(expectedSignature);
-      const txDetail = await getTxDetail(transport, props.appId);
-      let expectedTxDetail;
-      if (isEmpty(api.chain.layer2)) {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.symbol)
-          .messagePage('USDT')
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+tokenAmount)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      } else {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.layer2)
-          .messagePage(api.chain.symbol)
-          .messagePage('USDT')
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+tokenAmount)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      for (const token of Object.values(api.chain.tokens)) {
+        const hasCommercialAt = isEmpty(token.signature);
+        const scale = 10 ** +token.unit;
+        const tokenAmount = +transaction.amount;
+        const amount = Math.floor(tokenAmount * scale).toString(16);
+        const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+        const client: LegacyTransaction = {
+          transaction: {
+            ...transaction,
+            to: token.contractAddress,
+            data: erc20Data,
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+        const signature = await api.signTransaction(client);
+        const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+        const txDetail = await getTxDetail(transport, props.appId);
+        let expectedTxDetail;
+        const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
+        if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        }
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
       }
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
 
@@ -182,7 +183,6 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
-      console.error('Transaction:', transaction);
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
