@@ -79,10 +79,8 @@ function Settings(props: Props) {
 
   const getMCUVersion = async () => {
     handleState(async () => {
-      // const data = await apdu.mcu.dfu.getMCUInfo(transport!);
-      // return data.firmwareVersion;
-      const data = await apdu.mcu.dfu.getMCUVersion(transport!);
-      return data.fwStatus;
+      const data = await apdu.mcu.dfu.getMCUInfo(transport!);
+      return data.firmwareVersion;
     }, setMCUVersion);
   };
 

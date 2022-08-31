@@ -28,7 +28,6 @@ const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
   const { outputData } = await executeCommand(transport, commands.GET_MCU_VERSION, target.MCU);
   const blockMark = outputData.slice(6, 10); // 3900
   const cardMCUVersion = outputData.slice(10, 18).toUpperCase();
-  console.log('blockMark: ' + blockMark);
   return { fwStatus: blockMark, cardMCUVersion };
 };
 
@@ -124,6 +123,7 @@ const updateMCU = async (
       sig = SigA;
       program = ProgramA;
     } else {
+      // Should be FF FF
       sig = SigB;
       program = ProgramB;
     }
