@@ -10,6 +10,7 @@
   "dependencies": {
     "@coolwallet/ada": "file:../coin-ada",
     "@coolwallet/algo": "file:../coin-algo",
+    "@coolwallet/aptos": "file:../coin-aptos",
     "@coolwallet/avaxc": "file:../coin-avaxc",
     "@coolwallet/bnb": "file:../coin-bnb",
     "@coolwallet/bsc": "file:../coin-bsc",
