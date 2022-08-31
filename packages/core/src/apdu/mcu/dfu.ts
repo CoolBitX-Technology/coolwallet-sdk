@@ -26,7 +26,7 @@ const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
   // Data[8]: Hour
   // Data[9]: Data[0..9] XOR
   const { outputData } = await executeCommand(transport, commands.GET_MCU_VERSION, target.MCU);
-  const blockMark = outputData.slice(4, 10); // 3900
+  const blockMark = outputData.slice(6, 10); // 3900
   const cardMCUVersion = outputData.slice(10, 18).toUpperCase();
   return { fwStatus: blockMark, cardMCUVersion };
 };
@@ -117,12 +117,13 @@ const updateMCU = async (
   let program;
   try {
     /* pre-update */
-    const MCUInfo = await getMCUVersion(transport);
+    const MCUVersion = await getMCUVersion(transport);
 
-    if (MCUInfo.fwStatus === '3900') {
+    if (MCUVersion.fwStatus === '3900') {
       sig = SigA;
       program = ProgramA;
     } else {
+      // Should be FF FF
       sig = SigB;
       program = ProgramB;
     }
