@@ -20,8 +20,6 @@ const getPath = (addressIndex=0) => {
 const publicKeyToAuthenticationKey = (publicKey: string) => {
   const publicKeyAndScheme = Buffer.concat([Buffer.from(publicKey, 'hex'), Buffer.alloc(1)]);
   const authenticationKey = sha3_256(publicKeyAndScheme);
-  console.log('publicKeyAndScheme :', publicKeyAndScheme.toString('hex'));
-  console.log('authenticationKey  :', authenticationKey);
   return authenticationKey;
 };
 
