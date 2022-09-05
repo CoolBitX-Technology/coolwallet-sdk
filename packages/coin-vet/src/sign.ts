@@ -51,9 +51,10 @@ export async function signTransaction(
   const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
   const v = recoveryParam;
   const { r, s } = signature as {r: string, s: string};
-  const signedTransaction = Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]);
+  rawTx.push(Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]));
+  const serializedTx = rlp.encode(rawTx);
   
-  return `0x${signedTransaction.toString('hex')}`;
+  return `0x${serializedTx.toString('hex')}`;
 }
 
 /**
@@ -95,9 +96,11 @@ export async function signTransaction(
   const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
   const v = recoveryParam;
   const { r, s } = signature as {r: string, s: string};
-  const signedTransaction = Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]);
   
-  return `0x${signedTransaction.toString('hex')}`;
+  rawTx.push(Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]));
+  const serializedTx = rlp.encode(rawTx);
+  
+  return `0x${serializedTx.toString('hex')}`;
 }
 
 /**
@@ -139,9 +142,10 @@ export async function signTransaction(
   const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
   const v = recoveryParam;
   const { r, s } = signature as {r: string, s: string};
-  const signedTransaction = Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]);
+  rawTx.push(Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]));
+  const serializedTx = rlp.encode(rawTx);
   
-  return `0x${signedTransaction.toString('hex')}`;
+  return `0x${serializedTx.toString('hex')}`;
 }
 
 /** 

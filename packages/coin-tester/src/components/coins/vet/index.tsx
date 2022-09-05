@@ -35,12 +35,13 @@ function CoinVet(props: Props) {
   const [signedTransaction, setSignedTransaction] = useState('');
   const [signedToken, setSignedToken] = useState('');
   const [signedVIP191TransactionOrigin, setSignedVIP191TransactionOrigin] = useState('');
-  // const [signedVIP191TransactionDelegator, setSignedVIP191TransactionDelegator] = useState('');
   const [signedCertificate, setSignedCertificate] = useState('');
   const [value, setValue] = useState('0.001');
   const [token, setToken] = useState('1');
+  const [vip191Value, setVip191Value] = useState('0');
   const [to, setTo] = useState('0x7567d83b7b8d80addcb281a71d54fc7b3364ffed');
-  // const [delegatorFor, setDelegatorFor] = useState('0x8a02ef4030f5e4602030dfadaf91827c1db31dcf');
+  const [vip191To, setVip191To] = useState('0x8384738c995d49c5b692560ae688fc8b51af1059');
+  const [vip191Data, setVip191Data] = useState('0xd09de08a');
 
   const [content, setContent] = useState('new message');
 
@@ -104,11 +105,6 @@ function CoinVet(props: Props) {
 
       const signedTx = await temp.signTransaction(signTxData);
 
-      const rawTx = getRawTx(transaction)
-      rawTx.push(Buffer.from(handleHex(signedTx), 'hex'))
-      const rawData = rlp.encode(rawTx)
-      console.log("rawData to sync-testnet", '0x' + rawData.toString('hex'))
-
       // Submit the raw transaction by hand to the test-net.
       const url = 'https://testnet.veblocks.net/transactions'
       fetch(url, {
@@ -118,7 +114,7 @@ function CoinVet(props: Props) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          'raw': '0x' + rawData.toString('hex')
+          'raw': signedTx
         })
       }).then(response => {
         response.text().then(r => { console.log(r) })
@@ -162,11 +158,6 @@ function CoinVet(props: Props) {
 
       const signedTx = await temp.signToken(signTxData);
 
-      const rawTx = getRawTx(transaction);
-      rawTx.push(Buffer.from(handleHex(signedTx), 'hex'));
-      const rawData = rlp.encode(rawTx);
-      console.log('rawData to sync-testnet', '0x' + rawData.toString('hex'));
-
       // Submit the raw transaction by hand to the test-net.
       const url = 'https://testnet.veblocks.net/transactions';
       fetch(url, {
@@ -176,7 +167,7 @@ function CoinVet(props: Props) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          raw: '0x' + rawData.toString('hex'),
+          raw: signedTx,
         }),
       })
         .then((response) => {
@@ -200,9 +191,9 @@ function CoinVet(props: Props) {
         expiration: web3.utils.toHex(32),
         clauses: [
           {
-            to: "0x8384738c995d49c5b692560ae688fc8b51af1059",
-            value: web3.utils.toHex(web3.utils.toWei(value, 'ether')),
-            data: "0xd09de08a",
+            to: vip191To,
+            value: web3.utils.toHex(web3.utils.toWei(vip191Value, 'ether')),
+            data: vip191Data,
           },
         ],
         gasPriceCoef: web3.utils.toHex(128),
@@ -252,8 +243,9 @@ function CoinVet(props: Props) {
       sponsorSignature = r.signature
       console.log("sponsor sig", sponsorSignature)
 
+      const decoded = rlp.decode(signedTx)
       const sig = Buffer.concat([
-        Buffer.from(handleHex(signedTx), 'hex'),
+        decoded.at(-1),
         Buffer.from(handleHex(sponsorSignature), 'hex')
       ])
       rawTx.push(sig)
@@ -373,14 +365,14 @@ function CoinVet(props: Props) {
         onClick={signVIP191TransactionOrigin}
         disabled={disabled}
         btnName='Sign'
-        value={value}
-        setValue={setValue}
-        placeholder='value'
-        inputSize={1}
-        value2={to}
-        setValue2={setTo}
-        placeholder2='to'
-        inputSize2={3}
+        value={vip191To}
+        setValue={setVip191To}
+        placeholder='contract'
+        inputSize={3}
+        value2={vip191Data}
+        setValue2={setVip191Data}
+        placeholder2='data'
+        inputSize2={1}
       />
 
       <OneInput
