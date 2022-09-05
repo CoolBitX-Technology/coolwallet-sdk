@@ -144,50 +144,6 @@ export async function signTransaction(
   return `0x${signedTransaction.toString('hex')}`;
 }
 
-/**
- * Sign VeChain Transaction (sponsor)
- */
-export async function signDelegatorTransaction(signTxData: types.signDelegatorTxType, publicKey: string): Promise<string> {
-  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
-
-  const preActions = [];
-
-  const { script, argument } = await scriptUtil.getDelegatorScriptAndArguments(addressIndex, transaction);
-
-  const sendScript = () => apdu.tx.sendScript(transport, script);
-  preActions.push(sendScript);
-  const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
-
-  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
-    transport,
-    preActions,
-    action,
-    false,
-    confirmCB,
-    authorizedCB,
-    true
-  );
-
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-  const rawTx = txUtil.getRawDelegatorTx(transaction);
-  const rawData = rlp.encode(rawTx);
-  const hash = blake2b(32).update(rawData).digest('hex');
-  
-  const delegatorFor = handleHex(transaction.delegatorFor)
-  
-  const finalHash = blake2b(32).update(Buffer.from(hash, 'hex')).update(Buffer.from(delegatorFor, 'hex')).digest('hex');
-  
-  const data = Buffer.from(handleHex(finalHash), 'hex');
-  const keyPair = ec.keyFromPublic(publicKey, 'hex');
-
-  const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
-  const v = recoveryParam;
-  const { r, s } = signature as { r: string; s: string };
-  const signedTransaction = Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]);
-
-  return `0x${signedTransaction.toString('hex')}`;
-}
-
 /** 
  * Sign VeChain Certificate
  */
