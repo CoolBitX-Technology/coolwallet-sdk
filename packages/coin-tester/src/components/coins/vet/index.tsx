@@ -77,7 +77,8 @@ function CoinVet(props: Props) {
   const signTransaction = () => {
     useRequest(async () => {
       const transaction = {
-        chainTag: '0x27',
+        // chainTag: '0x27',
+        chainTag: '0x4a',
         blockRef: connex.thor.status.head.id.slice(4, 18),
         expiration: web3.utils.toHex(32),
         clauses: [
@@ -130,7 +131,8 @@ function CoinVet(props: Props) {
   const signToken = () => {
     useRequest(async () => {
       const transaction = {
-        chainTag: '0x27',
+        // chainTag: '0x27',
+        chainTag: '0x4a',
         blockRef: connex.thor.status.head.id.slice(4, 18),
         expiration: web3.utils.toHex(32),
         clauses: [
@@ -187,7 +189,8 @@ function CoinVet(props: Props) {
   const signVIP191TransactionOrigin = () => {
     useRequest(async () => {
       const transaction = {
-        chainTag: web3.utils.toHex(39),
+        // chainTag: web3.utils.toHex(39),
+        chainTag: web3.utils.toHex(74),
         blockRef: connex.thor.status.head.id.slice(4, 18),
         expiration: web3.utils.toHex(32),
         clauses: [
