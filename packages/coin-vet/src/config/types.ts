@@ -14,6 +14,13 @@ export type Clause = {
   data: string;
 }
 
+export type Option = {
+  info: {
+    symbol: string;
+    decimals: string;
+  };
+};
+
 export type Record = {
   /** last byte of genesis block ID */
   chainTag: string;
@@ -37,6 +44,7 @@ export type Record = {
     features?: number;
     unused?: Buffer[];
   };
+  option: Option;
 };
 
 export type DelegatorRecord = {

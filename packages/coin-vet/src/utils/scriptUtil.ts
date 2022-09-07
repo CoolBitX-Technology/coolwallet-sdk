@@ -2,6 +2,7 @@ import { utils } from '@coolwallet/core';
 import * as params from '../config/params';
 import * as types from '../config/types';
 import * as stringUtil from './stringUtil';
+import * as token from './tokenUtil';
 import Web3Utils from 'web3-utils';
 
 const fastJsonStableStringify = require('fast-json-stable-stringify')
@@ -42,6 +43,47 @@ const getTransferArgument = (transaction: types.Record) => {
   }
 
   const argument = chainTag+blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+reserved;
+  
+  return argument;
+};
+
+const getTokenArgument = (transaction: types.Record) => {
+
+  const chainTag = stringUtil.handleHex(transaction.chainTag.toString()).padStart(2, '0');
+
+  const blockRef = stringUtil.handleHex(transaction.blockRef).padStart(16,'0');
+
+  const expiration = stringUtil.handleHex(transaction.expiration.toString()).padStart(8, '0');
+
+  const clause = transaction.clauses[0];
+  let to: string;
+  if (clause.to == null) {
+    to = "".padStart(40, '0');
+  } else {
+    to = stringUtil.handleHex(clause.to.toString());
+  }
+
+  const value = stringUtil.handleHex(clause.value.toString()).padStart(64, '0');
+
+  const data = stringUtil.handleHex(clause.data).padStart(12, '0');
+
+  const gasPriceCoef = stringUtil.handleHex(transaction.gasPriceCoef.toString()).padStart(2, '0');
+
+  const gas = stringUtil.handleHex(transaction.gas.toString()).padStart(16, '0');
+
+  const dependsOn = stringUtil.handleHex(transaction.dependsOn).padStart(64, '0');
+  
+  const nonce = stringUtil.handleHex(transaction.nonce).padStart(16, '0');
+
+  const txTokenInfo: types.Option = transaction.option;
+  
+  const tokenInfo = token.getSetTokenPayload(
+    to,
+    txTokenInfo.info.symbol,
+    parseInt(txTokenInfo.info.decimals)
+  );
+
+  const argument = chainTag+blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+tokenInfo;
   
   return argument;
 };
@@ -111,7 +153,7 @@ export const getScriptAndArguments = async (addressIndex: number, transaction: t
 
   const script  = params.TOKEN.scriptWithSignature;
 
-  const argument = getTransferArgument(transaction);
+  const argument = getTokenArgument(transaction);
   return {
     script,
     argument: SEPath + argument,

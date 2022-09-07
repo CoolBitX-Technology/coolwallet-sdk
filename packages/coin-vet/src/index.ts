@@ -3,6 +3,7 @@ import {  signCertificate, signTransaction, signToken, signVIP191 } from './sign
 import * as txUtil from './utils/transactionUtil';
 import * as params from './config/params';
 import * as types from './config/types';
+import { VTHOINFO } from './config/tokenType';
 
 export default class VET extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
@@ -76,7 +77,6 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
    * Sign VTHO Transaction.
    */
    async signToken(signTxData: types.signTxType): Promise<string> {
-    const { reserved } = signTxData.transaction;
 
     const publicKey = await this.getPublicKey(
       signTxData.transport,
@@ -85,8 +85,11 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
       signTxData.addressIndex
     );
 
-    if (reserved != null) {
-      return this.signVIP191Transaction(signTxData);
+    signTxData.transaction.option = {
+      info: {
+        symbol: VTHOINFO.symbol,
+        decimals: VTHOINFO.unit,
+      }
     }
 
     return signToken(signTxData, publicKey);

@@ -40,6 +40,7 @@ function CoinVet(props: Props) {
   const [token, setToken] = useState('1');
   const [vip191Value, setVip191Value] = useState('0');
   const [to, setTo] = useState('0x7567d83b7b8d80addcb281a71d54fc7b3364ffed');
+  const [vthoTo, setVthoTo] = useState('0x7567d83b7b8d80addcb281a71d54fc7b3364ffed');
   const [vip191To, setVip191To] = useState('0x8384738c995d49c5b692560ae688fc8b51af1059');
   const [vip191Data, setVip191Data] = useState('0xd09de08a');
 
@@ -136,7 +137,7 @@ function CoinVet(props: Props) {
           {
             to: '0x0000000000000000000000000000456E65726779',
             value: '0x',//this stands for vet, vtho transaction will ignore vet value
-            data: '0xa9059cbb0000000000000000000000007c5Bc2EB55cE9f4Bf9BE2BBEFa1a3c79c8e11AC1' + web3.utils.toHex(web3.utils.toWei(token, 'ether')).slice(2).padStart(64,'0'),
+            data: '0xa9059cbb000000000000000000000000' + vthoTo.slice(2) + web3.utils.toHex(web3.utils.toWei(token, 'ether')).slice(2).padStart(64,'0'),
           },
         ],
         gasPriceCoef: web3.utils.toHex(128),
@@ -347,17 +348,21 @@ function CoinVet(props: Props) {
         inputSize2={3}
       />
 
-      <OneInput
+      <TwoInputs
         title='Sign VTHO token'
         content={signedToken}
         onClick={signToken}
         disabled={disabled}
         btnName='Sign Token'
-        value={token}
-        setValue={setToken}
-        placeholder='50 VTHO'
+        value={vthoTo}
+        setValue={setVthoTo}
+        placeholder='to'
         inputSize={3}
-      />
+        value2={token}
+        setValue2={setToken}
+        placeholder2='50 VTHO'
+        inputSize2={1}
+      />    
 
       <TwoInputs
         title='Sign VIP191 Transaction Origin (user)'
