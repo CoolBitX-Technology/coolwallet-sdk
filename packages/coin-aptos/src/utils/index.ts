@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { sha3_256 } from 'js-sha3';
+import BigNumber from 'bignumber.js';
 import { utils, config } from '@coolwallet/core';
 import * as params from '../config/params';
-import * as types from '../config/types';
-import { sha3_256 } from 'js-sha3';
+import { Integer, Transaction } from '../config/types';
 
 const getPath = (addressIndex=0) => {
   const slip10PathType = config.PathType.SLIP0010.toString();
@@ -23,27 +24,49 @@ const publicKeyToAuthenticationKey = (publicKey: string) => {
   return authenticationKey;
 };
 
-function trimLeadingZeroes(value: string): string {
-  value = value.replace(/^0+/, '');
-  if (value === '') {
-    return '0';
-  }
-  return value;
+function checkAddress(param: string) {
+  const s = param.toLowerCase();
+  const hex = s.startsWith('0x') ? s.slice(2) : s;
+  const re = /^([0-9A-Fa-f]{2})+$/;
+  const isHex = re.test(hex);
+  const is32Bytes = hex.length === 64;
+  if (isHex && is32Bytes) return hex;
+  throw new Error('invalid address format');
 }
 
-const getScript = async (txn: types.TransactionType): Promise<string> => {
-  return '';
-};
+function toU64Arg(param: Integer) {
+  const bn = new BigNumber(param);
+  const hex = bn.toString(16);
+  const len = Math.ceil(hex.length/2)*2;
+  return Buffer.from(hex.padStart(len, '0'),'hex').reverse().toString('hex').padEnd(16,'0');
+}
 
-const getArgument = async (txn: types.TransactionType): Promise<string> => {
-  return '';
-};
+function getScript(): string {
+  return params.TRANSFER.script + params.TRANSFER.signature.padStart(144, '0');
+}
+
+function getArgument(tx: Transaction): string {
+  const { keyIndex, sender, sequence, receiver, amount, gasLimit, gasPrice, expiration } = tx;
+
+  const fullPath = utils.getFullPath({
+    pathType: config.PathType.SLIP0010,
+    pathString: `44'/637'/0'/0'/${keyIndex}'`,
+  });
+  let result = `15${fullPath}`; // length: 22 bytes
+  result += checkAddress(sender);
+  result += toU64Arg(sequence);
+  result += checkAddress(receiver);
+  result += toU64Arg(amount);
+  result += toU64Arg(gasLimit);
+  result += toU64Arg(gasPrice);
+  result += toU64Arg(expiration);
+  return result;
+}
 
 // Signed Transaction
 
-const getSignedTx = (txn: types.TransactionType, sig: Buffer): string => {
-  const { sender, publicKey, receiver, nonce, recentBlockHash, action } = txn;
+function getSignedTx(tx: Transaction, sig: Buffer): string {
   return '';
-};
+}
 
 export { getPath, publicKeyToAuthenticationKey, getScript, getArgument, getSignedTx };
