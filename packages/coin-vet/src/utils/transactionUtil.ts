@@ -29,29 +29,6 @@ export function pubKeyToAddress(compressedPubkey: string): string {
   return Web3.utils.toChecksumAddress(address);
 }
 
-const generateFullCanonicalSig = (canonicalSignature: any, phraseToSign: string, compressedPubkey: string) => {
-  const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
-
-  const hashcode = sha3_256.update(phraseToSign).hex();
-  const data = Buffer.from(stringUtil.handleHex(hashcode), 'hex');
-
-  // get v
-  const recoveryParam = ec.getKeyRecoveryParam(data, canonicalSignature, keyPair.pub);
-
-  let v;
-  if (recoveryParam === 0) {
-    v = '00';
-  } else if (recoveryParam === 1) {
-    v = '01';
-  } else {
-    throw `generateCanonicalSig failed unexpected value of recoveryParam: ${recoveryParam}`;
-  }
-  const { r } = canonicalSignature; // string
-  const { s } = canonicalSignature; // string
-
-  return r + s + v;
-};
-
 export const getRawTx = (transaction: types.Record): any => {
   const raw = []
   const rawData1 = [];
@@ -114,54 +91,6 @@ const toRaw = (value: string[]): Array<Buffer> => {
     return Buffer.from(hex, 'hex');
   })
 }
-
-export const getRawDelegatorTx = (transaction: types.DelegatorRecord): any => {
-  const raw = []
-  const rawData1 = [];
-  rawData1.push(transaction.chainTag);
-  rawData1.push(transaction.blockRef);
-  rawData1.push(transaction.expiration);
-  rawData1.map((d) => {
-    const hex = stringUtil.handleHex(d);
-    if (hex === '00' || hex === '') {
-      raw.push(Buffer.allocUnsafe(0))
-      return
-    }
-    raw.push(Buffer.from(hex, 'hex'));
-  });
-
-  const rawArrayClauseData = transaction.clauses.map((clause, i) => {
-    const rawClauseData = []
-    if (clause.to === null) {
-      rawClauseData.push('');
-    } else {
-      rawClauseData.push(clause.to);
-    }
-    rawClauseData.push(clause.value.toString())
-    rawClauseData.push(clause.data)
-    return toRaw(rawClauseData)
-  })
-  raw.push(rawArrayClauseData)
-
-  const rawData2 = []
-  rawData2.push(transaction.gasPriceCoef);
-  rawData2.push(transaction.gas);
-  rawData2.push(transaction.dependsOn);
-  rawData2.push(transaction.nonce);
-
-  rawData2.map((d) => {
-
-    const hex = stringUtil.handleHex(d);
-    if (hex === '00' || hex === '') {
-      raw.push(Buffer.allocUnsafe(0))
-      return
-    }
-    raw.push(Buffer.from(hex, 'hex'));
-  });
-  raw.push([transaction.reserved?.features])
-  // raw.push(Buffer.from(stringUtil.handleHex(transaction.nonce), 'hex'))
-  return raw;
-};
 
 export const getCertificateHex = (certificate: types.Certificate): any => {
   const msgHex = fastJsonStableStringify({...certificate, signer: safeToLowerCase(certificate.signer)})

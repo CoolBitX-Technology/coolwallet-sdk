@@ -1,9 +1,9 @@
 import { coin as COIN, Transport } from '@coolwallet/core';
-import {  signCertificate, signTransaction, signToken, signVIP191 } from './sign';
+import { signCertificate, signTransaction, signToken, signVIP191 } from './sign';
 import * as txUtil from './utils/transactionUtil';
 import * as params from './config/params';
 import * as types from './config/types';
-import { VTHOINFO } from './config/tokenType';
+import { TOKENTYPE } from './config/tokenType';
 
 export default class VET extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
@@ -51,7 +51,6 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
     return signVIP191(signTxData, publicKey);
   }
 
-
   /**
    * Sign VET Transaction.
    */
@@ -72,12 +71,10 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
     return signTransaction(signTxData, publicKey);
   }
 
-  
   /**
    * Sign VTHO Transaction.
    */
-   async signToken(signTxData: types.signTxType): Promise<string> {
-
+  async signToken(signTxData: types.signTxType): Promise<string> {
     const publicKey = await this.getPublicKey(
       signTxData.transport,
       signTxData.appPrivateKey,
@@ -85,14 +82,25 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
       signTxData.addressIndex
     );
 
-    signTxData.transaction.option = {
-      info: {
-        symbol: VTHOINFO.symbol,
-        decimals: VTHOINFO.unit,
+    const { clauses } = signTxData.transaction;
+    let to: string = '';
+    if (clauses[0].to != null) {
+      to = clauses[0].to;
+    }
+    const upperCaseAddress = to.toUpperCase();
+    for (const tokenInfo of TOKENTYPE) {
+      if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
+        signTxData.transaction.option = {
+          info: {
+            symbol: tokenInfo.symbol,
+            decimals: tokenInfo.unit,
+          },
+        };
+        return signToken(signTxData, publicKey);
       }
     }
 
-    return signToken(signTxData, publicKey);
+    return signTransaction(signTxData, publicKey);
   }
 
   /**
