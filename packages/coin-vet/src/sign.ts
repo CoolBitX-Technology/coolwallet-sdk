@@ -38,9 +38,6 @@ export async function signTransaction(
     true
   );
 
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-
-
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
  
@@ -84,9 +81,6 @@ export async function signTransaction(
     true
   );
 
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-
-
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
   const hash = blake2b(32).update(rawData).digest('hex')
@@ -129,9 +123,6 @@ export async function signTransaction(
     authorizedCB,
     true
   );
-
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
-
 
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
