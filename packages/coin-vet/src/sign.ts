@@ -211,9 +211,11 @@ export async function signSmartContractTransaction(
     authorizedCB,
     true
   );
-
+  const { signedTx } = await apdu.tx.getSignedHex(transport);
+  console.log("signedTx",{signedTx});
   const rawTx = txUtil.getRawTx(transaction);
   const rawData = rlp.encode(rawTx);
+  console.log('rawTx', { rawTx });
  
   const hash = blake2b(32).update(rawData).digest('hex')
   const data = Buffer.from(handleHex(hash), 'hex')

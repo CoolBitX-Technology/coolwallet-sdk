@@ -391,7 +391,7 @@ function CoinVet(props: Props) {
         });
 
       return signedTx;
-    }, props).then(setSignedTransaction);
+    }, props).then(setSignedSmartContract);
   };
 
   return (
