@@ -75,13 +75,16 @@ const getTokenArgument = (transaction: types.Record) => {
   
   const nonce = stringUtil.handleHex(transaction.nonce).padStart(16, '0');
 
-  const txTokenInfo: types.Option = transaction.option;
-  
-  const tokenInfo = token.getSetTokenPayload(
-    to,
-    txTokenInfo.info.symbol,
-    parseInt(txTokenInfo.info.decimals)
-  );
+  let txTokenInfo: types.Option
+  let tokenInfo: string = ''
+  if (transaction.option != null) {
+    txTokenInfo = transaction.option
+    tokenInfo = token.getSetTokenPayload(
+      to,
+      txTokenInfo.info.symbol,
+      parseInt(txTokenInfo.info.decimals)
+    );
+  }
 
   const argument = chainTag+blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+tokenInfo;
   

@@ -44,7 +44,7 @@ export type Record = {
     features?: number;
     unused?: Buffer[];
   };
-  option: Option;
+  option?: Option;
 };
 
 export type DelegatorRecord = {
