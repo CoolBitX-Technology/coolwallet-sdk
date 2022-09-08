@@ -131,6 +131,39 @@ const getVIP191TransferArgument = (transaction: types.Record) => {
   return argument;
 };
 
+const getSmartContractArgument = (transaction: types.Record) => {
+  const chainTag = stringUtil.handleHex(transaction.chainTag.toString()).padStart(2, '0');
+
+  const blockRef = stringUtil.handleHex(transaction.blockRef).padStart(16, '0');
+
+  const expiration = stringUtil.handleHex(transaction.expiration.toString()).padStart(8, '0');
+
+  const clause = transaction.clauses[0];
+  let to: string;
+  if (clause.to == null) {
+    to = ''.padStart(40, '0');
+  } else {
+    to = stringUtil.handleHex(clause.to.toString());
+  }
+
+  const value = stringUtil.handleHex(clause.value.toString()).padStart(64, '0');
+
+  const data = stringUtil.handleHex(clause.data);
+
+  const gasPriceCoef = stringUtil.handleHex(transaction.gasPriceCoef.toString()).padStart(2, '0');
+
+  const gas = stringUtil.handleHex(transaction.gas.toString()).padStart(16, '0');
+
+  const dependsOn = stringUtil.handleHex(transaction.dependsOn).padStart(64, '0');
+
+  const nonce = stringUtil.handleHex(transaction.nonce).padStart(16, '0');
+
+  const argument =
+    chainTag + blockRef + expiration + to + value + gasPriceCoef + gas + dependsOn + nonce + data;
+
+  return argument;
+};
+
 /**
  * @param {number} addressIndex
  * @param {*} transaction
@@ -189,6 +222,22 @@ export const getScriptAndArguments = async (addressIndex: number, transaction: t
   const script = params.CERT.scriptWithSignature;
   const msgHex = fastJsonStableStringify({...certificate, signer: safeToLowerCase(certificate.signer)})
   const argument = stringUtil.handleHex(Web3Utils.toHex(msgHex));
+  return {
+    script,
+    argument: SEPath + argument,
+  };
+};
+
+/**
+ * @param {number} addressIndex
+ * @param {*} transaction
+ */
+export const getSmartContractScriptAndArguments = async (addressIndex: number, transaction: types.Record) => {
+  const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
+
+  const script = params.SMART_CONTRACT.scriptWithSignature;
+
+  const argument = getSmartContractArgument(transaction);
   return {
     script,
     argument: SEPath + argument,

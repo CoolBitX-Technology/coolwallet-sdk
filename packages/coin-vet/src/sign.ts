@@ -184,3 +184,46 @@ export async function signCertificate(
   
   return `0x${signedTransaction.toString('hex')}`;
 }
+
+/**
+ * Sign VeChain Smart Contract Transaction
+ */
+export async function signSmartContractTransaction(
+  signTxData: types.signTxType,
+  publicKey: string
+): Promise<string> {
+  const { transaction, transport, addressIndex, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
+
+  const preActions = [];
+
+  const { script, argument } = await scriptUtil.getScriptAndArguments(addressIndex, transaction);
+
+  const sendScript = () => apdu.tx.sendScript(transport, script);
+  preActions.push(sendScript);
+  const action = () => apdu.tx.executeScript(transport, signTxData.appId, signTxData.appPrivateKey, argument);
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
+    transport,
+    preActions,
+    action,
+    false,
+    confirmCB,
+    authorizedCB,
+    true
+  );
+
+  const rawTx = txUtil.getRawTx(transaction);
+  const rawData = rlp.encode(rawTx);
+ 
+  const hash = blake2b(32).update(rawData).digest('hex')
+  const data = Buffer.from(handleHex(hash), 'hex')
+  const keyPair = ec.keyFromPublic(publicKey, 'hex');
+  
+  const recoveryParam = ec.getKeyRecoveryParam(data, signature, keyPair.pub);
+  const v = recoveryParam;
+  const { r, s } = signature as {r: string, s: string};
+  rawTx.push(Buffer.concat([Buffer.from(r, 'hex'), Buffer.from(s, 'hex'), Buffer.from([v])]));
+  const serializedTx = rlp.encode(rawTx);
+  
+  return `0x${serializedTx.toString('hex')}`;
+}
