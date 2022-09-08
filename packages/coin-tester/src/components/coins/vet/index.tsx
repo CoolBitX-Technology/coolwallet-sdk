@@ -339,8 +339,7 @@ function CoinVet(props: Props) {
   const signSmartContract = () => {
     useRequest(async () => {
       const transaction = {
-        chainTag: '0x27',
-        // chainTag: '0x4a',
+        chainTag: '0x4a',
         blockRef: connex.thor.status.head.id.slice(0, 18),
         expiration: web3.utils.toHex(32),
         clauses: [
@@ -367,7 +366,7 @@ function CoinVet(props: Props) {
       };
       console.log('signTxData: ', { signTxData });
 
-      const signedTx = await temp.signTransaction(signTxData);
+      const signedTx = await temp.signSmartContractTransaction(signTxData);
 
       // Submit the raw transaction by hand to the test-net.
       const url = 'https://testnet.veblocks.net/transactions';
