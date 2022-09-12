@@ -33,7 +33,7 @@ export const getRawTx = (transaction: types.Record): any => {
   const raw = []
   const rawData1 = [];
   rawData1.push(transaction.chainTag);
-  rawData1.push(stringUtil.handleHex(transaction.blockRef).slice(2));
+  rawData1.push(stringUtil.handleHex(transaction.blockRef).replace(/^0+/, ''));
   rawData1.push(transaction.expiration);
   rawData1.map((d) => {
     const hex = stringUtil.handleHex(d);
