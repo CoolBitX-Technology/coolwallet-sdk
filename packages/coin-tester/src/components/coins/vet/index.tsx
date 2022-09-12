@@ -5,7 +5,7 @@ import web3 from 'web3';
 import { NoInput, OneInput, TwoInputs } from '../../../utils/componentMaker';
 
 import VET from '@coolwallet/vet';
-import { getRawTx } from '@coolwallet/vet/src/utils/transactionUtil';
+import { getCertificateHex, getRawTx } from '@coolwallet/vet/src/utils/transactionUtil';
 import { handleHex } from '@coolwallet/vet/src/utils/stringUtil';
 import { useRequest } from '../../../utils/hooks';
 const rlp = require('rlp');
