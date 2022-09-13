@@ -61,7 +61,7 @@ export const getRawTx = (transaction: types.Record): any => {
   rawData2.push(transaction.gasPriceCoef);
   rawData2.push(transaction.gas);
   rawData2.push(transaction.dependsOn);
-  rawData2.push(transaction.nonce);
+  rawData2.push(stringUtil.handleHex(transaction.nonce).replace(/^0+/, ''));
 
   rawData2.map((d) => {
 
