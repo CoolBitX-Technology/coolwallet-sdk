@@ -10,6 +10,8 @@ import {
   getSignedTx,
 } from './utils';
 
+export { Transaction, Options };
+
 export default class APTOS extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
     super(params.COIN_TYPE);
