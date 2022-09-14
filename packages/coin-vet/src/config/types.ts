@@ -22,8 +22,6 @@ export type Option = {
 };
 
 export type Record = {
-  /** last byte of genesis block ID */
-  chainTag: string;
   /** 8 bytes prefix of some block's ID */
   blockRef: string;
   /** constraint of time bucket */
@@ -48,8 +46,6 @@ export type Record = {
 };
 
 export type DelegatorRecord = {
-  /** last byte of genesis block ID */
-  chainTag: string;
   /** 8 bytes prefix of some block's ID */
   blockRef: string;
   /** constraint of time bucket */

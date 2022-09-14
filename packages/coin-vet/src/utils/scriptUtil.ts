@@ -9,8 +9,6 @@ const fastJsonStableStringify = require('fast-json-stable-stringify')
 
 const getTransferArgument = (transaction: types.Record) => {
 
-  const chainTag = stringUtil.handleHex(transaction.chainTag.toString()).padStart(2, '0');
-
   const blockRef = stringUtil.handleHex(transaction.blockRef).padStart(16,'0');
 
   const expiration = stringUtil.handleHex(transaction.expiration.toString()).padStart(8, '0');
@@ -42,14 +40,12 @@ const getTransferArgument = (transaction: types.Record) => {
     reserved = ''
   }
 
-  const argument = chainTag+blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+reserved;
+  const argument = blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+reserved;
   
   return argument;
 };
 
 const getTokenArgument = (transaction: types.Record) => {
-
-  const chainTag = stringUtil.handleHex(transaction.chainTag.toString()).padStart(2, '0');
 
   const blockRef = stringUtil.handleHex(transaction.blockRef).padStart(16,'0');
 
@@ -86,14 +82,12 @@ const getTokenArgument = (transaction: types.Record) => {
     );
   }
 
-  const argument = chainTag+blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+tokenInfo;
+  const argument = blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+tokenInfo;
   
   return argument;
 };
 
 const getVIP191TransferArgument = (transaction: types.Record) => {
-
-  const chainTag = stringUtil.handleHex(transaction.chainTag.toString()).padStart(2, '0');
 
   const blockRef = stringUtil.handleHex(transaction.blockRef).padStart(16,'0');
 
@@ -126,13 +120,12 @@ const getVIP191TransferArgument = (transaction: types.Record) => {
     reserved = ''
   }
 
-  const argument = chainTag+blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+reserved;
+  const argument = blockRef+expiration+to+value+data+gasPriceCoef+gas+dependsOn+nonce+reserved;
   
   return argument;
 };
 
 const getSmartContractArgument = (transaction: types.Record) => {
-  const chainTag = stringUtil.handleHex(transaction.chainTag.toString()).padStart(2, '0');
 
   const blockRef = stringUtil.handleHex(transaction.blockRef).padStart(16, '0');
 
@@ -158,8 +151,7 @@ const getSmartContractArgument = (transaction: types.Record) => {
 
   const nonce = stringUtil.handleHex(transaction.nonce).padStart(16, '0');
 
-  const argument =
-    chainTag + blockRef + expiration + to + value + gasPriceCoef + gas + dependsOn + nonce + data;
+  const argument = blockRef + expiration + to + value + gasPriceCoef + gas + dependsOn + nonce + data;
 
   return argument;
 };
