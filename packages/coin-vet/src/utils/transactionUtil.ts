@@ -32,6 +32,7 @@ export function pubKeyToAddress(compressedPubkey: string): string {
 export const getRawTx = (transaction: types.Record): any => {
   const raw = []
   const rawData1 = [];
+  rawData1.push('4a');
   rawData1.push(stringUtil.handleHex(transaction.blockRef).replace(/^0+/, ''));
   rawData1.push(transaction.expiration);
   rawData1.map((d) => {
