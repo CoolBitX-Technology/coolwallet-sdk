@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-shadow @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { Container } from 'react-bootstrap';
 import BigNumber from 'bignumber.js';
@@ -81,7 +82,7 @@ function CoinAptos(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const authKey = await aptos.getAuthKey(transport!, appPrivateKey, appId, keyIndex);
+      const { authKey } = await aptos.getPubAndAuthKey(transport!, appPrivateKey, appId, keyIndex);
 
       // 清空 address
       setAccounts('');
@@ -105,6 +106,12 @@ function CoinAptos(props: Props) {
           originalAccount.address = currentAuth;
           originalAccount.sequence = sequence;
           originalAccount.balance = await accountBalance(authKey);
+
+          const args = [...transferArgs];
+          args[0] = currentAuth;
+          args[1] = sequence;
+          setTransferArgs(args);
+
         } else {
           originalAccount.address = 'rotated to other authKey';
         }
@@ -120,6 +127,12 @@ function CoinAptos(props: Props) {
           rotatedAccount.address = address;
           rotatedAccount.sequence = sequence;
           rotatedAccount.balance = balance;
+
+          const args = [...transferArgs];
+          args[0] = address;
+          args[1] = sequence;
+          setTransferArgs(args);
+
         } else {
           rotatedAccount.address = 'no rotated address';
         }
@@ -152,13 +165,34 @@ function CoinAptos(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      // const args = await prepareTx(address, transferArgs, 'transfer', {
-      //   amount: new BigNumber(transferArgs[3]).shiftedBy(18).toFixed(),
-      //   recipient: transferArgs[4],
-      //   payload: Buffer.from(handleHex(transferArgs[5]), 'hex'),
-      // });
-      // setTransferArgs(args);
-      return ''; // `nonce: ${args[0]}, gasLimit: ${args[1]}, gasPrice: ${args[2]}`;
+
+      const { pubKey } = await aptos.getPubAndAuthKey(transport!, appPrivateKey, appId, keyIndex);
+
+      const expiration = (Math.floor(Date.now() / 1000) + 60).toString();
+      const [sender, sequence, receiver, amount] = transferArgs;
+
+      const tx = {
+        keyIndex,
+        sender,
+        receiver,
+        sequence,
+        amount,
+        gasLimit: 2000,
+        gasPrice: 1,
+        expiration,
+      };
+      const gasLimit = await getGasLimit(tx, pubKey);
+      console.log('gasLimit :', typeof gasLimit);
+      const gasPrice = await getGasPrice();
+
+      const args = [...transferArgs];
+      args[4] = gasLimit;
+      args[5] = gasPrice.toString();
+      args[6] = expiration;
+
+      setTransferArgs(args);
+
+      return `gasLimit: ${args[4]}, gasPrice: ${args[5]}, expiration: ${args[6]}`;
     }, setTransferPrepare);
   };
 
@@ -168,8 +202,8 @@ function CoinAptos(props: Props) {
       if (!appId) throw new Error('No Appid stored, please register!');
       const options = { transport: transport!, appPrivateKey, appId };
 
-      const [sender, sequence, receiver, rawAmount, gasLimit, gasPrice, expiration] = transferArgs;
-      const amount = new BigNumber(rawAmount).shiftedBy(8).toFixed();
+      const [sender, sequence, receiver, amount, gasLimit, gasPrice, expiration] = transferArgs;
+      // const amount = new BigNumber(rawAmount).shiftedBy(8).toFixed();
       const transaction = { keyIndex, sender, sequence, receiver, amount, gasLimit, gasPrice, expiration };
       console.log('transaction :', transaction);
 
@@ -181,7 +215,8 @@ function CoinAptos(props: Props) {
 
   const sendTransaction = async () => {
     handleState(async () => {
-      return '';
+      const result = await sendTx(transferTx);
+      return result;
     }, setTransferResult);
   };
 

@@ -21,12 +21,12 @@ export default class APTOS extends COIN.EDDSACoin implements COIN.Coin {
     throw new Error('getAddress is not supported for aptos, please use getAuthKey instead');
   };
 
-  getAuthKey = async (
+  getPubAndAuthKey = async (
     transport: Transport, appPrivateKey: string, appId: string, keyIndex: number
-  ): Promise<string> => {
+  ): Promise<{ pubKey: string, authKey: string }> => {
     const publicKey = await getPublicKeyByKeyIndex(transport, appId, appPrivateKey, keyIndex);
     const authenticationKey = publicKeyToAuthenticationKey(publicKey);
-    return '0x' + authenticationKey;
+    return { pubKey: '0x' + publicKey, authKey: '0x' + authenticationKey };
   };
 
   getFakeSignedTx = async (transaction: Transaction, options: Options): Promise<string> => {

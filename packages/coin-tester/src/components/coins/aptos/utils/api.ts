@@ -21,23 +21,6 @@ const FAUCET_URL = 'https://faucet.devnet.aptoslabs.com';
 const client = new AptosClient(NODE_URL);
 const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
 
-/*
-    const gasPrice = await getGasPrice();
-
-    const testGasLimit = 2000;
-    const tx = {
-      sender,
-      receiver,
-      sequence,
-      amount: 1000,
-      gasLimit: testGasLimit,
-      gasPrice,
-      expiration: Math.floor(Date.now() / 1000) + 10,
-    };
-    const usedGas = await getGasLimit(tx, publicKey);
-
-    const history = await getHistory(oriAuth);
-*/
 async function fundAccount(address: string, amount: number) {
   return faucetClient.fundAccount(address, amount);
 }
@@ -138,7 +121,7 @@ function getSignedTx(tx: Transaction, publicKey: string, sig?: string) {
   return signedTx;
 }
 
-async function getGasLimit(tx: Transaction, publicKey: string) {
+async function getGasLimit(tx: Transaction, publicKey: string): Promise<string> {
   try {
     const fakeSignedTx = getSignedTx(tx, publicKey);
     const res = await client.submitBCSSimulation(Buffer.from(fakeSignedTx,'hex'));
@@ -146,7 +129,7 @@ async function getGasLimit(tx: Transaction, publicKey: string) {
     if (!result.success) throw new Error(result.vm_status);
     return result.gas_used;
   } catch (error) {
-    return error;
+    return '';
   }
 }
 
@@ -155,7 +138,9 @@ async function getHistory(address: string) {
   return transactions;
 }
 
-async function sendTx(bcsTxn: Buffer) {
-  const pendingTxn = await client.submitSignedBCSTransaction(bcsTxn);
+async function sendTx(signedTx: string) {
+  const txBuf = Buffer.from(signedTx, 'hex');
+  const pendingTxn = await client.submitSignedBCSTransaction(txBuf);
   await client.waitForTransaction(pendingTxn.hash);
+  return pendingTxn.hash;
 }
