@@ -82,7 +82,7 @@ function CoinAptos(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-      const { authKey } = await aptos.getPubAndAuthKey(transport!, appPrivateKey, appId, keyIndex);
+      const authKey = await aptos.getAuthKey(transport!, appPrivateKey, appId, keyIndex);
 
       // 清空 address
       setAccounts('');
@@ -165,8 +165,7 @@ function CoinAptos(props: Props) {
     handleState(async () => {
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
-
-      const { pubKey } = await aptos.getPubAndAuthKey(transport!, appPrivateKey, appId, keyIndex);
+      const options = { transport: transport!, appPrivateKey, appId };
 
       const expiration = (Math.floor(Date.now() / 1000) + 60).toString();
       const [sender, sequence, receiver, amount] = transferArgs;
@@ -181,7 +180,8 @@ function CoinAptos(props: Props) {
         gasPrice: 1,
         expiration,
       };
-      const gasLimit = await getGasLimit(tx, pubKey);
+      const fakeSignedTx = await aptos.getFakeSignedTx(tx, options);
+      const gasLimit = await getGasLimit(fakeSignedTx);
       console.log('gasLimit :', typeof gasLimit);
       const gasPrice = await getGasPrice();
 

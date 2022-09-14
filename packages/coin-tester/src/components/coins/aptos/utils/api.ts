@@ -96,34 +96,8 @@ function toU64Arg(param: string | number) {
   return Buffer.from(hex.padStart(len, '0'),'hex').reverse().toString('hex').padEnd(16,'0');
 }
 
-function getSignedTx(tx: Transaction, publicKey: string, sig?: string) {
-  const { sender, sequence, receiver, amount, gasLimit, gasPrice, expiration } = tx;
-
-  let signedTx = '';
-  signedTx += checkHex(sender, 64);
-  signedTx += toU64Arg(sequence);
-  signedTx += '02';
-  signedTx += '0000000000000000000000000000000000000000000000000000000000000001';
-  signedTx += '0d6170746f735f6163636f756e74';
-  signedTx += '087472616e73666572';
-  signedTx += '000220';
-  signedTx += checkHex(receiver, 64);
-  signedTx += '08';
-  signedTx += toU64Arg(amount);
-  signedTx += toU64Arg(gasLimit);
-  signedTx += toU64Arg(gasPrice);
-  signedTx += toU64Arg(expiration);
-  signedTx += '1b'; // chainId
-  signedTx += '0020';
-  signedTx += checkHex(publicKey, 64);
-  signedTx += '40';
-  signedTx += sig ? checkHex(sig, 128) : '0'.repeat(128);
-  return signedTx;
-}
-
-async function getGasLimit(tx: Transaction, publicKey: string): Promise<string> {
+async function getGasLimit(fakeSignedTx: string): Promise<string> {
   try {
-    const fakeSignedTx = getSignedTx(tx, publicKey);
     const res = await client.submitBCSSimulation(Buffer.from(fakeSignedTx,'hex'));
     const result = res[0];
     if (!result.success) throw new Error(result.vm_status);

@@ -11,7 +11,7 @@ export interface Options {
   authorizedCB?: Function;
 }
 
-export type Transaction = {
+export interface Transaction {
   keyIndex: number;
   sender: string;
   sequence: Integer;
@@ -20,5 +20,4 @@ export type Transaction = {
   gasLimit: Integer;
   gasPrice: Integer;
   expiration: Integer;
-};
-
+}
