@@ -22,21 +22,7 @@ const client = new AptosClient(NODE_URL);
 const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
 
 /*
-    const auth = bob;
-    const sender = alice.address().hexString;
-    const receiver = bob.address().hexString;
-
-    await fundAccount(sender, 6000);
-
-    const { sequence, currentAuth } = await getSequenceAndAuthKey(oriAuth);
-
-    const balance = await accountBalance(oriAuth);
-
-    const chainId = await getChainId();
-
     const gasPrice = await getGasPrice();
-
-    const publicKey = auth.pubKey().hexString;
 
     const testGasLimit = 2000;
     const tx = {
@@ -59,8 +45,8 @@ async function fundAccount(address: string, amount: number) {
 async function accountBalance(address: string) {
   try {
     const resource = await client.getAccountResource(address, '0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>');
-    const coin = resource.data as any;
-    return parseInt(coin.value);
+    const { coin } = resource.data as any;
+    return coin.value;
   } catch (error) {
     return 'Not Exist';
   }
@@ -89,7 +75,7 @@ async function getSequenceAndAuthKey(address: string) {
     } = await client.getAccount(address);
     return { sequence, currentAuth };
   } catch (error) {
-    return { sequence: null, currentAuth: '' };
+    return { sequence: '', currentAuth: '' };
   }
 }
 
