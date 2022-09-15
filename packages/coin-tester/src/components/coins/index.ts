@@ -17,6 +17,7 @@ import NEAR from './near';
 import THETA from './theta';
 import AVAXC from './avaxc';
 import IOTX from './iotx';
+import VET from './vet';
 import APTOS from './aptos';
 
 export default [
@@ -39,5 +40,6 @@ export default [
   { path: 'theta', Element: THETA },
   { path: 'avaxc', Element: AVAXC },
   { path: 'iotx', Element: IOTX },
+  { path: 'vet', Element: VET },
   { path: 'aptos', Element: APTOS },
 ];
