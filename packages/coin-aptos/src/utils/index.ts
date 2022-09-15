@@ -1,49 +1,103 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { utils, config } from '@coolwallet/core';
-import * as params from '../config/params';
-import * as types from '../config/types';
 import { sha3_256 } from 'js-sha3';
+import BigNumber from 'bignumber.js';
+import { coin as COIN, Transport, utils, config } from '@coolwallet/core';
+import * as params from '../config/params';
+import { Integer, Transaction } from '../config/types';
 
-const getPath = (addressIndex=0) => {
-  const slip10PathType = config.PathType.SLIP0010.toString();
-  const path =
-    slip10PathType +
-    '8000002C' +
-    params.COIN_TYPE +
-    '80000000' +
-    '80000000' +
-    (Math.floor(addressIndex) + 0x80000000).toString(16);
-
-  return path;
+export {
+  getPublicKeyByKeyIndex,
+  publicKeyToAuthenticationKey,
+  getScript,
+  getArgument,
+  getSignedTx,
 };
 
-const publicKeyToAuthenticationKey = (publicKey: string) => {
+function getPath(keyIndex: number) {
+  const path = utils.getFullPath({
+    pathType: config.PathType.SLIP0010,
+    pathString: `44'/637'/0'/0'/${keyIndex}'`,
+  });
+  return path;
+}
+
+async function getPublicKeyByKeyIndex(
+  transport: Transport, appId: string, appPrivateKey: string, keyIndex: number
+) {
+  const path = getPath(keyIndex);
+  const publicKey = await COIN.getPublicKeyByPath(transport, appId, appPrivateKey, path);
+  return publicKey;
+}
+
+function publicKeyToAuthenticationKey(publicKey: string) {
   const publicKeyAndScheme = Buffer.concat([Buffer.from(publicKey, 'hex'), Buffer.alloc(1)]);
   const authenticationKey = sha3_256(publicKeyAndScheme);
   return authenticationKey;
-};
-
-function trimLeadingZeroes(value: string): string {
-  value = value.replace(/^0+/, '');
-  if (value === '') {
-    return '0';
-  }
-  return value;
 }
 
-const getScript = async (txn: types.TransactionType): Promise<string> => {
-  return '';
-};
+function remove0x(param: string): string {
+  if (!param) return '';
+  const s = param.toLowerCase();
+  return s.startsWith('0x') ? s.slice(2) : s;
+}
 
-const getArgument = async (txn: types.TransactionType): Promise<string> => {
-  return '';
-};
+function checkHex(param: string, length: number): string {
+  const hex = remove0x(param);
+  const re = /^([0-9A-Fa-f]{2})+$/;
+  const isHex = re.test(hex);
+  const validLength = hex.length === length;
+  if (!isHex) throw new Error('invalid hex format');
+  if (!validLength) throw new Error(`invalid length, need ${length}, get ${hex.length}`);
+  return hex;
+}
 
-// Signed Transaction
+function toU64Arg(param: Integer): string {
+  const bn = new BigNumber(param);
+  const hex = bn.toString(16);
+  const len = Math.ceil(hex.length/2)*2;
+  return Buffer.from(hex.padStart(len, '0'),'hex').reverse().toString('hex').padEnd(16,'0');
+}
 
-const getSignedTx = (txn: types.TransactionType, sig: Buffer): string => {
-  const { sender, publicKey, receiver, nonce, recentBlockHash, action } = txn;
-  return '';
-};
+function getScript(): string {
+  return params.TRANSFER.script + params.TRANSFER.signature.padStart(144, '0');
+}
 
-export { getPath, publicKeyToAuthenticationKey, getScript, getArgument, getSignedTx };
+function getArgument(tx: Transaction): string {
+  const { keyIndex, sender, sequence, receiver, amount, gasLimit, gasPrice, expiration } = tx;
+
+  const path = getPath(keyIndex);
+  let result = `15${path}`;
+  result += checkHex(sender, 64);
+  result += toU64Arg(sequence);
+  result += checkHex(receiver, 64);
+  result += toU64Arg(amount);
+  result += toU64Arg(gasLimit);
+  result += toU64Arg(gasPrice);
+  result += toU64Arg(expiration);
+  return result;
+}
+
+function getSignedTx(tx: Transaction, publicKey: string, sig?: string): string {
+  const { sender, sequence, receiver, amount, gasLimit, gasPrice, expiration } = tx;
+
+  let signedTx = '';
+  signedTx += checkHex(sender, 64);
+  signedTx += toU64Arg(sequence);
+  signedTx += '02';
+  signedTx += '0000000000000000000000000000000000000000000000000000000000000001';
+  signedTx += '0d6170746f735f6163636f756e74';
+  signedTx += '087472616e73666572';
+  signedTx += '000220';
+  signedTx += checkHex(receiver, 64);
+  signedTx += '08';
+  signedTx += toU64Arg(amount);
+  signedTx += toU64Arg(gasLimit);
+  signedTx += toU64Arg(gasPrice);
+  signedTx += toU64Arg(expiration);
+  signedTx += '1b'; // chainId
+  signedTx += '0020';
+  signedTx += checkHex(publicKey, 64);
+  signedTx += '40';
+  signedTx += sig ? checkHex(sig, 128) : '0'.repeat(128);
+  return signedTx;
+}
