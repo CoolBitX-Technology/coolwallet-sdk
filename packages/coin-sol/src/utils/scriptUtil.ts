@@ -1,5 +1,7 @@
 import { utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
+import base58 from 'bs58';
+import { TOKEN_INFO } from '../config/tokenInfos';
 import * as types from '../config/types';
 import Transaction from './Transaction';
 
@@ -19,11 +21,13 @@ function getTransferArguments(rawTx: Transaction, addressIndex: number): string 
 }
 
 function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
-  const signature = tokenInfo.signature ?? '';
+  const tokenSignature = tokenInfo.signature ?? '';
+  const signature = tokenSignature.slice(82).padStart(144, '0');
   const tokenInfoToHex = Buffer.from([+tokenInfo.decimals, tokenInfo.symbol.length]).toString('hex');
   const tokenSymbol = Buffer.from(tokenInfo.symbol.toUpperCase()).toString('hex').padEnd(14, '0');
+  const tokenPublicKey = Buffer.from(base58.decode(tokenInfo.address)).toString('hex');
 
-  return tokenInfoToHex + tokenSymbol + signature;
+  return tokenInfoToHex + tokenSymbol + tokenPublicKey + signature;
 }
 
 /**
@@ -56,6 +60,16 @@ function getAssociateTokenAccount(rawTx: Transaction, addressIndex: number): str
   console.debug('SEPath: ', SEPath);
 
   return SEPath + rawTx.compileMessage().serializeAssociateTokenAccount();
+}
+
+function getCreateAndTransferSPLToken(rawTx: Transaction, addressIndex: number, tokenInfo?: types.TokenInfo): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+  let tokenInfoArgs = '';
+  if (tokenInfo) tokenInfoArgs = getTokenInfoArgs(tokenInfo);
+
+  return SEPath + rawTx.compileMessage().serializeCreateAndTransferSPLToken() + tokenInfoArgs;
 }
 
 function getDelegateArguments(rawTx: Transaction, addressIndex: number): string {
@@ -101,6 +115,7 @@ function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number):
 export {
   getAssociateTokenAccount,
   getSplTokenTransferArguments,
+  getCreateAndTransferSPLToken,
   getTransferArguments,
   getSmartContractArguments,
   getDelegateArguments,

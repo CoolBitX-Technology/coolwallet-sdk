@@ -43,5 +43,8 @@
   },
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "overrides": {
+    "grpc": "@grpc/grpc-js"
   }
 }

@@ -1,6 +1,7 @@
 import { Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import * as bip39 from 'bip39';
+import isEmpty from 'lodash/isEmpty';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import * as utils from 'web3-utils';
 import EVM, { CHAIN } from '../src';
@@ -14,6 +15,7 @@ import {
   MESSAGE_TRANSACTION,
   SMART_CONTRACT_SEGMENT_TRANSACTION,
   SMART_CONTRACT_TRANSACTION,
+  STAKING_TRANSACTION,
   TRANSFER_TRANSACTION,
   TYPED_DATA_TRANSACTION,
 } from './fixtures/transaction';
@@ -26,19 +28,16 @@ import type {
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
-function isEmpty(str) {
-  return !str || str.length === 0;
-}
-
 const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS) };
 const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
 const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
 const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO) };
+const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM) };
 // Layer 2
 const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
 
-const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinCelo];
+const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinCelo, coinFantom];
 
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
@@ -51,6 +50,8 @@ describe('Test EVM SDK', () => {
     props = await initialize(transport, mnemonic);
     await wallet.setMnemonic(mnemonic);
   });
+
+  beforeEach(async () => new Promise((resolve) => setTimeout(resolve, 1000)));
 
   it.each(TEST_COINS)('$name: test get address 0', async ({ api }) => {
     const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
@@ -98,51 +99,53 @@ describe('Test EVM SDK', () => {
     }
   });
 
-  it.each([coinCronos])('$name test sign erc20 transaction', async ({ api }) => {
+  it.each(TEST_COINS)('$name test sign erc20 transaction', async ({ api }) => {
     for (const transaction of ERC20_TRANSACTION) {
-      const token = api.chain.tokens?.USDT;
-      const scale = 10 ** +token.unit;
-      const tokenAmount = +transaction.amount;
-      const amount = (tokenAmount * scale).toString(16);
-      const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
-      const client: LegacyTransaction = {
-        transaction: {
-          ...transaction,
-          to: token.contractAddress,
-          data: erc20Data,
-        },
-        transport,
-        appPrivateKey: props.appPrivateKey,
-        appId: props.appId,
-        addressIndex: 0,
-      };
-
-      const signature = await api.signTransaction(client);
-      const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
-      expect(signature).toEqual(expectedSignature);
-      const txDetail = await getTxDetail(transport, props.appId);
-      let expectedTxDetail;
-      if (isEmpty(api.chain.layer2)) {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.symbol)
-          .messagePage('USDT')
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+tokenAmount)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      } else {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.layer2)
-          .messagePage(api.chain.symbol)
-          .messagePage('USDT')
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+tokenAmount)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      for (const token of Object.values(api.chain.tokens)) {
+        const hasCommercialAt = isEmpty(token.signature);
+        const scale = 10 ** +token.unit;
+        const tokenAmount = +transaction.amount;
+        const amount = Math.floor(tokenAmount * scale).toString(16);
+        const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+        const client: LegacyTransaction = {
+          transaction: {
+            ...transaction,
+            to: token.contractAddress,
+            data: erc20Data,
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+        const signature = await api.signTransaction(client);
+        const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+        const txDetail = await getTxDetail(transport, props.appId);
+        let expectedTxDetail;
+        const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
+        if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        }
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
       }
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   });
 
@@ -214,6 +217,69 @@ describe('Test EVM SDK', () => {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    }
+  });
+
+  it.each([coinFantom])('$name test staking transaction', async ({ api }) => {
+    for (const transaction of STAKING_TRANSACTION) {
+      const client: LegacyTransaction = {
+        transaction: {
+          ...transaction,
+          value: utils.toHex(utils.toWei(transaction.value, 'ether')),
+        },
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+      };
+
+      const signature = await api.signTransaction(client);
+      const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
+      expect(signature).toEqual(expectedSignature);
+      const txDetail = await getTxDetail(transport, props.appId);
+
+      const validatorId = parseInt(transaction.data.slice(10, 74), 16);
+      const validatorDisplay = 'ID ' + validatorId;
+
+      let expectedTxDetail = '';
+      const programId = transaction.data.slice(0, 10);
+      if (programId.toLowerCase() === api.chain.stakingInfo.delegate) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Delgt', '')
+          .messagePage(validatorDisplay)
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (programId.toLowerCase() === api.chain.stakingInfo.withdraw) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Withdr', '')
+          .messagePage(validatorDisplay)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (programId.toLowerCase() === api.chain.stakingInfo.undelegate) {
+        const parsedVal = parseInt(transaction.data.slice(138, 202), 16);
+        const scale = 10 ** -18;
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Undelgt', '')
+          .messagePage(validatorDisplay)
+          .amountPage(+(parsedVal * scale))
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
           .messagePage(api.chain.symbol)
           .wrapPage('SMART', '')
           .wrapPage('PRESS', 'BUTToN')

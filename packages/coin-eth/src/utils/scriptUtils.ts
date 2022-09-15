@@ -58,12 +58,13 @@ export const getERC20Argument = async (transaction: Transaction, tokenSignature:
  */
 export const getSmartContractArgument = async (transaction: Transaction, addressIndex: number) => {
   const argument =
-    handleHex(transaction.to) + // contractAddress : 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
+    ((transaction.to !== undefined && transaction.to !== "") ? handleHex(transaction.to) : "".padEnd(40, '0')) +  // Has to address
     handleHex(transaction.value).padStart(20, '0') + // 000000b1a2bc2ec50000
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c
     handleHex(transaction.nonce).padStart(16, '0') + // 0000000000000289
-    handleHex("0001") +
+    handleHex("0001") + 
+    // handleHex("0003") + // Ropsten chainId
     handleHex(transaction.data);
 
   return '15' + (await utils.getPath(COIN_TYPE, addressIndex)) + argument;
@@ -75,7 +76,7 @@ export const getSmartContractArgument = async (transaction: Transaction, address
  */
 export const getSmartContractArgumentSegment = async (transaction: Transaction, addressIndex: number) => {
   const argument =
-    handleHex(transaction.to) + // contractAddress : 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
+    ((transaction.to !== undefined && transaction.to !== "") ? handleHex(transaction.to) : "".padEnd(40, '0')) + // contractAddress : 81bb32e4A7e4d0500d11A52F3a5F60c9A6Ef126C
     handleHex(transaction.value).padStart(20, '0') + // 000000b1a2bc2ec50000
     handleHex(transaction.gasPrice).padStart(20, '0') + // 0000000000020c855800
     handleHex(transaction.gasLimit).padStart(20, '0') + // 0000000000000000520c

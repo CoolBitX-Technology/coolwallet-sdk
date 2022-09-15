@@ -72,11 +72,14 @@ export const executeAPDU = async (
       statusCode = response.slice(-4);
       outputData = response.slice(0, -4);
     } else {
-      // TODO MCU commands have different response format, should parse them specifically.
-      // statusCode = response.slice(-4);
-      // outputData = response.slice(0, -4);
-      statusCode = response.slice(4, 6);
-      outputData = response.slice(6);
+      const cla = apdu.command.slice(4, 6).toUpperCase();
+      if (cla === 'FF') {
+        statusCode = '';
+        outputData = response;
+      } else {
+        statusCode = response.slice(-4);
+        outputData = response.slice(0, -4);
+      }
     }
 
     const msg = util.getReturnMsg(statusCode.toUpperCase());
@@ -105,7 +108,7 @@ export const executeCommand = async (
   executedTarget: string = target.SE,
   data = '',
   params1?: string,
-  params2?: string,
+  params2?: string
   // forceUseSC: boolean = false,
 ): Promise<{ statusCode: string; msg: string; outputData: string }> => {
   const P1 = params1 ?? command.P1;

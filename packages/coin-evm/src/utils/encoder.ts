@@ -56,7 +56,7 @@ function encodeLegacyTransactionToSE(transaction: LegacyTransaction['transaction
     new Layout('nonce', 8),
   ]);
 
-  return LegacyTransferTransactionStructure.encodeToHex(omit(transaction, 'option'));
+  return LegacyTransferTransactionStructure.encodeToHex(omit(transaction, ['option']));
 }
 
 function encodeLegacyERC20TransactionToSE(transaction: LegacyTransaction['transaction']) {

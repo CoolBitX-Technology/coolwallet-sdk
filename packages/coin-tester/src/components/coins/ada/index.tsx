@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { useState } from 'react';
 import { Container } from 'react-bootstrap';
-import { Transport, apdu, utils, config } from '@coolwallet/core';
-import ADA, { TransferWithoutFee, Options } from '@coolwallet/ada';
+import { Transport } from '@coolwallet/core';
+import ADA, { TxTypes } from '@coolwallet/ada';
+import { NoInput, OneInput } from '../../../utils/componentMaker';
 import {
   getLatestBlock,
   getAddressInfo,
   getLatestProtocolParameters,
   getUtxos,
-  sendTx,
+  getStakePools,
+  getRegistrationHistory,
+  getDelegationHistory,
+  getAccountInfo,
 } from './utils/api';
-import { NoInput, OneInput, ObjInputs } from '../../../utils/componentMaker';
 
+import TxField from './txField';
 
 interface Props {
   transport: Transport | null,
@@ -42,47 +48,20 @@ function CoinAda(props: Props) {
   const disabled = !transport || props.isLocked;
   const ada = new ADA();
 
-  // 0. Address
-  const [addressIndex, setAddressIndex] = useState(0);
-  const [address, setAddress] = useState('');
+  const appId = localStorage.getItem('appId');
+  if (!appId) throw new Error('No Appid stored, please register!');
 
-  // 1. On chain data
-  const [info, setInfo] = useState('');
-  const [block, setBlock] = useState('');
-  const [protocolParameters, setProtocolParameters] = useState('');
-  const [a, setA] = useState(0);
-  const [b, setB] = useState(0);
-  const [utxos, setUtxos] = useState('');
+  const confirmCB = () => {
+    alert('Please confirm your info on card');
+  };
 
-  // 2. Transfer Tx
-  const [transferTxKeys, setTransferTxKeys] = useState([
-    'Transaction ID',
-    'UTXO Index',
-    'To Address',
-    'To Amount',
-    'Change Address',
-    'Change Amount',
-    'Time to Live',
-  ]);
-  const [transferTxValues, setTransferTxValues] = useState([
-    '',
-    '0',
-    '',
-    '0',
-    '',
-    '0',
-    '54000000',
-  ]);
-  const [transferTxSize, setTransferTxSize] = useState(0);
-  const [fee, setFee] = useState(0);
-  const [verifyingInput, setVerifyingInput] = useState(0);
-  const [difference, setDifference] = useState('');
-  const [transferTx, setTransferTx] = useState('');
-  const [sendTransferTxResult, setSendTransferTxResult] = useState('');
+  const authorizedCB = () => {
+    alert('Transaction has authorized and signed');
+  };
 
   const handleState = async (
-    request: () => Promise<string>,
-    handleResponse: (response: string) => void
+    request: () => Promise<any>,
+    handleResponse: (response: any) => void
   ) => {
     props.setIsLocked(true);
     try {
@@ -96,10 +75,21 @@ function CoinAda(props: Props) {
     }
   };
 
+  const options = {
+    transport: transport!,
+    appPrivateKey,
+    appId,
+    confirmCB,
+    authorizedCB
+  };
+
+  // Address
+
+  const [addressIndex, setAddressIndex] = useState(0);
+  const [address, setAddress] = useState('');
+
   const getAddress = async () => {
     handleState(async () => {
-      const appId = localStorage.getItem('appId');
-      if (!appId) throw new Error('No Appid stored, please register!');
       // const address = await ada.getAddress(
       //   transport!,
       //   appPrivateKey,
@@ -112,26 +102,92 @@ function CoinAda(props: Props) {
       //  change.addressIndex = from.addressIndex
       const toIndex = addressIndex === 0 ? 1 : 0;
       const to = ada.getAddressByAccountKey(acckey, toIndex);
-      const value = [...transferTxValues];
-      value[2] = to;
-      value[4] = address;
-      setTransferTxValues(value);
+
+      {
+        const value = [...transferTxValues];
+        value[2] = address;
+        value[5] = to;
+        setTransferTxValues(value);
+      }
+      {
+        const value = [...stakeRegisterValues];
+        value[2] = address;
+        setStakeRegisterValues(value);
+      }
+      {
+        const value = [...stakeDelegateValues];
+        value[2] = address;
+        setStakeDelegateValues(value);
+      }
+      {
+        const value = [...stakeDeregisterValues];
+        value[2] = address;
+        setStakeDeregisterValues(value);
+      }
+      {
+        const value = [...stakeWithdrawValues];
+        value[2] = address;
+        setStakeWithdrawValues(value);
+      }
 
       return address;
     }, setAddress);
   };
 
+  // On chain data
+
+  const [info, setInfo] = useState('');
+  const [block, setBlock] = useState('');
+  const [protocolParameters, setProtocolParameters] = useState('');
+  const [a, setA] = useState(0);
+  const [b, setB] = useState(0);
+  const [utxos, setUtxos] = useState('');
+  const [stakePools, setStakePools] = useState('');
+  const [stakeAddress, setStakeAddress] = useState('');
+  const [registrationHistory, setRegistrationHistory] = useState('');
+  const [delegationHistory, setDelegationHistory] = useState('');
+  const [accountInfo, setAccountInfo] = useState('');
+
   const clickToGetAddressInfo = async () => {
     handleState(async () => {
       if (address === '') return 'please getAddress in advance';
-      const info = await getAddressInfo(address);
-      return JSON.stringify(info);
+      const result = await getAddressInfo(address);
+      {
+        setStakeAddress(result.stake_address);
+      }
+      return JSON.stringify(result);
     }, setInfo);
   };
 
   const clickToGetLatestBlock = async () => {
     handleState(async () => {
       const latestBlock = await getLatestBlock();
+      const ttl = (latestBlock.slot + 400).toString(10);
+      {
+        const value = [...transferTxValues];
+        value[4] = ttl;
+        setTransferTxValues(value);
+      }
+      {
+        const value = [...stakeRegisterValues];
+        value[4] = ttl;
+        setStakeRegisterValues(value);
+      }
+      {
+        const value = [...stakeDelegateValues];
+        value[4] = ttl;
+        setStakeDelegateValues(value);
+      }
+      {
+        const value = [...stakeDeregisterValues];
+        value[4] = ttl;
+        setStakeDeregisterValues(value);
+      }
+      {
+        const value = [...stakeWithdrawValues];
+        value[4] = ttl;
+        setStakeWithdrawValues(value);
+      }
       return JSON.stringify(latestBlock);
     }, setBlock);
   };
@@ -147,92 +203,102 @@ function CoinAda(props: Props) {
 
   const clickToGetUtxos = async () => {
     handleState(async () => {
-      if (address === '') return 'please getAddress in advance';
+      if (address === '') return 'please get address in advance';
       const utxos = await getUtxos(address);
       return JSON.stringify(utxos);
     }, setUtxos);
   };
 
-  const genTransferTxWithoutFee = () => {
-    const [txId, index, address, amount, changeAddress, changeAmount, ttl] = transferTxValues;
-    const tx: TransferWithoutFee = {
-      addrIndexes: [addressIndex],
-      inputs: [{
-        txId,
-        index,
-      }],
-      output: {
-        address,
-        amount,
-      },
-      ttl,
-    };
-    if (parseInt(changeAmount) > 0) tx.change = {
-      address: changeAddress,
-      amount: changeAmount,
-    };
-    return tx;
-  };
-
-  const getTransferTxSize = async () => {
+  const clickToGetStakePools = async () => {
     handleState(async () => {
-      const size = await ada.getTransactionSize(genTransferTxWithoutFee());
-      return size;
-    }, setTransferTxSize);
+      const pools = await getStakePools();
+      return JSON.stringify(pools);
+    }, setStakePools);
   };
 
-  const calculateFee = async () => {
+  const clickToGetRegistrationHistory = async () => {
     handleState(async () => {
-      if (transferTxSize === 0) return 'please getTransferTxSize in advance';
-      const fee = a * transferTxSize + b;
-      return fee;
-    }, setFee);
+      if (stakeAddress === '') return 'please get address info in advance';
+      const history = await getRegistrationHistory(stakeAddress);
+      return JSON.stringify(history);
+    }, setRegistrationHistory);
   };
 
-  const verifyAmount = async () => {
+  const clickToGetDelegationHistory = async () => {
     handleState(async () => {
-      if (fee === 0) return 'please calculateFee in advance';
-      return `Output + Change should be : ${verifyingInput - fee}`;
-    }, setDifference);
+      if (stakeAddress === '') return 'please get address info in advance';
+      const history = await getDelegationHistory(stakeAddress);
+      return JSON.stringify(history);
+    }, setDelegationHistory);
   };
 
-  const confirmCB = () => {
-    alert('Please confirm your info on card');
-  };
-
-  const authorizedCB = () => {
-    alert('Transaction has authorized and signed');
-  };
-
-  const signTransferTx = async () => {
+  const clickToGetAccountInfo = async () => {
     handleState(async () => {
-      const transaction = {
-        fee,
-        ...genTransferTxWithoutFee()
-      };
-
-      const appId = localStorage.getItem('appId');
-      if (!appId) throw new Error('No Appid stored, please register!');
-      const options = {
-        transport: transport!,
-        appPrivateKey,
-        appId,
-        confirmCB,
-        authorizedCB
-      };
-
-      const signedTx = await ada.signTransaction(transaction, options);
-      return signedTx;
-    }, setTransferTx);
+      if (stakeAddress === '') return 'please get address info in advance';
+      const accountInfo = await getAccountInfo(stakeAddress);
+      return JSON.stringify(accountInfo);
+    }, setAccountInfo);
   };
 
-  const clickToSendTransferTx = async () => {
-    handleState(async () => {
-      if (transferTx === '') return 'please sign transfer tx in advance';
-      const result = await sendTx(transferTx);
-      return result;
-    }, setSendTransferTxResult);
-  };
+  // Transfer
+
+  const transferTxKeys = [
+    'Transaction ID',
+    'UTXO Index',
+    'Change Address',
+    'Change Amount',
+    'Time to Live',
+    'To Address',
+    'To Amount',
+  ];
+
+  const [transferTxValues, setTransferTxValues] = useState(['', '0', '', '', '0', '', '0']);
+
+  // Stake Register
+
+  const stakeRegisterKeys = [
+    'Transaction ID',
+    'UTXO Index',
+    'Change Address',
+    'Change Amount',
+    'Time to Live',
+  ];
+  const [stakeRegisterValues, setStakeRegisterValues] = useState(['', '0', '', '0', '0']);
+
+  // Stake Delegate
+
+  const stakeDelegateKeys = [
+    'Transaction ID',
+    'UTXO Index',
+    'Change Address',
+    'Change Amount',
+    'Time to Live',
+    'Pool Id',
+  ];
+  const [stakeDelegateValues, setStakeDelegateValues] = useState(['', '0', '', '0', '0', '']);
+
+  // Stake Deregister
+
+  const stakeDeregisterKeys = [
+    'Transaction ID',
+    'UTXO Index',
+    'Change Address',
+    'Change Amount',
+    'Time to Live',
+  ];
+  const [stakeDeregisterValues, setStakeDeregisterValues] = useState(['', '0', '', '0', '0']);
+
+  // Stake Withdraw
+
+  const stakeWithdrawKeys = [
+    'Transaction ID',
+    'UTXO Index',
+    'Change Address',
+    'Change Amount',
+    'Time to Live',
+    'Withdraw Amount',
+  ];
+  const [stakeWithdrawValues, setStakeWithdrawValues] = useState(['', '0', '', '0', '0', '0']);
 
   return (
     <Container>
@@ -277,54 +343,114 @@ function CoinAda(props: Props) {
         disabled={disabled}
         btnName='Get from API'
       />
+      <NoInput
+        title='Get Stake Pools'
+        content={stakePools}
+        onClick={clickToGetStakePools}
+        disabled={disabled}
+        btnName='Get from API'
+      />
+      <NoInput
+        title='Get Registration History'
+        content={registrationHistory}
+        onClick={clickToGetRegistrationHistory}
+        disabled={disabled}
+        btnName='Get from API'
+      />
+      <NoInput
+        title='Get Delegation History'
+        content={delegationHistory}
+        onClick={clickToGetDelegationHistory}
+        disabled={disabled}
+        btnName='Get from API'
+      />
+      <NoInput
+        title='Get Account Info'
+        content={accountInfo}
+        onClick={clickToGetAccountInfo}
+        disabled={disabled}
+        btnName='Get from API'
+      />
+
       <div className='title2'>2. Transfer Tx</div>
-      <ObjInputs
-        title='Transfer Tx Size'
-        content={`${transferTxSize} (bytes)`}
-        onClick={getTransferTxSize}
+      <TxField
+        txType={TxTypes.Transfer}
+        txKeys={transferTxKeys}
+        txValues={transferTxValues}
+        setTxValues={setTransferTxValues}
+        a={a}
+        b={b}
+        utxos={utxos}
+        handleState={handleState}
+        options={options}
         disabled={disabled}
-        keys={transferTxKeys}
-        values={transferTxValues}
-        setValues={setTransferTxValues}
-        btnName='Calculate by SDK'
+        ada={ada}
+        addrIndex={addressIndex}
       />
-      <OneInput
-        title='Calculate Fee'
-        content={`${a} (a) * ${transferTxSize} (size) + ${b} (b)`}
-        onClick={calculateFee}
+
+      <div className='title2'>3. Stake Register Tx</div>
+      <TxField
+        txType={TxTypes.StakeRegister}
+        txKeys={stakeRegisterKeys}
+        txValues={stakeRegisterValues}
+        setTxValues={setStakeRegisterValues}
+        a={a}
+        b={b}
+        utxos={utxos}
+        handleState={handleState}
+        options={options}
         disabled={disabled}
-        btnName='Calculate'
-        value={`${fee}`}
-        setNumberValue={setFee}
-        placeholder={'0'}
-        inputSize={1}
+        ada={ada}
+        addrIndex={addressIndex}
       />
-      <OneInput
-        title='Verify Output Value'
-        content={difference}
-        onClick={verifyAmount}
+
+      <div className='title2'>4. Stake Delegate Tx</div>
+      <TxField
+        txType={TxTypes.StakeDelegate}
+        txKeys={stakeDelegateKeys}
+        txValues={stakeDelegateValues}
+        setTxValues={setStakeDelegateValues}
+        a={a}
+        b={b}
+        utxos={utxos}
+        handleState={handleState}
+        options={options}
         disabled={disabled}
-        btnName='Calculate'
-        value={`${verifyingInput}`}
-        setNumberValue={setVerifyingInput}
-        placeholder={'0'}
-        inputSize={1}
+        ada={ada}
+        addrIndex={addressIndex}
       />
-      <NoInput
-        title='Sign Transfer Tx'
-        content={transferTx}
-        onClick={signTransferTx}
+
+      <div className='title2'>5. Stake Deregister Tx</div>
+      <TxField
+        txType={TxTypes.StakeDeregister}
+        txKeys={stakeDeregisterKeys}
+        txValues={stakeDeregisterValues}
+        setTxValues={setStakeDeregisterValues}
+        a={a}
+        b={b}
+        utxos={utxos}
+        handleState={handleState}
+        options={options}
         disabled={disabled}
-        btnName='Sign by SDK'
+        ada={ada}
+        addrIndex={addressIndex}
       />
-      <NoInput
-        title='Send Transfer Tx'
-        content={sendTransferTxResult}
-        onClick={clickToSendTransferTx}
+
+      <div className='title2'>6. Stake Withdraw Tx</div>
+      <TxField
+        txType={TxTypes.StakeWithdraw}
+        txKeys={stakeWithdrawKeys}
+        txValues={stakeWithdrawValues}
+        setTxValues={setStakeWithdrawValues}
+        a={a}
+        b={b}
+        utxos={utxos}
+        handleState={handleState}
+        options={options}
         disabled={disabled}
-        btnName='Send'
+        ada={ada}
+        addrIndex={addressIndex}
       />
-      <div className='title2'>3. Stake Register Tx (To be continued)</div>
     </Container>
   );
 }

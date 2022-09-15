@@ -1,4 +1,5 @@
 import { utils, config } from '@coolwallet/core';
+import isNil from 'lodash/isNil';
 import { TypedDataUtils, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { formatHex, ToHex } from './string';
 import * as Encoder from './encoder';
@@ -9,6 +10,7 @@ import type {
   EIP712TypedDataTransaction,
   LegacyTransaction,
 } from '../transaction/types';
+import { FANTOM } from '../chain';
 import type { ChainProps } from '../chain/types';
 
 async function getSELegacyTransaction(client: LegacyTransaction, chain: ChainProps, coinType: string): Promise<string> {
@@ -27,6 +29,9 @@ async function getSELegacyERC20Transaction(
   coinType: string
 ): Promise<string> {
   const { transaction } = client;
+  if (isNil(transaction.to)) {
+    transaction.to = '';
+  }
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
   const encoded = Encoder.encodeLegacyERC20TransactionToSE(client.transaction);
   const chainInfo = chain.toHexChainInfo();
@@ -141,6 +146,9 @@ async function getSEEIP1559ERC20Transaction(
   coinType: string
 ): Promise<string> {
   const { transaction } = client;
+  if (isNil(transaction.to)) {
+    transaction.to = '';
+  }
   const path = await utils.getPath(coinType, client.addressIndex, 5, config.PathType.BIP32);
   const encoded = Encoder.encodeEIP1559ERC20TransactionToSE(transaction);
   const chainInfo = chain.toHexChainInfo();

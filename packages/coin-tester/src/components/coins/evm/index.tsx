@@ -35,6 +35,26 @@ const CHAINS = {
     properties: CHAIN.CRONOS,
     rpc_url: 'https://evm-cronos.crypto.org',
   },
+  AVAXC: {
+    name: 'Avax',
+    properties: CHAIN.AVAXC,
+    rpc_url: 'https://api.avax.network/ext/bc/C/rpc',
+  },
+  AVAXC_TEST: {
+    name: 'AvaxTest',
+    properties: CHAIN.AVAXC_TEST,
+    rpc_url: 'https://api.avax-test.network/ext/bc/C/rpc',
+  },
+  AURORA: {
+    name: 'Aurora',
+    properties: CHAIN.AURORA,
+    rpc_url: 'https://mainnet.aurora.dev',
+  },
+  AURORA_TEST: {
+    name: 'AuroraTest',
+    properties: CHAIN.AURORA_TEST,
+    rpc_url: 'https://testnet.aurora.dev/',
+  },
   POLYGON: {
     name: 'Polygon',
     properties: CHAIN.POLYGON,

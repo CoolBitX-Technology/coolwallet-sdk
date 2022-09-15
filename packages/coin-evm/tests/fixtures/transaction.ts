@@ -39,6 +39,21 @@ const SMART_CONTRACT_TRANSACTION = [
     value: '0.00001',
     data: `0x095ea7b3000000000000000000000000bdcc4dbd6bbccc5b0d1c83c62d6ceeef1746a48a0000000000000000000000000000000000000000000000000000000000000001`,
   },
+  {
+    nonce: '0x2',
+    gasPrice: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '',
+    value: '0',
+    data: '0x6080604052348015610010576000'.padEnd(32, '0')
+  },
+  {
+    nonce: '0xc',
+    gasPrice: '0x91494C600',
+    gasLimit: '0x5208',
+    value: '0',
+    data: '0x6080604052348015610010576000'.padEnd(32, '0')
+  },
 ];
 
 const SMART_CONTRACT_SEGMENT_TRANSACTION = [
@@ -49,6 +64,64 @@ const SMART_CONTRACT_SEGMENT_TRANSACTION = [
     to: '0x8A1628c2397F6cA75579A45E81EE3e17DF19720e',
     value: '0.00001',
     data: '0x96Cd30C0C545f2656Ba40b00E0263A934532fa25'.padEnd(16000, '0'),
+  },
+  {
+    nonce: '0xb',
+    gasPrice: '0x9502f90e',
+    gasLimit: '0x112f0e',
+    value: '0',
+    data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
+  },
+  {
+    nonce: '0x4',
+    gasPrice: '0x9502f90e',
+    gasLimit: '0x112f0e',
+    to: '',
+    value: '0',
+    data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
+  },
+];
+
+const STAKING_TRANSACTION = [
+  {
+    nonce: '0x04',
+    gasPrice: '0x7738C850',
+    gasLimit: '0x30F17',
+    to: '0xfc00face00000000000000000000000000000000',
+    value: '20',
+    data: `0x9fa6dd350000000000000000000000000000000000000000000000000000000000000029`,
+  },
+  {
+    nonce: '0x04',
+    gasPrice: '0x7738C850',
+    gasLimit: '0x30F17',
+    to: '0xfc00face00000000000000000000000000000000',
+    value: '0',
+    data: `0x0962ef79000000000000000000000000000000000000000000000000000000000000000a`,
+  },
+  {
+    nonce: '0x04',
+    gasPrice: '0x7738C850',
+    gasLimit: '0x30F17',
+    to: '0xfc00face00000000000000000000000000000000',
+    value: '0',
+    data: `0x4f864df4000000000000000000000000000000000000000000000000000000000000002900000000000000000000000000000000000000000000000000000000f5268e010000000000000000000000000000000000000000000000000de0b6b3a7640000`,
+  },
+  {
+    nonce: '0x05',
+    gasPrice: '0x7738C850',
+    gasLimit: '0x30F17',
+    to: '0xfc00face00000000000000000000000000000000',
+    value: '0',
+    data: `0xde67f215000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000001275000000000000000000000000000000000000000000000000008ac7230489e80000`,
+  },
+  {
+    nonce: '0x05',
+    gasPrice: '0x7738C850',
+    gasLimit: '0x30F17',
+    to: '0xfc00face00000000000000000000000000000000',
+    value: '0',
+    data: `0x08c36874000000000000000000000000000000000000000000000000000000000000000a`,
   },
 ];
 
@@ -98,6 +171,23 @@ const EIP1559_SMART_CONTRACT_TRANSACTION = [
     value: '0.00001',
     data: '0x96Cd30C0C545f2656Ba40b00E0263A934532fa25',
   },
+  {
+    nonce: '0x4',
+    gasFeeCap: '0x91494C600',
+    gasTipCap: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '',
+    value: '0',
+    data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
+  },
+  {
+    nonce: '0x6',
+    gasFeeCap: '0x91494C600',
+    gasTipCap: '0x91494C600',
+    gasLimit: '0x5208',
+    value: '0',
+    data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
+  },
 ];
 
 const EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION = [
@@ -110,6 +200,23 @@ const EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION = [
     value: '0.00001',
     data: '0x96Cd30C0C545f2656Ba40b00E0263A934532fa25'.padEnd(16000, '0'),
   },
+  {
+    nonce: '0x9',
+    gasFeeCap: '0x91494C600',
+    gasTipCap: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '',
+    value: '0',
+    data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
+  },
+  {
+    nonce: '0x2',
+    gasFeeCap: '0x91494C600',
+    gasTipCap: '0x91494C600',
+    gasLimit: '0x5208',
+    value: '0',
+    data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
+  },
 ];
 
 export {
@@ -117,6 +224,7 @@ export {
   ERC20_TRANSACTION,
   SMART_CONTRACT_TRANSACTION,
   SMART_CONTRACT_SEGMENT_TRANSACTION,
+  STAKING_TRANSACTION,
   TYPED_DATA_TRANSACTION,
   MESSAGE_TRANSACTION,
   EIP1559_TRANSFER_TRANSACTION,

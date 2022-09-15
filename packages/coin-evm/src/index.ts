@@ -1,5 +1,6 @@
 import { coin as COIN, Transport, error } from '@coolwallet/core';
 import Ajv from 'ajv';
+import isNil from 'lodash/isNil';
 import { SCRIPTS } from './config/scripts';
 import { COIN_TYPE } from './config/constants';
 import { EIP712Schema } from './config/schema';
@@ -73,6 +74,9 @@ class Evm extends COIN.ECDSACoin {
 
   async signSmartContractTransaction(client: Transaction.LegacyTransaction): Promise<string> {
     const { transaction } = client;
+    if (isNil(transaction.to)) {
+      transaction.to = '';
+    }
     const publicKey = await this.getPublicKey(
       client.transport,
       client.appPrivateKey,
@@ -93,8 +97,23 @@ class Evm extends COIN.ECDSACoin {
       );
     }
 
-    const script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
+    let script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
+    if (
+      transaction.to !== undefined &&
+      this.chain.symbol === 'FTM' &&
+      this.chain.stakingInfo.contractAddress === transaction.to.toLowerCase()
+    ) {
+      const programId = transaction.data.slice(0, 10);
+      if (
+        programId.toLowerCase() === this.chain.stakingInfo.delegate ||
+        programId.toLowerCase() === this.chain.stakingInfo.withdraw ||
+        programId.toLowerCase() === this.chain.stakingInfo.undelegate
+      ) {
+        script = SCRIPTS.signStakingTransaction.scriptWithSignature;
+      }
+    }
     const argument = await SEArguments.getSELegacySmartContractTransaction(client, this.chain, this.coinType);
+
     return sign.signTransaction(client, script, argument, this.chain.id, publicKey);
   }
 
@@ -172,6 +191,9 @@ class Evm extends COIN.ECDSACoin {
 
   async signEIP1559SmartContractTransaction(client: Transaction.EIP1559Transaction): Promise<string> {
     const { transaction } = client;
+    if (isNil(transaction.to)) {
+      transaction.to = '';
+    }
     const publicKey = await this.getPublicKey(
       client.transport,
       client.appPrivateKey,

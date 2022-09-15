@@ -20,7 +20,11 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
   rawData.push(transaction.nonce);
   rawData.push(transaction.gasPrice);
   rawData.push(transaction.gasLimit);
-  rawData.push(transaction.to);
+  if (transaction.to !== undefined) {
+    rawData.push(transaction.to);
+  } else {
+    rawData.push('');
+  }
   rawData.push(transaction.value);
   rawData.push(transaction.data);
   const raw = rawData.map((d) => {
@@ -31,6 +35,7 @@ export const getRawHex = (transaction: Transaction): Array<Buffer> => {
     return Buffer.from(hex, 'hex');
   });
   raw[6] = Buffer.from([1]);
+  //raw[6] = Buffer.from([3]); // Ropsten chainId
   raw[7] = Buffer.allocUnsafe(0);
   raw[8] = Buffer.allocUnsafe(0);
 

@@ -9,6 +9,12 @@ class FantomChain extends ChainProps {
     '0'
   );
   tokens = TOKENS;
+  stakingInfo = {
+    contractAddress: '0xfc00face00000000000000000000000000000000',
+    delegate: '0x9fa6dd35',
+    withdraw: '0x0962ef79',
+    undelegate: '0x4f864df4',
+  };
 }
 
 export default new FantomChain();

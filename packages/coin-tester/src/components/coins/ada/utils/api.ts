@@ -40,3 +40,21 @@ export async function sendTx(tx: string) {
   console.log('result :', result);
   return result.message;
 }
+
+// Staking
+
+export async function getStakePools() {
+  return getData('https://cardano-mainnet.blockfrost.io/api/v0/pools?count=10');
+}
+
+export async function getRegistrationHistory(stakeAddress: string) {
+  return getData(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${stakeAddress}/registrations`);
+}
+
+export async function getDelegationHistory(stakeAddress: string) {
+  return getData(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${stakeAddress}/delegations`);
+}
+
+export async function getAccountInfo(stakeAddress: string) {
+  return getData(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${stakeAddress}`);
+}

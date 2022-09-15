@@ -2,12 +2,14 @@ import { coin as COIN, error as ERROR, Transport, utils } from '@coolwallet/core
 import { SDKError } from '@coolwallet/core/lib/error';
 import { PathType } from '@coolwallet/core/lib/config';
 import base58 from 'bs58';
+import BN from 'bn.js';
 import { sha256 } from 'js-sha256';
 import * as types from './config/types';
 import * as params from './config/params';
 import * as stringUtil from './utils/stringUtil';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
+import { TOKEN_INFO } from './config/tokenInfos';
 import {
   compileAssociateTokenAccount,
   compileDelegate,
@@ -20,10 +22,26 @@ import {
 import * as txUtils from './utils/transactionUtils';
 import Transaction from './utils/Transaction';
 import { createProgramAddressSync } from './utils/account';
+import { is_on_curve } from './utils/ed25519';
 
 class Solana extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
     super(params.COIN_TYPE);
+  }
+
+  isValidPublicKey(publicKey: types.Address): boolean {
+    let buffer: Buffer;
+    if (typeof publicKey === 'string') {
+      try {
+        buffer = base58.decode(publicKey);
+      } catch (e) {
+        return false;
+      }
+    } else {
+      buffer = publicKey;
+    }
+    const publicKeyBytes = new BN(buffer, 16).toArray(undefined, 32);
+    return is_on_curve(publicKeyBytes) === 1;
   }
 
   async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
@@ -78,16 +96,15 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
   }
 
   async signTransferSplTokenTransaction(signTxData: types.signTransferSplTokenTransactionType): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
+    const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script = params.SCRIPT.SPL_TOKEN.scriptWithSignature;
-    const rawTransaction = compileSplTokenTransaction({ ...signTxData.transaction, signer });
+    // If given token address can be found in official token list, use it instead of the user given one.
+    const tokenInfo: types.TokenInfo =
+      TOKEN_INFO.find((tok) => tok.address === transaction.tokenInfo.address) ?? transaction.tokenInfo;
+    const rawTransaction = compileSplTokenTransaction({ ...transaction, signer });
     const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getSplTokenTransferArguments(
-      transactionInstruction,
-      addressIndex,
-      rawTransaction.showTokenInfo
-    );
+    const argument = scriptUtil.getSplTokenTransferArguments(transactionInstruction, addressIndex, tokenInfo);
 
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
@@ -99,6 +116,28 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const rawTransaction = compileAssociateTokenAccount({ ...signTxData.transaction, signer });
     const transactionInstruction = new Transaction(rawTransaction);
     const argument = scriptUtil.getAssociateTokenAccount(transactionInstruction, addressIndex);
+
+    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+  }
+
+  async signCreateAndTransferSPLToken(signTxData: types.signCreateAndTransferSplTokenTransaction): Promise<string> {
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
+    const script = params.SCRIPT.CREATE_AND_SPL_TOKEN.scriptWithSignature;
+    // If given token address can be found in official token list, use it instead of the user given one.
+    const tokenInfo: types.TokenInfo =
+      TOKEN_INFO.find((tok) => tok.address === transaction.tokenInfo.address) ?? transaction.tokenInfo;
+    const associateAccountInstruction = compileAssociateTokenAccount({
+      ...transaction,
+      signer,
+      owner: transaction.toPubkey,
+      associateAccount: transaction.toTokenAccount,
+      token: tokenInfo.address,
+    });
+    const [transferInstruction] = compileSplTokenTransaction({ ...signTxData.transaction, signer }).instructions;
+    associateAccountInstruction.instructions.push(transferInstruction);
+    const transactionInstruction = new Transaction(associateAccountInstruction);
+    const argument = scriptUtil.getCreateAndTransferSPLToken(transactionInstruction, addressIndex, tokenInfo);
 
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
@@ -134,17 +173,23 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const { transport, appPrivateKey, appId, addressIndex } = signTxData;
     const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script = params.SCRIPT.DELEGATE_AND_CREATE_ACCOUNT_WITH_SEED.scriptWithSignature;
-    const rawTransaction = compileDelegateAndCreateAccountWithSeed({
+    let newAccountPubkey = signTxData.transaction.newAccountPubkey;
+    if (!newAccountPubkey) {
+      newAccountPubkey = await this.createWithSeed(fromPubkey, signTxData.transaction.seed, params.STAKE_PROGRAM_ID);
+    }
+    const transaction = {
       ...signTxData.transaction,
+      newAccountPubkey,
       fromPubkey,
       basePubkey: fromPubkey,
-    });
+    };
+    const rawTransaction = compileDelegateAndCreateAccountWithSeed(transaction);
     const transactionInstruction = new Transaction(rawTransaction);
     const argument = scriptUtil.getDelegateAndCreateAccountArguments(transactionInstruction, addressIndex);
 
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+    return sign.signTransaction({ ...signTxData, transaction }, transactionInstruction, script, argument);
   }
-  
+
   async signStackingWithdrawTransaction(signTxData: types.signStakingWithdrawType): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex } = signTxData;
     const authorizedPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
@@ -164,6 +209,8 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       return this.signTransferSplTokenTransaction(signTxData as types.signTransferSplTokenTransactionType);
     if (txUtils.isAssociateTokenAccount(signTxData))
       return this.signAssociateTokenAccount(signTxData as types.signAssociateTokenAccountTransactionType);
+    if (txUtils.isCreateAndTransferSPLToken(signTxData))
+      return this.signCreateAndTransferSPLToken(signTxData as types.signCreateAndTransferSplTokenTransaction);
     if (txUtils.isDelegate(signTxData)) return this.signDelegate(signTxData as types.signDelegateType);
     if (txUtils.isDelegateAndCreateAccountWithSeed(signTxData))
       return this.signDelegateAndCreateAccountWithSeed(signTxData as types.signDelegateAndCreateAccountWithSeedType);

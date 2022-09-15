@@ -37,6 +37,7 @@ async function run() {
   console.log('context :', context);
   await checkAndPublish(context, 'packages/core');
   await checkAndPublish(context, 'packages/coin-ada');
+  await checkAndPublish(context, 'packages/coin-aptos');
   await checkAndPublish(context, 'packages/coin-atom');
   await checkAndPublish(context, 'packages/coin-bch');
   await checkAndPublish(context, 'packages/coin-bnb');
@@ -52,6 +53,7 @@ async function run() {
   await checkAndPublish(context, 'packages/coin-iotx');
   await checkAndPublish(context, 'packages/coin-ltc');
   await checkAndPublish(context, 'packages/coin-matic');
+  await checkAndPublish(context, 'packages/coin-sol');
   await checkAndPublish(context, 'packages/coin-terra');
   await checkAndPublish(context, 'packages/coin-theta');
   await checkAndPublish(context, 'packages/coin-trx');

@@ -1,6 +1,8 @@
 import TEMPLATE from './template';
+import ALGO from './algo';
 import BNB from './bnb';
 import ADA from './ada';
+import COSMOS from './cosmos';
 import CRONOS from './cronos';
 import EVM from './evm';
 import ETC from './etc';
@@ -16,14 +18,17 @@ import THETA from './theta';
 import AVAXC from './avaxc';
 import IOTX from './iotx';
 import VET from './vet';
+import APTOS from './aptos';
 
 export default [
   { path: 'template', Element: TEMPLATE },
+  { path: 'algo', Element: ALGO },
   { path: 'bnb', Element: BNB },
   { path: 'ada', Element: ADA },
   { path: 'eth', Element: ETH },
   { path: 'evm', Element: EVM },
   { path: 'etc', Element: ETC },
+  { path: 'cosmos', Element: COSMOS },
   { path: 'cronos', Element: CRONOS },
   { path: 'cro', Element: CRO },
   { path: 'matic', Element: MATIC },
@@ -36,4 +41,5 @@ export default [
   { path: 'avaxc', Element: AVAXC },
   { path: 'iotx', Element: IOTX },
   { path: 'vet', Element: VET },
+  { path: 'aptos', Element: APTOS },
 ];

@@ -1,0 +1,73 @@
+import * as types from '../config/types';
+
+export const transactionFields: types.FieldType = {
+    aamt: { type: 'Number' },
+    aclose: { type: 'Buffer' },
+    afrz: { type: 'Boolean' },
+    amt: { type: 'Number' },
+    apaa: { type: 'Array', length: 8, subType: 'Buffer' },
+    apan: { type: 'Number' },
+    apap: { type: 'Buffer' },
+    apar: {
+        type: 'Object', length: 11,
+        subFields: {
+            am: { type: 'Buffer' },
+            an: { type: 'String' },
+            au: { type: 'String' },
+            c: { type: 'Buffer' },
+            dc: { type: 'Number' },
+            df: { type: 'Boolean' },
+            f: { type: 'Buffer' },
+            m: { type: 'Buffer' },
+            r: { type: 'Buffer' },
+            t: { type: 'Number' },
+            un: { type: 'String' },
+        }
+    },
+    apas: { type: 'Array', length: 8, subType: 'Number' },
+    apat: { type: 'Array', length: 8, subType: 'Buffer' },
+    apep: { type: 'Number' },
+    apfa: { type: 'Array', length: 8, subType: 'Number' },
+    apid: { type: 'Number' },
+    apls: {
+        type: 'Object', length: 2,
+        subFields: {
+            nbs: { type: 'Number' },
+            nui: { type: 'Number' },
+        }
+    },
+    apgs: {
+        type: 'Object', length: 2,
+        subFields: {
+            nbs: { type: 'Number' },
+            nui: { type: 'Number' },
+        }
+    },
+    apsu: { type: 'Buffer' },
+    arcv: { type: 'Buffer' },
+    asnd: { type: 'Buffer' },
+    caid: { type: 'Number' },
+    close: { type: 'Buffer' },
+    fadd: { type: 'Buffer' },
+    fee: { type: 'Number' },
+    faid: { type: 'Number' },
+    fv: { type: 'Number' },
+    gen: { type: 'String' },
+    grp: { type: 'Buffer' },
+    gh: { type: 'Buffer' },
+    lv: { type: 'Number' },
+    lx: { type: 'Buffer' },
+    nonpart: { type: 'Boolean' },
+    note: { type: 'Buffer' },
+    rcv: { type: 'Buffer' },
+    rekey: { type: 'Buffer' },
+    selkey: { type: 'Buffer' },
+    sprfkey: { type: 'Buffer' },
+    snd: { type: 'Buffer' },
+    type: { type: 'String' },
+    votefst: { type: 'Number' },
+    votekd: { type: 'Number' },
+    votekey: { type: 'Buffer' },
+    votelst: { type: 'Number' },
+    xaid: { type: 'Number' },
+}
