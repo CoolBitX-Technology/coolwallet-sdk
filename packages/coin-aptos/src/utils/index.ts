@@ -41,21 +41,21 @@ function remove0x(param: string): string {
   return s.startsWith('0x') ? s.slice(2) : s;
 }
 
-function checkHex(param: string, length: number): string {
+function checkHex(param: string, strLen: number): string {
   const hex = remove0x(param);
   const re = /^([0-9A-Fa-f]{2})+$/;
   const isHex = re.test(hex);
-  const validLength = hex.length === length;
+  const validLength = hex.length === strLen;
   if (!isHex) throw new Error('invalid hex format');
-  if (!validLength) throw new Error(`invalid length, need ${length}, get ${hex.length}`);
+  if (!validLength) throw new Error(`invalid length, need ${strLen}, get ${hex.length}`);
   return hex;
 }
 
-function toU64Arg(param: Integer): string {
+function toUintArg(param: Integer, byteLen: number): string {
   const bn = new BigNumber(param);
   const hex = bn.toString(16);
   const len = Math.ceil(hex.length/2)*2;
-  return Buffer.from(hex.padStart(len, '0'),'hex').reverse().toString('hex').padEnd(16,'0');
+  return Buffer.from(hex.padStart(len, '0'),'hex').reverse().toString('hex').padEnd(byteLen*2,'0');
 }
 
 function getScript(): string {
@@ -63,26 +63,27 @@ function getScript(): string {
 }
 
 function getArgument(tx: Transaction): string {
-  const { keyIndex, sender, sequence, receiver, amount, gasLimit, gasPrice, expiration } = tx;
+  const { keyIndex, sender, sequence, receiver, amount, gasLimit, gasPrice, expiration, chainId } = tx;
 
   const path = getPath(keyIndex);
   let result = `15${path}`;
   result += checkHex(sender, 64);
-  result += toU64Arg(sequence);
+  result += toUintArg(sequence, 8);
   result += checkHex(receiver, 64);
-  result += toU64Arg(amount);
-  result += toU64Arg(gasLimit);
-  result += toU64Arg(gasPrice);
-  result += toU64Arg(expiration);
+  result += toUintArg(amount, 8);
+  result += toUintArg(gasLimit, 8);
+  result += toUintArg(gasPrice, 8);
+  result += toUintArg(expiration, 8);
+  result += toUintArg(chainId, 1);
   return result;
 }
 
 function getSignedTx(tx: Transaction, publicKey: string, sig?: string): string {
-  const { sender, sequence, receiver, amount, gasLimit, gasPrice, expiration } = tx;
+  const { sender, sequence, receiver, amount, gasLimit, gasPrice, expiration, chainId } = tx;
 
   let signedTx = '';
   signedTx += checkHex(sender, 64);
-  signedTx += toU64Arg(sequence);
+  signedTx += toUintArg(sequence, 8);
   signedTx += '02';
   signedTx += '0000000000000000000000000000000000000000000000000000000000000001';
   signedTx += '0d6170746f735f6163636f756e74';
@@ -90,11 +91,11 @@ function getSignedTx(tx: Transaction, publicKey: string, sig?: string): string {
   signedTx += '000220';
   signedTx += checkHex(receiver, 64);
   signedTx += '08';
-  signedTx += toU64Arg(amount);
-  signedTx += toU64Arg(gasLimit);
-  signedTx += toU64Arg(gasPrice);
-  signedTx += toU64Arg(expiration);
-  signedTx += '1b'; // chainId
+  signedTx += toUintArg(amount, 8);
+  signedTx += toUintArg(gasLimit, 8);
+  signedTx += toUintArg(gasPrice, 8);
+  signedTx += toUintArg(expiration, 8);
+  signedTx += toUintArg(chainId, 1);
   signedTx += '0020';
   signedTx += checkHex(publicKey, 64);
   signedTx += '40';

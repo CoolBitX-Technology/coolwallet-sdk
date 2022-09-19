@@ -20,4 +20,5 @@ export interface Transaction {
   gasLimit: Integer;
   gasPrice: Integer;
   expiration: Integer;
+  chainId: Integer;
 }
