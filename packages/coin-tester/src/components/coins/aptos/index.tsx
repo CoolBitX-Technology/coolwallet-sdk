@@ -100,7 +100,7 @@ function CoinAptos(props: Props) {
 
       {
         const { sequence, currentAuth } = await getSequenceAndAuthKey(authKey);
-        if (currentAuth === null) {
+        if (currentAuth === '') {
           originalAccount.address = 'need to create';
         } else if (currentAuth === authKey) {
           originalAccount.address = currentAuth;
@@ -168,6 +168,8 @@ function CoinAptos(props: Props) {
       const options = { transport: transport!, appPrivateKey, appId };
 
       const expiration = (Math.floor(Date.now() / 1000) + 60).toString();
+      const chainId = await getChainId();
+      console.log('chainId :', chainId);
       const [sender, sequence, receiver, amount] = transferArgs;
 
       const tx = {
@@ -179,6 +181,7 @@ function CoinAptos(props: Props) {
         gasLimit: 2000,
         gasPrice: 1,
         expiration,
+        chainId,
       };
       const fakeSignedTx = await aptos.getFakeSignedTx(tx, options);
       const gasLimit = await getGasLimit(fakeSignedTx);
@@ -189,10 +192,11 @@ function CoinAptos(props: Props) {
       args[4] = gasLimit;
       args[5] = gasPrice.toString();
       args[6] = expiration;
+      args[7] = chainId.toString();
 
       setTransferArgs(args);
 
-      return `gasLimit: ${args[4]}, gasPrice: ${args[5]}, expiration: ${args[6]}`;
+      return `gasLimit: ${args[4]}, gasPrice: ${args[5]}, expiration: ${args[6]}, chainId: ${args[7]}`;
     }, setTransferPrepare);
   };
 
@@ -202,9 +206,9 @@ function CoinAptos(props: Props) {
       if (!appId) throw new Error('No Appid stored, please register!');
       const options = { transport: transport!, appPrivateKey, appId };
 
-      const [sender, sequence, receiver, amount, gasLimit, gasPrice, expiration] = transferArgs;
+      const [sender, sequence, receiver, amount, gasLimit, gasPrice, expiration, chainId] = transferArgs;
       // const amount = new BigNumber(rawAmount).shiftedBy(8).toFixed();
-      const transaction = { keyIndex, sender, sequence, receiver, amount, gasLimit, gasPrice, expiration };
+      const transaction = { keyIndex, sender, sequence, receiver, amount, gasLimit, gasPrice, expiration, chainId };
       console.log('transaction :', transaction);
 
       const signedTx = await aptos.signTransaction(transaction, options);
