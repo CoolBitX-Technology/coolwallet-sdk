@@ -52,10 +52,7 @@ async function lookupAddressByAuthKey(authKey: string) {
 
 async function getSequenceAndAuthKey(address: string) {
   try {
-    const {
-      sequence_number: sequence,
-      authentication_key: currentAuth,
-    } = await client.getAccount(address);
+    const { sequence_number: sequence, authentication_key: currentAuth } = await client.getAccount(address);
     return { sequence, currentAuth };
   } catch (error) {
     return { sequence: '', currentAuth: '' };
@@ -92,17 +89,18 @@ function checkHex(param: string, length: number) {
 function toU64Arg(param: string | number) {
   const bn = new BigNumber(param);
   const hex = bn.toString(16);
-  const len = Math.ceil(hex.length/2)*2;
-  return Buffer.from(hex.padStart(len, '0'),'hex').reverse().toString('hex').padEnd(16,'0');
+  const len = Math.ceil(hex.length / 2) * 2;
+  return Buffer.from(hex.padStart(len, '0'), 'hex').reverse().toString('hex').padEnd(16, '0');
 }
 
 async function getGasLimit(fakeSignedTx: string): Promise<string> {
   try {
-    const res = await client.submitBCSSimulation(Buffer.from(fakeSignedTx,'hex'));
+    const res = await client.submitBCSSimulation(Buffer.from(fakeSignedTx, 'hex'));
     const result = res[0];
     if (!result.success) throw new Error(result.vm_status);
     return result.gas_used;
   } catch (error) {
+    console.error('getGasLimit error', error);
     return '';
   }
 }
