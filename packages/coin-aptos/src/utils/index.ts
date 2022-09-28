@@ -5,13 +5,7 @@ import { coin as COIN, Transport, utils, config } from '@coolwallet/core';
 import * as params from '../config/params';
 import { Integer, Transaction } from '../config/types';
 
-export {
-  getPublicKeyByKeyIndex,
-  publicKeyToAuthenticationKey,
-  getScript,
-  getArgument,
-  getSignedTx,
-};
+export { getPublicKeyByKeyIndex, publicKeyToAuthenticationKey, getScript, getArgument, getSignedTx };
 
 function getPath(keyIndex: number) {
   const path = utils.getFullPath({
@@ -21,9 +15,7 @@ function getPath(keyIndex: number) {
   return path;
 }
 
-async function getPublicKeyByKeyIndex(
-  transport: Transport, appId: string, appPrivateKey: string, keyIndex: number
-) {
+async function getPublicKeyByKeyIndex(transport: Transport, appId: string, appPrivateKey: string, keyIndex: number) {
   const path = getPath(keyIndex);
   const publicKey = await COIN.getPublicKeyByPath(transport, appId, appPrivateKey, path);
   return publicKey;
@@ -52,10 +44,16 @@ function checkHex(param: string, strLen: number): string {
 }
 
 function toUintArg(param: Integer, byteLen: number): string {
+  if (!param) {
+    param = '0';
+  }
   const bn = new BigNumber(param);
   const hex = bn.toString(16);
-  const len = Math.ceil(hex.length/2)*2;
-  return Buffer.from(hex.padStart(len, '0'),'hex').reverse().toString('hex').padEnd(byteLen*2,'0');
+  const len = Math.ceil(hex.length / 2) * 2;
+  return Buffer.from(hex.padStart(len, '0'), 'hex')
+    .reverse()
+    .toString('hex')
+    .padEnd(byteLen * 2, '0');
 }
 
 function getScript(): string {
