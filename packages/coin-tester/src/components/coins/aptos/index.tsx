@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { Container } from 'react-bootstrap';
-import BigNumber from 'bignumber.js';
 import { NoInput, OneInput, TwoInputs, ObjInputs } from '../../../utils/componentMaker';
 import { transferKeys, transferValues } from './utils/defaultArguments';
 import {
@@ -25,7 +24,7 @@ interface Props {
   appPrivateKey: string;
   appPublicKey: string;
   isLocked: boolean;
-  setIsLocked: (isLocked:boolean) => void;
+  setIsLocked: (isLocked: boolean) => void;
 }
 
 interface Account {
@@ -57,13 +56,10 @@ function CoinAptos(props: Props) {
   const [transferTx, setTransferTx] = useState('');
   const [transferResult, setTransferResult] = useState('');
 
-  const { transport, appPrivateKey} = props;
+  const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
 
-  const handleState = async (
-    request: () => Promise<string>,
-    handleResponse: (response: string) => void
-  ) => {
+  const handleState = async (request: () => Promise<string>, handleResponse: (response: string) => void) => {
     props.setIsLocked(true);
     try {
       const response = await request();
@@ -111,7 +107,6 @@ function CoinAptos(props: Props) {
           args[0] = currentAuth;
           args[1] = sequence;
           setTransferArgs(args);
-
         } else {
           originalAccount.address = 'rotated to other authKey';
         }
@@ -132,7 +127,6 @@ function CoinAptos(props: Props) {
           args[0] = address;
           args[1] = sequence;
           setTransferArgs(args);
-
         } else {
           rotatedAccount.address = 'no rotated address';
         }
@@ -154,7 +148,7 @@ function CoinAptos(props: Props) {
     handleState(async () => {
       if (!hisAddr) throw new Error('need address!');
       let result = await getHistory(hisAddr);
-      result = result.map((tx: any)=>tx.payload.function);
+      result = result.map((tx: any) => tx.payload.function);
       return JSON.stringify(result);
     }, setHistory);
   };
@@ -171,6 +165,7 @@ function CoinAptos(props: Props) {
       const chainId = await getChainId();
       console.log('chainId :', chainId);
       const [sender, sequence, receiver, amount] = transferArgs;
+      const gasPrice = await getGasPrice();
 
       const tx = {
         keyIndex,
@@ -179,14 +174,13 @@ function CoinAptos(props: Props) {
         sequence,
         amount,
         gasLimit: 2000,
-        gasPrice: 1,
+        gasPrice,
         expiration,
         chainId,
       };
       const fakeSignedTx = await aptos.getFakeSignedTx(tx, options);
       const gasLimit = await getGasLimit(fakeSignedTx);
       console.log('gasLimit :', typeof gasLimit);
-      const gasPrice = await getGasPrice();
 
       const args = [...transferArgs];
       args[4] = gasLimit;
@@ -238,13 +232,7 @@ function CoinAptos(props: Props) {
         placeholder={'0'}
         inputSize={1}
       />
-      <NoInput
-        title='Get Address'
-        content={accounts}
-        onClick={getAccounts}
-        disabled={disabled}
-        btnName='Get'
-      />
+      <NoInput title='Get Address' content={accounts} onClick={getAccounts} disabled={disabled} btnName='Get' />
       <TwoInputs
         title='Fund Address'
         content={fundedResult}
