@@ -1,9 +1,9 @@
-import { coin as COIN, Transport } from '@coolwallet/core';
-import { signCertificate, signTransaction, signToken, signVIP191, signSmartContractTransaction } from './sign';
-import * as txUtil from './utils/transactionUtil';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { coin as COIN, Transport, apdu, tx } from '@coolwallet/core';
+import * as utils from './utils';
 import * as params from './config/params';
-import * as types from './config/types';
-import { TOKENTYPE } from './config/tokenType';
+import tokenInfos from './config/tokenInfos';
+import { CoolWalletParam, Param, TxParam, TokenParam, CertParam, SignType } from './config/types';
 
 export default class VET extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
@@ -15,118 +15,81 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
    */
   async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    return txUtil.pubKeyToAddress(publicKey);
+    return utils.pubKeyToAddress(publicKey);
   }
 
   async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
     const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
-    return txUtil.pubKeyToAddress(publicKey);
+    return utils.pubKeyToAddress(publicKey);
   }
 
-  /**
-   * Sign VET VIP191 Transaction.
-   */
-  async signVIP191Transaction(signTxData: types.signTxType): Promise<string> {
-    const publicKey = await this.getPublicKey(
-      signTxData.transport,
-      signTxData.appPrivateKey,
-      signTxData.appId,
-      signTxData.addressIndex
-    );
+  async signBase(cwParam: CoolWalletParam, param: Param, signType: SignType): Promise<string> {
+    const { transport, appPrivateKey, appId, addressIndex, confirmCB, authorizedCB } = cwParam;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
-    return signTransaction(signTxData, publicKey);
-  }
+    let newParam;
 
-  /**
-   * Sign VET VIP191 Transaction for origin (user).
-   */
-  async signVIP191TransactionOrigin(signTxData: types.signTxType): Promise<string> {
-    const publicKey = await this.getPublicKey(
-      signTxData.transport,
-      signTxData.appPrivateKey,
-      signTxData.appId,
-      signTxData.addressIndex
-    );
-
-    return signVIP191(signTxData, publicKey);
-  }
-
-  /**
-   * Sign VET Transaction.
-   */
-  async signTransaction(signTxData: types.signTxType): Promise<string> {
-    const { reserved } = signTxData.transaction;
-
-    const publicKey = await this.getPublicKey(
-      signTxData.transport,
-      signTxData.appPrivateKey,
-      signTxData.appId,
-      signTxData.addressIndex
-    );
-
-    if (reserved != null) {
-      return this.signVIP191Transaction(signTxData);
-    }
-
-    return signTransaction(signTxData, publicKey);
-  }
-
-  /**
-   * Sign VTHO Transaction.
-   */
-  async signToken(signTxData: types.signTxType): Promise<string> {
-    const publicKey = await this.getPublicKey(
-      signTxData.transport,
-      signTxData.appPrivateKey,
-      signTxData.appId,
-      signTxData.addressIndex
-    );
-
-    const { clauses } = signTxData.transaction;
-    let to: string = '';
-    if (clauses[0].to != null) {
-      to = clauses[0].to;
-    }
-    const upperCaseAddress = to.toUpperCase();
-    for (const tokenInfo of TOKENTYPE) {
-      if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
-        signTxData.transaction.option = {
-          info: {
-            symbol: tokenInfo.symbol,
-            decimals: tokenInfo.unit,
-          },
-        };
-        return signToken(signTxData, publicKey);
+    // check if an official token
+    if (signType === SignType.Transaction) {
+      const clause = (param as TxParam).clauses[0];
+      if (clause && clause.to !== null) {
+        const to = utils.handleHex(clause.to).toLowerCase();
+        const data = utils.handleHex(clause.data).toLowerCase();
+        const functionHash = data.slice(0, 8);
+        const info = tokenInfos.find((i) => {
+          return utils.handleHex(i.contractAddress).toLowerCase() === to;
+        });
+        if (functionHash === 'a9059cbb' && info) {
+          signType = SignType.Token;
+          newParam = {
+            ...param,
+            contractAddress: to,
+            recipient: data.slice(32, 72),
+            value: clause.value,
+            symbol: info.symbol,
+            decimals: info.decimals,
+          };
+        }
       }
     }
+    if (!newParam) newParam = param;
 
-    return signTransaction(signTxData, publicKey);
+    // prepare data
+
+    const { script, argument } = utils.getScriptAndArguments(addressIndex, newParam, signType);
+
+    // request CoolWallet to sign tx
+
+    await apdu.tx.sendScript(transport, script);
+    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    if (!encryptedSig) throw new Error('executeScript fails to return signature');
+    if (typeof confirmCB === "function") confirmCB();
+
+    // verify tx
+
+    await apdu.tx.finishPrepare(transport);
+    await apdu.tx.getTxDetail(transport);
+    const decryptingKey = await apdu.tx.getSignatureKey(transport);
+    await apdu.tx.clearTransaction(transport);
+    await apdu.mcu.control.powerOff(transport);
+    if (typeof authorizedCB === "function") authorizedCB();
+
+    // construct signed tx
+
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const signedTx = utils.getSignedTransaction(newParam, sig as { r: string; s: string }, publicKey, signType);
+    return signedTx;
   }
 
-  /**
-   * Sign VET Certificate.
-   */
-  async signCertificate(signTxData: types.signCertType): Promise<string> {
-    const publicKey = await this.getPublicKey(
-      signTxData.transport,
-      signTxData.appPrivateKey,
-      signTxData.appId,
-      signTxData.addressIndex
-    );
-
-    return signCertificate(signTxData, publicKey);
+  async signTransaction(cwParam: CoolWalletParam, txParam: TxParam): Promise<string> {
+    return this.signBase(cwParam, txParam, SignType.Transaction);
   }
 
-  async signSmartContractTransaction(signTxData: types.signTxType): Promise<string> {
-
-    const publicKey = await this.getPublicKey(
-      signTxData.transport,
-      signTxData.appPrivateKey,
-      signTxData.appId,
-      signTxData.addressIndex
-    );
-
-    return signSmartContractTransaction(signTxData, publicKey);
+  async signToken(cwParam: CoolWalletParam, tokenParam: TokenParam): Promise<string> {
+    return this.signBase(cwParam, tokenParam, SignType.Token);
   }
 
+  async signCertificate(cwParam: CoolWalletParam, certParam: CertParam): Promise<string> {
+    return this.signBase(cwParam, certParam, SignType.Certification);
+  }
 }
