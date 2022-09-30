@@ -1,0 +1,16 @@
+name: Assign Reviewers
+
+on: 
+  pull_request:
+    types: 
+      [ready_for_review, opened]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign Reviewers to PR
+        uses: itsOliverBott/assign-pr-reviewers@release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          users: "skchang0710, hank121314, kanitsu, hankliu418" 
+          ignore-drafts: true 
