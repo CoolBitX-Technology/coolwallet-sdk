@@ -32,7 +32,7 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
     // check if an official token
     if (signType === SignType.Transaction) {
       const clause = (param as TxParam).clauses[0];
-      if (clause && clause.to !== null) {
+      if (clause && clause.to !== null && !clause.value) {
         const to = utils.handleHex(clause.to).toLowerCase();
         const data = utils.handleHex(clause.data).toLowerCase();
         const functionHash = data.slice(0, 8);
@@ -45,7 +45,7 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
             ...param,
             contractAddress: to,
             recipient: data.slice(32, 72),
-            value: clause.value,
+            value: '0x' + data.slice(72),
             symbol: info.symbol,
             decimals: info.decimals,
           };
@@ -78,7 +78,7 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
 
     const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
     const signedTx = utils.getSignedTransaction(newParam, sig as { r: string; s: string }, publicKey, signType);
-    return signedTx;
+    return '0x' + signedTx;
   }
 
   async signTransaction(cwParam: CoolWalletParam, txParam: TxParam): Promise<string> {
