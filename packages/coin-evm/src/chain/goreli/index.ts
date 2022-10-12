@@ -1,7 +1,7 @@
 import { TOKENS } from './token';
 import { ChainProps } from '../types';
 
-class VelasChain extends ChainProps {
+class GoreliChain extends ChainProps {
   id = 5;
   symbol = 'ETH';
   signature =
@@ -12,4 +12,4 @@ class VelasChain extends ChainProps {
   tokens = TOKENS;
 }
 
-export default new VelasChain();
+export default new GoreliChain();
