@@ -10,7 +10,7 @@ export { getPublicKeyByKeyIndex, publicKeyToAuthenticationKey, getScript, getArg
 function getPath(keyIndex: number) {
   const path = utils.getFullPath({
     pathType: config.PathType.SLIP0010,
-    pathString: `44'/637'/0'/0'/${keyIndex}'`,
+    pathString: `44'/637'/${keyIndex}'/0'/0'`,
   });
   return path;
 }

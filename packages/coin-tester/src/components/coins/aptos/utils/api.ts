@@ -96,6 +96,7 @@ function toU64Arg(param: string | number) {
 async function getGasLimit(fakeSignedTx: string): Promise<string> {
   try {
     const res = await client.submitBCSSimulation(Buffer.from(fakeSignedTx, 'hex'));
+    console.log('getGasLimit :', res);
     const result = res[0];
     if (!result.success) throw new Error(result.vm_status);
     return result.gas_used;
