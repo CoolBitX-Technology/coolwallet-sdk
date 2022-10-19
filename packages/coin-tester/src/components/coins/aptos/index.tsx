@@ -180,7 +180,7 @@ function CoinAptos(props: Props) {
       };
       const fakeSignedTx = await aptos.getFakeSignedTx(tx, options);
       const gasLimit = await getGasLimit(fakeSignedTx);
-      console.log('gasLimit :', typeof gasLimit);
+      console.log('gasLimit :', gasLimit, typeof gasLimit);
 
       const args = [...transferArgs];
       args[4] = gasLimit;
