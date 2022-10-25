@@ -1,9 +1,10 @@
-export { default as CRONOS } from './cronos';
-export { default as POLYGON } from './polygon';
 export { default as ARBITRUM } from './arbitrum';
-export { default as OPTIMISM } from './optimism';
-export { AVAXC, AVAXC_TEST } from './avaxc';
-export { default as FANTOM } from './fantom';
-export { default as VELAS } from './velas';
-export { CELO, CELO_TEST } from './celo';
 export { AURORA, AURORA_TEST } from './aurora';
+export { AVAXC, AVAXC_TEST } from './avaxc';
+export { CELO, CELO_TEST } from './celo';
+export { default as CRONOS } from './cronos';
+export { default as FANTOM } from './fantom';
+export { default as GORELI } from './goreli';
+export { default as OPTIMISM } from './optimism';
+export { default as POLYGON } from './polygon';
+export { default as VELAS } from './velas';
