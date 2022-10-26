@@ -80,6 +80,11 @@ const CHAINS = {
     properties: CHAIN.CELO_TEST,
     rpc_url: 'https://alfajores-forno.celo-testnet.org',
   },
+  ETH_TEST: {
+    name: 'EthTest',
+    properties: CHAIN.GORELI,
+    rpc_url: 'https://goerli.infura.io/v3/55c881399fe442bfb09d327b53dc5fdb',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
