@@ -5,7 +5,7 @@ class GoreliChain extends ChainProps {
   id = 5;
   symbol = 'ETH';
   signature =
-    `30450220056376379d62cc38c66f7c3ad654a96d6b2fd0bd787e3fff7c23f8085546a983022100bdbd04ff0fc76f3ed83ec670ce18b0eac5b26294f7b59e9b1d19b5ed16f2046e`.padStart(
+    `30450220313819cff788cf9e4e93ce2978b3bf605f2482a8524c6e2886c80b5b968e7bd70221008e444fffbea45dd94e4cdbc1db759fd23ace27b0ee34c5ec47f406b94ade6e2e`.padStart(
       144,
       '0'
     );

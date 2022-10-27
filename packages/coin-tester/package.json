@@ -52,7 +52,7 @@
     "bip32": "^3.0.1",
     "blake2b": "^2.1.4",
     "bluebird": "^3.7.2",
-    "bootstrap": "^5.1.3",
+    "bootstrap": "^5.2.2",
     "borsh": "^0.7.0",
     "bs58": "^4.0.1",
     "buffer": "^6.0.3",
@@ -78,7 +78,7 @@
     "secp256k1": "^4.0.2",
     "stream": "npm:readable-stream@^3.6.0",
     "util": "^0.12.4",
-    "vite": "^2.7.4",
+    "vite": "^2.9.15",
     "web3": "^1.7.1"
   },
   "browser": {
