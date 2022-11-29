@@ -441,7 +441,7 @@ export const TOKENTYPE = [
 
   // Old WETH
   {
-    name: 'Ether Token',
+    name: 'Wrapped Ether Old',
     symbol: 'WETH',
     unit: '18',
     contractAddress: '0x2956356cd2a2bf3202f771f50d3d14a367b48070',
