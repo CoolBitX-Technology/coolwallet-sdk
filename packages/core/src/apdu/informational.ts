@@ -21,6 +21,7 @@ export const getCardInfo = async (
   showDetail: boolean;
   pairRemainTimes: number;
   accountDigest: string;
+  accountDigest20?: string;
   cardanoSeed?: string;
 }> => {
   try {
@@ -31,11 +32,14 @@ export const getCardInfo = async (
     const pairRemainTimes = parseInt(databuf.slice(2, 3).toString('hex'), 16);
     const walletStatus = databuf.slice(3, 4).toString('hex');
     const accountDigest = databuf.slice(4, 9).toString('hex');
-    const remain = databuf.slice(9);
-    const displayType = remain.slice(0, 1).toString('hex');
+    const displayType = databuf.slice(9, 10).toString('hex');
     let bipEd25519IsInit;
-    if (remain.length > 1) {
-      bipEd25519IsInit = remain.slice(1, 2).toString('hex');
+    if (databuf.length >= 11) {
+      bipEd25519IsInit = databuf.slice(10, 11).toString('hex');
+    }
+    let accountDigest20;
+    if (databuf.length > 11) {
+      accountDigest20 = databuf.slice(11, 31).toString('hex');
     }
 
     if (accountDigest === '81c69f2d90' || accountDigest === '3d84ba58bf' || accountDigest === '83ccf4aab1') {
@@ -55,6 +59,7 @@ export const getCardInfo = async (
       accountDigest,
     };
     if (!isNil(bipEd25519IsInit)) set(result, 'cardanoSeed', bipEd25519IsInit === '01');
+    if (!isNil(accountDigest20)) set(result, 'accountDigest20', accountDigest20);
 
     return result;
   } catch (e) {

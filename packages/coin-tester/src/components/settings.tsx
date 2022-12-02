@@ -94,7 +94,7 @@ function Settings(props: Props) {
   const getCardInfo = async () => {
     handleState(async () => {
       const data = await apdu.info.getCardInfo(transport!);
-      const formattedData = `paired: ${data.paired}, locked: ${data.locked}, walletCreated: ${data.walletCreated},showDetail: ${data.showDetail}, pairRemainTimes: ${data.pairRemainTimes}, cardanoSeed: ${data.cardanoSeed}`;
+      const formattedData = `paired: ${data.paired}, locked: ${data.locked}, walletCreated: ${data.walletCreated},showDetail: ${data.showDetail}, pairRemainTimes: ${data.pairRemainTimes}, cardanoSeed: ${data.cardanoSeed}, accountDigest: ${data.accountDigest}, accountDigest20: ${data.accountDigest20}`;
       return formattedData;
     }, setCardInfo);
   };
