@@ -61,6 +61,10 @@ export default class ADA implements COIN.Coin {
     return this.getTransactionSize(transaction, TxTypes.StakeRegister);
   }
 
+  getStakeRegisterAndDelegateSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeRegisterAndDelegate);
+  }
+
   getStakeDeregisterSize(transaction: RawTransaction) {
     return this.getTransactionSize(transaction, TxTypes.StakeDeregister);
   }
@@ -128,6 +132,10 @@ export default class ADA implements COIN.Coin {
 
   async signStakeRegister(transaction: Transaction, options: Options) {
     return this.signTransaction(transaction, options, TxTypes.StakeRegister);
+  }
+
+  async signStakeRegisterAndDelegate(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeRegisterAndDelegate);
   }
 
   async signStakeDeregister(transaction: Transaction, options: Options) {

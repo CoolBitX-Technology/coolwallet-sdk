@@ -1,6 +1,6 @@
 import { utils, config } from '@coolwallet/core';
 import { MajorType, Integer, Output, Witness, TxTypes, Transaction } from '../config/types';
-import { TRANSFER, REGISTER, DELEGATE, DEREGISTER, WITHDRAW } from '../config/params';
+import { TRANSFER, REGISTER, REGISTER_AND_DELEGATE, DELEGATE, DEREGISTER, WITHDRAW } from '../config/params';
 import {
   derivePubKeyFromAccountToIndex,
   decodeAddress,
@@ -50,6 +50,7 @@ const getKeyHash = (keyHash?: string) => {
 export const getScript = (txType: TxTypes): string => {
   if (txType === TxTypes.Transfer) return TRANSFER.scriptWithSignature;
   if (txType === TxTypes.StakeRegister) return REGISTER.scriptWithSignature;
+  if (txType === TxTypes.StakeRegisterAndDelegate) return REGISTER_AND_DELEGATE.scriptWithSignature;
   if (txType === TxTypes.StakeDelegate) return DELEGATE.scriptWithSignature;
   if (txType === TxTypes.StakeDeregister) return DEREGISTER.scriptWithSignature;
   if (txType === TxTypes.StakeWithdraw) return WITHDRAW.scriptWithSignature;
@@ -82,7 +83,7 @@ export const getArguments = (
       + getKeyHash(stakeKeyHash)
       + genInputs(inputs);
   }
-  if (txType === TxTypes.StakeDelegate) {
+  if (txType === TxTypes.StakeDelegate || txType === TxTypes.StakeRegisterAndDelegate) {
     argument = getChangeArgument(change)
       + getUintArgument(fee)
       + getUintArgument(ttl)
