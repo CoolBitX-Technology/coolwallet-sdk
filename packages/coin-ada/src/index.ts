@@ -13,17 +13,9 @@ import {
 import { TxTypes } from './config/types';
 export { TxTypes };
 
-import type {
-  Options,
-  RawTransaction,
-  Transaction,
-} from './config/types';
+import type { Options, RawTransaction, Transaction } from './config/types';
 
-export type {
-  Options,
-  RawTransaction,
-  Transaction,
-};
+export type { Options, RawTransaction, Transaction };
 
 export default class ADA implements COIN.Coin {
   // implement this because of not extending ECDSACoin
@@ -35,15 +27,21 @@ export default class ADA implements COIN.Coin {
     return pubkey;
   }
 
-  getAddressByAccountKey(accPubkey: string, addressIndex: number): string {
+  getAddressByAccountKey(accPubkey: string, addressIndex: number, isTestNet = false): string {
     const accPubkeyBuff = Buffer.from(accPubkey, 'hex');
-    const address = accountKeyToAddress(accPubkeyBuff, addressIndex);
+    const address = accountKeyToAddress(accPubkeyBuff, addressIndex, isTestNet);
     return address;
   }
 
-  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+  async getAddress(
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number,
+    isTestNet = false
+  ): Promise<string> {
     const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
-    const address = this.getAddressByAccountKey(accPubKey, addressIndex);
+    const address = this.getAddressByAccountKey(accPubKey, addressIndex, isTestNet);
     return address;
   }
 
@@ -96,8 +94,7 @@ export default class ADA implements COIN.Coin {
       witness.sig = encryptedSig;
     }
 
-    if (typeof confirmCB === "function")
-      confirmCB();
+    if (typeof confirmCB === 'function') confirmCB();
 
     // show information for verification
 
@@ -107,7 +104,7 @@ export default class ADA implements COIN.Coin {
     // resolve signature
 
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
-    if (typeof authorizedCB === "function") {
+    if (typeof authorizedCB === 'function') {
       authorizedCB();
     }
     for (const witness of witnesses) {

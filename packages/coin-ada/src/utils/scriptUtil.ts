@@ -34,7 +34,7 @@ const getOutputArgument = (output: Output) => {
 
 const getChangeArgument = (output?: Output) => {
   if (!output) return '0'.repeat(202);
-  const { addressBuff } = decodeAddress(output.address);
+  const { addressBuff } = decodeAddress(output.address, true);
   const addressLength = addressBuff.length.toString(16).padStart(2, '0');
   const address = addressBuff.toString('hex').padEnd(180, '0');
   const amount = getUintArgument(output.amount);
