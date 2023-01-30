@@ -8,3 +8,4 @@ export { default as GORELI } from './goreli';
 export { default as OPTIMISM } from './optimism';
 export { default as POLYGON } from './polygon';
 export { default as VELAS } from './velas';
+export { default as FLARE } from './flare';
