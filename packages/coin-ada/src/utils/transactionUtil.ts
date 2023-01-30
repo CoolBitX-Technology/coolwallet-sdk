@@ -104,7 +104,7 @@ export const genTxBody = (tx: Transaction, accPubKey: string, txType: TxTypes) =
   const stakeKeyBuff = derivePubKeyFromAccountToIndex(accPubKeyBuff, 2, 0);
   const stakeKeyHash = blake2b224(stakeKeyBuff).toString('hex').padStart(56, '0');
 
-  if (txType === TxTypes.StakeRegister) result += '048282008200581c' + stakeKeyHash;
+  if (txType === TxTypes.StakeRegister) result += '048182008200581c' + stakeKeyHash;
   if (txType === TxTypes.StakeDeregister) result += '048182018200581c' + stakeKeyHash;
   if (txType === TxTypes.StakeDelegate) {
     if (!tx.poolKeyHash) throw new Error('poolKeyHash is required');
