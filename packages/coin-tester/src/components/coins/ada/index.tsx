@@ -388,7 +388,23 @@ function CoinAda(props: Props) {
         addrIndex={addressIndex}
       />
 
-      <div className='title2'>3. Stake Register Tx</div>
+      <div className='title2'>3. Stake Register & Delegate Tx</div>
+      <TxField
+        txType={TxTypes.StakeRegisterAndDelegate}
+        txKeys={stakeDelegateKeys}
+        txValues={stakeDelegateValues}
+        setTxValues={setStakeDelegateValues}
+        a={a}
+        b={b}
+        utxos={utxos}
+        handleState={handleState}
+        options={options}
+        disabled={disabled}
+        ada={ada}
+        addrIndex={addressIndex}
+      />
+
+      <div className='title2'>3A. Stake Register Tx</div>
       <TxField
         txType={TxTypes.StakeRegister}
         txKeys={stakeRegisterKeys}
@@ -404,7 +420,7 @@ function CoinAda(props: Props) {
         addrIndex={addressIndex}
       />
 
-      <div className='title2'>4. Stake Delegate Tx</div>
+      <div className='title2'>3B. Stake Delegate Tx</div>
       <TxField
         txType={TxTypes.StakeDelegate}
         txKeys={stakeDelegateKeys}
@@ -420,7 +436,7 @@ function CoinAda(props: Props) {
         addrIndex={addressIndex}
       />
 
-      <div className='title2'>5. Stake Deregister Tx</div>
+      <div className='title2'>4. Stake Deregister Tx</div>
       <TxField
         txType={TxTypes.StakeDeregister}
         txKeys={stakeDeregisterKeys}
@@ -436,7 +452,7 @@ function CoinAda(props: Props) {
         addrIndex={addressIndex}
       />
 
-      <div className='title2'>6. Stake Withdraw Tx</div>
+      <div className='title2'>5. Stake Withdraw Tx</div>
       <TxField
         txType={TxTypes.StakeWithdraw}
         txKeys={stakeWithdrawKeys}

@@ -71,7 +71,7 @@ function TxField(props: Props) {
       const amount = parseInt(txValues[6]);
       if (amount > 0) tx.output = { address, amount };
     }
-    if (txType === TxTypes.StakeDelegate) {
+    if (txType === TxTypes.StakeDelegate || txType === TxTypes.StakeRegisterAndDelegate) {
       const poolId = txValues[5];
       const decoded = bech32.decode(poolId, 80);
       const recovered = bech32.fromWords(decoded.words);
