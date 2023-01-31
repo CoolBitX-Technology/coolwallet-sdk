@@ -7,25 +7,40 @@ import { sendTx } from './utils/api';
 import { NoInput, OneInput, ObjInputs } from '../../../utils/componentMaker';
 
 interface Props {
-  txType: TxTypes,
-  txKeys: string[],
-  txValues: string[],
-  setTxValues: any,
-  a: number,
-  b: number,
-  utxos: string,
+  txType: TxTypes;
+  txKeys: string[];
+  txValues: string[];
+  setTxValues: any;
+  a: number;
+  b: number;
+  utxos: string;
 
-  handleState: any,
-  options: any,
-  disabled: boolean,
+  handleState: any;
+  options: any;
+  disabled: boolean;
 
-  ada: ADA,
-  addrIndex: number,
+  ada: ADA;
+  addrIndex: number;
+
+  isTestNet: boolean;
 }
 
 function TxField(props: Props) {
-
-  const { txType, txKeys, txValues, setTxValues, a, b, utxos, handleState, options, disabled, ada, addrIndex } = props;
+  const {
+    txType,
+    txKeys,
+    txValues,
+    setTxValues,
+    a,
+    b,
+    utxos,
+    handleState,
+    options,
+    disabled,
+    ada,
+    addrIndex,
+    isTestNet,
+  } = props;
 
   const [txSize, setTxSize] = useState(0);
   const [estimatedTxSize, setEstimatedTxSize] = useState(0);
@@ -40,10 +55,12 @@ function TxField(props: Props) {
 
     const tx: RawTransaction = {
       addrIndexes: [addrIndex],
-      inputs: [{
-        txId,
-        index,
-      }],
+      inputs: [
+        {
+          txId,
+          index,
+        },
+      ],
       ttl,
     };
 
@@ -61,10 +78,11 @@ function TxField(props: Props) {
     //   ttl,
     // };
 
-    if (parseInt(changeAmount) > 0) tx.change = {
-      address: changeAddress,
-      amount: changeAmount,
-    };
+    if (parseInt(changeAmount) > 0)
+      tx.change = {
+        address: changeAddress,
+        amount: changeAmount,
+      };
 
     if (txType === TxTypes.Transfer) {
       const address = txValues[5];
@@ -87,12 +105,16 @@ function TxField(props: Props) {
     console.log('getTxSize :');
     handleState(() => {
       if (utxos) {
-        const txs = JSON.parse(utxos) as Array<{tx_hash: string, tx_index: number, amount: Array<{quantity: string}>}>;
-        const tx = txs.find(e => e.tx_hash === txValues[0]);
+        const txs = JSON.parse(utxos) as Array<{
+          tx_hash: string;
+          tx_index: number;
+          amount: Array<{ quantity: string }>;
+        }>;
+        const tx = txs.find((e) => e.tx_hash === txValues[0]);
         if (tx) {
           const value = [...txValues];
-          const amount = tx.amount[0].quantity; 
-          setVerifyingInput(Number.parseInt(amount)); 
+          const amount = tx.amount[0].quantity;
+          setVerifyingInput(Number.parseInt(amount));
           value[1] = tx.tx_index.toString(10);
 
           // modify change by to-amount
@@ -105,7 +127,7 @@ function TxField(props: Props) {
           setTxValues(value);
         }
       }
-      const size = ada.getTransactionSize(genRawTx(), txType);
+      const size = ada.getTransactionSize(genRawTx(), txType, isTestNet);
       setEstimatedTxSize(size);
       return size;
     }, setTxSize);
@@ -122,7 +144,6 @@ function TxField(props: Props) {
   const verifyAmount = async () => {
     console.log('verifyAmount :');
     handleState(async () => {
-
       // calculate diff by fee and change by to-amount
       const diff = verifyingInput - fee;
       const value = [...txValues];
@@ -147,10 +168,10 @@ function TxField(props: Props) {
     handleState(async () => {
       const transaction = {
         fee,
-        ...genRawTx()
+        ...genRawTx(),
       };
 
-      const result = await ada.signTransaction(transaction, options, txType);
+      const result = await ada.signTransaction(transaction, options, txType, isTestNet);
       return result;
     }, setSignedTx);
   };
@@ -196,20 +217,8 @@ function TxField(props: Props) {
         placeholder={'0'}
         inputSize={1}
       />
-      <NoInput
-        title='Sign Tx'
-        content={signedTx}
-        onClick={signTx}
-        disabled={disabled}
-        btnName='Sign by SDK'
-      />
-      <NoInput
-        title='Send Tx'
-        content={sendTxResult}
-        onClick={sendSignedTx}
-        disabled={disabled}
-        btnName='Send'
-      />
+      <NoInput title='Sign Tx' content={signedTx} onClick={signTx} disabled={disabled} btnName='Sign by SDK' />
+      <NoInput title='Send Tx' content={sendTxResult} onClick={sendSignedTx} disabled={disabled} btnName='Send' />
     </Container>
   );
 }

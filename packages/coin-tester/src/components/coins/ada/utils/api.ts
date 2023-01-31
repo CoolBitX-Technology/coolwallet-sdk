@@ -1,13 +1,24 @@
 import 'isomorphic-fetch';
 
-const config = {
+const main_config = {
   project_id: 'mainnetEMA6xeDs6p9hq2Cxfs9hCVPfRmjpSEu1',
   network: 'mainnet',
 };
-// const config = {
-//   project_id: 'preprod5wKKMffQzylz8tdSR56Q3jdiwymVLjag',
-//   network: 'preprod',
-// };
+const test_config = {
+  project_id: 'preprod5wKKMffQzylz8tdSR56Q3jdiwymVLjag',
+  network: 'preprod',
+};
+
+let config = main_config;
+
+export function setTestnetApi(isTestnet: boolean){
+  if(isTestnet) {
+    config = test_config;
+  }
+  else {
+    config = main_config;
+  }
+}
 
 async function getData(url: string) {
   const response = await fetch(url, {

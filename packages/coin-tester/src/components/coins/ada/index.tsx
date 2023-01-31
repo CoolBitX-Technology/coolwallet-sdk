@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { useState } from 'react';
-import { Container } from 'react-bootstrap';
+import { ButtonGroup, Container, ToggleButton } from 'react-bootstrap';
 import { Transport } from '@coolwallet/core';
 import ADA, { TxTypes } from '@coolwallet/ada';
 import { NoInput, OneInput } from '../../../utils/componentMaker';
 import {
+  setTestnetApi,
   getLatestBlock,
   getAddressInfo,
   getLatestProtocolParameters,
@@ -19,11 +20,11 @@ import {
 import TxField from './txField';
 
 interface Props {
-  transport: Transport | null,
-  appPrivateKey: string,
-  appPublicKey: string,
-  isLocked: boolean,
-  setIsLocked: (isLocked:boolean) => void,
+  transport: Transport | null;
+  appPrivateKey: string;
+  appPublicKey: string;
+  isLocked: boolean;
+  setIsLocked: (isLocked: boolean) => void;
 }
 
 // const txWithoutFee = {
@@ -59,10 +60,7 @@ function CoinAda(props: Props) {
     alert('Transaction has authorized and signed');
   };
 
-  const handleState = async (
-    request: () => Promise<any>,
-    handleResponse: (response: any) => void
-  ) => {
+  const handleState = async (request: () => Promise<any>, handleResponse: (response: any) => void) => {
     props.setIsLocked(true);
     try {
       const response = await request();
@@ -80,13 +78,30 @@ function CoinAda(props: Props) {
     appPrivateKey,
     appId,
     confirmCB,
-    authorizedCB
+    authorizedCB,
   };
 
   // Address
 
   const [addressIndex, setAddressIndex] = useState(0);
   const [address, setAddress] = useState('');
+
+  // On chain data
+
+  const [info, setInfo] = useState('');
+  const [block, setBlock] = useState('');
+  const [protocolParameters, setProtocolParameters] = useState('');
+  const [a, setA] = useState(0);
+  const [b, setB] = useState(0);
+  const [utxos, setUtxos] = useState('');
+  const [stakePools, setStakePools] = useState('');
+  const [stakeAddress, setStakeAddress] = useState('');
+  const [registrationHistory, setRegistrationHistory] = useState('');
+  const [delegationHistory, setDelegationHistory] = useState('');
+  const [accountInfo, setAccountInfo] = useState('');
+  const [isTestNet, setTestNet] = useState(false);
+
+  setTestnetApi(isTestNet);
 
   const getAddress = async () => {
     handleState(async () => {
@@ -97,11 +112,11 @@ function CoinAda(props: Props) {
       //   addressIndex,
       // );
       const acckey = await ada.getAccountPubKey(transport!, appPrivateKey, appId);
-      const address = ada.getAddressByAccountKey(acckey, addressIndex);
+      const address = ada.getAddressByAccountKey(acckey, addressIndex, isTestNet);
       //  to.addressIndex = from.addressIndex == 0 ? 1 : 0;
       //  change.addressIndex = from.addressIndex
       const toIndex = addressIndex === 0 ? 1 : 0;
-      const to = ada.getAddressByAccountKey(acckey, toIndex);
+      const to = ada.getAddressByAccountKey(acckey, toIndex, isTestNet);
 
       {
         const value = [...transferTxValues];
@@ -133,20 +148,6 @@ function CoinAda(props: Props) {
       return address;
     }, setAddress);
   };
-
-  // On chain data
-
-  const [info, setInfo] = useState('');
-  const [block, setBlock] = useState('');
-  const [protocolParameters, setProtocolParameters] = useState('');
-  const [a, setA] = useState(0);
-  const [b, setB] = useState(0);
-  const [utxos, setUtxos] = useState('');
-  const [stakePools, setStakePools] = useState('');
-  const [stakeAddress, setStakeAddress] = useState('');
-  const [registrationHistory, setRegistrationHistory] = useState('');
-  const [delegationHistory, setDelegationHistory] = useState('');
-  const [accountInfo, setAccountInfo] = useState('');
 
   const clickToGetAddressInfo = async () => {
     handleState(async () => {
@@ -256,13 +257,7 @@ function CoinAda(props: Props) {
 
   // Stake Register
 
-  const stakeRegisterKeys = [
-    'Transaction ID',
-    'UTXO Index',
-    'Change Address',
-    'Change Amount',
-    'Time to Live',
-  ];
+  const stakeRegisterKeys = ['Transaction ID', 'UTXO Index', 'Change Address', 'Change Amount', 'Time to Live'];
   const [stakeRegisterValues, setStakeRegisterValues] = useState(['', '0', '', '0', '0']);
 
   // Stake Delegate
@@ -279,13 +274,7 @@ function CoinAda(props: Props) {
 
   // Stake Deregister
 
-  const stakeDeregisterKeys = [
-    'Transaction ID',
-    'UTXO Index',
-    'Change Address',
-    'Change Amount',
-    'Time to Live',
-  ];
+  const stakeDeregisterKeys = ['Transaction ID', 'UTXO Index', 'Change Address', 'Change Amount', 'Time to Live'];
   const [stakeDeregisterValues, setStakeDeregisterValues] = useState(['', '0', '', '0', '0']);
 
   // Stake Withdraw
@@ -302,6 +291,34 @@ function CoinAda(props: Props) {
 
   return (
     <Container>
+      <ButtonGroup>
+        <ToggleButton
+          key={0}
+          type='radio'
+          value='main'
+          variant={isTestNet ? 'outline-primary' : 'primary'}
+          checked={!isTestNet}
+          onClick={() => {
+            console.log('\u001b[32m' + 'main' + '\u001b[0m');
+            setTestNet(false);
+          }}
+        >
+          Main Net
+        </ToggleButton>
+        <ToggleButton
+          key={1}
+          type='radio'
+          value='test'
+          variant={isTestNet ? 'primary' : 'outline-primary'}
+          checked={isTestNet}
+          onClick={() => {
+            console.log('\u001b[32m' + 'test' + '\u001b[0m');
+            setTestNet(true);
+          }}
+        >
+          Test Net
+        </ToggleButton>
+      </ButtonGroup>
       <div className='title2'>0. Address</div>
       <OneInput
         title='Get Address'
@@ -336,13 +353,7 @@ function CoinAda(props: Props) {
         disabled={disabled}
         btnName='Get from API'
       />
-      <NoInput
-        title='Get UTXOs'
-        content={utxos}
-        onClick={clickToGetUtxos}
-        disabled={disabled}
-        btnName='Get from API'
-      />
+      <NoInput title='Get UTXOs' content={utxos} onClick={clickToGetUtxos} disabled={disabled} btnName='Get from API' />
       <NoInput
         title='Get Stake Pools'
         content={stakePools}
@@ -386,6 +397,7 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
+        isTestNet={isTestNet}
       />
 
       <div className='title2'>3. Stake Register & Delegate Tx</div>
@@ -402,6 +414,7 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
+        isTestNet={isTestNet}
       />
 
       <div className='title2'>3A. Stake Register Tx</div>
@@ -418,6 +431,7 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
+        isTestNet={isTestNet}
       />
 
       <div className='title2'>3B. Stake Delegate Tx</div>
@@ -434,6 +448,7 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
+        isTestNet={isTestNet}
       />
 
       <div className='title2'>4. Stake Deregister Tx</div>
@@ -450,6 +465,7 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
+        isTestNet={isTestNet}
       />
 
       <div className='title2'>5. Stake Withdraw Tx</div>
@@ -466,6 +482,7 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
+        isTestNet={isTestNet}
       />
     </Container>
   );
