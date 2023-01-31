@@ -23,8 +23,8 @@ const getUintArgument = (value: Integer) => {
   return length + data.padEnd(18, '0');
 };
 
-const getOutputArgument = (output: Output) => {
-  const { addressBuff, addressEncodeType } = decodeAddress(output.address);
+const getOutputArgument = (output: Output, isTestNet = false) => {
+  const { addressBuff, addressEncodeType } = decodeAddress(output.address, isTestNet);
   const encodeType = addressEncodeType.toString(16).padStart(2, '0');
   const addressLength = addressBuff.length.toString(16).padStart(2, '0');
   const address = addressBuff.toString('hex').padEnd(180, '0');
@@ -32,9 +32,9 @@ const getOutputArgument = (output: Output) => {
   return encodeType + addressLength + address + amount;
 };
 
-const getChangeArgument = (output?: Output) => {
+const getChangeArgument = (output?: Output, isTestNet = false) => {
   if (!output) return '0'.repeat(202);
-  const { addressBuff } = decodeAddress(output.address, true);
+  const { addressBuff } = decodeAddress(output.address, isTestNet);
   const addressLength = addressBuff.length.toString(16).padStart(2, '0');
   const address = addressBuff.toString('hex').padEnd(180, '0');
   const amount = getUintArgument(output.amount);
@@ -61,6 +61,7 @@ export const getArguments = (
   transaction: Transaction,
   accPubKey: string,
   txType: TxTypes,
+  isTestNet = false,
 ): Witness[] => {
   const { addrIndexes, inputs, output, change, fee, ttl, poolKeyHash, withdrawAmount } = transaction;
   const accPubKeyBuff = Buffer.from(accPubKey, 'hex');
@@ -70,21 +71,21 @@ export const getArguments = (
   let argument = '';
   if (txType === TxTypes.Transfer) {
     if (!output) throw new Error('output is required');
-    argument = getChangeArgument(change)
-      + getOutputArgument(output)
+    argument = getChangeArgument(change, isTestNet)
+      + getOutputArgument(output, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
       + genInputs(inputs);
   }
   if (txType === TxTypes.StakeRegister || txType === TxTypes.StakeDeregister) {
-    argument = getChangeArgument(change)
+    argument = getChangeArgument(change, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
       + getKeyHash(stakeKeyHash)
       + genInputs(inputs);
   }
   if (txType === TxTypes.StakeDelegate || txType === TxTypes.StakeRegisterAndDelegate) {
-    argument = getChangeArgument(change)
+    argument = getChangeArgument(change, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
       + getKeyHash(stakeKeyHash)
@@ -93,7 +94,7 @@ export const getArguments = (
   }
   if (txType === TxTypes.StakeWithdraw) {
     if (!withdrawAmount) throw new Error('withdrawAmount is required');
-    argument = getChangeArgument(change)
+    argument = getChangeArgument(change, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
       + getKeyHash(stakeKeyHash)
