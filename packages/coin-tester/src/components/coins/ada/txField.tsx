@@ -13,6 +13,7 @@ interface Props {
   setTxValues: any;
   a: number;
   b: number;
+  keyDeposit?: number; // key deposit value for staking
   utxos: string;
 
   handleState: any;
@@ -33,6 +34,7 @@ function TxField(props: Props) {
     setTxValues,
     a,
     b,
+    keyDeposit,
     utxos,
     handleState,
     options,
@@ -151,6 +153,9 @@ function TxField(props: Props) {
       if (txType === TxTypes.Transfer) {
         const output = Number.parseInt(value[6]);
         if (!Number.isNaN(output)) change = diff - output;
+      } else if (keyDeposit && !Number.isNaN(keyDeposit)) {
+        if (txType === TxTypes.StakeRegister || txType === TxTypes.StakeRegisterAndDelegate) change -= keyDeposit;
+        else if (txType === TxTypes.StakeDeregister) change += Number.parseInt(keyDeposit);
       }
       value[3] = change.toString(10);
       setTxValues(value);

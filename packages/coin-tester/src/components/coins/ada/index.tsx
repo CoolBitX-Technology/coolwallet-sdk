@@ -93,6 +93,7 @@ function CoinAda(props: Props) {
   const [protocolParameters, setProtocolParameters] = useState('');
   const [a, setA] = useState(0);
   const [b, setB] = useState(0);
+  const [keyDeposit, setKeyDeposit] = useState(0);
   const [utxos, setUtxos] = useState('');
   const [stakePools, setStakePools] = useState('');
   const [stakeAddress, setStakeAddress] = useState('');
@@ -198,6 +199,7 @@ function CoinAda(props: Props) {
       const latestProtocolParameters = await getLatestProtocolParameters();
       setA(latestProtocolParameters.min_fee_a);
       setB(latestProtocolParameters.min_fee_b);
+      setKeyDeposit(latestProtocolParameters.key_deposit);
       return JSON.stringify(latestProtocolParameters);
     }, setProtocolParameters);
   };
@@ -408,6 +410,7 @@ function CoinAda(props: Props) {
         setTxValues={setStakeDelegateValues}
         a={a}
         b={b}
+        keyDeposit={keyDeposit}
         utxos={utxos}
         handleState={handleState}
         options={options}
@@ -425,6 +428,7 @@ function CoinAda(props: Props) {
         setTxValues={setStakeRegisterValues}
         a={a}
         b={b}
+        keyDeposit={keyDeposit}
         utxos={utxos}
         handleState={handleState}
         options={options}
@@ -459,6 +463,7 @@ function CoinAda(props: Props) {
         setTxValues={setStakeDeregisterValues}
         a={a}
         b={b}
+        keyDeposit={keyDeposit}
         utxos={utxos}
         handleState={handleState}
         options={options}
