@@ -17,11 +17,11 @@ interface TokenProps {
 abstract class ChainProps {
   abstract readonly id: number;
   abstract readonly symbol: string;
-  readonly layer2: string = '';
   abstract readonly signature: string;
   abstract readonly tokens: Record<string, TokenProps>;
-  abstract readonly scripts?: Record<string, ScriptProps>;
   readonly coinType: string = COIN_TYPE;
+  readonly scripts?: Record<string, ScriptProps>;
+  readonly layer2: string = '';
   readonly stakingInfo = {
     contractAddress: '',
     delegate: '',
