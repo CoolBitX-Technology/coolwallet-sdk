@@ -39,6 +39,8 @@ const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
 
 const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinCelo, coinFantom];
 
+const delay = (timeout = 1000) => new Promise((resolve) => setTimeout(resolve, timeout));
+
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
@@ -51,7 +53,9 @@ describe('Test EVM SDK', () => {
     await wallet.setMnemonic(mnemonic);
   });
 
-  beforeEach(async () => new Promise((resolve) => setTimeout(resolve, 1000)));
+  beforeEach(async () => {
+    await delay();
+  });
 
   it.each(TEST_COINS)('$name: test get address 0', async ({ api }) => {
     const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
@@ -95,7 +99,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -144,7 +150,9 @@ describe('Test EVM SDK', () => {
             .wrapPage('PRESS', 'BUTToN')
             .finalize();
         }
+
         expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        await delay();
       }
     }
   });
@@ -183,7 +191,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -222,7 +232,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -285,7 +297,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -320,7 +334,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -356,7 +372,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -396,7 +414,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -444,7 +464,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -482,7 +504,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 
@@ -520,7 +544,9 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
+
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      await delay();
     }
   });
 });

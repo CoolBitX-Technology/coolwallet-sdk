@@ -2,7 +2,6 @@ import { coin as COIN, Transport, error } from '@coolwallet/core';
 import Ajv from 'ajv';
 import isNil from 'lodash/isNil';
 import { SCRIPTS } from './config/scripts';
-import { COIN_TYPE } from './config/constants';
 import { EIP712Schema } from './config/schema';
 import { TRANSACTION_TYPE } from './transaction/constants';
 import { getTransactionType } from './transaction';
@@ -16,7 +15,7 @@ class Evm extends COIN.ECDSACoin {
   chain: ChainProps;
 
   constructor(chain: ChainProps) {
-    super(COIN_TYPE);
+    super(chain.coinType);
     this.chain = chain;
   }
 
@@ -43,7 +42,7 @@ class Evm extends COIN.ECDSACoin {
   }
 
   async signTransferTransaction(client: Transaction.LegacyTransaction): Promise<string> {
-    const script = SCRIPTS.signTransaction.scriptWithSignature;
+    const script = this.getScript('signTransaction');
     const argument = await SEArguments.getSELegacyTransaction(client, this.chain, this.coinType);
     const publicKey = await this.getPublicKey(
       client.transport,
@@ -60,7 +59,7 @@ class Evm extends COIN.ECDSACoin {
       transaction: { option },
     } = client;
     const tokenSignature = option?.info.signature ?? signature;
-    const script = SCRIPTS.signERC20Transaction.scriptWithSignature;
+    const script = this.getScript('signERC20Transaction');
     const argument = await SEArguments.getSELegacyERC20Transaction(client, tokenSignature, this.chain, this.coinType);
     const publicKey = await this.getPublicKey(
       client.transport,
@@ -85,7 +84,7 @@ class Evm extends COIN.ECDSACoin {
     );
     // if data bytes is larger than 4000 sign it segmentally.
     if (transaction.data.length > 8000) {
-      const script = SCRIPTS.signSmartContractSegmentTransaction.scriptWithSignature;
+      const script = this.getScript('signSmartContractSegmentTransaction');
       const argument = await SEArguments.getSELegacySmartContractSegmentTransaction(client, this.chain, this.coinType);
       return sign.signLegacyTransactionSegmentally(
         client,
@@ -97,7 +96,7 @@ class Evm extends COIN.ECDSACoin {
       );
     }
 
-    let script = SCRIPTS.signSmartContractTransaction.scriptWithSignature;
+    let script = this.getScript('signSmartContractTransaction');
     if (
       transaction.to !== undefined &&
       this.chain.symbol === 'FTM' &&
@@ -109,7 +108,7 @@ class Evm extends COIN.ECDSACoin {
         programId.toLowerCase() === this.chain.stakingInfo.withdraw ||
         programId.toLowerCase() === this.chain.stakingInfo.undelegate
       ) {
-        script = SCRIPTS.signStakingTransaction.scriptWithSignature;
+        script = this.getScript('signStakingTransaction');
       }
     }
     const argument = await SEArguments.getSELegacySmartContractTransaction(client, this.chain, this.coinType);
@@ -125,7 +124,7 @@ class Evm extends COIN.ECDSACoin {
       client.addressIndex
     );
 
-    const script = SCRIPTS.signMessage.scriptWithSignature;
+    const script = this.getScript('signMessage');
     const argument = await SEArguments.getSEEIP712MessageTransaction(client, this.chain, this.coinType);
     return sign.signTransaction(client, script, argument, this.chain.id, publicKey);
   }
@@ -142,7 +141,7 @@ class Evm extends COIN.ECDSACoin {
       client.addressIndex
     );
 
-    const script = SCRIPTS.signTypedData.scriptWithSignature;
+    const script = this.getScript('signTypedData');
     const argument = await SEArguments.getSEEIP712TypedDataTransaction(client, this.chain, this.coinType);
     return sign.signTransaction(client, script, argument, this.chain.id, publicKey);
   }
@@ -167,7 +166,7 @@ class Evm extends COIN.ECDSACoin {
       client.addressIndex
     );
 
-    const script = SCRIPTS.signEIP1559Transaction.scriptWithSignature;
+    const script = this.getScript('signEIP1559Transaction');
     const argument = await SEArguments.getSEEIP1559Transaction(client, this.chain, this.coinType);
     return sign.signEIP1559Transaction(client, script, argument, this.chain.id, publicKey);
   }
@@ -184,7 +183,7 @@ class Evm extends COIN.ECDSACoin {
       client.addressIndex
     );
 
-    const script = SCRIPTS.signEIP1559ERC20Transaction.scriptWithSignature;
+    const script = this.getScript('signEIP1559ERC20Transaction');
     const argument = await SEArguments.getSEEIP1559ERC20Transaction(client, tokenSignature, this.chain, this.coinType);
     return sign.signEIP1559Transaction(client, script, argument, this.chain.id, publicKey);
   }
@@ -202,7 +201,7 @@ class Evm extends COIN.ECDSACoin {
     );
     // if data bytes is larger than 4000 sign it segmentally.
     if (transaction.data.length > 8000) {
-      const script = SCRIPTS.signEIP1559SmartContractSegmentTransaction.scriptWithSignature;
+      const script = this.getScript('signEIP1559SmartContractSegmentTransaction');
       const argument = await SEArguments.getSEEIP1559SmartContractSegmentTransaction(client, this.chain, this.coinType);
       return sign.signEIP1559TransactionSegmentally(
         client,
@@ -214,9 +213,19 @@ class Evm extends COIN.ECDSACoin {
       );
     }
 
-    const script = SCRIPTS.signEIP1559SmartContractTransaction.scriptWithSignature;
+    const script = this.getScript('signEIP1559SmartContractTransaction');
     const argument = await SEArguments.getSEEIP1559SmartContractTransaction(client, this.chain, this.coinType);
     return sign.signEIP1559Transaction(client, script, argument, this.chain.id, publicKey);
+  }
+
+  /**
+   * Get the script from chain if it has.
+   * 
+   * @param type 
+   * @returns {string}
+   */
+  private getScript(type: keyof typeof SCRIPTS) {
+    return this.chain.scripts?.[type].scriptWithSignature ?? SCRIPTS[type].scriptWithSignature;
   }
 }
 

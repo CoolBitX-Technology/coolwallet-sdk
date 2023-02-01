@@ -1,3 +1,11 @@
+import { COIN_TYPE } from "../config/constants";
+
+interface ScriptProps {
+  script: string,
+  signature: string,
+  scriptWithSignature: string,
+}
+
 interface TokenProps {
   name: string;
   symbol: string;
@@ -12,6 +20,8 @@ abstract class ChainProps {
   readonly layer2: string = '';
   abstract readonly signature: string;
   abstract readonly tokens: Record<string, TokenProps>;
+  abstract readonly scripts?: Record<string, ScriptProps>;
+  readonly coinType: string = COIN_TYPE;
   readonly stakingInfo = {
     contractAddress: '',
     delegate: '',
