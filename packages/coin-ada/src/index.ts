@@ -18,6 +18,11 @@ import type { Options, RawTransaction, Transaction } from './config/types';
 export type { Options, RawTransaction, Transaction };
 
 export default class ADA implements COIN.Coin {
+  isTestNet = false;
+  constructor(isTest = false) {
+    this.isTestNet = isTest;
+  }
+
   // implement this because of not extending ECDSACoin
   async getAccountPubKey(transport: Transport, appPrivateKey: string, appId: string): Promise<string> {
     const pathType = config.PathType.BIP32ED25519;
@@ -27,9 +32,9 @@ export default class ADA implements COIN.Coin {
     return pubkey;
   }
 
-  getAddressByAccountKey(accPubkey: string, addressIndex: number, isTestNet = false): string {
+  getAddressByAccountKey(accPubkey: string, addressIndex: number): string {
     const accPubkeyBuff = Buffer.from(accPubkey, 'hex');
-    const address = accountKeyToAddress(accPubkeyBuff, addressIndex, isTestNet);
+    const address = accountKeyToAddress(accPubkeyBuff, addressIndex, this.isTestNet);
     return address;
   }
 
@@ -37,50 +42,48 @@ export default class ADA implements COIN.Coin {
     transport: Transport,
     appPrivateKey: string,
     appId: string,
-    addressIndex: number,
-    isTestNet = false
+    addressIndex: number
   ): Promise<string> {
     const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
-    const address = this.getAddressByAccountKey(accPubKey, addressIndex, isTestNet);
+    const address = this.getAddressByAccountKey(accPubKey, addressIndex);
     return address;
   }
 
-  getTransactionSize(transaction: RawTransaction, txType = TxTypes.Transfer, isTestNet = false): number {
+  getTransactionSize(transaction: RawTransaction, txType = TxTypes.Transfer): number {
     const internalTx = { ...transaction, fee: 170000 };
     const txHex =
-      '83' + genFakeTxBody(internalTx, txType, isTestNet) + genFakeWitness(internalTx.addrIndexes, txType) + 'f6';
+      '83' + genFakeTxBody(internalTx, txType, this.isTestNet) + genFakeWitness(internalTx.addrIndexes, txType) + 'f6';
     return txHex.length / 2;
   }
 
-  getTransferSize(transaction: RawTransaction, isTestNet = false) {
-    return this.getTransactionSize(transaction, TxTypes.Transfer, isTestNet);
+  getTransferSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.Transfer);
   }
 
-  getStakeRegisterSize(transaction: RawTransaction, isTestNet = false) {
-    return this.getTransactionSize(transaction, TxTypes.StakeRegister, isTestNet);
+  getStakeRegisterSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeRegister);
   }
 
-  getStakeRegisterAndDelegateSize(transaction: RawTransaction, isTestNet = false) {
-    return this.getTransactionSize(transaction, TxTypes.StakeRegisterAndDelegate, isTestNet);
+  getStakeRegisterAndDelegateSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeRegisterAndDelegate);
   }
 
-  getStakeDeregisterSize(transaction: RawTransaction, isTestNet = false) {
-    return this.getTransactionSize(transaction, TxTypes.StakeDeregister, isTestNet);
+  getStakeDeregisterSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeDeregister);
   }
 
-  getStakeDelegateSize(transaction: RawTransaction, isTestNet = false) {
-    return this.getTransactionSize(transaction, TxTypes.StakeDelegate, isTestNet);
+  getStakeDelegateSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeDelegate);
   }
 
-  getStakeWithdrawSize(transaction: RawTransaction, isTestNet = false) {
-    return this.getTransactionSize(transaction, TxTypes.StakeWithdraw, isTestNet);
+  getStakeWithdrawSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeWithdraw);
   }
 
   async signTransaction(
     transaction: Transaction,
     options: Options,
-    txType = TxTypes.Transfer,
-    isTestNet = false
+    txType = TxTypes.Transfer
   ): Promise<string> {
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
     const internalTx = { ...transaction };
@@ -89,7 +92,7 @@ export default class ADA implements COIN.Coin {
 
     const script = getScript(txType);
     const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
-    const witnesses = getArguments(internalTx, accPubKey, txType, isTestNet);
+    const witnesses = getArguments(internalTx, accPubKey, txType, this.isTestNet);
 
     // request CoolWallet to sign tx
 
@@ -123,33 +126,33 @@ export default class ADA implements COIN.Coin {
 
     // construct the signed transaction
 
-    const signedTx = '83' + genTxBody(internalTx, accPubKey, txType, isTestNet) + genWitness(witnesses) + 'f6';
+    const signedTx = '83' + genTxBody(internalTx, accPubKey, txType, this.isTestNet) + genWitness(witnesses) + 'f6';
 
     // const { signedTx: verifyTxBody } = await apdu.tx.getSignedHex(transport);
     return signedTx;
   }
 
-  async signTransfer(transaction: Transaction, options: Options, isTestNet = false) {
-    return this.signTransaction(transaction, options, TxTypes.Transfer, isTestNet);
+  async signTransfer(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.Transfer);
   }
 
-  async signStakeRegister(transaction: Transaction, options: Options, isTestNet = false) {
-    return this.signTransaction(transaction, options, TxTypes.StakeRegister, isTestNet);
+  async signStakeRegister(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeRegister);
   }
 
-  async signStakeRegisterAndDelegate(transaction: Transaction, options: Options, isTestNet = false) {
-    return this.signTransaction(transaction, options, TxTypes.StakeRegisterAndDelegate, isTestNet);
+  async signStakeRegisterAndDelegate(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeRegisterAndDelegate);
   }
 
-  async signStakeDeregister(transaction: Transaction, options: Options, isTestNet = false) {
-    return this.signTransaction(transaction, options, TxTypes.StakeDeregister, isTestNet);
+  async signStakeDeregister(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeDeregister);
   }
 
-  async signStakeDelegate(transaction: Transaction, options: Options, isTestNet = false) {
-    return this.signTransaction(transaction, options, TxTypes.StakeDelegate, isTestNet);
+  async signStakeDelegate(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeDelegate);
   }
 
-  async signStakeWithdraw(transaction: Transaction, options: Options, isTestNet = false) {
-    return this.signTransaction(transaction, options, TxTypes.StakeWithdraw, isTestNet);
+  async signStakeWithdraw(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeWithdraw);
   }
 }
