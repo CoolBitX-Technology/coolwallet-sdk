@@ -38,12 +38,7 @@ export default class ADA implements COIN.Coin {
     return address;
   }
 
-  async getAddress(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    addressIndex: number
-  ): Promise<string> {
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
     const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
     const address = this.getAddressByAccountKey(accPubKey, addressIndex);
     return address;
@@ -80,11 +75,7 @@ export default class ADA implements COIN.Coin {
     return this.getTransactionSize(transaction, TxTypes.StakeWithdraw);
   }
 
-  async signTransaction(
-    transaction: Transaction,
-    options: Options,
-    txType = TxTypes.Transfer
-  ): Promise<string> {
+  async signTransaction(transaction: Transaction, options: Options, txType = TxTypes.Transfer): Promise<string> {
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
     const internalTx = { ...transaction };
 
