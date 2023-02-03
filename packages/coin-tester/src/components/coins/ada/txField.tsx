@@ -22,8 +22,6 @@ interface Props {
 
   ada: ADA;
   addrIndex: number;
-
-  isTestNet: boolean;
 }
 
 function TxField(props: Props) {
@@ -41,7 +39,6 @@ function TxField(props: Props) {
     disabled,
     ada,
     addrIndex,
-    isTestNet,
   } = props;
 
   const [txSize, setTxSize] = useState(0);
@@ -129,7 +126,7 @@ function TxField(props: Props) {
           setTxValues(value);
         }
       }
-      const size = ada.getTransactionSize(genRawTx(), txType, isTestNet);
+      const size = ada.getTransactionSize(genRawTx(), txType);
       setEstimatedTxSize(size);
       return size;
     }, setTxSize);
@@ -176,7 +173,7 @@ function TxField(props: Props) {
         ...genRawTx(),
       };
 
-      const result = await ada.signTransaction(transaction, options, txType, isTestNet);
+      const result = await ada.signTransaction(transaction, options, txType);
       return result;
     }, setSignedTx);
   };

@@ -47,7 +47,6 @@ interface Props {
 function CoinAda(props: Props) {
   const { transport, appPrivateKey } = props;
   const disabled = !transport || props.isLocked;
-  const ada = new ADA();
 
   const appId = localStorage.getItem('appId');
   if (!appId) throw new Error('No Appid stored, please register!');
@@ -104,6 +103,8 @@ function CoinAda(props: Props) {
 
   useEffect(() => setTestnetApi(isTestNet), [isTestNet]);
 
+  const ada = new ADA(isTestNet);
+
   const getAddress = async () => {
     handleState(async () => {
       // const address = await ada.getAddress(
@@ -113,11 +114,11 @@ function CoinAda(props: Props) {
       //   addressIndex,
       // );
       const acckey = await ada.getAccountPubKey(transport!, appPrivateKey, appId);
-      const address = ada.getAddressByAccountKey(acckey, addressIndex, isTestNet);
+      const address = ada.getAddressByAccountKey(acckey, addressIndex);
       //  to.addressIndex = from.addressIndex == 0 ? 1 : 0;
       //  change.addressIndex = from.addressIndex
       const toIndex = addressIndex === 0 ? 1 : 0;
-      const to = ada.getAddressByAccountKey(acckey, toIndex, isTestNet);
+      const to = ada.getAddressByAccountKey(acckey, toIndex);
 
       {
         const value = [...transferTxValues];
@@ -397,7 +398,6 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
-        isTestNet={isTestNet}
       />
 
       <div className='title2'>3. Stake Register & Delegate Tx</div>
@@ -415,7 +415,6 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
-        isTestNet={isTestNet}
       />
 
       <div className='title2'>3A. Stake Register Tx</div>
@@ -433,7 +432,6 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
-        isTestNet={isTestNet}
       />
 
       <div className='title2'>3B. Stake Delegate Tx</div>
@@ -450,7 +448,6 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
-        isTestNet={isTestNet}
       />
 
       <div className='title2'>4. Stake Deregister Tx</div>
@@ -468,7 +465,6 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
-        isTestNet={isTestNet}
       />
 
       <div className='title2'>5. Stake Withdraw Tx</div>
@@ -485,7 +481,6 @@ function CoinAda(props: Props) {
         disabled={disabled}
         ada={ada}
         addrIndex={addressIndex}
-        isTestNet={isTestNet}
       />
     </Container>
   );
