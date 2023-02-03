@@ -21,8 +21,8 @@ export interface Options {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  confirmCB?: any;
-  authorizedCB?: any;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 }
 
 export interface Input {

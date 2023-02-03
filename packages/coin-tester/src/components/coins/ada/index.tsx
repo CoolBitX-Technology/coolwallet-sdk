@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ButtonGroup, Container, ToggleButton } from 'react-bootstrap';
 import { Transport } from '@coolwallet/core';
 import ADA, { TxTypes } from '@coolwallet/ada';
@@ -102,7 +102,7 @@ function CoinAda(props: Props) {
   const [accountInfo, setAccountInfo] = useState('');
   const [isTestNet, setTestNet] = useState(false);
 
-  setTestnetApi(isTestNet);
+  useEffect(() => setTestnetApi(isTestNet), [isTestNet]);
 
   const getAddress = async () => {
     handleState(async () => {
