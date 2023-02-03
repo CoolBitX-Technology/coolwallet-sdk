@@ -7,25 +7,39 @@ import { sendTx } from './utils/api';
 import { NoInput, OneInput, ObjInputs } from '../../../utils/componentMaker';
 
 interface Props {
-  txType: TxTypes,
-  txKeys: string[],
-  txValues: string[],
-  setTxValues: any,
-  a: number,
-  b: number,
-  utxos: string,
+  txType: TxTypes;
+  txKeys: string[];
+  txValues: string[];
+  setTxValues: any;
+  a: number;
+  b: number;
+  keyDeposit?: number; // key deposit value for staking
+  utxos: string;
 
-  handleState: any,
-  options: any,
-  disabled: boolean,
+  handleState: any;
+  options: any;
+  disabled: boolean;
 
-  ada: ADA,
-  addrIndex: number,
+  ada: ADA;
+  addrIndex: number;
 }
 
 function TxField(props: Props) {
-
-  const { txType, txKeys, txValues, setTxValues, a, b, utxos, handleState, options, disabled, ada, addrIndex } = props;
+  const {
+    txType,
+    txKeys,
+    txValues,
+    setTxValues,
+    a,
+    b,
+    keyDeposit,
+    utxos,
+    handleState,
+    options,
+    disabled,
+    ada,
+    addrIndex,
+  } = props;
 
   const [txSize, setTxSize] = useState(0);
   const [estimatedTxSize, setEstimatedTxSize] = useState(0);
@@ -40,10 +54,12 @@ function TxField(props: Props) {
 
     const tx: RawTransaction = {
       addrIndexes: [addrIndex],
-      inputs: [{
-        txId,
-        index,
-      }],
+      inputs: [
+        {
+          txId,
+          index,
+        },
+      ],
       ttl,
     };
 
@@ -61,17 +77,18 @@ function TxField(props: Props) {
     //   ttl,
     // };
 
-    if (parseInt(changeAmount) > 0) tx.change = {
-      address: changeAddress,
-      amount: changeAmount,
-    };
+    if (parseInt(changeAmount) > 0)
+      tx.change = {
+        address: changeAddress,
+        amount: changeAmount,
+      };
 
     if (txType === TxTypes.Transfer) {
       const address = txValues[5];
       const amount = parseInt(txValues[6]);
       if (amount > 0) tx.output = { address, amount };
     }
-    if (txType === TxTypes.StakeDelegate) {
+    if (txType === TxTypes.StakeDelegate || txType === TxTypes.StakeRegisterAndDelegate) {
       const poolId = txValues[5];
       const decoded = bech32.decode(poolId, 80);
       const recovered = bech32.fromWords(decoded.words);
@@ -87,12 +104,16 @@ function TxField(props: Props) {
     console.log('getTxSize :');
     handleState(() => {
       if (utxos) {
-        const txs = JSON.parse(utxos) as Array<{tx_hash: string, tx_index: number, amount: Array<{quantity: string}>}>;
-        const tx = txs.find(e => e.tx_hash === txValues[0]);
+        const txs = JSON.parse(utxos) as Array<{
+          tx_hash: string;
+          tx_index: number;
+          amount: Array<{ quantity: string }>;
+        }>;
+        const tx = txs.find((e) => e.tx_hash === txValues[0]);
         if (tx) {
           const value = [...txValues];
-          const amount = tx.amount[0].quantity; 
-          setVerifyingInput(Number.parseInt(amount)); 
+          const amount = tx.amount[0].quantity;
+          setVerifyingInput(Number.parseInt(amount));
           value[1] = tx.tx_index.toString(10);
 
           // modify change by to-amount
@@ -122,7 +143,6 @@ function TxField(props: Props) {
   const verifyAmount = async () => {
     console.log('verifyAmount :');
     handleState(async () => {
-
       // calculate diff by fee and change by to-amount
       const diff = verifyingInput - fee;
       const value = [...txValues];
@@ -130,6 +150,9 @@ function TxField(props: Props) {
       if (txType === TxTypes.Transfer) {
         const output = Number.parseInt(value[6]);
         if (!Number.isNaN(output)) change = diff - output;
+      } else if (keyDeposit && !Number.isNaN(keyDeposit)) {
+        if (txType === TxTypes.StakeRegister || txType === TxTypes.StakeRegisterAndDelegate) change -= keyDeposit;
+        else if (txType === TxTypes.StakeDeregister) change += Number.parseInt(keyDeposit);
       }
       value[3] = change.toString(10);
       setTxValues(value);
@@ -147,7 +170,7 @@ function TxField(props: Props) {
     handleState(async () => {
       const transaction = {
         fee,
-        ...genRawTx()
+        ...genRawTx(),
       };
 
       const result = await ada.signTransaction(transaction, options, txType);
@@ -196,20 +219,8 @@ function TxField(props: Props) {
         placeholder={'0'}
         inputSize={1}
       />
-      <NoInput
-        title='Sign Tx'
-        content={signedTx}
-        onClick={signTx}
-        disabled={disabled}
-        btnName='Sign by SDK'
-      />
-      <NoInput
-        title='Send Tx'
-        content={sendTxResult}
-        onClick={sendSignedTx}
-        disabled={disabled}
-        btnName='Send'
-      />
+      <NoInput title='Sign Tx' content={signedTx} onClick={signTx} disabled={disabled} btnName='Sign by SDK' />
+      <NoInput title='Send Tx' content={sendTxResult} onClick={sendSignedTx} disabled={disabled} btnName='Send' />
     </Container>
   );
 }

@@ -1,6 +1,11 @@
 # CoolWallet Cardano SDK
 Typescript library with support for the integration of Cardano for third party application, include the functionalities of generation of addresses and signed transactions. 
 
+## Updates
+1. Support combined register and delegate in single transaction.
+2. Support testnet address.
+
+
 ## Install
 ```shell
 npm install @coolwallet/ada
@@ -88,6 +93,7 @@ export enum TxTypes {
   StakeDelegate,
   StakeDeregister,
   StakeWithdraw,
+  StakeRegisterAndDelegate,
 }
 
 export interface Input {

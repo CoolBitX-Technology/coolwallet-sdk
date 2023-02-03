@@ -19,7 +19,7 @@ export const blake2b224 = (input: Buffer) => {
   return Buffer.from(blake2b(28).update(input).digest());
 };
 
-export const accountKeyToAddress = (accPubkey: Buffer, addrIndex: number) => {
+export const accountKeyToAddress = (accPubkey: Buffer, addrIndex: number, isTestNet = false) => {
   const paymentPubKey = derivePubKeyFromAccountToIndex(accPubkey, 0, addrIndex);
   const stakePubKey = derivePubKeyFromAccountToIndex(accPubkey, 2, 0);
 
@@ -27,16 +27,19 @@ export const accountKeyToAddress = (accPubkey: Buffer, addrIndex: number) => {
   const stakeHash = blake2b224(stakePubKey);
 
   const addressBuff = Buffer.concat([
-    Buffer.allocUnsafe(1).fill(0x01),
+    isTestNet ? Buffer.allocUnsafe(1).fill(0x00) : Buffer.allocUnsafe(1).fill(0x01),
     paymentHash,
     stakeHash
   ]);
   const words = bech32.toWords(addressBuff);
-  const address = bech32.encode('addr', words, 200);
-  return address;
+
+  if(isTestNet){
+    return bech32.encode('addr_test', words, 200);
+  }
+  return bech32.encode('addr', words, 200);
 };
 
-export const decodeAddress = (address: string)
+export const decodeAddress = (address: string, isTestNet = false)
 : { addressBuff: Buffer, addressEncodeType: number } => {
   let addressBuff;
   let addressEncodeType;
@@ -44,8 +47,16 @@ export const decodeAddress = (address: string)
     const { prefix, words } = bech32.decode(address, 150);
     addressBuff = Buffer.from(bech32.fromWords(words));
     const dataLen = addressBuff.length;
-    if (prefix === 'addr' && dataLen === 57) addressEncodeType = 1;
-    if (prefix === 'addr' && dataLen === 29) addressEncodeType = 2;
+
+    if(isTestNet){
+      if (prefix === 'addr_test' && dataLen === 57) addressEncodeType = 1;
+      if (prefix === 'addr_test' && dataLen === 29) addressEncodeType = 2;
+    }
+    else {
+      if (prefix === 'addr' && dataLen === 57) addressEncodeType = 1;
+      if (prefix === 'addr' && dataLen === 29) addressEncodeType = 2;
+    }
+
     // not support staking address
     if (!addressEncodeType) throw new Error('address not supported');
   } catch(err) {

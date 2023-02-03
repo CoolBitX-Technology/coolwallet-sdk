@@ -14,14 +14,15 @@ export enum TxTypes {
   StakeDelegate,
   StakeDeregister,
   StakeWithdraw,
+  StakeRegisterAndDelegate,
 }
 
 export interface Options {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  confirmCB?: Function;
-  authorizedCB?: Function;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 }
 
 export interface Input {

@@ -1,6 +1,6 @@
 import { utils, config } from '@coolwallet/core';
 import { MajorType, Integer, Output, Witness, TxTypes, Transaction } from '../config/types';
-import { TRANSFER, REGISTER, DELEGATE, DEREGISTER, WITHDRAW } from '../config/params';
+import { TRANSFER, REGISTER, REGISTER_AND_DELEGATE, DELEGATE, DEREGISTER, WITHDRAW } from '../config/params';
 import {
   derivePubKeyFromAccountToIndex,
   decodeAddress,
@@ -23,8 +23,8 @@ const getUintArgument = (value: Integer) => {
   return length + data.padEnd(18, '0');
 };
 
-const getOutputArgument = (output: Output) => {
-  const { addressBuff, addressEncodeType } = decodeAddress(output.address);
+const getOutputArgument = (output: Output, isTestNet = false) => {
+  const { addressBuff, addressEncodeType } = decodeAddress(output.address, isTestNet);
   const encodeType = addressEncodeType.toString(16).padStart(2, '0');
   const addressLength = addressBuff.length.toString(16).padStart(2, '0');
   const address = addressBuff.toString('hex').padEnd(180, '0');
@@ -32,9 +32,9 @@ const getOutputArgument = (output: Output) => {
   return encodeType + addressLength + address + amount;
 };
 
-const getChangeArgument = (output?: Output) => {
+const getChangeArgument = (output?: Output, isTestNet = false) => {
   if (!output) return '0'.repeat(202);
-  const { addressBuff } = decodeAddress(output.address);
+  const { addressBuff } = decodeAddress(output.address, isTestNet);
   const addressLength = addressBuff.length.toString(16).padStart(2, '0');
   const address = addressBuff.toString('hex').padEnd(180, '0');
   const amount = getUintArgument(output.amount);
@@ -50,6 +50,7 @@ const getKeyHash = (keyHash?: string) => {
 export const getScript = (txType: TxTypes): string => {
   if (txType === TxTypes.Transfer) return TRANSFER.scriptWithSignature;
   if (txType === TxTypes.StakeRegister) return REGISTER.scriptWithSignature;
+  if (txType === TxTypes.StakeRegisterAndDelegate) return REGISTER_AND_DELEGATE.scriptWithSignature;
   if (txType === TxTypes.StakeDelegate) return DELEGATE.scriptWithSignature;
   if (txType === TxTypes.StakeDeregister) return DEREGISTER.scriptWithSignature;
   if (txType === TxTypes.StakeWithdraw) return WITHDRAW.scriptWithSignature;
@@ -60,6 +61,7 @@ export const getArguments = (
   transaction: Transaction,
   accPubKey: string,
   txType: TxTypes,
+  isTestNet = false,
 ): Witness[] => {
   const { addrIndexes, inputs, output, change, fee, ttl, poolKeyHash, withdrawAmount } = transaction;
   const accPubKeyBuff = Buffer.from(accPubKey, 'hex');
@@ -69,21 +71,21 @@ export const getArguments = (
   let argument = '';
   if (txType === TxTypes.Transfer) {
     if (!output) throw new Error('output is required');
-    argument = getChangeArgument(change)
-      + getOutputArgument(output)
+    argument = getChangeArgument(change, isTestNet)
+      + getOutputArgument(output, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
       + genInputs(inputs);
   }
   if (txType === TxTypes.StakeRegister || txType === TxTypes.StakeDeregister) {
-    argument = getChangeArgument(change)
+    argument = getChangeArgument(change, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
       + getKeyHash(stakeKeyHash)
       + genInputs(inputs);
   }
-  if (txType === TxTypes.StakeDelegate) {
-    argument = getChangeArgument(change)
+  if (txType === TxTypes.StakeDelegate || txType === TxTypes.StakeRegisterAndDelegate) {
+    argument = getChangeArgument(change, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
       + getKeyHash(stakeKeyHash)
@@ -92,7 +94,7 @@ export const getArguments = (
   }
   if (txType === TxTypes.StakeWithdraw) {
     if (!withdrawAmount) throw new Error('withdrawAmount is required');
-    argument = getChangeArgument(change)
+    argument = getChangeArgument(change, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
       + getKeyHash(stakeKeyHash)

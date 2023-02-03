@@ -18,10 +18,10 @@ const genOutputsPrefix = (output?: Output, change?: Output) => {
   return '01' + cborEncode(MajorType.Array, outputCount);
 };
 
-export const genOutput = (output?: Output): string => {
+export const genOutput = (output?: Output, isTestNet = false): string => {
   if (!output) return '';
   let result = '82';
-  const addressBuff = decodeAddress(output.address).addressBuff;
+  const addressBuff = decodeAddress(output.address, isTestNet).addressBuff;
   result += cborEncode(MajorType.Byte, addressBuff.length);
   result += addressBuff.toString('hex');
   result += cborEncode(MajorType.Uint, output.amount)
@@ -68,16 +68,17 @@ const genTxBodyPrefix = (txType: TxTypes) => {
   return 'a5';
 };
 
-export const genFakeTxBody = (tx: Transaction, txType: TxTypes) => {
+export const genFakeTxBody = (tx: Transaction, txType: TxTypes, isTestNet = false) => {
   let result = genTxBodyPrefix(txType);
   result += genInputs(tx.inputs);
   result += genOutputsPrefix(tx.output, tx.change);
-  result += genOutput(tx.output);
-  result += genOutput(tx.change);
+  result += genOutput(tx.output, isTestNet);
+  result += genOutput(tx.change, isTestNet);
   result += genFee(tx.fee);
   result += genTtl(tx.ttl);
 
   if (txType === TxTypes.StakeRegister) result += '0'.repeat(72);
+  if (txType === TxTypes.StakeRegisterAndDelegate) result += '0'.repeat(200);
   if (txType === TxTypes.StakeDeregister) result += '0'.repeat(72);
   if (txType === TxTypes.StakeDelegate) result += '0'.repeat(132);
   if (txType === TxTypes.StakeWithdraw) {
@@ -88,12 +89,12 @@ export const genFakeTxBody = (tx: Transaction, txType: TxTypes) => {
   return result;
 };
 
-export const genTxBody = (tx: Transaction, accPubKey: string, txType: TxTypes) => {
+export const genTxBody = (tx: Transaction, accPubKey: string, txType: TxTypes, isTestNet = false) => {
   let result = genTxBodyPrefix(txType);
   result += genInputs(tx.inputs);
   result += genOutputsPrefix(tx.output, tx.change);
-  result += genOutput(tx.output);
-  result += genOutput(tx.change);
+  result += genOutput(tx.output, isTestNet);
+  result += genOutput(tx.change, isTestNet);
   result += genFee(tx.fee);
   result += genTtl(tx.ttl);
 
@@ -113,6 +114,10 @@ export const genTxBody = (tx: Transaction, accPubKey: string, txType: TxTypes) =
     if (!tx.withdrawAmount) throw new Error('withdrawAmount is required');
     result += '05a1581de1' + stakeKeyHash + cborEncode(MajorType.Uint, tx.withdrawAmount);
   }
-
+  if (txType === TxTypes.StakeRegisterAndDelegate) {
+    if (!tx.poolKeyHash) throw new Error('poolKeyHash is required');
+    result += '048282008200581c' + stakeKeyHash;
+    result += '83028200581c' + stakeKeyHash + '581c' + tx.poolKeyHash;
+  }
   return result;
 };

@@ -13,19 +13,16 @@ import {
 import { TxTypes } from './config/types';
 export { TxTypes };
 
-import type {
-  Options,
-  RawTransaction,
-  Transaction,
-} from './config/types';
+import type { Options, RawTransaction, Transaction } from './config/types';
 
-export type {
-  Options,
-  RawTransaction,
-  Transaction,
-};
+export type { Options, RawTransaction, Transaction };
 
 export default class ADA implements COIN.Coin {
+  isTestNet = false;
+  constructor(isTest = false) {
+    this.isTestNet = isTest;
+  }
+
   // implement this because of not extending ECDSACoin
   async getAccountPubKey(transport: Transport, appPrivateKey: string, appId: string): Promise<string> {
     const pathType = config.PathType.BIP32ED25519;
@@ -37,7 +34,7 @@ export default class ADA implements COIN.Coin {
 
   getAddressByAccountKey(accPubkey: string, addressIndex: number): string {
     const accPubkeyBuff = Buffer.from(accPubkey, 'hex');
-    const address = accountKeyToAddress(accPubkeyBuff, addressIndex);
+    const address = accountKeyToAddress(accPubkeyBuff, addressIndex, this.isTestNet);
     return address;
   }
 
@@ -49,7 +46,8 @@ export default class ADA implements COIN.Coin {
 
   getTransactionSize(transaction: RawTransaction, txType = TxTypes.Transfer): number {
     const internalTx = { ...transaction, fee: 170000 };
-    const txHex = '83' + genFakeTxBody(internalTx, txType) + genFakeWitness(internalTx.addrIndexes, txType) + 'f6';
+    const txHex =
+      '83' + genFakeTxBody(internalTx, txType, this.isTestNet) + genFakeWitness(internalTx.addrIndexes, txType) + 'f6';
     return txHex.length / 2;
   }
 
@@ -59,6 +57,10 @@ export default class ADA implements COIN.Coin {
 
   getStakeRegisterSize(transaction: RawTransaction) {
     return this.getTransactionSize(transaction, TxTypes.StakeRegister);
+  }
+
+  getStakeRegisterAndDelegateSize(transaction: RawTransaction) {
+    return this.getTransactionSize(transaction, TxTypes.StakeRegisterAndDelegate);
   }
 
   getStakeDeregisterSize(transaction: RawTransaction) {
@@ -81,7 +83,7 @@ export default class ADA implements COIN.Coin {
 
     const script = getScript(txType);
     const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
-    const witnesses = getArguments(internalTx, accPubKey, txType);
+    const witnesses = getArguments(internalTx, accPubKey, txType, this.isTestNet);
 
     // request CoolWallet to sign tx
 
@@ -92,8 +94,7 @@ export default class ADA implements COIN.Coin {
       witness.sig = encryptedSig;
     }
 
-    if (typeof confirmCB === "function")
-      confirmCB();
+    if (typeof confirmCB === 'function') confirmCB();
 
     // show information for verification
 
@@ -103,7 +104,7 @@ export default class ADA implements COIN.Coin {
     // resolve signature
 
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
-    if (typeof authorizedCB === "function") {
+    if (typeof authorizedCB === 'function') {
       authorizedCB();
     }
     for (const witness of witnesses) {
@@ -116,7 +117,7 @@ export default class ADA implements COIN.Coin {
 
     // construct the signed transaction
 
-    const signedTx = '83' + genTxBody(internalTx, accPubKey, txType) + genWitness(witnesses) + 'f6';
+    const signedTx = '83' + genTxBody(internalTx, accPubKey, txType, this.isTestNet) + genWitness(witnesses) + 'f6';
 
     // const { signedTx: verifyTxBody } = await apdu.tx.getSignedHex(transport);
     return signedTx;
@@ -128,6 +129,10 @@ export default class ADA implements COIN.Coin {
 
   async signStakeRegister(transaction: Transaction, options: Options) {
     return this.signTransaction(transaction, options, TxTypes.StakeRegister);
+  }
+
+  async signStakeRegisterAndDelegate(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.StakeRegisterAndDelegate);
   }
 
   async signStakeDeregister(transaction: Transaction, options: Options) {
