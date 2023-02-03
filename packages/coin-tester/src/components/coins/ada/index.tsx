@@ -301,7 +301,6 @@ function CoinAda(props: Props) {
           variant={isTestNet ? 'outline-primary' : 'primary'}
           checked={!isTestNet}
           onClick={() => {
-            console.log('\u001b[32m' + 'main' + '\u001b[0m');
             setTestNet(false);
           }}
         >
@@ -314,7 +313,6 @@ function CoinAda(props: Props) {
           variant={isTestNet ? 'primary' : 'outline-primary'}
           checked={isTestNet}
           onClick={() => {
-            console.log('\u001b[32m' + 'test' + '\u001b[0m');
             setTestNet(true);
           }}
         >
