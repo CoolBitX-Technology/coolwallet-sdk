@@ -85,6 +85,16 @@ const CHAINS = {
     properties: CHAIN.GORELI,
     rpc_url: 'https://goerli.infura.io/v3/55c881399fe442bfb09d327b53dc5fdb',
   },
+  THUNDERCORE: {
+    name: 'ThunderCore',
+    properties: CHAIN.THUNDERCORE,
+    rpc_url: 'https://mainnet-rpc.thundertoken.net',
+  },
+  THUNDERCORE_TEST: {
+    name: 'ThunderCoreTest',
+    properties: CHAIN.THUNDERCORE_TEST,
+    rpc_url: 'https://testnet-rpc.thundercore.com',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
