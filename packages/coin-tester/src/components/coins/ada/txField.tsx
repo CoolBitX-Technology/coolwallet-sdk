@@ -150,6 +150,8 @@ function TxField(props: Props) {
       if (txType === TxTypes.Transfer) {
         const output = Number.parseInt(value[6]);
         if (!Number.isNaN(output)) change = diff - output;
+      } else if (txType === TxTypes.StakeWithdraw) {
+        change += Number.parseInt(value[5]);
       } else if (keyDeposit && !Number.isNaN(keyDeposit)) {
         if (txType === TxTypes.StakeRegister || txType === TxTypes.StakeRegisterAndDelegate) change -= keyDeposit;
         else if (txType === TxTypes.StakeDeregister) change += Number.parseInt(keyDeposit);
