@@ -22,3 +22,5 @@ console.log('Flare Information', CHAIN.FLARE.toHexChainInfo());
 console.log('Flare Signature', CHAIN.FLARE.getSignature());
 console.log('ThunderCore Information', CHAIN.THUNDERCORE.toHexChainInfo());
 console.log('ThunderCore Signature', CHAIN.THUNDERCORE.getSignature());
+console.log('OKX Information', CHAIN.OKX.toHexChainInfo());
+console.log('OKX Signature', CHAIN.OKX.getSignature());
