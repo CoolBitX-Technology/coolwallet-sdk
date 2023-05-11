@@ -33,11 +33,12 @@ const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
 const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
 const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO) };
 const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM) };
+const coinOKX = { name: 'OKX', api: new EVM(CHAIN.OKX) };
 // Layer 2
 const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
 
-const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinCelo, coinFantom];
+const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinCelo, coinFantom, coinOKX];
 
 const delay = (timeout = 1000) => new Promise((resolve) => setTimeout(resolve, timeout));
 
@@ -420,7 +421,7 @@ describe('Test EVM SDK', () => {
     }
   });
 
-  it.each([coinCronos])('$name test sign eip1559 erc20 transaction', async ({ api }) => {
+  it.each([coinCronos, coinOKX])('$name test sign eip1559 erc20 transaction', async ({ api }) => {
     for (const transaction of EIP1559_ERC20_TRANSACTION) {
       const token = api.chain.tokens?.USDT;
       const scale = 10 ** +token.unit;
