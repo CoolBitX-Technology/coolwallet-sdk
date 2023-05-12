@@ -440,7 +440,7 @@ export default class AVAXC implements COIN.Coin {
       required: ['types', 'primaryType', 'domain', 'message'],
     };
 
-    const ajv = new Ajv();
+    const ajv = new Ajv({ allErrors: true, inlineRefs: false });
 
     if (!ajv.validate(EIP712Schema, typedData)) {
       throw new Error(ajv.errorsText());

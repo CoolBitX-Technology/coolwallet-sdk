@@ -130,7 +130,7 @@ class Evm extends COIN.ECDSACoin {
   }
 
   async signTypedData(client: Transaction.EIP712TypedDataTransaction): Promise<string> {
-    const ajv = new Ajv();
+    const ajv = new Ajv({ allErrors: true, inlineRefs: false });
     if (!ajv.validate(EIP712Schema, client.typedData)) {
       throw new error.SDKError(this.signTypedData.name, ajv.errorsText());
     }

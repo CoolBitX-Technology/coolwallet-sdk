@@ -9,7 +9,7 @@ import * as scriptUtils from './utils/scriptUtils';
 import { handleHex } from './utils/stringUtil';
 import { signMsg, signTyped, EIP712Schema, signTx } from './config/types';
 
-const ajv = new Ajv();
+const ajv = new Ajv({ allErrors: true, inlineRefs: false });
 
 /**
  * sign ETH Transaction
