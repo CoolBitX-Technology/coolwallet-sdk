@@ -10,7 +10,7 @@ import * as scriptUtils from './utils/scriptUtils';
 import { handleHex } from './utils/stringUtil';
 import { signMsg, signTyped, EIP712Schema, signTx, signEIP1559Tx } from './config/types';
 
-const ajv = new Ajv();
+const ajv = new Ajv({ allErrors: true, inlineRefs: false });
 
 export const signEIP1559Transaction = async (
   signTxData: signEIP1559Tx,

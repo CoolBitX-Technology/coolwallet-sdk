@@ -8,7 +8,7 @@ import { handleHex } from './utils/stringUtil';
 
 const Web3 = require('web3');
 const Ajv = require('ajv');
-const ajv = new Ajv();
+const ajv = new Ajv({ allErrors: true, inlineRefs: false });
 const typedDataUtils = require('eth-sig-util').TypedDataUtils;
 const rlp = require('rlp');
 
