@@ -45,14 +45,14 @@ const SMART_CONTRACT_TRANSACTION = [
     gasLimit: '0x5208',
     to: '',
     value: '0',
-    data: '0x6080604052348015610010576000'.padEnd(32, '0')
+    data: '0x6080604052348015610010576000'.padEnd(32, '0'),
   },
   {
     nonce: '0xc',
     gasPrice: '0x91494C600',
     gasLimit: '0x5208',
     value: '0',
-    data: '0x6080604052348015610010576000'.padEnd(32, '0')
+    data: '0x6080604052348015610010576000'.padEnd(32, '0'),
   },
 ];
 
@@ -159,6 +159,24 @@ const EIP1559_ERC20_TRANSACTION = [
     value: '0x0',
     amount: '0.00001',
   },
+  {
+    nonce: '0x0',
+    gasFeeCap: '0x91494C600',
+    gasTipCap: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '0x8A1628c2397F6cA75579A45E81EE3e17DF19720e',
+    value: '0x00',
+    amount: '0.1',
+  },
+  {
+    nonce: '0x0',
+    gasFeeCap: '0x91494C600',
+    gasTipCap: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '0x8A1628c2397F6cA75579A45E81EE3e17DF19720e',
+    value: '',
+    amount: '0.1',
+  }
 ];
 
 const EIP1559_SMART_CONTRACT_TRANSACTION = [
