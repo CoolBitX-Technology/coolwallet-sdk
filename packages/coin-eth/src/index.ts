@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { coin as COIN, setting, apdu, Transport } from '@coolwallet/core';
+import web3 from 'web3';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types';
@@ -43,7 +44,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     // erc20
     const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-    if ((!value || value === '0x0') && data && functionHash === 'a9059cbb') {
+    const valueBN = web3.utils.toBN(value);
+    if (valueBN.isZero() && data && functionHash === 'a9059cbb') {
       // 檢查是否內建
       const upperCaseAddress = to.toUpperCase();
       for (const tokenInfo of TOKENTYPE) {
@@ -128,8 +130,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     // erc20
     const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-
-    if (data && functionHash === 'a9059cbb') {
+    const valueBN = web3.utils.toBN(value);
+    if (valueBN.isZero() && data && functionHash === 'a9059cbb') {
       const upperCaseAddress = to.toUpperCase(); // contractAddr
       let tokenSignature;
       for (const tokenInfo of TOKENTYPE) {

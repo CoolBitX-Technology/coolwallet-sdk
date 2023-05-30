@@ -242,7 +242,7 @@ export const signMessage = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
-    const signature = `0x${r}${s}${v.toString(16)}`;
+    const signature = `0x${r.padStart(64,'0')}${s.padStart(64,'0')}${v.toString(16)}`;
     return signature;
   } else {
     throw new error.SDKError(signMessage.name, 'canonicalSignature type error');
@@ -305,7 +305,7 @@ export const signTypedData = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
-    const signature = `0x${r}${s}${v.toString(16)}`;
+    const signature = `0x${r.padStart(64,'0')}${s.padStart(64,'0')}${v.toString(16)}`;
 
     return signature;
   } else {

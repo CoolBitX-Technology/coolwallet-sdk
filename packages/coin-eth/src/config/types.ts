@@ -42,9 +42,9 @@ export type signEIP1559Tx = {
   appId: string;
   transaction: EIP1559Transaction;
   addressIndex: number;
-  publicKey: string | undefined;
-  confirmCB: () => void | undefined;
-  authorizedCB: () => void | undefined;
+  publicKey?: string
+  confirmCB?: () => void
+  authorizedCB?: () => void
 };
 
 export type signTx = {
@@ -53,9 +53,9 @@ export type signTx = {
   appId: string;
   transaction: Transaction;
   addressIndex: number;
-  publicKey: string | undefined;
-  confirmCB: () => void | undefined;
-  authorizedCB: () => void | undefined;
+  publicKey?: string;
+  confirmCB?: () => void;
+  authorizedCB?: () => void;
 };
 
 export type signMsg = {
@@ -64,8 +64,8 @@ export type signMsg = {
   appId: string;
   message: string;
   addressIndex: number;
-  confirmCB: () => void | undefined;
-  authorizedCB: () => void | undefined;
+  confirmCB?: () => void
+  authorizedCB?: () => void
 };
 
 export type signTyped = {
