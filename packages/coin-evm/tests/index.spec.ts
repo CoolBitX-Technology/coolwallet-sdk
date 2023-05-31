@@ -174,6 +174,69 @@ describe('Test EVM SDK', () => {
 
         expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
       });
+
+      const unofficialToken = {
+        name: 'Tether USD',
+        symbol: 'USDT',
+        unit: '6',
+        contractAddress: '0xffffffffffffffffffffffffffffffffffffffff',
+        signature: ``,
+      };
+
+      it('Unofficial token', async () => {
+        const hasCommercialAt = isEmpty(unofficialToken.signature);
+        const scale = 10 ** +unofficialToken.unit;
+        const tokenAmount = +transaction.amount;
+        const amount = Math.floor(tokenAmount * scale).toString(16);
+        const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+        const client: LegacyTransaction = {
+          transaction: {
+            ...transaction,
+            to: unofficialToken.contractAddress,
+            data: erc20Data,
+            option: {
+              info: {
+                symbol: unofficialToken.symbol,
+                decimals: unofficialToken.unit,
+              },
+            },
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+        const signature = await api.signTransaction(client);
+        const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const txDetail = await getTxDetail(transport, props.appId);
+        const tokenSymbol = (hasCommercialAt ? '@' : '') + unofficialToken.symbol;
+        let expectedTxDetail;
+        if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        }
+
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      });
     });
 
     it.each(SMART_CONTRACT_TRANSACTION)('Send smart contract transaction to $to', async (transaction) => {

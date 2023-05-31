@@ -220,8 +220,8 @@ class Evm extends COIN.ECDSACoin {
 
   /**
    * Get the script from chain if it has.
-   * 
-   * @param type 
+   *
+   * @param type
    * @returns {string}
    */
   private getScript(type: keyof typeof SCRIPTS) {
