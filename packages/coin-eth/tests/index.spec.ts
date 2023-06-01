@@ -1,16 +1,17 @@
 import { Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import * as bip39 from 'bip39';
+import isEmpty from 'lodash/isEmpty';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import * as utils from 'web3-utils';
 import Wallet from './utils/wallet';
 import ETH, { TOKENTYPE } from '../src';
 import * as Fixtures from './fixtures/transactions';
+import { signTx } from '../src/config/types';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
 const CHAIN_ID = 1;
-
 
 describe('Test ETH SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
@@ -104,7 +105,60 @@ describe('Test ETH SDK', () => {
       const expectedTxDetail = new DisplayBuilder()
         .messagePage('TEST')
         .messagePage('ETH')
-        .messagePage(token.symbol)
+        .messagePage(token.symbol.substring(0, 7))
+        .addressPage(transaction.to.toLowerCase())
+        .amountPage(+tokenAmount)
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+
+    const unofficialToken = {
+      name: 'Tether USD',
+      symbol: 'USDTUDSU',
+      unit: '6',
+      contractAddress: '0xffffffffffffffffffffffffffffffffffffffff',
+      signature: ``,
+    };
+
+    it('Unofficial token', async () => {
+      const hasCommercialAt = isEmpty(unofficialToken.signature);
+      const scale = 10 ** +unofficialToken.unit;
+      const tokenAmount = +transaction.amount;
+      const amount = Math.floor(tokenAmount * scale).toString(16);
+      const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+      const client: signTx = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: {
+          chainId: CHAIN_ID,
+          ...transaction,
+          to: unofficialToken.contractAddress,
+          data: erc20Data,
+          option: {
+            info: {
+              symbol: unofficialToken.symbol,
+              decimals: unofficialToken.unit,
+            },
+          },
+        },
+        addressIndex: 0,
+      };
+      const signature = await eth.signTransaction(client);
+      const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
+      expect(signature).toEqual(expectedSignature);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const tokenSymbol = hasCommercialAt
+        ? ('@' + unofficialToken.symbol).substring(0, 8)
+        : unofficialToken.symbol.substring(0, 7);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .messagePage(tokenSymbol)
         .addressPage(transaction.to.toLowerCase())
         .amountPage(+tokenAmount)
         .wrapPage('PRESS', 'BUTToN')

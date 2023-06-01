@@ -65,7 +65,7 @@ export const composeSignedTransacton = (
   transaction.push(Buffer.from([vValue]), Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
 
   const serializedTx = rlp.encode(transaction);
-  return `0x${serializedTx.toString('hex')}`;
+  return `0x${Buffer.from(serializedTx).toString('hex')}`;
 };
 
 /**
