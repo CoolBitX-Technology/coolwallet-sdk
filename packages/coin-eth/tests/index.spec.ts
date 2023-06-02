@@ -114,15 +114,15 @@ describe('Test ETH SDK', () => {
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
 
-    const unofficialToken = {
-      name: 'Tether USD',
-      symbol: 'USDTUDSU',
-      unit: '6',
-      contractAddress: '0xffffffffffffffffffffffffffffffffffffffff',
-      signature: ``,
-    };
-
     it('Unofficial token', async () => {
+      const unofficialToken = {
+        name: 'Tether USD',
+        symbol: 'USDTUDSU',
+        unit: '6',
+        contractAddress: '0xffffffffffffffffffffffffffffffffffffffff',
+        signature: ``,
+      };
+
       const hasCommercialAt = isEmpty(unofficialToken.signature);
       const scale = 10 ** +unofficialToken.unit;
       const tokenAmount = +transaction.amount;
