@@ -9,7 +9,7 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts\" --source-maps inline",
     "build": "del-cli lib && npm run build:types && npm run build:ts",
-    "test": "jest --runInBand --testTimeout=60000"
+    "test": "jest --runInBand --testTimeout=60000 --coverage"
   },
   "repository": {
     "type": "git",

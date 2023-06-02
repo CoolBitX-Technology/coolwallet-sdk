@@ -33,12 +33,23 @@ const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
 const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
 const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO) };
 const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM) };
+const coinFlare = { name: 'Flare', api: new EVM(CHAIN.FLARE) };
 const coinOKX = { name: 'OKX', api: new EVM(CHAIN.OKX) };
 // Layer 2
 const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
 
-const TEST_COINS = [coinCronos, coinPolygon, coinAvaxC, coinArbitrum, coinOptimism, coinCelo, coinFantom, coinOKX];
+const TEST_COINS = [
+  coinCronos,
+  coinPolygon,
+  coinAvaxC,
+  coinArbitrum,
+  coinOptimism,
+  coinCelo,
+  coinFantom,
+  coinFlare,
+  coinOKX,
+];
 
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
@@ -54,13 +65,24 @@ describe('Test EVM SDK', () => {
     await wallet.setMnemonic(mnemonic);
   });
 
-  it.each(TEST_COINS)('$name: test get address 0', async ({ api }) => {
-    const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
-    const expectedAddress = await wallet.getAddress(0);
-    expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
-  });
+  describe.each(TEST_COINS)('Test EVM $name SDK', ({ api }) => {
+    beforeEach(() => {
+      wallet.coinType = api.coinType;
+    });
 
-  describe.each(TEST_COINS)('$name test sign transaction', ({ api }) => {
+    it('Get address 0', async () => {
+      const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
+      const expectedAddress = await wallet.getAddress(0);
+      expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
+    });
+
+    it('Get address 0 from account key', async () => {
+      const accExtKey = await wallet.getAccountAddress();
+      const address = await api.getAddressByAccountKey(accExtKey.publicKey, accExtKey.chainCode, 0);
+      const expectedAddress = await wallet.getAddress(0);
+      expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
+    });
+
     it.each(TRANSFER_TRANSACTION)('Send transaction to $to', async (transaction) => {
       const client: LegacyTransaction = {
         transaction: {
@@ -101,9 +123,7 @@ describe('Test EVM SDK', () => {
 
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
-  });
 
-  describe.each(TEST_COINS)('$name test sign erc20 transactions', ({ api }) => {
     describe.each(ERC20_TRANSACTION)('send erc20 token to $to', (transaction) => {
       if (isEmpty(api.chain.tokens)) return;
       it.each(Object.values(api.chain.tokens))('$symbol token:', async (token) => {
@@ -154,10 +174,71 @@ describe('Test EVM SDK', () => {
 
         expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
       });
-    });
-  });
 
-  describe.each(TEST_COINS)('$name test sign smart contract transaction', ({ api }) => {
+      const unofficialToken = {
+        name: 'Tether USD',
+        symbol: 'USDT',
+        unit: '6',
+        contractAddress: '0xffffffffffffffffffffffffffffffffffffffff',
+        signature: ``,
+      };
+
+      it('Unofficial token', async () => {
+        const hasCommercialAt = isEmpty(unofficialToken.signature);
+        const scale = 10 ** +unofficialToken.unit;
+        const tokenAmount = +transaction.amount;
+        const amount = Math.floor(tokenAmount * scale).toString(16);
+        const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+        const client: LegacyTransaction = {
+          transaction: {
+            ...transaction,
+            to: unofficialToken.contractAddress,
+            data: erc20Data,
+            option: {
+              info: {
+                symbol: unofficialToken.symbol,
+                decimals: unofficialToken.unit,
+              },
+            },
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+        const signature = await api.signTransaction(client);
+        const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const txDetail = await getTxDetail(transport, props.appId);
+        const tokenSymbol = (hasCommercialAt ? '@' : '') + unofficialToken.symbol;
+        let expectedTxDetail;
+        if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        }
+
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      });
+    });
+
     it.each(SMART_CONTRACT_TRANSACTION)('Send smart contract transaction to $to', async (transaction) => {
       const client: LegacyTransaction = {
         transaction: {
@@ -196,9 +277,7 @@ describe('Test EVM SDK', () => {
 
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
-  });
 
-  describe.each(TEST_COINS)('$name test sign smart contract segment transaction', ({ api }) => {
     it.each(SMART_CONTRACT_SEGMENT_TRANSACTION)(
       'Send smart contract segment transaction to $to',
       async (transaction) => {
@@ -241,9 +320,258 @@ describe('Test EVM SDK', () => {
         expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
       }
     );
+
+    it.each(TYPED_DATA_TRANSACTION)('Send transaction to $to', async (transaction) => {
+      const client: EIP712TypedDataTransaction = {
+        typedData: transaction.typedData(api.chain.id),
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+      };
+
+      const signature = await api.signTypedData(client);
+      const expectedSignature = await wallet.signTypedData(client.typedData);
+      expect(signature).toEqual(expectedSignature);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('EIP712', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('EIP712', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+
+    it.each(MESSAGE_TRANSACTION)('Send message transaction to $to', async (transaction) => {
+      const client: EIP712MessageTransaction = {
+        message: transaction.message,
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+      };
+
+      const signature = await api.signMessage(client);
+      const expectedSignature = await wallet.signMessage(client.message);
+      expect(signature).toEqual(expectedSignature);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('MESSAGE', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('MESSAGE', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+
+    it.each(EIP1559_TRANSFER_TRANSACTION)('Send eip1559 transaction to $to', async (transaction) => {
+      const client: EIP1559Transaction = {
+        transaction: {
+          ...transaction,
+          value: utils.toHex(utils.toWei(transaction.value, 'ether')),
+        },
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+      };
+
+      const signature = await api.signEIP1559Transaction(client);
+      const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
+      expect(signature).toEqual(expectedSignature);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+
+    describe.each(EIP1559_ERC20_TRANSACTION)('Send eip1559 erc20 transaction to $to', (transaction) => {
+      if (isEmpty(api.chain.tokens)) return;
+      it.each(Object.values(api.chain.tokens))('$symbol token:', async (token) => {
+        const hasCommercialAt = isEmpty(token.signature);
+        const decimals = Math.pow(10, +token.unit);
+        const tokenAmount = +transaction.amount;
+        const amount = Math.floor(decimals * tokenAmount).toString(16);
+        console.log(amount);
+        const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+        const client: EIP1559Transaction = {
+          transaction: {
+            ...transaction,
+            to: token.contractAddress,
+            data: erc20Data,
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+
+        const signature = await api.signEIP1559Transaction(client);
+        const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const txDetail = await getTxDetail(transport, props.appId);
+        const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
+        let expectedTxDetail: string;
+        if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        }
+
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      });
+    });
+
+    it.each(EIP1559_SMART_CONTRACT_TRANSACTION)('Send eip1559 smart transaction to $to', async (transaction) => {
+      const client: EIP1559Transaction = {
+        transaction: {
+          ...transaction,
+          value: utils.toHex(utils.toWei(transaction.value, 'ether')),
+        },
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+      };
+
+      const signature = await api.signEIP1559SmartContractTransaction(client);
+      const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
+      expect(signature).toEqual(expectedSignature);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
+      if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+
+    it.each(EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION)(
+      'Send eip1559 smart contract segment transaction to $to',
+      async (transaction) => {
+        const client: EIP1559Transaction = {
+          transaction: {
+            ...transaction,
+            value: utils.toHex(utils.toWei(transaction.value, 'ether')),
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+
+        const signature = await api.signEIP1559Transaction(client);
+        const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const txDetail = await getTxDetail(transport, props.appId);
+        let expectedTxDetail: string;
+        if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .wrapPage('SMART', '')
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .wrapPage('SMART', '')
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        }
+
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      }
+    );
   });
 
-  describe.each([coinFantom])('$name test staking transaction', ({ api }) => {
+  describe.each([coinFantom])('Test $name Staking Transaction', ({ api }) => {
     it.each(STAKING_TRANSACTION)('Send staking transaction to $to', async (transaction) => {
       const client: LegacyTransaction = {
         transaction: {
@@ -307,266 +635,5 @@ describe('Test EVM SDK', () => {
 
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
-  });
-
-  describe.each(TEST_COINS)('$name test sign typed data transaction', ({ api }) => {
-    it.each(TYPED_DATA_TRANSACTION)('Send transaction to $to', async (transaction) => {
-      const client: EIP712TypedDataTransaction = {
-        typedData: transaction.typedData(api.chain.id),
-        transport,
-        appPrivateKey: props.appPrivateKey,
-        appId: props.appId,
-        addressIndex: 0,
-      };
-
-      const signature = await api.signTypedData(client);
-      const expectedSignature = await wallet.signTypedData(client.typedData);
-      expect(signature).toEqual(expectedSignature);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const txDetail = await getTxDetail(transport, props.appId);
-      let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.symbol)
-          .wrapPage('EIP712', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      } else {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.layer2)
-          .messagePage(api.chain.symbol)
-          .wrapPage('EIP712', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      }
-
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-    });
-  });
-
-  describe.each(TEST_COINS)('$name test sign message transaction', ({ api }) => {
-    it.each(MESSAGE_TRANSACTION)('Send message transaction to $to', async (transaction) => {
-      const client: EIP712MessageTransaction = {
-        message: transaction.message,
-        transport,
-        appPrivateKey: props.appPrivateKey,
-        appId: props.appId,
-        addressIndex: 0,
-      };
-
-      const signature = await api.signMessage(client);
-      const expectedSignature = await wallet.signMessage(client.message);
-      expect(signature).toEqual(expectedSignature);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const txDetail = await getTxDetail(transport, props.appId);
-
-      let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.symbol)
-          .wrapPage('MESSAGE', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      } else {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.layer2)
-          .messagePage(api.chain.symbol)
-          .wrapPage('MESSAGE', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      }
-
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-    });
-  });
-
-  describe.each(TEST_COINS)('$name test sign eip1559 transaction', ({ api }) => {
-    it.each(EIP1559_TRANSFER_TRANSACTION)('Send eip1559 transaction to $to', async (transaction) => {
-      const client: EIP1559Transaction = {
-        transaction: {
-          ...transaction,
-          value: utils.toHex(utils.toWei(transaction.value, 'ether')),
-        },
-        transport,
-        appPrivateKey: props.appPrivateKey,
-        appId: props.appId,
-        addressIndex: 0,
-      };
-
-      const signature = await api.signEIP1559Transaction(client);
-      const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
-      expect(signature).toEqual(expectedSignature);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const txDetail = await getTxDetail(transport, props.appId);
-      let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.symbol)
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+transaction.value)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      } else {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.layer2)
-          .messagePage(api.chain.symbol)
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+transaction.value)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      }
-
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-    });
-  });
-
-  describe.each(TEST_COINS)('$name test sign eip1559 erc20 transactions', ({ api }) => {
-    describe.each(EIP1559_ERC20_TRANSACTION)('send token to $to', (transaction) => {
-      if (isEmpty(api.chain.tokens)) return;
-      it.each(Object.values(api.chain.tokens))('$symbol token:', async (token) => {
-        const hasCommercialAt = isEmpty(token.signature);
-        const decimals = Math.pow(10, +token.unit);
-        const tokenAmount = +transaction.amount;
-        const amount = Math.floor(decimals * tokenAmount).toString(16);
-        console.log(amount);
-        const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
-        const client: EIP1559Transaction = {
-          transaction: {
-            ...transaction,
-            to: token.contractAddress,
-            data: erc20Data,
-          },
-          transport,
-          appPrivateKey: props.appPrivateKey,
-          appId: props.appId,
-          addressIndex: 0,
-        };
-
-        const signature = await api.signEIP1559Transaction(client);
-        const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
-        expect(signature).toEqual(expectedSignature);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
-        let expectedTxDetail: string;
-        if (isEmpty(api.chain.layer2)) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .messagePage(tokenSymbol)
-            .addressPage(transaction.to.toLowerCase())
-            .amountPage(+tokenAmount)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.layer2)
-            .messagePage(api.chain.symbol)
-            .messagePage(tokenSymbol)
-            .addressPage(transaction.to.toLowerCase())
-            .amountPage(+tokenAmount)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        }
-
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      });
-    });
-  });
-
-  describe.each(TEST_COINS)('$name test sign eip1559 smart contract transaction', ({ api }) => {
-    it.each(EIP1559_SMART_CONTRACT_TRANSACTION)('Send eip1559 smart transaction to $to', async (transaction) => {
-      const client: EIP1559Transaction = {
-        transaction: {
-          ...transaction,
-          value: utils.toHex(utils.toWei(transaction.value, 'ether')),
-        },
-        transport,
-        appPrivateKey: props.appPrivateKey,
-        appId: props.appId,
-        addressIndex: 0,
-      };
-
-      const signature = await api.signEIP1559SmartContractTransaction(client);
-      const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
-      expect(signature).toEqual(expectedSignature);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const txDetail = await getTxDetail(transport, props.appId);
-      let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.symbol)
-          .wrapPage('SMART', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      } else {
-        expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage(api.chain.layer2)
-          .messagePage(api.chain.symbol)
-          .wrapPage('SMART', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
-      }
-
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-    });
-  });
-
-  describe.each(TEST_COINS)('$name test sign eip1559 smart contract segment transaction', ({ api }) => {
-    it.each(EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION)(
-      'Send eip1559 smart contract segment transaction to $to',
-      async (transaction) => {
-        const client: EIP1559Transaction = {
-          transaction: {
-            ...transaction,
-            value: utils.toHex(utils.toWei(transaction.value, 'ether')),
-          },
-          transport,
-          appPrivateKey: props.appPrivateKey,
-          appId: props.appId,
-          addressIndex: 0,
-        };
-
-        const signature = await api.signEIP1559Transaction(client);
-        const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
-        expect(signature).toEqual(expectedSignature);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        let expectedTxDetail: string;
-        if (isEmpty(api.chain.layer2)) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .wrapPage('SMART', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.layer2)
-            .messagePage(api.chain.symbol)
-            .wrapPage('SMART', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        }
-
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
-    );
   });
 });
