@@ -9,7 +9,7 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
-    "test": "jest --runInBand --testTimeout=60000",
+    "test": "jest --runInBand --testTimeout=60000 --coverage",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "peerDependencies": {
@@ -20,8 +20,8 @@
     "eth-sig-util": "^2.5.3",
     "keccak": "^3.0.2",
     "regenerator-runtime": "^0.13.9",
-    "rlp": "^2.2.3",
-    "web3": "^1.2.6"
+    "rlp": "^3.0.0",
+    "web3": "^1.10.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",

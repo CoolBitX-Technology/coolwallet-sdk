@@ -39,7 +39,11 @@ export const signEIP1559Transaction = async (
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtilEIP1559.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
+    const { v, r, s } = await ethUtilEIP1559.genEthSigFromSESig(
+      canonicalSignature,
+      Buffer.from(rlp.encode(rawPayload)),
+      publicKey
+    );
     const serializedTx = ethUtilEIP1559.composeSignedTransacton(rawPayload, v, r, s);
     return serializedTx;
   } else {
@@ -82,7 +86,11 @@ export const signEIP1559SmartContractTransaction = async (
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtilEIP1559.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
+    const { v, r, s } = await ethUtilEIP1559.genEthSigFromSESig(
+      canonicalSignature,
+      Buffer.from(rlp.encode(rawPayload)),
+      publicKey
+    );
     return ethUtilEIP1559.composeSignedTransacton(rawPayload, v, r, s);
   } else {
     throw new error.SDKError(signEIP1559Transaction.name, 'canonicalSignature type error');
@@ -131,7 +139,11 @@ export const signTransaction = async (
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
+    const { v, r, s } = await ethUtil.genEthSigFromSESig(
+      canonicalSignature,
+      Buffer.from(rlp.encode(rawPayload)),
+      publicKey
+    );
     return ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
   } else {
     throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
@@ -187,7 +199,11 @@ export const signSmartContractTransaction = async (
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
-    const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, rlp.encode(rawPayload), publicKey);
+    const { v, r, s } = await ethUtil.genEthSigFromSESig(
+      canonicalSignature,
+      Buffer.from(rlp.encode(rawPayload)),
+      publicKey
+    );
     const serializedTx = ethUtil.composeSignedTransacton(rawPayload, v, r, s, transaction.chainId);
     return serializedTx;
   } else {
@@ -242,7 +258,7 @@ export const signMessage = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
-    const signature = `0x${r.padStart(64,'0')}${s.padStart(64,'0')}${v.toString(16)}`;
+    const signature = `0x${r.padStart(64, '0')}${s.padStart(64, '0')}${v.toString(16)}`;
     return signature;
   } else {
     throw new error.SDKError(signMessage.name, 'canonicalSignature type error');
@@ -305,7 +321,7 @@ export const signTypedData = async (
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const { v, r, s } = await ethUtil.genEthSigFromSESig(canonicalSignature, payload, publicKey);
-    const signature = `0x${r.padStart(64,'0')}${s.padStart(64,'0')}${v.toString(16)}`;
+    const signature = `0x${r.padStart(64, '0')}${s.padStart(64, '0')}${v.toString(16)}`;
 
     return signature;
   } else {

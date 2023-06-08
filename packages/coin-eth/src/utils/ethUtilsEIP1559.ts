@@ -1,8 +1,8 @@
 import { handleHex } from './stringUtil';
 import { EIP1559Transaction } from '../config/types';
 
-const Web3 = require('web3');
-const rlp = require('rlp');
+import Web3 from 'web3';
+import rlp from 'rlp';
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
 const ec = new elliptic.ec('secp256k1');
@@ -44,7 +44,7 @@ export const composeSignedTransacton = (payload: Array<Buffer | Buffer[]>, v: nu
   }
   transaction.push(Buffer.from(r, 'hex'), Buffer.from(s, 'hex'));
   const serializedTx = rlp.encode(transaction);
-  return `0x02${serializedTx.toString('hex')}`;
+  return `0x02${Buffer.from(serializedTx).toString('hex')}`;
 };
 
 export const genEthSigFromSESig = async (
