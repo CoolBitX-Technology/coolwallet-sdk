@@ -95,6 +95,11 @@ const CHAINS = {
     properties: CHAIN.THUNDERCORE_TEST,
     rpc_url: 'https://testnet-rpc.thundercore.com',
   },
+  ZKSYNC: {
+    name: 'zkSync',
+    properties: CHAIN.ZKSYNC,
+    rpc_url: 'https://mainnet.era.zksync.io',
+  },
 } as Record<'CRONOS', ChainItem>;
 
 enum TxType {
