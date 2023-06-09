@@ -24,3 +24,5 @@ console.log('ThunderCore Information', CHAIN.THUNDERCORE.toHexChainInfo());
 console.log('ThunderCore Signature', CHAIN.THUNDERCORE.getSignature());
 console.log('OKX Information', CHAIN.OKX.toHexChainInfo());
 console.log('OKX Signature', CHAIN.OKX.getSignature());
+console.log('ZKS Information', CHAIN.ZKSYNC.toHexChainInfo());
+console.log('ZKS Signature', CHAIN.ZKSYNC.getSignature());

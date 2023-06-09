@@ -11,3 +11,4 @@ export { default as VELAS } from './velas';
 export { default as FLARE } from './flare';
 export { THUNDERCORE, THUNDERCORE_TEST } from './thunderCore';
 export { default as OKX } from './okx';
+export { default as ZKSYNC } from './zkSync';
