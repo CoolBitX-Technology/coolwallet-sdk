@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import crypto from 'crypto';
 import { Container } from 'react-bootstrap';
 import { Transport, apdu, tx, utils, config } from '@coolwallet/core';
+import * as bip39 from 'bip39';
 import { NoInput, OneInput, ObjInputs } from '../utils/componentMaker';
 
 interface Props {
@@ -163,7 +164,7 @@ function Settings(props: Props) {
 
   const recoverWallet = async () => {
     handleState(async () => {
-      console.log('mnemonicInput :', mnemonicInput);
+      console.log('mnemonicInput: ', mnemonicInput);
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const SEPublicKey = await config.getSEPublicKey(transport!);
@@ -174,11 +175,12 @@ function Settings(props: Props) {
 
   const recoverWalletWithoutADA = async () => {
     handleState(async () => {
-      console.log('mnemonicInput :', mnemonicInput);
+      console.log('mnemonicWithoutADAInput: ', mnemonicWithoutADAInput);
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       const SEPublicKey = await config.getSEPublicKey(transport!);
-      await apdu.wallet.setSeed(transport!, appId, props.appPrivateKey, mnemonicInput, SEPublicKey);
+      const seed = await bip39.mnemonicToSeed(mnemonicWithoutADAInput);
+      await apdu.wallet.setSeed(transport!, appId, props.appPrivateKey, seed.toString('hex'), SEPublicKey);
       return 'success';
     }, setMnemonicWithoutADAStatus);
   };
