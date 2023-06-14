@@ -1,4 +1,4 @@
-import { OKX } from '../src/chain';
+import { OKX, ZKSYNC } from '../src/chain';
 import { TokenProps } from '../src/chain/types';
 
 const buildTokenHex = (token: TokenProps) => {
@@ -12,3 +12,5 @@ const buildTokenHex = (token: TokenProps) => {
 
 console.log('OKX USDT: ', buildTokenHex(OKX.tokens.USDT));
 console.log('OKX USDC: ', buildTokenHex(OKX.tokens.USDC));
+console.log('ZKS USDC: ', buildTokenHex(ZKSYNC.tokens.USDC));
+console.log('ZKS WETH: ', buildTokenHex(ZKSYNC.tokens.WETH));
