@@ -1,8 +1,8 @@
 import { handleHex } from './stringUtil';
 import { EIP1559Transaction } from '../config/types';
-
-import Web3 from 'web3';
+import createKeccakHash from 'keccak';
 import rlp from 'rlp';
+
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
 const ec = new elliptic.ec('secp256k1');
@@ -53,12 +53,11 @@ export const genEthSigFromSESig = async (
   compressedPubkey: string | undefined = undefined
 ): Promise<{ v: number; r: string; s: string }> => {
   const prefixedPayload = Buffer.concat([Buffer.from([2]), payload]);
-  const hash = Web3.utils.keccak256(prefixedPayload);
-  const data = Buffer.from(handleHex(hash), 'hex');
+  const hash = createKeccakHash('keccak256').update(prefixedPayload).digest();
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
 
   // get v
-  const recoveryParam = ec.getKeyRecoveryParam(data, canonicalSignature, keyPair.pub);
+  const recoveryParam = ec.getKeyRecoveryParam(hash, canonicalSignature, keyPair.pub);
   const v = recoveryParam;
   const { r } = canonicalSignature;
   const { s } = canonicalSignature;
