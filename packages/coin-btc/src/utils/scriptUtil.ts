@@ -5,7 +5,7 @@ import * as txUtil from './transactionUtil';
 import * as varuint from './varuintUtil';
 import { COIN_TYPE } from '../config/param';
 import { utils } from '@coolwallet/core';
-import { ScriptType, Input, Output, Change, PreparedData } from '../config/types';
+import { ScriptType, Input, Output, Change, PreparedData, Callback } from '../config/types';
 
 const getPath = async (addressIndex: number) => {
   let path = await utils.getPath(COIN_TYPE, addressIndex);
@@ -20,7 +20,7 @@ export function getScriptSigningActions(
   appPrivateKey: string,
   preparedData: PreparedData
 ): {
-  actions: Array<Function>;
+  actions: Array<Callback>;
 } {
   const utxoArguments = preparedData.preparedInputs.map(async (preparedInput) => {
     // const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
@@ -64,7 +64,7 @@ export function getScriptSigningPreActions(
   script: string,
   inputArgument: string
 ): {
-  preActions: Array<Function>;
+  preActions: Array<Callback>;
 } {
   // const argument = "00" + getBTCArgument(redeemScriptType, inputs, output, change);// keylength zero
   const argument = '00' + inputArgument; // keylength zero

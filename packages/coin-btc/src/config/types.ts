@@ -1,6 +1,8 @@
 import { Transport } from '@coolwallet/core';
 export { Transport };
 
+export type Callback = () => void;
+
 export type signUSDTTxType = {
   transport: Transport;
   appPrivateKey: string;
@@ -10,8 +12,8 @@ export type signUSDTTxType = {
   output: Output;
   value: string;
   change?: Change;
-  confirmCB?(): void;
-  authorizedCB?(): void;
+  confirmCB?: Callback;
+  authorizedCB?: Callback;
 };
 
 export type signTxType = {
@@ -22,8 +24,8 @@ export type signTxType = {
   inputs: [Input];
   output: Output;
   change?: Change;
-  confirmCB?(): void;
-  authorizedCB?(): void;
+  confirmCB?: Callback;
+  authorizedCB?: Callback;
 };
 
 export type Input = {
