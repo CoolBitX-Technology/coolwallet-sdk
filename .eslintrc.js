@@ -33,7 +33,7 @@ module.exports = {
     '@typescript-eslint/indent': [
       'error',
       2,
-      { SwitchCase: 1, ignoredNodes: ['ConditionalExpression', 'TSTypeParameterInstantiation'] },
+      { SwitchCase: 1, ignoredNodes: ['ConditionalExpression', 'TSTypeParameterInstantiation', 'TSTypeLiteral'] },
     ],
     '@typescript-eslint/no-unused-expressions': ['error'],
     '@typescript-eslint/no-use-before-define': ['error'],
