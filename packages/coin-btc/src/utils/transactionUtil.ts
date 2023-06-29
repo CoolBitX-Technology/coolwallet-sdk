@@ -67,9 +67,9 @@ export function createUnsignedTransactions(
   redeemScriptType: ScriptType,
   inputs: Array<Input>,
   output: Output,
-  change: Change | undefined,
-  value?: string,
-  omniType?: OmniType,
+  change?: Change | null,
+  value?: string | null,
+  omniType?: OmniType | null,
   version = 1,
   lockTime = 0
 ): {

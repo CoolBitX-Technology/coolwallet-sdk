@@ -36,7 +36,7 @@ async function signTransaction(
   return transaction.toString('hex');
 }
 
-async function chsckRedeemScriptType(redeemScriptType: ScriptType) {
+async function checkRedeemScriptType(redeemScriptType: ScriptType) {
   if (
     redeemScriptType !== ScriptType.P2PKH &&
     redeemScriptType !== ScriptType.P2WPKH &&
@@ -53,15 +53,24 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
     inputs,
     output,
     change,
+    version,
     appId,
     appPrivateKey,
     confirmCB,
     authorizedCB,
   } = signTxData;
 
-  chsckRedeemScriptType(redeemScriptType);
+  checkRedeemScriptType(redeemScriptType);
 
-  const { preparedData } = txUtil.createUnsignedTransactions(redeemScriptType, inputs, output, change);
+  const { preparedData } = txUtil.createUnsignedTransactions(
+    redeemScriptType,
+    inputs,
+    output,
+    change,
+    /*value=*/ null,
+    /*omniType=*/ null,
+    version
+  );
 
   const argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
 
@@ -88,6 +97,7 @@ export async function signUSDTransaction(signUSDTTxData: signUSDTTxType): Promis
     inputs,
     output,
     change,
+    version,
     appId,
     appPrivateKey,
     confirmCB,
@@ -95,11 +105,19 @@ export async function signUSDTransaction(signUSDTTxData: signUSDTTxType): Promis
     value,
   } = signUSDTTxData;
 
-  chsckRedeemScriptType(redeemScriptType);
+  checkRedeemScriptType(redeemScriptType);
 
   const omniType = OmniType.USDT;
 
-  const { preparedData } = txUtil.createUnsignedTransactions(redeemScriptType, inputs, output, change, value, omniType);
+  const { preparedData } = txUtil.createUnsignedTransactions(
+    redeemScriptType,
+    inputs,
+    output,
+    change,
+    value,
+    omniType,
+    version
+  );
 
   const script = param.USDT.script + param.USDT.signature;
   const argument = await scriptUtil.getUSDTArgument(redeemScriptType, inputs, output, value, change);

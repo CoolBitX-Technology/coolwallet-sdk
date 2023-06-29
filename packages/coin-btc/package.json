@@ -1,9 +1,10 @@
 {
   "name": "@coolwallet/btc",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "Coolwallet Bitcoin sdk",
   "main": "lib/index.js",
   "scripts": {
+    "test": "jest --runInBand --testTimeout=60000",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
@@ -26,20 +27,21 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.1"
+    "@coolwallet/core": "^1.1.16"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.1",
-    "jest": "^26.0.1"
+    "@coolwallet/core": "^1.1.16",
+    "ecpair": "^2.1.0",
+    "tiny-secp256k1": "^2.2.2"
   },
   "dependencies": {
-    "@types/bn.js": "^4.11.6",
-    "bitcoinjs-lib": "^5.1.7",
-    "bn.js": "^5.1.1"
+    "@types/bn.js": "^5.1.1",
+    "bitcoinjs-lib": "^6.1.3",
+    "bn.js": "^5.2.1"
   },
   "repository": {
     "type": "git",
