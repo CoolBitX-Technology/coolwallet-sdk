@@ -4,7 +4,7 @@
   "description": "Coolwallet Bitcoin sdk",
   "main": "lib/index.js",
   "scripts": {
-    "test": "jest --runInBand --testTimeout=60000",
+    "test": "jest --runInBand --testTimeout=60000 --coverage",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
