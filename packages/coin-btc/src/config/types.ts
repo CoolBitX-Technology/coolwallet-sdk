@@ -8,10 +8,11 @@ export type signUSDTTxType = {
   appPrivateKey: string;
   appId: string;
   scriptType: ScriptType;
-  inputs: [Input];
+  inputs: Input[];
   output: Output;
   value: string;
   change?: Change;
+  version?: number;
   confirmCB?: Callback;
   authorizedCB?: Callback;
 };
@@ -21,9 +22,10 @@ export type signTxType = {
   appPrivateKey: string;
   appId: string;
   scriptType: ScriptType;
-  inputs: [Input];
+  inputs: Input[];
   output: Output;
   change?: Change;
+  version?: number;
   confirmCB?: Callback;
   authorizedCB?: Callback;
 };

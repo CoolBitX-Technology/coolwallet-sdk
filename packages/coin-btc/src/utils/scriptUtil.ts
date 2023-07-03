@@ -45,7 +45,7 @@ export function getScriptSigningActions(
   });
 
   const actions = utxoArguments.map((utxoArgument) => async () => {
-    console.debug('utxoArgument: ' + utxoArgument);
+    console.debug('utxoArgument: ' + await utxoArgument);
     return apdu.tx.executeUtxoScript(
       transport,
       appId,
