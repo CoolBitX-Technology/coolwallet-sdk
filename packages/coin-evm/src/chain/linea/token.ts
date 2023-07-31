@@ -1,1 +1,16 @@
-export const TOKENS = {};
+export const TOKENS = {
+  BUSD: {
+    name: 'Binance USD',
+    symbol: 'BUSD',
+    unit: '18',
+    contractAddress: '0x7d43AABC515C356145049227CeE54B608342c0ad',
+    signature: `1204425553440000007d43AABC515C356145049227CeE54B608342c0ad3045022100f0dda7276affca6e42465bf5ab13043f44a5783322accee8f07cd21b6d2d668f022019e1af2e80659007448927d9bbb84bbd50169f284a78ef4076b632a6b267929f`,
+  },
+  WETH: {
+    name: 'Wrapped Ether',
+    symbol: 'WETH',
+    unit: '18',
+    contractAddress: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+    signature: `120457455448000000e5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f304502201ff9a5abaa71c0149279729c9fbe99e6ef72f5c10c7b38a8247d535163b68f66022100ccd1bba1caaaf28c02c253eff477ec6d3c039d0d2572ceb466e5e031422a9c56`,
+  },
+};
