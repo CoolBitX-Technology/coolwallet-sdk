@@ -46,7 +46,6 @@ export async function getScriptSigningActions(
   const seVersion = await apdu.general.getSEVersion(transport);
 
   const actions = utxoArguments.map((utxoArgument) => async () => {
-    console.debug('utxoArgument: ' + (await utxoArgument));
     return apdu.tx.executeUtxoScript(
       transport,
       appId,
