@@ -13,15 +13,15 @@ const getPath = async (addressIndex: number) => {
   return path;
 };
 
-export function getScriptSigningActions(
+export async function getScriptSigningActions(
   transport: Transport,
   redeemScriptType: ScriptType,
   appId: string,
   appPrivateKey: string,
   preparedData: PreparedData
-): {
+): Promise<{
   actions: Array<Callback>;
-} {
+}> {
   const utxoArguments = preparedData.preparedInputs.map(async (preparedInput) => {
     // const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
     const path = await getPath(preparedInput.addressIndex);
@@ -43,15 +43,16 @@ export function getScriptSigningActions(
     const inputHash = cryptoUtil.hash160(preparedInput.pubkeyBuf);
     return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
   });
+  const seVersion = await apdu.general.getSEVersion(transport);
 
   const actions = utxoArguments.map((utxoArgument) => async () => {
-    console.debug('utxoArgument: ' + await utxoArgument);
     return apdu.tx.executeUtxoScript(
       transport,
       appId,
       appPrivateKey,
       await utxoArgument,
-      redeemScriptType === ScriptType.P2PKH ? '10' : '11'
+      // script type 14, 15 only support for se version greater than 330.
+      redeemScriptType === ScriptType.P2PKH ? (seVersion > 330 ? '14' : '10') : seVersion > 330 ? '15' : '11'
     );
   });
   return { actions };

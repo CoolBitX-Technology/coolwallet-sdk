@@ -15,7 +15,7 @@ async function signTransaction(
   confirmCB?: Callback,
   authorizedCB?: Callback
 ): Promise<string> {
-  const { actions } = scriptUtil.getScriptSigningActions(
+  const { actions } = await scriptUtil.getScriptSigningActions(
     transport,
     redeemScriptType,
     appId,
