@@ -87,13 +87,12 @@ export const executeSegmentScript = async (
   const total = args.length - 1;
   for (const [i, v] of args.entries()) {
     let counter = i;
-    // P1 and P2 is a single byte, if `i` is greater than 255, it will overflow to '100'
+    // P1 is a single byte, if `i` is greater than 255, it will overflow to '100'
     // which is not safe to use it. So if `i` is greater than 255 iterate again from 1.
     if (i > 255) {
       counter -= 255;
     }
     const p1 = counter.toString(16).padStart(2, '0');
-    const p2 = (counter + 1).toString(16).padStart(2, '0');
     const signature = await getCommandSignature(
       transport,
       appId,
@@ -101,7 +100,7 @@ export const executeSegmentScript = async (
       commands.EXECUTE_SEGMENT_SCRIPT,
       v,
       p1,
-      p2
+      undefined
     );
     const { outputData, statusCode, msg } = await executeCommand(
       transport,
@@ -109,7 +108,7 @@ export const executeSegmentScript = async (
       target.SE,
       v + signature,
       p1,
-      p2
+      undefined
     );
     if (i === total) {
       if (outputData) {
@@ -158,6 +157,63 @@ export const executeUtxoScript = async (
     return encryptedSignature;
   } else {
     throw new APDUError(commands.EXECUTE_UTXO_SCRIPT, statusCode, msg);
+  }
+};
+
+/**
+ * Scriptable step 3
+ * @param {*} transport
+ * @param {*} argument
+ */
+export const executeUtxoSegmentScript = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  utxoArgument: string
+) => {
+  if (utxoArgument.length > 2147483648 * 2) throw new Error('argument too long');
+
+  const args = utxoArgument.match(/.{2,3800}/g);
+  if (args === null) throw new Error('argument is empty');
+
+  if (args.length > 1) {
+    const version = await getSEVersion(transport);
+    if (version < 320) throw new Error('argument too long, try updating to support the longer data');
+  }
+
+  const total = args.length - 1;
+  for (const [i, v] of args.entries()) {
+    let counter = i;
+    // P1 is a single byte, if `i` is greater than 255, it will overflow to '100'
+    // which is not safe to use it. So if `i` is greater than 255 iterate again from 1.
+    if (i > 255) {
+      counter -= 255;
+    }
+    const p1 = counter.toString(16).padStart(2, '0');
+    const signature = await getCommandSignature(
+      transport,
+      appId,
+      appPrivKey,
+      commands.EXECUTE_UTXO_SEGMENT_SCRIPT,
+      v,
+      p1,
+      undefined
+    );
+    const { outputData, statusCode, msg } = await executeCommand(
+      transport,
+      commands.EXECUTE_UTXO_SEGMENT_SCRIPT,
+      target.SE,
+      v + signature,
+      p1,
+      undefined
+    );
+    if (i === total) {
+      if (outputData) {
+        return outputData;
+      } else {
+        throw new APDUError(commands.EXECUTE_SEGMENT_SCRIPT, statusCode, msg);
+      }
+    }
   }
 };
 
