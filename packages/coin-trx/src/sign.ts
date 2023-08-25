@@ -3,7 +3,23 @@ import { sha256 } from './utils/cryptoUtil';
 
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
-const ec = new elliptic.ec("secp256k1");
+const ec = new elliptic.ec('secp256k1');
+
+/**
+ * @description convert int to varint
+ * @param {number} int
+ * @return {string}
+ */
+function toVarint(int: number) {
+  const bytes = [];
+  while (int > 0) {
+    let out = int & 127;
+    int = int >> 7;
+    if (int > 0) out += 128;
+    bytes.push([out]);
+  }
+  return Buffer.from(bytes).toString('hex');
+}
 
 /**
  * sign TRX Transaction
@@ -25,9 +41,7 @@ export const signTransaction = async (
   argument: string,
   publicKey: string
 ): Promise<string> => {
-  const {
-    transport, appPrivateKey, appId, confirmCB, authorizedCB
-  } = signTxData;
+  const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = signTxData;
 
   const preActions = [];
   const sendScript = async () => {
@@ -36,12 +50,7 @@ export const signTransaction = async (
 
   preActions.push(sendScript);
 
-  const action = async () => apdu.tx.executeScript(
-    transport,
-    appId,
-    appPrivateKey,
-    argument
-  );
+  const action = async () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
   const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
     transport,
@@ -54,32 +63,12 @@ export const signTransaction = async (
   );
 
   if (Buffer.isBuffer(canonicalSignature)) return '';
-	const { r, s } = canonicalSignature;
+  const { r, s } = canonicalSignature;
   const { signedTx } = await apdu.tx.getSignedHex(transport);
-  const keyPair = ec.keyFromPublic(publicKey, "hex");
-  const v = ec.getKeyRecoveryParam(
-    sha256(Buffer.from(signedTx, 'hex')),
-    canonicalSignature,
-    keyPair.pub
-  );
+  const keyPair = ec.keyFromPublic(publicKey, 'hex');
+  const v = ec.getKeyRecoveryParam(sha256(Buffer.from(signedTx, 'hex')), canonicalSignature, keyPair.pub);
 
   const sig = r + s + v.toString().padStart(2, '0');
 
-	return '0a' + toVarint(signedTx.length/2) + signedTx + '12' + toVarint(sig.length/2) + sig;
+  return '0a' + toVarint(signedTx.length / 2) + signedTx + '12' + toVarint(sig.length / 2) + sig;
 };
-
-/**
- * @description convert int to varint
- * @param {number} int
- * @return {string}
- */
-function toVarint(int: number) {
-	const bytes = [];
-	while (int > 0) {
-		let out = int & 127;
-		int = int >> 7;
-		if (int > 0) out += 128;
-		bytes.push([out]);
-	}
-	return Buffer.from(bytes).toString('hex');
-}

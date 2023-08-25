@@ -53,6 +53,7 @@ export interface UnfreezeData extends SignTxData {
 export interface UnfreezeContract extends Transaction {
   contract: {
     resource: RESOURCE_CODE;
+    unfrozenBalance?: number | string;
     receiverAddress?: string;
     ownerAddress: string;
   };

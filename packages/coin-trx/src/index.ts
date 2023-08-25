@@ -1,4 +1,4 @@
-import { coin as COIN } from '@coolwallet/core';
+import { coin as COIN, error } from '@coolwallet/core';
 import * as trxSign from './sign';
 import * as scriptUtil from './utils/scriptUtil';
 import * as txUtil from './utils/transactionUtil';
@@ -41,6 +41,9 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
 
+  /**
+   * @deprecated The method should not use anymore
+   */
   async signFreeze(signTxData: type.FreezeData): Promise<string> {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const { receiverAddress, ownerAddress } = transaction.contract;
@@ -103,6 +106,40 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     const script = params.TRC20.script + params.TRC20.signature;
     const argument = await scriptUtil.getTRC20Argument(transaction, addressIndex);
+
+    return trxSign.signTransaction(signTxData, script, argument, publicKey);
+  }
+
+  async signFreezeV2(signTxData: type.FreezeData): Promise<string> {
+    const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
+    const { receiverAddress } = transaction.contract;
+    if (receiverAddress) {
+      throw new error.SDKError(
+        this.signFreezeV2.name,
+        `Sign freezeV2 does not support receiverAddress : ${receiverAddress}`
+      );
+    }
+    const script = params.FREEZE_V2.script + params.FREEZE_V2.signature;
+    const argument = await scriptUtil.getFreezeV2Argument(transaction, addressIndex);
+
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+    return trxSign.signTransaction(signTxData, script, argument, publicKey);
+  }
+
+  async signUnfreezeV2(signTxData: type.UnfreezeData): Promise<string> {
+    const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
+    const { receiverAddress } = transaction.contract;
+    if (receiverAddress) {
+      throw new error.SDKError(
+        this.signUnfreezeV2.name,
+        `Sign unfreezeV2 does not support receiverAddress : ${receiverAddress}`
+      );
+    }
+    const script = params.UNFREEZE_V2.script + params.UNFREEZE_V2.signature;
+    const argument = await scriptUtil.getUnfreezeV2Argument(transaction, addressIndex);
+
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
 
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
