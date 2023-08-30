@@ -198,7 +198,10 @@ export async function getBTCNewArgument(
   const reverseVersion = Buffer.from('02000000', 'hex');
 
   const prevouts = inputs.map((input) => {
-    return Buffer.concat([Buffer.from(input.preTxHash, 'hex'), bufferUtil.toReverseUintBuffer(input.preIndex, 4)]);
+    return Buffer.concat([
+      Buffer.from(input.preTxHash, 'hex').reverse(),
+      bufferUtil.toReverseUintBuffer(input.preIndex, 4),
+    ]);
   });
 
   const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
