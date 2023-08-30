@@ -26,3 +26,7 @@ console.log('OKX Information', CHAIN.OKX.toHexChainInfo());
 console.log('OKX Signature', CHAIN.OKX.getSignature());
 console.log('ZKS Information', CHAIN.ZKSYNC.toHexChainInfo());
 console.log('ZKS Signature', CHAIN.ZKSYNC.getSignature());
+console.log('Linea Information', CHAIN.LINEA.toHexChainInfo());
+console.log('Linea Signature', CHAIN.LINEA.getSignature());
+console.log('Base Information', CHAIN.BASE.toHexChainInfo());
+console.log('Base Signature', CHAIN.BASE.getSignature());
