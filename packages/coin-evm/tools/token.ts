@@ -1,4 +1,4 @@
-import { OKX, ZKSYNC } from '../src/chain';
+import { BASE, OKX, ZKSYNC } from '../src/chain';
 import { TokenProps } from '../src/chain/types';
 
 type BuildTokenHexInput = Pick<TokenProps, 'symbol' | 'unit' | 'contractAddress'>;
@@ -15,6 +15,12 @@ console.log('OKX USDT: ', buildTokenHex(OKX.tokens.USDT));
 console.log('OKX USDC: ', buildTokenHex(OKX.tokens.USDC));
 console.log('ZKS USDC: ', buildTokenHex(ZKSYNC.tokens.USDC));
 console.log('ZKS WETH: ', buildTokenHex(ZKSYNC.tokens.WETH));
+console.log('BASE WETH: ', buildTokenHex(BASE.tokens.WETH));
+console.log('BASE USDbC: ', buildTokenHex(BASE.tokens.USDbC));
+console.log('BASE axlUSDC: ', buildTokenHex(BASE.tokens.axlUSDC))
+console.log('BASE BSWAP: ', buildTokenHex(BASE.tokens.BSWAP));
+console.log('BASE BASE: ', buildTokenHex(BASE.tokens.BASE));
+
 
 const tokenGALA: BuildTokenHexInput = {
   symbol: 'GALA',

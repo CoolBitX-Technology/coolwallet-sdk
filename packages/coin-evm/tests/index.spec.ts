@@ -39,6 +39,7 @@ const coinOKX = { name: 'OKX', api: new EVM(CHAIN.OKX) };
 const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
 const coinZkSync = { name: 'zkSync', api: new EVM(CHAIN.ZKSYNC) };
+const coinBase = { name: 'Base', api: new EVM(CHAIN.BASE) };
 
 const TEST_COINS = [
   coinCronos,
@@ -51,6 +52,7 @@ const TEST_COINS = [
   coinFlare,
   coinOKX,
   coinZkSync,
+  coinBase,
 ];
 
 describe('Test EVM SDK', () => {
