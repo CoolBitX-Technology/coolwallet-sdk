@@ -232,7 +232,7 @@ export async function getBTCNewArgument(
   let changeAmount;
   let changePath;
   if (change) {
-    if (!change.pubkeyBuf) throw new error.SDKError(getBTCArgument.name, 'Public Key not exists !!');
+    if (!change.pubkeyBuf) throw new error.SDKError(getBTCNewArgument.name, 'Public Key not exists !!');
     haveChange = varuint.encode(1);
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
     changeAmount = bufferUtil.toUintBuffer(change.value, 8);
