@@ -88,7 +88,7 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
 
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
 
-  return await signTransaction(
+  return signTransaction(
     transport,
     appId,
     appPrivateKey,
@@ -129,12 +129,20 @@ export async function signUSDTransaction(signUSDTTxData: signUSDTTxType): Promis
     omniType,
     version
   );
+  const seVersion = await apdu.general.getSEVersion(transport);
 
-  const script = param.USDT.script + param.USDT.signature;
-  const argument = await scriptUtil.getUSDTArgument(redeemScriptType, inputs, output, value, change);
+  let script;
+  let argument;
+
+  if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
+    script = param.NEW_USDT.script + param.NEW_USDT.signature;
+    argument = await scriptUtil.getUSDTNewArgument(redeemScriptType, inputs, output, value, change);
+  } else {
+    script = param.USDT.script + param.USDT.signature;
+    argument = await scriptUtil.getUSDTArgument(redeemScriptType, inputs, output, value, change);
+  }
 
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
-  const seVersion = await apdu.general.getSEVersion(transport);
 
   return await signTransaction(
     transport,
