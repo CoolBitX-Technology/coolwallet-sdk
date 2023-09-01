@@ -211,7 +211,7 @@ export const executeUtxoSegmentScript = async (
       if (outputData) {
         return outputData;
       } else {
-        throw new APDUError(commands.EXECUTE_SEGMENT_SCRIPT, statusCode, msg);
+        throw new APDUError(commands.EXECUTE_UTXO_SEGMENT_SCRIPT, statusCode, msg);
       }
     }
   }

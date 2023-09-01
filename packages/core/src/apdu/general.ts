@@ -97,7 +97,7 @@ export const resetCard = async (transport: Transport): Promise<boolean> => {
   if (statusCode === CODE._9000) {
     return true;
   } else {
-    throw new APDUError(commands.GET_NONCE, statusCode, msg);
+    throw new APDUError(commands.RESET_PAIR, statusCode, msg);
   }
 };
 
