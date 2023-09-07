@@ -193,7 +193,7 @@ export async function getBTCNewArgument(
 ): Promise<string> {
   const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
   if (!outputHash) {
-    throw new error.SDKError(getBTCArgument.name, `OutputHash Undefined`);
+    throw new error.SDKError(getBTCNewArgument.name, `OutputHash Undefined`);
   }
   const reverseVersion = Buffer.from('02000000', 'hex');
 
