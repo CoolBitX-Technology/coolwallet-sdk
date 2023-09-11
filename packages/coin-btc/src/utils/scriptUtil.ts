@@ -6,6 +6,7 @@ import * as varuint from './varuintUtil';
 import { COIN_TYPE } from '../config/param';
 import { utils } from '@coolwallet/core';
 import { ScriptType, Input, Output, Change, PreparedData, Callback } from '../config/types';
+import { pubkeyToAddressAndOutScript } from './transactionUtil';
 
 const getPath = async (addressIndex: number) => {
   let path = await utils.getPath(COIN_TYPE, addressIndex);
@@ -18,10 +19,44 @@ export async function getScriptSigningActions(
   redeemScriptType: ScriptType,
   appId: string,
   appPrivateKey: string,
-  preparedData: PreparedData
+  preparedData: PreparedData,
+  seVersion: number
 ): Promise<{
   actions: Array<Callback>;
 }> {
+  if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
+    const utxoArguments = preparedData.preparedInputs.map(async (preparedInput) => {
+      const SEPath = Buffer.from(await getPath(preparedInput.addressIndex), 'hex');
+      const outPoint = preparedInput.preOutPointBuf;
+      let inputScript;
+      switch (redeemScriptType) {
+        case ScriptType.P2SH_P2WPKH:
+        case ScriptType.P2WPKH: {
+          const { outScript } = pubkeyToAddressAndOutScript(preparedInput.pubkeyBuf, ScriptType.P2PKH);
+          inputScript = outScript;
+          break;
+        }
+        case ScriptType.P2WSH:
+          inputScript = Buffer.from('', 'hex');
+          break;
+        default:
+          throw new error.SDKError(getScriptSigningActions.name, `Unsupport ScriptType '${redeemScriptType}'`);
+      }
+      const inputAmount = preparedInput.preValueBuf;
+      return Buffer.concat([
+        SEPath,
+        outPoint,
+        Buffer.from(inputScript.length.toString(16), 'hex'),
+        inputScript,
+        inputAmount,
+      ]).toString('hex');
+    });
+
+    const actions = utxoArguments.map((utxoArgument) => async () => {
+      return apdu.tx.executeUtxoSegmentScript(transport, appId, appPrivateKey, await utxoArgument);
+    });
+    return { actions };
+  }
   const utxoArguments = preparedData.preparedInputs.map(async (preparedInput) => {
     // const addressIdHex = "00".concat(preparedInput.addressIndex.toString(16).padStart(6, "0"));
     const path = await getPath(preparedInput.addressIndex);
@@ -30,9 +65,9 @@ export async function getScriptSigningActions(
     let inputScriptType;
     // TODO
     if (
-      redeemScriptType == ScriptType.P2PKH ||
-      redeemScriptType == ScriptType.P2WPKH ||
-      redeemScriptType == ScriptType.P2SH_P2WPKH
+      redeemScriptType === ScriptType.P2PKH ||
+      redeemScriptType === ScriptType.P2WPKH ||
+      redeemScriptType === ScriptType.P2SH_P2WPKH
     ) {
       inputScriptType = varuint.encode(0);
     } else {
@@ -43,7 +78,6 @@ export async function getScriptSigningActions(
     const inputHash = cryptoUtil.hash160(preparedInput.pubkeyBuf);
     return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
   });
-  const seVersion = await apdu.general.getSEVersion(transport);
 
   const actions = utxoArguments.map((utxoArgument) => async () => {
     return apdu.tx.executeUtxoScript(
@@ -97,10 +131,10 @@ export async function getBTCArgument(
   }
   let outputScriptType;
   let outputHashBuf;
-  if (outputType == ScriptType.P2PKH || outputType == ScriptType.P2SH_P2WPKH || outputType == ScriptType.P2WPKH) {
+  if (outputType === ScriptType.P2PKH || outputType === ScriptType.P2SH_P2WPKH || outputType === ScriptType.P2WPKH) {
     outputScriptType = varuint.encode(outputType);
     outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-  } else if (outputType == ScriptType.P2WSH) {
+  } else if (outputType === ScriptType.P2WSH) {
     outputScriptType = varuint.encode(outputType);
     outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
   } else {
@@ -151,6 +185,89 @@ export async function getBTCArgument(
   ]).toString('hex');
 }
 
+export async function getBTCNewArgument(
+  scriptType: ScriptType,
+  inputs: Array<Input>,
+  output: Output,
+  change?: Change
+): Promise<string> {
+  const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
+  if (!outputHash) {
+    throw new error.SDKError(getBTCNewArgument.name, `OutputHash Undefined`);
+  }
+  const reverseVersion = Buffer.from('02000000', 'hex');
+
+  const prevouts = inputs.map((input) => {
+    return Buffer.concat([
+      Buffer.from(input.preTxHash, 'hex').reverse(),
+      bufferUtil.toReverseUintBuffer(input.preIndex, 4),
+    ]);
+  });
+
+  const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
+  const sequences = inputs.map((input) => {
+    return Buffer.concat([
+      input.sequence ? bufferUtil.toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
+    ]);
+  });
+  const hashSequences = cryptoUtil.doubleSha256(Buffer.concat(sequences));
+
+  const zeroPadding = Buffer.from('00000000', 'hex');
+
+  let outputScriptType;
+  let outputHashBuf;
+  if (outputType === ScriptType.P2PKH || outputType === ScriptType.P2SH_P2WPKH || outputType === ScriptType.P2WPKH) {
+    outputScriptType = varuint.encode(outputType);
+    outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+  } else if (outputType === ScriptType.P2WSH) {
+    outputScriptType = varuint.encode(outputType);
+    outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
+  } else {
+    throw new error.SDKError(getBTCArgument.name, `Unsupport ScriptType '${outputType}'`);
+  }
+  const outputAmount = bufferUtil.toUintBuffer(output.value, 8);
+  //[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
+  let haveChange;
+  let changeScriptType;
+  let changeAmount;
+  let changePath;
+  if (change) {
+    if (!change.pubkeyBuf) throw new error.SDKError(getBTCNewArgument.name, 'Public Key not exists !!');
+    haveChange = varuint.encode(1);
+    changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
+    changeAmount = bufferUtil.toUintBuffer(change.value, 8);
+    changePath = Buffer.from(await utils.getPath(COIN_TYPE, change.addressIndex), 'hex');
+  } else {
+    haveChange = Buffer.from('00', 'hex');
+    changeScriptType = Buffer.from('00', 'hex');
+    changeAmount = bufferUtil.toUintBuffer(0, 8); //)Buffer.from('0000000000000000', 'hex');
+    changePath = bufferUtil.toUintBuffer(0, 21); //Buffer.from('000000000000000000000000000000000000000000', 'hex');
+  }
+
+  const reverseSequence = Buffer.from('fdffffff', 'hex');
+
+  const reverseLockTime = Buffer.from('00000000', 'hex');
+
+  const reverseHashType = Buffer.from('01000000', 'hex');
+
+  return Buffer.concat([
+    reverseVersion,
+    hashPrevouts,
+    hashSequences,
+    zeroPadding,
+    outputScriptType,
+    outputAmount,
+    outputHashBuf,
+    haveChange,
+    changeScriptType,
+    changeAmount,
+    changePath,
+    reverseSequence,
+    reverseLockTime,
+    reverseHashType,
+  ]).toString('hex');
+}
+
 export async function getUSDTArgument(
   scriptType: ScriptType,
   inputs: Array<Input>,
@@ -164,10 +281,10 @@ export async function getUSDTArgument(
   }
   let outputScriptType;
   let outputHashBuf;
-  if (outputType == ScriptType.P2PKH || outputType == ScriptType.P2SH_P2WPKH || outputType == ScriptType.P2WPKH) {
+  if (outputType === ScriptType.P2PKH || outputType === ScriptType.P2SH_P2WPKH || outputType === ScriptType.P2WPKH) {
     outputScriptType = varuint.encode(outputType);
     outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-  } else if (outputType == ScriptType.P2WSH) {
+  } else if (outputType === ScriptType.P2WSH) {
     outputScriptType = varuint.encode(outputType);
     outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
   } else {
@@ -218,5 +335,91 @@ export async function getUSDTArgument(
     hashPrevouts,
     hashSequence,
     usdtAmount,
+  ]).toString('hex');
+}
+
+export async function getUSDTNewArgument(
+  scriptType: ScriptType,
+  inputs: Array<Input>,
+  output: Output,
+  value: string,
+  change?: Change
+): Promise<string> {
+  const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
+  if (!outputHash) {
+    throw new error.SDKError(getBTCArgument.name, `OutputHash Undefined`);
+  }
+  const reverseVersion = Buffer.from('02000000', 'hex');
+
+  const prevouts = inputs.map((input) => {
+    return Buffer.concat([
+      Buffer.from(input.preTxHash, 'hex').reverse(),
+      bufferUtil.toReverseUintBuffer(input.preIndex, 4),
+    ]);
+  });
+
+  const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
+  const sequences = inputs.map((input) => {
+    return Buffer.concat([
+      input.sequence ? bufferUtil.toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
+    ]);
+  });
+  const hashSequences = cryptoUtil.doubleSha256(Buffer.concat(sequences));
+
+  const zeroPadding = Buffer.from('00000000', 'hex');
+  const usdtDust = bufferUtil.toUintBuffer(output.value, 8);
+
+  let outputScriptType;
+  let outputHashBuf;
+  if (outputType === ScriptType.P2PKH || outputType === ScriptType.P2SH_P2WPKH || outputType === ScriptType.P2WPKH) {
+    outputScriptType = varuint.encode(outputType);
+    outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+  } else if (outputType === ScriptType.P2WSH) {
+    outputScriptType = varuint.encode(outputType);
+    outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
+  } else {
+    throw new error.SDKError(getBTCArgument.name, `Unsupport ScriptType '${outputType}'`);
+  }
+  const usdtAmount = bufferUtil.toUintBuffer(value, 8);
+  //[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
+  let haveChange;
+  let changeScriptType;
+  let changeAmount;
+  let changePath;
+  if (change) {
+    if (!change.pubkeyBuf) throw new error.SDKError(getBTCNewArgument.name, 'Public Key not exists !!');
+    haveChange = varuint.encode(1);
+    changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
+    changeAmount = bufferUtil.toUintBuffer(change.value, 8);
+    changePath = Buffer.from(await utils.getPath(COIN_TYPE, change.addressIndex), 'hex');
+  } else {
+    haveChange = Buffer.from('00', 'hex');
+    changeScriptType = Buffer.from('00', 'hex');
+    changeAmount = bufferUtil.toUintBuffer(0, 8); //)Buffer.from('0000000000000000', 'hex');
+    changePath = bufferUtil.toUintBuffer(0, 21); //Buffer.from('000000000000000000000000000000000000000000', 'hex');
+  }
+
+  const reverseSequence = Buffer.from('fdffffff', 'hex');
+
+  const reverseLockTime = Buffer.from('00000000', 'hex');
+
+  const reverseHashType = Buffer.from('01000000', 'hex');
+
+  return Buffer.concat([
+    reverseVersion,
+    hashPrevouts,
+    hashSequences,
+    zeroPadding,
+    outputScriptType,
+    usdtDust,
+    usdtAmount,
+    outputHashBuf,
+    haveChange,
+    changeScriptType,
+    changeAmount,
+    changePath,
+    reverseSequence,
+    reverseLockTime,
+    reverseHashType,
   ]).toString('hex');
 }

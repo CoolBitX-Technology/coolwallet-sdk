@@ -68,5 +68,6 @@ module.exports = {
     eqeqeq: 'warn',
     'block-scoped-var': 'error',
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
+    '@typescript-eslint/no-inferrable-types': 'off',
   },
 };
