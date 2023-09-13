@@ -1,25 +1,22 @@
 import { getPublicKeyByPath, derivePubKey } from './derive';
 import Transport from '../transport';
 import * as utils from '../utils';
+import { PathType } from '../config/param';
 
 const EC = require('elliptic').ec;
 
 export default class ECDSACoin {
   coinType: string;
 
-  accPublicKey: string;
-
-  accChainCode: string;
-
-  publicKeys: string[];
-
+  accExtendPublicKeyMap: Map<number, { publicKey: string; chainCode: string; indexPublicKeys: Map<number, string> }>;
   ec: any;
 
   constructor(coinType: string, curvePara?: string) {
     this.coinType = coinType;
-    this.accPublicKey = '';
-    this.accChainCode = '';
-    this.publicKeys = [];
+    this.accExtendPublicKeyMap = new Map<
+      number,
+      { publicKey: string; chainCode: string; indexPublicKeys: Map<number, string> }
+    >();
     if (!curvePara) {
       this.ec = new EC('secp256k1');
     } else {
@@ -32,37 +29,64 @@ export default class ECDSACoin {
    * For ECDSA based coins
    */
   getPublicKey = async (
-    transport: Transport, appPrivateKey: string, appId: string, addressIndex: number
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    addressIndex: number,
+    purpose?: number
   ): Promise<string> => {
-    if (this.accPublicKey === '' || this.accChainCode === '') {
-      await this.getAccountPubKeyAndChainCode(transport, appPrivateKey, appId);
+    if (!purpose) {
+      purpose = 44;
     }
-    if (!this.publicKeys[addressIndex]) {
-      const node = derivePubKey(this.accPublicKey, this.accChainCode, 0, addressIndex);
-      this.publicKeys[addressIndex] = node.publicKey;
+    const accExtendPublicKey = this.accExtendPublicKeyMap.get(purpose);
+    if (!accExtendPublicKey) {
+      const extAccKey = await this.getAccountPubKeyAndChainCode(transport, appPrivateKey, appId, purpose);
+      const node = derivePubKey(extAccKey.accountPublicKey, extAccKey.accountChainCode, 0, addressIndex);
+      const indexPublicKeys = new Map<number, string>();
+      indexPublicKeys.set(addressIndex, node.publicKey);
+      this.accExtendPublicKeyMap.set(44, {
+        publicKey: extAccKey.accountPublicKey,
+        chainCode: extAccKey.accountChainCode,
+        indexPublicKeys,
+      });
+      return node.publicKey;
+    } else {
+      const indexPublicKey = accExtendPublicKey.indexPublicKeys.get(addressIndex);
+      if (indexPublicKey) {
+        return indexPublicKey;
+      }
+      const node = derivePubKey(accExtendPublicKey.publicKey, accExtendPublicKey.chainCode, 0, addressIndex);
+      accExtendPublicKey.indexPublicKeys.set(addressIndex, node.publicKey);
+      return node.publicKey;
     }
-    return this.publicKeys[addressIndex];
-  }
+  };
 
   getAccountPubKeyAndChainCode = async (
-    transport: Transport, appPrivateKey: string, appId: string
-  ): Promise<{accountPublicKey:string, accountChainCode:string}> => {
-    if (this.accPublicKey === '' || this.accChainCode === '') {
-      const path = await utils.getPath(this.coinType, 0, 3);
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    purpose?: number
+  ): Promise<{ accountPublicKey: string; accountChainCode: string }> => {
+    if (!purpose) {
+      purpose = 44;
+    }
+    const accExtendPublicKey = this.accExtendPublicKeyMap.get(purpose);
+    if (!accExtendPublicKey) {
+      const path = await utils.getPath(this.coinType, 0, 3, PathType.BIP32, purpose);
       const decryptedData = await getPublicKeyByPath(transport, appId, appPrivateKey, path);
       const accBuf = Buffer.from(decryptedData, 'hex');
-      this.accPublicKey = accBuf.slice(0, 33).toString('hex');
-      this.accChainCode = accBuf.slice(33).toString('hex');
+      const accPublicKey = accBuf.subarray(0, 33).toString('hex');
+      const accChainCode = accBuf.subarray(33).toString('hex');
+      return { accountPublicKey: accPublicKey, accountChainCode: accChainCode };
+    } else {
+      return { accountPublicKey: accExtendPublicKey.publicKey, accountChainCode: accExtendPublicKey.chainCode };
     }
-    return { accountPublicKey: this.accPublicKey, accountChainCode: this.accChainCode };
-  }
+  };
 
-  getAddressPublicKey = (
-    accPublicKey: string, accChainCode: string, addressIndex: number
-  ): string => {
+  getAddressPublicKey = (accPublicKey: string, accChainCode: string, addressIndex: number): string => {
     const node = derivePubKey(accPublicKey, accChainCode, 0, addressIndex);
     return node.publicKey;
-  }
+  };
 
   /**
    * decompress public key
