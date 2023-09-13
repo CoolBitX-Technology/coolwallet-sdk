@@ -1,21 +1,21 @@
 import BigNumber from 'bignumber.js';
-import { utils } from '@coolwallet/core';
+import { utils, error } from '@coolwallet/core';
 import * as param from '../config/params';
 import { TOKENTYPE } from '../config/tokenType';
 import {
-	NormalContract,
-	FreezeContract,
-	UnfreezeContract,
-	VoteWitnessContract,
-	WithdrawBalanceContract,
-	TRC20TransferContract
+  NormalContract,
+  FreezeContract,
+  UnfreezeContract,
+  VoteWitnessContract,
+  WithdrawBalanceContract,
+  TRC20TransferContract,
 } from '../config/types';
 
 const sanitizeAddress = (address: string): string => {
-	if (address.startsWith('41') && address.length === 42) {
-		return address.slice(2);
-	}
-	throw new Error('The accepted address format is 21 bytes long and starts with "41"!!');
+  if (address.startsWith('41') && address.length === 42) {
+    return address.slice(2);
+  }
+  throw new Error('The accepted address format is 21 bytes long and starts with "41"!!');
 };
 
 const removeHex0x = (hex: string): string => (hex.slice(0, 2) === '0x' ? hex.slice(2) : hex);
@@ -23,43 +23,36 @@ const evenHexDigit = (hex: string): string => (hex.length % 2 !== 0 ? `0${hex}` 
 const handleHex = (hex: string): string => evenHexDigit(removeHex0x(hex));
 
 const getSetTokenPayload = (contractAddress: string, symbol: string, decimals: string): string => {
-	const unit = handleHex(parseInt(decimals, 10).toString(16));
-	const len = handleHex(symbol.length.toString(16));
-	const symb = handleHex(Buffer.from(symbol).toString('hex'));
-	const setTokenPayload = unit + len + symb.padEnd(14, '0') + removeHex0x(contractAddress);
-	return setTokenPayload;
+  const unit = handleHex(parseInt(decimals, 10).toString(16));
+  const len = handleHex(symbol.length.toString(16));
+  const symb = handleHex(Buffer.from(symbol).toString('hex'));
+  const setTokenPayload = unit + len + symb.padEnd(14, '0') + removeHex0x(contractAddress);
+  return setTokenPayload;
 };
 
 const addPath = async (argument: string, addressIndex: number): Promise<string> => {
-	const SEPath = `15${await utils.getPath(param.COIN_TYPE, addressIndex)}`;
-	return SEPath + argument;
+  const SEPath = `15${await utils.getPath(param.COIN_TYPE, addressIndex)}`;
+  return SEPath + argument;
 };
 
-const numberToHex = (num: number|string, pad = 20): string => {
-	const tBN = new BigNumber(num);
-	return tBN.toString(16).padStart(pad, '0');
+const numberToHex = (num: number | string, pad = 20): string => {
+  const tBN = new BigNumber(num);
+  return tBN.toString(16).padStart(pad, '0');
 };
 
-export const getNormalTradeArgument = async (
-	rawData: NormalContract,
-	addressIndex: number
-): Promise<string> => {
-	const {
-		refBlockBytes,
-		refBlockHash,
-		expiration,
-		timestamp,
-		contract
-	} = rawData;
-	const {
-		ownerAddress,
-		toAddress,
-		amount
-	} = contract;
-	const argument = refBlockBytes + refBlockHash + numberToHex(expiration)
-		+ ownerAddress + toAddress + numberToHex(amount) + numberToHex(timestamp);
+export const getNormalTradeArgument = async (rawData: NormalContract, addressIndex: number): Promise<string> => {
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress, toAddress, amount } = contract;
+  const argument =
+    refBlockBytes +
+    refBlockHash +
+    numberToHex(expiration) +
+    ownerAddress +
+    toAddress +
+    numberToHex(amount) +
+    numberToHex(timestamp);
 
-	return addPath(argument, addressIndex);
+  return addPath(argument, addressIndex);
 };
 
 /*
@@ -74,29 +67,24 @@ export const getNormalTradeArgument = async (
   + "0000000001768893DA8A"; //timestamp
 */
 export const getFreezeArgument = async (
-	rawData: FreezeContract,
-	addressIndex: number,
-	hasReceiver: boolean
+  rawData: FreezeContract,
+  addressIndex: number,
+  hasReceiver: boolean
 ): Promise<string> => {
-	const {
-		refBlockBytes,
-		refBlockHash,
-		expiration,
-		timestamp,
-		contract
-	} = rawData;
-	const {
-		ownerAddress,
-		receiverAddress,
-		frozenBalance,
-		frozenDuration,
-		resource
-	} = contract;
-	const argument = refBlockBytes + refBlockHash + numberToHex(expiration) + ownerAddress
-		+ numberToHex(frozenBalance) + numberToHex(frozenDuration) + resource
-		+ (hasReceiver ? receiverAddress : '') + numberToHex(timestamp);
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress, receiverAddress, frozenBalance, frozenDuration, resource } = contract;
+  const argument =
+    refBlockBytes +
+    refBlockHash +
+    numberToHex(expiration) +
+    ownerAddress +
+    numberToHex(frozenBalance) +
+    numberToHex(frozenDuration) +
+    resource +
+    (hasReceiver ? receiverAddress : '') +
+    numberToHex(timestamp);
 
-	return addPath(argument, addressIndex);
+  return addPath(argument, addressIndex);
 };
 
 /**
@@ -109,26 +97,22 @@ export const getFreezeArgument = async (
   + "0000000001765F16E047"; //timestamp
  */
 export const getUnfreezeArgument = async (
-	rawData: UnfreezeContract,
-	addressIndex: number,
-	hasReceiver: boolean
+  rawData: UnfreezeContract,
+  addressIndex: number,
+  hasReceiver: boolean
 ): Promise<string> => {
-	const {
-		refBlockBytes,
-		refBlockHash,
-		expiration,
-		timestamp,
-		contract
-	} = rawData;
-	const {
-		ownerAddress,
-		receiverAddress,
-		resource
-	} = contract;
-	const argument = refBlockBytes + refBlockHash + numberToHex(expiration) + ownerAddress
-		+ resource + (hasReceiver ? receiverAddress : '') + numberToHex(timestamp);
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress, receiverAddress, resource } = contract;
+  const argument =
+    refBlockBytes +
+    refBlockHash +
+    numberToHex(expiration) +
+    ownerAddress +
+    resource +
+    (hasReceiver ? receiverAddress : '') +
+    numberToHex(timestamp);
 
-	return addPath(argument, addressIndex);
+  return addPath(argument, addressIndex);
 };
 
 /**
@@ -140,26 +124,19 @@ export const getUnfreezeArgument = async (
     + "00000000000000000001" //vote_count
     + "0000000001764B9E8D43"; //timestamp
  */
-export const getVoteWitnessArgument = async (
-	rawData: VoteWitnessContract,
-	addressIndex: number
-): Promise<string> => {
-	const {
-		refBlockBytes,
-		refBlockHash,
-		expiration,
-		timestamp,
-		contract
-	} = rawData;
-	const {
-		ownerAddress,
-		voteAddress,
-		voteCount
-	} = contract;
-	const argument = refBlockBytes + refBlockHash + numberToHex(expiration)
-			+ ownerAddress + voteAddress + numberToHex(voteCount) + numberToHex(timestamp);
+export const getVoteWitnessArgument = async (rawData: VoteWitnessContract, addressIndex: number): Promise<string> => {
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress, voteAddress, voteCount } = contract;
+  const argument =
+    refBlockBytes +
+    refBlockHash +
+    numberToHex(expiration) +
+    ownerAddress +
+    voteAddress +
+    numberToHex(voteCount) +
+    numberToHex(timestamp);
 
-	return addPath(argument, addressIndex);
+  return addPath(argument, addressIndex);
 };
 
 /**
@@ -170,22 +147,43 @@ export const getVoteWitnessArgument = async (
   + "0000000001764B9E8D43"; //timestamp
  */
 export const getWithdrawBalanceArgument = async (
-	rawData: WithdrawBalanceContract,
-	addressIndex: number
+  rawData: WithdrawBalanceContract,
+  addressIndex: number
 ): Promise<string> => {
-	const {
-		refBlockBytes,
-		refBlockHash,
-		expiration,
-		timestamp,
-		contract
-	} = rawData;
-	const { ownerAddress } = contract;
-	const argument = refBlockBytes + refBlockHash + numberToHex(expiration)
-			+ ownerAddress + numberToHex(timestamp);
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress } = contract;
+  const argument = refBlockBytes + refBlockHash + numberToHex(expiration) + ownerAddress + numberToHex(timestamp);
 
-	return addPath(argument, addressIndex);
+  return addPath(argument, addressIndex);
 };
+
+function checkTokenInfo(transaction: TRC20TransferContract): {
+  symbol: string;
+  decimals: string;
+  tokenSignature: string;
+} {
+  let { symbol, decimals } = (transaction.option && transaction.option.info) || {};
+
+  // check if official token
+  let contractAddress = sanitizeAddress(transaction.contract.contractAddress);
+  contractAddress = contractAddress.toUpperCase();
+  let tokenSignature = '';
+  for (const tokenInfo of TOKENTYPE) {
+    if (tokenInfo.contractAddress.toUpperCase() === contractAddress) {
+      tokenSignature = tokenInfo.signature;
+      symbol = tokenInfo.symbol;
+      decimals = tokenInfo.decimals;
+      break;
+    }
+  }
+
+  // verify token info
+  if (!symbol || !decimals) {
+    throw new Error('Token symbol and decimals are required');
+  }
+
+  return { symbol, decimals, tokenSignature };
+}
 
 /**
  = "676c" //ref_block_bytes
@@ -198,57 +196,79 @@ export const getWithdrawBalanceArgument = async (
  + "000000000178c3fa8184" //timestamp
  + "00000000000005f5e100";// fee_limit
  */
-export const getTRC20Argument = async (
-	transaction: TRC20TransferContract, addressIndex: number
-): Promise<string> => {
-	const {
-		refBlockBytes,
-		refBlockHash,
-		expiration,
-		timestamp,
-		contract,
-		feeLimit,
-	} = transaction;
+export const getTRC20Argument = async (transaction: TRC20TransferContract, addressIndex: number): Promise<string> => {
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract, feeLimit } = transaction;
 
-	const { symbol, decimals, tokenSignature } = checkTokenInfo(transaction);
+  const { symbol, decimals, tokenSignature } = checkTokenInfo(transaction);
 
-	const ownerAddress = sanitizeAddress(contract.ownerAddress);
-	const contractAddress = sanitizeAddress(contract.contractAddress);
-	const receiverAddress = sanitizeAddress(contract.receiverAddress);
+  const ownerAddress = sanitizeAddress(contract.ownerAddress);
+  const contractAddress = sanitizeAddress(contract.contractAddress);
+  const receiverAddress = sanitizeAddress(contract.receiverAddress);
 
-	const tokenInfo = getSetTokenPayload(contractAddress, symbol, decimals);
-	const signature = tokenSignature.padStart(144, '0');
-	const argument = refBlockBytes + refBlockHash + numberToHex(expiration)
-		+ ownerAddress + tokenInfo + signature + receiverAddress + numberToHex(contract.amount, 24)
-		+ numberToHex(timestamp) + numberToHex(feeLimit);
+  const tokenInfo = getSetTokenPayload(contractAddress, symbol, decimals);
+  const signature = tokenSignature.padStart(144, '0');
+  const argument =
+    refBlockBytes +
+    refBlockHash +
+    numberToHex(expiration) +
+    ownerAddress +
+    tokenInfo +
+    signature +
+    receiverAddress +
+    numberToHex(contract.amount, 24) +
+    numberToHex(timestamp) +
+    numberToHex(feeLimit);
 
-	return addPath(argument, addressIndex);
+  return addPath(argument, addressIndex);
 };
 
-function checkTokenInfo(transaction: TRC20TransferContract): ({
-	symbol: string,
-	decimals: string,
-	tokenSignature: string
-}) {
-	let { symbol, decimals } = (transaction.option && transaction.option.info) || {};
+/*
+  = "61a2" //ref_block_bytes
+  + "952256953626c4dd" //ref_block_hash
+  + "00000000018A221C8100" //expiration
+  + "41ce8a0cf0c16d48bcf22825f6053248df653c89ca" //owner_address
+  + "00000000000077359400" //frozen_balance
+  + "01" //resource
+  + "00000000018A221B9A50"; //timestamp
+*/
+export const getFreezeV2Argument = async (rawData: FreezeContract, addressIndex: number): Promise<string> => {
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress, frozenBalance, resource } = contract;
+  const argument =
+    refBlockBytes +
+    refBlockHash +
+    numberToHex(expiration) +
+    ownerAddress +
+    numberToHex(frozenBalance) +
+    resource +
+    numberToHex(timestamp);
 
-	// check if official token
-	let contractAddress = sanitizeAddress(transaction.contract.contractAddress);
-	contractAddress = contractAddress.toUpperCase();
-	let tokenSignature = '';
-	for (const tokenInfo of TOKENTYPE) {
-		if (tokenInfo.contractAddress.toUpperCase() === contractAddress) {
-			tokenSignature = tokenInfo.signature;
-			symbol = tokenInfo.symbol;
-			decimals = tokenInfo.decimals;
-			break;
-		}
-	}
+  return addPath(argument, addressIndex);
+};
 
-	// verify token info
-	if (!symbol || !decimals) {
-		throw new Error('Token symbol and decimals are required');
-	}
+/**
+	= "6454" //ref_block_bytes
+	+ "5007c4e46764b163" //ref_block_hash
+	+ "00000000018A223DB118" //expiration
+	+ "41ce8a0cf0c16d48bcf22825f6053248df653c89ca" //owner_address
+  + "000000000000000F4240" //unfrozen_balance
+	+ "01"//resource
+	+ "0000000001765F16E047"; //timestamp
+   */
+export const getUnfreezeV2Argument = async (rawData: UnfreezeContract, addressIndex: number): Promise<string> => {
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress, unfrozenBalance, resource } = contract;
+  if (!unfrozenBalance) {
+    throw new error.SDKError(getUnfreezeV2Argument.name, `SignUnfreezeV2 should have unfrozenBalance.`);
+  }
+  const argument =
+    refBlockBytes +
+    refBlockHash +
+    numberToHex(expiration) +
+    ownerAddress +
+    numberToHex(unfrozenBalance) +
+    resource +
+    numberToHex(timestamp);
 
-	return { symbol, decimals, tokenSignature };
-}
+  return addPath(argument, addressIndex);
+};
