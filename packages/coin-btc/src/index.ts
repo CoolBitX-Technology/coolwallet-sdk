@@ -19,9 +19,10 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     scriptType: ScriptType,
-    addressIndex: number
+    addressIndex: number,
+    purpose?: number
   ): Promise<string> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
     const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
     return address;
   }
