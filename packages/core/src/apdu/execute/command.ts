@@ -108,6 +108,12 @@ export const commands = {
     P1: '00',
     P2: '00',
   },
+  EXECUTE_UTXO_SEGMENT_SCRIPT: {
+    CLA: '80',
+    INS: 'AA',
+    P1: '00',
+    P2: '00',
+  },
   TX_PREPARE_FOR_TESTNET: {
     CLA: '80',
     INS: '42',
