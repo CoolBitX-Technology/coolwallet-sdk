@@ -8,8 +8,8 @@ import { utils } from '@coolwallet/core';
 import { ScriptType, Input, Output, Change, PreparedData, Callback } from '../config/types';
 import { pubkeyToAddressAndOutScript } from './transactionUtil';
 
-const getPath = async (addressIndex: number) => {
-  let path = await utils.getPath(COIN_TYPE, addressIndex);
+const getPath = async (addressIndex: number, purpose?: number) => {
+  let path = await utils.getPath(COIN_TYPE, addressIndex, purpose);
   path = '15' + path;
   return path;
 };
@@ -26,7 +26,7 @@ export async function getScriptSigningActions(
 }> {
   if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
     const utxoArguments = preparedData.preparedInputs.map(async (preparedInput) => {
-      const SEPath = Buffer.from(await getPath(preparedInput.addressIndex), 'hex');
+      const SEPath = Buffer.from(await getPath(preparedInput.addressIndex, preparedInput.purposeIndex), 'hex');
       const outPoint = preparedInput.preOutPointBuf;
       let inputScript;
       switch (redeemScriptType) {

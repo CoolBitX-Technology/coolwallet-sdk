@@ -37,6 +37,7 @@ export type Input = {
   sequence?: number;
   addressIndex: number;
   pubkeyBuf?: Buffer;
+  purposeIndex?: number;
 };
 
 export type Output = {
@@ -48,6 +49,7 @@ export type Change = {
   value: string;
   addressIndex: number;
   pubkeyBuf?: Buffer;
+  purposeIndex?: number;
 };
 
 export type PreparedData = {
@@ -59,6 +61,7 @@ export type PreparedData = {
     preOutPointBuf: Buffer;
     preValueBuf: Buffer;
     sequenceBuf: Buffer;
+    purposeIndex?: number;
   }[];
   outputType: ScriptType;
   outputsCount: Buffer;
