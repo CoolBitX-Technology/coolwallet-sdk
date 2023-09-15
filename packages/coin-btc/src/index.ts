@@ -19,9 +19,10 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     scriptType: ScriptType,
-    addressIndex: number
+    addressIndex: number,
+    purpose?: number
   ): Promise<string> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
     const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
     return address;
   }
@@ -31,9 +32,10 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     appPrivateKey: string,
     appId: string,
     scriptType: ScriptType,
-    addressIndex: number
+    addressIndex: number,
+    purpose?: number
   ): Promise<{ address: string; outScript: Buffer }> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
     return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
   }
 
@@ -43,7 +45,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     scriptType: ScriptType
   ): Promise<{ address: string; outScript: Buffer }> {
-    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
   }
 
@@ -54,7 +56,8 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
         signTxData.transport,
         signTxData.appPrivateKey,
         signTxData.appId,
-        input.addressIndex
+        input.addressIndex,
+        input.purposeIndex
       );
       input.pubkeyBuf = Buffer.from(pubkey, 'hex');
     }
@@ -63,7 +66,8 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
         signTxData.transport,
         signTxData.appPrivateKey,
         signTxData.appId,
-        signTxData.change.addressIndex
+        signTxData.change.addressIndex,
+        signTxData.change.purposeIndex
       );
       // eslint-disable-next-line no-param-reassign
       signTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');

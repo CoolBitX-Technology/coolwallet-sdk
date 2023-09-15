@@ -43,17 +43,32 @@ export function pubkeyToAddressAndOutScript(
   scriptType: ScriptType
 ): { address: string; outScript: Buffer; hash: Buffer } {
   let payment;
-  if (scriptType === ScriptType.P2PKH) {
-    payment = bitcoin.payments.p2pkh({ pubkey });
-  } else if (scriptType === ScriptType.P2SH_P2WPKH) {
-    payment = bitcoin.payments.p2sh({
-      redeem: bitcoin.payments.p2wpkh({ pubkey }),
-    });
-  } else if (scriptType === ScriptType.P2WPKH) {
-    payment = bitcoin.payments.p2wpkh({ pubkey });
-  } else {
-    throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
+  switch (scriptType) {
+    case ScriptType.P2PKH:
+      payment = bitcoin.payments.p2pkh({ pubkey });
+      break;
+    case ScriptType.P2SH_P2WPKH:
+      payment = bitcoin.payments.p2sh({
+        redeem: bitcoin.payments.p2wpkh({ pubkey }),
+      });
+      break;
+    case ScriptType.P2WPKH:
+      payment = bitcoin.payments.p2wpkh({ pubkey });
+      break;
+    default:
+      throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
   }
+  // if (scriptType === ScriptType.P2PKH) {
+  //   payment = bitcoin.payments.p2pkh({ pubkey });
+  // } else if (scriptType === ScriptType.P2SH_P2WPKH) {
+  //   payment = bitcoin.payments.p2sh({
+  //     redeem: bitcoin.payments.p2wpkh({ pubkey }),
+  //   });
+  // } else if (scriptType === ScriptType.P2WPKH) {
+  //   payment = bitcoin.payments.p2wpkh({ pubkey });
+  // } else {
+  //   throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
+  // }
   if (!payment.address)
     throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No Address for ScriptType '${scriptType}'`);
   if (!payment.output)

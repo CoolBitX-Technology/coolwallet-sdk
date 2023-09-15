@@ -1,4 +1,4 @@
-import { tx, error } from '@coolwallet/core';
+import { tx, error, apdu } from '@coolwallet/core';
 import { ScriptType, OmniType, PreparedData, Callback } from './config/types';
 import * as param from './config/param';
 import * as txUtil from './utils/transactionUtil';
@@ -12,6 +12,7 @@ async function signTransaction(
   preActions: Array<Callback>,
   redeemScriptType: ScriptType,
   preparedData: PreparedData,
+  seVersion: number,
   confirmCB?: Callback,
   authorizedCB?: Callback
 ): Promise<string> {
@@ -20,7 +21,8 @@ async function signTransaction(
     redeemScriptType,
     appId,
     appPrivateKey,
-    preparedData
+    preparedData,
+    seVersion
   );
 
   const signatures = await tx.flow.getSignaturesFromCoolWallet(
@@ -71,20 +73,29 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
     /*omniType=*/ null,
     version
   );
+  const seVersion = await apdu.general.getSEVersion(transport);
 
-  const argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
+  let script;
+  let argument;
 
-  const script = param.TRANSFER.script + param.TRANSFER.signature;
+  if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
+    script = param.NEW_TRANSFER.script + param.NEW_TRANSFER.signature;
+    argument = await scriptUtil.getBTCNewArgument(redeemScriptType, inputs, output, change);
+  } else {
+    script = param.TRANSFER.script + param.TRANSFER.signature;
+    argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
+  }
 
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
 
-  return await signTransaction(
+  return signTransaction(
     transport,
     appId,
     appPrivateKey,
     preActions,
     redeemScriptType,
     preparedData,
+    seVersion,
     confirmCB,
     authorizedCB
   );
@@ -118,9 +129,18 @@ export async function signUSDTransaction(signUSDTTxData: signUSDTTxType): Promis
     omniType,
     version
   );
+  const seVersion = await apdu.general.getSEVersion(transport);
 
-  const script = param.USDT.script + param.USDT.signature;
-  const argument = await scriptUtil.getUSDTArgument(redeemScriptType, inputs, output, value, change);
+  let script;
+  let argument;
+
+  if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
+    script = param.NEW_USDT.script + param.NEW_USDT.signature;
+    argument = await scriptUtil.getUSDTNewArgument(redeemScriptType, inputs, output, value, change);
+  } else {
+    script = param.USDT.script + param.USDT.signature;
+    argument = await scriptUtil.getUSDTArgument(redeemScriptType, inputs, output, value, change);
+  }
 
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
 
@@ -131,6 +151,7 @@ export async function signUSDTransaction(signUSDTTxData: signUSDTTxType): Promis
     preActions,
     redeemScriptType,
     preparedData,
+    seVersion,
     confirmCB,
     authorizedCB
   );
