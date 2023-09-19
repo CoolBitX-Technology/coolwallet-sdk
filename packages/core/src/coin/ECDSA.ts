@@ -44,7 +44,7 @@ export default class ECDSACoin {
       const node = derivePubKey(extAccKey.accountPublicKey, extAccKey.accountChainCode, 0, addressIndex);
       const indexPublicKeys = new Map<number, string>();
       indexPublicKeys.set(addressIndex, node.publicKey);
-      this.accExtendPublicKeyMap.set(44, {
+      this.accExtendPublicKeyMap.set(purpose, {
         publicKey: extAccKey.accountPublicKey,
         chainCode: extAccKey.accountChainCode,
         indexPublicKeys,
@@ -75,8 +75,8 @@ export default class ECDSACoin {
       const path = await utils.getPath(this.coinType, 0, 3, PathType.BIP32, purpose);
       const decryptedData = await getPublicKeyByPath(transport, appId, appPrivateKey, path);
       const accBuf = Buffer.from(decryptedData, 'hex');
-      const accPublicKey = accBuf.subarray(0, 33).toString('hex');
-      const accChainCode = accBuf.subarray(33).toString('hex');
+      const accPublicKey = Buffer.from(accBuf.subarray(0, 33)).toString('hex');
+      const accChainCode = Buffer.from(accBuf.subarray(33)).toString('hex');
       return { accountPublicKey: accPublicKey, accountChainCode: accChainCode };
     } else {
       return { accountPublicKey: accExtendPublicKey.publicKey, accountChainCode: accExtendPublicKey.chainCode };
