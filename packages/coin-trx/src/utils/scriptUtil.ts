@@ -11,6 +11,7 @@ import {
   TRC20TransferContract,
   UnfreezeContractV2,
   FreezeContractV2,
+  WithdrawExpireUnfreezeContract,
 } from '../config/types';
 
 const sanitizeAddress = (address: string): string => {
@@ -260,9 +261,6 @@ export const getFreezeV2Argument = async (rawData: FreezeContractV2, addressInde
 export const getUnfreezeV2Argument = async (rawData: UnfreezeContractV2, addressIndex: number): Promise<string> => {
   const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
   const { ownerAddress, unfrozenBalance, resource } = contract;
-  if (!unfrozenBalance) {
-    throw new error.SDKError(getUnfreezeV2Argument.name, `SignUnfreezeV2 should have unfrozenBalance.`);
-  }
   const argument =
     refBlockBytes +
     refBlockHash +
@@ -271,6 +269,25 @@ export const getUnfreezeV2Argument = async (rawData: UnfreezeContractV2, address
     numberToHex(unfrozenBalance) +
     resource +
     numberToHex(timestamp);
+
+  return addPath(argument, addressIndex);
+};
+
+/** 
+= "0295" // ref_block_bytes
++ "adbe424e0aafb88d" // ref_block_hash
++ "00000000018AB16BBE98" // expiration
++ "41fb5c19f956a2bf76e7b3d0b25237eb39e37e1420" //owner_address
++ "00000000018AB16ADB40"; // timestamp
+ */
+
+export const getWithdrawExpireUnfreezeArgument = async (
+  rawData: WithdrawExpireUnfreezeContract,
+  addressIndex: number
+): Promise<string> => {
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress } = contract;
+  const argument = refBlockBytes + refBlockHash + numberToHex(expiration) + ownerAddress + numberToHex(timestamp);
 
   return addPath(argument, addressIndex);
 };
