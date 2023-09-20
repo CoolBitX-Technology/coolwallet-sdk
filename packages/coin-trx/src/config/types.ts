@@ -46,6 +46,18 @@ export interface FreezeContract extends Transaction {
   };
 }
 
+export interface FreezeDataV2 extends SignTxData {
+  transaction: FreezeContractV2;
+}
+
+export interface FreezeContractV2 extends Transaction {
+  contract: {
+    resource: RESOURCE_CODE;
+    frozenBalance: number | string;
+    ownerAddress: string;
+  };
+}
+
 export interface UnfreezeData extends SignTxData {
   transaction: UnfreezeContract;
 }
@@ -53,8 +65,19 @@ export interface UnfreezeData extends SignTxData {
 export interface UnfreezeContract extends Transaction {
   contract: {
     resource: RESOURCE_CODE;
-    unfrozenBalance?: number | string;
     receiverAddress?: string;
+    ownerAddress: string;
+  };
+}
+
+export interface UnfreezeDataV2 extends SignTxData {
+  transaction: UnfreezeContractV2;
+}
+
+export interface UnfreezeContractV2 extends Transaction {
+  contract: {
+    resource: RESOURCE_CODE;
+    unfrozenBalance: number | string;
     ownerAddress: string;
   };
 }
