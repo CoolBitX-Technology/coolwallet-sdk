@@ -237,7 +237,10 @@ export async function getBTCNewArgument(
     haveChange = varuint.encode(1);
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
     changeAmount = bufferUtil.toUintBuffer(change.value, 8);
-    changePath = Buffer.from(await getPath(change.addressIndex, change.purposeIndex), 'hex');
+    changePath = Buffer.from(
+      await utils.getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP32, change.purposeIndex),
+      'hex'
+    );
   } else {
     haveChange = Buffer.from('00', 'hex');
     changeScriptType = Buffer.from('00', 'hex');
@@ -392,7 +395,10 @@ export async function getUSDTNewArgument(
     haveChange = varuint.encode(1);
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
     changeAmount = bufferUtil.toUintBuffer(change.value, 8);
-    changePath = Buffer.from(await getPath(change.addressIndex, change.purposeIndex), 'hex');
+    changePath = Buffer.from(
+      await utils.getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP32, change.purposeIndex),
+      'hex'
+    );
   } else {
     haveChange = Buffer.from('00', 'hex');
     changeScriptType = Buffer.from('00', 'hex');
