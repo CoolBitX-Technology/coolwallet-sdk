@@ -110,15 +110,9 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
 
-  async signFreezeV2(signTxData: type.FreezeData): Promise<string> {
+  async signFreezeV2(signTxData: type.FreezeDataV2): Promise<string> {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
-    const { receiverAddress } = transaction.contract;
-    if (receiverAddress) {
-      throw new error.SDKError(
-        this.signFreezeV2.name,
-        `Sign freezeV2 does not support receiverAddress : ${receiverAddress}`
-      );
-    }
+
     const script = params.FREEZE_V2.script + params.FREEZE_V2.signature;
     const argument = await scriptUtil.getFreezeV2Argument(transaction, addressIndex);
 
@@ -127,15 +121,9 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
 
-  async signUnfreezeV2(signTxData: type.UnfreezeData): Promise<string> {
+  async signUnfreezeV2(signTxData: type.UnfreezeDataV2): Promise<string> {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
-    const { receiverAddress } = transaction.contract;
-    if (receiverAddress) {
-      throw new error.SDKError(
-        this.signUnfreezeV2.name,
-        `Sign unfreezeV2 does not support receiverAddress : ${receiverAddress}`
-      );
-    }
+
     const script = params.UNFREEZE_V2.script + params.UNFREEZE_V2.signature;
     const argument = await scriptUtil.getUnfreezeV2Argument(transaction, addressIndex);
 

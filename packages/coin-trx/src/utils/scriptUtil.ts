@@ -9,6 +9,8 @@ import {
   VoteWitnessContract,
   WithdrawBalanceContract,
   TRC20TransferContract,
+  UnfreezeContractV2,
+  FreezeContractV2,
 } from '../config/types';
 
 const sanitizeAddress = (address: string): string => {
@@ -231,7 +233,7 @@ export const getTRC20Argument = async (transaction: TRC20TransferContract, addre
   + "01" //resource
   + "00000000018A221B9A50"; //timestamp
 */
-export const getFreezeV2Argument = async (rawData: FreezeContract, addressIndex: number): Promise<string> => {
+export const getFreezeV2Argument = async (rawData: FreezeContractV2, addressIndex: number): Promise<string> => {
   const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
   const { ownerAddress, frozenBalance, resource } = contract;
   const argument =
@@ -255,7 +257,7 @@ export const getFreezeV2Argument = async (rawData: FreezeContract, addressIndex:
 	+ "01"//resource
 	+ "0000000001765F16E047"; //timestamp
    */
-export const getUnfreezeV2Argument = async (rawData: UnfreezeContract, addressIndex: number): Promise<string> => {
+export const getUnfreezeV2Argument = async (rawData: UnfreezeContractV2, addressIndex: number): Promise<string> => {
   const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
   const { ownerAddress, unfrozenBalance, resource } = contract;
   if (!unfrozenBalance) {
