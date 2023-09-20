@@ -94,23 +94,26 @@ export function createUnsignedTransactions(
   const versionBuf = toReverseUintBuffer(version, 4);
   const lockTimeBuf = toReverseUintBuffer(lockTime, 4);
   const inputsCount = varuint.encode(inputs.length);
-  const preparedInputs = inputs.map(({ preTxHash, preIndex, preValue, sequence, addressIndex, pubkeyBuf }) => {
-    if (!pubkeyBuf) {
-      throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
+  const preparedInputs = inputs.map(
+    ({ preTxHash, preIndex, preValue, sequence, addressIndex, pubkeyBuf, purposeIndex }) => {
+      if (!pubkeyBuf) {
+        throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
+      }
+      const preOutPointBuf = Buffer.concat([Buffer.from(preTxHash, 'hex').reverse(), toReverseUintBuffer(preIndex, 4)]);
+
+      const preValueBuf = toReverseUintBuffer(preValue, 8);
+      const sequenceBuf = sequence ? toReverseUintBuffer(sequence, 4) : Buffer.from('ffffffff', 'hex');
+
+      return {
+        addressIndex,
+        pubkeyBuf,
+        preOutPointBuf,
+        preValueBuf,
+        sequenceBuf,
+        purposeIndex,
+      };
     }
-    const preOutPointBuf = Buffer.concat([Buffer.from(preTxHash, 'hex').reverse(), toReverseUintBuffer(preIndex, 4)]);
-
-    const preValueBuf = toReverseUintBuffer(preValue, 8);
-    const sequenceBuf = sequence ? toReverseUintBuffer(sequence, 4) : Buffer.from('ffffffff', 'hex');
-
-    return {
-      addressIndex,
-      pubkeyBuf,
-      preOutPointBuf,
-      preValueBuf,
-      sequenceBuf,
-    };
-  });
+  );
 
   const { scriptType: outputType, outScript: outputScript } = addressToOutScript(output.address);
   const outputScriptLen = varuint.encode(outputScript.length);
