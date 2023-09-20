@@ -7,9 +7,10 @@ import { COIN_TYPE } from '../config/param';
 import { utils } from '@coolwallet/core';
 import { ScriptType, Input, Output, Change, PreparedData, Callback } from '../config/types';
 import { pubkeyToAddressAndOutScript } from './transactionUtil';
+import { PathType } from '@coolwallet/core/lib/config/param';
 
 const getPath = async (addressIndex: number, purpose?: number) => {
-  let path = await utils.getPath(COIN_TYPE, addressIndex, purpose);
+  let path = await utils.getPath(COIN_TYPE, addressIndex, 5, PathType.BIP32, purpose);
   path = '15' + path;
   return path;
 };
@@ -236,7 +237,7 @@ export async function getBTCNewArgument(
     haveChange = varuint.encode(1);
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
     changeAmount = bufferUtil.toUintBuffer(change.value, 8);
-    changePath = Buffer.from(await utils.getPath(COIN_TYPE, change.addressIndex, change.purposeIndex), 'hex');
+    changePath = Buffer.from(await getPath(change.addressIndex, change.purposeIndex), 'hex');
   } else {
     haveChange = Buffer.from('00', 'hex');
     changeScriptType = Buffer.from('00', 'hex');
@@ -391,7 +392,7 @@ export async function getUSDTNewArgument(
     haveChange = varuint.encode(1);
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
     changeAmount = bufferUtil.toUintBuffer(change.value, 8);
-    changePath = Buffer.from(await utils.getPath(COIN_TYPE, change.addressIndex, change.purposeIndex), 'hex');
+    changePath = Buffer.from(await getPath(change.addressIndex, change.purposeIndex), 'hex');
   } else {
     haveChange = Buffer.from('00', 'hex');
     changeScriptType = Buffer.from('00', 'hex');
