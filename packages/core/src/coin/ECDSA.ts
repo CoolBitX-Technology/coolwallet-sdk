@@ -95,4 +95,8 @@ export default class ECDSACoin {
     const keyPair = this.ec.keyFromPublic(compressPubKey, 'hex');
     return keyPair.getPublic(false, 'hex');
   }
+
+  reset = (): void => {
+    this.accExtendPublicKeyMap.clear();
+  };
 }
