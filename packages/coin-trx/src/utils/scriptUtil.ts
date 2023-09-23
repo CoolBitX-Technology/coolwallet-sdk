@@ -12,6 +12,7 @@ import {
   UnfreezeContractV2,
   FreezeContractV2,
   WithdrawExpireUnfreezeContract,
+  CancelAllUnfreezeContractV2,
 } from '../config/types';
 
 const sanitizeAddress = (address: string): string => {
@@ -283,6 +284,24 @@ export const getUnfreezeV2Argument = async (rawData: UnfreezeContractV2, address
 
 export const getWithdrawExpireUnfreezeArgument = async (
   rawData: WithdrawExpireUnfreezeContract,
+  addressIndex: number
+): Promise<string> => {
+  const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;
+  const { ownerAddress } = contract;
+  const argument = refBlockBytes + refBlockHash + numberToHex(expiration) + ownerAddress + numberToHex(timestamp);
+
+  return addPath(argument, addressIndex);
+};
+
+/**
+= "cb63" // ref_block_bytes
++ "40949daa9e1a17dd" // ref_block_hash
++ "00000000018A688F1C60" // expiration
++ "41fb5c19f956a2bf76e7b3d0b25237eb39e37e1420" //owner_address
++ "00000000018A688E3BBE"; // timestamp
+ */
+export const getCancelAllUnfreezeV2Argument = async (
+  rawData: CancelAllUnfreezeContractV2,
   addressIndex: number
 ): Promise<string> => {
   const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = rawData;

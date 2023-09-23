@@ -142,4 +142,15 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
+
+  async signCancelAllUnfreezeV2(signTxData: type.CancelAllUnfreezeDataV2): Promise<string> {
+    const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
+
+    const script = params.CANCEL_ALL_UNFREEZE_V2.script + params.CANCEL_ALL_UNFREEZE_V2.signature;
+    const argument = await scriptUtil.getCancelAllUnfreezeV2Argument(transaction, addressIndex);
+
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+
+    return trxSign.signTransaction(signTxData, script, argument, publicKey);
+  }
 }
