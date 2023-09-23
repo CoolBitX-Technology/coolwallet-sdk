@@ -114,6 +114,16 @@ export interface WithdrawExpireUnfreezeContract extends Transaction {
   };
 }
 
+export interface CancelAllUnfreezeDataV2 extends SignTxData {
+  transaction: CancelAllUnfreezeContractV2;
+}
+
+export interface CancelAllUnfreezeContractV2 extends Transaction {
+  contract: {
+    ownerAddress: string;
+  };
+}
+
 export interface TriggerSmartData extends SignTxData {
   transaction: TriggerSmartContract;
 }
