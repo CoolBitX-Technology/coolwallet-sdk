@@ -62,7 +62,6 @@ export interface BondTx extends dotTransaction {
   method: BondMethod;
 }
 export interface BondMethod {
-  controllerAddress: string;
   value: string;
   payee: params.payeeType;
 }
@@ -135,7 +134,6 @@ export interface FormatNormalMethod {
 
 export interface FormatBondMethod {
   callIndex: string;
-  controllerAddress: string;
   value: string;
   payeeType: string;
 }
