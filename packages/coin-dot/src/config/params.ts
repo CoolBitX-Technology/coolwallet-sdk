@@ -41,7 +41,7 @@ export enum payeeType {
 export enum ValueMode {
   singleByteMode = 'singleByteMode',
   twoByteMode = 'twoByteMode',
-  foreByteMode = 'foreByteMode',
+  fourByteMode = 'fourByteMode',
   bigIntegerMode = 'bigIntegerMode',
 }
 
