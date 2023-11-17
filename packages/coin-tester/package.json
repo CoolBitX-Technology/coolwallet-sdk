@@ -12,6 +12,7 @@
     "@coolwallet/algo": "file:../coin-algo",
     "@coolwallet/aptos": "file:../coin-aptos",
     "@coolwallet/avaxc": "file:../coin-avaxc",
+    "@coolwallet/btc": "file:../coin-btc",
     "@coolwallet/bnb": "file:../coin-bnb",
     "@coolwallet/bsc": "file:../coin-bsc",
     "@coolwallet/core": "file:../core",
@@ -61,7 +62,7 @@
     "eth-sig-util": "^3.0.1",
     "ethereum-hdwallet": "^0.0.26",
     "events": "^3.3.0",
-    "iotex-antenna": "^0.30.10",
+    "iotex-antenna": "^0.31.7",
     "isomorphic-fetch": "^3.0.0",
     "lodash": "^4.17.21",
     "mnemonic-to-key-pair": "^1.0.0",
@@ -98,6 +99,7 @@
     "typescript": "^4.3.2"
   },
   "overrides": {
-    "grpc": "@grpc/grpc-js"
+    "grpc": "@grpc/grpc-js",
+    "protoc": "git+ssh://git@github.com:iotexproject/node-protoc-patch.git"
   }
 }
