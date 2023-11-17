@@ -71,7 +71,7 @@ export function getBondMethod(
       value,
       payeeType,
     },
-    methodString: callIndex + params.TX_ADDRESS_PRE + formatSCALECodec(rawData.value) + payeeType,
+    methodString: callIndex + formatSCALECodec(rawData.value) + payeeType,
   };
 }
 
@@ -201,7 +201,7 @@ export function formatSCALECodec(value: string): string {
       break;
     case params.ValueMode.bigIntegerMode:
       const length = Math.ceil(bigValue.toString(16).length / 2);
-      const addCode = (length - 4).toString(2).padStart(6, '0') + '11';
+      const addCode = (length - 4).toString(2).padEnd(6, '0') + '11';
 
       formatValue = bigValue.shln(8).add(new BN(addCode, 2));
       break;
@@ -231,11 +231,11 @@ export function getValueMode(value: string): string {
   let mode;
   const one = new BN(1);
   const bigValue = new BN(value);
-  if (bigValue.cmp(new BN(64)) == -1) {
+  if (bigValue.cmp(new BN(64)) === -1) {
     mode = params.ValueMode.singleByteMode;
-  } else if (bigValue.cmp(new BN(64)) >= 0 && bigValue.cmp(new BN(2 ** 14)) == -1) {
+  } else if (bigValue.cmp(new BN(64)) >= 0 && bigValue.cmp(new BN(2 ** 14)) === -1) {
     mode = params.ValueMode.twoByteMode;
-  } else if (bigValue.cmp(new BN(2 ** 14)) >= 0 && bigValue.cmp(new BN(2 ** 30)) == -1) {
+  } else if (bigValue.cmp(new BN(2 ** 14)) >= 0 && bigValue.cmp(new BN(2 ** 30)) === -1) {
     mode = params.ValueMode.foreByteMode;
   } else {
     // (2**30)-(2**536-1).

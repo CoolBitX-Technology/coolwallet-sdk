@@ -31,9 +31,11 @@ export const METHOD_CALL_INDEX = {
 };
 
 export enum payeeType {
-  stash = '01',
   staked = '00',
+  stash = '01',
   controller = '02',
+  account = '03',
+  none = '04',
 }
 
 export enum ValueMode {
