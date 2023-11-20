@@ -41,7 +41,7 @@ export function addressToOutScript(address: string): { scriptType: ScriptType; o
 export function pubkeyToAddressAndOutScript(
   pubkey: Buffer,
   scriptType: ScriptType
-): { address: string; outScript: Buffer; hash: Buffer } {
+): { address: string; outScript: Buffer } {
   let payment;
   switch (scriptType) {
     case ScriptType.P2PKH:
@@ -55,27 +55,17 @@ export function pubkeyToAddressAndOutScript(
     case ScriptType.P2WPKH:
       payment = bitcoin.payments.p2wpkh({ pubkey });
       break;
+    case ScriptType.P2TR:
+      payment = bitcoin.payments.p2tr({ pubkey: pubkey.slice(1, pubkey.length) });
+      break;
     default:
       throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
   }
-  // if (scriptType === ScriptType.P2PKH) {
-  //   payment = bitcoin.payments.p2pkh({ pubkey });
-  // } else if (scriptType === ScriptType.P2SH_P2WPKH) {
-  //   payment = bitcoin.payments.p2sh({
-  //     redeem: bitcoin.payments.p2wpkh({ pubkey }),
-  //   });
-  // } else if (scriptType === ScriptType.P2WPKH) {
-  //   payment = bitcoin.payments.p2wpkh({ pubkey });
-  // } else {
-  //   throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
-  // }
   if (!payment.address)
     throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No Address for ScriptType '${scriptType}'`);
   if (!payment.output)
     throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
-  if (!payment.hash)
-    throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
-  return { address: payment.address, outScript: payment.output, hash: payment.hash };
+  return { address: payment.address, outScript: payment.output };
 }
 
 export function createUnsignedTransactions(

@@ -12,5 +12,5 @@ jobs:
         uses: itsOliverBott/assign-pr-reviewers@release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          users: "hank121314, hankliu418" 
+          users: "Dorac, hankliu418, mobius, turing"
           ignore-drafts: true 
