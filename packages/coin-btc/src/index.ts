@@ -5,12 +5,10 @@ import { ScriptType, signTxType, signUSDTTxType, Transport } from './config/type
 import { COIN_TYPE } from './config/param';
 
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
-  public ScriptType: any;
   public addressToOutScript: (address: string) => { scriptType: ScriptType; outScript: Buffer; outHash?: Buffer };
 
   constructor() {
     super(COIN_TYPE);
-    this.ScriptType = ScriptType;
     this.addressToOutScript = addressToOutScript;
   }
 

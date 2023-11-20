@@ -74,6 +74,7 @@ export enum ScriptType {
   P2SH_P2WPKH = 1,
   P2WPKH = 2,
   P2WSH = 3,
+  P2TR = 4,
 }
 
 export enum OmniType {
