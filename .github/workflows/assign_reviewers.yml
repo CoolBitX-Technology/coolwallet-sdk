@@ -19,5 +19,5 @@ jobs:
         uses: rowi1de/auto-assign-review-teams@v1.1.3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          teams: "mobius, turing" # only works for GitHub Organisation/Teams
+          teams: "CoolBitX-Technology/mobius, CoolBitX-Technology/turing" # only works for GitHub Organisation/Teams
           pick-one-from-persons-or-team: false # Will pick out on
