@@ -27,6 +27,7 @@ export const METHOD_CALL_INDEX = {
     unbond: '0602',
     nominate: '0605',
     withdraw: '0603',
+    chill: '0606',
   },
 };
 
