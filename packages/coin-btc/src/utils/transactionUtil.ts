@@ -28,9 +28,12 @@ export function addressToOutScript(address: string): { scriptType: ScriptType; o
   } else if (address.startsWith('3')) {
     scriptType = ScriptType.P2SH_P2WPKH;
     payment = bitcoin.payments.p2sh({ address });
-  } else if (address.startsWith('bc1')) {
+  } else if (address.startsWith('bc1q')) {
     scriptType = ScriptType.P2WPKH;
     payment = bitcoin.payments.p2wpkh({ address });
+  } else if (address.startsWith('bc1p')) {
+    scriptType = ScriptType.P2TR;
+    payment = bitcoin.payments.p2tr({ address });
   } else {
     throw new error.SDKError(addressToOutScript.name, `Unsupport Address : ${address}`);
   }
