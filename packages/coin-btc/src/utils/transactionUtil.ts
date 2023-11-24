@@ -4,8 +4,6 @@ import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuintUtil';
 import * as cryptoUtil from './cryptoUtil';
 import { ScriptType, OmniType, Input, Output, Change, PreparedData } from '../config/types';
-import * as ecc from 'tiny-secp256k1';
-bitcoin.initEccLib(ecc);
 
 function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
   const bn = new BN(numberOrString);

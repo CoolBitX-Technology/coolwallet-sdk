@@ -1,15 +1,30 @@
 import { coin as COIN } from '@coolwallet/core';
-import { addressToOutScript, pubkeyToAddressAndOutScript } from './utils/transactionUtil';
+import { pubkeyToAddressAndOutScript } from './utils/transactionUtil';
 import { signBTCTransaction, signUSDTransaction } from './sign';
 import { ScriptType, signTxType, signUSDTTxType, Transport } from './config/types';
 import { COIN_TYPE } from './config/param';
+import { TinySecp256k1Interface } from 'bitcoinjs-lib/src/types';
+import * as bitcoin from 'bitcoinjs-lib';
 
+function isNodeEnvironment() {
+  return typeof process !== 'undefined' && process.versions && process.versions.node;
+}
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
-  public addressToOutScript: (address: string) => { scriptType: ScriptType; outScript: Buffer; outHash?: Buffer };
+  private static isInitialized = false;
 
-  constructor() {
+  constructor(ecc?: TinySecp256k1Interface) {
     super(COIN_TYPE);
-    this.addressToOutScript = addressToOutScript;
+    if (BTC.isInitialized) {
+      return;
+    }
+    if (isNodeEnvironment()) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const nodeEcc = require('tiny-secp256k1');
+      bitcoin.initEccLib(nodeEcc);
+    } else {
+      bitcoin.initEccLib(ecc);
+    }
+    BTC.isInitialized = true;
   }
 
   async getAddress(
