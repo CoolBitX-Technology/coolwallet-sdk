@@ -42,7 +42,8 @@ async function checkRedeemScriptType(redeemScriptType: ScriptType) {
   if (
     redeemScriptType !== ScriptType.P2PKH &&
     redeemScriptType !== ScriptType.P2WPKH &&
-    redeemScriptType !== ScriptType.P2SH_P2WPKH
+    redeemScriptType !== ScriptType.P2SH_P2WPKH &&
+    redeemScriptType !== ScriptType.P2TR
   ) {
     throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
   }
