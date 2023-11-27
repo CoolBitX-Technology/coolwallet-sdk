@@ -1,5 +1,5 @@
 import { coin as COIN } from '@coolwallet/core';
-import { pubkeyToAddressAndOutScript } from './utils/transactionUtil';
+import { addressToOutScript, pubkeyToAddressAndOutScript } from './utils/transactionUtil';
 import { signBTCTransaction, signUSDTransaction } from './sign';
 import { ScriptType, signTxType, signUSDTTxType, Transport } from './config/types';
 import { COIN_TYPE } from './config/param';
@@ -11,9 +11,11 @@ function isNodeEnvironment() {
 }
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
   private static isInitialized = false;
+  public addressToOutScript: (address: string) => { scriptType: ScriptType; outScript: Buffer; outHash?: Buffer };
 
   constructor(ecc?: TinySecp256k1Interface) {
     super(COIN_TYPE);
+    this.addressToOutScript = addressToOutScript;
     if (BTC.isInitialized) {
       return;
     }
@@ -36,6 +38,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     purpose?: number
   ): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
+    console.log('publicKey in getAddress', publicKey);
     const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
     return address;
   }
