@@ -1,9 +1,12 @@
 import BN from 'bn.js';
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { error } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuintUtil';
 import * as cryptoUtil from './cryptoUtil';
 import { ScriptType, OmniType, Input, Output, Change, PreparedData } from '../config/types';
+
+bitcoin.initEccLib(ecc);
 
 function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
   const bn = new BN(numberOrString);

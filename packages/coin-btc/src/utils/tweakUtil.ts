@@ -1,5 +1,5 @@
 import { sha256 } from './cryptoUtil';
-import { getEccLib } from './eccLibUtil';
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 
 const TAGS = [
   'BIP0340/challenge',
@@ -72,11 +72,11 @@ function tapTweakHash(pubKey: Buffer, h: Buffer | null) {
 }
 
 function tweakKey(pubKey: Buffer, h: Buffer | null) {
-  if (!Buffer.isBuffer(pubKey)) return null;
+  //   if (!Buffer.isBuffer(pubKey)) return null;
   if (pubKey.length !== 32) return null;
   if (h && h.length !== 32) return null;
   const tweakHash = tapTweakHash(pubKey, h);
-  const res = getEccLib().xOnlyPointAddTweak(pubKey, tweakHash);
+  const res = ecc.xOnlyPointAddTweak(pubKey, tweakHash);
   if (!res || res.xOnlyPubkey === null) return null;
   return {
     parity: res.parity,
