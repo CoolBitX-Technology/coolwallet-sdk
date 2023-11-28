@@ -59,7 +59,7 @@ export function pubkeyToAddressAndOutScript(
       payment = bitcoin.payments.p2wpkh({ pubkey });
       break;
     case ScriptType.P2TR:
-      payment = bitcoin.payments.p2tr({ pubkey: pubkey.slice(1, pubkey.length) });
+      payment = bitcoin.payments.p2tr({ pubkey });
       break;
     default:
       throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);

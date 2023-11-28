@@ -5,6 +5,8 @@ import { ScriptType, signTxType, signUSDTTxType, Transport } from './config/type
 import { COIN_TYPE } from './config/param';
 import { TinySecp256k1Interface } from 'bitcoinjs-lib/src/types';
 import * as bitcoin from 'bitcoinjs-lib';
+import { initEccLib } from './utils/eccLibUtil';
+import { tweak } from './utils/tweakUtil';
 
 function isNodeEnvironment() {
   return typeof process !== 'undefined' && process.versions && process.versions.node;
@@ -23,8 +25,10 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const nodeEcc = require('tiny-secp256k1');
       bitcoin.initEccLib(nodeEcc);
+      initEccLib(nodeEcc);
     } else {
       bitcoin.initEccLib(ecc);
+      initEccLib(ecc);
     }
     BTC.isInitialized = true;
   }
@@ -37,8 +41,10 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     purpose?: number
   ): Promise<string> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
-    console.log('publicKey in getAddress', publicKey);
+    let publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
+    if (scriptType === ScriptType.P2TR) {
+      publicKey = tweak(publicKey);
+    }
     const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
     return address;
   }
