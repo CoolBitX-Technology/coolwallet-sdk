@@ -72,7 +72,7 @@ function tapTweakHash(pubKey: Buffer, h: Buffer | null) {
 }
 
 function tweakKey(pubKey: Buffer, h: Buffer | null) {
-  //   if (!Buffer.isBuffer(pubKey)) return null;
+  //   if (!Buffer.isBuffer(pubKey)) return null; // react-native doesn't support is function
   if (pubKey.length !== 32) return null;
   if (h && h.length !== 32) return null;
   const tweakHash = tapTweakHash(pubKey, h);
