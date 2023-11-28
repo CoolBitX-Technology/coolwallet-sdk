@@ -3,30 +3,14 @@ import { addressToOutScript, pubkeyToAddressAndOutScript } from './utils/transac
 import { signBTCTransaction, signUSDTransaction } from './sign';
 import { ScriptType, signTxType, signUSDTTxType, Transport } from './config/types';
 import { COIN_TYPE } from './config/param';
-import { TinySecp256k1Interface } from 'bitcoinjs-lib/src/types';
-import * as bitcoin from 'bitcoinjs-lib';
+import { tweak } from './utils/tweakUtil';
 
-function isNodeEnvironment() {
-  return typeof process !== 'undefined' && process.versions && process.versions.node;
-}
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
-  private static isInitialized = false;
   public addressToOutScript: (address: string) => { scriptType: ScriptType; outScript: Buffer; outHash?: Buffer };
 
-  constructor(ecc?: TinySecp256k1Interface) {
+  constructor() {
     super(COIN_TYPE);
     this.addressToOutScript = addressToOutScript;
-    if (BTC.isInitialized) {
-      return;
-    }
-    if (isNodeEnvironment()) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const nodeEcc = require('tiny-secp256k1');
-      bitcoin.initEccLib(nodeEcc);
-    } else {
-      bitcoin.initEccLib(ecc);
-    }
-    BTC.isInitialized = true;
   }
 
   async getAddress(
@@ -37,8 +21,10 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     purpose?: number
   ): Promise<string> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
-    console.log('publicKey in getAddress', publicKey);
+    let publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
+    if (scriptType === ScriptType.P2TR) {
+      publicKey = tweak(publicKey);
+    }
     const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
     return address;
   }
@@ -51,7 +37,10 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     purpose?: number
   ): Promise<{ address: string; outScript: Buffer }> {
-    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
+    let publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
+    if (scriptType === ScriptType.P2TR) {
+      publicKey = tweak(publicKey);
+    }
     return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
   }
 
@@ -61,7 +50,10 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     scriptType: ScriptType
   ): Promise<{ address: string; outScript: Buffer }> {
-    const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    let publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    if (scriptType === ScriptType.P2TR) {
+      publicKey = tweak(publicKey);
+    }
     return pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
   }
 
