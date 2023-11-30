@@ -79,12 +79,15 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
   let script;
   let argument;
 
-  if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
-    script = param.WITNESS_0.script + param.WITNESS_0.signature;
-    argument = await scriptUtil.getBTCNewArgument(redeemScriptType, inputs, output, change);
-  } else {
+  if (seVersion <= 331 || redeemScriptType === ScriptType.P2PKH) {
     script = param.TRANSFER.script + param.TRANSFER.signature;
     argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
+  } else if (redeemScriptType === ScriptType.P2TR) {
+    script = param.WITNESS_1.script + param.WITNESS_1.signature;
+    argument = await scriptUtil.getWitness1Argument(redeemScriptType, inputs, output, change);
+  } else {
+    script = param.WITNESS_0.script + param.WITNESS_0.signature;
+    argument = await scriptUtil.getWitness0Argument(redeemScriptType, inputs, output, change);
   }
 
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
