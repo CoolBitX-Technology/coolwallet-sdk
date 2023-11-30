@@ -14,3 +14,4 @@ export { default as OKX } from './okx';
 export { default as ZKSYNC } from './zkSync';
 export { default as LINEA } from './linea';
 export { default as BASE } from './base';
+export { default as DIS } from './dis';

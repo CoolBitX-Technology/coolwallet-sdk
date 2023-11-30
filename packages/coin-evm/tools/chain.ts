@@ -30,3 +30,5 @@ console.log('Linea Information', CHAIN.LINEA.toHexChainInfo());
 console.log('Linea Signature', CHAIN.LINEA.getSignature());
 console.log('Base Information', CHAIN.BASE.toHexChainInfo());
 console.log('Base Signature', CHAIN.BASE.getSignature());
+console.log('Dis Information', CHAIN.DIS.toHexChainInfo());
+console.log('Dis Signature', CHAIN.DIS.getSignature());
