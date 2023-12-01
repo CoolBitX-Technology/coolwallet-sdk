@@ -230,7 +230,8 @@ export function composeFinalTransaction(
   if (
     redeemScriptType !== ScriptType.P2PKH &&
     redeemScriptType !== ScriptType.P2WPKH &&
-    redeemScriptType !== ScriptType.P2SH_P2WPKH
+    redeemScriptType !== ScriptType.P2SH_P2WPKH &&
+    redeemScriptType !== ScriptType.P2TR
   ) {
     throw new error.SDKError(composeFinalTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
   }

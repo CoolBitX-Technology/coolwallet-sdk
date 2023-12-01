@@ -59,12 +59,13 @@ export async function getScriptSigningActions(
     });
     return { actions };
   } else if (redeemScriptType === ScriptType.P2TR) {
-    const actions = preparedData.preparedInputs.map((utxoArgument, index) => async () => {
+    const actions = preparedData.preparedInputs.map((preparedInput, index) => async () => {
+      const SEPath = Buffer.from(await getPath(preparedInput.addressIndex, preparedInput.purposeIndex), 'hex');
       return apdu.tx.executeUtxoSegmentScript(
         transport,
         appId,
         appPrivateKey,
-        bufferUtil.toReverseUintBuffer(index, 4).toString('hex')
+        Buffer.concat([SEPath, bufferUtil.toReverseUintBuffer(index, 4)]).toString('hex')
       );
     });
     return { actions };
