@@ -1,7 +1,5 @@
-
 import * as flow from './txFlow';
 import * as util from './txUtil';
 
-export {
-   flow, util
-};
+type SignatureType = flow.SignatureType;
+export { flow, util, SignatureType };
