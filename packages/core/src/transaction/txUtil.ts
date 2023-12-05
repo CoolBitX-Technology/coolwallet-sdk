@@ -1,46 +1,43 @@
-import { aes256CbcDecrypt } from "../crypto/encryptions";
-import * as signatureTools from "../crypto/signature";
+import { aes256CbcDecrypt } from '../crypto/encryptions';
+import * as signatureTools from '../crypto/signature';
+import { SDKError } from '../error';
+import { SignatureType } from './type';
 
 /**
  * @description Decrypt Data from CoolWallet
  * @param {String} encryptedSignature
  * @param {String} signatureKey
- * @param {Boolean} isEDDSA
- * @param {Boolean} returnCanonical
- * @return {{r:string, s:string} | Buffer } canonical or DER signature
+ * @param {SignatureType} signatureType
+ * @return {{r:string, s:string} | Buffer } Buffer or DER signature
  */
 export const decryptSignatureFromSE = (
   encryptedSignature: string,
   signatureKey: string,
-  isEDDSA: boolean = false,
-  returnCanonical: boolean = true
-): { r: string; s: string; } | Buffer => {
+  signatureType: SignatureType
+): { r: string; s: string } | Buffer => {
   const iv = Buffer.alloc(16);
   iv.fill(0);
-  const derSigBuff = aes256CbcDecrypt(
-    iv,
-    Buffer.from(signatureKey, "hex"),
-    encryptedSignature
-  );
-
-  if (isEDDSA) return derSigBuff;
-
-  const sigObj = signatureTools.parseDERsignature(derSigBuff.toString("hex"));
-  const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
-  if (returnCanonical) return canonicalSignature;
-
-  return signatureTools.convertToDER(canonicalSignature);
+  const sigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature);
+  switch (signatureType) {
+    case SignatureType.EDDSA:
+    case SignatureType.Schnorr:
+      return sigBuff;
+    case SignatureType.DER: {
+      const sigObj = signatureTools.parseDERsignature(sigBuff.toString('hex'));
+      const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
+      return signatureTools.convertToDER(canonicalSignature);
+    }
+    default:
+      throw new SDKError(decryptSignatureFromSE.name, 'Not supported SignatureType: ' + SignatureType);
+  }
 };
 
 /**
  * @param {String}addressIndexToKeyId coinType
  * @param {String} addressIndex
  */
-export const addressIndexToKeyId = (
-  coinType: string,
-  addressIndex: number
-) => {
-  const indexHex = addressIndex.toString(16).padStart(4, "0");
+export const addressIndexToKeyId = (coinType: string, addressIndex: number) => {
+  const indexHex = addressIndex.toString(16).padStart(4, '0');
   const keyId = `${coinType}0000${indexHex}`;
   return keyId;
 };
