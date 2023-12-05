@@ -254,19 +254,30 @@ export function composeFinalTransaction(
     return Buffer.concat([versionBuf, inputsCount, inputsBuf, outputsCount, outputsBuf, lockTimeBuf]);
   } else {
     const flagBuf = Buffer.from('0001', 'hex');
-    const segwitBuf = Buffer.concat(
-      preparedInputs.map(({ pubkeyBuf }, i) => {
-        const signature = signatures[i];
-        const segwitScript = Buffer.concat([
-          Buffer.from((signature.length + 1).toString(16), 'hex'),
-          signature,
-          Buffer.from('01', 'hex'),
-          Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
-          pubkeyBuf,
-        ]);
-        return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
-      })
-    );
+    let segwitBuf;
+    if (redeemScriptType === ScriptType.P2TR) {
+      segwitBuf = Buffer.concat(
+        preparedInputs.map((_, i) => {
+          const signature = signatures[i];
+          const segwitScript = Buffer.concat([Buffer.from(signature.length.toString(16), 'hex'), signature]);
+          return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
+        })
+      );
+    } else {
+      segwitBuf = Buffer.concat(
+        preparedInputs.map(({ pubkeyBuf }, i) => {
+          const signature = signatures[i];
+          const segwitScript = Buffer.concat([
+            Buffer.from((signature.length + 1).toString(16), 'hex'),
+            signature,
+            Buffer.from('01', 'hex'),
+            Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
+            pubkeyBuf,
+          ]);
+          return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
+        })
+      );
+    }
 
     const inputsBuf = Buffer.concat(
       preparedInputs.map(({ pubkeyBuf, preOutPointBuf, sequenceBuf }) => {

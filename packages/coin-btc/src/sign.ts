@@ -4,6 +4,7 @@ import * as param from './config/param';
 import * as txUtil from './utils/transactionUtil';
 import * as scriptUtil from './utils/scriptUtil';
 import { signTxType, signUSDTTxType, Transport } from './config/types';
+import { SignatureType } from '@coolwallet/core/lib/transaction/type';
 
 async function signTransaction(
   transport: Transport,
@@ -25,14 +26,28 @@ async function signTransaction(
     seVersion
   );
 
+  let signatureType: SignatureType;
+
+  switch (redeemScriptType) {
+    case ScriptType.P2PKH:
+    case ScriptType.P2WPKH:
+    case ScriptType.P2SH_P2WPKH:
+      signatureType = SignatureType.DER;
+      break;
+    case ScriptType.P2TR:
+      signatureType = SignatureType.Schnorr;
+      break;
+    default:
+      throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
+  }
+
   const signatures = await tx.flow.getSignaturesFromCoolWallet(
     transport,
     preActions,
     actions,
-    false,
     confirmCB,
     authorizedCB,
-    false
+    signatureType
   );
   const transaction = txUtil.composeFinalTransaction(redeemScriptType, preparedData, signatures as Buffer[]);
   return transaction.toString('hex');
