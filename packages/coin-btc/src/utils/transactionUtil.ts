@@ -260,7 +260,7 @@ export function composeFinalTransaction(
         preparedInputs.map((_, i) => {
           const signature = signatures[i];
           const segwitScript = Buffer.concat([Buffer.from(signature.length.toString(16), 'hex'), signature]);
-          return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
+          return Buffer.concat([Buffer.from('01', 'hex'), segwitScript]);
         })
       );
     } else {
