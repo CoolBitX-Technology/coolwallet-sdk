@@ -320,7 +320,7 @@ export async function getWitness1Argument(
         if (!input.pubkeyBuf) {
           throw new error.SDKError(getWitness1Argument.name, 'Public Key not exists !!');
         }
-        const { outScript } = pubkeyToAddressAndOutScript(input.pubkeyBuf, ScriptType.P2PKH);
+        const { outScript } = pubkeyToAddressAndOutScript(input.pubkeyBuf, scriptType);
         inputScript = outScript;
         break;
       }
