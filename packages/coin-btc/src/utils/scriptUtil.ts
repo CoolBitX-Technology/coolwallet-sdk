@@ -9,8 +9,8 @@ import { ScriptType, Input, Output, Change, PreparedData, Callback } from '../co
 import { pubkeyToAddressAndOutScript, toReverseUintBuffer } from './transactionUtil';
 import { PathType } from '@coolwallet/core/lib/config/param';
 
-const getPath = async (addressIndex: number, purpose?: number) => {
-  let path = await utils.getPath(COIN_TYPE, addressIndex, 5, PathType.BIP32, purpose);
+const getPath = async (addressIndex: number, purpose?: number, pathType?: PathType) => {
+  let path = await utils.getPath(COIN_TYPE, addressIndex, 5, pathType, purpose);
   path = '15' + path;
   return path;
 };
@@ -60,7 +60,10 @@ export async function getScriptSigningActions(
     return { actions };
   } else if (redeemScriptType === ScriptType.P2TR) {
     const actions = preparedData.preparedInputs.map((preparedInput, index) => async () => {
-      const SEPath = Buffer.from(await getPath(preparedInput.addressIndex, preparedInput.purposeIndex), 'hex');
+      const SEPath = Buffer.from(
+        await getPath(preparedInput.addressIndex, preparedInput.purposeIndex, PathType.BIP340),
+        'hex'
+      );
       return apdu.tx.executeUtxoSegmentScript(
         transport,
         appId,
@@ -363,7 +366,7 @@ export async function getWitness1Argument(
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
     changeAmount = bufferUtil.toUintBuffer(change.value, 8);
     changePath = Buffer.from(
-      await utils.getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP32, change.purposeIndex),
+      await utils.getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP340, change.purposeIndex),
       'hex'
     );
   } else {
