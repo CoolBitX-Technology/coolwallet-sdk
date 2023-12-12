@@ -46,7 +46,7 @@ export default class BNB extends COIN.ECDSACoin implements COIN.Coin {
     let tokenSignature;
     for (const tokenInfo of TOKEN_SIGS) {
       // get tokenSignature
-      if (denom.toUpperCase() === tokenInfo.symbol) {
+      if (denom.toUpperCase() === tokenInfo.contractAddress) {
         tokenSignature = tokenInfo.signature;
         break;
       }
