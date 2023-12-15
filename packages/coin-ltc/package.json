@@ -40,9 +40,7 @@
     "@types/bn.js": "^4.11.6",
     "bitcoinjs-lib": "^5.1.7",
     "bn.js": "^5.1.1",
-    "bs58": "^4.0.1",
-    "bs58check": "^2.1.2",
-    "litecore-lib": "^0.13.22"
+    "bs58check": "^2.1.2"
   },
   "repository": {
     "type": "git",
