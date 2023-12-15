@@ -4,7 +4,6 @@ import * as cryptoUtil from './cryptoUtil';
 import * as params from '../config/params';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as types from '../config/types';
-const base58 = require('bs58');
 
 export function addressToOutScript(address: string): {
   scriptType: types.ScriptType;

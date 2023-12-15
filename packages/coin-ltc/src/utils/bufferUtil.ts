@@ -1,6 +1,5 @@
 import BN from 'bn.js';
 import * as varuint from './varuint';
-const base58 = require('bs58');
 
 export function toVarUintBuffer(int: number): Buffer {
   return varuint.encode(int);
