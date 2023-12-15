@@ -67,7 +67,11 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
         input.addressIndex,
         input.purposeIndex
       );
-      input.pubkeyBuf = Buffer.from(pubkey, 'hex');
+      if (signTxData.scriptType === ScriptType.P2TR) {
+        input.pubkeyBuf = Buffer.from(tweak(pubkey), 'hex');
+      } else {
+        input.pubkeyBuf = Buffer.from(pubkey, 'hex');
+      }
     }
     if (signTxData.change) {
       const pubkey = await this.getPublicKey(
@@ -78,7 +82,11 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
         signTxData.change.purposeIndex
       );
       // eslint-disable-next-line no-param-reassign
-      signTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+      if (signTxData.scriptType === ScriptType.P2TR) {
+        signTxData.change.pubkeyBuf = Buffer.from(tweak(pubkey), 'hex');
+      } else {
+        signTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+      }
     }
     return signBTCTransaction(signTxData);
   }

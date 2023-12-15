@@ -4,6 +4,7 @@ import * as param from './config/param';
 import * as txUtil from './utils/transactionUtil';
 import * as scriptUtil from './utils/scriptUtil';
 import { signTxType, signUSDTTxType, Transport } from './config/types';
+import { SignatureType } from '@coolwallet/core/lib/transaction/type';
 
 async function signTransaction(
   transport: Transport,
@@ -25,14 +26,28 @@ async function signTransaction(
     seVersion
   );
 
+  let signatureType: SignatureType;
+
+  switch (redeemScriptType) {
+    case ScriptType.P2PKH:
+    case ScriptType.P2WPKH:
+    case ScriptType.P2SH_P2WPKH:
+      signatureType = SignatureType.DER;
+      break;
+    case ScriptType.P2TR:
+      signatureType = SignatureType.Schnorr;
+      break;
+    default:
+      throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
+  }
+
   const signatures = await tx.flow.getSignaturesFromCoolWallet(
     transport,
     preActions,
     actions,
-    false,
     confirmCB,
     authorizedCB,
-    false
+    signatureType
   );
   const transaction = txUtil.composeFinalTransaction(redeemScriptType, preparedData, signatures as Buffer[]);
   return transaction.toString('hex');
@@ -79,12 +94,15 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
   let script;
   let argument;
 
-  if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
-    script = param.NEW_TRANSFER.script + param.NEW_TRANSFER.signature;
-    argument = await scriptUtil.getBTCNewArgument(redeemScriptType, inputs, output, change);
-  } else {
+  if (seVersion <= 331 || redeemScriptType === ScriptType.P2PKH) {
     script = param.TRANSFER.script + param.TRANSFER.signature;
     argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
+  } else if (redeemScriptType === ScriptType.P2TR) {
+    script = param.WITNESS_1.script + param.WITNESS_1.signature;
+    argument = await scriptUtil.getWitness1Argument(redeemScriptType, inputs, output, change);
+  } else {
+    script = param.WITNESS_0.script + param.WITNESS_0.signature;
+    argument = await scriptUtil.getWitness0Argument(redeemScriptType, inputs, output, change);
   }
 
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);

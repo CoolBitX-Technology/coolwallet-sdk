@@ -1,9 +1,10 @@
 import * as rlp from 'rlp';
 import * as txUtil from './txUtil';
-import Transport from "../transport";
-import * as tx from '../apdu/transaction'
-import * as apdu from "../apdu/index";
+import Transport from '../transport';
+import * as tx from '../apdu/transaction';
+import * as apdu from '../apdu/index';
 import { SDKError } from '../error/errorHandle';
+import { SignatureType } from './type';
 
 /**
  * @description Prepare RLP Data for CoolWallet
@@ -26,24 +27,20 @@ export const prepareSEData = (keyId: string, rawData: Buffer | Array<Buffer>, re
 /**
  * @description Send Signing Function to CoolWallet
  * @param {Transport} transport
- * @param {String} appId
- * @param {String} appPrivateKey
  * @param {Array<{Function}>} preActions
  * @param {Array<{Function}>} actions
- * @param {Boolean} isEDDSA
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
- * @param {Boolean} returnCanonical
+ * @param {SignatureType} signatureType
  * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
 export const getSingleSignatureFromCoolWallet = async (
   transport: Transport,
   preActions: Array<Function> | undefined = undefined,
   action: Function,
-  isEDDSA = false,
   txPrepareCompleteCallback: Function | undefined = undefined,
   authorizedCallback: Function | undefined = undefined,
-  returnCanonical: boolean = true
+  signatureType: SignatureType
 ) => {
   // signing
   if (preActions) {
@@ -54,55 +51,45 @@ export const getSingleSignatureFromCoolWallet = async (
   }
   const encryptedSignature = await action();
 
-  if (typeof txPrepareCompleteCallback === "function")
-    txPrepareCompleteCallback();
+  if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
 
   // finish prepare
   await tx.finishPrepare(transport);
 
   // get tx detail
-  if (! await tx.getTxDetail(transport)) {
+  if (!(await tx.getTxDetail(transport))) {
     throw new SDKError(getSingleSignatureFromCoolWallet.name, 'get tx detail statusCode fail!!');
   }
   //authorize tx
   const signatureKey = await tx.getSignatureKey(transport);
-  if (typeof authorizedCallback === "function") {
+  if (typeof authorizedCallback === 'function') {
     authorizedCallback();
   }
   // clear tx
   await tx.clearTransaction(transport);
   await apdu.mcu.control.powerOff(transport);
   // decrpt signature
-  const signature = txUtil.decryptSignatureFromSE(
-    encryptedSignature,
-    signatureKey,
-    isEDDSA,
-    returnCanonical
-  );
+  const signature = txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType);
   return signature;
 };
 
 /**
  * @description Send Signing Function to CoolWallet
  * @param {Transport} transport
- * @param {String} appId
- * @param {String} appPrivateKey
  * @param {Array<{Function}>} preActions
  * @param {Array<{Function}>} actions
- * @param {Boolean} isEDDSA
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
- * @param {Boolean} returnCanonical
+ * @param {SignatureType} signatureType
  * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
 export const getSignaturesFromCoolWallet = async (
   transport: Transport,
   preActions: Array<Function> | undefined = undefined,
   actions: Array<Function>,
-  isEDDSA = false,
   txPrepareCompleteCallback: Function | undefined = undefined,
   authorizedCallback: Function | undefined = undefined,
-  returnCanonical: boolean = true
+  signatureType: SignatureType
 ) => {
   // signing
   if (preActions) {
@@ -116,32 +103,26 @@ export const getSignaturesFromCoolWallet = async (
   for (const action of actions) {
     encryptedSignatureArray.push(await action());
   }
-  if (typeof txPrepareCompleteCallback === "function")
-    txPrepareCompleteCallback();
+  if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
 
   // finish prepare
   await tx.finishPrepare(transport);
 
   // get tx detail
-  if (! await tx.getTxDetail(transport)) {
+  if (!(await tx.getTxDetail(transport))) {
     throw new SDKError(getSignaturesFromCoolWallet.name, 'get tx detail statusCode fail!!');
   }
   //authorize tx
   const signatureKey = await tx.getSignatureKey(transport);
-  if (typeof authorizedCallback === "function") {
+  if (typeof authorizedCallback === 'function') {
     authorizedCallback();
   }
   // clear tx
   await tx.clearTransaction(transport);
   await apdu.mcu.control.powerOff(transport);
   // decrpt signature
-  const signatures = encryptedSignatureArray.map(
-    (encryptedSignature) => txUtil.decryptSignatureFromSE(
-      encryptedSignature,
-      signatureKey,
-      isEDDSA,
-      returnCanonical
-    )
+  const signatures = encryptedSignatureArray.map((encryptedSignature) =>
+    txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
   );
   return signatures;
 };

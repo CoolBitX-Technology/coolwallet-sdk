@@ -8,7 +8,7 @@ import { ScriptType, OmniType, Input, Output, Change, PreparedData } from '../co
 
 bitcoin.initEccLib(ecc);
 
-function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
+export function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
   const bn = new BN(numberOrString);
   const buf = Buffer.from(bn.toArray()).reverse();
   return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
@@ -20,28 +20,42 @@ function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer
   return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
 }
 
-export function addressToOutScript(address: string): { scriptType: ScriptType; outScript: Buffer; outHash?: Buffer } {
+function toXOnly(pubKey: Buffer): Buffer {
+  return pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
+}
+
+export function addressToOutScript(address: string): {
+  scriptType: ScriptType;
+  outScript: Buffer;
+  outHash?: Buffer;
+  scriptPubKey?: Buffer;
+} {
   let scriptType;
   let payment;
+  let scriptPubKey;
   if (address.startsWith('1')) {
     scriptType = ScriptType.P2PKH;
     payment = bitcoin.payments.p2pkh({ address });
+    scriptPubKey = payment.hash;
   } else if (address.startsWith('3')) {
     scriptType = ScriptType.P2SH_P2WPKH;
     payment = bitcoin.payments.p2sh({ address });
+    scriptPubKey = payment.hash;
   } else if (address.startsWith('bc1q')) {
     scriptType = ScriptType.P2WPKH;
     payment = bitcoin.payments.p2wpkh({ address });
+    scriptPubKey = payment.hash;
   } else if (address.startsWith('bc1p')) {
     scriptType = ScriptType.P2TR;
     payment = bitcoin.payments.p2tr({ address });
+    scriptPubKey = payment.pubkey;
   } else {
     throw new error.SDKError(addressToOutScript.name, `Unsupport Address : ${address}`);
   }
   if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address : ${address}`);
   const outScript = payment.output;
   const outHash = payment.hash;
-  return { scriptType, outScript, outHash };
+  return { scriptType, outScript, outHash, scriptPubKey };
 }
 
 export function pubkeyToAddressAndOutScript(
@@ -62,7 +76,7 @@ export function pubkeyToAddressAndOutScript(
       payment = bitcoin.payments.p2wpkh({ pubkey });
       break;
     case ScriptType.P2TR:
-      payment = bitcoin.payments.p2tr({ pubkey });
+      payment = bitcoin.payments.p2tr({ pubkey: toXOnly(pubkey) });
       break;
     default:
       throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
@@ -216,7 +230,8 @@ export function composeFinalTransaction(
   if (
     redeemScriptType !== ScriptType.P2PKH &&
     redeemScriptType !== ScriptType.P2WPKH &&
-    redeemScriptType !== ScriptType.P2SH_P2WPKH
+    redeemScriptType !== ScriptType.P2SH_P2WPKH &&
+    redeemScriptType !== ScriptType.P2TR
   ) {
     throw new error.SDKError(composeFinalTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
   }
@@ -239,19 +254,30 @@ export function composeFinalTransaction(
     return Buffer.concat([versionBuf, inputsCount, inputsBuf, outputsCount, outputsBuf, lockTimeBuf]);
   } else {
     const flagBuf = Buffer.from('0001', 'hex');
-    const segwitBuf = Buffer.concat(
-      preparedInputs.map(({ pubkeyBuf }, i) => {
-        const signature = signatures[i];
-        const segwitScript = Buffer.concat([
-          Buffer.from((signature.length + 1).toString(16), 'hex'),
-          signature,
-          Buffer.from('01', 'hex'),
-          Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
-          pubkeyBuf,
-        ]);
-        return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
-      })
-    );
+    let segwitBuf;
+    if (redeemScriptType === ScriptType.P2TR) {
+      segwitBuf = Buffer.concat(
+        preparedInputs.map((_, i) => {
+          const signature = signatures[i];
+          const segwitScript = Buffer.concat([Buffer.from(signature.length.toString(16), 'hex'), signature]);
+          return Buffer.concat([Buffer.from('01', 'hex'), segwitScript]);
+        })
+      );
+    } else {
+      segwitBuf = Buffer.concat(
+        preparedInputs.map(({ pubkeyBuf }, i) => {
+          const signature = signatures[i];
+          const segwitScript = Buffer.concat([
+            Buffer.from((signature.length + 1).toString(16), 'hex'),
+            signature,
+            Buffer.from('01', 'hex'),
+            Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
+            pubkeyBuf,
+          ]);
+          return Buffer.concat([Buffer.from('02', 'hex'), segwitScript]);
+        })
+      );
+    }
 
     const inputsBuf = Buffer.concat(
       preparedInputs.map(({ pubkeyBuf, preOutPointBuf, sequenceBuf }) => {
