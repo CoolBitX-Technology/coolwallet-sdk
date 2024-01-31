@@ -151,7 +151,7 @@ export const getSingleSignatureFromCoolWallet = async (
   authorizedCallback: Function | undefined = undefined,
   returnCanonical: boolean = true
 ) => {
-  const signatureType = isEDDSA ? SignatureType.EDDSA : SignatureType.DER;
+  const signatureType = isEDDSA ? SignatureType.EDDSA : returnCanonical ? SignatureType.Canonical : SignatureType.DER;
   return getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
@@ -185,7 +185,7 @@ export const getSignaturesFromCoolWallet = async (
   authorizedCallback: Function | undefined = undefined,
   returnCanonical: boolean = true
 ) => {
-  const signatureType = isEDDSA ? SignatureType.EDDSA : SignatureType.DER;
+  const signatureType = isEDDSA ? SignatureType.EDDSA : returnCanonical ? SignatureType.Canonical : SignatureType.DER;
   return getSignaturesFromCoolWalletV2(
     transport,
     preActions,

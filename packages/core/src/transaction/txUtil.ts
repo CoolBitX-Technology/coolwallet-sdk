@@ -22,6 +22,11 @@ export const decryptSignatureFromSE = (
     case SignatureType.EDDSA:
     case SignatureType.Schnorr:
       return sigBuff;
+    case SignatureType.Canonical: {
+      const sigObj = signatureTools.parseDERsignature(sigBuff.toString('hex'));
+      const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
+      return canonicalSignature;
+    }
     case SignatureType.DER: {
       const sigObj = signatureTools.parseDERsignature(sigBuff.toString('hex'));
       const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
