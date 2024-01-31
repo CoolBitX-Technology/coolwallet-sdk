@@ -24,6 +24,7 @@ export const prepareSEData = (keyId: string, rawData: Buffer | Array<Buffer>, re
   return dataForSE.toString('hex');
 };
 
+
 /**
  * @description Send Signing Function to CoolWallet
  * @param {Transport} transport
@@ -34,7 +35,7 @@ export const prepareSEData = (keyId: string, rawData: Buffer | Array<Buffer>, re
  * @param {SignatureType} signatureType
  * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
-export const getSingleSignatureFromCoolWallet = async (
+export const getSingleSignatureFromCoolWalletV2 = async (
   transport: Transport,
   preActions: Array<Function> | undefined = undefined,
   action: Function,
@@ -58,7 +59,7 @@ export const getSingleSignatureFromCoolWallet = async (
 
   // get tx detail
   if (!(await tx.getTxDetail(transport))) {
-    throw new SDKError(getSingleSignatureFromCoolWallet.name, 'get tx detail statusCode fail!!');
+    throw new SDKError(getSingleSignatureFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
   }
   //authorize tx
   const signatureKey = await tx.getSignatureKey(transport);
@@ -83,7 +84,7 @@ export const getSingleSignatureFromCoolWallet = async (
  * @param {SignatureType} signatureType
  * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
-export const getSignaturesFromCoolWallet = async (
+export const getSignaturesFromCoolWalletV2 = async (
   transport: Transport,
   preActions: Array<Function> | undefined = undefined,
   actions: Array<Function>,
@@ -110,7 +111,7 @@ export const getSignaturesFromCoolWallet = async (
 
   // get tx detail
   if (!(await tx.getTxDetail(transport))) {
-    throw new SDKError(getSignaturesFromCoolWallet.name, 'get tx detail statusCode fail!!');
+    throw new SDKError(getSignaturesFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
   }
   //authorize tx
   const signatureKey = await tx.getSignatureKey(transport);
@@ -125,4 +126,72 @@ export const getSignaturesFromCoolWallet = async (
     txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
   );
   return signatures;
+};
+
+/**
+ * @deprecated Please use getSingleSignatureFromCoolWalletV2 instead
+ * @description Send Signing Function to CoolWallet
+ * @param {Transport} transport
+ * @param {String} appId
+ * @param {String} appPrivateKey
+ * @param {Array<{Function}>} preActions
+ * @param {Array<{Function}>} actions
+ * @param {Boolean} isEDDSA
+ * @param {Function} txPrepareCompleteCallback notify app to show the tx info
+ * @param {Function} authorizedCallback notify app to close the tx info
+ * @param {Boolean} returnCanonical
+ * @return {Promise<Array<{r: string, s: string} | Buffer >>}
+ */
+export const getSingleSignatureFromCoolWallet = async (
+  transport: Transport,
+  preActions: Array<Function> | undefined = undefined,
+  action: Function,
+  isEDDSA = false,
+  txPrepareCompleteCallback: Function | undefined = undefined,
+  authorizedCallback: Function | undefined = undefined,
+  returnCanonical: boolean = true
+) => {
+  const signatureType = isEDDSA ? SignatureType.EDDSA : SignatureType.DER;
+  return getSingleSignatureFromCoolWalletV2(
+    transport,
+    preActions,
+    action,
+    txPrepareCompleteCallback,
+    authorizedCallback,
+    signatureType
+  );
+};
+
+/**
+ * @deprecated Please use getSignaturesFromCoolWalletV2 instead
+ * @description Send Signing Function to CoolWallet
+ * @param {Transport} transport
+ * @param {String} appId
+ * @param {String} appPrivateKey
+ * @param {Array<{Function}>} preActions
+ * @param {Array<{Function}>} actions
+ * @param {Boolean} isEDDSA
+ * @param {Function} txPrepareCompleteCallback notify app to show the tx info
+ * @param {Function} authorizedCallback notify app to close the tx info
+ * @param {Boolean} returnCanonical
+ * @return {Promise<Array<{r: string, s: string} | Buffer >>}
+ */
+export const getSignaturesFromCoolWallet = async (
+  transport: Transport,
+  preActions: Array<Function> | undefined = undefined,
+  actions: Array<Function>,
+  isEDDSA = false,
+  txPrepareCompleteCallback: Function | undefined = undefined,
+  authorizedCallback: Function | undefined = undefined,
+  returnCanonical: boolean = true
+) => {
+  const signatureType = isEDDSA ? SignatureType.EDDSA : SignatureType.DER;
+  return getSignaturesFromCoolWalletV2(
+    transport,
+    preActions,
+    actions,
+    txPrepareCompleteCallback,
+    authorizedCallback,
+    signatureType
+  );
 };
