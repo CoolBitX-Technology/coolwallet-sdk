@@ -41,7 +41,7 @@ async function signTransaction(
       throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
   }
 
-  const signatures = await tx.flow.getSignaturesFromCoolWallet(
+  const signatures = await tx.flow.getSignaturesFromCoolWalletV2(
     transport,
     preActions,
     actions,
