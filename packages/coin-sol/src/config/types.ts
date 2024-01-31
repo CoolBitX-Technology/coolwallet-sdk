@@ -152,15 +152,40 @@ export type StakingWithdrawTransaction = {
   lamports: number | string;
 };
 
-type Mandatory<T> = {
-  transport: Transport;
-  appPrivateKey: string;
-  appId: string;
-  transaction: T;
-  addressIndex: number;
-  confirmCB?(): void;
-  authorizedCB?(): void;
+export type SignInMessage = {
+  domain: string;
+  address: string;
+  statement?: string;
+  uri?: string;
+  version?: string;
+  chainId?: string;
+  nonce?: string;
+  issuedAt?: string;
+  expirationTime?: string;
+  notBefore?: string;
+  requestId?: string;
+  resources?: string[];
 };
+
+type Mandatory<T> = T extends SignInMessage
+  ? {
+    transport: Transport;
+    appPrivateKey: string;
+    appId: string;
+    message: T;
+    addressIndex: number;
+    confirmCB?(): void;
+    authorizedCB?(): void;
+  }
+  : {
+    transport: Transport;
+    appPrivateKey: string;
+    appId: string;
+    transaction: T;
+    addressIndex: number;
+    confirmCB?(): void;
+    authorizedCB?(): void;
+  };
 
 export type signTransactionType = Mandatory<TransactionArgs>;
 
@@ -180,6 +205,8 @@ export type signDelegateAndCreateAccountWithSeedType = Mandatory<DelegateAndCrea
 
 export type signStakingWithdrawType = Mandatory<StakingWithdrawTransaction>;
 
+export type signSignInMessageType = Mandatory<SignInMessage>;
+
 export type signTxType =
   | signTransactionType
   | signTransferTransactionType
@@ -190,3 +217,5 @@ export type signTxType =
   | signUndelegateType
   | signDelegateAndCreateAccountWithSeedType
   | signStakingWithdrawType;
+
+export type signMsgType = signSignInMessageType;

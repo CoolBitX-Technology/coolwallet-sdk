@@ -22,7 +22,7 @@ Depending on your platform, you may can choose different [transport](#Transport)
 
 ### 2. Register and setup hardware wallet.
 
-To register you application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet)  in `core` package. This guide you through the process of registeration and seed generation.
+To register you application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet.ts)  in `core` package. This guide you through the process of registeration and seed generation.
 
 ### 3. Build your Application
 

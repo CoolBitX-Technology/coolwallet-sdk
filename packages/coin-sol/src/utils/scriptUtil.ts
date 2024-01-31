@@ -1,9 +1,9 @@
 import { utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
 import base58 from 'bs58';
-import { TOKEN_INFO } from '../config/tokenInfos';
 import * as types from '../config/types';
 import Transaction from './Transaction';
+import { createSignInMessage } from './signIn';
 
 /**
  * getTransferArguments
@@ -112,6 +112,15 @@ function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number):
   return SEPath + rawTx.compileMessage().serializeStakingWithdraw();
 }
 
+function getSignInArguments(message: types.SignInMessage, addressIndex: number): string {
+  const PATH_LENGTH = '11';
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `${PATH_LENGTH}${path}`;
+  console.debug('SEPath: ', SEPath);
+  const argument = createSignInMessage(message, path);
+  return SEPath + argument;
+}
+
 export {
   getAssociateTokenAccount,
   getSplTokenTransferArguments,
@@ -122,4 +131,5 @@ export {
   getUndelegateArguments,
   getDelegateAndCreateAccountArguments,
   getStackingWithdrawArguments,
+  getSignInArguments
 };
