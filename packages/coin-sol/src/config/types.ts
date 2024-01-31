@@ -153,18 +153,18 @@ export type StakingWithdrawTransaction = {
 };
 
 export type SignInMessage = {
-  readonly domain: string;
-  readonly address: string;
-  readonly statement?: string;
-  readonly uri?: string;
-  readonly version?: string;
-  readonly chainId?: string;
-  readonly nonce?: string;
-  readonly issuedAt?: string;
-  readonly expirationTime?: string;
-  readonly notBefore?: string;
-  readonly requestId?: string;
-  readonly resources?: string[];
+  domain: string;
+  address: string;
+  statement?: string;
+  uri?: string;
+  version?: string;
+  chainId?: string;
+  nonce?: string;
+  issuedAt?: string;
+  expirationTime?: string;
+  notBefore?: string;
+  requestId?: string;
+  resources?: string[];
 };
 
 type Mandatory<T> = T extends SignInMessage

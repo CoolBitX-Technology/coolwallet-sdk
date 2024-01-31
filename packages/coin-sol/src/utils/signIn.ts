@@ -1,6 +1,6 @@
 import { types } from '..';
 
-export function createSignInMessageText(input: types.SignInMessage): string {
+export function createSignInMessageText(input: types.SignInMessage): { domain: string; optionalMessage: string } {
   // ${domain} wants you to sign in with your Solana account:
   // ${address}
   //
@@ -20,11 +20,14 @@ export function createSignInMessageText(input: types.SignInMessage): string {
   // ...
   // - ${resources[n]}
 
-  let message = `${input.domain} wants you to sign in with your Solana account:\n`;
-  message += `${input.address}`;
+  // The following data are provided by Java Card
+  // ` wants you to sign in with your Solana account:\n`;
+  // `${input.address}`;
+
+  let optionalMessage = '';
 
   if (input.statement) {
-    message += `\n\n${input.statement}`;
+    optionalMessage += `\n\n${input.statement}`;
   }
 
   const fields: string[] = [];
@@ -59,13 +62,30 @@ export function createSignInMessageText(input: types.SignInMessage): string {
     }
   }
   if (fields.length) {
-    message += `\n\n${fields.join('\n')}`;
+    optionalMessage += `\n\n${fields.join('\n')}`;
   }
 
-  return message;
+  return { domain: input.domain, optionalMessage };
 }
 
-export function createSignInMessage(input: types.SignInMessage): Uint8Array {
-  const text = createSignInMessageText(input);
-  return new TextEncoder().encode(text);
+export function createSignInMessage(input: types.SignInMessage, path: string): string {
+  const { domain, optionalMessage } = createSignInMessageText(input);
+  const domainLength = domain.length;
+
+  const optionalMessageLength = optionalMessage.length;
+  if (domainLength > 255) {
+    throw new Error('Domain is too long');
+  }
+  if (optionalMessageLength > 2048) {
+    throw new Error('Signing message is too long');
+  }
+
+  const domainLengthPrefix = String.fromCharCode(domainLength);
+  const optionalMessageLengthPrefix = String.fromCharCode(optionalMessageLength);
+
+  let message = Buffer.from(domainLengthPrefix + domain, 'utf8').toString('hex');
+  message += Buffer.from(optionalMessageLengthPrefix, 'utf8').toString('hex').padStart(4, '0');
+  message += Buffer.from(optionalMessage, 'utf8').toString('hex');
+  message += path;
+  return message;
 }

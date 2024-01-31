@@ -4,7 +4,6 @@ import base58 from 'bs58';
 import * as types from '../config/types';
 import Transaction from './Transaction';
 import { createSignInMessage } from './signIn';
-import { numberToStringHex } from './stringUtil';
 
 /**
  * getTransferArguments
@@ -114,12 +113,12 @@ function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number):
 }
 
 function getSignInArguments(message: types.SignInMessage, addressIndex: number): string {
+  const PATH_LENGTH = '11';
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
-  const SEPath = `11${path}`;
+  const SEPath = `${PATH_LENGTH}${path}`;
   console.debug('SEPath: ', SEPath);
-  const encodedText = createSignInMessage(message);
-  const numberArray = Array.from(encodedText);
-  return SEPath + numberToStringHex(numberArray, numberArray.length * 2);
+  const argument = createSignInMessage(message, path);
+  return SEPath + argument;
 }
 
 export {
