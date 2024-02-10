@@ -18,11 +18,11 @@ This is the monorepo of all the packages you need to build your own app with Coo
 
 ### 1. Define your [transport](#Transport) layer
 
-Depending on your platform, you may can choose different [transport](#Transport) object to use in you application.
+Depending on your platform, you may choose different [transport](#Transport) object to use in your application.
 
 ### 2. Register and setup hardware wallet.
 
-To register you application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet.ts)  in `core` package. This guide you through the process of registeration and seed generation.
+To register your application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet.ts)  in `core` package. This guide you through the process of registration and seed generation.
 
 ### 3. Build your Application
 
@@ -102,7 +102,7 @@ disconnect = () => {
 
 ```
 
-- transport: The object use to communicate with CoolWallet
+- transport: The object used to communicate with CoolWallet
 - SEPublicKey: The key used to authenticate SE.
 
 
@@ -172,7 +172,7 @@ const address = await ETH.getAddress(
 
 ```
 
-The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of folllowing BIP44 path:
+The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of following BIP44 path:
 
 ```none
 m/44'/60'/0'/0/{i}
