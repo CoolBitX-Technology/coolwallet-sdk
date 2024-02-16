@@ -80,7 +80,6 @@ export default class ADA implements COIN.Coin {
     const internalTx = { ...transaction };
 
     // prepare data
-
     const script = getScript(txType);
     const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
     const witnesses = getArguments(internalTx, accPubKey, txType, this.isTestNet);
@@ -109,7 +108,7 @@ export default class ADA implements COIN.Coin {
     }
     for (const witness of witnesses) {
       const encryptedSig = witness.sig;
-      const sig = tx.util.decryptSignatureFromSE(encryptedSig, decryptingKey, true);
+      const sig = tx.util.decryptSignatureFromSE(encryptedSig, decryptingKey, tx.SignatureType.EDDSA);
       witness.sig = sig.toString('hex');
     }
     await apdu.tx.clearTransaction(transport);
