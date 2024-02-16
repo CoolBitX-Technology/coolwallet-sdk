@@ -121,6 +121,15 @@ function getSignInArguments(message: types.SignInMessage, addressIndex: number):
   return SEPath + argument;
 }
 
+function getSignMessageArguments(message: Uint8Array, addressIndex: number): string {
+  const PATH_LENGTH = '11';
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `${PATH_LENGTH}${path}`;
+  console.debug('SEPath: ', SEPath);
+  const argument = Buffer.from(message).toString('hex');
+  return SEPath + argument;
+}
+
 export {
   getAssociateTokenAccount,
   getSplTokenTransferArguments,
@@ -131,5 +140,6 @@ export {
   getUndelegateArguments,
   getDelegateAndCreateAccountArguments,
   getStackingWithdrawArguments,
-  getSignInArguments
+  getSignInArguments,
+  getSignMessageArguments
 };
