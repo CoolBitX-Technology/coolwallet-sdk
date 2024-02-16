@@ -84,8 +84,8 @@ export function createSignInMessage(input: types.SignInMessage, path: string): s
   const optionalMessageLengthPrefix = String.fromCharCode(optionalMessageLength);
 
   let message = Buffer.from(domainLengthPrefix + domain, 'utf8').toString('hex');
+  message += path;
   message += Buffer.from(optionalMessageLengthPrefix, 'utf8').toString('hex').padStart(4, '0');
   message += Buffer.from(optionalMessage, 'utf8').toString('hex');
-  message += path;
   return message;
 }
