@@ -83,9 +83,10 @@ export function createSignInMessage(input: types.SignInMessage, path: string): s
   const domainLengthPrefix = String.fromCharCode(domainLength);
   const optionalMessageLengthPrefix = String.fromCharCode(optionalMessageLength);
 
-  let message = Buffer.from(domainLengthPrefix + domain, 'utf8').toString('hex');
-  message += path;
+  let message = Buffer.from(domainLengthPrefix, 'utf8').toString('hex');
+  message += Buffer.from(domain, 'utf8').toString('hex').padStart(256, '0');
   message += Buffer.from(optionalMessageLengthPrefix, 'utf8').toString('hex').padStart(4, '0');
-  message += Buffer.from(optionalMessage, 'utf8').toString('hex');
+  message += Buffer.from(optionalMessage, 'utf8').toString('hex').padStart(2048, '0');
+  message += path;
   return message;
 }
