@@ -212,7 +212,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
 
   async signMessage(signMsgData: types.signMessageType): Promise<string> {
     const { addressIndex } = signMsgData;
-    const script = params.SCRIPT.SIGN_IN.scriptWithSignature;
+    const script = params.SCRIPT.SIGN_MESSAGE.scriptWithSignature;
     const message = signMsgData.message;
     const argument = scriptUtil.getSignMessageArguments(message, addressIndex);
 

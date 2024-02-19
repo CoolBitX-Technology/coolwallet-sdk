@@ -220,3 +220,5 @@ export type signTxType =
   | signStakingWithdrawType;
 
 export type signMsgType = signSignInMessageType | signMessageType;
+
+export type SignDataType = signTxType | signMsgType;
