@@ -167,7 +167,7 @@ export type SignInMessage = {
   resources?: string[];
 };
 
-type Mandatory<T> = T extends SignInMessage | Uint8Array
+type Mandatory<T> = T extends SignInMessage | string
   ? {
     transport: Transport;
     appPrivateKey: string;
@@ -206,7 +206,7 @@ export type signDelegateAndCreateAccountWithSeedType = Mandatory<DelegateAndCrea
 export type signStakingWithdrawType = Mandatory<StakingWithdrawTransaction>;
 
 export type signSignInMessageType = Mandatory<SignInMessage>;
-export type signMessageType = Mandatory<Uint8Array>;
+export type signMessageType = Mandatory<string>;
 
 export type signTxType =
   | signTransactionType

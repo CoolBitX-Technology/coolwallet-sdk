@@ -121,12 +121,12 @@ function getSignInArguments(message: types.SignInMessage, addressIndex: number):
   return SEPath + argument;
 }
 
-function getSignMessageArguments(message: Uint8Array, addressIndex: number): string {
+function getSignMessageArguments(message: string, addressIndex: number): string {
   const PATH_LENGTH = '11';
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `${PATH_LENGTH}${path}`;
   console.debug('SEPath: ', SEPath);
-  const argument = Buffer.from(message).toString('hex');
+  const argument = message.startsWith('0x') ? message.slice(2) : message;
   return SEPath + argument;
 }
 
