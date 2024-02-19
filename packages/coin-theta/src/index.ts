@@ -12,7 +12,7 @@ import type {
   StakeGuardianTransaction,
   StakeEdgeTransaction,
   WithdrawTransaction,
-  SmartTransaction
+  SmartTransaction,
 } from './config/types';
 export type {
   Options,
@@ -21,7 +21,7 @@ export type {
   StakeGuardianTransaction,
   StakeEdgeTransaction,
   WithdrawTransaction,
-  SmartTransaction
+  SmartTransaction,
 };
 
 export default class Theta extends COIN.ECDSACoin implements COIN.Coin {
@@ -29,43 +29,19 @@ export default class Theta extends COIN.ECDSACoin implements COIN.Coin {
     super(params.COIN_TYPE);
   }
 
-  async getAddress(
-    transport: Transport,
-    appPrivateKey: string,
-    appId: string,
-    addressIndex: number
-  ): Promise<string> {
-    const publicKey = await this.getPublicKey(
-      transport,
-      appPrivateKey,
-      appId,
-      addressIndex);
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return utils.pubKeyToAddress(publicKey);
   }
 
-  getAddressByAccountKey(
-    accPublicKey: string,
-    accChainCode: string,
-    addressIndex: number
-  ): string {
-    const publicKey = this.getAddressPublicKey(
-      accPublicKey,
-      accChainCode,
-      addressIndex);
+  getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): string {
+    const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     return utils.pubKeyToAddress(publicKey);
   }
 
-  async signTransactionBase(
-    transaction: Transaction,
-    options: Options,
-    txType: TxTypes
-  ): Promise<string> {
+  async signTransactionBase(transaction: Transaction, options: Options, txType: TxTypes): Promise<string> {
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
-    const publicKey = await this.getPublicKey(
-      transport,
-      appPrivateKey,
-      appId,
-      transaction.addressIndex);
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, transaction.addressIndex);
     const fromAddr = utils.pubKeyToAddress(publicKey);
 
     // prepare data
@@ -76,11 +52,7 @@ export default class Theta extends COIN.ECDSACoin implements COIN.Coin {
     // request CoolWallet to sign tx
 
     await apdu.tx.sendScript(transport, signScript);
-    const encryptedSig = await apdu.tx.executeScript(
-      transport,
-      appId,
-      appPrivateKey,
-      signArguments);
+    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, signArguments);
     if (!encryptedSig) throw new Error('executeScript fails to return signature');
 
     // verification and return signed tx
@@ -90,61 +62,36 @@ export default class Theta extends COIN.ECDSACoin implements COIN.Coin {
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
     await apdu.tx.clearTransaction(transport);
     await apdu.mcu.control.powerOff(transport);
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
-    const signedTx = utils.getSignedTransaction(
-      transaction,
-      sig as { r:string, s:string },
-      publicKey,
-      txType);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
+    const signedTx = utils.getSignedTransaction(transaction, sig as { r: string; s: string }, publicKey, txType);
     return signedTx;
   }
 
-  async signTransaction(
-    transaction: SendTransaction,
-    options: Options
-  ): Promise<string> {
+  async signTransaction(transaction: SendTransaction, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.Send);
   }
 
-  async signStakeValidatorTransaction(
-    transaction: StakeValidatorTransaction,
-    options: Options
-  ): Promise<string> {
+  async signStakeValidatorTransaction(transaction: StakeValidatorTransaction, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.StakeValidator);
   }
 
-  async signStakeGuardianTransaction(
-    transaction: StakeGuardianTransaction,
-    options: Options
-  ): Promise<string> {
+  async signStakeGuardianTransaction(transaction: StakeGuardianTransaction, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.StakeGuardian);
   }
 
-  async signStakeEdgeTransaction(
-    transaction: StakeEdgeTransaction,
-    options: Options
-  ): Promise<string> {
+  async signStakeEdgeTransaction(transaction: StakeEdgeTransaction, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.StakeEdge);
   }
 
-  async signWithdrawTransaction(
-    transaction: WithdrawTransaction,
-    options: Options
-  ): Promise<string> {
+  async signWithdrawTransaction(transaction: WithdrawTransaction, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.Withdraw);
   }
 
-  async signSmartTransaction(
-    transaction: SmartTransaction,
-    options: Options
-  ): Promise<string> {
+  async signSmartTransaction(transaction: SmartTransaction, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.Smart);
   }
 
-  async signEvmTransaction(
-    transaction: SmartTransaction,
-    options: Options
-  ): Promise<string> {
+  async signEvmTransaction(transaction: SmartTransaction, options: Options): Promise<string> {
     return this.signTransactionBase(transaction, options, TxTypes.Evm);
   }
 }

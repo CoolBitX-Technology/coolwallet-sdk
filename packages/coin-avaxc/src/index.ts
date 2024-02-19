@@ -92,7 +92,7 @@ export default class AVAXC implements COIN.Coin {
 
     await apdu.mcu.control.powerOff(transport);
 
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
 
     const { signedTx } = await apdu.tx.getSignedHex(transport);
 
@@ -201,7 +201,7 @@ export default class AVAXC implements COIN.Coin {
 
     await apdu.mcu.control.powerOff(transport);
 
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
 
     const { signedTx } = await apdu.tx.getSignedHex(transport);
 
@@ -295,7 +295,7 @@ export default class AVAXC implements COIN.Coin {
 
     await apdu.mcu.control.powerOff(transport);
 
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
 
     const rawTx = getRawTx(transaction);
 
@@ -365,7 +365,7 @@ export default class AVAXC implements COIN.Coin {
 
     await apdu.mcu.control.powerOff(transport);
 
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
 
     const { signedTx } = await apdu.tx.getSignedHex(transport);
 
@@ -477,7 +477,7 @@ export default class AVAXC implements COIN.Coin {
 
     await apdu.mcu.control.powerOff(transport);
 
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
 
     const { signedTx } = await apdu.tx.getSignedHex(transport);
 

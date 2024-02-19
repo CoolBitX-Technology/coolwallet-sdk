@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/vet",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.0",
   "description": "CoolWallet Vechain sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -23,7 +23,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.10"
+    "@coolwallet/core": "^1.1.22"
   },
   "dependencies": {
     "bignumber.js": "^9.0.2",
@@ -42,7 +42,7 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.10",
+    "@coolwallet/core": "^1.1.22",
     "@coolwallet/transport-jre-http": "^1.1.3",
     "thor-devkit": "^2.0.5"
   },

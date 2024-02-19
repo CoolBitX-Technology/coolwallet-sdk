@@ -63,7 +63,7 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
     await apdu.tx.sendScript(transport, script);
     const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
     if (!encryptedSig) throw new Error('executeScript fails to return signature');
-    if (typeof confirmCB === "function") confirmCB();
+    if (typeof confirmCB === 'function') confirmCB();
 
     // verify tx
 
@@ -72,11 +72,11 @@ export default class VET extends COIN.ECDSACoin implements COIN.Coin {
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
     await apdu.tx.clearTransaction(transport);
     await apdu.mcu.control.powerOff(transport);
-    if (typeof authorizedCB === "function") authorizedCB();
+    if (typeof authorizedCB === 'function') authorizedCB();
 
     // construct signed tx
 
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
     const signedTx = utils.getSignedTransaction(newParam, sig as { r: string; s: string }, publicKey, signType);
     return '0x' + signedTx;
   }

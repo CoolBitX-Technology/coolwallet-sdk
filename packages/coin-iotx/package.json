@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/iotx",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.0",
   "description": "Coolwallet IoTex sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -12,7 +12,7 @@
     "test": "jest --verbose"
   },
   "peerDependencies": {
-    "@coolwallet/core": "^1.0.14"
+    "@coolwallet/core": "^1.1.22"
   },
   "dependencies": {
     "bech32": "^2.0.0",
@@ -29,7 +29,7 @@
     "@babel/plugin-transform-runtime": "^7.16.5",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.0.14",
+    "@coolwallet/core": "^1.1.22",
     "@types/elliptic": "^6.4.14",
     "@types/eth-sig-util": "^2.1.1",
     "@types/node": "^14.0.13",

@@ -2,13 +2,7 @@
 import { coin as COIN, Transport, apdu, tx } from '@coolwallet/core';
 import * as params from './config/params';
 import { Transaction, Options } from './config/types';
-import {
-  getPublicKeyByKeyIndex,
-  publicKeyToAuthenticationKey,
-  getScript,
-  getArgument,
-  getSignedTx,
-} from './utils';
+import { getPublicKeyByKeyIndex, publicKeyToAuthenticationKey, getScript, getArgument, getSignedTx } from './utils';
 
 export { Transaction, Options };
 
@@ -22,7 +16,10 @@ export default class APTOS extends COIN.EDDSACoin implements COIN.Coin {
   };
 
   getAuthKey = async (
-    transport: Transport, appPrivateKey: string, appId: string, keyIndex: number
+    transport: Transport,
+    appPrivateKey: string,
+    appId: string,
+    keyIndex: number
   ): Promise<string> => {
     const publicKey = await getPublicKeyByKeyIndex(transport, appId, appPrivateKey, keyIndex);
     const authenticationKey = publicKeyToAuthenticationKey(publicKey);
@@ -33,10 +30,9 @@ export default class APTOS extends COIN.EDDSACoin implements COIN.Coin {
     const { transport, appPrivateKey, appId } = options;
     const publicKey = await getPublicKeyByKeyIndex(transport, appId, appPrivateKey, transaction.keyIndex);
     return getSignedTx(transaction, publicKey);
-  }
+  };
 
   signTransaction = async (transaction: Transaction, options: Options): Promise<string> => {
-
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
 
     // prepare data
@@ -51,8 +47,7 @@ export default class APTOS extends COIN.EDDSACoin implements COIN.Coin {
     const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, signArgument);
     if (!encryptedSig) throw new Error('executeScript fails to return signature');
 
-    if (typeof confirmCB === "function")
-      confirmCB();
+    if (typeof confirmCB === 'function') confirmCB();
 
     // verify tx
 
@@ -62,15 +57,15 @@ export default class APTOS extends COIN.EDDSACoin implements COIN.Coin {
     await apdu.tx.clearTransaction(transport);
     await apdu.mcu.control.powerOff(transport);
 
-    if (typeof authorizedCB === "function") {
+    if (typeof authorizedCB === 'function') {
       authorizedCB();
     }
 
     // construct signed tx
 
     const publicKey = await getPublicKeyByKeyIndex(transport, appId, appPrivateKey, transaction.keyIndex);
-    const sigBuf = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, true, false) as Buffer;
-    const sig = sigBuf.toString('hex').padStart(128,'0');
+    const sigBuf = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.EDDSA) as Buffer;
+    const sig = sigBuf.toString('hex').padStart(128, '0');
     return getSignedTx(transaction, publicKey, sig);
   };
 }

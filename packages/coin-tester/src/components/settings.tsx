@@ -199,7 +199,7 @@ function Settings(props: Props) {
       const decryptingKey = await apdu.tx.getSignatureKey(transport!);
       await apdu.tx.clearTransaction(transport!);
       await apdu.mcu.control.powerOff(transport!);
-      const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, false, false);
+      const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.DER);
       return sig.toString('hex');
     }, setSignature);
   };

@@ -56,7 +56,7 @@ export default class IOTX extends COIN.ECDSACoin implements COIN.Coin {
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
     await apdu.tx.clearTransaction(transport);
     await apdu.mcu.control.powerOff(transport);
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
     const signedTx = utils.getSignedTransaction(transaction, sig as { r: string; s: string }, publicKey, txType);
     return signedTx;
   }
