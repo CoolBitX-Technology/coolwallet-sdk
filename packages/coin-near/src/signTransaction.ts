@@ -13,6 +13,6 @@ export default async function signTransaction(signTxData: types.SignTxType): Pro
   const decryptingKey = await apdu.tx.getSignatureKey(transport);
   await apdu.tx.clearTransaction(transport);
   await apdu.mcu.control.powerOff(transport);
-  const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, true, false) as Buffer;
+  const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.EDDSA) as Buffer;
   return getSignedTx(transaction, sig);
 }

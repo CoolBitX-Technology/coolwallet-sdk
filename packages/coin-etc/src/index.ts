@@ -79,8 +79,7 @@ export default class ETC implements COIN.Coin {
     addressIndex: number,
     transaction: Transaction
   ): Promise<string> => {
-    const script =
-      `03040601C707000000003DA00700C2ACD70032FFF8C2ACD7001EFFF6C2ACD70028FFF6CC071094CAA02700C2A2D700FFF6CC071080CC0E103DC2E09700CC07C0028080BE0710DC07C003455443CC0FC0023078BAA02F6C0E04DDF09700DAA2D7C0FFF612D207CC05065052455353425554546F4E`;
+    const script = `03040601C707000000003DA00700C2ACD70032FFF8C2ACD7001EFFF6C2ACD70028FFF6CC071094CAA02700C2A2D700FFF6CC071080CC0E103DC2E09700CC07C0028080BE0710DC07C003455443CC0FC0023078BAA02F6C0E04DDF09700DAA2D7C0FFF612D207CC05065052455353425554546F4E`;
     return this.doTransaction(transport, appPrivateKey, appId, addressIndex, transaction, script);
   };
 
@@ -123,18 +122,18 @@ export default class ETC implements COIN.Coin {
 
     const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
-    if (typeof transaction.confirmCB === "function") {
+    if (typeof transaction.confirmCB === 'function') {
       transaction.confirmCB();
     }
     await apdu.tx.finishPrepare(transport);
     await apdu.tx.getTxDetail(transport);
     const decryptingKey = await apdu.tx.getSignatureKey(transport);
-    if (typeof transaction.authorizedCB === "function") {
+    if (typeof transaction.authorizedCB === 'function') {
       transaction.authorizedCB();
     }
     await apdu.tx.clearTransaction(transport);
     await apdu.mcu.control.powerOff(transport);
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey);
+    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
 
     // 4. construct the signed transaction and return the result
 
