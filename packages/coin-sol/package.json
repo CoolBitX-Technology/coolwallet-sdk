@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/sol",
-  "version": "1.1.5-beta.5",
+  "version": "1.1.5",
   "description": "Coolwallet Solana sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -22,7 +22,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.1"
+    "@coolwallet/core": "^1.1.23"
   },
   "dependencies": {
     "@solana/buffer-layout": "^4.0.0",
@@ -36,7 +36,7 @@
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.1",
+    "@coolwallet/core": "^1.1.23",
     "@solana/spl-token": "^0.2.0",
     "@solana/web3.js": "^1.41.0",
     "@types/bs58": "^4.0.1",
