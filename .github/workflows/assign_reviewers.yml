@@ -8,17 +8,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Assign Reviewers to PR
-        uses: itsOliverBott/assign-pr-reviewers@release
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          users: "Dorac, hankliu418"
-          ignore-drafts: true 
-      
       - name: "Assign Team and Persons"
         uses: rowi1de/auto-assign-review-teams@v1.1.3
         with:
           repo-token: ${{ secrets.AUTOASSIGN_PAT }}
           org: "CoolBitX-Technology"
-          teams: "mobius, turing"
-          pick-one-from-persons-or-team: false
+          teams: "coolwallet, sesdk"
