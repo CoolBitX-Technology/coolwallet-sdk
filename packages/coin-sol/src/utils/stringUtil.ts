@@ -3,12 +3,10 @@ import BN from 'bn.js';
 import * as types from '../config/types';
 
 const HEX_REGEX = /[0-9A-Fa-f]{6}/g;
-const BS58_REGEX = /([G-Z])|([g-z])/g;
 
 export const isBase58Format = (value?: string): boolean => {
   if (!value) return false;
-  const match = value.match(BS58_REGEX);
-  return !!(match && match.length > 0);
+  return /^[A-HJ-NP-Za-km-z1-9]*$/.test(value);
 };
 
 function isHexFormat(value: string): boolean {
