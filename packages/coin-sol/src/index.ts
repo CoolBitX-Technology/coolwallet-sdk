@@ -17,7 +17,7 @@ import {
   compileSplTokenTransaction,
   compileTransferTransaction,
   compileUndelegate,
-  compileStakingWithdraw
+  compileStakingWithdraw,
 } from './utils/rawTransaction';
 import * as txUtils from './utils/transactionUtils';
 import Transaction from './utils/Transaction';
@@ -58,7 +58,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const buffer = Buffer.concat([
       stringUtil.toBase58Buffer(fromPublicKey),
       Buffer.from(seed),
-      stringUtil.toBase58Buffer(programId)
+      stringUtil.toBase58Buffer(programId),
     ]);
     const hash = sha256.create();
     hash.update(buffer);
@@ -132,7 +132,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       signer,
       owner: transaction.toPubkey,
       associateAccount: transaction.toTokenAccount,
-      token: tokenInfo.address
+      token: tokenInfo.address,
     });
     const [transferInstruction] = compileSplTokenTransaction({ ...signTxData.transaction, signer }).instructions;
     associateAccountInstruction.instructions.push(transferInstruction);
@@ -181,7 +181,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       ...signTxData.transaction,
       newAccountPubkey,
       fromPubkey,
-      basePubkey: fromPubkey
+      basePubkey: fromPubkey,
     };
     const rawTransaction = compileDelegateAndCreateAccountWithSeed(transaction);
     const transactionInstruction = new Transaction(rawTransaction);
@@ -239,7 +239,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
     const transactionInstruction = new Transaction(signTxData.transaction as types.TransactionArgs);
     const argument = scriptUtil.getSmartContractArguments(transactionInstruction, signTxData.addressIndex);
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+    return sign.signSmartContractTransaction(signTxData, transactionInstruction, script, argument);
   }
 }
 
@@ -253,6 +253,6 @@ export {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   SYSVAR_RENT_PUBKEY,
   SYSVAR_CLOCK_PUBKEY,
-  SYSVAR_STAKE_HISTORY_PUBKEY
+  SYSVAR_STAKE_HISTORY_PUBKEY,
 } from './config/params';
 export default Solana;

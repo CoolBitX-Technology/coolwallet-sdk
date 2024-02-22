@@ -141,5 +141,5 @@ export {
   getDelegateAndCreateAccountArguments,
   getStackingWithdrawArguments,
   getSignInArguments,
-  getSignMessageArguments
+  getSignMessageArguments,
 };
