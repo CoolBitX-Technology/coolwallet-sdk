@@ -121,6 +121,17 @@ const SCRIPT = {
     get scriptWithSignature(): string {
       return this.script + this.signature;
     }
+  },
+  MULTI_SIGN_TX: {
+    script: ``,
+    signature:
+      ``.padStart(
+        144,
+        '0'
+      ),
+    get scriptWithSignature(): string {
+      return this.script + this.signature;
+    }
   }
 };
 
@@ -142,6 +153,13 @@ const SYSVAR_STAKE_HISTORY_PUBKEY = base58.decode('SysvarStakeHistory11111111111
 
 const PACKET_DATA_SIZE = 1280 - 40 - 8;
 
+const VERSION_PREFIX_MASK = 0x7f;
+
+/**
+ * Size of public key in bytes
+ */
+const PUBLIC_KEY_LENGTH = 32;
+
 export {
   SCRIPT,
   COIN_TYPE,
@@ -154,5 +172,7 @@ export {
   SYSVAR_RENT_PUBKEY,
   SYSVAR_CLOCK_PUBKEY,
   SYSVAR_STAKE_HISTORY_PUBKEY,
-  PACKET_DATA_SIZE
+  PACKET_DATA_SIZE,
+  VERSION_PREFIX_MASK,
+  PUBLIC_KEY_LENGTH
 };

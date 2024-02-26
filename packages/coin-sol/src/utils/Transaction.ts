@@ -1,9 +1,73 @@
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as stringUtil from './stringUtil';
-import Message from './Message';
+import Message from '../message/legacy';
 import * as types from '../config/types';
+import { PublicKey } from './publickey';
 
-export default class Transaction {
+/**
+ * List of TransactionInstruction object fields that may be initialized at construction
+ */
+export type TransactionInstructionCtorFields = {
+  keys: Array<types.AccountMeta>;
+  programId: PublicKey;
+  data?: Buffer;
+};
+
+export interface TransactionInstructionJSON {
+  keys: {
+    pubkey: string;
+    isSigner: boolean;
+    isWritable: boolean;
+  }[];
+  programId: string;
+  data: number[];
+}
+
+/**
+ * Transaction Instruction class
+ */
+export class TransactionInstruction {
+  /**
+   * Public keys to include in this transaction
+   * Boolean represents whether this pubkey needs to sign the transaction
+   */
+  keys: Array<types.AccountMeta>;
+
+  /**
+   * Program Id to execute
+   */
+  programId: PublicKey;
+
+  /**
+   * Program input
+   */
+  data: Buffer = Buffer.alloc(0);
+
+  constructor(opts: TransactionInstructionCtorFields) {
+    this.programId = opts.programId;
+    this.keys = opts.keys;
+    if (opts.data) {
+      this.data = opts.data;
+    }
+  }
+
+  /**
+   * @internal
+   */
+  toJSON(): TransactionInstructionJSON {
+    return {
+      keys: this.keys.map(({ pubkey, isSigner, isWritable }) => ({
+        pubkey: stringUtil.toBase58(pubkey),
+        isSigner,
+        isWritable,
+      })),
+      programId: this.programId.toJSON(),
+      data: [...this.data],
+    };
+  }
+}
+
+export class Transaction {
   feePayer: string;
   recentBlockhash: string;
   instructions: types.TransactionInstruction[];

@@ -1,8 +1,10 @@
 import * as BufferLayout from '@solana/buffer-layout';
-import { encodeLength } from './stringUtil';
-import { publicKey } from './commonLayout';
-import { PACKET_DATA_SIZE } from '../config/params';
-import { CompliedInstruction, SerializedInstruction } from '../config/types';
+import { encodeLength } from '../utils/stringUtil';
+import { publicKey } from '../utils/commonLayout';
+import { PACKET_DATA_SIZE, PUBLIC_KEY_LENGTH, VERSION_PREFIX_MASK } from '../config/params';
+import { CompiledInstruction, CompliedInstruction, SerializedInstruction } from '../config/types';
+import * as shortvec from '../utils/shortvec-encoding';
+import bs58 from 'bs58';
 
 type MessageHeader = {
   numRequiredSignatures: number;
@@ -62,7 +64,7 @@ class Message {
     return { keyCount, instructionCount, instructions };
   }
 
-  serialize(): string {
+  serialize(): Buffer {
     const { keyCount, instructionCount, instructions } = this.encodedLength();
     // encode instruction
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
@@ -119,7 +121,8 @@ class Message {
     const length = signDataLayout.encode(transaction, signData);
     instructionBuffer.copy(signData, length);
 
-    return signData.slice(0, length + instructionBuffer.length).toString('hex');
+    // return signData.slice(0, length + instructionBuffer.length).toString('hex');
+    return signData.slice(0, length + instructionBuffer.length);
   }
 
   serializeTransferMessage(): string {
@@ -476,6 +479,70 @@ class Message {
     instructionBuffer.copy(signData, length);
 
     return signData.slice(0, length + instructionBuffer.length).toString('hex');
+  }
+
+  /**
+   * Decode a compiled message into a Message object.
+   */
+  static from(buffer: Buffer | Uint8Array | Array<number>): Message {
+    // Slice up wire data
+    let byteArray = [...buffer];
+
+    const numRequiredSignatures = byteArray.shift()!;
+    if (
+      numRequiredSignatures !==
+      (numRequiredSignatures & VERSION_PREFIX_MASK)
+    ) {
+      throw new Error(
+        'Versioned messages must be deserialized with VersionedMessage.deserialize()',
+      );
+    }
+
+    const numReadonlySignedAccounts = byteArray.shift()!;
+    const numReadonlyUnsignedAccounts = byteArray.shift()!;
+
+    const accountCount = shortvec.decodeLength(byteArray);
+    const accountKeys = [];
+    for (let i = 0; i < accountCount; i++) {
+      const account = byteArray.slice(0, PUBLIC_KEY_LENGTH);
+      byteArray = byteArray.slice(PUBLIC_KEY_LENGTH);
+      // accountKeys.push(new PublicKey(Buffer.from(account)));
+      accountKeys.push(bs58.encode(Buffer.from(account)));
+    }
+
+    const recentBlockhash = byteArray.slice(0, PUBLIC_KEY_LENGTH);
+    byteArray = byteArray.slice(PUBLIC_KEY_LENGTH);
+
+    const instructionCount = shortvec.decodeLength(byteArray);
+    const instructions: CompiledInstruction[] = [];
+    for (let i = 0; i < instructionCount; i++) {
+      const programIdIndex = byteArray.shift()!;
+      const instructionAccountCount = shortvec.decodeLength(byteArray);
+      const accounts = byteArray.slice(0, instructionAccountCount);
+      byteArray = byteArray.slice(instructionAccountCount);
+      const dataLength = shortvec.decodeLength(byteArray);
+      const dataSlice = byteArray.slice(0, dataLength);
+      const data = bs58.encode(Buffer.from(dataSlice));
+      byteArray = byteArray.slice(dataLength);
+      instructions.push({
+        programIdIndex,
+        accounts,
+        data,
+      });
+    }
+
+    const messageArgs = {
+      header: {
+        numRequiredSignatures,
+        numReadonlySignedAccounts,
+        numReadonlyUnsignedAccounts,
+      },
+      recentBlockhash: bs58.encode(Buffer.from(recentBlockhash)),
+      accountKeys,
+      instructions,
+    };
+
+    return new Message(messageArgs);
   }
 }
 

@@ -20,9 +20,9 @@ import {
   compileStakingWithdraw
 } from './utils/rawTransaction';
 import * as txUtils from './utils/transactionUtils';
-import Transaction from './utils/Transaction';
 import { createProgramAddressSync } from './utils/account';
 import { is_on_curve } from './utils/ed25519';
+import { Transaction } from './utils/Transaction';
 
 class Solana extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
@@ -218,6 +218,25 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
 
     return sign.signMessage(signMsgData, script, argument);
   }
+
+  async signAllTransaction(signTxData: types.signTransactionType[]): Promise<string> {
+    const script = params.SCRIPT.MULTI_SIGN_TX.scriptWithSignature;
+    const transactionInstructions = signTxData.map((signTx) => 
+      new Transaction(signTx.transaction as types.TransactionArgs));
+    const argument = transactionInstructions.map((transactionInstruction, index) => {
+      const addressIndex = signTxData[index].addressIndex;
+      return scriptUtil.getSmartContractArguments(transactionInstruction, addressIndex);
+    });
+    return sign.signTransaction(signTxData[0], transactionInstructions[0], script, argument.join(''));
+  }
+
+  async signVersionedTransaction(signTxData: types.signVersionedTransactionType): Promise<string> {
+    const { addressIndex } = signTxData;
+    const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
+    const argument = scriptUtil.getSignVersionedArguments(signTxData.transaction, addressIndex) 
+    return sign.signTransaction(signTxData, signTxData.transaction ,script, argument);
+  }
+
 
   async signTransaction(signTxData: types.signTxType): Promise<string> {
     // Specific which kind of transaction automatically
