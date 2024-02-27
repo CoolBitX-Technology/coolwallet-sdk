@@ -41,9 +41,13 @@ export function addressToOutScript(address: string): {
     scriptType = ScriptType.P2SH_P2WPKH;
     payment = bitcoin.payments.p2sh({ address });
     scriptPubKey = payment.hash;
-  } else if (address.startsWith('bc1q')) {
+  } else if (address.startsWith('bc1q') && address.length === 42) {
     scriptType = ScriptType.P2WPKH;
     payment = bitcoin.payments.p2wpkh({ address });
+    scriptPubKey = payment.hash;
+  } else if (address.startsWith('bc1q') && address.length === 62) {
+    scriptType = ScriptType.P2WSH;
+    payment = bitcoin.payments.p2wsh({ address });
     scriptPubKey = payment.hash;
   } else if (address.startsWith('bc1p')) {
     scriptType = ScriptType.P2TR;
