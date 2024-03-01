@@ -1,8 +1,9 @@
 import { tx, apdu } from '@coolwallet/core';
 import * as types from './config/types';
 import { MessageV0, VersionedMessageType } from './message';
-import { VersionedTransaction } from './utils/VersionedTransaction';
+
 import { Transaction } from './utils/Transaction';
+import { VersionedTransaction } from './utils/versionedTransaction';
 
 async function executeScriptWithPreActions(
   signData: types.SignDataType,
