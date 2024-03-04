@@ -1,8 +1,8 @@
 import { SDKError } from '@coolwallet/core/lib/error';
 import * as stringUtil from './stringUtil';
-import Message from '../message/legacy';
 import * as types from '../config/types';
 import { PublicKey } from './publickey';
+import { Message } from '../message';
 
 /**
  * List of TransactionInstruction object fields that may be initialized at construction

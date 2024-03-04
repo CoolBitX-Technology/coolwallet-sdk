@@ -231,7 +231,7 @@ type Mandatory<T> = T extends SignInMessage | string
   };
 
 interface VersionedTransaction <T extends VersionedMessage> {
-  signatures: string;
+  signatures: Array<Uint8Array>;
   message: T;
 }
 
@@ -258,6 +258,7 @@ export type signSignInMessageType = Mandatory<SignInMessage>;
 export type signMessageType = Mandatory<string>;
 
 export type signVersionedTransactionType = Mandatory<VersionedTransaction<VersionedMessage>>
+export type signVersionedTransactions = Mandatory<VersionedTransaction<VersionedMessage>[]>
 
 export type signTxType =
   | signTransactionType
@@ -269,7 +270,8 @@ export type signTxType =
   | signUndelegateType
   | signDelegateAndCreateAccountWithSeedType
   | signStakingWithdrawType
-  | signVersionedTransactionType;
+  | signVersionedTransactionType
+  | signVersionedTransactions;
 
 export type signMsgType = signSignInMessageType | signMessageType;
 

@@ -1,5 +1,5 @@
 import { VERSION_PREFIX_MASK } from '../config/params';
-import   Message    from './legacy';
+import { Message }    from './legacy';
 import { MessageV0 } from './v0';
 
 export type VersionedMessage = Message | MessageV0;

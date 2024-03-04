@@ -1,9 +1,11 @@
 import { tx, apdu } from '@coolwallet/core';
 import * as types from './config/types';
-import { MessageV0, VersionedMessage } from './message';
+import  { Message, MessageV0, VersionedMessage } from './message';
 
 import { Transaction } from './utils/Transaction';
 import { VersionedTransaction } from './utils/versionedTransaction';
+import { getScriptSigningActions } from './utils/scriptUtil';
+import { SignatureType } from '@coolwallet/core/lib/transaction';
 
 async function executeScriptWithPreActions(
   signData: types.SignDataType,
@@ -25,6 +27,34 @@ async function executeScriptWithPreActions(
   );
 }
 
+async function signAllTransactions(
+  signTxData: types.signVersionedTransactions,
+  preActions: Array<() => Promise<void>>,
+): Promise<Uint8Array[]> {
+  const { transport, confirmCB, authorizedCB } = signTxData;
+  const { actions } = await getScriptSigningActions(signTxData);
+  const signatures = await tx.flow.getSignaturesFromCoolWalletV2(
+    transport,
+    preActions,
+    actions,
+    confirmCB,
+    authorizedCB,
+    SignatureType.EDDSA
+  );
+
+  return signatures.map((signature) => {
+    let signatureUint8Array: Uint8Array;
+    if (signature instanceof Buffer) {
+      signatureUint8Array = new Uint8Array(signature);
+    } else {
+      const rBuffer = Buffer.from(signature.r, 'hex');
+      const sBuffer = Buffer.from(signature.s, 'hex');
+      signatureUint8Array = new Uint8Array([...rBuffer, ...sBuffer]);
+    }
+    return signatureUint8Array;
+  })
+}
+
 async function signTransaction(
   signTxData: types.signTxType,
   rawTx: Transaction | VersionedMessage,
@@ -33,7 +63,7 @@ async function signTransaction(
 ): Promise<string> {
   const signature = await executeScriptWithPreActions(signTxData, script, argument);
 
-  if (rawTx instanceof MessageV0) {
+  if (rawTx instanceof Message || rawTx instanceof MessageV0) {
     let signatureUint8Array: Uint8Array;
     if (signature instanceof Buffer) {
       signatureUint8Array = new Uint8Array(signature);
@@ -58,4 +88,4 @@ async function signMessage(
   const signature = await executeScriptWithPreActions(signMsgData, script, argument);
   return signature.toString('hex');
 }
-export { signTransaction, signMessage };
+export { signTransaction, signMessage, signAllTransactions };

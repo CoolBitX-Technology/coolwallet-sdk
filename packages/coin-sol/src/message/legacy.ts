@@ -19,7 +19,7 @@ type MessageArgs = {
   instructions: CompliedInstruction[];
 };
 
-class Message {
+export class Message {
   header: MessageHeader;
   accountKeys: string[];
   recentBlockhash: string;
@@ -546,4 +546,3 @@ class Message {
   }
 }
 
-export default Message;

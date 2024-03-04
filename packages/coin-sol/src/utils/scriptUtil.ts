@@ -5,6 +5,7 @@ import * as types from '../config/types';
 import { createSignInMessage } from './signIn';
 import { Transaction } from './Transaction';
 import { VersionedMessage } from '../message';
+import { apdu } from '@coolwallet/core';
 
 /**
  * getTransferArguments
@@ -138,6 +139,51 @@ function getSignVersionedArguments(rawTx: VersionedMessage, addressIndex: number
   return SEPath + rawTx.serialize().toString('hex');
 }
 
+export function getScriptSigningPreActions(
+  signData: types.signVersionedTransactions,
+  script:string,
+  argument: string
+): {
+  preActions: Array<() => Promise<void>>;
+} {
+  const { transport, appPrivateKey, appId } = signData;
+
+  const preActions = [];
+  const sendScript = async () => {
+    await apdu.tx.sendScript(transport, script);
+  };
+  preActions.push(sendScript);
+
+  const sendArgument = async () => {
+    await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  };
+  preActions.push(sendArgument);
+
+  return { preActions };
+}
+
+function getScriptSigningActions(
+  signData: types.signVersionedTransactions,
+): {
+  actions: Array<() => Promise<string|undefined>>;
+} {
+  const { transport, appPrivateKey, appId, addressIndex } = signData;
+  const versionedTxs = signData.transaction;
+
+  const versionedArguments = versionedTxs.map((versionedTx) => {
+    const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+    const SEPath = `11${path}`;
+    console.debug('SEPath: ', SEPath);
+    return SEPath + versionedTx.message.serialize().toString('hex');
+  });
+
+  const actions = versionedArguments.map((argument) => async () => {
+    return await apdu.tx.executeUtxoSegmentScript(transport, appId, appPrivateKey, argument);
+  });
+
+  return { actions };
+}
+
 export {
   getAssociateTokenAccount,
   getSplTokenTransferArguments,
@@ -150,5 +196,6 @@ export {
   getStackingWithdrawArguments,
   getSignInArguments,
   getSignMessageArguments,
-  getSignVersionedArguments
+  getSignVersionedArguments,
+  getScriptSigningActions
 };
