@@ -2,8 +2,9 @@ import { utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
 import base58 from 'bs58';
 import * as types from '../config/types';
-import Transaction from './Transaction';
 import { createSignInMessage } from './signIn';
+import { Transaction } from './Transaction';
+import { VersionedMessageType } from '../message';
 
 /**
  * getTransferArguments
@@ -130,6 +131,13 @@ function getSignMessageArguments(message: string, addressIndex: number): string 
   return SEPath + argument;
 }
 
+function getSignVersionedArguments(rawTx: VersionedMessageType, addressIndex: number): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+  return SEPath + rawTx.serialize().toString('hex');
+}
+
 export {
   getAssociateTokenAccount,
   getSplTokenTransferArguments,
@@ -141,5 +149,6 @@ export {
   getDelegateAndCreateAccountArguments,
   getStackingWithdrawArguments,
   getSignInArguments,
-  getSignMessageArguments
+  getSignMessageArguments,
+  getSignVersionedArguments
 };

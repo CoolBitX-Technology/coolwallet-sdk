@@ -4,7 +4,6 @@ import * as stringUtil from './stringUtil';
 import { StakeProgramLayout, SystemProgramLayout } from './programLayout';
 import { encodeData } from './commonLayout';
 import * as instructions from './instructions';
-import { TOKEN_INFO } from '../config/tokenInfos';
 
 function compileTransferTransaction(transaction: {
   fromPubkey: types.Address;

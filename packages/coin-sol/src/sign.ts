@@ -1,6 +1,9 @@
 import { tx, apdu } from '@coolwallet/core';
 import * as types from './config/types';
-import Transaction from './utils/Transaction';
+import { MessageV0, VersionedMessageType } from './message';
+
+import { Transaction } from './utils/Transaction';
+import { VersionedTransaction } from './utils/versionedTransaction';
 
 async function executeScriptWithPreActions(
   signData: types.SignDataType,
@@ -24,12 +27,27 @@ async function executeScriptWithPreActions(
 
 async function signTransaction(
   signTxData: types.signTxType,
-  rawTx: Transaction,
+  rawTx: Transaction | VersionedMessageType,
   script: string,
   argument: string
 ): Promise<string> {
   const signature = await executeScriptWithPreActions(signTxData, script, argument);
-  return rawTx.toTxString(signature.toString('hex'));
+
+  if (rawTx instanceof MessageV0) {
+    let signatureUint8Array: Uint8Array;
+    if (signature instanceof Buffer) {
+      signatureUint8Array = new Uint8Array(signature);
+    } else {
+      const rBuffer = Buffer.from(signature.r, 'hex');
+      const sBuffer = Buffer.from(signature.s, 'hex');
+      signatureUint8Array = new Uint8Array([...rBuffer, ...sBuffer]);
+    }
+    return new VersionedTransaction(rawTx, [signatureUint8Array]).serialize().toString();
+  }else if (rawTx instanceof Transaction){
+    return rawTx.toTxString(signature.toString('hex'));
+  }else{
+    throw new Error('Invalid transaction type');
+  }
 }
 
 async function signMessage(

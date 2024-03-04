@@ -1,4 +1,6 @@
 import { Transport } from '@coolwallet/core';
+import { PublicKey } from '../utils/publickey';
+import {  VersionedMessageType } from '../message';
 
 export type Address = string | Buffer;
 
@@ -32,6 +34,47 @@ export type AccountMeta = {
   isSigner: boolean;
   isWritable: boolean;
 };
+
+/**
+ * Blockhash as Base58 string.
+ */
+export type Blockhash = string;
+
+/**
+ * An instruction to execute by a program
+ *
+ * @property {number} programIdIndex
+ * @property {number[]} accounts
+ * @property {string} data
+ */
+export type CompiledInstruction = {
+  /** Index into the transaction keys array indicating the program account that executes this instruction */
+  programIdIndex: number;
+  /** Ordered indices into the transaction keys array indicating which accounts to pass to the program */
+  accounts: number[];
+  /** The program input data encoded as base 58 */
+  data: string;
+};
+
+type AddressLookupTableState = {
+  deactivationSlot: bigint;
+  lastExtendedSlot: number;
+  lastExtendedSlotStartIndex: number;
+  authority?: PublicKey;
+  addresses: Array<PublicKey>;
+};
+
+export type AddressLookupTableAccount = {
+  key: PublicKey;
+  state: AddressLookupTableState;
+}
+
+type LoadedAddresses = {
+  writable: Array<PublicKey>;
+  readonly: Array<PublicKey>;
+};
+
+export type AccountKeysFromLookups = LoadedAddresses;
 
 /**
  * TransactionInstruction types for instruction input
@@ -187,6 +230,11 @@ type Mandatory<T> = T extends SignInMessage | string
     authorizedCB?(): void;
   };
 
+  type VersionedTransaction <T extends VersionedMessageType> ={
+    signature: string;
+    message: T;
+  };
+
 export type signTransactionType = Mandatory<TransactionArgs>;
 
 export type signTransferTransactionType = Mandatory<TransferTransaction>;
@@ -206,7 +254,10 @@ export type signDelegateAndCreateAccountWithSeedType = Mandatory<DelegateAndCrea
 export type signStakingWithdrawType = Mandatory<StakingWithdrawTransaction>;
 
 export type signSignInMessageType = Mandatory<SignInMessage>;
+
 export type signMessageType = Mandatory<string>;
+
+export type signVersionedTransactionType = Mandatory<VersionedTransaction<VersionedMessageType>>
 
 export type signTxType =
   | signTransactionType
@@ -217,7 +268,8 @@ export type signTxType =
   | signDelegateType
   | signUndelegateType
   | signDelegateAndCreateAccountWithSeedType
-  | signStakingWithdrawType;
+  | signStakingWithdrawType
+  | signVersionedTransactionType;
 
 export type signMsgType = signSignInMessageType | signMessageType;
 

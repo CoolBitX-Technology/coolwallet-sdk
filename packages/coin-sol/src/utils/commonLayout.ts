@@ -112,4 +112,8 @@ function encodeData<T extends InstructionInputData>(layoutType: InstructionLayou
   return data;
 }
 
-export { publicKey, authorized, lockup, rustString, encodeData };
+const signature = (property: string = 'signature') => {
+  return BufferLayout.blob(64, property);
+};
+
+export { publicKey, authorized, lockup, rustString, encodeData, signature as SignatureLayout };
