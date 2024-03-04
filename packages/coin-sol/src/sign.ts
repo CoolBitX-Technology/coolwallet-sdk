@@ -1,6 +1,6 @@
 import { tx, apdu } from '@coolwallet/core';
 import * as types from './config/types';
-import { MessageV0, VersionedMessageType } from './message';
+import { MessageV0, VersionedMessage } from './message';
 
 import { Transaction } from './utils/Transaction';
 import { VersionedTransaction } from './utils/versionedTransaction';
@@ -27,7 +27,7 @@ async function executeScriptWithPreActions(
 
 async function signTransaction(
   signTxData: types.signTxType,
-  rawTx: Transaction | VersionedMessageType,
+  rawTx: Transaction | VersionedMessage,
   script: string,
   argument: string
 ): Promise<string> {

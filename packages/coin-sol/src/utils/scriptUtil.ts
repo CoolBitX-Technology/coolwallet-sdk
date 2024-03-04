@@ -4,7 +4,7 @@ import base58 from 'bs58';
 import * as types from '../config/types';
 import { createSignInMessage } from './signIn';
 import { Transaction } from './Transaction';
-import { VersionedMessageType } from '../message';
+import { VersionedMessage } from '../message';
 
 /**
  * getTransferArguments
@@ -131,7 +131,7 @@ function getSignMessageArguments(message: string, addressIndex: number): string 
   return SEPath + argument;
 }
 
-function getSignVersionedArguments(rawTx: VersionedMessageType, addressIndex: number): string {
+function getSignVersionedArguments(rawTx: VersionedMessage, addressIndex: number): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);

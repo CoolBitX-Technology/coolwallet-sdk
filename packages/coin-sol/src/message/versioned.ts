@@ -2,7 +2,7 @@ import { VERSION_PREFIX_MASK } from '../config/params';
 import   Message    from './legacy';
 import { MessageV0 } from './v0';
 
-export type VersionedMessageType = Message | MessageV0;
+export type VersionedMessage = Message | MessageV0;
 // eslint-disable-next-line no-redeclare
 export const VersionedMessage = {
   deserializeMessageVersion(serializedMessage: Uint8Array): 'legacy' | number {
@@ -18,8 +18,7 @@ export const VersionedMessage = {
     return maskedPrefix;
   },
 
-  deserialize: (serializedMessageHex: string): VersionedMessageType => {
-    const serializedMessage = Buffer.from(serializedMessageHex, 'hex');
+  deserialize: (serializedMessage: Uint8Array): VersionedMessage => {
     const version =
       VersionedMessage.deserializeMessageVersion(serializedMessage);
     if (version === 'legacy') {
