@@ -136,7 +136,7 @@ function getSignVersionedArguments(rawTx: VersionedMessage, addressIndex: number
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
-  return SEPath + rawTx.serialize().toString('hex');
+  return SEPath + Buffer.from(rawTx.serialize()).toString('hex');
 }
 
 export function getScriptSigningPreActions(
