@@ -1,6 +1,6 @@
 import { Transport } from '@coolwallet/core';
 import { PublicKey } from '../utils/publickey';
-import {  VersionedMessageType } from '../message';
+import {  VersionedMessage } from '../message';
 
 export type Address = string | Buffer;
 
@@ -230,10 +230,10 @@ type Mandatory<T> = T extends SignInMessage | string
     authorizedCB?(): void;
   };
 
-  type VersionedTransaction <T extends VersionedMessageType> ={
-    signature: string;
-    message: T;
-  };
+interface VersionedTransaction <T extends VersionedMessage> {
+  signatures: Array<Uint8Array>;
+  message: T;
+}
 
 export type signTransactionType = Mandatory<TransactionArgs>;
 
@@ -257,7 +257,8 @@ export type signSignInMessageType = Mandatory<SignInMessage>;
 
 export type signMessageType = Mandatory<string>;
 
-export type signVersionedTransactionType = Mandatory<VersionedTransaction<VersionedMessageType>>
+export type signVersionedTransactionType = Mandatory<VersionedTransaction<VersionedMessage>>
+export type signVersionedTransactions = Mandatory<VersionedTransaction<VersionedMessage>[]>
 
 export type signTxType =
   | signTransactionType
@@ -269,7 +270,8 @@ export type signTxType =
   | signUndelegateType
   | signDelegateAndCreateAccountWithSeedType
   | signStakingWithdrawType
-  | signVersionedTransactionType;
+  | signVersionedTransactionType
+  | signVersionedTransactions;
 
 export type signMsgType = signSignInMessageType | signMessageType;
 

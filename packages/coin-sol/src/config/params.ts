@@ -155,6 +155,8 @@ const PACKET_DATA_SIZE = 1280 - 40 - 8;
 
 const VERSION_PREFIX_MASK = 0x7f;
 
+export const SIGNATURE_LENGTH_IN_BYTES = 64;
+
 /**
  * Size of public key in bytes
  */

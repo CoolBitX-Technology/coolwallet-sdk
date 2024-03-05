@@ -1,15 +1,16 @@
 import * as BufferLayout from '@solana/buffer-layout';
 import assert from './assert';
-import { MessageV0 } from '../message';
+import { VersionedMessage } from '../message';
 export type TransactionVersion = 'legacy' | 0;
 import * as shortvec from './shortvec-encoding';
 import { SignatureLayout } from './commonLayout';
+import { SIGNATURE_LENGTH_IN_BYTES } from '../config/params';
 
 export class VersionedTransaction {
   signatures: Array<Uint8Array>;
-  message: MessageV0;
+  message: VersionedMessage;
 
-  constructor(message: MessageV0, signatures: Array<Uint8Array>) {
+  constructor(message: VersionedMessage, signatures: Array<Uint8Array>) {
     if (signatures === undefined) {
       throw new Error('Signatures are required');
     }
@@ -22,6 +23,21 @@ export class VersionedTransaction {
     this.message = message;
   }
 
+  static deserialize(serializedTransaction: Uint8Array): VersionedTransaction {
+    const byteArray = [...serializedTransaction];
+
+    const signatures = [];
+    const signaturesLength = shortvec.decodeLength(byteArray);
+    for (let i = 0; i < signaturesLength; i++) {
+      signatures.push(
+        new Uint8Array(byteArray.splice(0, SIGNATURE_LENGTH_IN_BYTES)),
+      );
+    }
+
+    const message = VersionedMessage.deserialize(new Uint8Array(byteArray));
+    return new VersionedTransaction(message, signatures);
+  }
+  
   serialize(): Uint8Array {
     const serializedMessage = this.message.serialize();
 

@@ -23,6 +23,7 @@ import * as txUtils from './utils/transactionUtils';
 import { createProgramAddressSync } from './utils/account';
 import { is_on_curve } from './utils/ed25519';
 import { Transaction } from './utils/Transaction';
+import { VersionedTransaction } from './utils/versionedTransaction';
 
 class Solana extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
@@ -218,18 +219,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
 
     return sign.signMessage(signMsgData, script, argument);
   }
-  // TODO: implement signAllTransaction
-  // async signAllTransaction(signTxData: types.signTransactionType[]): Promise<string> {
-  //   const script = params.SCRIPT.MULTI_SIGN_TX.scriptWithSignature;
-  //   const transactionInstructions = signTxData.map((signTx) => 
-  //     new Transaction(signTx.transaction as types.TransactionArgs));
-  //   const argument = transactionInstructions.map((transactionInstruction, index) => {
-  //     const addressIndex = signTxData[index].addressIndex;
-  //     return scriptUtil.getSmartContractArguments(transactionInstruction, addressIndex);
-  //   });
-  //   return sign.signTransaction(signTxData[0], transactionInstructions[0], script, argument.join(''));
-  // }
-
+ 
   async signTransaction(signTxData: types.signVersionedTransactionType): Promise<string> {
     const { addressIndex } = signTxData;
     const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
@@ -237,28 +227,23 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     return sign.signTransaction(signTxData, signTxData.transaction.message ,script, argument);
   }
 
-  // async signTransaction(signTxData: types.signTxType): Promise<string> {
-  //   // Specific which kind of transaction automatically
-  //   if (txUtils.isTransfer(signTxData))
-  //     return this.signTransferTransaction(signTxData as types.signTransferTransactionType);
-  //   if (txUtils.isTransferSPLToken(signTxData))
-  //     return this.signTransferSplTokenTransaction(signTxData as types.signTransferSplTokenTransactionType);
-  //   if (txUtils.isAssociateTokenAccount(signTxData))
-  //     return this.signAssociateTokenAccount(signTxData as types.signAssociateTokenAccountTransactionType);
-  //   if (txUtils.isCreateAndTransferSPLToken(signTxData))
-  //     return this.signCreateAndTransferSPLToken(signTxData as types.signCreateAndTransferSplTokenTransaction);
-  //   if (txUtils.isDelegate(signTxData)) return this.signDelegate(signTxData as types.signDelegateType);
-  //   if (txUtils.isDelegateAndCreateAccountWithSeed(signTxData))
-  //     return this.signDelegateAndCreateAccountWithSeed(signTxData as types.signDelegateAndCreateAccountWithSeedType);
-  //   if (txUtils.isStakingWithdraw(signTxData))
-  //     return this.signStackingWithdrawTransaction(signTxData as types.signStakingWithdrawType);
+  async signAllTransactions (signTxData: types.signVersionedTransactions): Promise<string> {
+    const { addressIndex } = signTxData;
+    const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
 
-  //   // Blind signing
-  //   const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
-  //   const transactionInstruction = new Transaction(signTxData.transaction as types.TransactionArgs);
-  //   const argument = scriptUtil.getSmartContractArguments(transactionInstruction, signTxData.addressIndex);
-  //   return sign.signTransaction(signTxData, transactionInstruction, script, argument);
-  // }
+    const concatenatedArgument =  signTxData.transaction.map(txData => 
+      scriptUtil.getSignVersionedArguments(txData.message, addressIndex) 
+    ).join('')
+
+    const { preActions } = scriptUtil.getScriptSigningPreActions(signTxData, script, concatenatedArgument);  
+    const signatures = await sign.signAllTransactions(signTxData, preActions);
+
+    return signatures.map((signature, index) => {
+      const versionedTransaction = new VersionedTransaction(signTxData.transaction[index].message, [signature]);
+      return versionedTransaction.serialize().toString();
+    }).join('');
+  }
+
 }
 
 export { types };
