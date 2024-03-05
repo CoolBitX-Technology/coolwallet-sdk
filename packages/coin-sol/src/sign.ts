@@ -30,7 +30,7 @@ async function executeScriptWithPreActions(
 async function signAllTransactions(
   signTxData: types.signVersionedTransactions,
   preActions: Array<() => Promise<void>>,
-): Promise<Uint8Array[]> {
+): Promise<Array<Uint8Array>> {
   const { transport, confirmCB, authorizedCB } = signTxData;
   const { actions } = await getScriptSigningActions(signTxData);
   const signatures = await tx.flow.getSignaturesFromCoolWalletV2(
@@ -40,18 +40,10 @@ async function signAllTransactions(
     confirmCB,
     authorizedCB,
     SignatureType.EDDSA
-  );
+  ) as Array<Buffer>
 
   return signatures.map((signature) => {
-    let signatureUint8Array: Uint8Array;
-    if (signature instanceof Buffer) {
-      signatureUint8Array = new Uint8Array(signature);
-    } else {
-      const rBuffer = Buffer.from(signature.r, 'hex');
-      const sBuffer = Buffer.from(signature.s, 'hex');
-      signatureUint8Array = new Uint8Array([...rBuffer, ...sBuffer]);
-    }
-    return signatureUint8Array;
+    return new Uint8Array(signature);
   })
 }
 

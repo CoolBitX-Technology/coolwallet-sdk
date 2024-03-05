@@ -141,12 +141,11 @@ function getSignVersionedArguments(rawTx: VersionedMessage, addressIndex: number
 
 export function getScriptSigningPreActions(
   signData: types.signVersionedTransactions,
-  script:string,
-  argument: string
+  script:string
 ): {
   preActions: Array<() => Promise<void>>;
 } {
-  const { transport, appPrivateKey, appId } = signData;
+  const { transport } = signData;
 
   const preActions = [];
   const sendScript = async () => {
@@ -154,33 +153,20 @@ export function getScriptSigningPreActions(
   };
   preActions.push(sendScript);
 
-  const sendArgument = async () => {
-    await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
-  };
-  preActions.push(sendArgument);
-
   return { preActions };
 }
 
 function getScriptSigningActions(
   signData: types.signVersionedTransactions,
 ): {
-  actions: Array<() => Promise<string|undefined>>;
+  actions: Array<() => Promise<string | undefined>>;
 } {
   const { transport, appPrivateKey, appId, addressIndex } = signData;
   const versionedTxs = signData.transaction;
-
-  const versionedArguments = versionedTxs.map((versionedTx) => {
-    const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
-    const SEPath = `11${path}`;
-    console.debug('SEPath: ', SEPath);
-    return SEPath + versionedTx.message.serialize().toString('hex');
-  });
-
-  const actions = versionedArguments.map((argument) => async () => {
-    return await apdu.tx.executeUtxoSegmentScript(transport, appId, appPrivateKey, argument);
-  });
-
+  const actions = versionedTxs.map((tx) => async()=>{
+    const argument = getSignVersionedArguments(tx.message, addressIndex);
+    return apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  })
   return { actions };
 }
 

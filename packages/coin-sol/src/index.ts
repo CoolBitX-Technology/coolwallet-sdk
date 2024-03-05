@@ -19,7 +19,6 @@ import {
   compileUndelegate,
   compileStakingWithdraw
 } from './utils/rawTransaction';
-import * as txUtils from './utils/transactionUtils';
 import { createProgramAddressSync } from './utils/account';
 import { is_on_curve } from './utils/ed25519';
 import { Transaction } from './utils/Transaction';
@@ -228,14 +227,9 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
   }
 
   async signAllTransactions (signTxData: types.signVersionedTransactions): Promise<string> {
-    const { addressIndex } = signTxData;
     const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
-
-    const concatenatedArgument =  signTxData.transaction.map(txData => 
-      scriptUtil.getSignVersionedArguments(txData.message, addressIndex) 
-    ).join('')
-
-    const { preActions } = scriptUtil.getScriptSigningPreActions(signTxData, script, concatenatedArgument);  
+    const { preActions } = scriptUtil.getScriptSigningPreActions(signTxData, script);  
+    
     const signatures = await sign.signAllTransactions(signTxData, preActions);
 
     return signatures.map((signature, index) => {
