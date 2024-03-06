@@ -16,7 +16,7 @@ Normal transfer case, with sol token (native token on Solana)
 
 ```javascript
 import SOL from '@coolwallet/sol';
-import { Connection, PublicKey, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/web3.js';
+import { Connection, PublicKey, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/web3.js';
 import base58 from 'bs58';
 
 const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
