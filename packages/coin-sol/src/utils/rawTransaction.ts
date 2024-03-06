@@ -38,8 +38,9 @@ function compileSplTokenTransaction(transaction: {
   toTokenAccount: types.Address;
   recentBlockhash: string;
   amount: number | string;
+  programId: types.TokenProgramId;
 }): types.TransactionArgs {
-  const { signer, fromTokenAccount, toTokenAccount, amount, recentBlockhash } = transaction;
+  const { signer, fromTokenAccount, toTokenAccount, amount, recentBlockhash, programId } = transaction;
   return {
     instructions: [
       {
@@ -48,7 +49,7 @@ function compileSplTokenTransaction(transaction: {
           { pubkey: toTokenAccount, isSigner: false, isWritable: true },
           { pubkey: signer, isSigner: true, isWritable: true },
         ],
-        programId: params.TOKEN_PROGRAM_ID,
+        programId,
         data: stringUtil.splDataEncode(amount),
       },
     ],
@@ -63,8 +64,9 @@ function compileAssociateTokenAccount(transaction: {
   associateAccount: types.Address;
   token: types.Address;
   recentBlockhash: string;
+  programId : types.TokenProgramId;
 }): types.TransactionArgs {
-  const { signer, owner, associateAccount, token, recentBlockhash } = transaction;
+  const { signer, owner, associateAccount, token, recentBlockhash, programId } = transaction;
 
   return {
     instructions: [
@@ -75,7 +77,7 @@ function compileAssociateTokenAccount(transaction: {
           { pubkey: owner, isSigner: false, isWritable: false },
           { pubkey: token, isSigner: false, isWritable: false },
           { pubkey: params.SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false },
-          { pubkey: params.TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: programId, isSigner: false, isWritable: false },
           { pubkey: params.SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
         ],
         programId: params.ASSOCIATED_TOKEN_PROGRAM_ID,

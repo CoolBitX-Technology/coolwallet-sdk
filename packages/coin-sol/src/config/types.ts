@@ -1,6 +1,7 @@
 import { Transport } from '@coolwallet/core';
 import { PublicKey } from '../utils/publickey';
 import {  VersionedMessage } from '../message';
+import { TOKEN_PROGRAM_ID,TOKEN_2022_PROGRAM_ID } from  './params';
 
 export type Address = string | Buffer;
 
@@ -133,6 +134,8 @@ export type TransferTransaction = {
   lamports: number | string;
 };
 
+export type TokenProgramId = typeof TOKEN_PROGRAM_ID | typeof TOKEN_2022_PROGRAM_ID;
+
 export type TransferSplTokenTransaction = {
   fromTokenAccount: Address;
   toTokenAccount: Address;
@@ -144,6 +147,7 @@ export type TransferSplTokenTransaction = {
     address: string;
     signature?: string;
   };
+  programId: TokenProgramId;
 };
 
 export type AssociateTokenAccountTransaction = {
@@ -151,6 +155,7 @@ export type AssociateTokenAccountTransaction = {
   associateAccount: Address;
   token: Address;
   recentBlockhash: string;
+  programId: TokenProgramId;
 };
 
 export type CreateAndTransferSplTokenTransaction = {
@@ -165,6 +170,7 @@ export type CreateAndTransferSplTokenTransaction = {
     address: string;
     signature?: string;
   };
+  programId: TokenProgramId;
 };
 
 export type Delegate = {
