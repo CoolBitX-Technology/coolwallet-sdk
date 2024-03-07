@@ -39,18 +39,20 @@ function compileSplTokenTransaction(transaction: {
   recentBlockhash: string;
   amount: number | string;
   programId: types.TokenProgramId;
+  tokenInfo: types.TokenInfo;
 }): types.TransactionArgs {
-  const { signer, fromTokenAccount, toTokenAccount, amount, recentBlockhash, programId } = transaction;
+  const { signer, fromTokenAccount, toTokenAccount, amount, recentBlockhash, programId, tokenInfo } = transaction;
   return {
     instructions: [
       {
         accounts: [
+          { pubkey: signer, isSigner: true, isWritable: true },
           { pubkey: fromTokenAccount, isSigner: false, isWritable: true },
           { pubkey: toTokenAccount, isSigner: false, isWritable: true },
-          { pubkey: signer, isSigner: true, isWritable: true },
+          { pubkey: tokenInfo.address, isSigner: false, isWritable: false },
         ],
         programId,
-        data: stringUtil.splDataEncode(amount),
+        data: stringUtil.splDataEncode(amount,tokenInfo.decimals),
       },
     ],
     recentBlockhash,

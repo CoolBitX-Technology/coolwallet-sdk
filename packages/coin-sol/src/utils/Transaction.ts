@@ -228,6 +228,6 @@ export class Transaction {
    */
   toTxString(signature: string): string {
     this.signature = signature;
-    return '01' + this.signature + this.compileMessage().serialize();
+    return '01' + this.signature + Buffer.from(this.compileMessage().serialize()).toString('hex');
   }
 }
