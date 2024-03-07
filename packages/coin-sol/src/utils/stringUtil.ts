@@ -71,14 +71,15 @@ export const encodeLength = (bytes: number[], len: number): void => {
   }
 };
 
-export function splDataEncode(amount: number | string): Buffer {
-  const data = Buffer.alloc(9);
+export function splDataEncode(amount: number | string, tokenDecimals: number | string): Buffer {
+  const data = Buffer.alloc(10);
   const programIdIndexSpan = 1;
-  data.writeUIntLE(3, 0, programIdIndexSpan);
+  data.writeUIntLE(types.TokenInstruction.TransferChecked, 0, programIdIndexSpan);
 
   const valueHex = new BN(amount).toString(16, 8 * 2);
   const valueBuf = Buffer.from(valueHex, 'hex').reverse();
 
   data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
+  data.writeUInt8(+tokenDecimals, 9); 
   return data;
 }

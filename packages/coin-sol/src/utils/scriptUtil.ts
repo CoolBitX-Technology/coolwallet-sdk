@@ -103,7 +103,7 @@ function getSmartContractArguments(rawTx: Transaction, addressIndex: number): st
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
 
-  return SEPath + rawTx.compileMessage().serialize();
+  return SEPath + Buffer.from(rawTx.compileMessage().serialize()).toString('hex');
 }
 
 function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number): string {
