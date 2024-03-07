@@ -46,10 +46,10 @@ function compileSplTokenTransaction(transaction: {
     instructions: [
       {
         accounts: [
-          { pubkey: signer, isSigner: true, isWritable: true },
           { pubkey: fromTokenAccount, isSigner: false, isWritable: true },
-          { pubkey: toTokenAccount, isSigner: false, isWritable: true },
           { pubkey: tokenInfo.address, isSigner: false, isWritable: false },
+          { pubkey: toTokenAccount, isSigner: false, isWritable: true },
+          { pubkey: signer, isSigner: true, isWritable: true },
         ],
         programId,
         data: stringUtil.splDataEncode(amount,tokenInfo.decimals),
