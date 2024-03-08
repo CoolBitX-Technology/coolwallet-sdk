@@ -214,7 +214,7 @@ export class Message {
   }
 
   serializeCreateAndTransferSPLToken(): string {
-    const { instructions } = this.encodedLength();
+    const { keyCount, instructions } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
     const [associateAccount, tokenTransfer] = instructions;
     const associateAccountLayout = BufferLayout.struct<
@@ -243,11 +243,15 @@ export class Message {
 
     const signDataLayout = BufferLayout.struct<
       Readonly<{
+        keyCount: Uint8Array;
         keys: Uint8Array[];
         recentBlockhash: Uint8Array;
       }>
-    >([BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'), publicKey('recentBlockhash')]);
+    >([
+      BufferLayout.blob(keyCount.length, 'keyCount'),
+      BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'), publicKey('recentBlockhash')]);
     const transaction = {
+      keyCount: Buffer.from(keyCount),
       keys: this.accountKeys.map((key) => Buffer.from(key, 'hex')),
       recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
     };
