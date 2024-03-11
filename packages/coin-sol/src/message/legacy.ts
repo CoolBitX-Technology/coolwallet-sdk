@@ -510,8 +510,7 @@ export class Message {
     for (let i = 0; i < accountCount; i++) {
       const account = byteArray.slice(0, PUBLIC_KEY_LENGTH);
       byteArray = byteArray.slice(PUBLIC_KEY_LENGTH);
-      // accountKeys.push(new PublicKey(Buffer.from(account)));
-      accountKeys.push(bs58.encode(Buffer.from(account)));
+      accountKeys.push(Buffer.from(account).toString('hex'));
     }
 
     const recentBlockhash = byteArray.slice(0, PUBLIC_KEY_LENGTH);
@@ -526,7 +525,7 @@ export class Message {
       byteArray = byteArray.slice(instructionAccountCount);
       const dataLength = shortvec.decodeLength(byteArray);
       const dataSlice = byteArray.slice(0, dataLength);
-      const data = bs58.encode(Buffer.from(dataSlice));
+      const data = Buffer.from(dataSlice).toString('hex');
       byteArray = byteArray.slice(dataLength);
       instructions.push({
         programIdIndex,
@@ -541,7 +540,7 @@ export class Message {
         numReadonlySignedAccounts,
         numReadonlyUnsignedAccounts,
       },
-      recentBlockhash: bs58.encode(Buffer.from(recentBlockhash)),
+      recentBlockhash: Buffer.from(recentBlockhash).toString('hex'),
       accountKeys,
       instructions,
     };
