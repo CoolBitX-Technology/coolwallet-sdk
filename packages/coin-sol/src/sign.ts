@@ -53,19 +53,14 @@ async function signTransaction(
   script: string,
   argument: string
 ): Promise<string> {
-  const signature = await executeScriptWithPreActions(signTxData, script, argument);
+  const signature = await executeScriptWithPreActions(signTxData, script, argument) as Buffer;
 
-  if (rawTx instanceof Message || rawTx instanceof MessageV0) {
-    let signatureUint8Array: Uint8Array;
-    if (signature instanceof Buffer) {
-      signatureUint8Array = new Uint8Array(signature);
-    } else {
-      const rBuffer = Buffer.from(signature.r, 'hex');
-      const sBuffer = Buffer.from(signature.s, 'hex');
-      signatureUint8Array = new Uint8Array([...rBuffer, ...sBuffer]);
-    }
-    return new VersionedTransaction(rawTx, [signatureUint8Array]).serialize().toString();
-  }else if (rawTx instanceof Transaction){
+  if(rawTx instanceof Message|| rawTx instanceof MessageV0){
+    const signatureUint8Array = new Uint8Array(signature);
+    const serializedTransaction = new VersionedTransaction(rawTx, [signatureUint8Array]).serialize();
+    return  Buffer.from(serializedTransaction).toString('hex');
+  }
+  else if (rawTx instanceof Transaction){
     return rawTx.toTxString(signature.toString('hex'));
   }else{
     throw new Error('Invalid transaction type');
