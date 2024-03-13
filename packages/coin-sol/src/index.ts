@@ -17,7 +17,7 @@ import {
   compileSplTokenTransaction,
   compileTransferTransaction,
   compileUndelegate,
-  compileStakingWithdraw
+  compileStakingWithdraw,
 } from './utils/rawTransaction';
 import { createProgramAddressSync } from './utils/account';
 import { is_on_curve } from './utils/ed25519';
@@ -58,7 +58,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const buffer = Buffer.concat([
       stringUtil.toBase58Buffer(fromPublicKey),
       Buffer.from(seed),
-      stringUtil.toBase58Buffer(programId)
+      stringUtil.toBase58Buffer(programId),
     ]);
     const hash = sha256.create();
     hash.update(buffer);
@@ -87,7 +87,11 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
   async signTransferTransaction(signTxData: types.signTransferTransactionType): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex } = signTxData;
     const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
-    const script = params.SCRIPT.TRANSFER.scriptWithSignature;
+    const script =
+      fromPubkey === signTxData.transaction.toPubkey
+        ? params.SCRIPT.TRANSFER_SELF.scriptWithSignature
+        : params.SCRIPT.TRANSFER.scriptWithSignature;
+
     const rawTransaction = compileTransferTransaction({ ...signTxData.transaction, fromPubkey });
     const transactionInstruction = new Transaction(rawTransaction);
     const argument = scriptUtil.getTransferArguments(transactionInstruction, addressIndex);
@@ -132,7 +136,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       signer,
       owner: transaction.toPubkey,
       associateAccount: transaction.toTokenAccount,
-      token: tokenInfo.address
+      token: tokenInfo.address,
     });
     const [transferInstruction] = compileSplTokenTransaction({ ...signTxData.transaction, signer }).instructions;
     associateAccountInstruction.instructions.push(transferInstruction);
@@ -181,7 +185,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       ...signTxData.transaction,
       newAccountPubkey,
       fromPubkey,
-      basePubkey: fromPubkey
+      basePubkey: fromPubkey,
     };
     const rawTransaction = compileDelegateAndCreateAccountWithSeed(transaction);
     const transactionInstruction = new Transaction(rawTransaction);
@@ -218,26 +222,27 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
 
     return sign.signMessage(signMsgData, script, argument);
   }
- 
+
   async signTransaction(signTxData: types.signVersionedTransactionType): Promise<string> {
     const { addressIndex } = signTxData;
     const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
-    const argument = scriptUtil.getSignVersionedArguments(signTxData.transaction.message, addressIndex) 
-    return sign.signTransaction(signTxData, signTxData.transaction.message ,script, argument);
+    const argument = scriptUtil.getSignVersionedArguments(signTxData.transaction.message, addressIndex);
+    return sign.signTransaction(signTxData, signTxData.transaction.message, script, argument);
   }
 
-  async signAllTransactions (signTxData: types.signVersionedTransactions): Promise<string> {
+  async signAllTransactions(signTxData: types.signVersionedTransactions): Promise<string> {
     const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
-    const { preActions } = scriptUtil.getScriptSigningPreActions(signTxData, script);  
-    
+    const { preActions } = scriptUtil.getScriptSigningPreActions(signTxData, script);
+
     const signatures = await sign.signAllTransactions(signTxData, preActions);
 
-    return signatures.map((signature, index) => {
-      const versionedTransaction = new VersionedTransaction(signTxData.transaction[index].message, [signature]);
-      return versionedTransaction.serialize().toString();
-    }).join('');
+    return signatures
+      .map((signature, index) => {
+        const versionedTransaction = new VersionedTransaction(signTxData.transaction[index].message, [signature]);
+        return versionedTransaction.serialize().toString();
+      })
+      .join('');
   }
-
 }
 
 export { types };
@@ -251,6 +256,6 @@ export {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   SYSVAR_RENT_PUBKEY,
   SYSVAR_CLOCK_PUBKEY,
-  SYSVAR_STAKE_HISTORY_PUBKEY
+  SYSVAR_STAKE_HISTORY_PUBKEY,
 } from './config/params';
 export default Solana;
