@@ -6,6 +6,7 @@ import { Transaction } from './utils/Transaction';
 import { VersionedTransaction } from './utils/versionedTransaction';
 import { getScriptSigningActions } from './utils/scriptUtil';
 import { SignatureType } from '@coolwallet/core/lib/transaction';
+import { signVersionedTransactionType } from './config/types';
 
 async function executeScriptWithPreActions(
   signData: types.SignDataType,
@@ -47,10 +48,10 @@ async function signTransaction(
   argument: string
 ): Promise<string> {
   const signature = (await executeScriptWithPreActions(signTxData, script, argument)) as Buffer;
-
   if (rawTx instanceof Message || rawTx instanceof MessageV0) {
-    const signatureUint8Array = new Uint8Array(signature);
-    const serializedTransaction = new VersionedTransaction(rawTx, [signatureUint8Array]).serialize();
+    const signatureUint8Arrays = (signTxData as signVersionedTransactionType).transaction.signatures;
+    signatureUint8Arrays[0] = new Uint8Array(signature);
+    const serializedTransaction = new VersionedTransaction(rawTx, signatureUint8Arrays).serialize();
     return Buffer.from(serializedTransaction).toString('hex');
   } else if (rawTx instanceof Transaction) {
     return rawTx.toTxString(signature.toString('hex'));
