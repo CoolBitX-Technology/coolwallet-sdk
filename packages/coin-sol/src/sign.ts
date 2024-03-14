@@ -48,12 +48,10 @@ async function signTransaction(
 ): Promise<string> {
   const signature = (await executeScriptWithPreActions(signTxData, script, argument)) as Buffer;
 
-  if (rawTx instanceof Message) {
+  if (rawTx instanceof Message || rawTx instanceof MessageV0) {
     const signatureUint8Array = new Uint8Array(signature);
     const serializedTransaction = new VersionedTransaction(rawTx, [signatureUint8Array]).serialize();
     return Buffer.from(serializedTransaction).toString('hex');
-  } else if (rawTx instanceof MessageV0) {
-    return '01' + signature + rawTx.serialize();
   } else if (rawTx instanceof Transaction) {
     return rawTx.toTxString(signature.toString('hex'));
   } else {
