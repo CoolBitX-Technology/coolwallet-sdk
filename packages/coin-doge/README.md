@@ -5,17 +5,17 @@ Typescript library with support for the integration of Bitcoin for third party a
 ## Install
 
 ```shell
-npm i @coolwallet/btc
+npm i @coolwallet/doge
 ```
 
 ## Usage
 
 ```javascript
-import BTC from '@coolwallet/btc';
+import DOGE from '@coolwallet/doge';
 import { crypto } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-web-ble';
 
-const btc = new BTC();
+const doge = new DOGE();
 
 const transport = await createTransport();
 
@@ -25,7 +25,7 @@ const appId = 'appId that had been registered by wallet';
 
 const addressIndex = 0;
 
-const address = await btc.getAddress(transport, appPrivateKey, appId, scriptType, 0);
+const address = await doge.getAddress(transport, appPrivateKey, appId, scriptType, 0);
 
 const signTxData = {
     transport,
@@ -51,33 +51,7 @@ const signTxData = {
     }
 }
 
-const normalTx = await btc.signTransaction(signTxData)
-
-const usdtSignTxData = {
-    transport,
-    appPrivateKey,
-    appId,
-    scriptType: 1,
-    inputs: [{
-        preTxHash: "735153f57da91462a01c17937a397aa67f7b5faf9ab74ebcdd4c8f485aba26f5",
-        preIndex: 1,
-        preValue: 87302,
-        sequence: 0xFFFFFFFF,
-        addressIndex: 0,
-        pubkeyBuf: Uint8Array(33)
-    }],
-    output: {
-        value: "546",
-        address: "3442qW39131y5Q8qR963ehjmxXPAXUWn7Q",
-    },
-    change: {
-        value: "69926",
-        addressIndex: 0,
-        pubkeyBuf: Uint8Array(33)
-    }
-}
-
-const usdtTx = await btc.signUSDTTransaction(usdtSignTxData)
+const normalTx = await doge.signTransaction(signTxData)
 ```
 
 ## Methods
@@ -88,13 +62,13 @@ const usdtTx = await btc.signUSDTTransaction(usdtSignTxData)
 
 Get address by address index.
 
-The BTC address generated is compatible to BIP141 (SegWit Proposal) and BIP44 with **account** and **change** set to 0, which means calling `getAddress` with `addressIndex = i` will get the address of folllowing path:
+The DOGE address generated is compatible to BIP141 (SegWit Proposal) and BIP44 with **account** and **change** set to 0, which means calling `getAddress` with `addressIndex = i` will get the address of folllowing path:
 
 ```none
-m/44'/0'/0'/0/{i}
+m/44'/0'/3'/0/{i}
 ```
 
-In the design of current hardware, we only support path `m/44'/0'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
+In the design of current hardware, we only support path `m/44'/0'/3'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
 
 ```javascript
 async getAddress(

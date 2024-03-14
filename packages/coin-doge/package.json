@@ -1,5 +1,5 @@
 {
-  "name": "@coolwallet/btc",
+  "name": "@coolwallet/doge",
   "version": "1.0.0-beta.0",
   "description": "Coolwallet Dogecoin sdk",
   "main": "lib/index.js",
