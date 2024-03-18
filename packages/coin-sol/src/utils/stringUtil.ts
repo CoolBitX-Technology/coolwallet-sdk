@@ -1,6 +1,7 @@
 import base58 from 'bs58';
 import BN from 'bn.js';
 import * as types from '../config/types';
+import { ComputeBudgetInstruction } from '../config/types';
 
 const HEX_REGEX = /[0-9A-Fa-f]{6}/g;
 
@@ -71,6 +72,31 @@ export const encodeLength = (bytes: number[], len: number): void => {
   }
 };
 
+export function computeBudgetEncode(type: ComputeBudgetInstruction, amount: number | string): Buffer {
+  let data;
+  let length;
+  switch (type) {
+    case ComputeBudgetInstruction.SetComputeUnitLimit:
+      data = Buffer.alloc(5);
+      length = 4;
+      break;
+    case ComputeBudgetInstruction.SetComputeUnitPrice:
+      data = Buffer.alloc(9);
+      length = 8;
+      break;
+    default:
+      throw new Error('Not supported ComputeBudgetInstruction type: ' + type);
+  }
+
+  const typeSpan = 1;
+  data.writeUIntLE(type, 0, typeSpan);
+  const valueHex = new BN(amount).toString(16, length * 2);
+  const valueBuf = Buffer.from(valueHex, 'hex').reverse();
+  data.write(valueBuf.toString('hex'), typeSpan, length, 'hex');
+
+  return data;
+}
+
 export function splDataEncode(amount: number | string, tokenDecimals: number | string): Buffer {
   const data = Buffer.alloc(10);
   const programIdIndexSpan = 1;
@@ -80,6 +106,6 @@ export function splDataEncode(amount: number | string, tokenDecimals: number | s
   const valueBuf = Buffer.from(valueHex, 'hex').reverse();
 
   data.write(valueBuf.toString('hex'), programIdIndexSpan, 8, 'hex');
-  data.writeUInt8(+tokenDecimals, 9); 
+  data.writeUInt8(+tokenDecimals, 9);
   return data;
 }

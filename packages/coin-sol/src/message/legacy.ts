@@ -142,6 +142,11 @@ export class Message {
     ]);
     const instructionBufferLength = instructionLayout.encode(instruction, instructionBuffer, 0);
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
+    let accountKeys =[...this.accountKeys];
+    for (let i = this.accountKeys.length; i < 6; i++ ) {
+      accountKeys = accountKeys.concat(Buffer.alloc(32).toString('hex'))
+    }
+
     const signDataLayout = BufferLayout.struct<
       Readonly<{
         keyCount: Uint8Array;
@@ -155,7 +160,7 @@ export class Message {
     ]);
     const transaction = {
       keyCount: Buffer.from(keyCount),
-      keys: this.accountKeys.map((key) => Buffer.from(key, 'hex')),
+      keys: accountKeys.map((key) => Buffer.from(key, 'hex')),
       recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
     };
     const signData = Buffer.alloc(2048); // sign data max length
