@@ -3,7 +3,8 @@ import * as params from '../config/params';
 import * as stringUtil from './stringUtil';
 import { StakeProgramLayout, SystemProgramLayout } from './programLayout';
 import { encodeData } from './commonLayout';
-import * as instructions from './instructions';
+import * as instructionsTemplate from './instructions';
+import { ComputeBudgetInstruction } from '../config/types';
 
 function compileTransferTransaction(transaction: {
   fromPubkey: types.Address;
@@ -40,21 +41,37 @@ function compileSplTokenTransaction(transaction: {
   amount: number | string;
   programId: types.TokenProgramId;
   tokenInfo: types.TokenInfo;
+  gasPrice?: number | string;
+  gasLimit?: number | string;
 }): types.TransactionArgs {
   const { signer, fromTokenAccount, toTokenAccount, amount, recentBlockhash, programId, tokenInfo } = transaction;
-  return {
-    instructions: [
-      {
-        accounts: [
-          { pubkey: fromTokenAccount, isSigner: false, isWritable: true },
-          { pubkey: tokenInfo.address, isSigner: false, isWritable: false },
-          { pubkey: toTokenAccount, isSigner: false, isWritable: true },
-          { pubkey: signer, isSigner: true, isWritable: false },
-        ],
-        programId,
-        data: stringUtil.splDataEncode(amount,tokenInfo.decimals),
-      },
+  const instructions = [];
+  if (transaction.gasPrice) {
+    instructions.push({
+      accounts: [],
+      programId: params.COMPUTE_BUDGET_PROGRAM_ID,
+      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitPrice, transaction.gasPrice),
+    });
+  }
+  if (transaction.gasLimit) {
+    instructions.push({
+      accounts: [],
+      programId: params.COMPUTE_BUDGET_PROGRAM_ID,
+      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitLimit, transaction.gasLimit),
+    });
+  }
+  instructions.push({
+    accounts: [
+      { pubkey: fromTokenAccount, isSigner: false, isWritable: true },
+      { pubkey: tokenInfo.address, isSigner: false, isWritable: false },
+      { pubkey: toTokenAccount, isSigner: false, isWritable: true },
+      { pubkey: signer, isSigner: true, isWritable: false },
     ],
+    programId,
+    data: stringUtil.splDataEncode(amount, tokenInfo.decimals),
+  });
+  return {
+    instructions,
     recentBlockhash,
     feePayer: signer,
   };
@@ -66,7 +83,7 @@ function compileAssociateTokenAccount(transaction: {
   associateAccount: types.Address;
   token: types.Address;
   recentBlockhash: string;
-  programId : types.TokenProgramId;
+  programId: types.TokenProgramId;
 }): types.TransactionArgs {
   const { signer, owner, associateAccount, token, recentBlockhash, programId } = transaction;
 
@@ -99,7 +116,7 @@ function compileDelegate(transaction: {
   votePubkey: types.Address;
 }): types.TransactionArgs {
   const { feePayer, recentBlockhash } = transaction;
-  const delegateInstruction = instructions.delegate(transaction);
+  const delegateInstruction = instructionsTemplate.delegate(transaction);
   return {
     instructions: [delegateInstruction],
     recentBlockhash,
@@ -142,7 +159,7 @@ function compileDelegateAndCreateAccountWithSeed(transaction: {
   recentBlockhash: string;
 }): types.TransactionArgs {
   const { fromPubkey, newAccountPubkey, basePubkey, seed, lamports, recentBlockhash, votePubkey } = transaction;
-  const createAccountWithSeedInstructions = instructions.createAccountWithSeed({
+  const createAccountWithSeedInstructions = instructionsTemplate.createAccountWithSeed({
     fromPubkey,
     newAccountPubkey,
     basePubkey,
@@ -151,14 +168,14 @@ function compileDelegateAndCreateAccountWithSeed(transaction: {
     lamports,
     programId: params.STAKE_PROGRAM_ID,
   });
-  const initializeInstruction = instructions.initialize({
+  const initializeInstruction = instructionsTemplate.initialize({
     stakePubkey: newAccountPubkey,
     authorized: {
       staker: Buffer.from(stringUtil.formHex(fromPubkey), 'hex'),
       withdrawer: Buffer.from(stringUtil.formHex(fromPubkey), 'hex'),
     },
   });
-  const delegateInstruction = instructions.delegate({
+  const delegateInstruction = instructionsTemplate.delegate({
     stakePubkey: newAccountPubkey,
     authorizedPubkey: fromPubkey,
     votePubkey,

@@ -1,7 +1,7 @@
 import { Transport } from '@coolwallet/core';
 import { PublicKey } from '../utils/publickey';
-import {  VersionedMessage } from '../message';
-import { TOKEN_PROGRAM_ID,TOKEN_2022_PROGRAM_ID } from  './params';
+import { VersionedMessage } from '../message';
+import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from './params';
 
 export type Address = string | Buffer;
 
@@ -68,7 +68,7 @@ type AddressLookupTableState = {
 export type AddressLookupTableAccount = {
   key: PublicKey;
   state: AddressLookupTableState;
-}
+};
 
 type LoadedAddresses = {
   writable: Array<PublicKey>;
@@ -148,6 +148,8 @@ export type TransferSplTokenTransaction = {
     signature?: string;
   };
   programId: TokenProgramId;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type AssociateTokenAccountTransaction = {
@@ -236,7 +238,7 @@ type Mandatory<T> = T extends SignInMessage | string
     authorizedCB?(): void;
   };
 
-interface VersionedTransaction <T extends VersionedMessage> {
+interface VersionedTransaction<T extends VersionedMessage> {
   signatures: Array<Uint8Array>;
   message: T;
 }
@@ -284,6 +286,13 @@ export enum TokenInstruction {
   MetadataPointerExtension = 39,
 }
 
+export enum ComputeBudgetInstruction {
+  RequestUnits = 0,
+  RequestHeapFrame = 1,
+  SetComputeUnitLimit = 2,
+  SetComputeUnitPrice = 3,
+}
+
 export type signTransactionType = Mandatory<TransactionArgs>;
 
 export type signTransferTransactionType = Mandatory<TransferTransaction>;
@@ -306,8 +315,8 @@ export type signSignInMessageType = Mandatory<SignInMessage>;
 
 export type signMessageType = Mandatory<string>;
 
-export type signVersionedTransactionType = Mandatory<VersionedTransaction<VersionedMessage>>
-export type signVersionedTransactions = Mandatory<VersionedTransaction<VersionedMessage>[]>
+export type signVersionedTransactionType = Mandatory<VersionedTransaction<VersionedMessage>>;
+export type signVersionedTransactions = Mandatory<VersionedTransaction<VersionedMessage>[]>;
 
 export type signTxType =
   | signTransactionType

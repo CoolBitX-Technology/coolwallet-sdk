@@ -39,14 +39,22 @@ function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
  * @param {boolean} isPartialArgs is getting full rawTx as argument or not
  * @returns {Promise<string>}
  */
-function getSplTokenTransferArguments(rawTx: Transaction, addressIndex: number, tokenInfo?: types.TokenInfo): string {
+function getSplTokenTransferArguments(
+  rawTx: Transaction,
+  addressIndex: number,
+  tokenInfo?: types.TokenInfo,
+  computeUnitPrice = '',
+  computeUnitLimit = ''
+): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
   let tokenInfoArgs = '';
   if (tokenInfo) tokenInfoArgs = getTokenInfoArgs(tokenInfo);
 
-  return SEPath + rawTx.compileMessage().serializeTransferMessage() + tokenInfoArgs;
+  return (
+    SEPath + rawTx.compileMessage().serializeTransferMessage() + computeUnitPrice + computeUnitLimit + tokenInfoArgs
+  );
 }
 
 /**
@@ -141,7 +149,7 @@ function getSignVersionedArguments(rawTx: VersionedMessage, addressIndex: number
 
 export function getScriptSigningPreActions(
   signData: types.signVersionedTransactions,
-  script:string
+  script: string
 ): {
   preActions: Array<() => Promise<void>>;
 } {
@@ -156,17 +164,15 @@ export function getScriptSigningPreActions(
   return { preActions };
 }
 
-function getScriptSigningActions(
-  signData: types.signVersionedTransactions,
-): {
+function getScriptSigningActions(signData: types.signVersionedTransactions): {
   actions: Array<() => Promise<string | undefined>>;
 } {
   const { transport, appPrivateKey, appId, addressIndex } = signData;
   const versionedTxs = signData.transaction;
-  const actions = versionedTxs.map((tx) => async()=>{
+  const actions = versionedTxs.map((tx) => async () => {
     const argument = getSignVersionedArguments(tx.message, addressIndex);
     return apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
-  })
+  });
   return { actions };
 }
 
@@ -183,5 +189,5 @@ export {
   getSignInArguments,
   getSignMessageArguments,
   getSignVersionedArguments,
-  getScriptSigningActions
+  getScriptSigningActions,
 };
