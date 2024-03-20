@@ -111,13 +111,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       TOKEN_INFO.find((tok) => tok.address === transaction.tokenInfo.address) ?? transaction.tokenInfo;
     const rawTransaction = compileSplTokenTransaction({ ...transaction, signer });
     const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getSplTokenTransferArguments(
-      transactionInstruction,
-      addressIndex,
-      tokenInfo,
-      signTxData.transaction.computeUnitPrice,
-      signTxData.transaction.computeUnitLimit
-    );
+    const argument = scriptUtil.getSplTokenTransferArguments(transactionInstruction, addressIndex, tokenInfo);
 
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }

@@ -6,6 +6,7 @@ import { createSignInMessage } from './signIn';
 import { Transaction } from './Transaction';
 import { VersionedMessage } from '../message';
 import { apdu } from '@coolwallet/core';
+import { toReverseUintBuffer } from './stringUtil';
 
 /**
  * getTransferArguments
@@ -39,22 +40,13 @@ function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
  * @param {boolean} isPartialArgs is getting full rawTx as argument or not
  * @returns {Promise<string>}
  */
-function getSplTokenTransferArguments(
-  rawTx: Transaction,
-  addressIndex: number,
-  tokenInfo?: types.TokenInfo,
-  computeUnitPrice = '',
-  computeUnitLimit = ''
-): string {
+function getSplTokenTransferArguments(rawTx: Transaction, addressIndex: number, tokenInfo?: types.TokenInfo): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
   let tokenInfoArgs = '';
   if (tokenInfo) tokenInfoArgs = getTokenInfoArgs(tokenInfo);
-
-  return (
-    SEPath + rawTx.compileMessage().serializeTransferMessage() + computeUnitPrice + computeUnitLimit + tokenInfoArgs
-  );
+  return SEPath + rawTx.compileMessage().serializeTransferMessage() + tokenInfoArgs;
 }
 
 /**

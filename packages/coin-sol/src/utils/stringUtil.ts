@@ -72,6 +72,18 @@ export const encodeLength = (bytes: number[], len: number): void => {
   }
 };
 
+export function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
+  const bn = new BN(numberOrString);
+  const buf = Buffer.from(bn.toArray()).reverse();
+  return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
+}
+
+export function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
+  const bn = new BN(numberOrString);
+  const buf = Buffer.from(bn.toArray());
+  return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
+}
+
 export function computeBudgetEncode(type: ComputeBudgetInstruction, amount: number | string): Buffer {
   let data;
   let length;
@@ -90,8 +102,7 @@ export function computeBudgetEncode(type: ComputeBudgetInstruction, amount: numb
 
   const typeSpan = 1;
   data.writeUIntLE(type, 0, typeSpan);
-  const valueHex = new BN(amount).toString(16, length * 2);
-  const valueBuf = Buffer.from(valueHex, 'hex').reverse();
+  const valueBuf = toReverseUintBuffer(amount, length);
   data.write(valueBuf.toString('hex'), typeSpan, length, 'hex');
 
   return data;
