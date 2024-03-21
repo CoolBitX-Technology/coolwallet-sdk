@@ -6,7 +6,6 @@ import { createSignInMessage } from './signIn';
 import { Transaction } from './Transaction';
 import { VersionedMessage } from '../message';
 import { apdu } from '@coolwallet/core';
-import { toReverseUintBuffer } from './stringUtil';
 
 /**
  * getTransferArguments

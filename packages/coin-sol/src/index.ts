@@ -85,11 +85,11 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
   }
 
   async signTransferTransaction(signTxData: types.signTransferTransactionType): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script =
-      fromPubkey === signTxData.transaction.toPubkey
-        ? params.SCRIPT.TRANSFER_SELF.scriptWithSignature
+      transaction.computeUnitLimit && transaction.computeUnitPrice
+        ? params.SCRIPT.TRANSFER_WITH_COMPUTE_BUDGET.scriptWithSignature
         : params.SCRIPT.TRANSFER.scriptWithSignature;
 
     const rawTransaction = compileTransferTransaction({ ...signTxData.transaction, fromPubkey });
@@ -103,7 +103,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script =
-      signTxData.transaction.computeUnitLimit && signTxData.transaction.computeUnitPrice
+      transaction.computeUnitLimit && transaction.computeUnitPrice
         ? params.SCRIPT.SPL_TOKEN_WITH_COMPUTE_BUDGET.scriptWithSignature
         : params.SCRIPT.SPL_TOKEN.scriptWithSignature;
     // If given token address can be found in official token list, use it instead of the user given one.
@@ -130,7 +130,10 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
   async signCreateAndTransferSPLToken(signTxData: types.signCreateAndTransferSplTokenTransaction): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
-    const script = params.SCRIPT.CREATE_AND_SPL_TOKEN.scriptWithSignature;
+    const script =
+      transaction.computeUnitLimit && transaction.computeUnitPrice
+        ? params.SCRIPT.CREATE_AND_SPL_TOKEN_WITH_COMPUTE_BUDGET.scriptWithSignature
+        : params.SCRIPT.CREATE_AND_SPL_TOKEN.scriptWithSignature;
     // If given token address can be found in official token list, use it instead of the user given one.
     const tokenInfo: types.TokenInfo =
       TOKEN_INFO.find((tok) => tok.address === transaction.tokenInfo.address) ?? transaction.tokenInfo;
@@ -141,8 +144,8 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       associateAccount: transaction.toTokenAccount,
       token: tokenInfo.address,
     });
-    const [transferInstruction] = compileSplTokenTransaction({ ...signTxData.transaction, signer }).instructions;
-    associateAccountInstruction.instructions.push(transferInstruction);
+    const transferInstructions = compileSplTokenTransaction({ ...transaction, signer }).instructions;
+    associateAccountInstruction.instructions.push(...transferInstructions);
     const transactionInstruction = new Transaction(associateAccountInstruction);
     const argument = scriptUtil.getCreateAndTransferSPLToken(transactionInstruction, addressIndex, tokenInfo);
 
