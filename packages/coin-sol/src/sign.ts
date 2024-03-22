@@ -18,7 +18,14 @@ async function executeScriptWithPreActions(
   const preActions = [() => apdu.tx.sendScript(transport, script)];
   const action = () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 
-  return tx.flow.getSingleSignatureFromCoolWallet(transport, preActions, action, true, confirmCB, authorizedCB);
+  return tx.flow.getSingleSignatureFromCoolWalletV2(
+    transport,
+    preActions,
+    action,
+    confirmCB,
+    authorizedCB,
+    SignatureType.EDDSA
+  );
 }
 
 async function signAllTransactions(

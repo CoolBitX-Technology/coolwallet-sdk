@@ -11,23 +11,40 @@ function compileTransferTransaction(transaction: {
   toPubkey: types.Address;
   recentBlockhash: string;
   lamports: number | string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 }): types.TransactionArgs {
   const { fromPubkey, toPubkey, recentBlockhash, lamports } = transaction;
+  const instructions = [];
+  if (transaction.computeUnitPrice) {
+    instructions.push({
+      accounts: [],
+      programId: params.COMPUTE_BUDGET_PROGRAM_ID,
+      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitPrice, transaction.computeUnitPrice),
+    });
+  }
+  if (transaction.computeUnitLimit) {
+    instructions.push({
+      accounts: [],
+      programId: params.COMPUTE_BUDGET_PROGRAM_ID,
+      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitLimit, transaction.computeUnitLimit),
+    });
+  }
+
   const data = encodeData(SystemProgramLayout.Transfer, {
     lamports,
   });
+  instructions.push({
+    accounts: [
+      { pubkey: fromPubkey, isSigner: true, isWritable: true },
+      { pubkey: toPubkey, isSigner: false, isWritable: true },
+    ],
+    programId: params.SYSTEM_PROGRAM_ID,
+    data,
+  });
 
   return {
-    instructions: [
-      {
-        accounts: [
-          { pubkey: fromPubkey, isSigner: true, isWritable: true },
-          { pubkey: toPubkey, isSigner: false, isWritable: true },
-        ],
-        programId: params.SYSTEM_PROGRAM_ID,
-        data,
-      },
-    ],
+    instructions,
     recentBlockhash,
     feePayer: fromPubkey,
   };
@@ -41,23 +58,23 @@ function compileSplTokenTransaction(transaction: {
   amount: number | string;
   programId: types.TokenProgramId;
   tokenInfo: types.TokenInfo;
-  gasPrice?: number | string;
-  gasLimit?: number | string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 }): types.TransactionArgs {
   const { signer, fromTokenAccount, toTokenAccount, amount, recentBlockhash, programId, tokenInfo } = transaction;
   const instructions = [];
-  if (transaction.gasPrice) {
+  if (transaction.computeUnitPrice) {
     instructions.push({
       accounts: [],
       programId: params.COMPUTE_BUDGET_PROGRAM_ID,
-      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitPrice, transaction.gasPrice),
+      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitPrice, transaction.computeUnitPrice),
     });
   }
-  if (transaction.gasLimit) {
+  if (transaction.computeUnitLimit) {
     instructions.push({
       accounts: [],
       programId: params.COMPUTE_BUDGET_PROGRAM_ID,
-      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitLimit, transaction.gasLimit),
+      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitLimit, transaction.computeUnitLimit),
     });
   }
   instructions.push({

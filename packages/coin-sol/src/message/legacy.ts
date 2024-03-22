@@ -1,10 +1,9 @@
 import * as BufferLayout from '@solana/buffer-layout';
 import { encodeLength } from '../utils/stringUtil';
 import { publicKey } from '../utils/commonLayout';
-import { PACKET_DATA_SIZE, PUBLIC_KEY_LENGTH, VERSION_PREFIX_MASK } from '../config/params';
+import { PACKET_DATA_SIZE, PADDING_PUBLICKEY, PUBLIC_KEY_LENGTH, VERSION_PREFIX_MASK } from '../config/params';
 import { CompiledInstruction, CompliedInstruction, SerializedInstruction } from '../config/types';
 import * as shortvec from '../utils/shortvec-encoding';
-import bs58 from 'bs58';
 
 type MessageHeader = {
   numRequiredSignatures: number;
@@ -128,23 +127,69 @@ export class Message {
   serializeTransferMessage(): string {
     const { keyCount, instructions } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
-    const [instruction] = instructions;
-    const instructionLayout = BufferLayout.struct<
+    let gasPrice;
+    let gasLimit;
+    let transfer;
+    let instructionBufferLength = 0;
+    if (instructions.length === 3) {
+      [gasPrice, gasLimit, transfer] = instructions;
+      const gasPriceLayout = BufferLayout.struct<
+        Readonly<{
+          data: number[];
+          dataLength: Uint8Array;
+          programIdIndex: number;
+          keyIndices: number[];
+          keyIndicesCount: Uint8Array;
+        }>
+      >([
+        BufferLayout.u8('programIdIndex'),
+        BufferLayout.blob(gasPrice.keyIndicesCount.length, 'keyIndicesCount'),
+        BufferLayout.seq(BufferLayout.u8('keyIndex'), gasPrice.keyIndices.length, 'keyIndices'),
+        BufferLayout.blob(gasPrice.dataLength.length, 'dataLength'),
+        BufferLayout.seq(BufferLayout.u8('userdatum'), gasPrice.data.length, 'data'),
+      ]);
+      instructionBufferLength = gasPriceLayout.encode(gasPrice, instructionBuffer, 0);
+      const gasLimitLayout = BufferLayout.struct<
+        Readonly<{
+          data: number[];
+          dataLength: Uint8Array;
+          programIdIndex: number;
+          keyIndices: number[];
+          keyIndicesCount: Uint8Array;
+        }>
+      >([
+        BufferLayout.u8('programIdIndex'),
+        BufferLayout.blob(gasLimit.keyIndicesCount.length, 'keyIndicesCount'),
+        BufferLayout.seq(BufferLayout.u8('keyIndex'), gasLimit.keyIndices.length, 'keyIndices'),
+        BufferLayout.blob(gasLimit.dataLength.length, 'dataLength'),
+        BufferLayout.seq(BufferLayout.u8('userdatum'), gasLimit.data.length, 'data'),
+      ]);
+      instructionBufferLength += gasLimitLayout.encode(gasLimit, instructionBuffer, instructionBufferLength);
+    } else {
+      [transfer] = instructions;
+    }
+
+    const transferLayout = BufferLayout.struct<
       Readonly<{
         data: number[];
         dataLength: Uint8Array;
+        programIdIndex: number;
         keyIndices: number[];
+        keyIndicesCount: Uint8Array;
       }>
     >([
-      BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
-      BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
-      BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
+      BufferLayout.u8('programIdIndex'),
+      BufferLayout.blob(transfer.keyIndicesCount.length, 'keyIndicesCount'),
+      BufferLayout.seq(BufferLayout.u8('keyIndex'), transfer.keyIndices.length, 'keyIndices'),
+      BufferLayout.blob(transfer.dataLength.length, 'dataLength'),
+      BufferLayout.seq(BufferLayout.u8('userdatum'), transfer.data.length, 'data'),
     ]);
-    const instructionBufferLength = instructionLayout.encode(instruction, instructionBuffer, 0);
+
+    instructionBufferLength += transferLayout.encode(transfer, instructionBuffer, instructionBufferLength);
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
-    let accountKeys =[...this.accountKeys];
-    for (let i = this.accountKeys.length; i < 6; i++ ) {
-      accountKeys = accountKeys.concat(Buffer.alloc(32).toString('hex'))
+    let accountKeys = [...this.accountKeys];
+    for (let i = this.accountKeys.length; i < 6; i++) {
+      accountKeys = accountKeys.concat(PADDING_PUBLICKEY);
     }
 
     const signDataLayout = BufferLayout.struct<
@@ -155,7 +200,7 @@ export class Message {
       }>
     >([
       BufferLayout.blob(keyCount.length, 'keyCount'),
-      BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'),
+      BufferLayout.seq(publicKey('key'), accountKeys.length, 'keys'),
       publicKey('recentBlockhash'),
     ]);
     const transaction = {
@@ -191,7 +236,7 @@ export class Message {
     let accountKeys;
     if (this.accountKeys.length === 7) {
       // Padding argument.
-      accountKeys = [...this.accountKeys, Buffer.alloc(32).toString('hex')];
+      accountKeys = [...this.accountKeys, PADDING_PUBLICKEY];
     } else {
       accountKeys = this.accountKeys;
     }
@@ -221,30 +266,104 @@ export class Message {
   serializeCreateAndTransferSPLToken(): string {
     const { keyCount, instructions } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
-    const [associateAccount, tokenTransfer] = instructions;
-    const associateAccountLayout = BufferLayout.struct<
-      Readonly<{
-        programIdIndex: number;
-        keyIndices: number[];
-      }>
-    >([
-      BufferLayout.u8('programIdIndex'),
-      BufferLayout.seq(BufferLayout.u8('keyIndex'), associateAccount.keyIndices.length, 'keyIndices'),
-    ]);
-    let instructionBufferLength = associateAccountLayout.encode(associateAccount, instructionBuffer, 0);
+    let associateAccount;
+    let gasPrice;
+    let gasLimit;
+    let tokenTransfer;
+    let instructionBufferLength = 0;
+    if (instructions.length === 4) {
+      [associateAccount, gasPrice, gasLimit, tokenTransfer] = instructions;
+
+      const associateAccountLayout = BufferLayout.struct<
+        Readonly<{
+          data: number[];
+          dataLength: Uint8Array;
+          programIdIndex: number;
+          keyIndices: number[];
+          keyIndicesCount: Uint8Array;
+        }>
+      >([
+        BufferLayout.u8('programIdIndex'),
+        BufferLayout.blob(associateAccount.keyIndicesCount.length, 'keyIndicesCount'),
+        BufferLayout.seq(BufferLayout.u8('keyIndex'), associateAccount.keyIndices.length, 'keyIndices'),
+        BufferLayout.blob(associateAccount.dataLength.length, 'dataLength'),
+        BufferLayout.seq(BufferLayout.u8('userdatum'), associateAccount.data.length, 'data'),
+      ]);
+      instructionBufferLength = associateAccountLayout.encode(associateAccount, instructionBuffer, 0);
+
+      const gasPriceLayout = BufferLayout.struct<
+        Readonly<{
+          data: number[];
+          dataLength: Uint8Array;
+          programIdIndex: number;
+          keyIndices: number[];
+          keyIndicesCount: Uint8Array;
+        }>
+      >([
+        BufferLayout.u8('programIdIndex'),
+        BufferLayout.blob(gasPrice.keyIndicesCount.length, 'keyIndicesCount'),
+        BufferLayout.seq(BufferLayout.u8('keyIndex'), gasPrice.keyIndices.length, 'keyIndices'),
+        BufferLayout.blob(gasPrice.dataLength.length, 'dataLength'),
+        BufferLayout.seq(BufferLayout.u8('userdatum'), gasPrice.data.length, 'data'),
+      ]);
+      instructionBufferLength += gasPriceLayout.encode(gasPrice, instructionBuffer, instructionBufferLength);
+
+      const gasLimitLayout = BufferLayout.struct<
+        Readonly<{
+          data: number[];
+          dataLength: Uint8Array;
+          programIdIndex: number;
+          keyIndices: number[];
+          keyIndicesCount: Uint8Array;
+        }>
+      >([
+        BufferLayout.u8('programIdIndex'),
+        BufferLayout.blob(gasLimit.keyIndicesCount.length, 'keyIndicesCount'),
+        BufferLayout.seq(BufferLayout.u8('keyIndex'), gasLimit.keyIndices.length, 'keyIndices'),
+        BufferLayout.blob(gasLimit.dataLength.length, 'dataLength'),
+        BufferLayout.seq(BufferLayout.u8('userdatum'), gasLimit.data.length, 'data'),
+      ]);
+      instructionBufferLength += gasLimitLayout.encode(gasLimit, instructionBuffer, instructionBufferLength);
+    } else {
+      [associateAccount, tokenTransfer] = instructions;
+      const associateAccountLayout = BufferLayout.struct<
+        Readonly<{
+          data: number[];
+          dataLength: Uint8Array;
+          programIdIndex: number;
+          keyIndices: number[];
+          keyIndicesCount: Uint8Array;
+        }>
+      >([
+        BufferLayout.u8('programIdIndex'),
+        BufferLayout.blob(associateAccount.keyIndicesCount.length, 'keyIndicesCount'),
+        BufferLayout.seq(BufferLayout.u8('keyIndex'), associateAccount.keyIndices.length, 'keyIndices'),
+        BufferLayout.blob(associateAccount.dataLength.length, 'dataLength'),
+        BufferLayout.seq(BufferLayout.u8('userdatum'), associateAccount.data.length, 'data'),
+      ]);
+      instructionBufferLength = associateAccountLayout.encode(associateAccount, instructionBuffer, 0);
+    }
     const tokenTransferLayout = BufferLayout.struct<
       Readonly<{
         programIdIndex: number;
         keyIndices: number[];
+        keyIndicesCount: Uint8Array;
         data: number[];
+        dataLength: Uint8Array;
       }>
     >([
       BufferLayout.u8('programIdIndex'),
+      BufferLayout.blob(tokenTransfer.keyIndicesCount.length, 'keyIndicesCount'),
       BufferLayout.seq(BufferLayout.u8('keyIndex'), tokenTransfer.keyIndices.length, 'keyIndices'),
+      BufferLayout.blob(tokenTransfer.dataLength.length, 'dataLength'),
       BufferLayout.seq(BufferLayout.u8('userdatum'), tokenTransfer.data.length, 'data'),
     ]);
     instructionBufferLength += tokenTransferLayout.encode(tokenTransfer, instructionBuffer, instructionBufferLength);
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
+    let accountKeys = [...this.accountKeys];
+    for (let i = this.accountKeys.length; i < 9; i++) {
+      accountKeys = accountKeys.concat(Buffer.alloc(32).toString('hex'));
+    }
 
     const signDataLayout = BufferLayout.struct<
       Readonly<{
@@ -254,10 +373,12 @@ export class Message {
       }>
     >([
       BufferLayout.blob(keyCount.length, 'keyCount'),
-      BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'), publicKey('recentBlockhash')]);
+      BufferLayout.seq(publicKey('key'), accountKeys.length, 'keys'),
+      publicKey('recentBlockhash'),
+    ]);
     const transaction = {
       keyCount: Buffer.from(keyCount),
-      keys: this.accountKeys.map((key) => Buffer.from(key, 'hex')),
+      keys: accountKeys.map((key) => Buffer.from(key, 'hex')),
       recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
     };
     const signData = Buffer.alloc(2048); // sign data max length
@@ -498,13 +619,8 @@ export class Message {
     let byteArray = [...buffer];
 
     const numRequiredSignatures = byteArray.shift()!;
-    if (
-      numRequiredSignatures !==
-      (numRequiredSignatures & VERSION_PREFIX_MASK)
-    ) {
-      throw new Error(
-        'Versioned messages must be deserialized with VersionedMessage.deserialize()',
-      );
+    if (numRequiredSignatures !== (numRequiredSignatures & VERSION_PREFIX_MASK)) {
+      throw new Error('Versioned messages must be deserialized with VersionedMessage.deserialize()');
     }
 
     const numReadonlySignedAccounts = byteArray.shift()!;
@@ -553,4 +669,3 @@ export class Message {
     return new Message(messageArgs);
   }
 }
-

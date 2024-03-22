@@ -132,6 +132,8 @@ export type TransferTransaction = {
   toPubkey: Address;
   recentBlockhash: string;
   lamports: number | string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type TokenProgramId = typeof TOKEN_PROGRAM_ID | typeof TOKEN_2022_PROGRAM_ID;
@@ -173,6 +175,8 @@ export type CreateAndTransferSplTokenTransaction = {
     signature?: string;
   };
   programId: TokenProgramId;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type Delegate = {
