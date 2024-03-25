@@ -243,7 +243,13 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const signatures = await sign.signAllTransactions(signTxData, preActions);
 
     return signatures.map((signature, index) => {
-      const versionedTransaction = new VersionedTransaction(signTxData.transaction[index].message, [signature]);
+      const _signatures = [];
+      _signatures.push(signature);
+      const messageSignatures = signTxData.transaction[index].signatures;
+      for (let i = 1; i < messageSignatures.length; i++) {
+        _signatures.push(messageSignatures[i]);
+      }
+      const versionedTransaction = new VersionedTransaction(signTxData.transaction[index].message, _signatures);
       return Buffer.from(versionedTransaction.serialize()).toString('hex');
     });
   }
