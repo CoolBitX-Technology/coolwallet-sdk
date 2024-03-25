@@ -41,7 +41,7 @@
     "ethereumjs-util": "^7.1.4",
     "printf": "^0.6.1",
     "typescript": "^4.6.2",
-    "web3-utils": "^1.7.1"
+    "web3-utils": "^4.2.1"
   },
   "dependencies": {
     "@metamask/eth-sig-util": "^4.0.0",
