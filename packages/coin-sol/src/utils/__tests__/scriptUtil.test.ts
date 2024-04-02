@@ -163,8 +163,6 @@ describe('Test scriptUtil.getXXXArguments function', () => {
       seed: 'mSNdZ9gneHjGsRPnoQnfSY',
       recentBlockhash,
       lamports: '100000000',
-      // computeUnitPrice,
-      // computeUnitLimit,
     };
     const compiledDelegateAndCreateAccountWithSeedTx = compileDelegateAndCreateAccountWithSeed({
       ...tx,
@@ -178,13 +176,34 @@ describe('Test scriptUtil.getXXXArguments function', () => {
     );
   });
 
+  // need to fix with randow result problem
+  xit('getDelegateAndCreateAccountArguments with compute budget', async () => {
+    const tx = {
+      votePubkey: '9QU2QSxhb24FUX3Tu2FpczXjpK3VYrvRudywSZaM29mF',
+      newAccountPubkey: '9UdXnMquoTy8RJpQmidCDHJydZo5Q2ZFY2ntNbgqi1HA',
+      seed: 'mSNdZ9gneHjGsRPnoQnfSY',
+      recentBlockhash,
+      lamports: '100000000',
+      computeUnitPrice,
+      computeUnitLimit,
+    };
+    const compiledDelegateAndCreateAccountWithSeedTx = compileDelegateAndCreateAccountWithSeed({
+      ...tx,
+      fromPubkey: signer,
+      basePubkey: signer,
+    });
+    const rawTx = new Transaction(compiledDelegateAndCreateAccountWithSeedTx);
+    const args = getDelegateAndCreateAccountArguments(rawTx, 0);
+    expect(args).toMatchInlineSnapshot(
+      `"11108000002c800001f5800000008000000046a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a57df17b90d080e3a08cad64b0a1eecbdea26322603bd4cda54cf9f25525b2647100000000000000000000000000000000000000000000000000000000000000007ce0690f82fb61475febbd1605ef20c346a9167706d829ce4699435c4c2780ae0306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a4000000006a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc00000000006a1d817a502050b680791e6ce6db88e1e5b7150f61fc6790a4eb4d10000000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000006a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a0000000006a7d517193584d0feed9bb3431d13206be544281b57b8566cc5375ff4000000d4eb2f852b6be253a3e9585f8f1c7ad35affb8b3304785b620546d6fbe398642040903c0d4010000000000000000000000000000000000000000000000000000000000000000000000000003c0d40100000000008a1c01000000f0b88a1c010000000100000000000000040000000300000000218a1c010000007b0000000000000005000400050005000500060005000500040005000400050004000500040502400d0300020001720300000046a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a516000000000000006d534e645a39676e65486a477352506e6f516e66535900e1f50500000000c80000000000000006a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc000000000"`
+    );
+  });
+
   it('getUndelegateArguments', async () => {
     const tx = {
       authorizedPubkey: signer,
       stakePubkey: '9UdXnMquoTy8RJpQmidCDHJydZo5Q2ZFY2ntNbgqi1HA',
       recentBlockhash,
-      // computeUnitPrice,
-      // computeUnitLimit,
     };
 
     const compiledUndelegateTx = compileUndelegate({
@@ -198,14 +217,33 @@ describe('Test scriptUtil.getXXXArguments function', () => {
     );
   });
 
+  // TODO adjust method
+  xit('getUndelegateArguments with compute budget', async () => {
+    const tx = {
+      authorizedPubkey: signer,
+      stakePubkey: '9UdXnMquoTy8RJpQmidCDHJydZo5Q2ZFY2ntNbgqi1HA',
+      recentBlockhash,
+      computeUnitPrice,
+      computeUnitLimit,
+    };
+
+    const compiledUndelegateTx = compileUndelegate({
+      ...tx,
+      feePayer: signer,
+    });
+    const rawTx = new Transaction(compiledUndelegateTx);
+    const args = getUndelegateArguments(rawTx, 0);
+    expect(args).toMatchInlineSnapshot(
+      `"11108000002c800001f5800000008000000046a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a57df17b90d080e3a08cad64b0a1eecbdea26322603bd4cda54cf9f25525b264710306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a4000000006a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc00000000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b2100000000d4eb2f852b6be253a3e9585f8f1c7ad35affb8b3304785b620546d6fbe39864202"`
+    );
+  });
+
   it('getStackingWithdrawArguments', async () => {
     const tx = {
       withdrawToPubKey: signer,
       stakePubkey: '9UdXnMquoTy8RJpQmidCDHJydZo5Q2ZFY2ntNbgqi1HA',
       lamports: '100000000',
       recentBlockhash,
-      // computeUnitPrice,
-      // computeUnitLimit,
     };
 
     const compiledStakingWithdraw = compileStakingWithdraw({
@@ -216,6 +254,28 @@ describe('Test scriptUtil.getXXXArguments function', () => {
     const args = getStackingWithdrawArguments(rawTx, 0);
     expect(args).toMatchInlineSnapshot(
       `"11108000002c800001f580000000800000000546a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a57df17b90d080e3a08cad64b0a1eecbdea26322603bd4cda54cf9f25525b2647106a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc00000000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000006a7d517193584d0feed9bb3431d13206be544281b57b8566cc5375ff40000000000000000000000000000000000000000000000000000000000000000000000d4eb2f852b6be253a3e9585f8f1c7ad35affb8b3304785b620546d6fbe3986420201000304000c0400000000e1f50500000000"`
+    );
+  });
+
+  // TODO adjust method
+  xit('getStackingWithdrawArguments with compute budget', async () => {
+    const tx = {
+      withdrawToPubKey: signer,
+      stakePubkey: '9UdXnMquoTy8RJpQmidCDHJydZo5Q2ZFY2ntNbgqi1HA',
+      lamports: '100000000',
+      recentBlockhash,
+      computeUnitPrice,
+      computeUnitLimit,
+    };
+
+    const compiledStakingWithdraw = compileStakingWithdraw({
+      ...tx,
+      authorizedPubkey: signer,
+    });
+    const rawTx = new Transaction(compiledStakingWithdraw);
+    const args = getStackingWithdrawArguments(rawTx, 0);
+    expect(args).toMatchInlineSnapshot(
+      `"11108000002c800001f580000000800000000646a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a57df17b90d080e3a08cad64b0a1eecbdea26322603bd4cda54cf9f25525b264710306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a4000000006a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc00000000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000006a7d517193584d0feed9bb3431d13206be544281b57b8566cc5375ff4000000d4eb2f852b6be253a3e9585f8f1c7ad35affb8b3304785b620546d6fbe398642020903c0d4010000000000"`
     );
   });
 });

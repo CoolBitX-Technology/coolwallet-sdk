@@ -1,10 +1,6 @@
 import * as types from '../config/types';
 import * as params from '../config/params';
-import * as stringUtil from './stringUtil';
-import { StakeProgramLayout, SystemProgramLayout } from './programLayout';
-import { encodeData } from './commonLayout';
 import * as instructionsTemplate from './instructions';
-import { ComputeBudgetInstruction } from '../config/types';
 
 function compileTransferTransaction(transaction: {
   fromPubkey: types.Address;
@@ -15,36 +11,17 @@ function compileTransferTransaction(transaction: {
   computeUnitLimit?: string;
 }): types.TransactionArgs {
   const { fromPubkey, toPubkey, recentBlockhash, lamports } = transaction;
-  const instructions = [];
-  if (transaction.computeUnitPrice) {
-    instructions.push({
-      accounts: [],
-      programId: params.COMPUTE_BUDGET_PROGRAM_ID,
-      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitPrice, transaction.computeUnitPrice),
-    });
-  }
-  if (transaction.computeUnitLimit) {
-    instructions.push({
-      accounts: [],
-      programId: params.COMPUTE_BUDGET_PROGRAM_ID,
-      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitLimit, transaction.computeUnitLimit),
-    });
-  }
-
-  const data = encodeData(SystemProgramLayout.Transfer, {
+  const computeBudgetInstructions = instructionsTemplate.addComputeBudget({
+    computeUnitPrice: transaction.computeUnitPrice,
+    computeUnitLimit: transaction.computeUnitLimit,
+  });
+  const coinInstruction = instructionsTemplate.transferCoin({
+    fromPubkey,
+    toPubkey,
     lamports,
   });
-  instructions.push({
-    accounts: [
-      { pubkey: fromPubkey, isSigner: true, isWritable: true },
-      { pubkey: toPubkey, isSigner: false, isWritable: true },
-    ],
-    programId: params.SYSTEM_PROGRAM_ID,
-    data,
-  });
-
   return {
-    instructions,
+    instructions: [...computeBudgetInstructions, coinInstruction],
     recentBlockhash,
     feePayer: fromPubkey,
   };
@@ -62,33 +39,20 @@ function compileSplTokenTransaction(transaction: {
   computeUnitLimit?: string;
 }): types.TransactionArgs {
   const { signer, fromTokenAccount, toTokenAccount, amount, recentBlockhash, programId, tokenInfo } = transaction;
-  const instructions = [];
-  if (transaction.computeUnitPrice) {
-    instructions.push({
-      accounts: [],
-      programId: params.COMPUTE_BUDGET_PROGRAM_ID,
-      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitPrice, transaction.computeUnitPrice),
-    });
-  }
-  if (transaction.computeUnitLimit) {
-    instructions.push({
-      accounts: [],
-      programId: params.COMPUTE_BUDGET_PROGRAM_ID,
-      data: stringUtil.computeBudgetEncode(ComputeBudgetInstruction.SetComputeUnitLimit, transaction.computeUnitLimit),
-    });
-  }
-  instructions.push({
-    accounts: [
-      { pubkey: fromTokenAccount, isSigner: false, isWritable: true },
-      { pubkey: tokenInfo.address, isSigner: false, isWritable: false },
-      { pubkey: toTokenAccount, isSigner: false, isWritable: true },
-      { pubkey: signer, isSigner: true, isWritable: false },
-    ],
+  const computeBudgetInstructions = instructionsTemplate.addComputeBudget({
+    computeUnitPrice: transaction.computeUnitPrice,
+    computeUnitLimit: transaction.computeUnitLimit,
+  });
+  const splTokenInstruction = instructionsTemplate.transferSplToken({
+    signer,
+    fromTokenAccount,
+    toTokenAccount,
+    amount,
     programId,
-    data: stringUtil.splDataEncode(amount, tokenInfo.decimals),
+    tokenInfo,
   });
   return {
-    instructions,
+    instructions: [...computeBudgetInstructions, splTokenInstruction],
     recentBlockhash,
     feePayer: signer,
   };
@@ -103,23 +67,15 @@ function compileAssociateTokenAccount(transaction: {
   programId: types.TokenProgramId;
 }): types.TransactionArgs {
   const { signer, owner, associateAccount, token, recentBlockhash, programId } = transaction;
-
+  const createTokenInstruction = instructionsTemplate.createAssociateTokenAccount({
+    signer,
+    owner,
+    associateAccount,
+    token,
+    programId,
+  });
   return {
-    instructions: [
-      {
-        accounts: [
-          { pubkey: signer, isSigner: true, isWritable: true },
-          { pubkey: associateAccount, isSigner: false, isWritable: true },
-          { pubkey: owner, isSigner: false, isWritable: false },
-          { pubkey: token, isSigner: false, isWritable: false },
-          { pubkey: params.SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false },
-          { pubkey: programId, isSigner: false, isWritable: false },
-          // { pubkey: params.SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
-        ],
-        programId: params.ASSOCIATED_TOKEN_PROGRAM_ID,
-        data: Buffer.alloc(0),
-      },
-    ],
+    instructions: [createTokenInstruction],
     recentBlockhash,
     feePayer: signer,
   };
@@ -131,11 +87,17 @@ function compileDelegate(transaction: {
   stakePubkey: types.Address;
   authorizedPubkey: types.Address;
   votePubkey: types.Address;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 }): types.TransactionArgs {
   const { feePayer, recentBlockhash } = transaction;
+  const computeBudgetInstructions = instructionsTemplate.addComputeBudget({
+    computeUnitPrice: transaction.computeUnitPrice,
+    computeUnitLimit: transaction.computeUnitLimit,
+  });
   const delegateInstruction = instructionsTemplate.delegate(transaction);
   return {
-    instructions: [delegateInstruction],
+    instructions: [...computeBudgetInstructions, delegateInstruction],
     recentBlockhash,
     feePayer,
   };
@@ -146,21 +108,20 @@ function compileUndelegate(transaction: {
   recentBlockhash: string;
   stakePubkey: types.Address;
   authorizedPubkey: types.Address;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 }): types.TransactionArgs {
   const { stakePubkey, authorizedPubkey, feePayer, recentBlockhash } = transaction;
-  const data = encodeData(StakeProgramLayout.Deactivate);
+  const computeBudgetInstructions = instructionsTemplate.addComputeBudget({
+    computeUnitPrice: transaction.computeUnitPrice,
+    computeUnitLimit: transaction.computeUnitLimit,
+  });
+  const undelegateInstruction = instructionsTemplate.undelegate({
+    stakePubkey,
+    authorizedPubkey,
+  });
   return {
-    instructions: [
-      {
-        accounts: [
-          { pubkey: stakePubkey, isSigner: false, isWritable: true },
-          { pubkey: params.SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
-          { pubkey: authorizedPubkey, isSigner: true, isWritable: false },
-        ],
-        programId: params.STAKE_PROGRAM_ID,
-        data,
-      },
-    ],
+    instructions: [...computeBudgetInstructions, undelegateInstruction],
     feePayer,
     recentBlockhash,
   };
@@ -174,9 +135,15 @@ function compileDelegateAndCreateAccountWithSeed(transaction: {
   seed: string;
   lamports: string | number;
   recentBlockhash: string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 }): types.TransactionArgs {
   const { fromPubkey, newAccountPubkey, basePubkey, seed, lamports, recentBlockhash, votePubkey } = transaction;
-  const createAccountWithSeedInstructions = instructionsTemplate.createAccountWithSeed({
+  const computeUnitInstructions = instructionsTemplate.addComputeBudget({
+    computeUnitPrice: transaction.computeUnitPrice,
+    computeUnitLimit: transaction.computeUnitLimit,
+  });
+  const createAccountWithSeedInstruction = instructionsTemplate.createAccountWithSeed({
     fromPubkey,
     newAccountPubkey,
     basePubkey,
@@ -187,10 +154,8 @@ function compileDelegateAndCreateAccountWithSeed(transaction: {
   });
   const initializeInstruction = instructionsTemplate.initialize({
     stakePubkey: newAccountPubkey,
-    authorized: {
-      staker: Buffer.from(stringUtil.formHex(fromPubkey), 'hex'),
-      withdrawer: Buffer.from(stringUtil.formHex(fromPubkey), 'hex'),
-    },
+    staker: fromPubkey,
+    withdrawer: fromPubkey,
   });
   const delegateInstruction = instructionsTemplate.delegate({
     stakePubkey: newAccountPubkey,
@@ -198,7 +163,12 @@ function compileDelegateAndCreateAccountWithSeed(transaction: {
     votePubkey,
   });
   return {
-    instructions: [createAccountWithSeedInstructions, initializeInstruction, delegateInstruction],
+    instructions: [
+      ...computeUnitInstructions,
+      createAccountWithSeedInstruction,
+      initializeInstruction,
+      delegateInstruction,
+    ],
     recentBlockhash,
     feePayer: fromPubkey,
   };
@@ -210,32 +180,23 @@ function compileStakingWithdraw(transaction: {
   withdrawToPubKey: types.Address;
   recentBlockhash: string;
   lamports: number | string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 }): types.TransactionArgs {
   const { authorizedPubkey, stakePubkey, withdrawToPubKey, recentBlockhash, lamports } = transaction;
-  const data = encodeData(StakeProgramLayout.Withdraw, {
-    lamports: +lamports,
+  const computeBudgetInstructions = instructionsTemplate.addComputeBudget({
+    computeUnitPrice: transaction.computeUnitPrice,
+    computeUnitLimit: transaction.computeUnitLimit,
+  });
+  const withdrawInstruction = instructionsTemplate.withdraw({
+    stakePubkey,
+    withdrawToPubKey,
+    authorizedPubkey,
+    lamports,
   });
 
-  const accounts = [
-    { pubkey: stakePubkey, isSigner: false, isWritable: true },
-    { pubkey: withdrawToPubKey, isSigner: false, isWritable: true },
-    { pubkey: params.SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
-    {
-      pubkey: params.SYSVAR_STAKE_HISTORY_PUBKEY,
-      isSigner: false,
-      isWritable: false,
-    },
-    { pubkey: authorizedPubkey, isSigner: true, isWritable: false },
-  ];
-
   return {
-    instructions: [
-      {
-        accounts,
-        programId: params.STAKE_PROGRAM_ID,
-        data,
-      },
-    ],
+    instructions: [...computeBudgetInstructions, withdrawInstruction],
     recentBlockhash,
     feePayer: authorizedPubkey,
   };
