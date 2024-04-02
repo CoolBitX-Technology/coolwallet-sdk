@@ -233,6 +233,43 @@ function transferSplToken(params: {
   };
 }
 
+function paddingEmptyInstructionBuffer(params: {
+  paddingLength: number;
+  sourceInstructionBuf: Buffer;
+  sourceInstructionLength: number;
+}): Buffer {
+  const { paddingLength, sourceInstructionBuf, sourceInstructionLength } = params;
+  const emptyPaddingBuf = Buffer.alloc(paddingLength);
+  emptyPaddingBuf.copy(sourceInstructionBuf, sourceInstructionLength);
+  return sourceInstructionBuf;
+}
+
+function paddingEmptyComputeBudget(params: { oldInstructionBuffer: Buffer; oldInstructionLength: number }): {
+  newInstructionBuffer: Buffer;
+  newInstructionBufferLength: number;
+} {
+  const { oldInstructionBuffer, oldInstructionLength } = params;
+  const paddingGasPriceInstructionLength = 13;
+  let newInstructionBufferLength = oldInstructionLength;
+  let newInstructionBuffer = paddingEmptyInstructionBuffer({
+    paddingLength: paddingGasPriceInstructionLength,
+    sourceInstructionBuf: oldInstructionBuffer,
+    sourceInstructionLength: oldInstructionLength,
+  });
+  newInstructionBufferLength += paddingGasPriceInstructionLength;
+  const paddingGasLimitInstructionLength = 9;
+  newInstructionBuffer = paddingEmptyInstructionBuffer({
+    paddingLength: paddingGasLimitInstructionLength,
+    sourceInstructionBuf: newInstructionBuffer,
+    sourceInstructionLength: newInstructionBufferLength,
+  });
+  newInstructionBufferLength += paddingGasLimitInstructionLength;
+  return {
+    newInstructionBuffer: newInstructionBuffer,
+    newInstructionBufferLength: newInstructionBufferLength,
+  };
+}
+
 export {
   createAccountWithSeed,
   initialize,
@@ -243,4 +280,5 @@ export {
   transferCoin,
   transferSplToken,
   createAssociateTokenAccount,
+  paddingEmptyComputeBudget,
 };
