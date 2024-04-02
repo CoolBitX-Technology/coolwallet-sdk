@@ -426,28 +426,42 @@ export class Message {
   }
 
   serializeUndelegate(): string {
-    const { instructions } = this.encodedLength();
-    const [instruction] = instructions;
+    const { keyCount, instructions } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
-    const instructionLayout = BufferLayout.struct<
+    let instructionBufferLength = 0;
+
+    const [undelegate] = instructions;
+    const undelegateLayout = BufferLayout.struct<
       Readonly<{
-        keyIndices: number[];
+        data: number[];
+        dataLength: Uint8Array;
         programIdIndex: number;
+        keyIndices: number[];
+        keyIndicesCount: Uint8Array;
       }>
     >([
       BufferLayout.u8('programIdIndex'),
-      BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
+      BufferLayout.blob(undelegate.keyIndicesCount.length, 'keyIndicesCount'),
+      BufferLayout.seq(BufferLayout.u8('keyIndex'), undelegate.keyIndices.length, 'keyIndices'),
+      BufferLayout.blob(undelegate.dataLength.length, 'dataLength'),
+      BufferLayout.seq(BufferLayout.u8('userdatum'), undelegate.data.length, 'data'),
     ]);
-    const instructionBufferLength = instructionLayout.encode(instruction, instructionBuffer, 0);
+    instructionBufferLength = undelegateLayout.encode(undelegate, instructionBuffer, instructionBufferLength);
+    
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
-
     const signDataLayout = BufferLayout.struct<
       Readonly<{
+        keyCount: Uint8Array;
         keys: Uint8Array[];
         recentBlockhash: Uint8Array;
       }>
-    >([BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'), publicKey('recentBlockhash')]);
+    >([
+      BufferLayout.blob(keyCount.length, 'keyCount'),
+      BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'),
+      publicKey('recentBlockhash'),
+    ]);
     const transaction = {
+      keyCount: Buffer.from(keyCount),
       keys: this.accountKeys.map((key) => Buffer.from(key, 'hex')),
       recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
     };
