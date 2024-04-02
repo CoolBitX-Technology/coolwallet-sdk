@@ -85,8 +85,9 @@ function getUndelegateArguments(rawTx: Transaction, addressIndex: number): strin
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeUndelegate();
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeUndelegate();
 }
 
 function getDelegateAndCreateAccountArguments(rawTx: Transaction, addressIndex: number): string {

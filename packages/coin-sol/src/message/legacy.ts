@@ -1,5 +1,5 @@
 import * as BufferLayout from '@solana/buffer-layout';
-import { encodeLength } from '../utils/stringUtil';
+import { encodeLength, numberToStringHex } from '../utils/stringUtil';
 import { publicKey } from '../utils/commonLayout';
 import { PACKET_DATA_SIZE, PADDING_PUBLICKEY, PUBLIC_KEY_LENGTH, VERSION_PREFIX_MASK } from '../config/params';
 import { CompiledInstruction, CompliedInstruction, SerializedInstruction } from '../config/types';
@@ -30,6 +30,14 @@ export class Message {
     this.accountKeys = message.accountKeys;
     this.recentBlockhash = message.recentBlockhash;
     this.instructions = message.instructions;
+  }
+
+  serializeHeader(): string {
+    return (
+      numberToStringHex(this.header.numRequiredSignatures, 2) +
+      numberToStringHex(this.header.numReadonlySignedAccounts, 2) +
+      numberToStringHex(this.header.numReadonlyUnsignedAccounts, 2)
+    );
   }
 
   encodedLength(): { keyCount: number[]; instructionCount: number[]; instructions: SerializedInstruction[] } {
@@ -427,9 +435,10 @@ export class Message {
   }
 
   serializeUndelegate(): string {
-    const { keyCount, instructions } = this.encodedLength();
+    const { keyCount, instructions, instructionCount } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
-    let instructionBufferLength = 0;
+    Buffer.from(instructionCount).copy(instructionBuffer);
+    let instructionBufferLength = instructionCount.length;
     const hasComputeBudget = instructions.length > 1;
     // encode instruction
     instructions.forEach((instruction, index) => {
