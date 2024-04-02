@@ -429,25 +429,42 @@ export class Message {
     const { keyCount, instructions } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
     let instructionBufferLength = 0;
-
-    const [undelegate] = instructions;
-    const undelegateLayout = BufferLayout.struct<
-      Readonly<{
-        data: number[];
-        dataLength: Uint8Array;
-        programIdIndex: number;
-        keyIndices: number[];
-        keyIndicesCount: Uint8Array;
-      }>
-    >([
-      BufferLayout.u8('programIdIndex'),
-      BufferLayout.blob(undelegate.keyIndicesCount.length, 'keyIndicesCount'),
-      BufferLayout.seq(BufferLayout.u8('keyIndex'), undelegate.keyIndices.length, 'keyIndices'),
-      BufferLayout.blob(undelegate.dataLength.length, 'dataLength'),
-      BufferLayout.seq(BufferLayout.u8('userdatum'), undelegate.data.length, 'data'),
-    ]);
-    instructionBufferLength = undelegateLayout.encode(undelegate, instructionBuffer, instructionBufferLength);
-    
+    // const [undelegate] = instructions;
+    // const undelegateLayout = BufferLayout.struct<
+    //   Readonly<{
+    //     data: number[];
+    //     dataLength: Uint8Array;
+    //     programIdIndex: number;
+    //     keyIndices: number[];
+    //     keyIndicesCount: Uint8Array;
+    //   }>
+    // >([
+    //   BufferLayout.u8('programIdIndex'),
+    //   BufferLayout.blob(undelegate.keyIndicesCount.length, 'keyIndicesCount'),
+    //   BufferLayout.seq(BufferLayout.u8('keyIndex'), undelegate.keyIndices.length, 'keyIndices'),
+    //   BufferLayout.blob(undelegate.dataLength.length, 'dataLength'),
+    //   BufferLayout.seq(BufferLayout.u8('userdatum'), undelegate.data.length, 'data'),
+    // ]);
+    // instructionBufferLength = undelegateLayout.encode(undelegate, instructionBuffer, instructionBufferLength);
+    // encode instruction
+    instructions.forEach((instruction) => {
+      const instructionLayout = BufferLayout.struct<
+        Readonly<{
+          data: number[];
+          dataLength: Uint8Array;
+          keyIndices: number[];
+          keyIndicesCount: Uint8Array;
+          programIdIndex: number;
+        }>
+      >([
+        BufferLayout.u8('programIdIndex'),
+        BufferLayout.blob(instruction.keyIndicesCount.length, 'keyIndicesCount'),
+        BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
+        BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
+        BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
+      ]);
+      instructionBufferLength += instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
+    });
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
     const signDataLayout = BufferLayout.struct<
       Readonly<{
