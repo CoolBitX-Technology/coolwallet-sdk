@@ -1,7 +1,13 @@
 import * as BufferLayout from '@solana/buffer-layout';
 import { encodeLength, numberToStringHex } from '../utils/stringUtil';
 import { publicKey } from '../utils/commonLayout';
-import { PACKET_DATA_SIZE, PADDING_PUBLICKEY, PUBLIC_KEY_LENGTH, VERSION_PREFIX_MASK } from '../config/params';
+import {
+  COMPUTE_BUDGET_PROGRAM_ID,
+  PACKET_DATA_SIZE,
+  PADDING_PUBLICKEY,
+  PUBLIC_KEY_LENGTH,
+  VERSION_PREFIX_MASK,
+} from '../config/params';
 import { CompiledInstruction, CompliedInstruction, SerializedInstruction } from '../config/types';
 import * as shortvec from '../utils/shortvec-encoding';
 import { paddingEmptyComputeBudget } from '../utils/instructions';
@@ -439,7 +445,7 @@ export class Message {
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
     Buffer.from(instructionCount).copy(instructionBuffer);
     let instructionBufferLength = instructionCount.length;
-    const hasComputeBudget = instructions.length > 1;
+    const hasComputeBudget = this.accountKeys.includes(COMPUTE_BUDGET_PROGRAM_ID.toString('hex'));
     // encode instruction
     instructions.forEach((instruction, index) => {
       if (!hasComputeBudget && index === 0) {

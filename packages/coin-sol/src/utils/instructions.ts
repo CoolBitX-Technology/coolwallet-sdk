@@ -249,7 +249,7 @@ function paddingEmptyComputeBudget(params: { oldInstructionBuffer: Buffer; oldIn
   newInstructionBufferLength: number;
 } {
   const { oldInstructionBuffer, oldInstructionLength } = params;
-  const paddingGasPriceInstructionLength = 13;
+  const paddingGasPriceInstructionLength = 12;
   let newInstructionBufferLength = oldInstructionLength;
   let newInstructionBuffer = paddingEmptyInstructionBuffer({
     paddingLength: paddingGasPriceInstructionLength,
@@ -257,7 +257,7 @@ function paddingEmptyComputeBudget(params: { oldInstructionBuffer: Buffer; oldIn
     sourceInstructionLength: oldInstructionLength,
   });
   newInstructionBufferLength += paddingGasPriceInstructionLength;
-  const paddingGasLimitInstructionLength = 9;
+  const paddingGasLimitInstructionLength = 8;
   newInstructionBuffer = paddingEmptyInstructionBuffer({
     paddingLength: paddingGasLimitInstructionLength,
     sourceInstructionBuf: newInstructionBuffer,
