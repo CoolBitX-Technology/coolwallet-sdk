@@ -4,6 +4,7 @@ import { publicKey } from '../utils/commonLayout';
 import { PACKET_DATA_SIZE, PADDING_PUBLICKEY, PUBLIC_KEY_LENGTH, VERSION_PREFIX_MASK } from '../config/params';
 import { CompiledInstruction, CompliedInstruction, SerializedInstruction } from '../config/types';
 import * as shortvec from '../utils/shortvec-encoding';
+import { paddingEmptyComputeBudget } from '../utils/instructions';
 
 type MessageHeader = {
   numRequiredSignatures: number;
@@ -429,25 +430,17 @@ export class Message {
     const { keyCount, instructions } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
     let instructionBufferLength = 0;
-    // const [undelegate] = instructions;
-    // const undelegateLayout = BufferLayout.struct<
-    //   Readonly<{
-    //     data: number[];
-    //     dataLength: Uint8Array;
-    //     programIdIndex: number;
-    //     keyIndices: number[];
-    //     keyIndicesCount: Uint8Array;
-    //   }>
-    // >([
-    //   BufferLayout.u8('programIdIndex'),
-    //   BufferLayout.blob(undelegate.keyIndicesCount.length, 'keyIndicesCount'),
-    //   BufferLayout.seq(BufferLayout.u8('keyIndex'), undelegate.keyIndices.length, 'keyIndices'),
-    //   BufferLayout.blob(undelegate.dataLength.length, 'dataLength'),
-    //   BufferLayout.seq(BufferLayout.u8('userdatum'), undelegate.data.length, 'data'),
-    // ]);
-    // instructionBufferLength = undelegateLayout.encode(undelegate, instructionBuffer, instructionBufferLength);
+    const hasComputeBudget = instructions.length > 1;
     // encode instruction
-    instructions.forEach((instruction) => {
+    instructions.forEach((instruction, index) => {
+      if (!hasComputeBudget && index === 0) {
+        const paddingResult = paddingEmptyComputeBudget({
+          oldInstructionBuffer: instructionBuffer,
+          oldInstructionLength: instructionBufferLength,
+        });
+        instructionBuffer = paddingResult.newInstructionBuffer;
+        instructionBufferLength = paddingResult.newInstructionBufferLength;
+      }
       const instructionLayout = BufferLayout.struct<
         Readonly<{
           data: number[];
@@ -466,6 +459,13 @@ export class Message {
       instructionBufferLength += instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
     });
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
+
+    let accountKeys = this.accountKeys;
+    if (!hasComputeBudget) {
+      // Need to reserve compute budget program id space for account keys.
+      accountKeys = this.accountKeys.concat(PADDING_PUBLICKEY);
+    }
+
     const signDataLayout = BufferLayout.struct<
       Readonly<{
         keyCount: Uint8Array;
@@ -474,12 +474,13 @@ export class Message {
       }>
     >([
       BufferLayout.blob(keyCount.length, 'keyCount'),
-      BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'),
+      BufferLayout.seq(publicKey('key'), accountKeys.length, 'keys'),
       publicKey('recentBlockhash'),
     ]);
+
     const transaction = {
       keyCount: Buffer.from(keyCount),
-      keys: this.accountKeys.map((key) => Buffer.from(key, 'hex')),
+      keys: accountKeys.map((key) => Buffer.from(key, 'hex')),
       recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
     };
     const signData = Buffer.alloc(2048); // sign data max length
