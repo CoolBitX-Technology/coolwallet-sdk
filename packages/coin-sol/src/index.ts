@@ -206,7 +206,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     const script = params.SCRIPT.STAKING_WITHDRAW.scriptWithSignature;
     const rawTransaction = compileStakingWithdraw({ ...signTxData.transaction, authorizedPubkey });
     const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getStackingWithdrawArguments(transactionInstruction, addressIndex);
+    const argument = scriptUtil.getWithdrawArguments(transactionInstruction, addressIndex);
 
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }

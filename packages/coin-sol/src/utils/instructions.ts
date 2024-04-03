@@ -79,7 +79,7 @@ function createAccountWithSeed(params: {
     space,
     programId: Buffer.from(formHex(programId), 'hex'),
   });
-  console.log('data >>> ',data.toString('hex'));
+
   const keys = [
     { pubkey: fromPubkeyStr, isSigner: true, isWritable: true },
     { pubkey: formHex(newAccountPubkey), isSigner: false, isWritable: true },

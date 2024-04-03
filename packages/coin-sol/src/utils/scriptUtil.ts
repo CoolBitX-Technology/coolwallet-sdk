@@ -90,6 +90,15 @@ function getUndelegateArguments(rawTx: Transaction, addressIndex: number): strin
   return SEPath + header + compiledMessage.serializeUndelegate();
 }
 
+function getWithdrawArguments(rawTx: Transaction, addressIndex: number): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeWithdraw();
+}
+
 function getDelegateAndCreateAccountArguments(rawTx: Transaction, addressIndex: number): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
@@ -104,14 +113,6 @@ function getSmartContractArguments(rawTx: Transaction, addressIndex: number): st
   console.debug('SEPath: ', SEPath);
 
   return SEPath + Buffer.from(rawTx.compileMessage().serialize()).toString('hex');
-}
-
-function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number): string {
-  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
-  const SEPath = `11${path}`;
-  console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeStakingWithdraw();
 }
 
 function getSignInArguments(message: types.SignInMessage, addressIndex: number): string {
@@ -176,8 +177,8 @@ export {
   getSmartContractArguments,
   getDelegateArguments,
   getUndelegateArguments,
+  getWithdrawArguments,
   getDelegateAndCreateAccountArguments,
-  getStackingWithdrawArguments,
   getSignInArguments,
   getSignMessageArguments,
   getSignVersionedArguments,

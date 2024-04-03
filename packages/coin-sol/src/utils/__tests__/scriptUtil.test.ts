@@ -15,9 +15,9 @@ import {
   getSignMessageArguments,
   getSignVersionedArguments,
   getSplTokenTransferArguments,
-  getStackingWithdrawArguments,
   getTransferArguments,
   getUndelegateArguments,
+  getWithdrawArguments,
 } from '../scriptUtil';
 import { VersionedTransaction } from '../versionedTransaction';
 
@@ -237,7 +237,7 @@ describe('Test scriptUtil.getXXXArguments function', () => {
     );
   });
 
-  it('getStackingWithdrawArguments', async () => {
+  it('getWithdrawArguments', async () => {
     const tx = {
       withdrawToPubKey: signer,
       stakePubkey: '9UdXnMquoTy8RJpQmidCDHJydZo5Q2ZFY2ntNbgqi1HA',
@@ -250,14 +250,13 @@ describe('Test scriptUtil.getXXXArguments function', () => {
       authorizedPubkey: signer,
     });
     const rawTx = new Transaction(compiledStakingWithdraw);
-    const args = getStackingWithdrawArguments(rawTx, 0);
+    const args = getWithdrawArguments(rawTx, 0);
     expect(args).toMatchInlineSnapshot(
-      `"11108000002c800001f580000000800000000546a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a57df17b90d080e3a08cad64b0a1eecbdea26322603bd4cda54cf9f25525b2647106a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc00000000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000006a7d517193584d0feed9bb3431d13206be544281b57b8566cc5375ff40000000000000000000000000000000000000000000000000000000000000000000000d4eb2f852b6be253a3e9585f8f1c7ad35affb8b3304785b620546d6fbe3986420201000304000c0400000000e1f50500000000"`
+      `"11108000002c800001f580000000800000000100030546a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a57df17b90d080e3a08cad64b0a1eecbdea26322603bd4cda54cf9f25525b2647106a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc00000000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000006a7d517193584d0feed9bb3431d13206be544281b57b8566cc5375ff40000002d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2dd4eb2f852b6be253a3e9585f8f1c7ad35affb8b3304785b620546d6fbe398642010000000000000000000000000000000000000000020501000304000c0400000000e1f50500000000"`
     );
   });
 
-  // TODO adjust method
-  xit('getStackingWithdrawArguments with compute budget', async () => {
+  it('getWithdrawArguments with compute budget', async () => {
     const tx = {
       withdrawToPubKey: signer,
       stakePubkey: '9UdXnMquoTy8RJpQmidCDHJydZo5Q2ZFY2ntNbgqi1HA',
@@ -272,9 +271,9 @@ describe('Test scriptUtil.getXXXArguments function', () => {
       authorizedPubkey: signer,
     });
     const rawTx = new Transaction(compiledStakingWithdraw);
-    const args = getStackingWithdrawArguments(rawTx, 0);
+    const args = getWithdrawArguments(rawTx, 0);
     expect(args).toMatchInlineSnapshot(
-      `"11108000002c800001f580000000800000000646a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a57df17b90d080e3a08cad64b0a1eecbdea26322603bd4cda54cf9f25525b264710306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a4000000006a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc00000000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000006a7d517193584d0feed9bb3431d13206be544281b57b8566cc5375ff4000000d4eb2f852b6be253a3e9585f8f1c7ad35affb8b3304785b620546d6fbe398642020903c0d4010000000000"`
+      `"11108000002c800001f580000000800000000100040646a448fb09aea355ea540c1e2e86127d4795a86a533a977e20f5476f5bd100a57df17b90d080e3a08cad64b0a1eecbdea26322603bd4cda54cf9f25525b264710306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a4000000006a1d8179137542a983437bdfe2a7ab2557f535c8a78722b68a49dc00000000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000006a7d517193584d0feed9bb3431d13206be544281b57b8566cc5375ff40000002d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2dd4eb2f852b6be253a3e9585f8f1c7ad35affb8b3304785b620546d6fbe3986420302000903c0d401000000000002000502400d0300030501000405000c0400000000e1f50500000000"`
     );
   });
 });

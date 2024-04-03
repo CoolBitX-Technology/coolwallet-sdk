@@ -11,6 +11,13 @@ import {
 import { CompiledInstruction, CompliedInstruction, SerializedInstruction } from '../config/types';
 import * as shortvec from '../utils/shortvec-encoding';
 import { paddingEmptyComputeBudget } from '../utils/instructions';
+import {
+  structInstructionLayout,
+  structInstructionLayoutWithoutDataAndKeyIndicesCount,
+  structInstructionLayoutWithoutKeyIndicesCount,
+  structSignDataLayout,
+} from '../utils/bufferLayoutUtils';
+import base58 from 'bs58';
 
 type MessageHeader = {
   numRequiredSignatures: number;
@@ -403,6 +410,52 @@ export class Message {
     return signData.slice(0, length + instructionBuffer.length).toString('hex');
   }
 
+  encodeInstructionAndPaddingComputeBudget(instructions: SerializedInstruction[], instructionCount: number[]) {
+    let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
+    Buffer.from(instructionCount).copy(instructionBuffer);
+    let instructionBufferLength = instructionCount.length;
+    const hasComputeBudget = this.accountKeys.includes(COMPUTE_BUDGET_PROGRAM_ID.toString('hex'));
+    instructions.forEach((instruction, index) => {
+      if (!hasComputeBudget && index === 0) {
+        const paddingResult = paddingEmptyComputeBudget({
+          oldInstructionBuffer: instructionBuffer,
+          oldInstructionLength: instructionBufferLength,
+        });
+        instructionBuffer = paddingResult.newInstructionBuffer;
+        instructionBufferLength = paddingResult.newInstructionBufferLength;
+      }
+      const instructionLayout = structInstructionLayout(instruction);
+      instructionBufferLength += instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
+    });
+    instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
+    return {
+      instructionBuffer,
+      instructionBufferLength,
+    };
+  }
+
+  reservePaddingAccountKeys(maxAccountKeyLength: number): string[] {
+    const accountKeys = this.accountKeys;
+    const needPaddingKeyLength = maxAccountKeyLength - this.accountKeys.length;
+    for (let i = 0; i < needPaddingKeyLength; i++) {
+      accountKeys.push(PADDING_PUBLICKEY);
+    }
+    return accountKeys;
+  }
+
+  encodeSignData(keyCount: number[], newAccountKeys: string[], instructionBuffer: Buffer): string {
+    const signDataLayout = structSignDataLayout(keyCount, newAccountKeys);
+    const transaction = {
+      keyCount: Buffer.from(keyCount),
+      keys: newAccountKeys.map((key) => Buffer.from(key, 'hex')),
+      recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
+    };
+    const signData = Buffer.alloc(2048); // sign data max length
+    const length = signDataLayout.encode(transaction, signData);
+    instructionBuffer.copy(signData, length);
+    return signData.slice(0, length + instructionBuffer.length).toString('hex');
+  }
+
   serializeDelegate(): string {
     const { instructions } = this.encodedLength();
     const [instruction] = instructions;
@@ -441,221 +494,116 @@ export class Message {
   }
 
   serializeUndelegate(): string {
-    const { keyCount, instructions, instructionCount } = this.encodedLength();
-    let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
-    Buffer.from(instructionCount).copy(instructionBuffer);
-    let instructionBufferLength = instructionCount.length;
-    const hasComputeBudget = this.accountKeys.includes(COMPUTE_BUDGET_PROGRAM_ID.toString('hex'));
-    // encode instruction
-    instructions.forEach((instruction, index) => {
-      if (!hasComputeBudget && index === 0) {
-        const paddingResult = paddingEmptyComputeBudget({
-          oldInstructionBuffer: instructionBuffer,
-          oldInstructionLength: instructionBufferLength,
-        });
-        instructionBuffer = paddingResult.newInstructionBuffer;
-        instructionBufferLength = paddingResult.newInstructionBufferLength;
-      }
-      const instructionLayout = BufferLayout.struct<
-        Readonly<{
-          data: number[];
-          dataLength: Uint8Array;
-          keyIndices: number[];
-          keyIndicesCount: Uint8Array;
-          programIdIndex: number;
-        }>
-      >([
-        BufferLayout.u8('programIdIndex'),
-        BufferLayout.blob(instruction.keyIndicesCount.length, 'keyIndicesCount'),
-        BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
-        BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
-        BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
-      ]);
-      instructionBufferLength += instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
-    });
-    instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
-
-    let accountKeys = this.accountKeys;
-    if (!hasComputeBudget) {
-      // Need to reserve compute budget program id space for account keys.
-      accountKeys = this.accountKeys.concat(PADDING_PUBLICKEY);
-    }
-
-    const signDataLayout = BufferLayout.struct<
-      Readonly<{
-        keyCount: Uint8Array;
-        keys: Uint8Array[];
-        recentBlockhash: Uint8Array;
-      }>
-    >([
-      BufferLayout.blob(keyCount.length, 'keyCount'),
-      BufferLayout.seq(publicKey('key'), accountKeys.length, 'keys'),
-      publicKey('recentBlockhash'),
-    ]);
-
-    const transaction = {
-      keyCount: Buffer.from(keyCount),
-      keys: accountKeys.map((key) => Buffer.from(key, 'hex')),
-      recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
-    };
-    const signData = Buffer.alloc(2048); // sign data max length
-    const length = signDataLayout.encode(transaction, signData);
-
-    instructionBuffer.copy(signData, length);
-
-    return signData.slice(0, length + instructionBuffer.length).toString('hex');
+    const { keyCount, instructionCount, instructions } = this.encodedLength();
+    const { instructionBuffer } = this.encodeInstructionAndPaddingComputeBudget(instructions, instructionCount);
+    /**
+     * signerPubkey
+     * stakeAccountPubkey
+     * Stake11111111111111111111111111111111111111
+     * SysvarC1ock11111111111111111111111111111111
+     * ComputeBudget111111111111111111111111111111  (optional)
+     */
+    const newAccountKeys = this.reservePaddingAccountKeys(5);
+    return this.encodeSignData(keyCount, newAccountKeys, instructionBuffer);
   }
 
   serializeDelegateAndCreateAccountWithSeed(): string {
     const defaultLength = 92;
     const prefixLength = 44;
-    const { instructions } = this.encodedLength();
+    const { keyCount, instructions } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
+    // Buffer.from(instructionCount).copy(instructionBuffer);
     let instructionBufferLength = 0;
-    const [createAccountWithSeedInstruction, initializeInstruction, delegateInstruction] = instructions;
-    function getInstructionLayout(instruction: SerializedInstruction) {
-      return BufferLayout.struct<
-        Readonly<{
-          data: number[];
-          programIdIndex: number;
-          keyIndices: number[];
-          dataLength: Uint8Array;
-        }>
-      >([
-        BufferLayout.u8('programIdIndex'),
-        BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
-        BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
-        BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
-      ]);
-    }
-    const createAccountWithSeedLayout = BufferLayout.struct<
-      Readonly<{
-        programIdIndex: number;
-        keyIndices: number[];
-        dataLength: Uint8Array;
-      }>
-    >([
-      BufferLayout.u8('programIdIndex'),
-      BufferLayout.seq(BufferLayout.u8('keyIndex'), createAccountWithSeedInstruction.keyIndices.length, 'keyIndices'),
-      BufferLayout.blob(createAccountWithSeedInstruction.dataLength.length, 'dataLength'),
-    ]);
-    instructionBufferLength += createAccountWithSeedLayout.encode(
-      createAccountWithSeedInstruction,
-      instructionBuffer,
-      instructionBufferLength
-    );
+    // const hasComputeBudget = this.accountKeys.includes(COMPUTE_BUDGET_PROGRAM_ID.toString('hex'));
+    // encode instruction
+    instructions.forEach((instruction, index) => {
+      let instructionLayout;
+      if (index === 0) {
+        instructionLayout = structInstructionLayoutWithoutDataAndKeyIndicesCount(instruction);
+      } else {
+        instructionLayout = structInstructionLayoutWithoutKeyIndicesCount(instruction);
+      }
+      instructionBufferLength += instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
 
-    /*
-    Since seed is length variant, trying to padding seed to length 32 bytes:
+      if (index !== 0) return;
+      /*
+        Since seed is length variant, trying to padding seed to length 32 bytes:
 
-    Default structure:
-      instruction(4 bytes),
-      basePubkey(32 bytes),
-      length(4 bytes),
-      lengthPadding(4 bytes),
-      seed(variant),
-      lamports(8 bytes),
-      space(8 bytes),
-      programId(32 bytes)
+        Default structure:
+          instruction(4 bytes),
+          basePubkey(32 bytes),
+          length(4 bytes),
+          lengthPadding(4 bytes),
+          seed(variant),
+          lamports(8 bytes),
+          space(8 bytes),
+          programId(32 bytes)
 
-    After structure:
-      instruction(4 bytes),
-      basePubkey(32 bytes),
-      length(4 bytes),
-      lengthPadding(4 bytes),
-      seed(32 bytes),
-      lamports(8 bytes),
-      space(8 bytes),
-      programId(32 bytes)
-    */
-    const { data } = createAccountWithSeedInstruction;
-    const seedLength = data.length - defaultLength;
-    const dataAllocator = Buffer.allocUnsafe(data.length - seedLength + 32);
-    const dataPrefix = Buffer.from(data.slice(0, prefixLength));
-    const seed = Buffer.from(data.slice(prefixLength, prefixLength + seedLength));
-    const dataPostfix = Buffer.from(data.slice(prefixLength + seedLength, data.length));
-    const paddingSeed = Buffer.alloc(32);
-    seed.copy(paddingSeed, 32 - seed.length);
-    dataPrefix.copy(dataAllocator, 0);
-    paddingSeed.copy(dataAllocator, dataPrefix.length);
-    dataPostfix.copy(dataAllocator, dataPrefix.length + paddingSeed.length);
-    instructionBufferLength += dataAllocator.copy(instructionBuffer, instructionBufferLength);
-    instructionBufferLength += getInstructionLayout(initializeInstruction).encode(
-      initializeInstruction,
-      instructionBuffer,
-      instructionBufferLength
-    );
-    instructionBufferLength += getInstructionLayout(delegateInstruction).encode(
-      delegateInstruction,
-      instructionBuffer,
-      instructionBufferLength
-    );
+        After structure:
+          instruction(4 bytes),
+          basePubkey(32 bytes),
+          length(4 bytes),
+          lengthPadding(4 bytes),
+          seed(32 bytes),
+          lamports(8 bytes),
+          space(8 bytes),
+          programId(32 bytes)
+      */
+      const { data } = instruction;
+      const seedLength = data.length - defaultLength;
+      const dataAllocator = Buffer.allocUnsafe(data.length - seedLength + 32);
+      const dataPrefix = Buffer.from(data.slice(0, prefixLength));
+      const seed = Buffer.from(data.slice(prefixLength, prefixLength + seedLength));
+      const dataPostfix = Buffer.from(data.slice(prefixLength + seedLength, data.length));
+      const paddingSeed = Buffer.alloc(32);
+      seed.copy(paddingSeed, 32 - seed.length);
+      dataPrefix.copy(dataAllocator, 0);
+      paddingSeed.copy(dataAllocator, dataPrefix.length);
+      dataPostfix.copy(dataAllocator, dataPrefix.length + paddingSeed.length);
+      instructionBufferLength += dataAllocator.copy(instructionBuffer, instructionBufferLength);
+    });
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
+
     const signDataLayout = BufferLayout.struct<
       Readonly<{
+        // keyCount: Uint8Array;
         keys: Uint8Array[];
         recentBlockhash: Uint8Array;
       }>
-    >([BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'), publicKey('recentBlockhash')]);
+    >([
+      // BufferLayout.blob(keyCount.length, 'keyCount'),
+      BufferLayout.seq(publicKey('key'), this.accountKeys.length, 'keys'),
+      publicKey('recentBlockhash'),
+    ]);
+
     const transaction = {
+      // keyCount: Buffer.from(keyCount),
       keys: this.accountKeys.map((key) => Buffer.from(key, 'hex')),
       recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
     };
     const signData = Buffer.alloc(2048); // sign data max length
     const length = signDataLayout.encode(transaction, signData);
+
     instructionBuffer.copy(signData, length);
 
     return signData.slice(0, length + instructionBuffer.length).toString('hex');
   }
 
-  serializeStakingWithdraw(): string {
-    const { keyCount, instructions } = this.encodedLength();
-    const [instruction] = instructions;
-    let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
-    const instructionLayout = BufferLayout.struct<
-      Readonly<{
-        data: number[];
-        dataLength: Uint8Array;
-        keyIndices: number[];
-        programIdIndex: number;
-      }>
-    >([
-      BufferLayout.u8('programIdIndex'),
-      BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
-      BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
-      BufferLayout.seq(BufferLayout.u8('userdatum'), instruction.data.length, 'data'),
-    ]);
-    const instructionBufferLength = instructionLayout.encode(instruction, instructionBuffer);
-    instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
-    let accountKeys;
-    if (this.accountKeys.length === 5) {
-      // Padding argument.
-      accountKeys = [...this.accountKeys, Buffer.alloc(32).toString('hex')];
-    } else {
-      accountKeys = this.accountKeys;
-    }
-    const signDataLayout = BufferLayout.struct<
-      Readonly<{
-        keyCount: Uint8Array;
-        keys: Uint8Array[];
-        recentBlockhash: Uint8Array;
-      }>
-    >([
-      BufferLayout.blob(keyCount.length, 'keyCount'),
-      BufferLayout.seq(publicKey('key'), accountKeys.length, 'keys'),
-      publicKey('recentBlockhash'),
-    ]);
-    const transaction = {
-      keyCount: Buffer.from(keyCount),
-      keys: accountKeys.map((key) => Buffer.from(key, 'hex')),
-      recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
-    };
-    const signData = Buffer.alloc(2048); // sign data max length
-    const length = signDataLayout.encode(transaction, signData);
-
-    instructionBuffer.copy(signData, length);
-
-    return signData.slice(0, length + instructionBuffer.length).toString('hex');
+  serializeWithdraw(): string {
+    const { keyCount, instructionCount, instructions } = this.encodedLength();
+    const { instructionBuffer } = this.encodeInstructionAndPaddingComputeBudget(instructions, instructionCount);
+    /**
+     * signerPubkey
+     * stakeAccountPubkey
+     * withdrawToPubkey                            (optional)
+     * Stake11111111111111111111111111111111111111
+     * SysvarC1ock11111111111111111111111111111111
+     * SysvarStakeHistory1111111111111111111111111
+     * ComputeBudget111111111111111111111111111111 (optional)
+     */
+    const newAccountKeys = this.reservePaddingAccountKeys(7);
+    console.log('newAccountKeys.length = ', newAccountKeys.length);
+    return this.encodeSignData(keyCount, newAccountKeys, instructionBuffer);
   }
 
   /**

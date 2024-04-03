@@ -184,12 +184,16 @@ export type Delegate = {
   authorizedPubkey: Address;
   votePubkey: Address;
   recentBlockhash: string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type Undelegate = {
   stakePubkey: Address;
   authorizedPubkey: Address;
   recentBlockhash: string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type DelegateAndCreateAccountWithSeed = {
@@ -198,6 +202,8 @@ export type DelegateAndCreateAccountWithSeed = {
   seed: string;
   lamports: string | number;
   recentBlockhash: string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type StakingWithdrawTransaction = {
@@ -205,6 +211,8 @@ export type StakingWithdrawTransaction = {
   withdrawToPubKey: Address;
   recentBlockhash: string;
   lamports: number | string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type SignInMessage = {
