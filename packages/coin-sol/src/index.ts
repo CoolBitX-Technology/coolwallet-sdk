@@ -12,7 +12,6 @@ import * as sign from './sign';
 import { TOKEN_INFO } from './config/tokenInfos';
 import {
   compileAssociateTokenAccount,
-  compileDelegate,
   compileDelegateAndCreateAccountWithSeed,
   compileSplTokenTransaction,
   compileTransferTransaction,
@@ -116,17 +115,6 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
 
-  async signAssociateTokenAccount(signTxData: types.signAssociateTokenAccountTransactionType): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
-    const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
-    const script = params.SCRIPT.ASSOCIATED_TOKEN_ACCOUNT.scriptWithSignature;
-    const rawTransaction = compileAssociateTokenAccount({ ...signTxData.transaction, signer });
-    const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getAssociateTokenAccount(transactionInstruction, addressIndex);
-
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
-  }
-
   async signCreateAndTransferSPLToken(signTxData: types.signCreateAndTransferSplTokenTransaction): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
@@ -148,17 +136,6 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     associateAccountInstruction.instructions.push(...transferInstructions);
     const transactionInstruction = new Transaction(associateAccountInstruction);
     const argument = scriptUtil.getCreateAndTransferSPLToken(transactionInstruction, addressIndex, tokenInfo);
-
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
-  }
-
-  async signDelegate(signTxData: types.signDelegateType): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
-    const feePayer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
-    const script = params.SCRIPT.DELEGATE.scriptWithSignature;
-    const rawTransaction = compileDelegate({ ...signTxData.transaction, feePayer });
-    const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getDelegateArguments(transactionInstruction, addressIndex);
 
     return sign.signTransaction(signTxData, transactionInstruction, script, argument);
   }
