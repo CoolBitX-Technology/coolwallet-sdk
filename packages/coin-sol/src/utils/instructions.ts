@@ -106,8 +106,8 @@ function initialize(params: {
       withdrawer: Buffer.from(formHex(withdrawer), 'hex'),
     },
     lockup: {
-      unixTimestamp: params.unixTimestamp || 0,
-      epoch: params.epoch || 0,
+      unixTimestamp: params.unixTimestamp ?? 0,
+      epoch: params.epoch ?? 0,
       custodian: Buffer.alloc(32),
     },
   });
