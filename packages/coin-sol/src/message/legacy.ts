@@ -385,7 +385,7 @@ export class Message {
      * ComputeBudget111111111111111111111111111111  (optional)
      */
     const newAccountKeys = this.reservePaddingAccountKeys(10);
-    return encodeSignData(keyCount, newAccountKeys, this.recentBlockhash, instructionBuffer);
+    return encodeSignData(keyCount, newAccountKeys, this.recentBlockhash, instructionBuffer).toString('hex');
   }
 
   serializeUndelegate(): string {
@@ -404,7 +404,7 @@ export class Message {
      * ComputeBudget111111111111111111111111111111  (optional)
      */
     const newAccountKeys = this.reservePaddingAccountKeys(5);
-    return encodeSignData(keyCount, newAccountKeys, this.recentBlockhash, instructionBuffer);
+    return encodeSignData(keyCount, newAccountKeys, this.recentBlockhash, instructionBuffer).toString('hex');
   }
 
   serializeWithdraw(): string {
@@ -425,7 +425,7 @@ export class Message {
      * ComputeBudget111111111111111111111111111111 (optional)
      */
     const newAccountKeys = this.reservePaddingAccountKeys(7);
-    return encodeSignData(keyCount, newAccountKeys, this.recentBlockhash, instructionBuffer);
+    return encodeSignData(keyCount, newAccountKeys, this.recentBlockhash, instructionBuffer).toString('hex');
   }
 
   /**

@@ -3,7 +3,11 @@ import { SerializedInstruction } from '../config/types';
 import { structInstructionLayout, structInstructionLayoutWithoutData, structSignDataLayout } from './bufferLayoutUtils';
 import { isCreateSeedInstruction } from './instructions';
 
-function initializeInsructionBuffer(instructionCount?: number[]) {
+export interface InsructionBufferInfo {
+  instructionBuffer: Buffer;
+  instructionBufferLength: number;
+}
+function initializeInsructionBuffer(instructionCount?: number[]): InsructionBufferInfo {
   const instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
   if (instructionCount) {
     Buffer.from(instructionCount).copy(instructionBuffer);
@@ -19,7 +23,7 @@ function paddingEmptyInstructionBuffer(params: {
   paddingLength: number;
   sourceInstructionBuf: Buffer;
   sourceInstructionLength: number;
-}) {
+}): InsructionBufferInfo {
   const { paddingLength, sourceInstructionBuf, sourceInstructionLength } = params;
   const emptyPaddingBuf = Buffer.alloc(paddingLength);
   emptyPaddingBuf.copy(sourceInstructionBuf, sourceInstructionLength);
@@ -33,7 +37,7 @@ function paddingEmptyComputeBudgetInsructionBuffer(
   srcInstructionBuffer: Buffer,
   srcInstructionBufferLength: number,
   hasComputeBudget: boolean
-) {
+): InsructionBufferInfo {
   if (hasComputeBudget) {
     return {
       instructionBuffer: srcInstructionBuffer,
@@ -56,7 +60,10 @@ function paddingEmptyComputeBudgetInsructionBuffer(
   };
 }
 
-export function initAndPaddingComputeBudgetInstructionBuffer(accountKeys: string[], instructionCount?: number[]) {
+export function initAndPaddingComputeBudgetInstructionBuffer(
+  accountKeys: string[],
+  instructionCount?: number[]
+): InsructionBufferInfo {
   const initializeInstruction = initializeInsructionBuffer(instructionCount);
   const hasComputeBudget = accountKeys.includes(COMPUTE_BUDGET_PROGRAM_ID.toString('hex'));
   const paddingInstruction = paddingEmptyComputeBudgetInsructionBuffer(
@@ -74,7 +81,7 @@ export function paddingSeedInstructionBuffer(
   srcInstructionBuffer: Buffer,
   srcInstructionBufferLength: number,
   seedData: number[]
-) {
+): InsructionBufferInfo {
   /*
     Since seed is length variant, trying to padding seed to length 32 bytes:
 
@@ -121,7 +128,7 @@ export function encodeInstructionBuffer(
   instructions: SerializedInstruction[],
   srcInstructionBuffer: Buffer,
   srcInstructionBufferLength: number
-) {
+): Buffer {
   const instructionBuffer = srcInstructionBuffer;
   let instructionBufferLength = srcInstructionBufferLength;
   instructions.forEach((instruction) => {
@@ -136,7 +143,7 @@ export function encodeAndPaddingSeedInstructionBuffer(
   instructions: SerializedInstruction[],
   srcInstructionBuffer: Buffer,
   srcInstructionBufferLength: number
-) {
+): Buffer {
   let instructionBuffer = srcInstructionBuffer;
   let instructionBufferLength = srcInstructionBufferLength;
   instructions.forEach((instruction) => {
@@ -164,7 +171,7 @@ export function encodeSignData(
   newAccountKeys: string[],
   recentBlockhash: string,
   instructionBuffer: Buffer
-): string {
+): Buffer {
   const signDataLayout = structSignDataLayout(keyCount, newAccountKeys);
   const transaction = {
     keyCount: Buffer.from(keyCount),
@@ -174,5 +181,5 @@ export function encodeSignData(
   const signData = Buffer.alloc(2048); // sign data max length
   const length = signDataLayout.encode(transaction, signData);
   instructionBuffer.copy(signData, length);
-  return signData.slice(0, length + instructionBuffer.length).toString('hex');
+  return signData.slice(0, length + instructionBuffer.length);
 }

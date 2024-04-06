@@ -2,7 +2,14 @@ import * as BufferLayout from '@solana/buffer-layout';
 import { SerializedInstruction } from '../config/types';
 import { publicKey } from './commonLayout';
 
-export function structInstructionLayoutWithoutData(instruction: SerializedInstruction) {
+export function structInstructionLayoutWithoutData(instruction: SerializedInstruction): BufferLayout.Structure<
+  Readonly<{
+    dataLength: Uint8Array;
+    keyIndices: number[];
+    keyIndicesCount: Uint8Array;
+    programIdIndex: number;
+  }>
+> {
   return BufferLayout.struct<
     Readonly<{
       dataLength: Uint8Array;
@@ -18,7 +25,15 @@ export function structInstructionLayoutWithoutData(instruction: SerializedInstru
   ]);
 }
 
-export function structInstructionLayoutWithoutDataAndKeyIndicesCount(instruction: SerializedInstruction) {
+export function structInstructionLayoutWithoutDataAndKeyIndicesCount(
+  instruction: SerializedInstruction
+): BufferLayout.Structure<
+  Readonly<{
+    dataLength: Uint8Array;
+    keyIndices: number[];
+    programIdIndex: number;
+  }>
+> {
   return BufferLayout.struct<
     Readonly<{
       dataLength: Uint8Array;
@@ -32,7 +47,16 @@ export function structInstructionLayoutWithoutDataAndKeyIndicesCount(instruction
   ]);
 }
 
-export function structInstructionLayoutWithoutKeyIndicesCount(instruction: SerializedInstruction) {
+export function structInstructionLayoutWithoutKeyIndicesCount(
+  instruction: SerializedInstruction
+): BufferLayout.Structure<
+  Readonly<{
+    data: number[];
+    dataLength: Uint8Array;
+    keyIndices: number[];
+    programIdIndex: number;
+  }>
+> {
   return BufferLayout.struct<
     Readonly<{
       data: number[];
@@ -48,7 +72,15 @@ export function structInstructionLayoutWithoutKeyIndicesCount(instruction: Seria
   ]);
 }
 
-export function structInstructionLayout(instruction: SerializedInstruction) {
+export function structInstructionLayout(instruction: SerializedInstruction): BufferLayout.Structure<
+  Readonly<{
+    data: number[];
+    dataLength: Uint8Array;
+    keyIndices: number[];
+    keyIndicesCount: Uint8Array;
+    programIdIndex: number;
+  }>
+> {
   return BufferLayout.struct<
     Readonly<{
       data: number[];
@@ -66,7 +98,16 @@ export function structInstructionLayout(instruction: SerializedInstruction) {
   ]);
 }
 
-export function structSignDataLayout(keyCount: number[], accountKeys: string[]) {
+export function structSignDataLayout(
+  keyCount: number[],
+  accountKeys: string[]
+): BufferLayout.Structure<
+  Readonly<{
+    keyCount: Uint8Array;
+    keys: Uint8Array[];
+    recentBlockhash: Uint8Array;
+  }>
+> {
   return BufferLayout.struct<
     Readonly<{
       keyCount: Uint8Array;
