@@ -103,8 +103,9 @@ function getDelegateAndCreateAccountArguments(rawTx: Transaction, addressIndex: 
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeDelegateAndCreateAccountWithSeed();
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeDelegateAndCreateAccountWithSeed();
 }
 
 function getSmartContractArguments(rawTx: Transaction, addressIndex: number): string {
