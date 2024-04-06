@@ -12,7 +12,7 @@ import { StakeProgramLayout, SystemProgramLayout } from './programLayout';
 import { encodeData } from './commonLayout';
 import { formHex, computeBudgetEncode, splDataEncode } from './stringUtil';
 import * as types from '../config/types';
-import { ComputeBudgetInstruction } from '../config/types';
+import { ComputeBudgetInstruction, SerializedInstruction } from '../config/types';
 
 function addComputeBudget(params: {
   computeUnitPrice?: string;
@@ -233,41 +233,10 @@ function transferSplToken(params: {
   };
 }
 
-function paddingEmptyInstructionBuffer(params: {
-  paddingLength: number;
-  sourceInstructionBuf: Buffer;
-  sourceInstructionLength: number;
-}): Buffer {
-  const { paddingLength, sourceInstructionBuf, sourceInstructionLength } = params;
-  const emptyPaddingBuf = Buffer.alloc(paddingLength);
-  emptyPaddingBuf.copy(sourceInstructionBuf, sourceInstructionLength);
-  return sourceInstructionBuf;
-}
-
-function paddingEmptyComputeBudget(params: { oldInstructionBuffer: Buffer; oldInstructionLength: number }): {
-  newInstructionBuffer: Buffer;
-  newInstructionBufferLength: number;
-} {
-  const { oldInstructionBuffer, oldInstructionLength } = params;
-  const paddingGasPriceInstructionLength = 12;
-  let newInstructionBufferLength = oldInstructionLength;
-  let newInstructionBuffer = paddingEmptyInstructionBuffer({
-    paddingLength: paddingGasPriceInstructionLength,
-    sourceInstructionBuf: oldInstructionBuffer,
-    sourceInstructionLength: oldInstructionLength,
-  });
-  newInstructionBufferLength += paddingGasPriceInstructionLength;
-  const paddingGasLimitInstructionLength = 8;
-  newInstructionBuffer = paddingEmptyInstructionBuffer({
-    paddingLength: paddingGasLimitInstructionLength,
-    sourceInstructionBuf: newInstructionBuffer,
-    sourceInstructionLength: newInstructionBufferLength,
-  });
-  newInstructionBufferLength += paddingGasLimitInstructionLength;
-  return {
-    newInstructionBuffer: newInstructionBuffer,
-    newInstructionBufferLength: newInstructionBufferLength,
-  };
+function isCreateSeedInstruction(accountKeys: string[], instruction: SerializedInstruction): boolean {
+  const { programIdIndex, data } = instruction;
+  const programId = accountKeys?.[programIdIndex];
+  return programId === SYSTEM_PROGRAM_ID.toString('hex') && data?.[0] === 3;
 }
 
 export {
@@ -280,5 +249,5 @@ export {
   transferCoin,
   transferSplToken,
   createAssociateTokenAccount,
-  paddingEmptyComputeBudget,
+  isCreateSeedInstruction,
 };

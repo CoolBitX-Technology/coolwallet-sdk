@@ -81,28 +81,6 @@ function compileAssociateTokenAccount(transaction: {
   };
 }
 
-function compileDelegate(transaction: {
-  feePayer: types.Address;
-  recentBlockhash: string;
-  stakePubkey: types.Address;
-  authorizedPubkey: types.Address;
-  votePubkey: types.Address;
-  computeUnitPrice?: string;
-  computeUnitLimit?: string;
-}): types.TransactionArgs {
-  const { feePayer, recentBlockhash } = transaction;
-  const computeBudgetInstructions = instructionsTemplate.addComputeBudget({
-    computeUnitPrice: transaction.computeUnitPrice,
-    computeUnitLimit: transaction.computeUnitLimit,
-  });
-  const delegateInstruction = instructionsTemplate.delegate(transaction);
-  return {
-    instructions: [...computeBudgetInstructions, delegateInstruction],
-    recentBlockhash,
-    feePayer,
-  };
-}
-
 function compileUndelegate(transaction: {
   feePayer: types.Address;
   recentBlockhash: string;
@@ -206,7 +184,6 @@ export {
   compileTransferTransaction,
   compileSplTokenTransaction,
   compileAssociateTokenAccount,
-  compileDelegate,
   compileUndelegate,
   compileDelegateAndCreateAccountWithSeed,
   compileStakingWithdraw,
