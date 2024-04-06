@@ -229,54 +229,6 @@ export class Message {
     return signData.slice(0, length + instructionBuffer.length).toString('hex');
   }
 
-  serializeAssociateTokenAccount(): string {
-    const { keyCount, instructions } = this.encodedLength();
-    let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);
-    const [instruction] = instructions;
-    const instructionLayout = BufferLayout.struct<
-      Readonly<{
-        programIdIndex: number;
-        keyIndices: number[];
-        dataLength: Uint8Array;
-      }>
-    >([
-      BufferLayout.u8('programIdIndex'),
-      BufferLayout.seq(BufferLayout.u8('keyIndex'), instruction.keyIndices.length, 'keyIndices'),
-      BufferLayout.blob(instruction.dataLength.length, 'dataLength'),
-    ]);
-    const instructionBufferLength = instructionLayout.encode(instruction, instructionBuffer, 0);
-    instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
-    // Account length will be 7 or 8, depends on whether signer is same as owner.
-    let accountKeys;
-    if (this.accountKeys.length === 7) {
-      // Padding argument.
-      accountKeys = [...this.accountKeys, PADDING_PUBLICKEY];
-    } else {
-      accountKeys = this.accountKeys;
-    }
-    const signDataLayout = BufferLayout.struct<
-      Readonly<{
-        keyCount: Uint8Array;
-        keys: Uint8Array[];
-        recentBlockhash: Uint8Array;
-      }>
-    >([
-      BufferLayout.blob(keyCount.length, 'keyCount'),
-      BufferLayout.seq(publicKey('key'), accountKeys.length, 'keys'),
-      publicKey('recentBlockhash'),
-    ]);
-    const transaction = {
-      keyCount: Buffer.from(keyCount),
-      keys: accountKeys.map((key) => Buffer.from(key, 'hex')),
-      recentBlockhash: Buffer.from(this.recentBlockhash, 'hex'),
-    };
-    const signData = Buffer.alloc(2048); // sign data max length
-    const length = signDataLayout.encode(transaction, signData);
-    instructionBuffer.copy(signData, length);
-
-    return signData.slice(0, length + instructionBuffer.length).toString('hex');
-  }
-
   serializeCreateAndTransferSPLToken(): string {
     const { keyCount, instructions } = this.encodedLength();
     let instructionBuffer = Buffer.alloc(PACKET_DATA_SIZE);

@@ -48,21 +48,6 @@ function getSplTokenTransferArguments(rawTx: Transaction, addressIndex: number, 
   return SEPath + rawTx.compileMessage().serializeTransferMessage() + tokenInfoArgs;
 }
 
-/**
- * getAssociateTokenAccount
- *
- * @param {Transaction} rawTx transaction with extracted fields from a regular sol transaction
- * @param {boolean} isPartialArgs is getting full rawTx as argument or not
- * @returns {Promise<string>}
- */
-function getAssociateTokenAccount(rawTx: Transaction, addressIndex: number): string {
-  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
-  const SEPath = `11${path}`;
-  console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeAssociateTokenAccount();
-}
-
 function getCreateAndTransferSPLToken(rawTx: Transaction, addressIndex: number, tokenInfo?: types.TokenInfo): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
@@ -171,7 +156,6 @@ function getScriptSigningActions(signData: types.signVersionedTransactions): {
 }
 
 export {
-  getAssociateTokenAccount,
   getSplTokenTransferArguments,
   getCreateAndTransferSPLToken,
   getTransferArguments,
