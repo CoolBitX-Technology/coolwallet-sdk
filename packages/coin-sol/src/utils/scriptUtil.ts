@@ -58,14 +58,6 @@ function getCreateAndTransferSPLToken(rawTx: Transaction, addressIndex: number, 
   return SEPath + rawTx.compileMessage().serializeCreateAndTransferSPLToken() + tokenInfoArgs;
 }
 
-function getDelegateArguments(rawTx: Transaction, addressIndex: number): string {
-  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
-  const SEPath = `11${path}`;
-  console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeDelegate();
-}
-
 function getUndelegateArguments(rawTx: Transaction, addressIndex: number): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
@@ -160,7 +152,6 @@ export {
   getCreateAndTransferSPLToken,
   getTransferArguments,
   getSmartContractArguments,
-  getDelegateArguments,
   getUndelegateArguments,
   getWithdrawArguments,
   getDelegateAndCreateAccountArguments,
