@@ -48,21 +48,6 @@ function getSplTokenTransferArguments(rawTx: Transaction, addressIndex: number, 
   return SEPath + rawTx.compileMessage().serializeTransferMessage() + tokenInfoArgs;
 }
 
-/**
- * getAssociateTokenAccount
- *
- * @param {Transaction} rawTx transaction with extracted fields from a regular sol transaction
- * @param {boolean} isPartialArgs is getting full rawTx as argument or not
- * @returns {Promise<string>}
- */
-function getAssociateTokenAccount(rawTx: Transaction, addressIndex: number): string {
-  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
-  const SEPath = `11${path}`;
-  console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeAssociateTokenAccount();
-}
-
 function getCreateAndTransferSPLToken(rawTx: Transaction, addressIndex: number, tokenInfo?: types.TokenInfo): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
@@ -73,28 +58,31 @@ function getCreateAndTransferSPLToken(rawTx: Transaction, addressIndex: number, 
   return SEPath + rawTx.compileMessage().serializeCreateAndTransferSPLToken() + tokenInfoArgs;
 }
 
-function getDelegateArguments(rawTx: Transaction, addressIndex: number): string {
-  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
-  const SEPath = `11${path}`;
-  console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeDelegate();
-}
-
 function getUndelegateArguments(rawTx: Transaction, addressIndex: number): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeUndelegate();
+}
 
-  return SEPath + rawTx.compileMessage().serializeUndelegate();
+function getWithdrawArguments(rawTx: Transaction, addressIndex: number): string {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
+  const SEPath = `11${path}`;
+  console.debug('SEPath: ', SEPath);
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeWithdraw();
 }
 
 function getDelegateAndCreateAccountArguments(rawTx: Transaction, addressIndex: number): string {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeDelegateAndCreateAccountWithSeed();
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeDelegateAndCreateAccountWithSeed();
 }
 
 function getSmartContractArguments(rawTx: Transaction, addressIndex: number): string {
@@ -103,14 +91,6 @@ function getSmartContractArguments(rawTx: Transaction, addressIndex: number): st
   console.debug('SEPath: ', SEPath);
 
   return SEPath + Buffer.from(rawTx.compileMessage().serialize()).toString('hex');
-}
-
-function getStackingWithdrawArguments(rawTx: Transaction, addressIndex: number): string {
-  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
-  const SEPath = `11${path}`;
-  console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeStakingWithdraw();
 }
 
 function getSignInArguments(message: types.SignInMessage, addressIndex: number): string {
@@ -168,15 +148,13 @@ function getScriptSigningActions(signData: types.signVersionedTransactions): {
 }
 
 export {
-  getAssociateTokenAccount,
   getSplTokenTransferArguments,
   getCreateAndTransferSPLToken,
   getTransferArguments,
   getSmartContractArguments,
-  getDelegateArguments,
   getUndelegateArguments,
+  getWithdrawArguments,
   getDelegateAndCreateAccountArguments,
-  getStackingWithdrawArguments,
   getSignInArguments,
   getSignMessageArguments,
   getSignVersionedArguments,

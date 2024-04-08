@@ -154,14 +154,6 @@ export type TransferSplTokenTransaction = {
   computeUnitLimit?: string;
 };
 
-export type AssociateTokenAccountTransaction = {
-  owner: Address;
-  associateAccount: Address;
-  token: Address;
-  recentBlockhash: string;
-  programId: TokenProgramId;
-};
-
 export type CreateAndTransferSplTokenTransaction = {
   fromTokenAccount: Address;
   toPubkey: Address;
@@ -179,17 +171,12 @@ export type CreateAndTransferSplTokenTransaction = {
   computeUnitLimit?: string;
 };
 
-export type Delegate = {
-  stakePubkey: Address;
-  authorizedPubkey: Address;
-  votePubkey: Address;
-  recentBlockhash: string;
-};
-
 export type Undelegate = {
   stakePubkey: Address;
   authorizedPubkey: Address;
   recentBlockhash: string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type DelegateAndCreateAccountWithSeed = {
@@ -198,6 +185,8 @@ export type DelegateAndCreateAccountWithSeed = {
   seed: string;
   lamports: string | number;
   recentBlockhash: string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type StakingWithdrawTransaction = {
@@ -205,6 +194,8 @@ export type StakingWithdrawTransaction = {
   withdrawToPubKey: Address;
   recentBlockhash: string;
   lamports: number | string;
+  computeUnitPrice?: string;
+  computeUnitLimit?: string;
 };
 
 export type SignInMessage = {
@@ -303,11 +294,7 @@ export type signTransferTransactionType = Mandatory<TransferTransaction>;
 
 export type signTransferSplTokenTransactionType = Mandatory<TransferSplTokenTransaction>;
 
-export type signAssociateTokenAccountTransactionType = Mandatory<AssociateTokenAccountTransaction>;
-
 export type signCreateAndTransferSplTokenTransaction = Mandatory<CreateAndTransferSplTokenTransaction>;
-
-export type signDelegateType = Mandatory<Delegate>;
 
 export type signUndelegateType = Mandatory<Undelegate>;
 
@@ -327,8 +314,6 @@ export type signTxType =
   | signTransferTransactionType
   | signCreateAndTransferSplTokenTransaction
   | signTransferSplTokenTransactionType
-  | signAssociateTokenAccountTransactionType
-  | signDelegateType
   | signUndelegateType
   | signDelegateAndCreateAccountWithSeedType
   | signStakingWithdrawType
