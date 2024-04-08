@@ -233,10 +233,27 @@ function transferSplToken(params: {
   };
 }
 
-function isCreateSeedInstruction(accountKeys: string[], instruction: SerializedInstruction): boolean {
+function isSpecificInstruction(
+  accountKeys: string[],
+  instruction: SerializedInstruction,
+  filterProgramId: Buffer,
+  firstData: number
+): boolean {
   const { programIdIndex, data } = instruction;
   const programId = accountKeys?.[programIdIndex];
-  return programId === SYSTEM_PROGRAM_ID.toString('hex') && data?.[0] === 3;
+  return programId === filterProgramId.toString('hex') && data?.[0] === firstData;
+}
+
+function hasSpecificInstruction(
+  accountKeys: string[],
+  instructions: SerializedInstruction[],
+  filterProgramId: Buffer,
+  firstData: number
+): boolean {
+  return (
+    instructions.filter((instruction) => isSpecificInstruction(accountKeys, instruction, filterProgramId, firstData))
+      .length > 0
+  );
 }
 
 export {
@@ -249,5 +266,6 @@ export {
   transferCoin,
   transferSplToken,
   createAssociateTokenAccount,
-  isCreateSeedInstruction,
+  isSpecificInstruction,
+  hasSpecificInstruction,
 };

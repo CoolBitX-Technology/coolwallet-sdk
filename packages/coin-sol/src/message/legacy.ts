@@ -365,7 +365,11 @@ export class Message {
 
   serializeDelegateAndCreateAccountWithSeed(): string {
     const { keyCount, instructionCount, instructions } = this.encodedLength();
-    const initAndPaddingInstruction = initAndPaddingComputeBudgetInstructionBuffer(this.accountKeys, instructionCount);
+    const initAndPaddingInstruction = initAndPaddingComputeBudgetInstructionBuffer(
+      this.accountKeys,
+      instructions,
+      instructionCount
+    );
     const instructionBuffer = encodeAndPaddingSeedInstructionBuffer(
       this.accountKeys,
       instructions,
@@ -390,7 +394,11 @@ export class Message {
 
   serializeUndelegate(): string {
     const { keyCount, instructionCount, instructions } = this.encodedLength();
-    const initAndPaddingInstruction = initAndPaddingComputeBudgetInstructionBuffer(this.accountKeys, instructionCount);
+    const initAndPaddingInstruction = initAndPaddingComputeBudgetInstructionBuffer(
+      this.accountKeys,
+      instructions,
+      instructionCount
+    );
     const instructionBuffer = encodeInstructionBuffer(
       instructions,
       initAndPaddingInstruction.instructionBuffer,
@@ -409,7 +417,11 @@ export class Message {
 
   serializeWithdraw(): string {
     const { keyCount, instructionCount, instructions } = this.encodedLength();
-    const initAndPaddingInstruction = initAndPaddingComputeBudgetInstructionBuffer(this.accountKeys, instructionCount);
+    const initAndPaddingInstruction = initAndPaddingComputeBudgetInstructionBuffer(
+      this.accountKeys,
+      instructions,
+      instructionCount
+    );
     const instructionBuffer = encodeInstructionBuffer(
       instructions,
       initAndPaddingInstruction.instructionBuffer,

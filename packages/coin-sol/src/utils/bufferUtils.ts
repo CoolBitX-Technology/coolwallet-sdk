@@ -1,7 +1,7 @@
-import { COMPUTE_BUDGET_PROGRAM_ID, PACKET_DATA_SIZE } from '../config/params';
+import { COMPUTE_BUDGET_PROGRAM_ID, PACKET_DATA_SIZE, SYSTEM_PROGRAM_ID } from '../config/params';
 import { SerializedInstruction } from '../config/types';
 import { structInstructionLayout, structInstructionLayoutWithoutData, structSignDataLayout } from './bufferLayoutUtils';
-import { isCreateSeedInstruction } from './instructions';
+import { hasSpecificInstruction, isSpecificInstruction } from './instructions';
 
 export interface InsructionBufferInfo {
   instructionBuffer: Buffer;
@@ -36,40 +36,48 @@ function paddingEmptyInstructionBuffer(params: {
 function paddingEmptyComputeBudgetInsructionBuffer(
   srcInstructionBuffer: Buffer,
   srcInstructionBufferLength: number,
-  hasComputeBudget: boolean
+  hasGasPriceComputeBudget: boolean,
+  hasGasLimitComputeBudget: boolean
 ): InsructionBufferInfo {
-  if (hasComputeBudget) {
-    return {
-      instructionBuffer: srcInstructionBuffer,
-      instructionBufferLength: srcInstructionBufferLength,
-    };
+  let instructionBuffer = srcInstructionBuffer;
+  let instructionBufferLength = srcInstructionBufferLength;
+  if (!hasGasPriceComputeBudget) {
+    const paddingEmptyGasPrice = paddingEmptyInstructionBuffer({
+      paddingLength: 12,
+      sourceInstructionBuf: srcInstructionBuffer,
+      sourceInstructionLength: srcInstructionBufferLength,
+    });
+    instructionBuffer = paddingEmptyGasPrice.instructionBuffer;
+    instructionBufferLength = paddingEmptyGasPrice.instructionBufferLength;
   }
-  const paddingEmptyGasPrice = paddingEmptyInstructionBuffer({
-    paddingLength: 12,
-    sourceInstructionBuf: srcInstructionBuffer,
-    sourceInstructionLength: srcInstructionBufferLength,
-  });
-  const paddingEmptyGasLimit = paddingEmptyInstructionBuffer({
-    paddingLength: 8,
-    sourceInstructionBuf: paddingEmptyGasPrice.instructionBuffer,
-    sourceInstructionLength: paddingEmptyGasPrice.instructionBufferLength,
-  });
+  if (!hasGasLimitComputeBudget) {
+    const paddingEmptyGasLimit = paddingEmptyInstructionBuffer({
+      paddingLength: 8,
+      sourceInstructionBuf: instructionBuffer,
+      sourceInstructionLength: instructionBufferLength,
+    });
+    instructionBuffer = paddingEmptyGasLimit.instructionBuffer;
+    instructionBufferLength = paddingEmptyGasLimit.instructionBufferLength;
+  }
   return {
-    instructionBuffer: paddingEmptyGasLimit.instructionBuffer,
-    instructionBufferLength: paddingEmptyGasLimit.instructionBufferLength,
+    instructionBuffer,
+    instructionBufferLength,
   };
 }
 
 export function initAndPaddingComputeBudgetInstructionBuffer(
   accountKeys: string[],
+  instructions: SerializedInstruction[],
   instructionCount?: number[]
 ): InsructionBufferInfo {
   const initializeInstruction = initializeInsructionBuffer(instructionCount);
-  const hasComputeBudget = accountKeys.includes(COMPUTE_BUDGET_PROGRAM_ID.toString('hex'));
+  const hasGasPriceComputeBudget = hasSpecificInstruction(accountKeys, instructions, COMPUTE_BUDGET_PROGRAM_ID, 3);
+  const hasGasLimitComputeBudget = hasSpecificInstruction(accountKeys, instructions, COMPUTE_BUDGET_PROGRAM_ID, 2);
   const paddingInstruction = paddingEmptyComputeBudgetInsructionBuffer(
     initializeInstruction.instructionBuffer,
     initializeInstruction.instructionBufferLength,
-    hasComputeBudget
+    hasGasPriceComputeBudget,
+    hasGasLimitComputeBudget
   );
   return {
     instructionBuffer: paddingInstruction.instructionBuffer,
@@ -148,7 +156,8 @@ export function encodeAndPaddingSeedInstructionBuffer(
   let instructionBufferLength = srcInstructionBufferLength;
   instructions.forEach((instruction) => {
     let instructionLayout;
-    if (isCreateSeedInstruction(accountKeys, instruction)) {
+    const isCreateSeedInstruction = isSpecificInstruction(accountKeys, instruction, SYSTEM_PROGRAM_ID, 3);
+    if (isCreateSeedInstruction) {
       instructionLayout = structInstructionLayoutWithoutData(instruction);
       instructionBufferLength += instructionLayout.encode(instruction, instructionBuffer, instructionBufferLength);
       const paddingSeedInstruction = paddingSeedInstructionBuffer(
