@@ -7,4 +7,16 @@ export const TRANSFER = {
     ),
 };
 
+export const network = {
+  messagePrefix: '\x19Dogecoin Signed Message:\n',
+  bech32: 'doge',
+  bip32: {
+    public: 0x02facafd,
+    private: 0x02fac398,
+  },
+  pubKeyHash: 0x1e, // D
+  scriptHash: 0x16, // A, 9
+  wif: 0x9e,
+};
+
 export const COIN_TYPE = '80000003';

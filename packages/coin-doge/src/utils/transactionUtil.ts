@@ -4,6 +4,7 @@ import { error } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuintUtil';
 import { ScriptType, Input, Output, Change, PreparedData } from '../config/types';
+import { network } from '../config/param';
 
 bitcoin.initEccLib(ecc);
 
@@ -24,11 +25,11 @@ export function addressToOutScript(address: string): {
   let scriptPubKey;
   if (address.startsWith('D')) {
     scriptType = ScriptType.P2PKH;
-    payment = bitcoin.payments.p2pkh({ address });
+    payment = bitcoin.payments.p2pkh({ address, network });
     scriptPubKey = payment.hash;
   } else if (address.startsWith('A') || address.startsWith('9')) {
     scriptType = ScriptType.P2SH;
-    payment = bitcoin.payments.p2sh({ address });
+    payment = bitcoin.payments.p2sh({ address, network });
     scriptPubKey = payment.hash;
   } else {
     throw new error.SDKError(addressToOutScript.name, `Unsupport Address : ${address}`);
