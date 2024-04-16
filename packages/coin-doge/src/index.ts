@@ -4,7 +4,7 @@ import { signTransaction } from './sign';
 import { ScriptType, signTxType, Transport } from './config/types';
 import { COIN_TYPE } from './config/param';
 
-export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
+export default class DOGE extends COIN.ECDSACoin implements COIN.Coin {
   public addressToOutScript: (address: string) => { scriptType: ScriptType; outScript: Buffer; outHash?: Buffer };
 
   constructor() {
