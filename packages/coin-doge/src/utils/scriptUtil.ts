@@ -1,11 +1,11 @@
 import { Transport, apdu, error, utils } from '@coolwallet/core';
-import * as cryptoUtil from './cryptoUtil';
 import * as bufferUtil from './bufferUtil';
 import * as txUtil from './transactionUtil';
 import * as varuint from './varuintUtil';
 import { COIN_TYPE } from '../config/param';
-import { Output, Change, PreparedData, Callback } from '../config/types';
+import { Output, Change, PreparedData, Callback, ScriptType } from '../config/types';
 import { PathType } from '@coolwallet/core/lib/config/param';
+import { pubkeyToAddressAndOutScript } from './transactionUtil';
 
 const getPath = async (addressIndex: number, purpose?: number, pathType?: PathType) => {
   let path = await utils.getPath(COIN_TYPE, addressIndex, 5, pathType, purpose);
@@ -25,10 +25,10 @@ export async function getScriptSigningActions(
     const path = await getPath(preparedInput.addressIndex);
     const SEPath = Buffer.from(`${path}`, 'hex');
     const outPoint = preparedInput.preOutPointBuf;
-    const inputScriptType = varuint.encode(0);
-    const inputAmount = preparedInput.preValueBuf.reverse();
-    const inputHash = cryptoUtil.hash160(preparedInput.pubkeyBuf);
-    return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
+    const { outScript: inputScript } = pubkeyToAddressAndOutScript(preparedInput.pubkeyBuf, ScriptType.P2PKH);
+    return Buffer.concat([SEPath, outPoint, Buffer.from(inputScript.length.toString(16), 'hex'), inputScript]).toString(
+      'hex'
+    );
   });
 
   const actions = utxoArguments.map((utxoArgument) => async () => {
