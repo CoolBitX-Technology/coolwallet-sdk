@@ -13,4 +13,17 @@ class ArbitrumChain extends ChainProps {
   tokens = TOKENS;
 }
 
-export default new ArbitrumChain();
+class ArbitrumSepoliaChain extends ChainProps {
+  id = 421614;
+  symbol = 'ETH';
+  layer2 = 'ARB';
+  signature =
+    `304502210081e943d7a9130428360d26de206a2298e365dcfcacc38bcde6e0068f6e39a97802207291e17af07d6ca55f1049b7a3799a72a4f578a24dbf490ba682b56bce5fed78`.padStart(
+      144,
+      '0'
+    );
+  tokens = TOKENS;
+}
+
+export const ARBITRUM = new ArbitrumChain();
+export const ARBITRUM_TEST = new ArbitrumSepoliaChain();

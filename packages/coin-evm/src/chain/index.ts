@@ -1,4 +1,4 @@
-export { default as ARBITRUM } from './arbitrum';
+export { ARBITRUM, ARBITRUM_TEST } from './arbitrum';
 export { AURORA, AURORA_TEST } from './aurora';
 export { AVAXC, AVAXC_TEST } from './avaxc';
 export { CELO, CELO_TEST } from './celo';
