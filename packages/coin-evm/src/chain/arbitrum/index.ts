@@ -1,4 +1,4 @@
-import { TOKENS } from './token';
+import { TEST_TOKENS, TOKENS } from './token';
 import { ChainProps } from '../types';
 
 class ArbitrumChain extends ChainProps {
@@ -22,7 +22,7 @@ class ArbitrumSepoliaChain extends ChainProps {
       144,
       '0'
     );
-  tokens = TOKENS;
+  tokens = TEST_TOKENS;
 }
 
 export const ARBITRUM = new ArbitrumChain();
