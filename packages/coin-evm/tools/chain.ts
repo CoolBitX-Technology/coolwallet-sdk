@@ -8,6 +8,8 @@ console.log('Optimism Chain Information', CHAIN.OPTIMISM.toHexChainInfo());
 console.log('Optimism Chain Signature', CHAIN.OPTIMISM.getSignature());
 console.log('Arbitrum Chain Information', CHAIN.ARBITRUM.toHexChainInfo());
 console.log('Arbitrum Chain Signature', CHAIN.ARBITRUM.getSignature());
+console.log('Arbitrum Test Chain Information', CHAIN.ARBITRUM_TEST.toHexChainInfo());
+console.log('Arbitrum Test Chain Signature', CHAIN.ARBITRUM_TEST.getSignature());
 console.log('Avax C Chain Information', CHAIN.AVAXC.toHexChainInfo());
 console.log('Avax C Chain Signature', CHAIN.AVAXC.getSignature());
 console.log('Velas Information', CHAIN.VELAS.toHexChainInfo());
