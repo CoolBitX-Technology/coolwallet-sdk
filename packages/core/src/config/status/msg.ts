@@ -34,7 +34,7 @@ export const MSG: CodeList = {
   _6091: 'data order is wrong',
   _6092: 'hash error',
   _609A: 'packaging version of the card not supported',
-  _6985: 'conditions not satisfiled',
+  _6985: 'conditions not satisfied',
   _6A84: 'file full',
   _6100: 'bytes remaining 00',
   _6A80: 'wrong data',

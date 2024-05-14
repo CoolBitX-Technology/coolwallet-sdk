@@ -107,7 +107,7 @@ export async function sendCheckSum(transport: Transport, checkSum: number): Prom
 export async function setSeed(transport: Transport, appId: string, appPrivateKey: string, seedHex: string, SEPublicKey: string) {
   try {
     if (!SEPublicKey) {
-      throw new SDKError(setSeed.name, 'SEPublicKey can not be undifined')
+      throw new SDKError(setSeed.name, 'SEPublicKey can not be undefined')
     }
     const encryptedSeed = crypto.encryption.ECIESenc(SEPublicKey, seedHex);
     const signature = await setting.auth.getCommandSignature(
