@@ -176,7 +176,12 @@ describe('Test EVM SDK', () => {
             .finalize();
         }
 
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        try {
+          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        } catch (e) {
+          console.error('send erc20 token to ', token);
+          throw e;
+        }
       });
 
       it('Unofficial token', async () => {
