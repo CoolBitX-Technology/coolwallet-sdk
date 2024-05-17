@@ -1,7 +1,7 @@
 // jest.setup.js
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'development') {
   global.console = {
     ...console,
-    debug: jest.fn(), // Mock console.log
+    debug: jest.fn(), // Mock console.debug
   };
 }
