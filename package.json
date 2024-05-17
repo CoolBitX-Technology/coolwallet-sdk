@@ -21,7 +21,7 @@
     "typescript": "^4.6.3"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --runInBand",
     "bootstrap": "lerna bootstrap --ignore=\"@coolwallet/transport-react-native-ble\" --ignore=\"tester\"",
     "build": "lerna run build --ignore=\"@coolwallet/transport-react-native-ble\" --ignore=\"tester\"",
     "clean": "lerna clean --yes && lerna exec -- rm -rf lib",
@@ -32,5 +32,12 @@
   "license": "Apache-2.0",
   "dependencies": {
     "ts-node": "^10.9.2"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "coverage": true
   }
 }
