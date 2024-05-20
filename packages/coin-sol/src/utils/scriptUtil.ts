@@ -18,8 +18,9 @@ function getTransferArguments(rawTx: Transaction, addressIndex: number): string 
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/501'/${addressIndex}'/0'` });
   const SEPath = `11${path}`;
   console.debug('SEPath: ', SEPath);
-
-  return SEPath + rawTx.compileMessage().serializeTransferMessage();
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeTransferMessage();
 }
 
 function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
@@ -45,7 +46,9 @@ function getSplTokenTransferArguments(rawTx: Transaction, addressIndex: number, 
   console.debug('SEPath: ', SEPath);
   let tokenInfoArgs = '';
   if (tokenInfo) tokenInfoArgs = getTokenInfoArgs(tokenInfo);
-  return SEPath + rawTx.compileMessage().serializeTransferMessage() + tokenInfoArgs;
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeTransferMessage() + tokenInfoArgs;
 }
 
 function getCreateAndTransferSPLToken(rawTx: Transaction, addressIndex: number, tokenInfo?: types.TokenInfo): string {
@@ -54,8 +57,9 @@ function getCreateAndTransferSPLToken(rawTx: Transaction, addressIndex: number, 
   console.debug('SEPath: ', SEPath);
   let tokenInfoArgs = '';
   if (tokenInfo) tokenInfoArgs = getTokenInfoArgs(tokenInfo);
-
-  return SEPath + rawTx.compileMessage().serializeCreateAndTransferSPLToken() + tokenInfoArgs;
+  const compiledMessage = rawTx.compileMessage();
+  const header = compiledMessage.serializeHeader();
+  return SEPath + header + compiledMessage.serializeCreateAndTransferSPLToken() + tokenInfoArgs;
 }
 
 function getUndelegateArguments(rawTx: Transaction, addressIndex: number): string {
