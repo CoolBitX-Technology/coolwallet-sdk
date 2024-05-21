@@ -34,7 +34,7 @@
     "icon-sdk-js": "0.0.18",
     "js-sha3": "^0.8.0",
     "rlp": "^3.0.0",
-    "web3": "^1.7.4"
+    "web3": "^4.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
