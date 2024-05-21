@@ -2,7 +2,7 @@ import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, HDWallet, CURVE, DisplayBuilder, getTxDetail } from '@coolwallet/testing-library';
 import ECPairFactory from 'ecpair';
-import * as TinySecp256k1 from 'tiny-secp256k1';
+import * as TinySecp256k1 from '@bitcoin-js/tiny-secp256k1-asmjs';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import BTC from '../src';
