@@ -4,7 +4,7 @@
   "description": "Coolwallet Bitcoin sdk",
   "main": "lib/index.js",
   "scripts": {
-    "test": "NODE_ENV=development jest --runInBand",
+    "test": "NODE_ENV=development jest",
     "ci-test": "NODE_ENV=production jest --runInBand",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
