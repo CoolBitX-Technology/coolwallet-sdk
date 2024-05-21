@@ -10,18 +10,19 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts\" --source-maps inline",
     "build": "del-cli lib && npm run build:types && npm run build:ts",
-    "test": "jest --runInBand"
+    "test": "NODE_ENV=development jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-sdk.git"
   },
   "author": "coolwallet-team",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-sdk/issues"
   },
-  "homepage": "https://github.com/CoolBitX-Technology/coolwallet3-sdk#readme",
+  "homepage": "https://github.com/CoolBitX-Technology/coolwallet-sdk#readme",
   "peerDependencies": {
     "@coolwallet/core": "^1.1.10"
   },
@@ -44,5 +45,12 @@
     "bip39": "^3.0.4",
     "del-cli": "^4.0.1",
     "typescript": "^4.7.2"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
   }
 }

@@ -8,7 +8,8 @@
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish",
-    "test": "jest --runInBand"
+    "test": "NODE_ENV=development jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand"
   },
   "keywords": [
     "cryptocurrency",
@@ -48,5 +49,12 @@
   },
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
   }
 }

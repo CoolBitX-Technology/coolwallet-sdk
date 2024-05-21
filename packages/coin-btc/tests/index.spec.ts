@@ -39,7 +39,7 @@ describe('Test BTC SDK', () => {
     // P2SH_P2WPKH
     const p2sh_p2wpkh = await btc.getAddress(transport, props.appPrivateKey, props.appId, ScriptType.P2SH_P2WPKH, 0);
     const { address: expected_p2sh_p2wpkh } = bitcoin.payments.p2sh({
-      redeem: bitcoin.payments.p2wpkh({ pubkey: publicKey })
+      redeem: bitcoin.payments.p2wpkh({ pubkey: publicKey }),
     });
     expect(p2sh_p2wpkh).toEqual(expected_p2sh_p2wpkh);
 
@@ -59,20 +59,30 @@ describe('Test BTC SDK', () => {
     const amount = 14150;
     const payment = bitcoin.payments.p2pkh({
       pubkey: publicKey,
-      network
+      network,
     });
 
     const nonWitnessUtxo = Buffer.from(
-      /*version=*/ '02000000' +
-      /*input count=*/ '01' +
-      /*tx hash=*/ 'cebc7aa4e89c0e34598a0d2758fc96d8af2fda494dc4c00b12929ae1649e3847' +
-      /*tx index=*/ '00000000' +
-      /*script sig size=*/ '6b' +
-      /*signature size=*/ '48' +
-      /*signature=*/ `3045022100c86e9a111afc90f64b4904bd609e9eaed80d48ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc5660209e761da46e1c2f1152ec013215801` +
-      /*script=*/ `210211755115eabf846720f5cb18f248666fec631e5e1e66009ce3710ceea5b1ad13` +
-      /*sequence=*/ 'fffffffd' +
-      /*output count=*/ '01' +
+      //version
+      '02000000' +
+        //input count
+        '01' +
+        //tx hash
+        'cebc7aa4e89c0e34598a0d2758fc96d8af2fda494dc4c00b12929ae1649e3847' +
+        //tx index
+        '00000000' +
+        //script sig size
+        '6b' +
+        //signature size
+        '48' +
+        //signature
+        `3045022100c86e9a111afc90f64b4904bd609e9eaed80d48ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc5660209e761da46e1c2f1152ec013215801` +
+        //script
+        `210211755115eabf846720f5cb18f248666fec631e5e1e66009ce3710ceea5b1ad13` +
+        //sequence
+        'fffffffd' +
+        //output count
+        '01' +
         // value in satoshis (Int64LE) = 0x015f90 = 90000
         '905f010000000000' +
         // scriptPubkey length
@@ -90,8 +100,8 @@ describe('Test BTC SDK', () => {
         txIndex: 0,
         value: 90000,
         sequence: 0xfffffffd,
-        addressIndex: 0
-      }
+        addressIndex: 0,
+      },
     ];
 
     const options: signTxType = {
@@ -104,13 +114,13 @@ describe('Test BTC SDK', () => {
         preIndex: i.txIndex,
         preValue: '' + i.value,
         sequence: i.sequence,
-        addressIndex: i.addressIndex
+        addressIndex: i.addressIndex,
       })),
       output: {
         address: toAddress,
-        value: amount.toString()
+        value: amount.toString(),
       },
-      version: 2
+      version: 2,
     };
 
     const signature = await btc.signTransaction(options);
@@ -126,12 +136,12 @@ describe('Test BTC SDK', () => {
         index: i.txIndex,
         sequence: i.sequence,
         nonWitnessUtxo,
-        sighashType
+        sighashType,
       }))
     );
     psbt.addOutput({
       address: toAddress,
-      value: amount
+      value: amount,
     });
     psbt.signAllInputs(signer, [sighashType]);
     psbt.finalizeAllInputs();
@@ -162,20 +172,30 @@ describe('Test BTC SDK', () => {
     const amount = 14150;
     const payment = bitcoin.payments.p2pkh({
       pubkey: publicKey,
-      network
+      network,
     });
 
     const nonWitnessUtxo = Buffer.from(
-      /*version=*/ '02000000' +
-      /*input count=*/ '01' +
-      /*tx hash=*/ 'cebc7aa4e89c0e34598a0d2758fc96d8af2fda494dc4c00b12929ae1649e3847' +
-      /*tx index=*/ '00000000' +
-      /*script sig size=*/ '6b' +
-      /*signature size=*/ '48' +
-      /*signature=*/ `3045022100c86e9a111afc90f64b4904bd609e9eaed80d48ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc5660209e761da46e1c2f1152ec013215801` +
-      /*script=*/ `210211755115eabf846720f5cb18f248666fec631e5e1e66009ce3710ceea5b1ad13` +
-      /*sequence=*/ 'fffffffd' +
-      /*output count=*/ '01' +
+      //version
+      '02000000' +
+        //input count
+        '01' +
+        //tx hash
+        'cebc7aa4e89c0e34598a0d2758fc96d8af2fda494dc4c00b12929ae1649e3847' +
+        //tx index
+        '00000000' +
+        //script sig size
+        '6b' +
+        //signature size
+        '48' +
+        //signature
+        `3045022100c86e9a111afc90f64b4904bd609e9eaed80d48ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc5660209e761da46e1c2f1152ec013215801` +
+        //script
+        `210211755115eabf846720f5cb18f248666fec631e5e1e66009ce3710ceea5b1ad13` +
+        //sequence
+        'fffffffd' +
+        //output count
+        '01' +
         // value in satoshis (Int64LE) = 0x015f90 = 90000
         '905f010000000000' +
         // scriptPubkey length
@@ -193,8 +213,8 @@ describe('Test BTC SDK', () => {
         txIndex: 0,
         value: 90000,
         sequence: 0xfffffffd,
-        addressIndex: 0
-      }
+        addressIndex: 0,
+      },
     ];
 
     const fee = calculateSegwitFee(ECPair, inputs, network);
@@ -210,17 +230,17 @@ describe('Test BTC SDK', () => {
         preIndex: i.txIndex,
         preValue: '' + i.value,
         sequence: i.sequence,
-        addressIndex: i.addressIndex
+        addressIndex: i.addressIndex,
       })),
       output: {
         address: toAddress,
-        value: amount.toString()
+        value: amount.toString(),
       },
       change: {
         addressIndex: 0,
-        value: change.toString()
+        value: change.toString(),
       },
-      version: 2
+      version: 2,
     };
 
     const signature = await btc.signTransaction(options);
@@ -236,16 +256,16 @@ describe('Test BTC SDK', () => {
         index: i.txIndex,
         sequence: i.sequence,
         nonWitnessUtxo,
-        sighashType
+        sighashType,
       }))
     );
     psbt.addOutput({
       address: toAddress,
-      value: amount
+      value: amount,
     });
     psbt.addOutput({
       address: payment.address!,
-      value: change
+      value: change,
     });
     psbt.signAllInputs(signer, [sighashType]);
     psbt.finalizeAllInputs();
@@ -278,20 +298,30 @@ describe('Test BTC SDK', () => {
     const fund = 546;
     const payment = bitcoin.payments.p2pkh({
       pubkey: publicKey,
-      network
+      network,
     });
 
     const nonWitnessUtxo = Buffer.from(
-      /*version=*/ '02000000' +
-      /*input count=*/ '01' +
-      /*tx hash=*/ 'cebc7aa4e89c0e34598a0d2758fc96d8af2fda494dc4c00b12929ae1649e3847' +
-      /*tx index=*/ '00000000' +
-      /*script sig size=*/ '6b' +
-      /*signature size=*/ '48' +
-      /*signature=*/ `3045022100c86e9a111afc90f64b4904bd609e9eaed80d48ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc5660209e761da46e1c2f1152ec013215801` +
-      /*script=*/ `210211755115eabf846720f5cb18f248666fec631e5e1e66009ce3710ceea5b1ad13` +
-      /*sequence=*/ 'fffffffd' +
-      /*output count=*/ '01' +
+      //version
+      '02000000' +
+        //input count
+        '01' +
+        //tx hash
+        'cebc7aa4e89c0e34598a0d2758fc96d8af2fda494dc4c00b12929ae1649e3847' +
+        //tx index
+        '00000000' +
+        //script sig size
+        '6b' +
+        //signature size
+        '48' +
+        //signature
+        `3045022100c86e9a111afc90f64b4904bd609e9eaed80d48ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc5660209e761da46e1c2f1152ec013215801` +
+        //script
+        `210211755115eabf846720f5cb18f248666fec631e5e1e66009ce3710ceea5b1ad13` +
+        //sequence
+        'fffffffd' +
+        //output count
+        '01' +
         // value in satoshis (Int64LE) = 0x015f90 = 90000
         '905f010000000000' +
         // scriptPubkey length
@@ -309,8 +339,8 @@ describe('Test BTC SDK', () => {
         txIndex: 0,
         value: 90000,
         sequence: 0xfffffffd,
-        addressIndex: 0
-      }
+        addressIndex: 0,
+      },
     ];
 
     const options: signUSDTTxType = {
@@ -324,13 +354,13 @@ describe('Test BTC SDK', () => {
         preIndex: i.txIndex,
         preValue: i.value.toString(),
         sequence: i.sequence,
-        addressIndex: i.addressIndex
+        addressIndex: i.addressIndex,
       })),
       output: {
         address: toAddress,
-        value: fund.toString()
+        value: fund.toString(),
       },
-      version: 2
+      version: 2,
     };
 
     const signature = await btc.signUSDTTransaction(options);
@@ -346,25 +376,25 @@ describe('Test BTC SDK', () => {
         index: i.txIndex,
         sequence: i.sequence,
         nonWitnessUtxo,
-        sighashType
+        sighashType,
       }))
     );
     psbt.addOutput({
       address: toAddress,
-      value: fund
+      value: fund,
     });
     const usdtInfo = [
       '6f6d6e69',
       /*transaction version=*/ '0000',
       /*transaction type=*/ '0000',
       /*omni token type=*/ '0000001f',
-      amount.toString(16).padStart(16, '0')
+      amount.toString(16).padStart(16, '0'),
     ].join('');
     const data = Buffer.from(usdtInfo, 'hex');
     const omniOutput = bitcoin.script.compile([bitcoin.opcodes.OP_RETURN, data]);
     psbt.addOutput({
       script: omniOutput,
-      value: 0
+      value: 0,
     });
     psbt.signAllInputs(signer, [sighashType]);
     psbt.finalizeAllInputs();
@@ -398,20 +428,30 @@ describe('Test BTC SDK', () => {
     const fund = 546;
     const payment = bitcoin.payments.p2pkh({
       pubkey: publicKey,
-      network
+      network,
     });
 
     const nonWitnessUtxo = Buffer.from(
-      /*version=*/ '02000000' +
-      /*input count=*/ '01' +
-      /*tx hash=*/ 'cebc7aa4e89c0e34598a0d2758fc96d8af2fda494dc4c00b12929ae1649e3847' +
-      /*tx index=*/ '00000000' +
-      /*script sig size=*/ '6b' +
-      /*signature size=*/ '48' +
-      /*signature=*/ `3045022100c86e9a111afc90f64b4904bd609e9eaed80d48ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc5660209e761da46e1c2f1152ec013215801` +
-      /*script=*/ `210211755115eabf846720f5cb18f248666fec631e5e1e66009ce3710ceea5b1ad13` +
-      /*sequence=*/ 'fffffffd' +
-      /*output count=*/ '01' +
+      //version
+      '02000000' +
+        //input count
+        '01' +
+        //tx hash
+        'cebc7aa4e89c0e34598a0d2758fc96d8af2fda494dc4c00b12929ae1649e3847' +
+        //tx index
+        '00000000' +
+        //script sig size
+        '6b' +
+        //signature size
+        '48' +
+        //signature
+        `3045022100c86e9a111afc90f64b4904bd609e9eaed80d48ca17c162b1aca0a788ac3526f002207bb79b60d4fc6526329bf18a77135dc5660209e761da46e1c2f1152ec013215801` +
+        //script
+        `210211755115eabf846720f5cb18f248666fec631e5e1e66009ce3710ceea5b1ad13` +
+        //sequence
+        'fffffffd' +
+        //output count
+        '01' +
         // value in satoshis (Int64LE) = 0x015f90 = 90000
         '905f010000000000' +
         // scriptPubkey length
@@ -429,8 +469,8 @@ describe('Test BTC SDK', () => {
         txIndex: 0,
         value: 90000,
         sequence: 0xfffffffd,
-        addressIndex: 0
-      }
+        addressIndex: 0,
+      },
     ];
 
     const fee = calculateSegwitFee(ECPair, inputs, network);
@@ -447,17 +487,17 @@ describe('Test BTC SDK', () => {
         preIndex: i.txIndex,
         preValue: i.value.toString(),
         sequence: i.sequence,
-        addressIndex: i.addressIndex
+        addressIndex: i.addressIndex,
       })),
       output: {
         address: toAddress,
-        value: fund.toString()
+        value: fund.toString(),
       },
       change: {
         addressIndex: 0,
-        value: change.toString()
+        value: change.toString(),
       },
-      version: 2
+      version: 2,
     };
 
     const signature = await btc.signUSDTTransaction(options);
@@ -473,29 +513,29 @@ describe('Test BTC SDK', () => {
         index: i.txIndex,
         sequence: i.sequence,
         nonWitnessUtxo,
-        sighashType
+        sighashType,
       }))
     );
     psbt.addOutput({
       address: toAddress,
-      value: fund
+      value: fund,
     });
     const usdtInfo = [
       '6f6d6e69',
       /*transaction version=*/ '0000',
       /*transaction type=*/ '0000',
       /*omni token type=*/ '0000001f',
-      amount.toString(16).padStart(16, '0')
+      amount.toString(16).padStart(16, '0'),
     ].join('');
     const data = Buffer.from(usdtInfo, 'hex');
     const omniOutput = bitcoin.script.compile([bitcoin.opcodes.OP_RETURN, data]);
     psbt.addOutput({
       script: omniOutput,
-      value: 0
+      value: 0,
     });
     psbt.addOutput({
       address: payment.address!,
-      value: change
+      value: change,
     });
     psbt.signAllInputs(signer, [sighashType]);
     psbt.finalizeAllInputs();
@@ -527,8 +567,8 @@ describe('Test BTC SDK', () => {
         txIndex: 0,
         value: 90000,
         sequence: 0xfffffffd,
-        addressIndex: 0
-      }
+        addressIndex: 0,
+      },
     ];
 
     const options: signTxType = {
@@ -541,13 +581,13 @@ describe('Test BTC SDK', () => {
         preIndex: i.txIndex,
         preValue: '' + i.value,
         sequence: i.sequence,
-        addressIndex: i.addressIndex
+        addressIndex: i.addressIndex,
       })),
       output: {
         value: amount.toString(),
-        address: toAddress
+        address: toAddress,
       },
-      version: 2
+      version: 2,
     };
 
     const signature = await btc.signTransaction(options);
@@ -558,9 +598,9 @@ describe('Test BTC SDK', () => {
     const payment = bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
         pubkey: publicKey,
-        network
+        network,
       }),
-      network
+      network,
     });
 
     const signer = ECPair.fromPrivateKey(privateKey, { network });
@@ -574,14 +614,14 @@ describe('Test BTC SDK', () => {
         sequence: i.sequence,
         witnessUtxo: {
           script: payment.output!,
-          value: i.value
+          value: i.value,
         },
-        redeemScript: payment.redeem?.output
+        redeemScript: payment.redeem?.output,
       }))
     );
     psbt.addOutput({
       address: toAddress,
-      value: amount
+      value: amount,
     });
     psbt.signAllInputs(signer);
     psbt.finalizeAllInputs();
@@ -612,8 +652,8 @@ describe('Test BTC SDK', () => {
         txIndex: 0,
         value: 90000,
         sequence: 0xfffffffd,
-        addressIndex: 0
-      }
+        addressIndex: 0,
+      },
     ];
     const fee = calculateSegwitFee(ECPair, inputs, network);
     const change = inputs.reduce((acc, i) => acc + i.value, 0) - amount - fee;
@@ -628,17 +668,17 @@ describe('Test BTC SDK', () => {
         preIndex: i.txIndex,
         preValue: '' + i.value,
         sequence: i.sequence,
-        addressIndex: i.addressIndex
+        addressIndex: i.addressIndex,
       })),
       output: {
         value: amount.toString(),
-        address: toAddress
+        address: toAddress,
       },
       change: {
         addressIndex: 0,
-        value: change.toString()
+        value: change.toString(),
       },
-      version: 2
+      version: 2,
     };
 
     const signature = await btc.signTransaction(options);
@@ -649,9 +689,9 @@ describe('Test BTC SDK', () => {
     const payment = bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
         pubkey: publicKey,
-        network
+        network,
       }),
-      network
+      network,
     });
 
     const signer = ECPair.fromPrivateKey(privateKey, { network });
@@ -665,18 +705,18 @@ describe('Test BTC SDK', () => {
         sequence: i.sequence,
         witnessUtxo: {
           script: payment.output!,
-          value: i.value
+          value: i.value,
         },
-        redeemScript: payment.redeem?.output
+        redeemScript: payment.redeem?.output,
       }))
     );
     psbt.addOutput({
       address: toAddress,
-      value: amount
+      value: amount,
     });
     psbt.addOutput({
       address: payment.address!,
-      value: change
+      value: change,
     });
     psbt.signAllInputs(signer);
     psbt.finalizeAllInputs();
@@ -709,15 +749,15 @@ describe('Test BTC SDK', () => {
         txIndex: 0,
         value: 214150,
         sequence: 0xfffffffd,
-        addressIndex: 0
+        addressIndex: 0,
       },
       {
         txHash: 'e9489031d0314707e390226c07d96c5353a21c0dda66339e28126b9667242390',
         txIndex: 0,
         value: 214150,
         sequence: 0xfffffffd,
-        addressIndex: 0
-      }
+        addressIndex: 0,
+      },
     ];
 
     const options: signUSDTTxType = {
@@ -731,13 +771,13 @@ describe('Test BTC SDK', () => {
         preIndex: i.txIndex,
         preValue: i.value.toString(),
         sequence: i.sequence,
-        addressIndex: i.addressIndex
+        addressIndex: i.addressIndex,
       })),
       output: {
         value: fund.toString(),
-        address: toAddress
+        address: toAddress,
       },
-      version: 2
+      version: 2,
     };
 
     const signature = await btc.signUSDTTransaction(options);
@@ -748,9 +788,9 @@ describe('Test BTC SDK', () => {
     const payment = bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
         pubkey: publicKey,
-        network
+        network,
       }),
-      network
+      network,
     });
 
     const signer = ECPair.fromPrivateKey(privateKey, { network });
@@ -764,27 +804,27 @@ describe('Test BTC SDK', () => {
         sequence: i.sequence,
         witnessUtxo: {
           script: payment.output!,
-          value: i.value
+          value: i.value,
         },
-        redeemScript: payment.redeem?.output
+        redeemScript: payment.redeem?.output,
       }))
     );
     psbt.addOutput({
       address: toAddress,
-      value: fund
+      value: fund,
     });
     const usdtInfo = [
       '6f6d6e69',
       /*transaction version=*/ '0000',
       /*transaction type=*/ '0000',
       /*omni token type=*/ '0000001f',
-      amount.toString(16).padStart(16, '0')
+      amount.toString(16).padStart(16, '0'),
     ].join('');
     const data = Buffer.from(usdtInfo, 'hex');
     const omniOutput = bitcoin.script.compile([bitcoin.opcodes.OP_RETURN, data]);
     psbt.addOutput({
       script: omniOutput,
-      value: 0
+      value: 0,
     });
     psbt.signAllInputs(signer);
     psbt.finalizeAllInputs();
@@ -818,8 +858,8 @@ describe('Test BTC SDK', () => {
         txIndex: 0,
         value: 214150,
         sequence: 0xfffffffd,
-        addressIndex: 0
-      }
+        addressIndex: 0,
+      },
     ];
 
     const fee = calculateSegwitFee(ECPair, inputs, network);
@@ -836,17 +876,17 @@ describe('Test BTC SDK', () => {
         preIndex: i.txIndex,
         preValue: i.value.toString(),
         sequence: i.sequence,
-        addressIndex: i.addressIndex
+        addressIndex: i.addressIndex,
       })),
       output: {
         value: fund.toString(),
-        address: toAddress
+        address: toAddress,
       },
       change: {
         addressIndex: 0,
-        value: change.toString()
+        value: change.toString(),
       },
-      version: 2
+      version: 2,
     };
 
     const signature = await btc.signUSDTTransaction(options);
@@ -857,9 +897,9 @@ describe('Test BTC SDK', () => {
     const payment = bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
         pubkey: publicKey,
-        network
+        network,
       }),
-      network
+      network,
     });
 
     const signer = ECPair.fromPrivateKey(privateKey, { network });
@@ -873,31 +913,31 @@ describe('Test BTC SDK', () => {
         sequence: i.sequence,
         witnessUtxo: {
           script: payment.output!,
-          value: i.value
+          value: i.value,
         },
-        redeemScript: payment.redeem?.output
+        redeemScript: payment.redeem?.output,
       }))
     );
     psbt.addOutput({
       address: toAddress,
-      value: fund
+      value: fund,
     });
     const usdtInfo = [
       '6f6d6e69',
       /*transaction version=*/ '0000',
       /*transaction type=*/ '0000',
       /*omni token type=*/ '0000001f',
-      amount.toString(16).padStart(16, '0')
+      amount.toString(16).padStart(16, '0'),
     ].join('');
     const data = Buffer.from(usdtInfo, 'hex');
     const omniOutput = bitcoin.script.compile([bitcoin.opcodes.OP_RETURN, data]);
     psbt.addOutput({
       script: omniOutput,
-      value: 0
+      value: 0,
     });
     psbt.addOutput({
       address: payment.address!,
-      value: change
+      value: change,
     });
     psbt.signAllInputs(signer);
     psbt.finalizeAllInputs();
