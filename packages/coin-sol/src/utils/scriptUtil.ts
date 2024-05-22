@@ -26,7 +26,10 @@ function getTransferArguments(rawTx: Transaction, addressIndex: number): string 
 function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
   const tokenSignature = tokenInfo.signature ?? '';
   const signature = tokenSignature.slice(82).padStart(144, '0');
-  const tokenInfoToHex = Buffer.from([+tokenInfo.decimals, tokenInfo.symbol.length]).toString('hex');
+  const tokenInfoToHex = Buffer.from([
+    +tokenInfo.decimals,
+    tokenInfo.symbol.length > 7 ? 7 : tokenInfo.symbol.length,
+  ]).toString('hex');
   const tokenSymbol = Buffer.from(tokenInfo.symbol.slice(0, 7).toUpperCase()).toString('hex').padEnd(14, '0');
   const tokenPublicKey = Buffer.from(base58.decode(tokenInfo.address)).toString('hex');
 
