@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const crypto = require('crypto');
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 if (process.env.NODE_ENV !== 'development') {
   global.console = {
