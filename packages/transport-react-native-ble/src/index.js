@@ -112,7 +112,7 @@ export default class RNBleTransport extends transport.default {
       }
 
       if (!device) {
-        throw new error.TransportError(this.connect.name, 'cant open deivce');
+        throw new error.TransportError(this.connect.name, 'cant open device');
       }
     } else {
       device = deviceOrId;

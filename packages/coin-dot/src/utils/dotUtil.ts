@@ -291,7 +291,7 @@ export function getSignedTxLength(_value: BN | number): Uint8Array {
     length--;
   }
 
-  assert(length >= 4, 'Previous tests match anyting less than 2^30; qed');
+  assert(length >= 4, 'Previous tests match anything less than 2^30; qed');
 
   return u8aConcat(
     new Uint8Array([
