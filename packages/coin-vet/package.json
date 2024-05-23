@@ -4,7 +4,8 @@
   "description": "CoolWallet Vechain sdk",
   "main": "lib/index.js",
   "scripts": {
-    "test": "jest --runInBand",
+    "test": "NODE_ENV=development jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
@@ -43,14 +44,20 @@
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
     "@coolwallet/core": "^1.1.22",
-    "@coolwallet/transport-jre-http": "^1.1.3",
     "thor-devkit": "^2.0.5"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-sdk/issues"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
   }
 }
