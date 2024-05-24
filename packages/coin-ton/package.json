@@ -1,0 +1,47 @@
+{
+  "name": "@coolwallet/ton",
+  "version": "1.0.0-beta.0",
+  "description": "CoolWallet The Open Network(TON) SDK",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "jest --runInBand --testTimeout=60000 --coverage",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+  },
+  "keywords": [
+    "ton",
+    "toncoin",
+    "coolwallet",
+    "javascript",
+    "hardwarewallet",
+    "cryptocurrency",
+    "coolbitx",
+    "transaction"
+  ],
+  "author": "coolwallet-team",
+  "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.1.23"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.1.23"
+  },
+  "dependencies": {
+    "@types/bn.js": "^5.1.1",
+    "bip32": "^2.0.4",
+    "bn.js": "^5.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  }
+}
