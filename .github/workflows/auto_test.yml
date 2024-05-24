@@ -1,4 +1,4 @@
-name: Test on Push to Non-Master Branch
+name: Test on Pull Request to Master
 
 on: 
   pull_request:
