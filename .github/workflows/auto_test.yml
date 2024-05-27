@@ -20,7 +20,7 @@ jobs:
         path: sdk
         ref: ${{ github.event.pull_request.head.ref }}
         submodules: recursive
-        token: ${{ secrets.DEVOPS_ACCESS_REPO_TOKEN }}
+        token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
 
     - name: Authenticate gcloud
       uses: google-github-actions/auth@v1
