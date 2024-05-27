@@ -52,16 +52,20 @@ Used to sign transactions of different cryptocurrencies.
 | Package                                 | Version                                                   | Coin Name              |
 | --------------------------------------- | --------------------------------------------------------- | ------------------------ |
 | [`@coolwallet/atom`](/packages/cws-atom) | ![version](https://img.shields.io/npm/v/@coolwallet/atom) | Cosmos |
+| [`@coolwallet/ada`](/packages/cws-ada) | ![version](https://img.shields.io/npm/v/@coolwallet/ada) | Cardano |
 | [`@coolwallet/bch`](/packages/cws-bch) | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash |
 | [`@coolwallet/bsc`](/packages/cws-bsc) | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain |
 | [`@coolwallet/btc`](/packages/cws-btc) | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin/USDT |
+| [`@coolwallet/doge`](/packages/cws-doge) | ![version](https://img.shields.io/npm/v/@coolwallet/doge) | Doge |
 | [`@coolwallet/dot`](/packages/cws-dot) | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot/Kusama |
 | [`@coolwallet/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum (Ether, ERC20, Smart Contract, EIP-1559 etc.)|
 | [`@coolwallet/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon |
 | [`@coolwallet/ltc`](/packages/cws-ltc) | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LiteCoin |
+| [`@coolwallet/sol`](/packages/cws-sol) | ![version](https://img.shields.io/npm/v/@coolwallet/sol) | Solana |
 | [`@coolwallet/trx`](/packages/cws-trx) | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron |
 | [`@coolwallet/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar/Kinesis |
 | [`@coolwallet/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
+| [`@coolwallet/xtz`](/packages/cws-xtx) | ![version](https://img.shields.io/npm/v/@coolwallet/xtz) | Tezos |
 | [`@coolwallet/zen`](/packages/cws-zen) | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash |
 
 
