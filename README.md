@@ -53,7 +53,6 @@ Used to sign transactions of different cryptocurrencies.
 | --------------------------------------- | --------------------------------------------------------- | ------------------------ |
 | [`@coolwallet/atom`](/packages/cws-atom) | ![version](https://img.shields.io/npm/v/@coolwallet/atom) | Cosmos |
 | [`@coolwallet/bch`](/packages/cws-bch) | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash |
-| [`@coolwallet/bnb`](/packages/cws-bnb) | ![version](https://img.shields.io/npm/v/@coolwallet/bnb) | Binance |
 | [`@coolwallet/bsc`](/packages/cws-bsc) | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain |
 | [`@coolwallet/btc`](/packages/cws-btc) | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin/USDT |
 | [`@coolwallet/dot`](/packages/cws-dot) | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot/Kusama |
