@@ -1,0 +1,87 @@
+name: Test on Pull Request to Master
+
+on: 
+  pull_request:
+    branches:
+        - master
+
+env:
+  REGISTRY: asia-northeast1-docker.pkg.dev
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        repository: CoolBitX-Technology/coolwallet-sdk
+        path: sdk
+        ref: ${{ github.event.pull_request.head.ref }}
+        submodules: recursive
+        token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
+
+    - name: Authenticate gcloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.DEV_CP_GCP_SVC_GITHUB_RUNNER_KEY_FILE }}
+
+    - name: Fetch master branch from upstream repository
+      run: |
+        cd ${{ github.workspace }}/sdk
+        git remote add upstream https://github.com/CoolBitX-Technology/coolwallet-sdk.git
+        git fetch upstream master
+
+    - name: Get list of modified files and check for modified package.json in coin directories
+      id: modified_files
+      working-directory: sdk
+      run: |
+        # cd ${{ github.workspace }}/sdk
+        MODIFIED_FILES=$(git diff --name-only upstream/master)
+        echo "$MODIFIED_FILES"
+
+        MODIFIED_COINS=""
+        for file in $MODIFIED_FILES; do
+          echo "file = $file"
+          if [[ $file == packages/coin-*/package.json ]]; then
+            COIN_DIR=$(dirname "$file")
+            MODIFIED_COINS="$MODIFIED_COINS $COIN_DIR"
+          fi
+        done
+
+        MODIFIED_COINS=$(echo $MODIFIED_COINS | xargs)  # Trim leading/trailing whitespace
+        echo "modified_coins=$MODIFIED_COINS" >> $GITHUB_OUTPUT
+
+    - name: Docker auth
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
+
+    - name: Pull Docker image
+      run: docker pull ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+
+    - name: Run Docker container
+      run: docker run -d --name coolwallet-jcvm-jre-http -p 8080:8080 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+
+    - name: Build mandatory library
+      run: |
+        cd ${{ github.workspace }}/sdk/
+        npm install
+        cd ${{ github.workspace }}/sdk/packages/testing-library
+        npm install
+        npm run build
+        cd ${{ github.workspace }}/sdk/packages/transport-jre-http
+        npm install
+        npm run build
+
+    - name: Run tests for all modified coin project
+      run: |
+        for modified_coin in ${{ steps.modified_files.outputs.modified_coins }}; do
+          if [ -f "${{ github.workspace }}/sdk/$modified_coin/tests/index.spec.ts" ]; then
+            echo "Test file found for = $modified_coin"
+            cd ${{ github.workspace }}/sdk/$modified_coin
+            npm install
+            npm run ci-test
+          else
+            echo "Test file not found for $modified_coin"
+          fi
+        done
