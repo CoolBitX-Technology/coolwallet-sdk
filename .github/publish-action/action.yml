@@ -2,4 +2,5 @@ name: 'Publish to NPM'
 description: 'Build package, check version, add tag, publish to npm'
 runs:
   using: 'node16'
-  main: 'npm run build && dist/index.js'
+  pre: 'npm run build'
+  main: 'dist/index.js'
