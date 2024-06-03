@@ -1,7 +1,7 @@
 {
   "name": "@coolwallet/vet",
   "version": "1.0.1-beta.0",
-  "description": "CoolWallet Vechain sdk",
+  "description": "On testing!",
   "main": "lib/index.js",
   "scripts": {
     "test": "NODE_ENV=development jest --runInBand",
