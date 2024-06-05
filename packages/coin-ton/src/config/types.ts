@@ -16,4 +16,5 @@ export type TransferTxType = {
   seqno: number;
   expireAt?: number; // default: now + 60 seconds
   payload?: string; // memo
+  sendMode?: number; // default: 3, https://docs.ton.org/develop/smart-contracts/messages#message-modes
 };

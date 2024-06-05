@@ -8,6 +8,7 @@ describe('Test transactionUtils.ts', () => {
       seqno: 20,
       payload: 'Hello CoolWallet!',
       expireAt: 1716886177,
+      sendMode: 3,
     };
     const publicKey = '98840c22b503b78f4fad53f29a8aa7e7a8069e11846ba71a09e0387f86500c3b';
     const signature = Buffer.from(

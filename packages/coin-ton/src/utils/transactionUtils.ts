@@ -3,24 +3,24 @@ import { TransferTxType } from '../config/types';
 import { getWalletV4R2, tonweb } from './tonweb';
 import { Cell } from 'tonweb/dist/types/boc/cell';
 
-export function getPrepTransaction(transaction: TransferTxType): TransferTxType {
-  let { expireAt } = transaction;
+export function getPrepTransaction(transaction: TransferTxType): Required<TransferTxType> {
+  let { expireAt, payload, sendMode } = transaction;
 
   expireAt = expireAt || Math.floor(Date.now() / 1e3) + 60;
+  payload = payload || '';
+  sendMode = sendMode === undefined ? 3 : sendMode;
 
-  return { ...transaction, expireAt };
+  return { ...transaction, expireAt, payload, sendMode };
 }
 
 export async function composeFinalTransaction(
-  transaction: TransferTxType,
+  transaction: Required<TransferTxType>,
   publicKey: string,
   signature: Buffer
 ): Promise<string> {
-  const { receiver, amount, seqno, expireAt, payload } = transaction;
+  const { receiver, amount, seqno, expireAt, payload, sendMode } = transaction;
 
   const wallet = getWalletV4R2(publicKey);
-
-  const sendMode = 3;
 
   const signingMessage = (wallet as any).createSigningMessage(seqno, expireAt) as Cell;
   signingMessage.bits.writeUint8(sendMode);

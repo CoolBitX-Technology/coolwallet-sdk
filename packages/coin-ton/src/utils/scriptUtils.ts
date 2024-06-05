@@ -23,29 +23,29 @@ export function saveBitAsByte(hex: string): string {
   return result;
 }
 
-// [seqno(4B)] [expireAt(4B)] [cell2Length(8B)] [isBounceable(1B)] [receiver(256B)] [amountLength(4B)] [amount(120B)] [memo(512B)]
-export function getArgument(transaction: TransferTxType, addressIndex: number): string {
+// [seqno(4B)] [expireAt(4B)] [sendMode(1B)] [cell2Length(8B)] [isBounceable(1B)] [receiver(256B)] [amountLength(4B)] [amount(120B)] [memo(512B)]
+export function getArgument(transaction: Required<TransferTxType>, addressIndex: number): string {
   console.debug(`scriptUtils.getArgument transaction=${JSON.stringify(transaction, null, 2)}`);
-  const { seqno, expireAt, receiver, amount, payload } = transaction;
+  const { seqno, expireAt, receiver, amount, payload, sendMode } = transaction;
 
   const { isBounceable, hashPart } = new TonWeb.Address(receiver);
   const amountBuffer = new BN(amount).toBuffer();
 
-  if (!expireAt) throw new Error(`getArgument >>> expireAt not found.`);
-
   const seqnoArg = seqno.toString(16).padStart(8, '0');
   const expireAtArg = expireAt.toString(16).padStart(8, '0');
+  const sendModeArg = sendMode.toString(16).padStart(2, '0');
   const isBounceableArg = isBounceable ? '01' : '00';
   const receiverArg = Buffer.from(hashPart).toString('hex');
   const amountLengthArg = amountBuffer.byteLength.toString(16);
   const amountArg = amountBuffer.toString('hex');
-  const memoArg = '00000000' + Buffer.from(new TextEncoder().encode(payload || '')).toString('hex');
+  const memoArg = payload ? '00000000' + Buffer.from(new TextEncoder().encode(payload || '')).toString('hex') : '';
   const memoLength = ((memoArg.length / 2) * 8).toString(16).padStart(4, '0');
   const cell2LengthArg = (96 + memoArg.length + amountArg.length).toString(16);
 
   const argument =
     seqnoArg +
     expireAtArg +
+    sendModeArg +
     saveBitAsByte(cell2LengthArg) +
     isBounceableArg +
     saveBitAsByte(receiverArg) +
@@ -58,5 +58,6 @@ export function getArgument(transaction: TransferTxType, addressIndex: number): 
   const path = utils.getFullPath({ pathString: `44'/607'/${addressIndex}'`, pathType: config.PathType.SLIP0010 });
   const SEPath = `${pathLength}${path}`;
   console.debug('SEPath: ', SEPath);
+  console.debug('argument: ', argument);
   return SEPath + argument;
 }
