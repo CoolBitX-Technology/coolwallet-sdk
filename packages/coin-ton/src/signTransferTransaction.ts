@@ -9,13 +9,14 @@ import TonWeb from 'tonweb';
 import BigNumber from 'bignumber.js';
 
 function checkTransaction(transaction: TransferTxType): void {
-  const { amount, receiver } = transaction;
+  const { amount, receiver, payload } = transaction;
 
   const amountBN = new BigNumber(amount);
 
   if (!TonWeb.Address.isValid(receiver)) throw new Error(`checkTransaction: receiver is invalid. receiver=${receiver}`);
   if (amountBN.isZero()) throw new Error(`checkTransaction: not support amount 0`);
   if (amountBN.isGreaterThanOrEqualTo(TonWeb.utils.toNano('100000000').toString())) throw new Error(`checkTransaction: pro card cannot display 9 digits`);
+  if (new TextEncoder().encode(payload).byteLength > 64) throw new Error(`checkTransaction: payload too long`);
 }
 
 export default async function signTransferTransaction(signTxData: SignTransferTxType): Promise<string> {
