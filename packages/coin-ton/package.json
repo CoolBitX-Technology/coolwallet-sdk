@@ -11,7 +11,7 @@
     "build": "npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
-  "keywords": [
+  "keywords": [ 
     "ton",
     "toncoin",
     "coolwallet",
