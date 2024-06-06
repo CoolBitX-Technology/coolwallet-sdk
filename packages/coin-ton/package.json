@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/ton",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0",
   "description": "CoolWallet TON SDK",
   "main": "lib/index.js",
   "scripts": {

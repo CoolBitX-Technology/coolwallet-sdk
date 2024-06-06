@@ -198,5 +198,42 @@ describe('Test TON SDK', () => {
         sendMode: 130,
       });
     });
+
+    it('transfer with memo', async () => {
+      await expect_both_coolwallet_and_tonweb_signed_tx_is_same({
+        receiver: 'EQAW5QLk3XvW3HMbLqkE9wXkL9NdGpE1555tUxhdea8pVIbJ',
+        amount: '123000000',
+        seqno: 100,
+        expireAt: 1716886177,
+        sendMode: 130,
+        payload: 'Hello Hello Hello Hello Hello Hello',
+      });
+    });
+
+    it('transfer with large memo', async () => {
+      const transaction = {
+        receiver: 'EQAW5QLk3XvW3HMbLqkE9wXkL9NdGpE1555tUxhdea8pVIbJ',
+        amount: '123000000',
+        seqno: 20,
+        expireAt: 1716886177,
+        sendMode: 130,
+        payload: 'Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello Hello',
+      };
+
+      const addressIndex = 0;
+
+      expect(get_signed_tx_by_coolwallet_sdk(transaction, addressIndex)).rejects.toThrowError();
+    });
+
+    it('transfer with chinese memo', async () => {
+      await expect_both_coolwallet_and_tonweb_signed_tx_is_same({
+        receiver: 'EQAW5QLk3XvW3HMbLqkE9wXkL9NdGpE1555tUxhdea8pVIbJ',
+        amount: '123000000',
+        seqno: 100,
+        expireAt: 1716886177,
+        sendMode: 130,
+        payload: '你好',
+      });
+    });
   });
 });
