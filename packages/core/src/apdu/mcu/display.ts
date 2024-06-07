@@ -1,20 +1,20 @@
 import { executeCommand } from '../execute/execute';
 import Transport from '../../transport';
-import { commands } from "../execute/command";
+import { commands } from '../execute/command';
 import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
 import { APDUError } from '../../error/errorHandle';
-import { getCommandSignature } from "../../setting/auth";
-import { powerOff } from "./control";
+import { getCommandSignature } from '../../setting/auth';
+import { powerOff } from './control';
 
 /**
  * Display "UPDATE" on wallet display
  * @param {Transport} transport
  */
 export const showUpdate = async (transport: Transport) => {
-  const { statusCode, msg } = await executeCommand(transport, commands.START_UPDATE, target.SE); // TODO 
+  const { statusCode, msg } = await executeCommand(transport, commands.START_UPDATE, target.SE); // TODO
   if (statusCode !== CODE._9000) {
-    throw new APDUError(commands.START_UPDATE, statusCode, msg)
+    throw new APDUError(commands.START_UPDATE, statusCode, msg);
   }
 };
 
@@ -25,11 +25,11 @@ export const showUpdate = async (transport: Transport) => {
 export const hideUpdate = async (transport: Transport) => {
   const { statusCode, msg } = await executeCommand(transport, commands.FINISH_UPDATE, target.SE);
   if (statusCode !== CODE._9000) {
-    throw new APDUError(commands.FINISH_UPDATE, statusCode, msg)
+    throw new APDUError(commands.FINISH_UPDATE, statusCode, msg);
   }
 };
 
-export const formatBalance = function (balance: number, defaultValue = '0.0') {
+const formatBalance = function (balance: number, defaultValue = '0.0') {
   let result;
   if (isNaN(balance) || balance === null) {
     result = defaultValue;
@@ -37,14 +37,13 @@ export const formatBalance = function (balance: number, defaultValue = '0.0') {
     if (balance < 0) {
       result = defaultValue;
     } else {
-      let strVal = balance.toString();
-      let splitVal = strVal.split('.');
+      const strVal = balance.toString();
+      const splitVal = strVal.split('.');
       result = splitVal.length > 1 ? strVal : strVal + '.0';
     }
   }
   return result;
 };
-
 
 /**
  * Upate balances shown on card display
@@ -52,15 +51,19 @@ export const formatBalance = function (balance: number, defaultValue = '0.0') {
  * @param {Transport} transport
  * @param {Array<{balance: number, coinType: string}>} data
  */
-export const updateBalance = async (transport: Transport, appId: string, appPrivKey: string, data: Array<{ balance: number; coinType: string; }>) => {
+export const updateBalance = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  data: Array<{ balance: number; coinType: string }>
+) => {
   const defaultBalance = '0.0';
-  const coinTypes = ["00", "3c", "02", "90"];
+  const coinTypes = ['00', '3c', '02', '90'];
 
-  const allBalances = coinTypes.map(coinType => {
-    const targetCoin = data.find(coin => {
+  const allBalances = coinTypes.map((coinType) => {
+    const targetCoin = data.find((coin) => {
       return coin.coinType.toLowerCase() === coinType;
     });
-
 
     const balance = targetCoin ? formatBalance(targetCoin.balance) : defaultBalance;
     const splitBalance = balance.split('.');
@@ -73,18 +76,18 @@ export const updateBalance = async (transport: Transport, appId: string, appPriv
 
   const concatBalance = allBalances.join('');
 
-  const signature = await getCommandSignature(
-    transport,
-    appId,
-    appPrivKey,
-    commands.UPDATE_BALANCE,
-    concatBalance,
-  )
+  const signature = await getCommandSignature(transport, appId, appPrivKey, commands.UPDATE_BALANCE, concatBalance);
 
   const executeCommandData = concatBalance + signature;
 
-
-  const { statusCode, msg } = await executeCommand(transport, commands.UPDATE_BALANCE, target.SE, executeCommandData, undefined, undefined);
+  const { statusCode, msg } = await executeCommand(
+    transport,
+    commands.UPDATE_BALANCE,
+    target.SE,
+    executeCommandData,
+    undefined,
+    undefined
+  );
   await powerOff(transport);
 
   // if (statusCode !== CODE._9000) {

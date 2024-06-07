@@ -1,5 +1,5 @@
 import * as rlp from 'rlp';
-import * as txUtil from './txUtil';
+import * as txUtil from './util';
 import Transport from '../transport';
 import * as tx from '../apdu/transaction';
 import * as apdu from '../apdu/index';
@@ -23,7 +23,6 @@ export const prepareSEData = (keyId: string, rawData: Buffer | Array<Buffer>, re
   const dataForSE = rlp.encode(data);
   return dataForSE.toString('hex');
 };
-
 
 /**
  * @description Send Signing Function to CoolWallet

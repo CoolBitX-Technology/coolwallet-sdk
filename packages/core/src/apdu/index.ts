@@ -8,6 +8,4 @@ import * as tx from './transaction';
 import * as pair from './pair';
 import * as ota from './ota';
 
-export {
-	mcu, setting, info, execute, general, wallet, pair, tx, ota
-};
+export { mcu, setting, info, execute, general, wallet, pair, tx, ota };
