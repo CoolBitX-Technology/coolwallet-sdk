@@ -32,6 +32,8 @@ abstract class Transport {
 
   device: TransportDevice;
 
+  cardType?: 'Pro' | 'Lite' = 'Pro';
+
   constructor(device: TransportDevice) {
     this.device = device;
     this.peripheral = new PeripheralRequest(this);
