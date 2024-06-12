@@ -7,6 +7,7 @@ import { CODE } from '../config/status/code';
 import { APDUError } from '../error/errorHandle';
 
 /**
+ * @deprecated Please use common.echo instead
  * @param {Transport} transport
  * @param {string} data
  * @return {Promise<string>}
@@ -23,6 +24,7 @@ export const echo = async (transport: Transport, data: string): Promise<string> 
 
 /**
  * Response boolean (isCardRecognized)
+ * @deprecated Please use common.hi instead
  * @param {Transport} transport
  * @param {string} appId
  * @return {Promise<boolean>} isCardRecognized
@@ -37,7 +39,8 @@ export const hi = async (transport: Transport, appId: string): Promise<boolean> 
 };
 
 /**
- * Get nonce from CWS
+ * Get nonce from CoolWallet
+ * @deprecated Please use common.getNonce instead
  * @param {Transport} transport
  * @return {Promise<string>}
  */
@@ -51,7 +54,8 @@ export const getNonce = async (transport: Transport): Promise<string> => {
 };
 
 /**
- * Get SE Version from CoolWalletS
+ * Get SE Version from CoolWallet
+ * @deprecated Please use info.getSEVersion instead
  * @param {Transport} transport
  * @returns {Promise<Number>}
  */
@@ -69,7 +73,8 @@ export const getSEVersion = async (transport: Transport): Promise<number> => {
 };
 
 /**
- * Get SE Mode from CoolWalletS
+ * Get SE Mode from CoolWallet
+ * @deprecated Please use info.getSEMode instead
  * @param {Transport} transport
  * @returns {Promise<Number>}
  */
@@ -88,7 +93,8 @@ export const getSEMode = async (transport: Transport): Promise<SE_MODE> => {
 };
 
 /**
- * Reset CoolWalletS (clear all data)
+ * Reset CoolWallet (clear all data)
+ * @deprecated Please use setting.card.resetCard instead
  * @param {Transport} transport
  * @return {Promise<boolean>}
  */
@@ -102,6 +108,7 @@ export const resetCard = async (transport: Transport): Promise<boolean> => {
 };
 
 /**
+ * @deprecated Please use info.getCardId instead
  * @param {Transport} transport
  * @return {Promise<boolean>}
  */

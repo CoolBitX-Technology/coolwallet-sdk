@@ -17,6 +17,11 @@ import type { MCUInfo, MCUVersion, UpdateInfo } from './types';
 
 const MCU_UPDATE_VER = '150B0909';
 
+/**
+ * @deprecated Please use info.getMCUVersion instead
+ * @param transport
+ * @returns
+ */
 const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
   // Data[0..2]: Command echo
   // Data[3..4]: Block Mark
@@ -31,6 +36,11 @@ const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
   return { fwStatus: blockMark, cardMCUVersion };
 };
 
+/**
+ * @deprecated Please use info.getMCUInfo instead
+ * @param transport
+ * @returns
+ */
 const getMCUInfo = async (transport: Transport): Promise<MCUInfo> => {
   // HW_Version[9]
   // FW_Version[17]
