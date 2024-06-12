@@ -1,24 +1,23 @@
-import { executeCommand } from '../execute/execute';
-import Transport from '../../transport';
-import { commands } from '../execute/command';
-import { target } from '../../config/param';
-import { SDKError } from '../../error/errorHandle';
+import Transport from '../transport';
+import { target } from '../config/param';
+import { APDUError, SDKError } from '../error/errorHandle';
+import { executeCommand } from '../apdu/execute/execute';
+import { commands } from '../apdu/execute/command';
+import { CODE } from '../config/status/code';
 
 /**
  * Cancel last APDU
- * @deprecated Please use mcu.control.cancelAPDU instead
  * @param {Transport} transport
  */
 export const cancelAPDU = async (transport: Transport) => {
   const { statusCode, msg } = await executeCommand(transport, commands.CANCEL_APDU, target.MCU);
-  // if (statusCode !== CODE._9000) {
-  //   throw new APDUError(commands.CANCEL_APDU, statusCode, msg)
-  // }
+  if (statusCode !== CODE._9000) {
+    throw new APDUError(commands.CANCEL_APDU, statusCode, msg);
+  }
 };
 
 /**
  * Power off SE
- * @deprecated Please use mcu.control.powerOff instead
  * @param {Transport}
  * @return {Promise<boolean>}
  */
