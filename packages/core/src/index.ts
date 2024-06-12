@@ -10,5 +10,6 @@ import * as setting from './setting/index';
 import * as tx from './transaction/index';
 import Transport, { BleManager } from './transport/index';
 import * as utils from './utils/index';
+import * as wallet from './wallet/secret';
 
-export { apdu, coin, common, config, crypto, device, error, info, setting, tx, Transport, BleManager, utils };
+export { apdu, coin, common, config, crypto, device, error, info, setting, tx, Transport, BleManager, utils, wallet };

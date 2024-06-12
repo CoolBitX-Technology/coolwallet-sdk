@@ -1,16 +1,16 @@
-import { executeCommand } from './execute/execute';
-import Transport from '../transport';
-import { commands } from './execute/command';
+import { executeCommand } from '../apdu/execute/execute';
+import { commands } from '../apdu/execute/command';
 import { target } from '../config/param';
+import * as crypto from '../crypto/index';
 import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 import * as setting from '../setting/index';
-import * as crypto from '../crypto/index';
+import Transport from '../transport';
+import { error } from '..';
 
 /**
  * TODO
  * Authorization for requesting account keys
- * @deprecated Please use wallet.secret.authGetExtendedKey instead
  * @param {Transport} transport
  * @param {string} signature
  * @return { Promise<boolean> }
@@ -37,10 +37,8 @@ export const authGetExtendedKey = async (transport: Transport, signature: string
 
 /**
  * Get ECDSA Account Extended public key (Encrypted)
- * @deprecated Please use wallet.secret.getAccountExtendedKey instead
- * @param {*} transport
- * @param {string} coinType P1
- * @param {string} accIndex P2
+ * @param {Transport} transport
+ * @param {string} path
  * @return {Promise<string>}
  */
 export const getAccountExtendedKey = async (transport: Transport, path: string): Promise<string> => {
@@ -58,7 +56,6 @@ export const getAccountExtendedKey = async (transport: Transport, path: string):
 
 /**
  * Create a new seed with SE.
- * @deprecated Please use wallet.secret.createSeedByCard instead
  * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivateKey
@@ -101,8 +98,7 @@ export async function createSeedByCard(
 
 /**
  * Send sum of number seeds.
- * @deprecated Please use wallet.secret.sendCheckSum instead
- * @param {Transport}
+ * @param {Transport} transport
  * @param {number} checkSum
  * @return {Promise<boolean>}
  */
@@ -113,11 +109,11 @@ export async function sendCheckSum(transport: Transport, checkSum: number): Prom
 }
 
 /**
- * @deprecated Please use wallet.secret.setSeed instead
- * @param {Transport}
+ * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivateKey
- * @param {string} mnemonic
+ * @param {string} seedHex
+ * @param {string} SEPublicKey
  * @return {Promise<boolean>}
  */
 export async function setSeed(
@@ -126,7 +122,7 @@ export async function setSeed(
   appPrivateKey: string,
   seedHex: string,
   SEPublicKey: string
-) {
+): Promise<void> {
   try {
     if (!SEPublicKey) {
       throw new SDKError(setSeed.name, 'SEPublicKey can not be undefined');
@@ -150,6 +146,7 @@ export async function setSeed(
       undefined
     );
     if (statusCode === CODE._9000) {
+      return;
     } else if (statusCode === CODE._6881) {
       throw new APDUError(commands.SET_SEED, statusCode, 'wallet is exist');
     } else {
@@ -162,11 +159,14 @@ export async function setSeed(
 }
 
 /**
- * @deprecated Please use wallet.secret.initSecureRecovery instead
+ *
  * @param {Transport} transport
  * @param {number} strength
  */
 export async function initSecureRecovery(transport: Transport, strength: number) {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(initSecureRecovery.name, `CoolWallet LITE does not support this command.`);
+  }
   const P1 = strength.toString(16).padStart(2, '0');
   const { statusCode } = await executeCommand(
     transport,
@@ -180,11 +180,14 @@ export async function initSecureRecovery(transport: Transport, strength: number)
 }
 
 /**
- * @deprecated Please use wallet.secret.setSecureRecoveryIdx instead
+ *
  * @param {Transport} transport
  * @param {number} index
  */
 export async function setSecureRecoveryIdx(transport: Transport, index: number) {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(setSecureRecoveryIdx.name, `CoolWallet LITE does not support this command.`);
+  }
   const P1 = index.toString(16).padStart(2, '0');
   const { statusCode } = await executeCommand(
     transport,
@@ -198,11 +201,14 @@ export async function setSecureRecoveryIdx(transport: Transport, index: number) 
 }
 
 /**
- * @deprecated Please use wallet.secret.cancelSecureRecovery instead
+ *
  * @param {Transport} transport
  * @param {string} type
  */
 export async function cancelSecureRecovery(transport: Transport, type: string) {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(cancelSecureRecovery.name, `CoolWallet LITE does not support this command.`);
+  }
   let P1;
   if (type === '00') {
     P1 = '05';
@@ -223,14 +229,17 @@ export async function cancelSecureRecovery(transport: Transport, type: string) {
 }
 
 /**
- * @deprecated Please use wallet.secret.getSecureRecoveryStatus instead
+ *
  * @param {Transport} transport
  */
 export async function getSecureRecoveryStatus(transport: Transport) {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(getSecureRecoveryStatus.name, `CoolWallet LITE does not support this command.`);
+  }
   const { statusCode, outputData } = await executeCommand(
     transport,
     commands.GET_MCU_STATUS,
-    target.SE,
+    target.MCU,
     undefined,
     undefined,
     undefined
@@ -239,14 +248,17 @@ export async function getSecureRecoveryStatus(transport: Transport) {
 }
 
 /**
- * @deprecated Please use wallet.secret.initMcuSetSeed instead
+ *
  * @param {Transport} transport
  */
 export async function initMcuSetSeed(transport: Transport) {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(initMcuSetSeed.name, `CoolWallet LITE does not support this command.`);
+  }
   const { statusCode, outputData } = await executeCommand(
     transport,
     commands.MCU_START_SET_SEED,
-    target.SE,
+    target.MCU,
     undefined,
     undefined,
     undefined
@@ -254,8 +266,8 @@ export async function initMcuSetSeed(transport: Transport) {
   return statusCode;
 }
 
-export let creation = { createSeedByCard, sendCheckSum, setSeed };
-export let recovery = {
+export const creation = { createSeedByCard, sendCheckSum, setSeed };
+export const recovery = {
   setSeed,
   initSecureRecovery,
   setSecureRecoveryIdx,

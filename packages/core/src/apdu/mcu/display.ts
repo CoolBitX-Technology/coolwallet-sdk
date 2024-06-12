@@ -6,12 +6,16 @@ import { CODE } from '../../config/status/code';
 import { APDUError } from '../../error/errorHandle';
 import { getCommandSignature } from '../../setting/auth';
 import { powerOff } from './control';
+import { error } from '../..';
 
 /**
  * Display "UPDATE" on wallet display
  * @param {Transport} transport
  */
 export const showUpdate = async (transport: Transport) => {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(showUpdate.name, `CoolWallet LITE does not support this command.`);
+  }
   const { statusCode, msg } = await executeCommand(transport, commands.START_UPDATE, target.SE); // TODO
   if (statusCode !== CODE._9000) {
     throw new APDUError(commands.START_UPDATE, statusCode, msg);
@@ -23,6 +27,9 @@ export const showUpdate = async (transport: Transport) => {
  * @param {Transport}
  */
 export const hideUpdate = async (transport: Transport) => {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(hideUpdate.name, `CoolWallet LITE does not support this command.`);
+  }
   const { statusCode, msg } = await executeCommand(transport, commands.FINISH_UPDATE, target.SE);
   if (statusCode !== CODE._9000) {
     throw new APDUError(commands.FINISH_UPDATE, statusCode, msg);
@@ -57,6 +64,9 @@ export const updateBalance = async (
   appPrivKey: string,
   data: Array<{ balance: number; coinType: string }>
 ) => {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(updateBalance.name, `CoolWallet LITE does not support this command.`);
+  }
   const defaultBalance = '0.0';
   const coinTypes = ['00', '3c', '02', '90'];
 

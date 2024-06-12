@@ -1,52 +1,14 @@
-import { executeCommand } from './execute/execute';
-import Transport from '../transport';
-import { commands } from './execute/command';
+import { commands } from '../apdu/execute/command';
+import { executeCommand } from '../apdu/execute/execute';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
-import { SDKError, APDUError } from '../error/errorHandle';
-import { getCommandSignature } from '../setting/auth';
-import * as core from '../setting/index';
+import { APDUError, SDKError } from '../error/errorHandle';
+import Transport from '../transport';
 import * as crypto from '../crypto/index';
-import * as apdu from '../apdu/index';
+import { apdu } from '..';
+import { getCommandSignature } from '../setting/auth';
 
 /**
- * Toggle Lock card (01 to lock, 00 to unluch)
- * @deprecated Please use setting.card.switchLockStatus instead
- * @param {Transport} transport
- * @param {string} signature data
- * @param {string} lock 01 to lock your card
- */
-export const switchLockStatus = async (
-  transport: Transport,
-  appId: string,
-  appPrivKey: string,
-  freezePair: boolean
-) => {
-  const pairLockStatus = freezePair ? '01' : '00';
-  const signature = await core.auth.getCommandSignature(
-    transport,
-    appId,
-    appPrivKey,
-    commands.CHANGE_PAIR_STATUS,
-    '',
-    pairLockStatus
-  );
-
-  const { statusCode, msg } = await executeCommand(
-    transport,
-    commands.CHANGE_PAIR_STATUS,
-    target.SE,
-    signature,
-    pairLockStatus,
-    undefined
-  );
-  if (statusCode !== CODE._9000) {
-    throw new APDUError(commands.CHANGE_PAIR_STATUS, statusCode, msg);
-  }
-};
-
-/**
- * @deprecated Please use wallet.client.register instead
  * @param {Transport} transport
  * @param {string} appPublicKey
  * @param {String} password
@@ -101,7 +63,7 @@ export const register = async (
 };
 
 /**
- * @deprecated Please use wallet.client.getPairedApps instead
+ *
  * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivKey
@@ -112,7 +74,7 @@ export const getPairedApps = async (
   appId: string,
   appPrivKey: string
 ): Promise<Array<{ appId: string; deviceName: string }>> => {
-  const signature = await core.auth.getCommandSignature(transport, appId, appPrivKey, commands.GET_PAIRED_DEVICES);
+  const signature = await getCommandSignature(transport, appId, appPrivKey, commands.GET_PAIRED_DEVICES);
   const { outputData } = await executeCommand(
     transport,
     commands.GET_PAIRED_DEVICES,
@@ -138,14 +100,13 @@ export const getPairedApps = async (
 
 /**
  * Get Pairing password for current device
- * @deprecated Please use wallet.client.getPairingPassword instead
  * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivKey
  * @return {Promise<string>}
  */
 export const getPairingPassword = async (transport: Transport, appId: string, appPrivKey: string): Promise<string> => {
-  const signature = await core.auth.getCommandSignature(transport, appId, appPrivKey, commands.GET_PAIR_PWD);
+  const signature = await getCommandSignature(transport, appId, appPrivKey, commands.GET_PAIR_PWD);
   const { outputData: encryptedPassword } = await executeCommand(
     transport,
     commands.GET_PAIR_PWD,
@@ -165,9 +126,10 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
 
 /**
  * Remove Paired device by id
- * @deprecated Please use wallet.client.removePairedDevice instead
  * @param {Transport} transport
- * @param {string} appIdWithSig
+ * @param {string} appId
+ * @param {string} appPrivateKey
+ * @param {string} pairedAppId
  */
 export const removePairedDevice = async (
   transport: Transport,
@@ -196,9 +158,10 @@ export const removePairedDevice = async (
 
 /**
  * Rename current device
- * @deprecated Please use wallet.client.renameDevice instead
  * @param {Transport} transport
- * @param {string} nameWithSig
+ * @param {string} appId
+ * @param {string} appPrivKey
+ * @param {string} newDeviceName
  */
 export const renameDevice = async (transport: Transport, appId: string, appPrivKey: string, newDeviceName: string) => {
   try {
@@ -210,7 +173,7 @@ export const renameDevice = async (transport: Transport, appId: string, appPrivK
       nameToUTF = Buffer.concat([temp, nameToUTF]);
     }
     const name = nameToUTF.toString('hex');
-    const signature = await core.auth.getCommandSignature(transport, appId, appPrivKey, commands.RENAME_DEVICES, name);
+    const signature = await getCommandSignature(transport, appId, appPrivKey, commands.RENAME_DEVICES, name);
     const renameParams = name + signature;
 
     const { statusCode, msg } = await executeCommand(

@@ -10,6 +10,7 @@ import { getCommandSignature } from '../setting/auth';
 
 /**
  * Get basic card information
+ * @deprecated Please use info.getCardInfo instead
  * @param {Transport} transport
  */
 export const getCardInfo = async (
@@ -69,6 +70,7 @@ export const getCardInfo = async (
 
 /**
  * Update last used keyId to store in CWS.
+ * @deprecated Please use setting.card.updateKeyId instead
  * @param {Transport} transport
  * @param {Array<{KeyId: string, coinType: string}>} dataArr
  * @param {string} P1
@@ -111,6 +113,7 @@ export const updateKeyId = async (
 
 /**
  * Fetch last used keyId from CWS
+ * @deprecated Please use setting.card.getLastKeyId instead
  * @param {Transport} transport
  * @param {string} P1
  */
@@ -136,7 +139,7 @@ export const getLastKeyId = async (transport: Transport, P1: string) => {
 };
 
 /**
- *
+ * @deprecated Please use setting.card.toggleDisplayAddress instead
  * @param {Transport} transport
  * @param {string} signature
  * @param {boolean} detailFlag 00 if want to show detail, 01 otherwise

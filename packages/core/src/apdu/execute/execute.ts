@@ -4,6 +4,7 @@ import * as util from '../../utils';
 import Transport from '../../transport/index';
 import { SDKError } from '../../error/errorHandle';
 import { target } from '../../config/param';
+import { error } from '../..';
 
 const commandCounter = {
   command: '',
@@ -111,6 +112,9 @@ export const executeCommand = async (
   params2?: string
   // forceUseSC: boolean = false,
 ): Promise<{ statusCode: string; msg: string; outputData: string }> => {
+  if (transport.cardType === 'Lite' && executedTarget === target.MCU) {
+    throw new error.SDKError(executeCommand.name, `CoolWallet LITE does not support MCU command.`);
+  }
   const P1 = params1 ?? command.P1;
   const P2 = params2 ?? command.P2;
 

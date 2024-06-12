@@ -1,19 +1,20 @@
 import { executeCommand } from '../apdu/execute/execute';
 import { commands } from '../apdu/execute/command';
 import Transport from '../transport';
-
 import { target } from '../config/param';
 import { SE_MODE } from '../config/mode';
 import { CODE } from '../config/status/code';
-import { APDUError } from '../error/errorHandle';
+import { APDUError, SDKError } from '../error/errorHandle';
 import { MCUInfo, MCUVersion } from './types';
+import isNil from 'lodash/isNil';
+import set from 'lodash/set';
 
 /**
  * Get SE Version from CoolWalletS
  * @param {Transport} transport
  * @returns {Promise<Number>}
  */
-const getSEVersion = async (transport: Transport): Promise<number> => {
+export const getSEVersion = async (transport: Transport): Promise<number> => {
   try {
     const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
     if (outputData) {
@@ -31,7 +32,7 @@ const getSEVersion = async (transport: Transport): Promise<number> => {
  * @param {Transport} transport
  * @returns {Promise<Number>}
  */
-const getSEMode = async (transport: Transport): Promise<SE_MODE> => {
+export const getSEMode = async (transport: Transport): Promise<SE_MODE> => {
   const { outputData } = await executeCommand(transport, commands.GET_SE_MODE, target.SE);
   const isFactory = outputData.slice(0, 2);
   const isDevelop = outputData.slice(2, 4);
@@ -49,7 +50,7 @@ const getSEMode = async (transport: Transport): Promise<SE_MODE> => {
  * @param {Transport} transport
  * @return {Promise<boolean>}
  */
-const getCardId = async (transport: Transport): Promise<string> => {
+export const getCardId = async (transport: Transport): Promise<string> => {
   const { statusCode, msg, outputData } = await executeCommand(transport, commands.GET_CARD_ID, target.SE);
   if (statusCode === CODE._9000) {
     return outputData;
@@ -58,7 +59,7 @@ const getCardId = async (transport: Transport): Promise<string> => {
   }
 };
 
-const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
+export const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
   // Data[0..2]: Command echo
   // Data[3..4]: Block Mark
   // Data[5]: Year
@@ -72,7 +73,7 @@ const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
   return { fwStatus: blockMark, cardMCUVersion };
 };
 
-const getMCUInfo = async (transport: Transport): Promise<MCUInfo> => {
+export const getMCUInfo = async (transport: Transport): Promise<MCUInfo> => {
   // HW_Version[9]
   // FW_Version[17]
   // Device_ID_Length[20](Not fixed, ex. CoolWallet CWP000000)
@@ -86,4 +87,61 @@ const getMCUInfo = async (transport: Transport): Promise<MCUInfo> => {
   return { hardwareVersion, firmwareVersion, battery };
 };
 
-export { getSEVersion, getSEMode, getCardId, getMCUVersion, getMCUInfo };
+/**
+ * Get basic card information
+ * @param {Transport} transport
+ */
+export const getCardInfo = async (
+  transport: Transport
+): Promise<{
+  paired: boolean;
+  locked: boolean;
+  walletCreated: boolean;
+  showDetail: boolean;
+  pairRemainTimes: number;
+  accountDigest: string;
+  accountDigest20?: string;
+  cardanoSeed?: string;
+}> => {
+  try {
+    const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_CARD_INFO, target.SE);
+    const databuf = Buffer.from(outputData, 'hex');
+    const pairStatus = databuf.slice(0, 1).toString('hex');
+    const lockedStatus = databuf.slice(1, 2).toString('hex');
+    const pairRemainTimes = parseInt(databuf.slice(2, 3).toString('hex'), 16);
+    const walletStatus = databuf.slice(3, 4).toString('hex');
+    const accountDigest = databuf.slice(4, 9).toString('hex');
+    const displayType = databuf.slice(9, 10).toString('hex');
+    let bipEd25519IsInit;
+    if (databuf.length >= 11) {
+      bipEd25519IsInit = databuf.slice(10, 11).toString('hex');
+    }
+    let accountDigest20;
+    if (databuf.length > 11) {
+      accountDigest20 = databuf.slice(11, 31).toString('hex');
+    }
+
+    if (accountDigest === '81c69f2d90' || accountDigest === '3d84ba58bf' || accountDigest === '83ccf4aab1') {
+      throw new APDUError(commands.GET_CARD_INFO, statusCode, msg);
+    }
+
+    const paired = pairStatus === '01';
+    const locked = lockedStatus === '01';
+    const walletCreated = walletStatus === '01';
+    const showDetail = displayType === '00';
+    const result = {
+      paired,
+      locked,
+      walletCreated,
+      showDetail,
+      pairRemainTimes,
+      accountDigest,
+    };
+    if (!isNil(bipEd25519IsInit)) set(result, 'cardanoSeed', bipEd25519IsInit === '01');
+    if (!isNil(accountDigest20)) set(result, 'accountDigest20', accountDigest20);
+
+    return result;
+  } catch (e) {
+    throw new SDKError(getCardInfo.name, 'Bad Firmware statusCode. Please reset your CoolWallet.');
+  }
+};
