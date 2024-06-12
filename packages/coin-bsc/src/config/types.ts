@@ -1,60 +1,59 @@
-import { transport } from '@coolwallet/core';
+import { Transport } from '@coolwallet/core';
+
+export { Transport };
 
 export type Output = {
-  address: string,
-  value: number
-}
-
-export type Transport = transport.default;
+  address: string;
+  value: number;
+};
 
 export type signTx = {
-  transport: Transport,
-  appPrivateKey: string,
-  appId: string,
-  transaction: Transaction,
-  addressIndex: number,
-  publicKey: string | undefined,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
-}
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  transaction: Transaction;
+  addressIndex: number;
+  publicKey?: string;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+};
 
 export type signMsg = {
-  transport: Transport,
-  appPrivateKey: string,
-  appId: string,
-  message: string,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
-}
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  message: string;
+  addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+};
 
 export type signTyped = {
-  transport: Transport,
-  appPrivateKey: string,
-  appId: string,
-  typedData: any,
-  addressIndex: number,
-  confirmCB: Function | undefined,
-  authorizedCB: Function | undefined
-}
-
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  typedData: any;
+  addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+};
 
 export type Transaction = {
   // [key: string]: any,
-  nonce: string,
-  gasPrice: string,
-  gasLimit: string,
-  to: string,
-  value: string,
-  data: string,
-  option: Option
-}
+  nonce: string;
+  gasPrice: string;
+  gasLimit: string;
+  to: string;
+  value: string;
+  data: string;
+  option?: Option;
+};
 
 export type Option = {
-  info : {
-    symbol: string,
-    decimals: string
-  }
+  info: {
+    symbol: string;
+    decimals: string;
+  };
 };
 
 export const EIP712Schema = {
@@ -71,16 +70,16 @@ export const EIP712Schema = {
           type: 'object',
           properties: {
             name: { type: 'string' },
-            type: { type: 'string' }
+            type: { type: 'string' },
           },
-          required: ['name', 'type']
-        }
+          required: ['name', 'type'],
+        },
       },
-      required: ['EIP712Domain']
+      required: ['EIP712Domain'],
     },
     primaryType: { type: 'string' },
     domain: { type: 'object' },
-    message: { type: 'object' }
+    message: { type: 'object' },
   },
-  required: ['types', 'primaryType', 'domain', 'message']
-}
+  required: ['types', 'primaryType', 'domain', 'message'],
+};

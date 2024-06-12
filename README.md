@@ -18,11 +18,11 @@ This is the monorepo of all the packages you need to build your own app with Coo
 
 ### 1. Define your [transport](#Transport) layer
 
-Depending on your platform, you may can choose different [transport](#Transport) object to use in you application.
+Depending on your platform, you may choose different [transport](#Transport) object to use in your application.
 
 ### 2. Register and setup hardware wallet.
 
-To register you application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet)  in `core` package. This guide you through the process of registeration and seed generation.
+To register your application with the wallet, take a look at the [wallet module](/packages/core/src/apdu/wallet.ts)  in `core` package. This guide you through the process of registration and seed generation.
 
 ### 3. Build your Application
 
@@ -52,17 +52,20 @@ Used to sign transactions of different cryptocurrencies.
 | Package                                 | Version                                                   | Coin Name              |
 | --------------------------------------- | --------------------------------------------------------- | ------------------------ |
 | [`@coolwallet/atom`](/packages/cws-atom) | ![version](https://img.shields.io/npm/v/@coolwallet/atom) | Cosmos |
+| [`@coolwallet/ada`](/packages/cws-ada) | ![version](https://img.shields.io/npm/v/@coolwallet/ada) | Cardano |
 | [`@coolwallet/bch`](/packages/cws-bch) | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash |
-| [`@coolwallet/bnb`](/packages/cws-bnb) | ![version](https://img.shields.io/npm/v/@coolwallet/bnb) | Binance |
 | [`@coolwallet/bsc`](/packages/cws-bsc) | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain |
 | [`@coolwallet/btc`](/packages/cws-btc) | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin/USDT |
+| [`@coolwallet/doge`](/packages/cws-doge) | ![version](https://img.shields.io/npm/v/@coolwallet/doge) | Doge |
 | [`@coolwallet/dot`](/packages/cws-dot) | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot/Kusama |
 | [`@coolwallet/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum (Ether, ERC20, Smart Contract, EIP-1559 etc.)|
 | [`@coolwallet/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon |
 | [`@coolwallet/ltc`](/packages/cws-ltc) | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LiteCoin |
+| [`@coolwallet/sol`](/packages/cws-sol) | ![version](https://img.shields.io/npm/v/@coolwallet/sol) | Solana |
 | [`@coolwallet/trx`](/packages/cws-trx) | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron |
 | [`@coolwallet/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar/Kinesis |
 | [`@coolwallet/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
+| [`@coolwallet/xtz`](/packages/cws-xtx) | ![version](https://img.shields.io/npm/v/@coolwallet/xtz) | Tezos |
 | [`@coolwallet/zen`](/packages/cws-zen) | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash |
 
 
@@ -102,7 +105,7 @@ disconnect = () => {
 
 ```
 
-- transport: The object use to communicate with CoolWallet
+- transport: The object used to communicate with CoolWallet
 - SEPublicKey: The key used to authenticate SE.
 
 
@@ -172,7 +175,7 @@ const address = await ETH.getAddress(
 
 ```
 
-The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of folllowing BIP44 path:
+The address generated is compatible to BIP44 with **account** and **change** set to 0, which means calling `getAddress(i)` will get the address of following BIP44 path:
 
 ```none
 m/44'/60'/0'/0/{i}
@@ -214,6 +217,14 @@ const signTxData = {
 const signedTx = await ETH.signTransaction(signTxData);
 
 ```
+
+## Scripts
+
+- `bootstrap`: Initialize monorepo environment with lerna.
+- `build`: Build all packages.
+- `clean`: Remove all packages's node_modules.
+- `ci`: Script for CI.
+- `update:lock`: Update package-lock.json information.
 
 ## Contributing
 

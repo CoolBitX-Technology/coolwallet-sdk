@@ -1,0 +1,16 @@
+name: Assign Reviewers
+
+on: 
+  pull_request:
+    types: 
+      [ready_for_review, opened]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Assign Team and Persons"
+        uses: rowi1de/auto-assign-review-teams@v1.1.3
+        with:
+          repo-token: ${{ secrets.AUTOASSIGN_PAT }}
+          org: "CoolBitX-Technology"
+          teams: "coolwallet, sesdk"

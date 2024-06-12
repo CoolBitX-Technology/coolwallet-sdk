@@ -1,4 +1,4 @@
-import { apdu } from "@coolwallet/core";
+import { apdu } from '@coolwallet/core';
 import { blake2b } from './cryptoUtil';
 import * as types from '../config/types';
 import * as dotUtil from './dotUtil';
@@ -8,9 +8,8 @@ import * as params from '../config/params';
 
 const elliptic = require('elliptic');
 // eslint-disable-next-line new-cap
-const ec = new elliptic.ec("secp256k1");
+const ec = new elliptic.ec('secp256k1');
 const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
-
 
 /**
  * Convert public key to address
@@ -18,30 +17,28 @@ const { encodeAddress, decodeAddress } = require('@polkadot/keyring');
  * @return {string}
  */
 export function pubKeyToAddress(compressedPubkey: string, addressType: number): string {
-
-  const zero = '0x' + Buffer.from(blake2b(compressedPubkey)).toString('hex')
+  const zero = '0x' + Buffer.from(blake2b(compressedPubkey)).toString('hex');
   const address = encodeAddress(zero, addressType);
   return address;
 }
 
-
-export async function getCompleteSignature(transport: types.Transport, publicKey: string, canonicalSignature: { r: string; s: string; } | Buffer): Promise<string> {
+export async function getCompleteSignature(
+  transport: types.Transport,
+  publicKey: string,
+  canonicalSignature: { r: string; s: string } | Buffer
+): Promise<string> {
   if (Buffer.isBuffer(canonicalSignature)) {
     return '';
   }
   const { r, s } = canonicalSignature;
   const { signedTx } = await apdu.tx.getSignedHex(transport);
-  const keyPair = ec.keyFromPublic(publicKey, "hex");
-  const payloaBlake2bHash = blake2b(signedTx)
-  const v = ec.getKeyRecoveryParam(
-    payloaBlake2bHash,
-    canonicalSignature,
-    keyPair.pub
-  );
-  console.debug("v: ", v)
-  
+  const keyPair = ec.keyFromPublic(publicKey, 'hex');
+  const payloaBlake2bHash = blake2b(signedTx);
+  const v = ec.getKeyRecoveryParam(payloaBlake2bHash, canonicalSignature, keyPair.pub);
+  console.debug('v: ', v);
+
   const sig = r + s + v.toString().padStart(2, '0');
-  return sig
+  return sig;
 }
 
 /**
@@ -63,8 +60,13 @@ method
  * 
  * @returns 
  */
-export function getSubmitTransaction(fromAddress: string, formatTxData: types.FormatTransfer, methodString: string, signature: string, version: number): string {
-
+export function getSubmitTransaction(
+  fromAddress: string,
+  formatTxData: types.FormatTransfer,
+  methodString: string,
+  signature: string,
+  version: number
+): string {
   const sumitTx =
     params.TX_ADDRESS_PRE +
     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
@@ -72,9 +74,9 @@ export function getSubmitTransaction(fromAddress: string, formatTxData: types.Fo
     formatTxData.mortalEra +
     formatTxData.encodeNonce +
     formatTxData.encodeTip +
-    methodString
+    methodString;
 
-  const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version))
+  const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version));
 
-  return '0x' + resultTx
+  return '0x' + resultTx;
 }

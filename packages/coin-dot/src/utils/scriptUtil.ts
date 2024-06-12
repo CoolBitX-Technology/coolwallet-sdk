@@ -1,8 +1,7 @@
-import * as types from '../config/types'
+import * as types from '../config/types';
 import { utils } from '@coolwallet/core';
-import * as params from '../config/params'
-import * as stringUtil from './stringUtil'
-
+import * as params from '../config/params';
+import * as stringUtil from './stringUtil';
 
 async function addPath(argument: string, addressIndex: number, coinType: string) {
   const SEPath = `15${await utils.getPath(coinType, addressIndex)}`;
@@ -10,24 +9,22 @@ async function addPath(argument: string, addressIndex: number, coinType: string)
 }
 
 /**
- * 
- * @param rawData 
- * @returns 
+ *
+ * @param rawData
+ * @returns
  */
-const getTradeArgument = async (rawData: types.FormatTransfer)
-  : Promise<string> => {
-  const mortalEra = rawData.mortalEra.padStart(10, '0')
-  const nonce = stringUtil.removeHex0x(rawData.nonce).padStart(10, '0')
-  const tip = rawData.tip.padStart(10, '0')
-  const specVer = rawData.specVer.padStart(8, '0')
-  const txVer = rawData.txVer.padStart(8, '0')
-  const blockHash = stringUtil.removeHex0x(rawData.blockHash).padStart(64, '0')
-  const genesisHash = stringUtil.removeHex0x(rawData.genesisHash).padStart(64, '0')
+const getTradeArgument = async (rawData: types.FormatTransfer): Promise<string> => {
+  const mortalEra = rawData.mortalEra.padStart(10, '0');
+  const nonce = stringUtil.removeHex0x(rawData.nonce).padStart(10, '0');
+  const tip = rawData.tip.padStart(10, '0');
+  const specVer = rawData.specVer.padStart(8, '0');
+  const txVer = rawData.txVer.padStart(8, '0');
+  const blockHash = stringUtil.removeHex0x(rawData.blockHash).padStart(64, '0');
+  const genesisHash = stringUtil.removeHex0x(rawData.genesisHash).padStart(64, '0');
 
-  const argument = mortalEra + nonce + tip + specVer + txVer + genesisHash + blockHash
+  const argument = mortalEra + nonce + tip + specVer + txVer + genesisHash + blockHash;
   return argument;
 };
-
 
 /**
 payload:
@@ -47,112 +44,131 @@ payload:
  * @param addressIndex 
  * @returns 
  */
-export const getNormalArgument = async (rawData: types.FormatTransfer, method: types.FormatNormalMethod, addressIndex: number, coinType: string)
-  : Promise<string> => {
-
+export const getNormalArgument = async (
+  rawData: types.FormatTransfer,
+  method: types.FormatNormalMethod,
+  addressIndex: number,
+  coinType: string
+): Promise<string> => {
   // const methodLen = dotUtil.getMethodLength(methodString).padStart(4, '0')
-  const callIndex = method.callIndex.padStart(4, '0')
-  const destAddress = method.destAddress.padStart(64, '0')
-  const value = method.value.padStart(20, '0')
-  const tradeArgument = await getTradeArgument(rawData)
-  
-  const argument = callIndex + destAddress + value + tradeArgument
-  console.debug('NormalTradeArgument: ', argument)
+  const callIndex = method.callIndex.padStart(4, '0');
+  const destAddress = method.destAddress.padStart(64, '0');
+  const value = method.value.padStart(20, '0');
+  const tradeArgument = await getTradeArgument(rawData);
+
+  const argument = callIndex + destAddress + value + tradeArgument;
+  console.debug('NormalTradeArgument: ', argument);
   return addPath(argument, addressIndex, coinType);
 };
 
+export const getBondArgument = async (
+  rawData: types.FormatTransfer,
+  method: types.FormatBondMethod,
+  addressIndex: number,
+  coinType: string
+): Promise<string> => {
+  const callIndex = method.callIndex.padStart(4, '0');
+  const value = method.value.padStart(20, '0');
+  const payeeType = method.payeeType;
+  const tradeArgument = await getTradeArgument(rawData);
 
-export const getBondArgument = async (rawData: types.FormatTransfer, method: types.FormatBondMethod, addressIndex: number, coinType: string)
-  : Promise<string> => {
-
-  const callIndex = method.callIndex.padStart(4, '0')
-  const controllerAddress = method.controllerAddress.padStart(64, '0')
-  const value = method.value.padStart(20, '0')
-  const payeeType = method.payeeType
-  const tradeArgument = await getTradeArgument(rawData)
-
-  const argument = callIndex + controllerAddress + value + payeeType + tradeArgument
-  console.debug('BondArgument: ', argument)
-  return addPath(argument, addressIndex, coinType);
-};
-
-/**
- * 
- * @param rawData 
- * @param method 
- * @param addressIndex 
- * @returns 
- */
-export const getBondExtraArgument = async (rawData: types.FormatTransfer, method: types.FormatBondExtraMethod, addressIndex: number, coinType: string)
-  : Promise<string> => {
-
-  const callIndex = method.callIndex.padStart(4, '0')
-  const maxAdditional = method.maxAdditional.padStart(20, '0')
-  const tradeArgument = await getTradeArgument(rawData)
-
-  const argument = callIndex + maxAdditional + tradeArgument
-  console.debug('BondExtraArgument: ', argument)
+  const argument = callIndex + value + payeeType + tradeArgument;
+  console.debug('BondArgument: ', argument);
   return addPath(argument, addressIndex, coinType);
 };
 
 /**
- * 
- * @param rawData 
- * @param method 
- * @param addressIndex 
- * @returns 
+ *
+ * @param rawData
+ * @param method
+ * @param addressIndex
+ * @returns
  */
-export const getUnbondArgument = async (rawData: types.FormatTransfer, method: types.FormatUnbondMethod, addressIndex: number, coinType: string)
-  : Promise<string> => {
+export const getBondExtraArgument = async (
+  rawData: types.FormatTransfer,
+  method: types.FormatBondExtraMethod,
+  addressIndex: number,
+  coinType: string
+): Promise<string> => {
+  const callIndex = method.callIndex.padStart(4, '0');
+  const maxAdditional = method.maxAdditional.padStart(20, '0');
+  const tradeArgument = await getTradeArgument(rawData);
 
-  const callIndex = method.callIndex.padStart(4, '0')
-  const value = method.value.padStart(20, '0')
-  const tradeArgument = await getTradeArgument(rawData)
-  const argument = callIndex + value + tradeArgument
-  console.debug('UnbondArgument: ', argument)
+  const argument = callIndex + maxAdditional + tradeArgument;
+  console.debug('BondExtraArgument: ', argument);
+  return addPath(argument, addressIndex, coinType);
+};
+
+/**
+ *
+ * @param rawData
+ * @param method
+ * @param addressIndex
+ * @returns
+ */
+export const getUnbondArgument = async (
+  rawData: types.FormatTransfer,
+  method: types.FormatUnbondMethod,
+  addressIndex: number,
+  coinType: string
+): Promise<string> => {
+  const callIndex = method.callIndex.padStart(4, '0');
+  const value = method.value.padStart(20, '0');
+  const tradeArgument = await getTradeArgument(rawData);
+  const argument = callIndex + value + tradeArgument;
+  console.debug('UnbondArgument: ', argument);
   return addPath(argument, addressIndex, coinType);
 };
 
 /**
  * Argument = [callIndex (2B)][tradeArgument][targetCount (1B)][targets (Variety)]
- * @param rawData 
- * @param method 
- * @param addressIndex 
- * @returns 
+ * @param rawData
+ * @param method
+ * @param addressIndex
+ * @returns
  */
-export const getNominateArgument = async (rawData: types.FormatTransfer, method: types.FormatNominateMethod, addressIndex: number, coinType: string)
-  : Promise<string> => {
+export const getNominateArgument = async (
+  rawData: types.FormatTransfer,
+  method: types.FormatNominateMethod,
+  addressIndex: number,
+  coinType: string
+): Promise<string> => {
+  const callIndex = method.callIndex.padStart(4, '0');
+  const targetCount = method.addressCount.padStart(2, '0');
+  const targets = method.targetsString;
+  const tradeArgument = await getTradeArgument(rawData);
 
-  const callIndex = method.callIndex.padStart(4, '0')
-  const targetCount = method.addressCount.padStart(2, '0')
-  const targets = method.targetsString
-  const tradeArgument = await getTradeArgument(rawData)
-
-  const argument = callIndex + tradeArgument + targetCount + targets
-  console.debug('NominateArgument: ', argument)
+  const argument = callIndex + tradeArgument + targetCount + targets;
+  console.debug('NominateArgument: ', argument);
   return addPath(argument, addressIndex, coinType);
 };
 
 //  TODO
-export const getWithdrawUnbondedArgument = async (rawData: types.FormatTransfer, method: types.FormatWithdrawUnbondedTxMethod, addressIndex: number, coinType: string)
-  : Promise<string> => {
+export const getWithdrawUnbondedArgument = async (
+  rawData: types.FormatTransfer,
+  method: types.FormatWithdrawUnbondedTxMethod,
+  addressIndex: number,
+  coinType: string
+): Promise<string> => {
+  const callIndex = method.callIndex.padStart(4, '0');
+  const numSlashingSpans = method.numSlashingSpans.padStart(8, '0');
+  const tradeArgument = await getTradeArgument(rawData);
 
-  const callIndex = method.callIndex.padStart(4, '0')
-  const numSlashingSpans = method.numSlashingSpans.padStart(8, '0')
-  const tradeArgument = await getTradeArgument(rawData)
-
-  const argument = callIndex + numSlashingSpans + tradeArgument
-  console.debug('WithdrawUnbondedArgument: ', argument)
+  const argument = callIndex + numSlashingSpans + tradeArgument;
+  console.debug('WithdrawUnbondedArgument: ', argument);
   return addPath(argument, addressIndex, coinType);
 };
 
-export const getChillArgument = async (rawData: types.FormatTransfer, methodString: string, addressIndex: number, coinType: string)
-  : Promise<string> => {
+export const getChillArgument = async (
+  rawData: types.FormatTransfer,
+  methodString: string,
+  addressIndex: number,
+  coinType: string
+): Promise<string> => {
+  const callIndex = methodString.padStart(4, '0');
+  const tradeArgument = await getTradeArgument(rawData);
 
-  const callIndex = methodString.padStart(4, '0')
-  const tradeArgument = await getTradeArgument(rawData)
-
-  const argument = callIndex + tradeArgument
-  console.debug('ChillArgument: ', argument)
+  const argument = callIndex + tradeArgument;
+  console.debug('ChillArgument: ', argument);
   return addPath(argument, addressIndex, coinType);
 };

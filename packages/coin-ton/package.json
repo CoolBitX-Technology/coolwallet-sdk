@@ -1,0 +1,59 @@
+{
+  "name": "@coolwallet/ton",
+  "version": "1.0.0",
+  "description": "CoolWallet TON SDK",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "NODE_ENV=development jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+  },
+  "keywords": [
+    "ton",
+    "toncoin",
+    "coolwallet",
+    "javascript",
+    "hardwarewallet",
+    "cryptocurrency",
+    "coolbitx",
+    "transaction"
+  ],
+  "author": "coolwallet-team",
+  "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.1.24"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.1.23",
+    "@types/ledgerhq__hw-transport-webusb": "^4.70.4"
+  },
+  "dependencies": {
+    "@types/bn.js": "^5.1.1",
+    "bignumber.js": "^8.0.2",
+    "bip32": "^2.0.4",
+    "bn.js": "^5.2.1",
+    "ed25519-hd-key": "^1.3.0",
+    "tonweb": "0.0.66"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-sdk/issues"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
+  }
+}

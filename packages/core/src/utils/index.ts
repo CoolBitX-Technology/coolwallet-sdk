@@ -1,41 +1,79 @@
-import * as tx from '../apdu/transaction' ;
+import * as bip39 from 'bip39';
+import pbkdf2 from 'pbkdf2';
+import isEmpty from 'lodash/isEmpty';
+import { tx, wallet, general } from '../apdu';
 import Transport from '../transport';
-import { MSG } from '../config/status/msg'
-import { CODE } from '../config/status/code'
-import { pathType } from '../config/param'
-import { APDUError, SDKError } from '../error/errorHandle'
-const bip39 = require('bip39');
+import { MSG } from '../config/status/msg';
+import { CODE } from '../config/status/code';
+import { PathType } from '../config/param';
+import { SDKError } from '../error/errorHandle';
 
+function hardenPath(index: number) {
+  return (Math.floor(index) + 0x80000000).toString(16);
+}
 
+// input :
+//    pathType : BIP32 = '32', SLIP0010 = '10', BIP32EDDSA = '42', BIP32ED25519 = '17'
+//    pathString : 44'/0'/0'/0/0
+//
+// output : [path_type(1B)] [index(4B)] x 5
+//    32 8000002C 80000000 80000000 00000000 00000000
+export const getFullPath = ({
+  pathType = PathType.BIP32,
+  pathString,
+}: {
+  pathType: PathType;
+  pathString: string;
+}): string => {
+  const paths = pathString.split('/').map((index) => {
+    if (!index.match(/^\d+(|')$/)) {
+      throw new SDKError('getFullPath', `invalid pathString : ${pathString}`);
+    }
+    if (index.endsWith("'")) {
+      return hardenPath(parseInt(index.slice(0, -1), 10));
+    }
+    return parseInt(index, 10).toString(16).padStart(8, '0');
+  });
+  return pathType.toString().concat(...paths);
+};
 
-export const getPath = async (coinType: string, keyIndex: number, depth: number = 5, path: pathType = pathType.BIP32): Promise<string> => {
-  let fullPath = path.toString();
-
-  if (path == pathType.SLIP0010 || path == pathType.BIP32_ED25519) {
-    depth = 3;
-  }
-
+export const getPath = async (
+  coinType: string,
+  keyIndex: number,
+  depth = 5,
+  pathType = PathType.BIP32,
+  purpose?: number
+): Promise<string> => {
+  let fullPath = pathType.toString();
   if (depth >= 1) {
-    fullPath += "8000002C";
+    if (purpose) {
+      fullPath += (purpose + 0x80000000).toString(16);
+    } else {
+      fullPath += '8000002C';
+    }
   }
   if (depth >= 2) {
     fullPath += coinType;
   }
   if (depth >= 3) {
-    fullPath += "80000000";
+    fullPath += '80000000';
+  }
+  if (pathType === PathType.SLIP0010 || pathType === PathType.BIP32ED25519) {
+    return fullPath;
   }
   if (depth >= 4) {
-    fullPath += "00000000";
+    fullPath += '00000000';
   }
   if (depth >= 5) {
-    fullPath += (keyIndex.toString(16)).padStart(8, "0");
+    fullPath += keyIndex.toString(16).padStart(8, '0');
   }
   return fullPath;
-}
+};
 
 export const getReturnMsg = (code: string): string => {
-  return MSG[`_${code}`] ? MSG[`_${code}`] : "unknown command error";
-}
+  const message = MSG[`_${code}`] ? MSG[`_${code}`] : 'unknown command error';
+  return message;
+};
 
 const getCheckSum = (data: any) => {
   let XORTemp = 0;
@@ -63,31 +101,30 @@ export const assemblyCommandAndData = (
 
   const packetLength = 18;
   let dataLength = 0;
-  // flag = true;
-  let packets = '';
 
-  if (oriData) {
-    packets = oriData;
+  let packets = oriData ?? '';
+
+  let dataBuf = Buffer.from(packets, 'hex');
+  // Origin data length
+  const oriDataLength = dataBuf.length;
+
+  if (!isEmpty(dataBuf)) {
     const data = packets.match(/.{2}/g);
     const checksum = getCheckSum(data);
     packets += checksum;
+    dataBuf = Buffer.concat([dataBuf, Buffer.from(checksum, 'hex')]);
   }
 
-  const dataBuf = Buffer.from(packets, 'hex');
-  let copiedData = dataBuf;
-  let XORLength = dataBuf.length;
-  let oriDataLength = XORLength;
+  // Data with checksum length
+  const XORLength = dataBuf.length;
 
-  if (packets.length > 0) {
-    // copiedData = Buffer.from(copiedData, 'hex');
-    const length = copiedData.length / packetLength;
-    const remains = copiedData.length % packetLength;
+  if (dataBuf.length > 0) {
+    const length = dataBuf.length / packetLength;
+    const remains = dataBuf.length % packetLength;
     dataLength += length;
-    if (remains > 0) {
+    if (remains !== 0) {
       dataLength += 1;
     }
-
-    oriDataLength -= 1;
   }
 
   const oriDataBuf = Buffer.allocUnsafe(4);
@@ -99,34 +136,60 @@ export const assemblyCommandAndData = (
   XORData.fill(0);
   XORData.writeInt16BE(XORLength, 0);
   const hexXORLength = XORData.slice(0, 2).toString('hex').padStart(4, '0');
-  const hexBataLength = Buffer.from([dataLength]).toString('hex');
+  const hexDataLength = Buffer.from([dataLength]).toString('hex');
 
-  const command = pid + cmdLen + cla + ins + p1 + p2 + hexOriDataLength + hexXORLength + hexBataLength;
+  // 00 09 80 54 00 00 0000 0000 00
+  const command = pid + cmdLen + cla + ins + p1 + p2 + hexOriDataLength + hexXORLength + hexDataLength;
   return { command, data: packets };
 };
 
-
 export const checkSupportScripts = async (transport: Transport) => {
   const { statusCode } = await tx.getSignedHex(transport);
-  if (statusCode === CODE._9000){
+  if (statusCode === CODE._9000) {
     return true;
   } else if (statusCode === CODE._6D00) {
     return false;
   } else {
-    throw new SDKError(checkSupportScripts.name, 'checkSupportScripts error')
+    throw new SDKError(checkSupportScripts.name, 'checkSupportScripts error');
   }
 };
 
+export const createSeedByApp = async (wordNumber: number, randomBytes: (size: number) => Buffer): Promise<string> => {
+  const strength = wordNumber * 11 - wordNumber / 3;
+  return bip39.generateMnemonic(strength, randomBytes);
+};
 
+export const createWalletByMnemonic = async (
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  mnemonic: string,
+  SEPublicKey: string
+): Promise<void> => {
+  const seeds: Array<Buffer> = [];
+  const version = await general.getSEVersion(transport);
 
-export const createSeedByApp = async (strength: number, randomBytes: Buffer): Promise<string> => {
+  // mnemonic to seed
+  seeds[0] = await bip39.mnemonicToSeed(mnemonic);
 
-  const toBit = strength * 10.7;
-  const toFloor = Math.floor(toBit);
+  // mnemonic to ADA master key
+  if (version >= 317) {
+    const entropy = bip39.mnemonicToEntropy(mnemonic);
+    const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
+    key[0] &= 0b11111000;
+    key[31] &= 0b00011111;
+    key[31] |= 0b01000000;
 
-  let mnemonic;
-  const word = bip39.wordlists.english;
-  mnemonic = bip39.generateMnemonic(toFloor, randomBytes, word, false);
-  return mnemonic
+    seeds[1] = key;
+  }
 
-}
+  const seedHex = Buffer.concat(seeds).toString('hex');
+  return wallet.setSeed(transport, appId, appPrivateKey, seedHex, SEPublicKey);
+};
+
+/**
+ * Delay the promise and then resolve.
+ * @param {number} d The duration to delay the promise.
+ * @returns {Promise<void>}
+ */
+export const delay = (d: number): Promise<void> => new Promise((r) => setTimeout(r, d));

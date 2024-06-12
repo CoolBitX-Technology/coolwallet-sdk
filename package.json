@@ -2,36 +2,43 @@
   "name": "root",
   "private": true,
   "devDependencies": {
+    "@babel/core": "^7.16.0",
     "@babel/plugin-transform-runtime": "^7.8.3",
-    "@babel/preset-env": "^7.8.6",
-    "@types/jest": "^25.1.3",
-    "@typescript-eslint/eslint-plugin": "^4.10.0",
-    "@typescript-eslint/parser": "^4.10.0",
-    "babel-jest": "^25.1.0",
-    "eslint": "^6.1.0",
-    "eslint-config-airbnb": "^18.0.1",
-    "eslint-plugin-import": "^2.19.1",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.17.0",
-    "eslint-plugin-react-hooks": "^1.7.0",
-    "jest": "^25.1.0",
-    "lerna": "^3.18.3",
-    "prettier": "^2.0.5",
-    "prettier-eslint": "^9.0.0"
-  },
-  "jest": {
-    "testPathIgnorePatterns": [
-      "packages/.*/lib"
-    ],
-    "setupFiles": [
-      "<rootDir>/__mocks__/setup.js"
-    ]
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
+    "@coolwallet/testing-library": "file:./packages/testing-library",
+    "@coolwallet/transport-jre-http": "file:./packages/transport-jre-http",
+    "@types/jest": "^27.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
+    "babel-jest": "^27.4.4",
+    "eslint": "^8.4.1",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.4.0",
+    "jest": "^27.5.1",
+    "lerna": "^5.0.0",
+    "prettier": "^2.6.2",
+    "typescript": "^4.6.3"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --runInBand",
+    "bootstrap": "lerna bootstrap --ignore=\"@coolwallet/transport-react-native-ble\" --ignore=\"tester\"",
+    "build": "lerna run build --ignore=\"@coolwallet/transport-react-native-ble\" --ignore=\"tester\"",
+    "clean": "lerna clean --yes && lerna exec -- rm -rf lib",
+    "ci": "npm run clean && npm run bootstrap && npm run build",
+    "update:lock": "lerna exec --ignore=\"@coolwallet/transport-react-native-ble\" -- npm i",
+    "build-template": "cd packages/core && npm ci && npm run build && cd ../transport-web-ble && npm ci && npm run build && cd ../transport-jre-http && npm ci && npm run build && cd ../coin-template && npm ci && npm run build"
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@coolwallet/core": "0.1.0-beta.25"
+    "crypto": "^1.0.1",
+    "ts-node": "^10.9.2"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "coverage": true
   }
 }

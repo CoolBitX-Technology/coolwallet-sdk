@@ -1,9 +1,11 @@
 {
   "name": "@coolwallet/btc",
-  "version": "1.0.1",
+  "version": "1.1.9",
   "description": "Coolwallet Bitcoin sdk",
   "main": "lib/index.js",
   "scripts": {
+    "test": "NODE_ENV=development jest",
+    "ci-test": "NODE_ENV=production jest --runInBand",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
@@ -26,26 +28,34 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.0.0"
+    "@coolwallet/core": "^1.1.23"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "jest": "^26.0.1",
-    "@coolwallet/core": "^1.0.0"
+    "@coolwallet/core": "^1.1.23",
+    "ecpair": "^2.1.0"
   },
   "dependencies": {
-    "@types/bn.js": "^4.11.6",
-    "bitcoinjs-lib": "^5.1.7",
-    "bn.js": "^5.1.1"
+    "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
+    "@types/bn.js": "^5.1.1",
+    "bitcoinjs-lib": "^6.1.5",
+    "bn.js": "^5.2.1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-sdk/issues"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
   }
 }

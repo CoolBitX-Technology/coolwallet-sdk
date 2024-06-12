@@ -1,0 +1,911 @@
+{
+  "nested": {
+    "iotextypes": {
+      "options": {
+        "go_package": "github.com/iotexproject/iotex-proto/golang/iotextypes",
+        "java_multiple_files": true,
+        "java_package": "com.github.iotexproject.grpc.types"
+      },
+      "nested": {
+        "Transfer": {
+          "fields": {
+            "amount": {
+              "type": "string",
+              "id": 1
+            },
+            "recipient": {
+              "type": "string",
+              "id": 2
+            },
+            "payload": {
+              "type": "bytes",
+              "id": 3
+            }
+          }
+        },
+        "Candidate": {
+          "fields": {
+            "address": {
+              "type": "string",
+              "id": 1
+            },
+            "votes": {
+              "type": "bytes",
+              "id": 2
+            },
+            "pubKey": {
+              "type": "bytes",
+              "id": 3
+            },
+            "rewardAddress": {
+              "type": "string",
+              "id": 4
+            }
+          }
+        },
+        "CandidateList": {
+          "fields": {
+            "candidates": {
+              "rule": "repeated",
+              "type": "Candidate",
+              "id": 1
+            }
+          }
+        },
+        "PutPollResult": {
+          "fields": {
+            "height": {
+              "type": "uint64",
+              "id": 1
+            },
+            "candidates": {
+              "type": "CandidateList",
+              "id": 2
+            }
+          }
+        },
+        "Execution": {
+          "fields": {
+            "amount": {
+              "type": "string",
+              "id": 1
+            },
+            "contract": {
+              "type": "string",
+              "id": 2
+            },
+            "data": {
+              "type": "bytes",
+              "id": 3
+            },
+            "accessList": {
+              "rule": "repeated",
+              "type": "AccessTuple",
+              "id": 4
+            }
+          }
+        },
+        "AccessTuple": {
+          "fields": {
+            "address": {
+              "type": "string",
+              "id": 1
+            },
+            "storageKeys": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "StakeCreate": {
+          "fields": {
+            "candidateName": {
+              "type": "string",
+              "id": 1
+            },
+            "stakedAmount": {
+              "type": "string",
+              "id": 2
+            },
+            "stakedDuration": {
+              "type": "uint32",
+              "id": 3
+            },
+            "autoStake": {
+              "type": "bool",
+              "id": 4
+            },
+            "payload": {
+              "type": "bytes",
+              "id": 5
+            }
+          }
+        },
+        "StakeReclaim": {
+          "fields": {
+            "bucketIndex": {
+              "type": "uint64",
+              "id": 1
+            },
+            "payload": {
+              "type": "bytes",
+              "id": 2
+            }
+          }
+        },
+        "StakeAddDeposit": {
+          "fields": {
+            "bucketIndex": {
+              "type": "uint64",
+              "id": 1
+            },
+            "amount": {
+              "type": "string",
+              "id": 2
+            },
+            "payload": {
+              "type": "bytes",
+              "id": 3
+            }
+          }
+        },
+        "StakeRestake": {
+          "fields": {
+            "bucketIndex": {
+              "type": "uint64",
+              "id": 1
+            },
+            "stakedDuration": {
+              "type": "uint32",
+              "id": 2
+            },
+            "autoStake": {
+              "type": "bool",
+              "id": 3
+            },
+            "payload": {
+              "type": "bytes",
+              "id": 4
+            }
+          }
+        },
+        "StakeChangeCandidate": {
+          "fields": {
+            "bucketIndex": {
+              "type": "uint64",
+              "id": 1
+            },
+            "candidateName": {
+              "type": "string",
+              "id": 2
+            },
+            "payload": {
+              "type": "bytes",
+              "id": 3
+            }
+          }
+        },
+        "StakeTransferOwnership": {
+          "fields": {
+            "bucketIndex": {
+              "type": "uint64",
+              "id": 1
+            },
+            "voterAddress": {
+              "type": "string",
+              "id": 2
+            },
+            "payload": {
+              "type": "bytes",
+              "id": 3
+            }
+          }
+        },
+        "CandidateBasicInfo": {
+          "fields": {
+            "name": {
+              "type": "string",
+              "id": 1
+            },
+            "operatorAddress": {
+              "type": "string",
+              "id": 2
+            },
+            "rewardAddress": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "CandidateRegister": {
+          "fields": {
+            "candidate": {
+              "type": "CandidateBasicInfo",
+              "id": 1
+            },
+            "stakedAmount": {
+              "type": "string",
+              "id": 2
+            },
+            "stakedDuration": {
+              "type": "uint32",
+              "id": 3
+            },
+            "autoStake": {
+              "type": "bool",
+              "id": 4
+            },
+            "ownerAddress": {
+              "type": "string",
+              "id": 5
+            },
+            "payload": {
+              "type": "bytes",
+              "id": 6
+            }
+          }
+        },
+        "StartSubChain": {
+          "fields": {
+            "chainID": {
+              "type": "uint32",
+              "id": 1
+            },
+            "securityDeposit": {
+              "type": "string",
+              "id": 2
+            },
+            "operationDeposit": {
+              "type": "string",
+              "id": 3
+            },
+            "startHeight": {
+              "type": "uint64",
+              "id": 4
+            },
+            "parentHeightOffset": {
+              "type": "uint64",
+              "id": 5
+            }
+          }
+        },
+        "StopSubChain": {
+          "fields": {
+            "chainID": {
+              "type": "uint32",
+              "id": 1
+            },
+            "stopHeight": {
+              "type": "uint64",
+              "id": 2
+            },
+            "subChainAddress": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "MerkleRoot": {
+          "fields": {
+            "name": {
+              "type": "string",
+              "id": 1
+            },
+            "value": {
+              "type": "bytes",
+              "id": 2
+            }
+          }
+        },
+        "PutBlock": {
+          "fields": {
+            "subChainAddress": {
+              "type": "string",
+              "id": 1
+            },
+            "height": {
+              "type": "uint64",
+              "id": 2
+            },
+            "roots": {
+              "rule": "repeated",
+              "type": "MerkleRoot",
+              "id": 3
+            }
+          }
+        },
+        "CreateDeposit": {
+          "fields": {
+            "chainID": {
+              "type": "uint32",
+              "id": 1
+            },
+            "amount": {
+              "type": "string",
+              "id": 2
+            },
+            "recipient": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "SettleDeposit": {
+          "fields": {
+            "amount": {
+              "type": "string",
+              "id": 1
+            },
+            "recipient": {
+              "type": "string",
+              "id": 2
+            },
+            "index": {
+              "type": "uint64",
+              "id": 3
+            }
+          }
+        },
+        "CreatePlumChain": {
+          "fields": {}
+        },
+        "TerminatePlumChain": {
+          "fields": {
+            "subChainAddress": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "PlumPutBlock": {
+          "fields": {
+            "subChainAddress": {
+              "type": "string",
+              "id": 1
+            },
+            "height": {
+              "type": "uint64",
+              "id": 2
+            },
+            "roots": {
+              "keyType": "string",
+              "type": "bytes",
+              "id": 3
+            }
+          }
+        },
+        "PlumCreateDeposit": {
+          "fields": {
+            "subChainAddress": {
+              "type": "string",
+              "id": 1
+            },
+            "amount": {
+              "type": "string",
+              "id": 2
+            },
+            "recipient": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "PlumStartExit": {
+          "fields": {
+            "subChainAddress": {
+              "type": "string",
+              "id": 1
+            },
+            "previousTransfer": {
+              "type": "bytes",
+              "id": 2
+            },
+            "previousTransferBlockProof": {
+              "type": "bytes",
+              "id": 3
+            },
+            "previousTransferBlockHeight": {
+              "type": "uint64",
+              "id": 4
+            },
+            "exitTransfer": {
+              "type": "bytes",
+              "id": 5
+            },
+            "exitTransferBlockProof": {
+              "type": "bytes",
+              "id": 6
+            },
+            "exitTransferBlockHeight": {
+              "type": "uint64",
+              "id": 7
+            }
+          }
+        },
+        "PlumChallengeExit": {
+          "fields": {
+            "subChainAddress": {
+              "type": "string",
+              "id": 1
+            },
+            "coinID": {
+              "type": "uint64",
+              "id": 2
+            },
+            "challengeTransfer": {
+              "type": "bytes",
+              "id": 3
+            },
+            "challengeTransferBlockProof": {
+              "type": "bytes",
+              "id": 4
+            },
+            "challengeTransferBlockHeight": {
+              "type": "uint64",
+              "id": 5
+            }
+          }
+        },
+        "PlumResponseChallengeExit": {
+          "fields": {
+            "subChainAddress": {
+              "type": "string",
+              "id": 1
+            },
+            "coinID": {
+              "type": "uint64",
+              "id": 2
+            },
+            "challengeTransfer": {
+              "type": "bytes",
+              "id": 3
+            },
+            "responseTransfer": {
+              "type": "bytes",
+              "id": 4
+            },
+            "responseTransferBlockProof": {
+              "type": "bytes",
+              "id": 5
+            },
+            "previousTransferBlockHeight": {
+              "type": "uint64",
+              "id": 6
+            }
+          }
+        },
+        "PlumFinalizeExit": {
+          "fields": {
+            "subChainAddress": {
+              "type": "string",
+              "id": 1
+            },
+            "coinID": {
+              "type": "uint64",
+              "id": 2
+            }
+          }
+        },
+        "PlumSettleDeposit": {
+          "fields": {
+            "coinID": {
+              "type": "uint64",
+              "id": 1
+            }
+          }
+        },
+        "PlumTransfer": {
+          "fields": {
+            "coinID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "denomination": {
+              "type": "bytes",
+              "id": 2
+            },
+            "owner": {
+              "type": "string",
+              "id": 3
+            },
+            "recipient": {
+              "type": "string",
+              "id": 4
+            }
+          }
+        },
+        "ActionCore": {
+          "oneofs": {
+            "action": {
+              "oneof": [
+                "transfer",
+                "execution",
+                "startSubChain",
+                "stopSubChain",
+                "putBlock",
+                "createDeposit",
+                "settleDeposit",
+                "createPlumChain",
+                "terminatePlumChain",
+                "plumPutBlock",
+                "plumCreateDeposit",
+                "plumStartExit",
+                "plumChallengeExit",
+                "plumResponseChallengeExit",
+                "plumFinalizeExit",
+                "plumSettleDeposit",
+                "plumTransfer",
+                "depositToRewardingFund",
+                "claimFromRewardingFund",
+                "grantReward",
+                "stakeCreate",
+                "stakeUnstake",
+                "stakeWithdraw",
+                "stakeAddDeposit",
+                "stakeRestake",
+                "stakeChangeCandidate",
+                "stakeTransferOwnership",
+                "candidateRegister",
+                "candidateUpdate",
+                "putPollResult"
+              ]
+            }
+          },
+          "fields": {
+            "version": {
+              "type": "uint32",
+              "id": 1
+            },
+            "nonce": {
+              "type": "uint64",
+              "id": 2
+            },
+            "gasLimit": {
+              "type": "uint64",
+              "id": 3
+            },
+            "gasPrice": {
+              "type": "string",
+              "id": 4
+            },
+            "chainID": {
+              "type": "uint32",
+              "id": 5
+            },
+            "transfer": {
+              "type": "Transfer",
+              "id": 10
+            },
+            "execution": {
+              "type": "Execution",
+              "id": 12
+            },
+            "startSubChain": {
+              "type": "StartSubChain",
+              "id": 13
+            },
+            "stopSubChain": {
+              "type": "StopSubChain",
+              "id": 14
+            },
+            "putBlock": {
+              "type": "PutBlock",
+              "id": 15
+            },
+            "createDeposit": {
+              "type": "CreateDeposit",
+              "id": 16
+            },
+            "settleDeposit": {
+              "type": "SettleDeposit",
+              "id": 17
+            },
+            "createPlumChain": {
+              "type": "CreatePlumChain",
+              "id": 18
+            },
+            "terminatePlumChain": {
+              "type": "TerminatePlumChain",
+              "id": 19
+            },
+            "plumPutBlock": {
+              "type": "PlumPutBlock",
+              "id": 20
+            },
+            "plumCreateDeposit": {
+              "type": "PlumCreateDeposit",
+              "id": 21
+            },
+            "plumStartExit": {
+              "type": "PlumStartExit",
+              "id": 22
+            },
+            "plumChallengeExit": {
+              "type": "PlumChallengeExit",
+              "id": 23
+            },
+            "plumResponseChallengeExit": {
+              "type": "PlumResponseChallengeExit",
+              "id": 24
+            },
+            "plumFinalizeExit": {
+              "type": "PlumFinalizeExit",
+              "id": 25
+            },
+            "plumSettleDeposit": {
+              "type": "PlumSettleDeposit",
+              "id": 26
+            },
+            "plumTransfer": {
+              "type": "PlumTransfer",
+              "id": 27
+            },
+            "depositToRewardingFund": {
+              "type": "DepositToRewardingFund",
+              "id": 30
+            },
+            "claimFromRewardingFund": {
+              "type": "ClaimFromRewardingFund",
+              "id": 31
+            },
+            "grantReward": {
+              "type": "GrantReward",
+              "id": 32
+            },
+            "stakeCreate": {
+              "type": "StakeCreate",
+              "id": 40
+            },
+            "stakeUnstake": {
+              "type": "StakeReclaim",
+              "id": 41
+            },
+            "stakeWithdraw": {
+              "type": "StakeReclaim",
+              "id": 42
+            },
+            "stakeAddDeposit": {
+              "type": "StakeAddDeposit",
+              "id": 43
+            },
+            "stakeRestake": {
+              "type": "StakeRestake",
+              "id": 44
+            },
+            "stakeChangeCandidate": {
+              "type": "StakeChangeCandidate",
+              "id": 45
+            },
+            "stakeTransferOwnership": {
+              "type": "StakeTransferOwnership",
+              "id": 46
+            },
+            "candidateRegister": {
+              "type": "CandidateRegister",
+              "id": 47
+            },
+            "candidateUpdate": {
+              "type": "CandidateBasicInfo",
+              "id": 48
+            },
+            "putPollResult": {
+              "type": "PutPollResult",
+              "id": 50
+            }
+          }
+        },
+        "Encoding": {
+          "values": {
+            "IOTEX_PROTOBUF": 0,
+            "ETHEREUM_RLP": 1
+          }
+        },
+        "Action": {
+          "fields": {
+            "core": {
+              "type": "ActionCore",
+              "id": 1
+            },
+            "senderPubKey": {
+              "type": "bytes",
+              "id": 2
+            },
+            "signature": {
+              "type": "bytes",
+              "id": 3
+            },
+            "encoding": {
+              "type": "Encoding",
+              "id": 4
+            }
+          }
+        },
+        "Receipt": {
+          "fields": {
+            "status": {
+              "type": "uint64",
+              "id": 1
+            },
+            "blkHeight": {
+              "type": "uint64",
+              "id": 2
+            },
+            "actHash": {
+              "type": "bytes",
+              "id": 3
+            },
+            "gasConsumed": {
+              "type": "uint64",
+              "id": 4
+            },
+            "contractAddress": {
+              "type": "string",
+              "id": 5
+            },
+            "logs": {
+              "rule": "repeated",
+              "type": "Log",
+              "id": 6
+            },
+            "executionRevertMsg": {
+              "type": "string",
+              "id": 7
+            },
+            "txIndex": {
+              "type": "uint32",
+              "id": 8
+            }
+          }
+        },
+        "Log": {
+          "fields": {
+            "contractAddress": {
+              "type": "string",
+              "id": 1
+            },
+            "topics": {
+              "rule": "repeated",
+              "type": "bytes",
+              "id": 2
+            },
+            "data": {
+              "type": "bytes",
+              "id": 3
+            },
+            "blkHeight": {
+              "type": "uint64",
+              "id": 4
+            },
+            "actHash": {
+              "type": "bytes",
+              "id": 5
+            },
+            "index": {
+              "type": "uint32",
+              "id": 6
+            },
+            "blkHash": {
+              "type": "bytes",
+              "id": 7
+            },
+            "txIndex": {
+              "type": "uint32",
+              "id": 8
+            }
+          }
+        },
+        "Logs": {
+          "fields": {
+            "logs": {
+              "rule": "repeated",
+              "type": "Log",
+              "id": 1
+            }
+          }
+        },
+        "EvmTransfer": {
+          "fields": {
+            "amount": {
+              "type": "bytes",
+              "id": 1
+            },
+            "from": {
+              "type": "string",
+              "id": 2
+            },
+            "to": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "EvmTransferList": {
+          "fields": {
+            "evmTransfers": {
+              "rule": "repeated",
+              "type": "EvmTransfer",
+              "id": 1
+            }
+          }
+        },
+        "ActionEvmTransfer": {
+          "fields": {
+            "actionHash": {
+              "type": "bytes",
+              "id": 1
+            },
+            "numEvmTransfers": {
+              "type": "uint64",
+              "id": 2
+            },
+            "evmTransfers": {
+              "rule": "repeated",
+              "type": "EvmTransfer",
+              "id": 3
+            }
+          }
+        },
+        "BlockEvmTransfer": {
+          "fields": {
+            "blockHeight": {
+              "type": "uint64",
+              "id": 1
+            },
+            "numEvmTransfers": {
+              "type": "uint64",
+              "id": 2
+            },
+            "actionEvmTransfers": {
+              "rule": "repeated",
+              "type": "ActionEvmTransfer",
+              "id": 3
+            }
+          }
+        },
+        "DepositToRewardingFund": {
+          "fields": {
+            "amount": {
+              "type": "string",
+              "id": 1
+            },
+            "data": {
+              "type": "bytes",
+              "id": 2
+            }
+          }
+        },
+        "ClaimFromRewardingFund": {
+          "fields": {
+            "amount": {
+              "type": "string",
+              "id": 1
+            },
+            "data": {
+              "type": "bytes",
+              "id": 2
+            }
+          }
+        },
+        "RewardType": {
+          "values": {
+            "BlockReward": 0,
+            "EpochReward": 1
+          }
+        },
+        "GrantReward": {
+          "fields": {
+            "type": {
+              "type": "RewardType",
+              "id": 1
+            },
+            "height": {
+              "type": "uint64",
+              "id": 2
+            }
+          }
+        }
+      }
+    }
+  }
+}

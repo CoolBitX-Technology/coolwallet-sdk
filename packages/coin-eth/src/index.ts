@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, setting, apdu } from '@coolwallet/core';
+import { coin as COIN, setting, apdu, Transport } from '@coolwallet/core';
+import web3 from 'web3';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types';
@@ -14,7 +15,7 @@ const convertEIP1559IntoLegacyTx = (eip1559Tx: types.signEIP1559Tx): types.signT
   const tx: types.Transaction = {
     chainId: 1,
     gasPrice: eip1559Tx.transaction.gasFeeCap,
-    ...eip1559Tx.transaction
+    ...eip1559Tx.transaction,
   };
   return { ...eip1559Tx, transaction: tx };
 };
@@ -24,32 +25,17 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     super(params.COIN_TYPE);
   }
 
-  async getAddress(
-    transport: types.Transport,
-    appPrivateKey: string,
-    appId: string,
-    addressIndex: number
-  ): Promise<string> {
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
+  async getAddress(transport: Transport, appPrivateKey: string, appId: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return pubKeyToAddress(publicKey);
   }
 
-  async getAddressByAccountKey(
-    accPublicKey: string,
-    accChainCode: string,
-    addressIndex: number
-  ): Promise<string> {
-    const publicKey = await this.getAddressPublicKey(
-      accPublicKey, accChainCode, addressIndex
-    );
+  async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
+    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     return pubKeyToAddress(publicKey);
   }
 
-  async signEIP1559Transaction(
-    signTxData: types.signEIP1559Tx
-  ): Promise<string> {
+  async signEIP1559Transaction(signTxData: types.signEIP1559Tx): Promise<string> {
     const { value, data, to } = signTxData.transaction;
     // eth
     if (value && !data) {
@@ -58,7 +44,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     // erc20
     const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-    if ((!value || value === '0x0') && data && functionHash === 'a9059cbb') {
+    const valueBN = web3.utils.toBN(value);
+    if (valueBN.isZero() && data && functionHash === 'a9059cbb') {
       // 檢查是否內建
       const upperCaseAddress = to.toUpperCase();
       for (const tokenInfo of TOKENTYPE) {
@@ -66,8 +53,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
           signTxData.transaction.option = {
             info: {
               symbol: tokenInfo.symbol,
-              decimals: tokenInfo.unit
-            }
+              decimals: tokenInfo.unit,
+            },
           };
           return this.signEIP1559ERC20(signTxData, tokenInfo.signature);
         }
@@ -85,93 +72,56 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     return this.signEIP1559Smart(signTxData);
   }
 
-  async signEIP1559Transfer(
-    signTxData: types.signEIP1559Tx
-  ): Promise<string> {
+  async signEIP1559Transfer(signTxData: types.signEIP1559Tx): Promise<string> {
     const version = await apdu.general.getSEVersion(signTxData.transport);
     if (version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signTransferTransaction(data);
     }
 
-    const {
-      transport, appPrivateKey, appId, addressIndex, transaction
-    } = signTxData;
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
-    const argument = await scriptUtilsEIP1559.getTransferArgument(
-      transaction, addressIndex
-    );
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const argument = await scriptUtilsEIP1559.getTransferArgument(transaction, addressIndex);
     const script = params.EIP1559Transfer.scriptWithSignature;
 
-    return ethSign.signEIP1559Transaction(
-      signTxData,
-      script,
-      argument,
-      publicKey,
-    );
+    return ethSign.signEIP1559Transaction(signTxData, script, argument, publicKey);
   }
 
-  async signEIP1559ERC20(
-    signTxData: types.signEIP1559Tx, tokenSignature = ''
-  ): Promise<string> {
+  async signEIP1559ERC20(signTxData: types.signEIP1559Tx, tokenSignature = ''): Promise<string> {
     const version = await apdu.general.getSEVersion(signTxData.transport);
     if (version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signERC20Transaction(data, tokenSignature);
     }
 
-    const {
-      transport, appPrivateKey, appId, addressIndex, transaction
-    } = signTxData;
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
-    const argument = await scriptUtilsEIP1559.getERC20Argument(
-      transaction, tokenSignature, addressIndex
-    );
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const argument = await scriptUtilsEIP1559.getERC20Argument(transaction, tokenSignature, addressIndex);
     const script = params.EIP1559ERC20.scriptWithSignature;
 
-    return ethSign.signEIP1559Transaction(
-      signTxData,
-      script,
-      argument,
-      publicKey,
-    );
+    return ethSign.signEIP1559Transaction(signTxData, script, argument, publicKey);
   }
 
-  async signEIP1559Smart(
-    signTxData: types.signEIP1559Tx
-  ): Promise<string> {
+  async signEIP1559Smart(signTxData: types.signEIP1559Tx): Promise<string> {
     const version = await apdu.general.getSEVersion(signTxData.transport);
     if (version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signSmartContractTransaction(data);
     }
 
-    const {
-      transport, appPrivateKey, appId, addressIndex, transaction
-    } = signTxData;
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
-    const argument = await scriptUtilsEIP1559.getSmartArgument(
-      transaction, addressIndex
-    );
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.EIP1559SmartContractSegment.scriptWithSignature;
+      const argument = await scriptUtilsEIP1559.getSmartArgumentSegment(transaction, addressIndex);
+      return ethSign.signEIP1559SmartContractTransaction(signTxData, script, argument, publicKey);
+    }
     const script = params.EIP1559SmartContract.scriptWithSignature;
-
-    return ethSign.signEIP1559Transaction(
-      signTxData,
-      script,
-      argument,
-      publicKey,
-    );
+    const argument = await scriptUtilsEIP1559.getSmartArgument(transaction, addressIndex);
+    return ethSign.signEIP1559Transaction(signTxData, script, argument, publicKey);
   }
 
-  async signTransaction(
-    signTxData: types.signTx
-  ): Promise<string> {
+  async signTransaction(signTxData: types.signTx): Promise<string> {
     const { value, data, to } = signTxData.transaction;
     // eth
     if (value && !data) {
@@ -180,11 +130,12 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
     // erc20
     const functionHash = data.startsWith('0x') ? data.slice(2, 10) : data.slice(0, 8);
-
-    if (data && functionHash === 'a9059cbb') {
+    const valueBN = web3.utils.toBN(value);
+    if (valueBN.isZero() && data && functionHash === 'a9059cbb') {
       const upperCaseAddress = to.toUpperCase(); // contractAddr
       let tokenSignature;
-      for (const tokenInfo of TOKENTYPE) { // get tokenSignature
+      for (const tokenInfo of TOKENTYPE) {
+        // get tokenSignature
         if (tokenInfo.contractAddress.toUpperCase() === upperCaseAddress) {
           tokenSignature = tokenInfo.signature;
           signTxData.transaction.option.info.symbol = tokenInfo.symbol;
@@ -195,7 +146,8 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
       const { symbol, decimals } = signTxData.transaction.option.info;
       if (symbol && decimals) {
-        if (tokenSignature) { // 內建
+        if (tokenSignature) {
+          // 內建
           return this.signERC20Transaction(signTxData, tokenSignature);
         }
         // 自建
@@ -207,114 +159,56 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
     return this.signSmartContractTransaction(signTxData);
   }
 
-  async signTransferTransaction(
-    signTxData: types.signTx
-  ): Promise<string> {
-    const {
-      transport, appPrivateKey, appId, addressIndex, transaction
-    } = signTxData;
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
-    const argument = await scriptUtils.getTransferArgument(
-      transaction, addressIndex
-    );
+  async signTransferTransaction(signTxData: types.signTx): Promise<string> {
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const argument = await scriptUtils.getTransferArgument(transaction, addressIndex);
     const script = params.TRANSFER.scriptWithSignature;
 
-    return ethSign.signTransaction(
-      signTxData,
-      script,
-      argument,
-      publicKey,
-    );
+    return ethSign.signTransaction(signTxData, script, argument, publicKey);
   }
 
-  async signERC20Transaction(
-    signTxData: types.signTx, tokenSignature = ''
-  ): Promise<string> {
-    const {
-      transport, appPrivateKey, appId, addressIndex, transaction
-    } = signTxData;
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
-    const argument = await scriptUtils.getERC20Argument(
-      transaction, tokenSignature, addressIndex
-    );
+  async signERC20Transaction(signTxData: types.signTx, tokenSignature = ''): Promise<string> {
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const argument = await scriptUtils.getERC20Argument(transaction, tokenSignature, addressIndex);
     const script = params.ERC20.scriptWithSignature;
 
-    return ethSign.signTransaction(
-      signTxData,
-      script,
-      argument,
-      publicKey,
-    );
+    return ethSign.signTransaction(signTxData, script, argument, publicKey);
   }
 
-  async signSmartContractTransaction(
-    signTxData: types.signTx
-  ): Promise<string> {
-    const {
-      transport, appPrivateKey, appId, addressIndex, transaction
-    } = signTxData;
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
-    const argument = await scriptUtils.getSmartContractArgument(
-      transaction, addressIndex
-    );
+  async signSmartContractTransaction(signTxData: types.signTx): Promise<string> {
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    // if data bytes is larger than 4000 sign it segmentally.
+    if (signTxData.transaction.data.length > 8000) {
+      const script = params.SmartContractSegment.scriptWithSignature;
+      const argument = await scriptUtils.getSmartContractArgumentSegment(transaction, addressIndex);
+      return ethSign.signSmartContractTransaction(signTxData, script, argument, publicKey);
+    }
     const script = params.SmartContract.scriptWithSignature;
-
-    return ethSign.signTransaction(
-      signTxData,
-      script,
-      argument,
-      publicKey,
-    );
+    const argument = await scriptUtils.getSmartContractArgument(transaction, addressIndex);
+    return ethSign.signTransaction(signTxData, script, argument, publicKey);
   }
 
-  async signMessage(
-    signMsgData: types.signMsg
-  ): Promise<string> {
+  async signMessage(signMsgData: types.signMsg): Promise<string> {
     await setting.auth.versionCheck(signMsgData.transport, 81);
 
-    const {
-      transport, appPrivateKey, appId, addressIndex, message
-    } = signMsgData;
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
-    const argument = await scriptUtils.getSignMessageArgument(
-      message, addressIndex
-    );
+    const { transport, appPrivateKey, appId, addressIndex, message } = signMsgData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const argument = await scriptUtils.getSignMessageArgument(message, addressIndex);
     const script = params.SIGN_MESSAGE.scriptWithSignature;
 
-    return ethSign.signMessage(
-      signMsgData,
-      script,
-      argument,
-      publicKey
-    );
+    return ethSign.signMessage(signMsgData, script, argument, publicKey);
   }
 
-  async signTypedData(
-    typedData: types.signTyped
-  ): Promise<string> {
+  async signTypedData(typedData: types.signTyped): Promise<string> {
     await setting.auth.versionCheck(typedData.transport, 84);
 
-    const {
-      transport, appPrivateKey, appId, addressIndex
-    } = typedData;
-    const publicKey = await this.getPublicKey(
-      transport, appPrivateKey, appId, addressIndex
-    );
+    const { transport, appPrivateKey, appId, addressIndex } = typedData;
+    const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     const script = params.SIGN_TYPED_DATA.scriptWithSignature;
 
-    return ethSign.signTypedData(
-      typedData,
-      script,
-      publicKey,
-    );
+    return ethSign.signTypedData(typedData, script, publicKey);
   }
 }
-

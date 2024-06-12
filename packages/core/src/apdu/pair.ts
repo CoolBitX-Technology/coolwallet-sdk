@@ -1,13 +1,12 @@
 import { executeCommand } from './execute/execute';
 import Transport from '../transport';
-import { commands } from "./execute/command";
+import { commands } from './execute/command';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
-import { getCommandSignature } from "../setting/auth";
+import { getCommandSignature } from '../setting/auth';
 import * as core from '../setting/index';
 import * as crypto from '../crypto/index';
-import * as config from '../config/index';
 import * as apdu from '../apdu/index';
 
 /**
@@ -16,7 +15,12 @@ import * as apdu from '../apdu/index';
  * @param {string} signature data
  * @param {string} lock 01 to lock your card
  */
-export const switchLockStatus = async (transport: Transport, appId: string, appPrivKey: string, freezePair: boolean) => {
+export const switchLockStatus = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  freezePair: boolean
+) => {
   const pairLockStatus = freezePair ? '01' : '00';
   const signature = await core.auth.getCommandSignature(
     transport,
@@ -27,12 +31,18 @@ export const switchLockStatus = async (transport: Transport, appId: string, appP
     pairLockStatus
   );
 
-  const { statusCode, msg } = await executeCommand(transport, commands.CHANGE_PAIR_STATUS, target.SE, signature, pairLockStatus, undefined);
+  const { statusCode, msg } = await executeCommand(
+    transport,
+    commands.CHANGE_PAIR_STATUS,
+    target.SE,
+    signature,
+    pairLockStatus,
+    undefined
+  );
   if (statusCode !== CODE._9000) {
-    throw new APDUError(commands.CHANGE_PAIR_STATUS, statusCode, msg)
+    throw new APDUError(commands.CHANGE_PAIR_STATUS, statusCode, msg);
   }
 };
-
 
 /**
  * @param {Transport} transport
@@ -41,9 +51,15 @@ export const switchLockStatus = async (transport: Transport, appId: string, appP
  * @param {String} deviceName
  * @returns {Promise}
  */
-export const register = async (transport: Transport, appPublicKey: string, password: string, deviceName: string, SEPublicKey: string): Promise<string> => {
+export const register = async (
+  transport: Transport,
+  appPublicKey: string,
+  password: string,
+  deviceName: string,
+  SEPublicKey: string
+): Promise<string> => {
   if (!SEPublicKey) {
-    throw new SDKError(register.name, 'SEPublicKey can not be undifined')
+    throw new SDKError(register.name, 'SEPublicKey can not be undifined');
   }
   let nameToUTF = Buffer.from(deviceName, 'utf8');
   const maxLen = 30;
@@ -70,13 +86,16 @@ export const register = async (transport: Transport, appPublicKey: string, passw
     data = crypto.encryption.ECIESenc(SEPublicKey, data);
     P1 = '01';
   }
-  const { statusCode, outputData: appId, msg } = await executeCommand(transport, commands.REGISTER, target.SE, data, P1);
+  const {
+    statusCode,
+    outputData: appId,
+    msg,
+  } = await executeCommand(transport, commands.REGISTER, target.SE, data, P1);
   if (statusCode === CODE._9000) {
     return appId;
   } else {
-    throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg)
+    throw new APDUError(commands.REGISTER, statusCode, msg);
   }
-
 };
 
 /**
@@ -86,25 +105,26 @@ export const register = async (transport: Transport, appPublicKey: string, passw
  * @param {string} appPrivKey
  * @return {Promise<Array<{appId:string, deviceName:string}>>}
  */
-export const getPairedApps = async (transport: Transport, appId: string, appPrivKey: string): Promise<Array<{ appId: string, deviceName: string }>> => {
-  const signature = await core.auth.getCommandSignature(
-    transport,
-    appId,
-    appPrivKey,
-    commands.GET_PAIRED_DEVICES
-  );
+export const getPairedApps = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string
+): Promise<Array<{ appId: string; deviceName: string }>> => {
+  const signature = await core.auth.getCommandSignature(transport, appId, appPrivKey, commands.GET_PAIRED_DEVICES);
   const { outputData } = await executeCommand(
     transport,
     commands.GET_PAIRED_DEVICES,
     target.SE,
-    signature, undefined, undefined
+    signature,
+    undefined,
+    undefined
   );
   const appsInfo = outputData.match(/.{100}/g);
   if (!appsInfo) {
-    throw new SDKError(getPairedApps.name, 'appsInfo is undefined')
+    throw new SDKError(getPairedApps.name, 'appsInfo is undefined');
   }
   const apps = appsInfo.map((appInfo) => {
-    const appId = appInfo.slice(0, 40);
+    appId = appInfo.slice(0, 40);
     const deviceName = Buffer.from(appInfo.slice(40), 'hex')
       .toString()
       // eslint-disable-next-line no-control-regex
@@ -122,18 +142,20 @@ export const getPairedApps = async (transport: Transport, appId: string, appPriv
  * @return {Promise<string>}
  */
 export const getPairingPassword = async (transport: Transport, appId: string, appPrivKey: string): Promise<string> => {
-  const signature = await core.auth.getCommandSignature(
+  const signature = await core.auth.getCommandSignature(transport, appId, appPrivKey, commands.GET_PAIR_PWD);
+  const { outputData: encryptedPassword } = await executeCommand(
     transport,
-    appId,
-    appPrivKey,
-    commands.GET_PAIR_PWD
+    commands.GET_PAIR_PWD,
+    target.SE,
+    signature,
+    undefined,
+    undefined
   );
-  const { outputData: encryptedPassword } = await executeCommand(transport, commands.GET_PAIR_PWD, target.SE, signature, undefined, undefined);
 
   // const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
   await apdu.mcu.control.powerOff(transport);
   let password = crypto.encryption.ECIESDec(appPrivKey, encryptedPassword);
-  if (!password) throw new SDKError(getPairingPassword.name, `password error, your password: ${password}`)
+  if (!password) throw new SDKError(getPairingPassword.name, `password error, your password: ${password}`);
   password = password.replace(/f/gi, '');
   return password;
 };
@@ -143,25 +165,29 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
  * @param {Transport} transport
  * @param {string} appIdWithSig
  */
-export const removePairedDevice = async (transport: Transport, appId: string, appPrivateKey: string, pairedAppId: string) => {
+export const removePairedDevice = async (
+  transport: Transport,
+  appId: string,
+  appPrivateKey: string,
+  pairedAppId: string
+) => {
   if (appId !== pairedAppId) {
-    const signature = await getCommandSignature(
+    const signature = await getCommandSignature(transport, appId, appPrivateKey, commands.REMOVE_DEVICES, pairedAppId);
+    const appIdWithSig = pairedAppId + signature;
+    const { statusCode, msg } = await executeCommand(
       transport,
-      appId,
-      appPrivateKey,
       commands.REMOVE_DEVICES,
-      pairedAppId
+      target.SE,
+      appIdWithSig,
+      undefined,
+      undefined
     );
-    const appIdWithSig = pairedAppId + signature
-    const { statusCode, msg } = await executeCommand(transport, commands.REMOVE_DEVICES, target.SE, appIdWithSig, undefined, undefined);
     if (statusCode !== CODE._9000) {
-      throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg)
+      throw new APDUError(commands.REMOVE_DEVICES, statusCode, msg);
     }
   } else {
-    throw new SDKError(removePairedDevice.name, `pairedAppId should not equal appId`)
+    throw new SDKError(removePairedDevice.name, `pairedAppId should not equal appId`);
   }
-
-
 };
 
 /**
@@ -173,22 +199,23 @@ export const renameDevice = async (transport: Transport, appId: string, appPrivK
   try {
     let nameToUTF = Buffer.from(newDeviceName);
     if (nameToUTF.length < 30) {
-      let diff = 30 - nameToUTF.length;
-      let temp = Buffer.allocUnsafe(diff);
+      const diff = 30 - nameToUTF.length;
+      const temp = Buffer.allocUnsafe(diff);
       temp.fill(0);
       nameToUTF = Buffer.concat([temp, nameToUTF]);
     }
     const name = nameToUTF.toString('hex');
-    const signature = await core.auth.getCommandSignature(
-      transport,
-      appId,
-      appPrivKey,
-      commands.RENAME_DEVICES,
-      name
-    );
+    const signature = await core.auth.getCommandSignature(transport, appId, appPrivKey, commands.RENAME_DEVICES, name);
     const renameParams = name + signature;
 
-    const { statusCode, msg } = await executeCommand(transport, commands.RENAME_DEVICES, target.SE, renameParams, undefined, undefined);
+    const { statusCode, msg } = await executeCommand(
+      transport,
+      commands.RENAME_DEVICES,
+      target.SE,
+      renameParams,
+      undefined,
+      undefined
+    );
 
     if (statusCode !== CODE._9000) {
       throw new APDUError(commands.RENAME_DEVICES, statusCode, msg);
@@ -196,6 +223,4 @@ export const renameDevice = async (transport: Transport, appId: string, appPrivK
   } catch (e) {
     throw new SDKError(renameDevice.name, 'SDK RenamePairedDevice failed');
   }
-
-
 };
