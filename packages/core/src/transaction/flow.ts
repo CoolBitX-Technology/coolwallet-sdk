@@ -1,10 +1,12 @@
 import * as rlp from 'rlp';
 import * as txUtil from './util';
 import Transport from '../transport';
-import * as tx from '../apdu/transaction';
-import * as apdu from '../apdu/index';
+// import * as tx from '../apdu/transaction';
+// import * as apdu from '../apdu/index';
 import { SDKError } from '../error/errorHandle';
 import { SignatureType } from './type';
+import * as command from './command';
+import * as mcu from '../mcu';
 
 /**
  * @description Prepare RLP Data for CoolWallet
@@ -54,20 +56,20 @@ export const getSingleSignatureFromCoolWalletV2 = async (
   if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
 
   // finish prepare
-  await tx.finishPrepare(transport);
+  await command.finishPrepare(transport);
 
   // get tx detail
-  if (!(await tx.getTxDetail(transport))) {
+  if (!(await command.getTxDetail(transport))) {
     throw new SDKError(getSingleSignatureFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
   }
   //authorize tx
-  const signatureKey = await tx.getSignatureKey(transport);
+  const signatureKey = await command.getSignatureKey(transport);
   if (typeof authorizedCallback === 'function') {
     authorizedCallback();
   }
   // clear tx
-  await tx.clearTransaction(transport);
-  await apdu.mcu.control.powerOff(transport);
+  await command.clearTransaction(transport);
+  await mcu.control.powerOff(transport);
   // decrpt signature
   const signature = txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType);
   return signature;
@@ -106,20 +108,20 @@ export const getSignaturesFromCoolWalletV2 = async (
   if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
 
   // finish prepare
-  await tx.finishPrepare(transport);
+  await command.finishPrepare(transport);
 
   // get tx detail
-  if (!(await tx.getTxDetail(transport))) {
+  if (!(await command.getTxDetail(transport))) {
     throw new SDKError(getSignaturesFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
   }
   //authorize tx
-  const signatureKey = await tx.getSignatureKey(transport);
+  const signatureKey = await command.getSignatureKey(transport);
   if (typeof authorizedCallback === 'function') {
     authorizedCallback();
   }
   // clear tx
-  await tx.clearTransaction(transport);
-  await apdu.mcu.control.powerOff(transport);
+  await command.clearTransaction(transport);
+  await mcu.control.powerOff(transport);
   // decrpt signature
   const signatures = encryptedSignatureArray.map((encryptedSignature) =>
     txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
