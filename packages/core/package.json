@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/core",
-  "version": "1.1.24",
+  "version": "2.0.0-beta.0",
   "description": "Core library for other CoolWallet SDKs.",
   "main": "lib/index.js",
   "scripts": {
@@ -32,10 +32,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-sdk/issues"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.0",
