@@ -1,19 +1,16 @@
 import * as RLP from 'rlp';
-import { executeCommand } from './execute/execute';
 import { getCommandSignature } from '../setting/auth';
 import Transport from '../transport';
-import { commands } from './execute/command';
 import { APDUError, SDKError } from '../error/errorHandle';
 import { CODE } from '../config/status/code';
 import { target } from '../config/param';
-import { getSEVersion } from './general';
+import { executeCommand } from '../apdu/execute/execute';
+import { commands } from '../apdu/execute/command';
+import { getSEVersion } from '../info';
 
 /**
  * Scriptable step 1
- * @deprecated Please use tx.command.sendScript instead
- * @param transport
- * @param script
- * @returns
+ * @todo append signature
  */
 export const sendScript = async (transport: Transport, script: string) => {
   const { statusCode, msg } = await executeCommand(transport, commands.SEND_SCRIPT, target.SE, script);
@@ -26,12 +23,6 @@ export const sendScript = async (transport: Transport, script: string) => {
 
 /**
  * Scriptable step 2 : sign tx by arguments and return encrypted signature
- * @deprecated Please use tx.command.executeScript instead
- * @param transport
- * @param appId
- * @param appPrivKey
- * @param argument
- * @returns
  */
 export const executeScript = async (transport: Transport, appId: string, appPrivKey: string, argument: string) => {
   if (argument.length > 20000) throw new Error('argument too long');
@@ -67,13 +58,15 @@ export const executeScript = async (transport: Transport, appId: string, appPriv
 };
 
 /**
- * Scriptable step 3 : Send smart contract data one by one and hash it in card.
- * @deprecated Please use tx.command.executeSegmentScript instead
- * @param transport
- * @param appId
- * @param appPrivKey
- * @param argument
- * @returns
+ * Scriptable step 3.
+ *
+ * Send smart contract data one by one and hash it in card.
+ *
+ * @param transport Transport layer
+ * @param appId application id
+ * @param appPrivKey application private key
+ * @param argument smart contract data
+ * @returns encryptedSignature
  */
 export const executeSegmentScript = async (
   transport: Transport,
@@ -129,13 +122,8 @@ export const executeSegmentScript = async (
 
 /**
  * Scriptable step 3
- * @deprecated Please use tx.command.executeUtxoScript instead
- * @param transport
- * @param appId
- * @param appPrivKey
- * @param utxoArgument
- * @param extraTransactionType
- * @returns
+ * @param {*} transport
+ * @param {*} argument
  */
 export const executeUtxoScript = async (
   transport: Transport,
@@ -174,12 +162,8 @@ export const executeUtxoScript = async (
 
 /**
  * Scriptable step 3
- * @deprecated Please use tx.command.executeUtxoSegmentScript instead
- * @param transport
- * @param appId
- * @param appPrivKey
- * @param utxoArgument
- * @returns
+ * @param {*} transport
+ * @param {*} argument
  */
 export const executeUtxoSegmentScript = async (
   transport: Transport,
@@ -246,18 +230,6 @@ export const executeUtxoSegmentScript = async (
  * @param {string?} argument
  * @returns
  */
-
-/**
- * Scriptable step 4 : Execute a script which have rlp items
- * @deprecated Please use tx.command.executeRlpScript instead
- * @param transport
- * @param appId
- * @param appPrivKey
- * @param path
- * @param rlpItems
- * @param argument
- * @returns
- */
 export const executeRlpScript = async (
   transport: Transport,
   appId: string,
@@ -273,10 +245,11 @@ export const executeRlpScript = async (
 };
 
 /**
+ * 9000 true  6D00 false  other error
  * Get full transactino composed by SE. Can be use to check if card supports scripts.
- * @deprecated Please use tx.command.getSignedHex instead
- * @param transport
- * @returns
+ * @todo append signature
+ * @param {Transport} transport
+ * @return {Promse<{ signedTx: string, statusCode: string }>}
  */
 export const getSignedHex = async (transport: Transport): Promise<{ signedTx: string; statusCode: string }> => {
   const { outputData: signedTx, statusCode, msg } = await executeCommand(transport, commands.GET_SIGNED_HEX, target.SE);
@@ -288,10 +261,9 @@ export const getSignedHex = async (transport: Transport): Promise<{ signedTx: st
 };
 
 /**
- * Inform CoolWallet that tx_prepare is completed.
- * @deprecated Please use tx.command.finishPrepare instead
- * @param transport
- * @returns
+ * Inform CoolWalletS that tx_prepare is completed.
+ * @param {Transport} transport
+ * @return {Promse<boolean>}
  */
 export const finishPrepare = async (transport: Transport): Promise<boolean> => {
   const { statusCode, msg } = await executeCommand(transport, commands.FINISH_PREPARE, target.SE);
@@ -304,9 +276,8 @@ export const finishPrepare = async (transport: Transport): Promise<boolean> => {
 
 /**
  * Get an one-time key to decrypt received signatures.
- * @deprecated Please use tx.command.getSignatureKey instead
- * @param transport
- * @returns
+ * @param {Transport} transport
+ * @return {Promise<string>}
  */
 export const getSignatureKey = async (transport: Transport): Promise<string> => {
   const { outputData: signatureKey, statusCode, msg } = await executeCommand(transport, commands.GET_TX_KEY, target.SE);
@@ -318,10 +289,9 @@ export const getSignatureKey = async (transport: Transport): Promise<string> => 
 };
 
 /**
- * Clear memory on CoolWallet
- * @deprecated Please use tx.command.clearTransaction instead
- * @param transport
- * @returns
+ * Clear memory on CoolWalletS
+ * @param {Transport} transport
+ * @return {Promise<boolean>}
  */
 export const clearTransaction = async (transport: Transport): Promise<boolean> => {
   const { statusCode, msg } = await executeCommand(transport, commands.CLEAR_TX, target.SE);
@@ -334,9 +304,8 @@ export const clearTransaction = async (transport: Transport): Promise<boolean> =
 
 /**
  * get transaction detail shown on hardware.
- * @deprecated Please use tx.command.getTxDetail instead
- * @param transport
- * @returns
+ * @param {Transport} transport
+ * @return {Promise<boolean>} true: success, false: canceled.
  */
 export const getTxDetail = async (transport: Transport): Promise<boolean> => {
   const { statusCode, msg } = await executeCommand(transport, commands.GET_TX_DETAIL, target.SE);
@@ -349,9 +318,8 @@ export const getTxDetail = async (transport: Transport): Promise<boolean> => {
 
 /**
  * get transaction detail message and shown on hardware.
- * @deprecated Please use tx.command.getExplicitTxDetail instead
- * @param transport
- * @returns
+ * @param {Transport} transport
+ * @return {Promise<boolean>} true: success, false: canceled.
  */
 export const getExplicitTxDetail = async (transport: Transport): Promise<string> => {
   const { statusCode, msg, outputData } = await executeCommand(transport, commands.GET_TX_DETAIL, target.SE);
@@ -364,11 +332,10 @@ export const getExplicitTxDetail = async (transport: Transport): Promise<string>
 
 /**
  * set built-in ERC20 token payload in CWS.
- * @deprecated Please use tx.command.setToken instead
- * @param transport
- * @param payload
- * @param sn  1: normal erc20, 2: second token in 0x.
- * @returns
+ * @param {Transport} transport
+ * @param {string} payload
+ * @param {number} sn 1: normal erc20, 2: second token in 0x.
+ * @return {Promise<boolean>}
  */
 export const setToken = async (transport: Transport, payload: string, sn = 1): Promise<boolean> => {
   const command = sn === 1 ? commands.SET_ERC20_TOKEN : commands.SET_SECOND_ERC20_TOKEN;
@@ -382,11 +349,10 @@ export const setToken = async (transport: Transport, payload: string, sn = 1): P
 
 /**
  * Set custom ERC20
- * @deprecated Please use tx.command.setCustomToken instead
- * @param transport
- * @param payload
- * @param sn
- * @returns
+ * @param {Transport} transport
+ * @param {string} payload
+ * @param {number} sn 1: normal erc20, 2: second token in 0x.
+ * @return {Promise<boolean>}
  */
 export const setCustomToken = async (transport: Transport, payload: string, sn = 1): Promise<boolean> => {
   const command = sn === 1 ? commands.SET_ERC20_TOKEN : commands.SET_SECOND_ERC20_TOKEN;
