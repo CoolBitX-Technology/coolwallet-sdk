@@ -55,6 +55,11 @@ const getMCUInfo = async (transport: Transport): Promise<MCUInfo> => {
   return { hardwareVersion, firmwareVersion, battery };
 };
 
+/**
+ * @deprecated Please use mcu.dfu.checkUpdate instead
+ * @param transport
+ * @returns
+ */
 const checkUpdate = async (transport: Transport): Promise<UpdateInfo> => {
   const { cardMCUVersion } = await getMCUVersion(transport);
   const isNeedUpdate = parseInt(MCU_UPDATE_VER, 16) > parseInt(cardMCUVersion, 16);
@@ -65,14 +70,31 @@ const checkUpdate = async (transport: Transport): Promise<UpdateInfo> => {
   };
 };
 
+/**
+ * @deprecated Please use mcu.dfu.sendFWsign instead
+ * @param transport
+ * @param data
+ */
 const sendFWsign = async (transport: Transport, data: string): Promise<void> => {
   await executeCommand(transport, commands.SEND_FW_SIGN, target.MCU, data);
 };
 
+/**
+ * @deprecated Please use mcu.dfu.resetFW instead
+ * @param transport
+ */
 const resetFW = async (transport: Transport): Promise<void> => {
   await executeCommand(transport, commands.FW_RESET, target.MCU);
 };
 
+/**
+ * @deprecated Please use mcu.dfu.updateFW instead
+ * @param transport
+ * @param P1
+ * @param P2
+ * @param data
+ * @returns
+ */
 const updateFW = async (
   transport: Transport,
   P1: string,
@@ -82,6 +104,14 @@ const updateFW = async (
   return executeCommand(transport, commands.FW_UPDATE, target.MCU, data, P1, P2);
 };
 
+/**
+ * @deprecated Please use mcu.dfu.executeDFU instead
+ * @param transport
+ * @param DFUCmd
+ * @param updateSE
+ * @param progressCallback
+ * @returns
+ */
 const executeDFU = async (
   transport: Transport,
   DFUCmd: {
@@ -118,6 +148,13 @@ const executeDFU = async (
   return mcuLatestVersion;
 };
 
+/**
+ * @deprecated Please use mcu.dfu.updateMCU instead
+ * @param transport
+ * @param progressCallback
+ * @param updateSE
+ * @returns
+ */
 const updateMCU = async (
   transport: Transport,
   progressCallback: (progress: number) => void,

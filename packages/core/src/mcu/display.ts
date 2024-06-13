@@ -1,23 +1,22 @@
-import { executeCommand } from '../execute/execute';
-import Transport from '../../transport';
-import { commands } from '../execute/command';
-import { target } from '../../config/param';
-import { CODE } from '../../config/status/code';
-import { APDUError } from '../../error/errorHandle';
-import { getCommandSignature } from '../../setting/auth';
+import Transport from '../transport';
+import { target } from '../config/param';
+import { CODE } from '../config/status/code';
+import { APDUError } from '../error/errorHandle';
+import { getCommandSignature } from '../setting/auth';
 import { powerOff } from './control';
-import { error } from '../..';
+import { error } from '..';
+import { executeCommand } from '../apdu/execute/execute';
+import { commands } from '../apdu/execute/command';
 
 /**
  * Display "UPDATE" on wallet display
- * @deprecated Please use mcu.display.showUpdate instead
  * @param {Transport} transport
  */
 export const showUpdate = async (transport: Transport) => {
   if (transport.cardType === 'Lite') {
     throw new error.SDKError(showUpdate.name, `CoolWallet LITE does not support this command.`);
   }
-  const { statusCode, msg } = await executeCommand(transport, commands.START_UPDATE, target.SE); // TODO
+  const { statusCode, msg } = await executeCommand(transport, commands.START_UPDATE, target.MCU);
   if (statusCode !== CODE._9000) {
     throw new APDUError(commands.START_UPDATE, statusCode, msg);
   }
@@ -25,14 +24,13 @@ export const showUpdate = async (transport: Transport) => {
 
 /**
  * Hide "UPDATE" on card
- * @deprecated Please use mcu.display.hideUpdate instead
- * @param {Transport}
+ * @param {Transport} transport
  */
 export const hideUpdate = async (transport: Transport) => {
   if (transport.cardType === 'Lite') {
     throw new error.SDKError(hideUpdate.name, `CoolWallet LITE does not support this command.`);
   }
-  const { statusCode, msg } = await executeCommand(transport, commands.FINISH_UPDATE, target.SE);
+  const { statusCode, msg } = await executeCommand(transport, commands.FINISH_UPDATE, target.MCU);
   if (statusCode !== CODE._9000) {
     throw new APDUError(commands.FINISH_UPDATE, statusCode, msg);
   }
@@ -57,7 +55,6 @@ const formatBalance = function (balance: number, defaultValue = '0.0') {
 /**
  * Upate balances shown on card display
  * coinTypes => BTC: 00, ETH: 3C, LTC: 02, XRP: 90];
- * @deprecated Please use mcu.display.updateBalance instead
  * @param {Transport} transport
  * @param {Array<{balance: number, coinType: string}>} data
  */
@@ -103,7 +100,7 @@ export const updateBalance = async (
   );
   await powerOff(transport);
 
-  // if (statusCode !== CODE._9000) {
-  //   throw new APDUError(commands.UPDATE_BALANCE, statusCode, msg)
-  // }
+  if (statusCode !== CODE._9000) {
+    throw new APDUError(commands.UPDATE_BALANCE, statusCode, msg);
+  }
 };

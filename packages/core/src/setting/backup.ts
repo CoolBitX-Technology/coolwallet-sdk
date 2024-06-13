@@ -1,13 +1,12 @@
-import { executeCommand } from './execute/execute';
-import Transport from '../transport';
-import { commands } from './execute/command';
+import { commands } from '../apdu/execute/command';
+import { executeCommand } from '../apdu/execute/execute';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
-import { SDKError, APDUError } from '../error/errorHandle';
+import { APDUError } from '../error/errorHandle';
+import Transport from '../transport';
 
 /**
  * backup seed in SE.
- * @deprecated Please use setting.backup.backupSeed instead
  * @param {Transport} transport
  * @param {string} signedCommand
  * @return {Promise<{ status: boolean, statusCode: string, msg: string }>}
@@ -30,7 +29,6 @@ export const backupSeed = async (transport: Transport, signature: string): Promi
 
 /**
  * Recover wallet automatically with backed up seed.
- * @deprecated Please use setting.backup.recoverSeed instead
  * @param {Transport} transport
  * @return {Promise<{ status: boolean, statusCode: string, msg: string }>}
  */
@@ -45,7 +43,6 @@ export const recoverSeed = async (transport: Transport): Promise<boolean> => {
 
 /**
  * check if there's backed up data in SE.
- * @deprecated Please use setting.backup.checkBackupStatus instead
  * @param {Transport} transport
  * @return {boolean} 01 true: may need recovery after update. 00 false
  */
@@ -60,7 +57,6 @@ export const checkBackupStatus = async (transport: Transport): Promise<boolean> 
 
 /**
  * Delete backed up seed in SE.
- * @deprecated Please use setting.backup.deleteSeedBackup instead
  * @param {Transport} transport
  * @param {string} signedCommand
  * @return {Promise<{ status: boolean, statusCode: string, msg: string }>}

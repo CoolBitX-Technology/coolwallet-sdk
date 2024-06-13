@@ -6,9 +6,27 @@ import * as crypto from './crypto/index';
 import * as device from './device/index';
 import * as error from './error/index';
 import * as info from './info/index';
+import * as mcu from './mcu/index';
 import * as setting from './setting/index';
 import * as tx from './transaction/index';
 import Transport, { BleManager } from './transport/index';
 import * as utils from './utils/index';
+import * as wallet from './wallet/secret';
 
-export { apdu, coin, common, config, crypto, device, error, info, setting, tx, Transport, BleManager, utils };
+export {
+  apdu,
+  coin,
+  common,
+  config,
+  crypto,
+  device,
+  error,
+  info,
+  mcu,
+  setting,
+  tx,
+  Transport,
+  BleManager,
+  utils,
+  wallet,
+};

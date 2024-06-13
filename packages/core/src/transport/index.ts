@@ -4,6 +4,10 @@ import PeripheralRequest from '../device/ble/PeripheralRequest';
 
 type TransportDevice = BluetoothDevice | RNBlePlxDevice;
 
+enum CardType {
+  Pro = 'Pro',
+  Lite = 'Lite',
+}
 /**
  * Transport is an abstract class.
  * All class that implement this abstract class will need to implements following methods:
@@ -32,11 +36,12 @@ abstract class Transport {
 
   device: TransportDevice;
 
-  cardType?: 'Pro' | 'Lite' = 'Pro';
+  cardType: CardType;
 
-  constructor(device: TransportDevice) {
+  constructor(device: TransportDevice, cardType?: CardType) {
     this.device = device;
     this.peripheral = new PeripheralRequest(this);
+    this.cardType = cardType ?? CardType.Pro;
   }
 
   abstract sendCommandToCard(command: number[]): Promise<void>;
@@ -81,5 +86,5 @@ interface BleManager {
   disconnect(): Promise<void>;
 }
 
-export { BleManager };
+export { BleManager, CardType };
 export default Transport;
