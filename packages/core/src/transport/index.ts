@@ -8,6 +8,13 @@ enum CardType {
   Pro = 'Pro',
   Lite = 'Lite',
 }
+
+interface Transport {
+  cardType: CardType;
+  request(command: string, packets: string): Promise<string>;
+  requestAPDUV2?: (apdu: { command: string; data: string }, target: string) => Promise<any>;
+}
+
 /**
  * Transport is an abstract class.
  * All class that implement this abstract class will need to implements following methods:
@@ -29,13 +36,10 @@ enum CardType {
  * // readDataFromCard will use responseCharacteristic to read value from card.
  * readDataFromCard(): Promise<number[]>;
  */
-abstract class Transport {
+abstract class BleTransport implements Transport {
   [key: string]: any;
-
   peripheral: PeripheralRequest;
-
   device: TransportDevice;
-
   cardType: CardType;
 
   constructor(device: TransportDevice, cardType?: CardType) {
@@ -86,5 +90,5 @@ interface BleManager {
   disconnect(): Promise<void>;
 }
 
-export { BleManager, CardType };
+export { BleManager, CardType, BleTransport };
 export default Transport;
