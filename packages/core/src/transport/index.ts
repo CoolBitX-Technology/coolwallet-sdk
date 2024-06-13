@@ -11,8 +11,9 @@ enum CardType {
 
 interface Transport {
   cardType: CardType;
-  request(command: string, packets: string): Promise<string>;
   requestAPDUV2?: (apdu: { command: string; data: string }, target: string) => Promise<any>;
+  
+  request(command: string, packets: string): Promise<string>;
 }
 
 /**
