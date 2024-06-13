@@ -1,26 +1,15 @@
 import { Transport } from '@coolwallet/core';
 import { TransportError } from '@coolwallet/core/lib/error';
-import type { Device } from 'react-native-ble-plx';
 import { decodeCommand,encodeApdu,numberArrayToHexString } from './utils';
 import { CMD_LEN, PID } from './configs/commands';
 import NfcManager, { NfcTech } from 'react-native-nfc-manager';
+import { CardType } from '@coolwallet/core/lib/transport';
 
-class NFCTransport extends Transport {
+class NFCTransport implements Transport {
+  cardType: CardType;
 
-  constructor() {
-    super({ name: 'NFC' } as Device);
-  }
-
-  sendCommandToCard(_: number[]): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  sendDataToCard(_: number[]): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  checkCardStatus(): Promise<number> {
-    throw new Error('Method not implemented.');
+  constructor(cardType = CardType.Pro) {
+    this.cardType = cardType;
   }
 
   readDataFromCard = async(nfcTech: NfcTech = NfcTech.Ndef): Promise<number[]> => {
