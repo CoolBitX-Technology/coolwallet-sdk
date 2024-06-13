@@ -1,0 +1,19 @@
+{
+  "name": "transport-nfc-ble",
+  "version": "1.0.0-beta.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "react-native-nfc-manager": "^3.15.0"
+  }
+}
