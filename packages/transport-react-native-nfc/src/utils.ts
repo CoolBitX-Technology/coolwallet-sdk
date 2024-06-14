@@ -5,11 +5,11 @@ type APDUCommand = {
   p2: number;
 };
 
-function numberArrayToHexString(numberArray:number[]) {
-  return numberArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+function numberArrayToHexString(numberArray: number[]) {
+  return numberArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-function hexStringToNumberArray(hexString:string) {
+function hexStringToNumberArray(hexString: string) {
   if (hexString.startsWith('0x')) {
     hexString = hexString.slice(2);
   }
@@ -41,5 +41,4 @@ function encodeApdu(cla: number, ins: number, p1: number, p2: number, data: stri
   return [cla, ins, p1, p2, dataBytes.length, ...dataBytes];
 }
 
-
-export { decodeCommand,encodeApdu,numberArrayToHexString };
+export { decodeCommand, encodeApdu, numberArrayToHexString, hexStringToNumberArray };

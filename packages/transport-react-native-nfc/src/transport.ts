@@ -1,6 +1,6 @@
 import { Transport } from '@coolwallet/core';
 import { TransportError } from '@coolwallet/core/lib/error';
-import { decodeCommand, encodeApdu, numberArrayToHexString } from './utils';
+import { decodeCommand, encodeApdu, hexStringToNumberArray, numberArrayToHexString } from './utils';
 import { CMD_LEN, PID } from './configs/commands';
 import NfcManager from 'react-native-nfc-manager';
 import { CardType } from '@coolwallet/core/lib/transport';
@@ -32,6 +32,8 @@ class NFCTransport implements Transport {
         requestBody.p2,
         requestBody.data
       );
+
+      await NfcManager.isoDepHandler.transceive(hexStringToNumberArray('00a404000e436f6f6c57616c6c65744c495445')); // select applet for COOLWALLET LITE
       const response = await NfcManager.isoDepHandler.transceive(commandBytes);
       return numberArrayToHexString(response);
     } catch (error) {
