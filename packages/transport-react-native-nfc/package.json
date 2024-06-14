@@ -1,6 +1,6 @@
 {
-  "name": "transport-nfc",
-  "version": "1.0.0-beta.1",
+  "name": "transport-react-native-nfc",
+  "version": "1.0.0-beta.2",
   "description": "",
   "main": "index.js",
   "scripts": {
