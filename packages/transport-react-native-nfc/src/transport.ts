@@ -39,8 +39,6 @@ class NFCTransport implements Transport {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
       throw new TransportError(this.request.name, errorMessage);
-    } finally {
-      NfcManager.cancelTechnologyRequest();
     }
   };
 }
