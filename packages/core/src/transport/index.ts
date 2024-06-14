@@ -91,5 +91,5 @@ interface BleManager {
   disconnect(): Promise<void>;
 }
 
-export { BleManager, CardType, BleTransport };
+export { BleManager, BleTransport, CardType };
 export default Transport;
