@@ -1,0 +1,22 @@
+{
+  "name": "@coolwallet/transport-react-native-nfc",
+  "version": "1.0.0-beta.2",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "jest",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
+    "build": "del-cli lib && npm run build:types && npm run build:ts"
+  },
+  "author": "coolwallet-team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@coolwallet/core": "^2.0.0-beta.2",
+    "react-native-nfc-manager": "^3.14.14"
+  }
+}
