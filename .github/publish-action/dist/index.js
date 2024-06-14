@@ -15739,6 +15739,9 @@ function run() {
                     return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
                 case 31:
                     _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-react-native-nfc')];
+                case 32:
+                    _a.sent();
                     return [2 /*return*/];
             }
         });
