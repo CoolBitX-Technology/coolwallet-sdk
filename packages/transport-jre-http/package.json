@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/transport-jre-http",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "Http transport for javacard virtual machine.",
   "main": "lib/index.js",
   "scripts": {
