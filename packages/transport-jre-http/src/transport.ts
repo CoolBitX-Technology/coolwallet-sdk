@@ -1,11 +1,10 @@
-import { Transport } from '@coolwallet/core';
+import { Transport, CardType } from '@coolwallet/core';
 import { TransportError } from '@coolwallet/core/lib/error';
 import { createAxiosInstance } from './services/http';
 import { decodeCommand } from './utils';
 import ENDPOINTS from './configs/endpoints';
 import { PID, CMD_LEN } from './configs/commands';
 import type { Axios } from 'axios';
-import { CardType } from '@coolwallet/core/lib/transport';
 
 class JRETransport implements Transport {
   cardType: CardType;
@@ -15,7 +14,7 @@ class JRETransport implements Transport {
     this.cardType = cardType;
     this.requestAxios = createAxiosInstance(baseURL);
   }
-  
+
   request = async (command: string, packets: string): Promise<string> => {
     if (!command.startsWith(PID + CMD_LEN)) {
       throw new TransportError(this.request.name, 'Unknown command payload.');
