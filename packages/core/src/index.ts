@@ -11,7 +11,7 @@ import * as setting from './setting/index';
 import * as tx from './transaction/index';
 import Transport, { BleManager } from './transport/index';
 import * as utils from './utils/index';
-import * as wallet from './wallet/secret';
+import * as wallet from './wallet/index';
 
 export {
   apdu,
