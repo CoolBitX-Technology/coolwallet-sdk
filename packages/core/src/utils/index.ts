@@ -1,12 +1,12 @@
 import * as bip39 from 'bip39';
 import pbkdf2 from 'pbkdf2';
 import isEmpty from 'lodash/isEmpty';
-import { tx, wallet, general } from '../apdu';
 import Transport from '../transport';
 import { MSG } from '../config/status/msg';
 import { CODE } from '../config/status/code';
 import { PathType } from '../config/param';
 import { SDKError } from '../error/errorHandle';
+import { info, tx, wallet } from '..';
 
 function hardenPath(index: number) {
   return (Math.floor(index) + 0x80000000).toString(16);
@@ -144,7 +144,7 @@ export const assemblyCommandAndData = (
 };
 
 export const checkSupportScripts = async (transport: Transport) => {
-  const { statusCode } = await tx.getSignedHex(transport);
+  const { statusCode } = await tx.command.getSignedHex(transport);
   if (statusCode === CODE._9000) {
     return true;
   } else if (statusCode === CODE._6D00) {
@@ -167,7 +167,7 @@ export const createWalletByMnemonic = async (
   SEPublicKey: string
 ): Promise<void> => {
   const seeds: Array<Buffer> = [];
-  const version = await general.getSEVersion(transport);
+  const version = await info.getSEVersion(transport);
 
   // mnemonic to seed
   seeds[0] = await bip39.mnemonicToSeed(mnemonic);
@@ -184,7 +184,7 @@ export const createWalletByMnemonic = async (
   }
 
   const seedHex = Buffer.concat(seeds).toString('hex');
-  return wallet.setSeed(transport, appId, appPrivateKey, seedHex, SEPublicKey);
+  return wallet.secret.setSeed(transport, appId, appPrivateKey, seedHex, SEPublicKey);
 };
 
 /**

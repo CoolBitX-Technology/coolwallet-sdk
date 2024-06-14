@@ -1,9 +1,9 @@
 import crypto from 'crypto';
-import * as general from '../apdu/general';
 import Transport from '../transport';
 import { SHA256 } from '../crypto/hash';
 import { SE_KEY_PARAM, PathType } from './param';
 import { ec as EC } from 'elliptic';
+import { info } from '..';
 
 const secp256k1 = new EC('secp256k1');
 
@@ -53,7 +53,7 @@ function getCompressedPublicKey(publicKey: string) {
  * @return {Promise<string>} SEPublicKey
  */
 async function getSEPublicKey(transport: Transport): Promise<string> {
-  const cardId = await general.getCardId(transport);
+  const cardId = await info.getCardId(transport);
   console.debug('cardId: ' + cardId);
   const cardIdHash = SHA256(cardId).toString('hex');
   const parseCardIdHash = parseInt(cardIdHash.slice(0, 2), 16) & 0x7f;
@@ -73,7 +73,7 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
 
   const Ki = publicKey.add(chipMasterPublicKey);
 
-  return Ki.encode("hex", false);
+  return Ki.encode('hex', false);
 }
 
 export { getSEPublicKey, PathType };
