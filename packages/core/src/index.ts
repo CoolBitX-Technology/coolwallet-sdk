@@ -9,7 +9,7 @@ import * as info from './info/index';
 import * as mcu from './mcu/index';
 import * as setting from './setting/index';
 import * as tx from './transaction/index';
-import Transport, { BleManager, BleTransport } from './transport/index';
+import Transport, { BleManager, BleTransport, CardType } from './transport/index';
 import * as utils from './utils/index';
 import * as wallet from './wallet/index';
 
@@ -28,6 +28,7 @@ export {
   Transport,
   BleTransport,
   BleManager,
+  CardType,
   utils,
   wallet,
 };
