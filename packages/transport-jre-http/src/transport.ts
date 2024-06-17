@@ -1,4 +1,4 @@
-import { Transport, CardType } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { TransportError } from '@coolwallet/core/lib/error';
 import { createAxiosInstance } from './services/http';
 import { decodeCommand } from './utils';

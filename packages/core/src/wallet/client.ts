@@ -5,7 +5,7 @@ import { CODE } from '../config/status/code';
 import { APDUError, SDKError } from '../error/errorHandle';
 import Transport from '../transport';
 import * as crypto from '../crypto/index';
-import { apdu } from '..';
+import { apdu, mcu } from '..';
 import { getCommandSignature } from '../setting/auth';
 
 /**
@@ -117,7 +117,7 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
   );
 
   // const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
-  await apdu.mcu.control.powerOff(transport);
+  await mcu.control.powerOff(transport);
   let password = crypto.encryption.ECIESDec(appPrivKey, encryptedPassword);
   if (!password) throw new SDKError(getPairingPassword.name, `password error, your password: ${password}`);
   password = password.replace(/f/gi, '');
