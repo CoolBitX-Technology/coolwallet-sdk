@@ -1,9 +1,9 @@
 import * as rlp from 'rlp';
 import * as txUtil from './util';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 // import * as tx from '../apdu/transaction';
 // import * as apdu from '../apdu/index';
-import { SDKError } from '../error/errorHandle';
+import * as error from '../error';
 import { SignatureType } from './type';
 import * as command from './command';
 import * as mcu from '../mcu';
@@ -30,19 +30,19 @@ export const prepareSEData = (keyId: string, rawData: Buffer | Array<Buffer>, re
  * @description Send Signing Function to CoolWallet
  * @param {Transport} transport
  * @param {Array<{Function}>} preActions
- * @param {Array<{Function}>} actions
+ * @param {Array<{Function}>} action
+ * @param {SignatureType} signatureType
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
- * @param {SignatureType} signatureType
  * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
 export const getSingleSignatureFromCoolWalletV2 = async (
   transport: Transport,
   preActions: Array<Function> | undefined = undefined,
   action: Function,
+  signatureType: SignatureType,
   txPrepareCompleteCallback: Function | undefined = undefined,
-  authorizedCallback: Function | undefined = undefined,
-  signatureType: SignatureType
+  authorizedCallback: Function | undefined = undefined
 ) => {
   // signing
   if (preActions) {
@@ -54,25 +54,34 @@ export const getSingleSignatureFromCoolWalletV2 = async (
   const encryptedSignature = await action();
 
   if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
+  if (transport.cardType === CardType.Pro) {
+    // finish prepare
+    await command.finishPrepare(transport);
 
-  // finish prepare
-  await command.finishPrepare(transport);
+    // get tx detail
+    const result = await command.getTxDetail(transport);
+    if (!result) {
+      throw new error.SDKError(getSingleSignatureFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
+    }
 
-  // get tx detail
-  if (!(await command.getTxDetail(transport))) {
-    throw new SDKError(getSingleSignatureFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
+    //authorize tx
+    const signatureKey = await command.getSignatureKey(transport);
+    if (typeof authorizedCallback === 'function') {
+      authorizedCallback();
+    }
+
+    // clear tx
+    await command.clearTransaction(transport);
+    await mcu.control.powerOff(transport);
+
+    // decrpt signature
+    const signature = txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType);
+    return signature;
+  } else if (transport.cardType === CardType.Lite) {
+    return txUtil.formatSignature(encryptedSignature, signatureType);
+  } else {
+    throw new error.SDKError(getSingleSignatureFromCoolWalletV2.name, 'Not suppotrd card type.');
   }
-  //authorize tx
-  const signatureKey = await command.getSignatureKey(transport);
-  if (typeof authorizedCallback === 'function') {
-    authorizedCallback();
-  }
-  // clear tx
-  await command.clearTransaction(transport);
-  await mcu.control.powerOff(transport);
-  // decrpt signature
-  const signature = txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType);
-  return signature;
 };
 
 /**
@@ -80,18 +89,18 @@ export const getSingleSignatureFromCoolWalletV2 = async (
  * @param {Transport} transport
  * @param {Array<{Function}>} preActions
  * @param {Array<{Function}>} actions
+ * @param {SignatureType} signatureType
  * @param {Function} txPrepareCompleteCallback notify app to show the tx info
  * @param {Function} authorizedCallback notify app to close the tx info
- * @param {SignatureType} signatureType
  * @return {Promise<Array<{r: string, s: string} | Buffer >>}
  */
 export const getSignaturesFromCoolWalletV2 = async (
   transport: Transport,
   preActions: Array<Function> | undefined = undefined,
   actions: Array<Function>,
+  signatureType: SignatureType,
   txPrepareCompleteCallback: Function | undefined = undefined,
-  authorizedCallback: Function | undefined = undefined,
-  signatureType: SignatureType
+  authorizedCallback: Function | undefined = undefined
 ) => {
   // signing
   if (preActions) {
@@ -112,7 +121,7 @@ export const getSignaturesFromCoolWalletV2 = async (
 
   // get tx detail
   if (!(await command.getTxDetail(transport))) {
-    throw new SDKError(getSignaturesFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
+    throw new error.SDKError(getSignaturesFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
   }
   //authorize tx
   const signatureKey = await command.getSignatureKey(transport);
@@ -127,72 +136,4 @@ export const getSignaturesFromCoolWalletV2 = async (
     txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
   );
   return signatures;
-};
-
-/**
- * @deprecated Please use getSingleSignatureFromCoolWalletV2 instead
- * @description Send Signing Function to CoolWallet
- * @param {Transport} transport
- * @param {String} appId
- * @param {String} appPrivateKey
- * @param {Array<{Function}>} preActions
- * @param {Array<{Function}>} actions
- * @param {Boolean} isEDDSA
- * @param {Function} txPrepareCompleteCallback notify app to show the tx info
- * @param {Function} authorizedCallback notify app to close the tx info
- * @param {Boolean} returnCanonical
- * @return {Promise<Array<{r: string, s: string} | Buffer >>}
- */
-export const getSingleSignatureFromCoolWallet = async (
-  transport: Transport,
-  preActions: Array<Function> | undefined = undefined,
-  action: Function,
-  isEDDSA = false,
-  txPrepareCompleteCallback: Function | undefined = undefined,
-  authorizedCallback: Function | undefined = undefined,
-  returnCanonical: boolean = true
-) => {
-  const signatureType = isEDDSA ? SignatureType.EDDSA : returnCanonical ? SignatureType.Canonical : SignatureType.DER;
-  return getSingleSignatureFromCoolWalletV2(
-    transport,
-    preActions,
-    action,
-    txPrepareCompleteCallback,
-    authorizedCallback,
-    signatureType
-  );
-};
-
-/**
- * @deprecated Please use getSignaturesFromCoolWalletV2 instead
- * @description Send Signing Function to CoolWallet
- * @param {Transport} transport
- * @param {String} appId
- * @param {String} appPrivateKey
- * @param {Array<{Function}>} preActions
- * @param {Array<{Function}>} actions
- * @param {Boolean} isEDDSA
- * @param {Function} txPrepareCompleteCallback notify app to show the tx info
- * @param {Function} authorizedCallback notify app to close the tx info
- * @param {Boolean} returnCanonical
- * @return {Promise<Array<{r: string, s: string} | Buffer >>}
- */
-export const getSignaturesFromCoolWallet = async (
-  transport: Transport,
-  preActions: Array<Function> | undefined = undefined,
-  actions: Array<Function>,
-  isEDDSA = false,
-  txPrepareCompleteCallback: Function | undefined = undefined,
-  authorizedCallback: Function | undefined = undefined,
-  returnCanonical: boolean = true
-) => {
-  const signatureType = isEDDSA ? SignatureType.EDDSA : returnCanonical ? SignatureType.Canonical : SignatureType.DER;
-  return getSignaturesFromCoolWalletV2(
-    transport,
-    preActions,
-    actions,
-    txPrepareCompleteCallback,
-    authorizedCallback,
-    signatureType
-  );
 };
