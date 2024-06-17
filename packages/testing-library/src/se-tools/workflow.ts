@@ -1,4 +1,4 @@
-import { apdu, Transport, config, utils, crypto } from '@coolwallet/core';
+import { Transport, config, utils, crypto, common, setting, wallet, tx } from '@coolwallet/core';
 
 type Mandatory = {
   appPrivateKey: string;
@@ -8,16 +8,16 @@ type Mandatory = {
 };
 
 async function initialize(transport: Transport, mnemonic: string): Promise<Mandatory> {
-  await apdu.general.resetCard(transport);
+  await setting.card.resetCard(transport);
   const keyPair = crypto.key.generateKeyPair();
   const appPrivateKey = keyPair.privateKey;
   const appPublicKey = keyPair.publicKey;
   const name = 'testEVM';
   const password = '12345678';
   const SEPublicKey = await config.getSEPublicKey(transport);
-  const appId = await apdu.pair.register(transport, appPublicKey, password, name, SEPublicKey);
+  const appId = await wallet.client.register(transport, appPublicKey, password, name, SEPublicKey);
   await utils.createWalletByMnemonic(transport, appId, appPrivateKey, mnemonic, SEPublicKey);
-  await apdu.info.toggleDisplayAddress(transport, appId, appPrivateKey, true);
+  await setting.card.toggleDisplayAddress(transport, appId, appPrivateKey, true);
 
   return {
     appPrivateKey,
@@ -28,9 +28,9 @@ async function initialize(transport: Transport, mnemonic: string): Promise<Manda
 }
 
 async function getTxDetail(transport: Transport, appId: string): Promise<string> {
-  await apdu.general.hi(transport, appId);
-  await apdu.tx.finishPrepare(transport);
-  return apdu.tx.getExplicitTxDetail(transport);
+  await common.hi(transport, appId);
+  await tx.command.finishPrepare(transport);
+  return tx.command.getExplicitTxDetail(transport);
 }
 
 export { initialize, getTxDetail };
