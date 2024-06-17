@@ -176,7 +176,7 @@ const EIP1559_ERC20_TRANSACTION = [
     to: '0x8A1628c2397F6cA75579A45E81EE3e17DF19720e',
     value: '',
     amount: '0.1',
-  }
+  },
 ];
 
 const EIP1559_SMART_CONTRACT_TRANSACTION = [
