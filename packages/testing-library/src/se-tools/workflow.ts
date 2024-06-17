@@ -1,4 +1,4 @@
-import { Transport, config, utils, crypto, common, setting, wallet, tx } from '@coolwallet/core';
+import { Transport, config, utils, crypto, common, setting, wallet, tx, CardType } from '@coolwallet/core';
 
 type Mandatory = {
   appPrivateKey: string;
@@ -17,7 +17,9 @@ async function initialize(transport: Transport, mnemonic: string): Promise<Manda
   const SEPublicKey = await config.getSEPublicKey(transport);
   const appId = await wallet.client.register(transport, appPublicKey, password, name, SEPublicKey);
   await utils.createWalletByMnemonic(transport, appId, appPrivateKey, mnemonic, SEPublicKey);
-  await setting.card.toggleDisplayAddress(transport, appId, appPrivateKey, true);
+  if (transport.cardType === CardType.Pro) {
+    await setting.card.toggleDisplayAddress(transport, appId, appPrivateKey, true);
+  }
 
   return {
     appPrivateKey,
