@@ -1,9 +1,9 @@
-import { composeFinalTransaction } from '../transactionUtils';
+import { finalizeTransferTransaction } from '../transactionUtils';
 
 describe('Test transactionUtils.ts', () => {
   it('Test composeFinalTransaction', async () => {
     const transaction = {
-      receiver: 'EQAW5QLk3XvW3HMbLqkE9wXkL9NdGpE1555tUxhdea8pVIbJ',
+      toAddress: 'EQAW5QLk3XvW3HMbLqkE9wXkL9NdGpE1555tUxhdea8pVIbJ',
       amount: '123000000',
       seqno: 20,
       payload: 'Hello CoolWallet!',
@@ -16,7 +16,7 @@ describe('Test transactionUtils.ts', () => {
       'hex'
     );
 
-    expect(await composeFinalTransaction(transaction, publicKey, signature)).toBe(
+    expect(await finalizeTransferTransaction(transaction, publicKey, signature)).toBe(
       'te6cckEBAgEAvwAB4YgASrT5P/nTDC5E74DyH+76IjHh20SSOMQ0wgRkO6cnHEYBGTGvFvLTB3hE3qa2rbiE+UpuzEPxaT3tpn/s2YhNLp/5vFf4bUwx0RAXSpKKSOa3M898aUfd/KMEtH85ADcAcU1NGLsyrNUIAAAAoAAcAQCSYgALcoFybr3rbjmNl1SCe4LyF+mujUia8882qYwuvNeUqiA6pqYAAAAAAAAAAAAAAAAAAAAAAABIZWxsbyBDb29sV2FsbGV0Ie1Mom4='
     );
   });

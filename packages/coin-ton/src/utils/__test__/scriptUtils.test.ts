@@ -35,7 +35,7 @@ describe('Test scriptUtils.ts', () => {
     expect(
       getArgument(
         {
-          receiver: 'EQAW5QLk3XvW3HMbLqkE9wXkL9NdGpE1555tUxhdea8pVIbJ',
+          toAddress: 'EQAW5QLk3XvW3HMbLqkE9wXkL9NdGpE1555tUxhdea8pVIbJ',
           amount: '123000000',
           seqno: 20,
           payload: 'Hello CoolWallet!',
