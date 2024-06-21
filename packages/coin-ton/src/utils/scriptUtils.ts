@@ -71,7 +71,7 @@ export function getArgument(transaction: Required<TransferTransaction>, addressI
 // Cell3: [cell3Length(8B)][jettonAmountLength(4B)][jettonAmount(120B)][receiver(256B)][receiverWorkchain(8B)][responser(256B)][responserWorkchain(8B)][forwardAmountLength(4B)][forwardAmount(120B)][memoLength(2B)][memo(512)]
 // Cell2: [cell2Length(8B)][fromTokenAccount(256B)][fromTokenAccountIsBounceable(1B)][fromTokenAccountWorkchain(8B)][amountLength(4B)][amount(120B)]
 // Cell1: [seqno(4B)][expireAt(4B)][sendMode(1B)]
-// Token: [tokenDecimal(1B)][tokenNameLength(1B)][tokenName(7B)][tokenContractAddress(32B)][tokenSign(72)]
+// Token: [tokenDecimal(1B)][tokenNameLength(1B)][tokenName(7B)][tokenContractAddress(36B)][tokenSign(72B)]
 export function getTransferTokenArgument(
   transaction: Required<TransferTokenTransaction>,
   addressIndex: number
@@ -127,7 +127,7 @@ export function getTransferTokenArgument(
     decimalsHex +
     symbolLengthHex +
     symbolHex.padEnd(14, '0') +
-    removeHex0x(Buffer.from(new TonWeb.Address(tokenAddress).hashPart).toString('hex'));
+    removeHex0x(Buffer.from(tokenAddress, 'base64').toString('hex'));
   const signatureArg = tokenSignature.padStart(144, '0');
 
   const argument =
@@ -157,6 +157,8 @@ export function getTransferTokenArgument(
     // Token Info
     tokenInfoArg +
     signatureArg;
+
+  console.debug(`argument: ${argument}`);
 
   return getSEPath(addressIndex) + argument;
 }
