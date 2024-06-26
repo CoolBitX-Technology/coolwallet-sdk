@@ -20,7 +20,7 @@ function checkAddressIsValid(address: string): void {
 }
 
 // The script reserves 64 bytes for memo.
-function checkMemoLength(memo?: string): void {
+function checkMemoLength(memo: string = ''): void {
   if (new TextEncoder().encode(memo).byteLength > 64) throw new Error(`checkParams: memo too long`);
 }
 
