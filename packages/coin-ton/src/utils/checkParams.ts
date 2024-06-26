@@ -16,6 +16,7 @@ function checkAmountNotZero(amount: string): void {
 // Check address.
 function checkAddressIsValid(address: string): void {
   if (!TonWeb.Address.isValid(address)) throw new Error(`checkParams: address is invalid. address=${address}`);
+  if (new TonWeb.Address(address).wc !== 0) throw new Error(`checkParams: we did not support other chain. address=${address}`);
 }
 
 // The script reserves 64 bytes for memo.
