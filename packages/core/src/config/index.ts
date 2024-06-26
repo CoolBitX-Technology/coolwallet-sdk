@@ -4,6 +4,7 @@ import Transport from '../transport';
 import { SHA256 } from '../crypto/hash';
 import { SE_KEY_PARAM, PathType } from './param';
 import { ec as EC } from 'elliptic';
+import { apdu } from '..';
 
 const secp256k1 = new EC('secp256k1');
 
@@ -58,20 +59,26 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
   const cardIdHash = SHA256(cardId).toString('hex');
   const parseCardIdHash = parseInt(cardIdHash.slice(0, 2), 16) & 0x7f;
   const index = parseCardIdHash.toString(16).padStart(2, '0') + cardIdHash.slice(2, 8);
+  const seVersion = await apdu.general.getSEVersion(transport);
+  let masterPublicKey;
+  let masterChainCode;
+  if (seVersion < 338) {
+    masterPublicKey = SE_KEY_PARAM.chipEncMasterPublicKey;
+    masterChainCode = SE_KEY_PARAM.chipEncMasterChainCode;
+  } else {
+    masterPublicKey = SE_KEY_PARAM.chipTransMasterPublicKey;
+    masterChainCode = SE_KEY_PARAM.chipTransMasterChainCode;
+  }
+  const compressedPublicKey = getCompressedPublicKey(masterPublicKey);
 
-  const compressedPublicKey = getCompressedPublicKey(SE_KEY_PARAM.chipTransMasterPublicKey);
-
-  const addend = sha512(
-    Buffer.from(SE_KEY_PARAM.chipTransMasterChainCode, 'hex'),
-    Buffer.from(compressedPublicKey + index, 'hex')
-  ).toString('hex');
+  const addend = sha512(Buffer.from(masterChainCode, 'hex'), Buffer.from(compressedPublicKey + index, 'hex')).toString(
+    'hex'
+  );
   const privateKey = Buffer.from(addend.slice(0, 64), 'hex');
 
   const keyPair = secp256k1.keyFromPrivate(privateKey);
   const publicKey = keyPair.getPublic();
-  const chipMasterPublicKey = secp256k1
-    .keyFromPublic(Buffer.from(SE_KEY_PARAM.chipTransMasterPublicKey, 'hex'))
-    .getPublic();
+  const chipMasterPublicKey = secp256k1.keyFromPublic(Buffer.from(masterPublicKey, 'hex')).getPublic();
 
   const Ki = publicKey.add(chipMasterPublicKey);
 
