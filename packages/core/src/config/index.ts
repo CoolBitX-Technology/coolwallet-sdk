@@ -59,21 +59,23 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
   const parseCardIdHash = parseInt(cardIdHash.slice(0, 2), 16) & 0x7f;
   const index = parseCardIdHash.toString(16).padStart(2, '0') + cardIdHash.slice(2, 8);
 
-  const compressedPublicKey = getCompressedPublicKey(SE_KEY_PARAM.chipMasterPublicKey);
+  const compressedPublicKey = getCompressedPublicKey(SE_KEY_PARAM.chipTransMasterPublicKey);
 
   const addend = sha512(
-    Buffer.from(SE_KEY_PARAM.chipMasterChainCode, 'hex'),
+    Buffer.from(SE_KEY_PARAM.chipTransMasterChainCode, 'hex'),
     Buffer.from(compressedPublicKey + index, 'hex')
   ).toString('hex');
   const privateKey = Buffer.from(addend.slice(0, 64), 'hex');
 
   const keyPair = secp256k1.keyFromPrivate(privateKey);
   const publicKey = keyPair.getPublic();
-  const chipMasterPublicKey = secp256k1.keyFromPublic(Buffer.from(SE_KEY_PARAM.chipMasterPublicKey, 'hex')).getPublic();
+  const chipMasterPublicKey = secp256k1
+    .keyFromPublic(Buffer.from(SE_KEY_PARAM.chipTransMasterPublicKey, 'hex'))
+    .getPublic();
 
   const Ki = publicKey.add(chipMasterPublicKey);
 
-  return Ki.encode("hex", false);
+  return Ki.encode('hex', false);
 }
 
 export { getSEPublicKey, PathType };
