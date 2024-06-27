@@ -19,6 +19,6 @@ export const TOKENS: Record<string, Token> = {
     symbol: 'NOT',
     unit: '9',
     contractAddress: 'EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT',
-    signature: `d3933044022055f330afc6bec928f9d59d928a71c2fc3913c8316dea48c63562593692e53b770220328cff664ca1f6cae83681d32d2fcbabd07b33d7b82f56686e33d92c49123666`,
+    signature: `3044022055f330afc6bec928f9d59d928a71c2fc3913c8316dea48c63562593692e53b770220328cff664ca1f6cae83681d32d2fcbabd07b33d7b82f56686e33d92c49123666`,
   },
 };
