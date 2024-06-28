@@ -38,7 +38,9 @@ function decodeCommand(command: string): APDUCommand {
 
 function encodeApdu(cla: number, ins: number, p1: number, p2: number, data: string): number[] {
   const dataBytes = hexStringToNumberArray(data);
-  return [cla, ins, p1, p2, dataBytes.length, ...dataBytes];
+  const dataLengthBytes =  hexStringToNumberArray(dataBytes.length.toString(16).padStart(6, '0'));
+
+  return [cla, ins, p1, p2, ...dataLengthBytes, ...dataBytes];
 }
 
 export { decodeCommand, encodeApdu, numberArrayToHexString, hexStringToNumberArray };
