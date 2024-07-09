@@ -67,6 +67,7 @@ export function getSubmitTransaction(
   signature: string,
   version: number
 ): string {
+  const mode = '00'; // skip checking the metadata hash, refer to: https://github.com/polkadot-fellows/runtimes/pull/337#issuecomment-2204079667
   const sumitTx =
     params.TX_ADDRESS_PRE +
     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
@@ -74,6 +75,7 @@ export function getSubmitTransaction(
     formatTxData.mortalEra +
     formatTxData.encodeNonce +
     formatTxData.encodeTip +
+    mode +
     methodString;
 
   const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version));
