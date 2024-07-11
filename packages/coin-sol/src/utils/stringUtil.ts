@@ -46,7 +46,7 @@ export function pubKeyToAddress(publicKey: string): string {
 export const formHex = (address: string | Buffer | undefined): string => {
   if (!address) return '';
   if (typeof address === 'string') {
-    if (isBase58Format(address)) return base58.decode(address).toString('hex');
+    if (isBase58Format(address) && address.length === 44) return base58.decode(address).toString('hex');
     return address;
   }
   return address.toString('hex');
