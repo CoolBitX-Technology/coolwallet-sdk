@@ -6,7 +6,7 @@ const config: Config.InitialOptions = {
   automock: false,
   // ingore broken coin-tests
   testPathIgnorePatterns: ['/packages/coin-trx/', '/packages/coin-atom/', 'packages/coin-theta'],
-  testMatch: ['**/index.spec.(js|ts)'],
+  testMatch: ['**/index.spec.(js|ts)', '**/*.test.(js|ts)'],
   setupFilesAfterEnv: ['./jest.setup.js'],
 };
 export default config;
