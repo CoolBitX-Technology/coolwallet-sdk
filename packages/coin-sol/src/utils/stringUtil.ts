@@ -43,10 +43,23 @@ export function pubKeyToAddress(publicKey: string): string {
   return base58.encode(pubKeyBuf);
 }
 
+/**
+ * CW-21334 Fixed user's publicKey just matches the base58 encoding, resulting in repeated decoding.
+ *
+ * The user's Solana address (base58 encoded) is:
+ * 5XZiuCyozesbRJsSdoJQCTHQRnTGDfSms5bV1ybLn9yg
+ *
+ * After converting it to Hex:
+ * fc238b62abd32cd576f1d5568d3b6b5cb2fbc57b419cc2b4cd8a2814973919a7
+ * This hex conform to the Base58 format (without 0, O, i, I, +, /), causing base58.decode to be executed again, resulting in an incorrect publicKey. 
+ *
+ * How to fix it:
+ * Adjust base58 verification method. A 32-byte public key can only be base58 encoded using 43 or 44 characters.
+ */
 export const formHex = (address: string | Buffer | undefined): string => {
   if (!address) return '';
   if (typeof address === 'string') {
-    if (isBase58Format(address) && address.length === 44) return base58.decode(address).toString('hex');
+    if (isBase58Format(address) && (address.length === 43 || address.length === 44)) return base58.decode(address).toString('hex');
     return address;
   }
   return address.toString('hex');
