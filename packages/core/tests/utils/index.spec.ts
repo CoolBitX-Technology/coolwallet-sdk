@@ -1,7 +1,7 @@
 import { createSeedsHexByMnemonic } from '../../src/utils';
 
 describe('utils', () => {
-  test('createSeedsHexFromMnemonic', async () => {
+  test('createSeedsHexByMnemonic', async () => {
     const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo card';
     const seedsHex = await createSeedsHexByMnemonic(mnemonic);
     expect(seedsHex).toMatchInlineSnapshot(
