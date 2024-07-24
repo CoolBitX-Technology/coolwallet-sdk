@@ -159,6 +159,31 @@ export const createSeedByApp = async (wordNumber: number, randomBytes: (size: nu
   return bip39.generateMnemonic(strength, randomBytes);
 };
 
+const createAdaMasterKeyByMnemonic = (mnemonic: string): Buffer => {
+  const entropy = bip39.mnemonicToEntropy(mnemonic);
+  const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
+  key[0] &= 0b11111000;
+  key[31] &= 0b00011111;
+  key[31] |= 0b01000000;
+  return key;
+};
+
+const createBip39SeedByMnemonic = async (mnemonic: string): Promise<Buffer> => {
+  return bip39.mnemonicToSeed(mnemonic);
+};
+
+export const createSeedsHexByMnemonic = async (mnemonic: string): Promise<string> => {
+  const seeds: Array<Buffer> = [];
+
+  // mnemonic to seed
+  seeds[0] = await createBip39SeedByMnemonic(mnemonic);
+
+  // mnemonic to ADA master key
+  seeds[1] = createAdaMasterKeyByMnemonic(mnemonic);
+
+  return Buffer.concat(seeds).toString('hex');
+};
+
 export const createWalletByMnemonic = async (
   transport: Transport,
   appId: string,
@@ -167,20 +192,14 @@ export const createWalletByMnemonic = async (
   SEPublicKey: string
 ): Promise<void> => {
   const seeds: Array<Buffer> = [];
-  const version = await info.getSEVersion(transport);
 
   // mnemonic to seed
-  seeds[0] = await bip39.mnemonicToSeed(mnemonic);
+  seeds[0] = await createBip39SeedByMnemonic(mnemonic);
 
   // mnemonic to ADA master key
+  const version = await info.getSEVersion(transport);
   if (version >= 317) {
-    const entropy = bip39.mnemonicToEntropy(mnemonic);
-    const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
-    key[0] &= 0b11111000;
-    key[31] &= 0b00011111;
-    key[31] |= 0b01000000;
-
-    seeds[1] = key;
+    seeds[1] = createAdaMasterKeyByMnemonic(mnemonic);
   }
 
   const seedHex = Buffer.concat(seeds).toString('hex');
