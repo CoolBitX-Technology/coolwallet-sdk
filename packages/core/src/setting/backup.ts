@@ -92,18 +92,26 @@ export const exportBackupData = async (
   appPrivateKey: string,
   backupCardId: string
 ): Promise<string> => {
+  const backupCardIdLength = new Uint8Array(2);
+  backupCardIdLength[0] = backupCardId.length & 0xff; // Lower byte
+  backupCardIdLength[1] = (backupCardId.length >> 8) & 0xff;
+  const data =
+    Buffer.from(backupCardIdLength).toString('hex') +
+    backupCardId +
+    // padding zero to trigger extended length
+    `0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`;
   const signature = await auth.getCommandSignature(
     transport,
     appId,
     appPrivateKey,
     commands.DELETE_REGISTER_BACKUP,
-    backupCardId
+    data
   );
   const { statusCode, msg } = await executeCommand(
     transport,
     commands.DELETE_REGISTER_BACKUP,
     target.SE,
-    backupCardId + signature,
+    data + signature,
     undefined,
     undefined
   );
