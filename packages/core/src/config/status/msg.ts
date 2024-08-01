@@ -1,4 +1,4 @@
-import { CodeList } from './pattern'
+import { CodeList } from './pattern';
 export const MSG: CodeList = {
   _9000: 'success',
   _9999: 'unknow error',
@@ -24,12 +24,16 @@ export const MSG: CodeList = {
   _609E: 'check signature main function is failed',
   _6BAC: '',
   _6ED1: 'the data decrypted an incorrect result (PKCS5 check failed, the key may be wrong)',
-  _6D63: 'path length is incorrect',
-  _6D64: 'bip32Ed25519 seed is not initialized',
-  _6D68: 'path is not standard',
-  _6D6C: 'the path of SLIP10 contains non-harden index',
-  _6D65: 'path uses unsupported scheme (limited to BIP32 or SLIP10)',
-  _6AC3: 'unsupported signature algorithm',
+  _6D60: 'path uses unsupported scheme in Bip32.java',
+  _6D61: 'sign type is incorrect in Bip32.java',
+  _6D62: 'path length is incorrect in Bip32Ed25519.java',
+  _6D63: 'path length is incorrect in Bip32.java',
+  _6D64: 'seed has not been initialized in Bip32Ed25519.java',
+  _6D65: 'path uses unsupported scheme in Bip32.java',
+  _6D66: 'unsupported signature algorithm in Bip32Ed25519.java',
+  _6D67: 'path uses unsupported scheme in KeyManager.java',
+  _6D68: 'path is not standard in KeyManager.java',
+  _6D6C: 'the path of SLIP0010 contains non-harden index in Bip32.java',
   _6D6E: 'the required master key does not exist',
   _6091: 'data order is wrong',
   _6092: 'hash error',
@@ -63,5 +67,5 @@ export const MSG: CodeList = {
   _6AC2: 'p1 and script type not match',
   _6AC7: 'p1 not supported',
   _6AC5: 'script type not supported (only support P2PKH=00 P2SH=01)',
-  _6A88: 'applet is not exits'
-}
+  _6A88: 'applet is not exits',
+};
