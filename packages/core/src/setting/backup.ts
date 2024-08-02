@@ -93,30 +93,27 @@ export const exportBackupData = async (
   backupCardId: string
 ): Promise<string> => {
   const backupCardIdLength = new Uint8Array(2);
-  backupCardIdLength[0] = backupCardId.length & 0xff; // Lower byte
-  backupCardIdLength[1] = (backupCardId.length >> 8) & 0xff;
-  const data =
-    Buffer.from(backupCardIdLength).toString('hex') +
-    backupCardId +
+  const backupCardIdBuf = Buffer.from(backupCardId, 'hex');
+  backupCardIdLength[0] = (backupCardIdBuf.length >> 8) & 0xff;
+  backupCardIdLength[1] = backupCardIdBuf.length & 0xff;
+
+  const data = Buffer.concat([
+    Buffer.from(backupCardIdLength),
+    backupCardIdBuf,
     // padding zero to trigger extended length
-    `0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`;
-  const signature = await auth.getCommandSignature(
+    Buffer.alloc(200),
+  ]).toString('hex');
+  const signature = await auth.getCommandSignature(transport, appId, appPrivateKey, commands.EXPORT_BACKUP_DATA, data);
+  const { statusCode, msg, outputData } = await executeCommand(
     transport,
-    appId,
-    appPrivateKey,
-    commands.DELETE_REGISTER_BACKUP,
-    data
-  );
-  const { statusCode, msg } = await executeCommand(
-    transport,
-    commands.DELETE_REGISTER_BACKUP,
+    commands.EXPORT_BACKUP_DATA,
     target.SE,
     data + signature,
     undefined,
     undefined
   );
   if (statusCode === CODE._9000) {
-    return msg;
+    return outputData;
   } else {
     throw new APDUError(commands.EXPORT_BACKUP_DATA, statusCode, msg);
   }
