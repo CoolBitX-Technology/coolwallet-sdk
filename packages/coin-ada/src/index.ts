@@ -85,9 +85,8 @@ export default class ADA implements COIN.Coin {
     const witnesses = getArguments(internalTx, accPubKey, txType, this.isTestNet);
 
     // request CoolWallet to sign tx
-
+    await apdu.tx.sendScript(transport, script);
     for (const witness of witnesses) {
-      await apdu.tx.sendScript(transport, script);
       const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, witness.arg);
       if (!encryptedSig) throw new Error('executeScript fails to return signature');
       witness.sig = encryptedSig;

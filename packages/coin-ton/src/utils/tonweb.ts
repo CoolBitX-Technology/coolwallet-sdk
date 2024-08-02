@@ -1,10 +1,11 @@
 import TonWeb from 'tonweb';
 import { mnemonicToSeed } from 'bip39';
 import { derivePath } from 'ed25519-hd-key';
+import { WalletV4ContractR2 } from 'tonweb/dist/types/contract/wallet/v4/wallet-v4-contract-r2';
 
 export const tonweb = new TonWeb();
 
-export function getWalletV4R2(publicKey: string) {
+export function getWalletV4R2(publicKey: string): WalletV4ContractR2 {
   const WalletClass = tonweb.wallet.all.v4R2;
 
   const wallet = new WalletClass(tonweb.provider, {
@@ -13,6 +14,10 @@ export function getWalletV4R2(publicKey: string) {
   });
 
   return wallet;
+}
+
+export async function getJettonWallet(fromTokenAccount: string) {
+  return new TonWeb.token.jetton.JettonWallet(tonweb.provider, { address: fromTokenAccount });
 }
 
 export async function getKeyPair(mnemonic: string, index: number) {

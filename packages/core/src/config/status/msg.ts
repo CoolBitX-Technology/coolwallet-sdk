@@ -68,4 +68,6 @@ export const MSG: CodeList = {
   _6AC7: 'p1 not supported',
   _6AC5: 'script type not supported (only support P2PKH=00 P2SH=01)',
   _6A88: 'applet is not exits',
+  _6B0C: 'could not get pair password when card is not registered',
+  _6B0D: 'could not get pair password when card is freezed',
 };

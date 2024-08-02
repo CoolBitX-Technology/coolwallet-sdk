@@ -69,11 +69,9 @@ function createAccountWithSeed(params: {
   programId: types.Address;
 }): types.TransactionInstruction {
   const { fromPubkey, basePubkey, seed, space, lamports, programId, newAccountPubkey } = params;
-  const basePubkeyStr = formHex(basePubkey);
-  const fromPubkeyStr = formHex(fromPubkey);
 
   const data = encodeData(SystemProgramLayout.createWithSeed, {
-    base: Buffer.from(basePubkeyStr, 'hex'),
+    base: Buffer.from(formHex(basePubkey), 'hex'),
     seed,
     lamports,
     space,
@@ -81,8 +79,8 @@ function createAccountWithSeed(params: {
   });
 
   const keys = [
-    { pubkey: fromPubkeyStr, isSigner: true, isWritable: true },
-    { pubkey: formHex(newAccountPubkey), isSigner: false, isWritable: true },
+    { pubkey: fromPubkey, isSigner: true, isWritable: true },
+    { pubkey: newAccountPubkey, isSigner: false, isWritable: true },
   ];
 
   return {

@@ -14,8 +14,12 @@ export enum PathType {
 
 export const SE_KEY_PARAM = {
   Pro: {
+    // SE < 338
     chipMasterChainCode: '2c46cb15df0237d86c216690ebdee5ceeb19396ac1cc69e1bf8295555cf34ef9',
     chipMasterPublicKey: `0411c1a05f74dd3d30f19e332f7257c6873f60309fcd33208c12da388e9b7e92ccd5384094fe43d26cabe532b81096d86b2c946f8b3cd1970f2644568a11cd55e3`,
+    // SE >= 338
+    chipTransMasterChainCode: '515f75207921359a2c547590f457dfd5e5f4ddf0d5f94eb7b4c397656a3a3061',
+    chipTransMasterPublicKey: `046dd46f9b64a044b38fa057c02535e1647bb260cc409ea47eaaf1ece65657afc069428f822d9ecec82bea11ae6ff4e62d7977d7dacc4b9b1453f0f17843f258ee`,
   },
   Lite: {
     chipMasterChainCode: 'a7ba184bfb2fc1a91b019d88bb9681b3230067871fcb3e1ca8d08a45ae2a3447',
