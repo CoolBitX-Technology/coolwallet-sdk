@@ -60,7 +60,7 @@ jobs:
       run: docker pull ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
 
     - name: Run Docker container
-      run: docker run -d --name coolwallet-jcvm-jre-http -p 8080:8080 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+      run: docker run -d --name coolwallet-jcvm-jre-http -p 9527:9527 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
 
     - name: Build mandatory library
       run: |
