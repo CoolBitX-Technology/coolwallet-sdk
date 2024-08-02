@@ -32,7 +32,6 @@ export function addressToOutScript(address: string): {
   if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address '${address}'`);
   const outScript = payment.output;
   const outHash = payment.hash;
-  console.debug(payment);
   return { scriptType, outScript, outHash };
 }
 
@@ -58,7 +57,6 @@ export function pubkeyToAddressAndOutScript(
     throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
   }
 
-  console.debug(payment);
   if (!payment.address)
     throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No Address for ScriptType '${scriptType}'`);
   if (!payment.output)

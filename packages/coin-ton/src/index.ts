@@ -1,8 +1,10 @@
 import { coin as COIN, Transport } from '@coolwallet/core';
 import * as AddressUtils from './utils/addressUtils';
 import { COIN_TYPE } from './config/param';
-import { SignTransferTxType } from './config/types';
+import { SignTransferTxType, SignTransferTokenTxType } from './config/types';
 import signTransferTransaction from './signTransferTransaction';
+import signTransferTokenTransaction from './signTransferTokenTransaction';
+export { TOKENS } from './config/tokenInfos';
 
 export default class TON extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
@@ -23,5 +25,9 @@ export default class TON extends COIN.EDDSACoin implements COIN.Coin {
 
   async signTransaction(data: SignTransferTxType): Promise<string> {
     return signTransferTransaction(data);
+  }
+
+  async signTransferTokenTransaction(data: SignTransferTokenTxType): Promise<string> {
+    return signTransferTokenTransaction(data);
   }
 }
