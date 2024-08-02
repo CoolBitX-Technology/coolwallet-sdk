@@ -93,12 +93,13 @@ export const exportBackupData = async (
   backupCardId: string
 ): Promise<string> => {
   const backupCardIdLength = new Uint8Array(2);
-  backupCardIdLength[0] = (backupCardId.length >> 8) & 0xff;
-  backupCardIdLength[1] = backupCardId.length & 0xff;
+  const backupCardIdBuf = Buffer.from(backupCardId, 'hex');
+  backupCardIdLength[0] = (backupCardIdBuf.length >> 8) & 0xff;
+  backupCardIdLength[1] = backupCardIdBuf.length & 0xff;
 
   const data = Buffer.concat([
     Buffer.from(backupCardIdLength),
-    Buffer.from(backupCardId, 'hex'),
+    backupCardIdBuf,
     // padding zero to trigger extended length
     Buffer.alloc(200),
   ]).toString('hex');
