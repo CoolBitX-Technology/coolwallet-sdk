@@ -22,7 +22,7 @@
     "keccak": "^3.0.2",
     "regenerator-runtime": "^0.13.9",
     "rlp": "^3.0.0",
-    "web3": "^1.10.0"
+    "web3": "^4.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
