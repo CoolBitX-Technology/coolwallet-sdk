@@ -88,7 +88,7 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
   const keyPair = secp256k1.keyFromPrivate(privateKey);
   const publicKey = keyPair.getPublic();
   const chipMasterPublicKey = secp256k1
-    .keyFromPublic(Buffer.from(masterChainCode, 'hex'))
+    .keyFromPublic(Buffer.from(masterPublicKey, 'hex'))
     .getPublic();
 
   const Ki = publicKey.add(chipMasterPublicKey);
