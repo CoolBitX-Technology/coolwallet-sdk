@@ -35,7 +35,6 @@ export interface CodeList {
   _6D68: string,
   _6D6C: string,
   _6D65: string,
-  _6AC3: string,
   _6D6E: string,
   _6091: string,
   _6092: string,
