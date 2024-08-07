@@ -4,7 +4,9 @@
   "description": "Core library for other CoolWallet SDKs.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "jest --runInBand",
+    "test": "NODE_ENV=development jest --runInBand",
+    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
     "build": "del-cli lib; npm run build:types; npm run build:ts",
