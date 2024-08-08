@@ -55,3 +55,9 @@ async getAddress(
     addressIndex: number
 ): Promise<string> 
 ```
+
+## Acknowledgements
+
+This project includes code from the following open source projects:
+
+- [js-wallet-sdk](https://github.com/okx/js-wallet-sdk) - Licensed under the MIT License
