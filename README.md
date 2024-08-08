@@ -50,23 +50,29 @@ To communicate with CoolWallet device, you need to specify a bluetooth transport
 Used to sign transactions of different cryptocurrencies.
 
 | Package                                 | Version                                                   | Coin Name              |
-| --------------------------------------- | --------------------------------------------------------- | ------------------------ |
-| [`@coolwallet/atom`](/packages/cws-atom) | ![version](https://img.shields.io/npm/v/@coolwallet/atom) | Cosmos |
-| [`@coolwallet/ada`](/packages/cws-ada) | ![version](https://img.shields.io/npm/v/@coolwallet/ada) | Cardano |
-| [`@coolwallet/bch`](/packages/cws-bch) | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash |
-| [`@coolwallet/bsc`](/packages/cws-bsc) | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain |
-| [`@coolwallet/btc`](/packages/cws-btc) | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin/USDT |
-| [`@coolwallet/doge`](/packages/cws-doge) | ![version](https://img.shields.io/npm/v/@coolwallet/doge) | Doge |
-| [`@coolwallet/dot`](/packages/cws-dot) | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot/Kusama |
-| [`@coolwallet/eth`](/packages/cws-eth) | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum (Ether, ERC20, Smart Contract, EIP-1559 etc.)|
-| [`@coolwallet/icx`](/packages/cws-icx) | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon |
-| [`@coolwallet/ltc`](/packages/cws-ltc) | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LiteCoin |
-| [`@coolwallet/sol`](/packages/cws-sol) | ![version](https://img.shields.io/npm/v/@coolwallet/sol) | Solana |
-| [`@coolwallet/trx`](/packages/cws-trx) | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron |
-| [`@coolwallet/xlm`](/packages/cws-xlm) | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar/Kinesis |
-| [`@coolwallet/xrp`](/packages/cws-xrp) | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
-| [`@coolwallet/xtz`](/packages/cws-xtx) | ![version](https://img.shields.io/npm/v/@coolwallet/xtz) | Tezos |
-| [`@coolwallet/zen`](/packages/cws-zen) | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash |
+| ----------------------------------------- | --------------------------------------------------------- | ------------------------ |
+| [`@coolwallet/ada`](/packages/coin-ada)   | ![version](https://img.shields.io/npm/v/@coolwallet/ada) | Cardano |
+| [`@coolwallet/aptos`](/packages/coin-aptos)   | ![version](https://img.shields.io/npm/v/@coolwallet/aptos) | Aptos |
+| [`@coolwallet/atom`](/packages/coin-atom) | ![version](https://img.shields.io/npm/v/@coolwallet/atom) | Cosmos |
+| [`@coolwallet/bch`](/packages/coin-bch)   | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash |
+| [`@coolwallet/bsc`](/packages/coin-bsc)   | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain |
+| [`@coolwallet/btc`](/packages/coin-btc)   | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin/USDT |
+| [`@coolwallet/cro`](/packages/coin-cro)   | ![version](https://img.shields.io/npm/v/@coolwallet/cro) | Crypto.org |
+| [`@coolwallet/cronos`](/packages/coin-cronos)   | ![version](https://img.shields.io/npm/v/@coolwallet/cronos) | Cronos |
+| [`@coolwallet/doge`](/packages/coin-doge) | ![version](https://img.shields.io/npm/v/@coolwallet/doge) | Doge |
+| [`@coolwallet/dot`](/packages/coin-dot)   | ![version](https://img.shields.io/npm/v/@coolwallet/dot) | Polkadot/Kusama |
+| [`@coolwallet/etc`](/packages/coin-etc)   | ![version](https://img.shields.io/npm/v/@coolwallet/etc) | Ethereum Classic |
+| [`@coolwallet/eth`](/packages/coin-eth)   | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum |
+| [`@coolwallet/evm`](/packages/coin-evm)   | ![version](https://img.shields.io/npm/v/@coolwallet/evm) | Some EVM coins |
+| [`@coolwallet/icx`](/packages/coin-icx)   | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon |
+| [`@coolwallet/ltc`](/packages/coin-ltc)   | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LiteCoin |
+| [`@coolwallet/sol`](/packages/coin-sol)   | ![version](https://img.shields.io/npm/v/@coolwallet/sol) | Solana |
+| [`@coolwallet/ton`](/packages/coin-ton)   | ![version](https://img.shields.io/npm/v/@coolwallet/ton) | The Open Network |
+| [`@coolwallet/trx`](/packages/coin-trx)   | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron |
+| [`@coolwallet/xlm`](/packages/coin-xlm)   | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar/Kinesis |
+| [`@coolwallet/xrp`](/packages/coin-xrp)   | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
+| [`@coolwallet/xtz`](/packages/coin-xtx)   | ![version](https://img.shields.io/npm/v/@coolwallet/xtz) | Tezos |
+| [`@coolwallet/zen`](/packages/coin-zen)   | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash |
 
 
 ## Examples: Build ETH in web app
