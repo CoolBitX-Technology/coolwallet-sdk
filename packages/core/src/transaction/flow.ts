@@ -102,38 +102,66 @@ export const getSignaturesFromCoolWalletV2 = async (
   txPrepareCompleteCallback: Function | undefined = undefined,
   authorizedCallback: Function | undefined = undefined
 ) => {
+  console.log(`aaaaaaaa13.0`);
+
   // signing
   if (preActions) {
     // eslint-disable-next-line no-await-in-loop
     for (const preAction of preActions) {
+      console.log(`aaaaaaaa13.1`);
       await preAction();
     }
   }
+  console.log(`aaaaaaaa13.1 finish`);
+
   const encryptedSignatureArray = [];
   // eslint-disable-next-line no-await-in-loop
   for (const action of actions) {
+    console.log(`aaaaaaaa13.2`);
+
     encryptedSignatureArray.push(await action());
   }
+
+  console.log(`aaaaaaaa13.3`);
+
   if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
 
-  // finish prepare
-  await command.finishPrepare(transport);
+  console.log(`aaaaaaaa13.4 transport.cardType=${transport.cardType}`);
+  if (transport.cardType === CardType.Pro) {
+    console.log(`aaaaaaaa13.5`);
 
-  // get tx detail
-  if (!(await command.getTxDetail(transport))) {
-    throw new error.SDKError(getSignaturesFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
+    // finish prepare
+    await command.finishPrepare(transport);
+
+    // get tx detail
+    if (!(await command.getTxDetail(transport))) {
+      throw new error.SDKError(getSignaturesFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
+    }
+    //authorize tx
+    const signatureKey = await command.getSignatureKey(transport);
+    if (typeof authorizedCallback === 'function') {
+      authorizedCallback();
+    }
+    // clear tx
+    await command.clearTransaction(transport);
+    await mcu.control.powerOff(transport);
+
+    // decrpt signature
+    const signatures = encryptedSignatureArray.map((encryptedSignature) =>
+      txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
+    );
+    return signatures;
+  } else if (transport.cardType === CardType.Lite) {
+    console.log(`aaaaaaaa13.6 encryptedSignatureArray=${JSON.stringify(encryptedSignatureArray)}`);
+
+    // decrpt signature
+    const signatures = encryptedSignatureArray.map((encryptedSignature) =>
+      txUtil.formatSignature(encryptedSignature, signatureType)
+    );
+    console.log(`aaaaaaaa13.7 signatures=${signatures}`);
+
+    return signatures;
+  } else {
+    throw new error.SDKError(getSingleSignatureFromCoolWalletV2.name, 'Not suppotrd card type.');
   }
-  //authorize tx
-  const signatureKey = await command.getSignatureKey(transport);
-  if (typeof authorizedCallback === 'function') {
-    authorizedCallback();
-  }
-  // clear tx
-  await command.clearTransaction(transport);
-  await mcu.control.powerOff(transport);
-  // decrpt signature
-  const signatures = encryptedSignatureArray.map((encryptedSignature) =>
-    txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
-  );
-  return signatures;
 };

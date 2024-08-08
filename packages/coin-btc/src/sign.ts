@@ -1,4 +1,4 @@
-import { tx, error, apdu } from '@coolwallet/core';
+import { tx, error, info, CardType } from '@coolwallet/core';
 import { ScriptType, OmniType, PreparedData, Callback } from './config/types';
 import * as param from './config/param';
 import * as txUtil from './utils/transactionUtil';
@@ -17,6 +17,7 @@ async function signTransaction(
   confirmCB?: Callback,
   authorizedCB?: Callback
 ): Promise<string> {
+  console.log('aaaaaaaa11');
   const { actions } = await scriptUtil.getScriptSigningActions(
     transport,
     redeemScriptType,
@@ -25,6 +26,7 @@ async function signTransaction(
     preparedData,
     seVersion
   );
+  console.log('aaaaaaaa12');
 
   let signatureType: SignatureType;
 
@@ -40,16 +42,21 @@ async function signTransaction(
     default:
       throw new error.SDKError(signTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
   }
+  console.log(`aaaaaaaa13 redeemScriptType=${redeemScriptType}`);
 
   const signatures = await tx.flow.getSignaturesFromCoolWalletV2(
     transport,
     preActions,
     actions,
+    signatureType,
     confirmCB,
-    authorizedCB,
-    signatureType
+    authorizedCB
   );
+  console.log(`aaaaaaaa14`);
+
   const transaction = txUtil.composeFinalTransaction(redeemScriptType, preparedData, signatures as Buffer[]);
+  console.log(`aaaaaaaa15`);
+
   return transaction.toString('hex');
 }
 
@@ -65,6 +72,8 @@ async function checkRedeemScriptType(redeemScriptType: ScriptType) {
 }
 
 export async function signBTCTransaction(signTxData: signTxType): Promise<string> {
+  console.log(`aaaaaaaa0`);
+
   const {
     scriptType: redeemScriptType,
     transport,
@@ -78,7 +87,10 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
     authorizedCB,
   } = signTxData;
 
+  console.log(`aaaaaaaa1`);
+
   checkRedeemScriptType(redeemScriptType);
+  console.log(`aaaaaaaa2`);
 
   const { preparedData } = txUtil.createUnsignedTransactions(
     redeemScriptType,
@@ -89,24 +101,35 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
     /*omniType=*/ null,
     version
   );
-  const seVersion = await apdu.general.getSEVersion(transport);
+  console.log(`aaaaaaaa3`);
+
+  const seVersion = await info.getSEVersion(transport);
+
+  console.log(`aaaaaaaa4`);
 
   let script;
   let argument;
 
-  if (seVersion <= 331 || redeemScriptType === ScriptType.P2PKH) {
+  console.log(`aaaaaaaa5`);
+
+  if ((transport.cardType === CardType.Pro && seVersion <= 331) || redeemScriptType === ScriptType.P2PKH) {
+    console.log(`aaaaaaaa6`);
     script = param.TRANSFER.script + param.TRANSFER.signature;
     argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
   } else if (redeemScriptType === ScriptType.P2TR) {
+    console.log(`aaaaaaaa7`);
     script = param.WITNESS_1.script + param.WITNESS_1.signature;
     argument = await scriptUtil.getWitness1Argument(redeemScriptType, inputs, output, change);
   } else {
+    console.log(`aaaaaaaa8`);
     script = param.WITNESS_0.script + param.WITNESS_0.signature;
     argument = await scriptUtil.getWitness0Argument(redeemScriptType, inputs, output, change);
   }
 
+  console.log(`aaaaaaaa9`);
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
 
+  console.log(`aaaaaaaa10`);
   return signTransaction(
     transport,
     appId,
@@ -148,12 +171,12 @@ export async function signUSDTransaction(signUSDTTxData: signUSDTTxType): Promis
     omniType,
     version
   );
-  const seVersion = await apdu.general.getSEVersion(transport);
+  const seVersion = await info.getSEVersion(transport);
 
   let script;
   let argument;
 
-  if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
+  if (transport.cardType === CardType.Pro && seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
     script = param.NEW_USDT.script + param.NEW_USDT.signature;
     argument = await scriptUtil.getUSDTNewArgument(redeemScriptType, inputs, output, value, change);
   } else {

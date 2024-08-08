@@ -58,6 +58,7 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async signTransaction(signTxData: signTxType): Promise<string> {
+    console.log(`aaaaaaaa1 sdk signTransaction=${JSON.stringify(signTxData)}`)
     for (const input of signTxData.inputs) {
       // eslint-disable-next-line no-await-in-loop
       const pubkey = await this.getPublicKey(
@@ -88,6 +89,8 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
         signTxData.change.pubkeyBuf = Buffer.from(pubkey, 'hex');
       }
     }
+    console.log(`aaaaaaaa2 sdk signTransaction=${JSON.stringify(signTxData)}`)
+
     return signBTCTransaction(signTxData);
   }
 
