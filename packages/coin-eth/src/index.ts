@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, setting, apdu, Transport } from '@coolwallet/core';
+import { coin as COIN, setting, Transport, info } from '@coolwallet/core';
 import web3 from 'web3';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
@@ -73,7 +73,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async signEIP1559Transfer(signTxData: types.signEIP1559Tx): Promise<string> {
-    const version = await apdu.general.getSEVersion(signTxData.transport);
+    const version = await info.getSEVersion(signTxData.transport);
     if (version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signTransferTransaction(data);
@@ -88,7 +88,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async signEIP1559ERC20(signTxData: types.signEIP1559Tx, tokenSignature = ''): Promise<string> {
-    const version = await apdu.general.getSEVersion(signTxData.transport);
+    const version = await info.getSEVersion(signTxData.transport);
     if (version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signERC20Transaction(data, tokenSignature);
@@ -103,7 +103,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async signEIP1559Smart(signTxData: types.signEIP1559Tx): Promise<string> {
-    const version = await apdu.general.getSEVersion(signTxData.transport);
+    const version = await info.getSEVersion(signTxData.transport);
     if (version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signSmartContractTransaction(data);
