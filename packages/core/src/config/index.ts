@@ -80,8 +80,8 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
       masterPublicKey = SE_KEY_PARAM.Pro.chipMasterPublicKey;
       masterChainCode = SE_KEY_PARAM.Pro.chipMasterChainCode;
     } else {
-      masterPublicKey = SE_KEY_PARAM.Pro.chipTransMasterChainCode;
-      masterChainCode = SE_KEY_PARAM.Pro.chipTransMasterPublicKey;
+      masterPublicKey = SE_KEY_PARAM.Pro.chipTransMasterPublicKey;
+      masterChainCode = SE_KEY_PARAM.Pro.chipTransMasterChainCode;
     }
   } else if (transport.cardType === CardType.Lite) {
     masterPublicKey = SE_KEY_PARAM.Lite.chipMasterPublicKey;
