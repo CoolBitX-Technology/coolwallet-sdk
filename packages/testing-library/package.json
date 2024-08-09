@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/testing-library",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0-beta.3",
   "description": "Testing library for CoolWallet SDKs",
   "main": "lib/index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "@babel/core": "^7.17.9",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
-    "@coolwallet/core": "^2.0.0-beta.13",
+    "@coolwallet/core": "^2.0.0-beta.14",
     "bs58check": "^2.1.2",
     "del-cli": "^4.0.1",
     "jest": "^27.5.1",
