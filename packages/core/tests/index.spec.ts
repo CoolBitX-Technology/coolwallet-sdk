@@ -1,4 +1,4 @@
-import { Transport, coin, config, apdu, tx, CardType } from '../src';
+import { Transport, coin, config, apdu, tx, CardType, setting, info } from '../src';
 import * as bip39 from 'bip39';
 import { Signature } from '@noble/secp256k1';
 import { keccak_256 } from '@noble/hashes/sha3';
@@ -77,7 +77,7 @@ describe('Test CoolWallet SDK Core Functional', () => {
     const encoded = Buffer.from(keccak_256(Buffer.from(message, 'hex')));
     const expected = Buffer.from((await node.sign(encoded)) ?? '').toString('hex');
     const signature = Signature.fromCompact(se_signature.r + se_signature.s).normalizeS();
-    expect(signature.toDERHex(false)).toEqual(expected);
+    expect(signature.toDERHex()).toEqual(expected);
     if (transport.cardType === CardType.Pro) {
       const txDetail = await getTxDetail(transport, props.appId);
       const expctedTxDetail = new DisplayBuilder()
@@ -160,5 +160,50 @@ describe('Test CoolWallet SDK Core Functional', () => {
         .finalize();
       expect(txDetail).toEqual(expctedTxDetail.toLowerCase());
     }
+  });
+});
+
+describe('Test CoolWallet SDK Core Backup', () => {
+  let props: PromiseValue<ReturnType<typeof initialize>>;
+  let transport: Transport;
+  let cardType: CardType;
+
+  beforeAll(async () => {
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
+    // transport = (await createTransport())!;
+    props = await initialize(transport, mnemonic);
+    secpWallet.setMnemonic(mnemonic);
+    edWallet.setMnemonic(mnemonic);
+  });
+
+  it('Test backup', async () => {
+    const publicKey = await coin.getPublicKeyByPath(
+      transport,
+      props.appId,
+      props.appPrivateKey,
+      config.PathType.CURVE25519
+    );
+    const expectedPublicKey = Buffer.from(edWallet.deriveCurve25519PublicKey() ?? '').toString('hex');
+    expect(publicKey).toEqual(expectedPublicKey);
+
+    const cardId = await info.getCardId(transport);
+    const exportData = await setting.backup.exportBackupData(transport, props.appId, props.appPrivateKey, cardId);
+    const oldInfo = await info.getCardInfo(transport);
+    console.log('old info:', oldInfo);
+
+    await setting.card.resetCard(transport);
+    await setting.backup.importBackupData(transport, exportData);
+    const newInfo = await info.getCardInfo(transport);
+    console.log('new info:', newInfo);
+    expect(oldInfo).toEqual(newInfo);
   });
 });
