@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/evm",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "description": "Coolwallet EVMOS sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -42,7 +42,7 @@
     "web3-utils": "^1.7.1"
   },
   "dependencies": {
-    "@coolwallet/core": "^2.0.0-beta.6",
+    "@coolwallet/core": "^2.0.0-beta.14",
     "@metamask/eth-sig-util": "^4.0.0",
     "ajv": "^8.10.0",
     "bn.js": "^5.2.0",
