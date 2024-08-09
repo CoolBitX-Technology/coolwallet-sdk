@@ -35,9 +35,12 @@ export const executeScript = async (transport: Transport, appId: string, appPriv
   }
 
   for (const [i, v] of args.entries()) {
+    console.log(`aaaaaaaaaaa executeScript [i, v]=${JSON.stringify([i, v])}`)
     const p1 = i.toString(16).padStart(2, '0');
     const p2 = args.length.toString(16).padStart(2, '0');
     const signature = await getCommandSignature(transport, appId, appPrivKey, commands.EXECUTE_SCRIPT, v, p1, p2);
+    console.log(`aaaaaaaaaaa executeScript signature=${signature}`)
+
     const { outputData, statusCode, msg } = await executeCommand(
       transport,
       commands.EXECUTE_SCRIPT,
@@ -46,10 +49,17 @@ export const executeScript = async (transport: Transport, appId: string, appPriv
       p1,
       p2
     );
+
+    console.log(`aaaaaaaaaaa executeScript { outputData, statusCode, msg }=${JSON.stringify({ outputData, statusCode, msg },null,2)}`)
+    console.log(`aaaaaaaaaaa executeScript i =${i}`)
+    console.log(`aaaaaaaaaaa executeScript i+1 =${i+1}`)
+    console.log(`aaaaaaaaaaa executeScript args.length =${args.length}`)
     if (i + 1 === args.length) {
-      if (outputData) {
+      if (true) {
+        console.log(`aaaaaaaaaaa executeScript return outputData=${outputData}`)
         return outputData;
       } else {
+        console.log(`aaaaaaaaaaa executeScript error`)
         throw new APDUError(commands.EXECUTE_SCRIPT, statusCode, msg);
       }
     }

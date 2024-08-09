@@ -229,6 +229,8 @@ export function composeFinalTransaction(
   preparedData: PreparedData,
   signatures: Array<Buffer>
 ): Buffer {
+  console.log(`aaaaaaaa14.1`);
+
   const { versionBuf, inputsCount, preparedInputs, outputsCount, outputsBuf, lockTimeBuf } = preparedData;
 
   if (
@@ -239,6 +241,7 @@ export function composeFinalTransaction(
   ) {
     throw new error.SDKError(composeFinalTransaction.name, `Unsupport ScriptType '${redeemScriptType}'`);
   }
+  console.log(`aaaaaaaa14.2`);
 
   if (redeemScriptType === ScriptType.P2PKH) {
     const inputsBuf = Buffer.concat(
@@ -260,6 +263,8 @@ export function composeFinalTransaction(
     const flagBuf = Buffer.from('0001', 'hex');
     let segwitBuf;
     if (redeemScriptType === ScriptType.P2TR) {
+      console.log(`aaaaaaaa14.3`);
+
       segwitBuf = Buffer.concat(
         preparedInputs.map((_, i) => {
           const signature = signatures[i];
@@ -283,6 +288,8 @@ export function composeFinalTransaction(
       );
     }
 
+    console.log(`aaaaaaaa14.4`);
+
     const inputsBuf = Buffer.concat(
       preparedInputs.map(({ pubkeyBuf, preOutPointBuf, sequenceBuf }) => {
         if (redeemScriptType === ScriptType.P2SH_P2WPKH) {
@@ -290,10 +297,15 @@ export function composeFinalTransaction(
           const inScript = Buffer.concat([Buffer.from(outScript.length.toString(16), 'hex'), outScript]);
           return Buffer.concat([preOutPointBuf, varuint.encode(inScript.length), inScript, sequenceBuf]);
         } else {
+          console.log(`aaaaaaaa14.7`);
+
           return Buffer.concat([preOutPointBuf, Buffer.from('00', 'hex'), sequenceBuf]);
         }
       })
     );
+
+    console.log(`aaaaaaaa14.6`);
+
 
     return Buffer.concat([
       versionBuf,

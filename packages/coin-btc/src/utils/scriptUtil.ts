@@ -1,10 +1,10 @@
-import { Transport, apdu, error } from '@coolwallet/core';
+import { Transport, error, CardType } from '@coolwallet/core';
 import * as cryptoUtil from './cryptoUtil';
 import * as bufferUtil from './bufferUtil';
 import * as txUtil from './transactionUtil';
 import * as varuint from './varuintUtil';
 import { COIN_TYPE } from '../config/param';
-import { utils } from '@coolwallet/core';
+import { utils, tx } from '@coolwallet/core';
 import { ScriptType, Input, Output, Change, PreparedData, Callback } from '../config/types';
 import { pubkeyToAddressAndOutScript, toReverseUintBuffer } from './transactionUtil';
 import { PathType } from '@coolwallet/core/lib/config/param';
@@ -25,7 +25,9 @@ export async function getScriptSigningActions(
 ): Promise<{
   actions: Array<Callback>;
 }> {
-  if (seVersion <= 331 || redeemScriptType === ScriptType.P2PKH) {
+  console.log('aaaaaaaa11.1');
+
+  if ((transport.cardType === CardType.Pro && seVersion <= 331) || redeemScriptType === ScriptType.P2PKH) {
     const utxoArguments = preparedData.preparedInputs.map(async (preparedInput) => {
       const path = await getPath(preparedInput.addressIndex);
       const SEPath = Buffer.from(`${path}`, 'hex');
@@ -48,7 +50,7 @@ export async function getScriptSigningActions(
     });
 
     const actions = utxoArguments.map((utxoArgument) => async () => {
-      return apdu.tx.executeUtxoScript(
+      return tx.command.executeUtxoScript(
         transport,
         appId,
         appPrivateKey,
@@ -59,12 +61,18 @@ export async function getScriptSigningActions(
     });
     return { actions };
   } else if (redeemScriptType === ScriptType.P2TR) {
+    console.log('aaaaaaaa11.2');
+
     const actions = preparedData.preparedInputs.map((preparedInput, index) => async () => {
+      console.log('aaaaaaaa11.3');
+
       const SEPath = Buffer.from(
         await getPath(preparedInput.addressIndex, preparedInput.purposeIndex, PathType.BIP340),
         'hex'
       );
-      return apdu.tx.executeUtxoSegmentScript(
+      console.log('aaaaaaaa11.4');
+
+      return tx.command.executeUtxoSegmentScript(
         transport,
         appId,
         appPrivateKey,
@@ -101,7 +109,7 @@ export async function getScriptSigningActions(
     });
 
     const actions = utxoArguments.map((utxoArgument) => async () => {
-      return apdu.tx.executeUtxoSegmentScript(transport, appId, appPrivateKey, await utxoArgument);
+      return tx.command.executeUtxoSegmentScript(transport, appId, appPrivateKey, await utxoArgument);
     });
     return { actions };
   }
@@ -122,12 +130,12 @@ export function getScriptSigningPreActions(
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    await tx.command.executeScript(transport, appId, appPrivateKey, argument);
   };
   preActions.push(sendArgument);
 
