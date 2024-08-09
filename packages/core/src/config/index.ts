@@ -47,6 +47,18 @@ function getCompressedPublicKey(publicKey: string) {
   return prefix + publicKey.substring(2, 66);
 }
 
+function hexToAscii(hex: string) {
+  let asciiStr = '';
+
+  for (let i = 0; i < hex.length; i += 2) {
+    const hexPair = hex.substr(i, 2);
+    const decimal = parseInt(hexPair, 16);
+    asciiStr += String.fromCharCode(decimal);
+  }
+
+  return asciiStr;
+}
+
 /**
  * Using card id to generate public key.
  *
@@ -55,11 +67,12 @@ function getCompressedPublicKey(publicKey: string) {
  */
 async function getSEPublicKey(transport: Transport): Promise<string> {
   const cardId = await info.getCardId(transport);
-  console.debug('cardId: ' + cardId);
+  console.debug('cardId: ' + hexToAscii(cardId));
   const cardIdHash = SHA256(cardId).toString('hex');
   const parseCardIdHash = parseInt(cardIdHash.slice(0, 2), 16) & 0x7f;
   const index = parseCardIdHash.toString(16).padStart(2, '0') + cardIdHash.slice(2, 8);
   const seVersion = await info.getSEVersion(transport);
+  console.debug('SE version: ' + seVersion);
   let masterPublicKey;
   let masterChainCode;
   if (transport.cardType === CardType.Pro) {
@@ -79,17 +92,14 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
 
   const compressedPublicKey = getCompressedPublicKey(masterPublicKey);
 
-  const addend = sha512(
-    Buffer.from(masterChainCode, 'hex'),
-    Buffer.from(compressedPublicKey + index, 'hex')
-  ).toString('hex');
+  const addend = sha512(Buffer.from(masterChainCode, 'hex'), Buffer.from(compressedPublicKey + index, 'hex')).toString(
+    'hex'
+  );
   const privateKey = Buffer.from(addend.slice(0, 64), 'hex');
 
   const keyPair = secp256k1.keyFromPrivate(privateKey);
   const publicKey = keyPair.getPublic();
-  const chipMasterPublicKey = secp256k1
-    .keyFromPublic(Buffer.from(masterPublicKey, 'hex'))
-    .getPublic();
+  const chipMasterPublicKey = secp256k1.keyFromPublic(Buffer.from(masterPublicKey, 'hex')).getPublic();
 
   const Ki = publicKey.add(chipMasterPublicKey);
 

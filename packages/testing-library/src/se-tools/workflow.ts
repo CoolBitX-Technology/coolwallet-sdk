@@ -1,4 +1,4 @@
-import { Transport, config, utils, crypto, common, setting, wallet, tx, CardType } from '@coolwallet/core';
+import { Transport, config, utils, crypto, common, setting, wallet, tx, CardType, info } from '@coolwallet/core';
 
 type Mandatory = {
   appPrivateKey: string;
@@ -30,6 +30,9 @@ async function initialize(transport: Transport, mnemonic: string): Promise<Manda
 }
 
 async function getTxDetail(transport: Transport, appId: string): Promise<string> {
+  if (transport.cardType === CardType.Lite) {
+    return '';
+  }
   await common.hi(transport, appId);
   await tx.command.finishPrepare(transport);
   return tx.command.getExplicitTxDetail(transport);
