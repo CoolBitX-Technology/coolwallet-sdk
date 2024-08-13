@@ -46,5 +46,12 @@
   },
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
   }
 }
