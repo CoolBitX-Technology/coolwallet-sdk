@@ -4,7 +4,8 @@
   "description": "Coolwallet Kaspa sdk",
   "main": "lib/index.js",
   "scripts": {
-    "test": "jest --runInBand --testTimeout=60000 --coverage",
+    "test": "NODE_ENV=development jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
