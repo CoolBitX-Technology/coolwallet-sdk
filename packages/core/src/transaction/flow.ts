@@ -116,24 +116,37 @@ export const getSignaturesFromCoolWalletV2 = async (
   }
   if (typeof txPrepareCompleteCallback === 'function') txPrepareCompleteCallback();
 
-  // finish prepare
-  await command.finishPrepare(transport);
+  if (transport.cardType === CardType.Pro) {
+    // finish prepare
+    await command.finishPrepare(transport);
 
-  // get tx detail
-  if (!(await command.getTxDetail(transport))) {
-    throw new error.SDKError(getSignaturesFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
+    // get tx detail
+    if (!(await command.getTxDetail(transport))) {
+      throw new error.SDKError(getSignaturesFromCoolWalletV2.name, 'get tx detail statusCode fail!!');
+    }
+    //authorize tx
+    const signatureKey = await command.getSignatureKey(transport);
+    if (typeof authorizedCallback === 'function') {
+      authorizedCallback();
+    }
+    // clear tx
+    await command.clearTransaction(transport);
+    await mcu.control.powerOff(transport);
+    // decrpt signature
+    const signatures = encryptedSignatureArray.map((encryptedSignature) =>
+      txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
+    );
+    return signatures;
+  } else if (transport.cardType === CardType.Lite) {
+    // decrpt signature
+    const signatures = encryptedSignatureArray.map((encryptedSignature) =>
+      txUtil.formatSignature(encryptedSignature, signatureType)
+    );
+    return signatures;
+  } else {
+    throw new error.SDKError(
+      getSingleSignatureFromCoolWalletV2.name,
+      `Not suppotrd card type. cardType=${transport.cardType}`
+    );
   }
-  //authorize tx
-  const signatureKey = await command.getSignatureKey(transport);
-  if (typeof authorizedCallback === 'function') {
-    authorizedCallback();
-  }
-  // clear tx
-  await command.clearTransaction(transport);
-  await mcu.control.powerOff(transport);
-  // decrpt signature
-  const signatures = encryptedSignatureArray.map((encryptedSignature) =>
-    txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
-  );
-  return signatures;
 };

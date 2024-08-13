@@ -47,7 +47,7 @@ export const executeScript = async (transport: Transport, appId: string, appPriv
       p2
     );
     if (i + 1 === args.length) {
-      if (outputData) {
+      if (statusCode === CODE._9000) {
         return outputData;
       } else {
         throw new APDUError(commands.EXECUTE_SCRIPT, statusCode, msg);
