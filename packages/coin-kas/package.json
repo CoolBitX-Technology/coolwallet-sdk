@@ -38,6 +38,7 @@
     "@types/bn.js": "^5.1.1",
     "bitcoinjs-lib": "^6.1.5",
     "bn.js": "^5.2.1",
+    "bignumber.js": "^8.0.2",
     "blakejs": "^1.2.1"
   },
   "repository": {
