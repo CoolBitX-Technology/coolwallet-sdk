@@ -2,6 +2,8 @@
 import { coin as COIN, Transport } from '@coolwallet/core';
 import { COIN_TYPE } from './config/param';
 import { getAddressByPublicKey } from './utils/address';
+import { SignTransferTxType } from './config/type';
+import signTransferTransaction from './sign';
 
 export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
@@ -19,7 +21,11 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     return getAddressByPublicKey(publicKey);
   }
 
-  async signTransaction(): Promise<string> {
-    throw new Error(`KAS.signTransaction not implemented.`);
+  async signTransaction(signTxType: SignTransferTxType): Promise<string> {
+    const { transport, appPrivateKey, appId, addressIndex } = signTxType;
+    const changePublicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
+    const changeAddress = getAddressByPublicKey(changePublicKey);
+
+    signTransferTransaction(signTxType, changeAddress);
   }
 }
