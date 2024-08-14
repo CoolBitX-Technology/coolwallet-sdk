@@ -3,6 +3,7 @@ import { Transport, config, utils, crypto, common, setting, wallet, tx, CardType
 type Mandatory = {
   appPrivateKey: string;
   appPublicKey: string;
+  name: string;
   appId: string;
   SEPublicKey: string;
 };
@@ -24,6 +25,7 @@ async function initialize(transport: Transport, mnemonic: string): Promise<Manda
   return {
     appPrivateKey,
     appPublicKey,
+    name,
     appId,
     SEPublicKey,
   };
