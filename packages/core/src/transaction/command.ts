@@ -1,12 +1,12 @@
 import * as RLP from 'rlp';
-import { executeCommand } from './execute/execute';
 import { getCommandSignature } from '../setting/auth';
-import Transport from '../transport';
-import { commands } from './execute/command';
+import Transport, { CardType } from '../transport';
 import { APDUError, SDKError } from '../error/errorHandle';
 import { CODE } from '../config/status/code';
 import { target } from '../config/param';
-import { getSEVersion } from './general';
+import { executeCommand } from '../apdu/execute/execute';
+import { commands } from '../apdu/execute/command';
+import { getSEVersion } from '../info';
 
 /**
  * Scriptable step 1
@@ -29,8 +29,7 @@ export const executeScript = async (transport: Transport, appId: string, appPriv
 
   const args = argument.match(/.{2,3800}/g);
   if (args === null) throw new Error('argument is empty');
-
-  if (args.length > 1) {
+  if (transport.cardType === CardType.Pro && args.length > 1) {
     const version = await getSEVersion(transport);
     if (version < 314) throw new Error('argument too long, try updating to support the longer data');
   }
@@ -48,7 +47,7 @@ export const executeScript = async (transport: Transport, appId: string, appPriv
       p2
     );
     if (i + 1 === args.length) {
-      if (outputData) {
+      if (statusCode === CODE._9000) {
         return outputData;
       } else {
         throw new APDUError(commands.EXECUTE_SCRIPT, statusCode, msg);
@@ -79,7 +78,7 @@ export const executeSegmentScript = async (
   const args = argument.match(/.{2,3800}/g);
   if (args === null) throw new Error('argument is empty');
 
-  if (args.length > 1) {
+  if (transport.cardType === CardType.Pro && args.length > 1) {
     const version = await getSEVersion(transport);
     if (version < 320) throw new Error('argument too long, try updating to support the longer data');
   }
@@ -176,7 +175,7 @@ export const executeUtxoSegmentScript = async (
   const args = utxoArgument.match(/.{2,3800}/g);
   if (args === null) throw new Error('argument is empty');
 
-  if (args.length > 1) {
+  if (transport.cardType === CardType.Pro && args.length > 1) {
     const version = await getSEVersion(transport);
     if (version < 320) throw new Error('argument too long, try updating to support the longer data');
   }
@@ -266,6 +265,9 @@ export const getSignedHex = async (transport: Transport): Promise<{ signedTx: st
  * @return {Promse<boolean>}
  */
 export const finishPrepare = async (transport: Transport): Promise<boolean> => {
+  if (transport.cardType === CardType.Lite) {
+    throw new SDKError(finishPrepare.name, `CoolWallet LITE does not support this command.`);
+  }
   const { statusCode, msg } = await executeCommand(transport, commands.FINISH_PREPARE, target.SE);
   if (statusCode === CODE._9000) {
     return true;
@@ -280,6 +282,9 @@ export const finishPrepare = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<string>}
  */
 export const getSignatureKey = async (transport: Transport): Promise<string> => {
+  if (transport.cardType === CardType.Lite) {
+    throw new SDKError(getSignatureKey.name, `CoolWallet LITE does not support this command.`);
+  }
   const { outputData: signatureKey, statusCode, msg } = await executeCommand(transport, commands.GET_TX_KEY, target.SE);
   if (signatureKey) {
     return signatureKey;
@@ -308,6 +313,9 @@ export const clearTransaction = async (transport: Transport): Promise<boolean> =
  * @return {Promise<boolean>} true: success, false: canceled.
  */
 export const getTxDetail = async (transport: Transport): Promise<boolean> => {
+  if (transport.cardType === CardType.Lite) {
+    throw new SDKError(getTxDetail.name, `CoolWallet LITE does not support this command.`);
+  }
   const { statusCode, msg } = await executeCommand(transport, commands.GET_TX_DETAIL, target.SE);
   if (statusCode === CODE._9000) {
     return true;

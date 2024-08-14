@@ -1,7 +1,36 @@
 import { aes256CbcDecrypt } from '../crypto/encryptions';
 import * as signatureTools from '../crypto/signature';
-import { SDKError } from '../error';
+import * as error from '../error';
 import { SignatureType } from './type';
+
+/**
+ *
+ * @param {String} signature
+ * @param {String} signatureType
+ * @returns {{r:string, s:string} | Buffer } Buffer or DER signature
+ */
+export const formatSignature = (signature: string, signatureType: SignatureType): { r: string; s: string } | Buffer => {
+  const iv = Buffer.alloc(16);
+  iv.fill(0);
+  const sigBuff = Buffer.from(signature, 'hex');
+  switch (signatureType) {
+    case SignatureType.EDDSA:
+    case SignatureType.Schnorr:
+      return sigBuff;
+    case SignatureType.Canonical: {
+      const sigObj = signatureTools.parseDERsignature(sigBuff.toString('hex'));
+      const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
+      return canonicalSignature;
+    }
+    case SignatureType.DER: {
+      const sigObj = signatureTools.parseDERsignature(sigBuff.toString('hex'));
+      const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
+      return signatureTools.convertToDER(canonicalSignature);
+    }
+    default:
+      throw new error.SDKError(formatSignature.name, 'Not supported SignatureType: ' + SignatureType);
+  }
+};
 
 /**
  * @description Decrypt Data from CoolWallet
@@ -18,27 +47,11 @@ export const decryptSignatureFromSE = (
   const iv = Buffer.alloc(16);
   iv.fill(0);
   const sigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature);
-  switch (signatureType) {
-    case SignatureType.EDDSA:
-    case SignatureType.Schnorr:
-      return sigBuff;
-    case SignatureType.Canonical: {
-      const sigObj = signatureTools.parseDERsignature(sigBuff.toString('hex'));
-      const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
-      return canonicalSignature;
-    }
-    case SignatureType.DER: {
-      const sigObj = signatureTools.parseDERsignature(sigBuff.toString('hex'));
-      const canonicalSignature = signatureTools.getCanonicalSignature(sigObj);
-      return signatureTools.convertToDER(canonicalSignature);
-    }
-    default:
-      throw new SDKError(decryptSignatureFromSE.name, 'Not supported SignatureType: ' + SignatureType);
-  }
+  return formatSignature(sigBuff.toString('hex'), signatureType);
 };
 
 /**
- * @param {String}addressIndexToKeyId coinType
+ * @param {String} coinType
  * @param {String} addressIndex
  */
 export const addressIndexToKeyId = (coinType: string, addressIndex: number) => {

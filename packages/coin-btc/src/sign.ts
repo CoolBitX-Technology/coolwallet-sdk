@@ -1,10 +1,11 @@
-import { tx, error, apdu } from '@coolwallet/core';
+import { tx, error, info } from '@coolwallet/core';
 import { ScriptType, OmniType, PreparedData, Callback } from './config/types';
 import * as param from './config/param';
 import * as txUtil from './utils/transactionUtil';
 import * as scriptUtil from './utils/scriptUtil';
 import { signTxType, signUSDTTxType, Transport } from './config/types';
 import { SignatureType } from '@coolwallet/core/lib/transaction/type';
+import { shouldUseLegacyUtxoScript } from './utils/versionUtil';
 
 async function signTransaction(
   transport: Transport,
@@ -45,9 +46,9 @@ async function signTransaction(
     transport,
     preActions,
     actions,
+    signatureType,
     confirmCB,
-    authorizedCB,
-    signatureType
+    authorizedCB
   );
   const transaction = txUtil.composeFinalTransaction(redeemScriptType, preparedData, signatures as Buffer[]);
   return transaction.toString('hex');
@@ -89,12 +90,12 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
     /*omniType=*/ null,
     version
   );
-  const seVersion = await apdu.general.getSEVersion(transport);
+  const seVersion = await info.getSEVersion(transport);
 
   let script;
   let argument;
 
-  if (seVersion <= 331 || redeemScriptType === ScriptType.P2PKH) {
+  if (shouldUseLegacyUtxoScript(transport.cardType, seVersion) || redeemScriptType === ScriptType.P2PKH) {
     script = param.TRANSFER.script + param.TRANSFER.signature;
     argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
   } else if (redeemScriptType === ScriptType.P2TR) {
@@ -148,17 +149,17 @@ export async function signUSDTransaction(signUSDTTxData: signUSDTTxType): Promis
     omniType,
     version
   );
-  const seVersion = await apdu.general.getSEVersion(transport);
+  const seVersion = await info.getSEVersion(transport);
 
   let script;
   let argument;
 
-  if (seVersion > 331 && redeemScriptType !== ScriptType.P2PKH) {
-    script = param.NEW_USDT.script + param.NEW_USDT.signature;
-    argument = await scriptUtil.getUSDTNewArgument(redeemScriptType, inputs, output, value, change);
-  } else {
+  if (shouldUseLegacyUtxoScript(transport.cardType, seVersion) || redeemScriptType === ScriptType.P2PKH) {
     script = param.USDT.script + param.USDT.signature;
     argument = await scriptUtil.getUSDTArgument(redeemScriptType, inputs, output, value, change);
+  } else {
+    script = param.NEW_USDT.script + param.NEW_USDT.signature;
+    argument = await scriptUtil.getUSDTNewArgument(redeemScriptType, inputs, output, value, change);
   }
 
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);

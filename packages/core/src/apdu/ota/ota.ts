@@ -3,11 +3,7 @@ import Transport from '../../transport';
 import { commands } from '../execute/command';
 import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
-import * as general from '../general';
 import * as SCRIPT from '../script/otaScript';
-import * as setting from '../setting';
-import * as informational from '../informational';
-import * as display from '../mcu/display';
 import { SDKError } from '../../error/errorHandle';
 import Progress from './Progress';
 import { getAPIOption, formatAPIResponse } from './api';
@@ -23,6 +19,7 @@ import {
   SSD_AID,
 } from './constants';
 import type { AppletStatus, APIOptions, SEUpdateInfo } from './types';
+import { common, info, mcu, setting } from '../..';
 
 /**
  *
@@ -40,7 +37,7 @@ export const selectApplet = async (transport: Transport, appletCommand: string =
 export const checkUpdate = async (transport: Transport): Promise<SEUpdateInfo> => {
   let cardSEVersion;
   try {
-    cardSEVersion = await general.getSEVersion(transport);
+    cardSEVersion = await info.getSEVersion(transport);
   } catch (error) {
     cardSEVersion = 0;
   }
@@ -70,7 +67,7 @@ export const updateSE = async (
   // BackupApplet
   let cardSEVersion;
   try {
-    cardSEVersion = await general.getSEVersion(transport);
+    cardSEVersion = await info.getSEVersion(transport);
   } catch (e) {
     console.error(e);
     cardSEVersion = 0;
@@ -82,7 +79,7 @@ export const updateSE = async (
   }
   const progress = new Progress(progressNum);
   try {
-    await display.showUpdate(transport);
+    await mcu.display.showUpdate(transport);
 
     progressCallback(progress.current()); // progress 14
 
@@ -97,9 +94,9 @@ export const updateSE = async (
 
     if (isAppletExist) {
       if (cardSEVersion >= hasBackupScriptSEVersion) {
-        const isCardRecognized = await general.hi(transport, appId);
+        const isCardRecognized = await common.hi(transport, appId);
 
-        const { walletCreated } = await informational.getCardInfo(transport);
+        const { walletCreated } = await info.getCardInfo(transport);
         console.debug(`isCardRecognized: ${isCardRecognized}, walletStatus: ${walletCreated}`);
 
         if (isCardRecognized) {
@@ -142,7 +139,7 @@ export const updateSE = async (
 
     await insertScript(transport, SCRIPT.installScript);
 
-    await display.hideUpdate(transport); // Hide update from the card
+    await mcu.display.hideUpdate(transport); // Hide update from the card
 
     await selectApplet(transport, CARDMANAGER_AID);
     isAppletExist = await selectApplet(transport);
@@ -151,7 +148,7 @@ export const updateSE = async (
     if (isAppletExist) {
       // start recover backupData
       console.debug('Start checking recovery');
-      const isNeedRecover = await setting.checkBackupStatus(transport);
+      const isNeedRecover = await setting.backup.checkBackupStatus(transport);
       console.debug(`isNeedRecover: ${isNeedRecover}`);
       if (isNeedRecover === true) {
         await recoverBackupData(transport);
@@ -164,7 +161,7 @@ export const updateSE = async (
     return SE_UPDATE_VER;
   } catch (e) {
     try {
-      await display.hideUpdate(transport);
+      await mcu.display.hideUpdate(transport);
     } catch (ex) {
       console.error(`APDU.Other.finishUpdate Failed ${e}`);
     }
