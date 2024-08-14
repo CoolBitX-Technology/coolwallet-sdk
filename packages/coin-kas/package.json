@@ -1,10 +1,8 @@
 {
-  "name": "@coolwallet/bsc",
-  "version": "2.0.0-beta.1",
-  "description": "Coolwallet BSC sdk",
+  "name": "@coolwallet/kas",
+  "version": "1.0.0-beta.0",
+  "description": "Coolwallet Kaspa sdk",
   "main": "lib/index.js",
-  "author": "coolwallet-team",
-  "license": "Apache-2.0",
   "scripts": {
     "test": "NODE_ENV=development jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
@@ -13,20 +11,34 @@
     "build": "npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
-  "dependencies": {
-    "@coolwallet/core": "^2.0.0-beta.12",
-    "@types/node": "^14.0.13",
-    "elliptic": "^6.5.1",
-    "eth-sig-util": "^2.5.3",
-    "rlp": "^2.2.3",
-    "web3": "^1.2.6"
+  "keywords": [
+    "kas",
+    "kaspa",
+    "coolwallet",
+    "javascript",
+    "hardwarewallet",
+    "cryptocurrency",
+    "coolbitx",
+    "transaction"
+  ],
+  "author": "coolwallet-team",
+  "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.1.23"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7"
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.1.23"
+  },
+  "dependencies": {
+    "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
+    "@types/bn.js": "^5.1.1",
+    "bitcoinjs-lib": "^6.1.5",
+    "bn.js": "^5.2.1",
+    "blakejs": "^1.2.1"
   },
   "repository": {
     "type": "git",
@@ -34,5 +46,12 @@
   },
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
   }
 }
