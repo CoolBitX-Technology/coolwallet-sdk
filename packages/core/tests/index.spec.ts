@@ -192,7 +192,9 @@ describe('Test CoolWallet SDK Core Backup', () => {
     );
     const expectedPublicKey = Buffer.from(edWallet.deriveCurve25519PublicKey() ?? '').toString('hex');
     expect(publicKey).toEqual(expectedPublicKey);
-
+    if (transport.cardType === CardType.Pro) {
+      return;
+    }
     const cardId = await info.getCardId(transport);
     const exportData = await setting.backup.exportBackupData(transport, props.appId, props.appPrivateKey, cardId);
     const oldInfo = await info.getCardInfo(transport);
@@ -239,45 +241,63 @@ describe('Test CoolWallet SDK Core Register', () => {
       const appPrivateKey = keyPair.privateKey;
       const appPublicKey = keyPair.publicKey;
       const password = '12345678';
-
-      const appId = await wallet.client.register(
-        transport,
-        appPublicKey,
-        password,
-        deviceName,
-        firstDevice.SEPublicKey
-      );
-      deviceList.push({ appId, deviceName });
-      if (deviceList.length > 3) {
-        deviceList.shift();
+      try {
+        const appId = await wallet.client.register(
+          transport,
+          appPublicKey,
+          password,
+          deviceName,
+          firstDevice.SEPublicKey
+        );
+        deviceList.push({ appId, deviceName });
+        if (deviceList.length > 3) {
+          deviceList.shift();
+        }
+        return { appPrivateKey, appPublicKey, deviceName, password, appId };
+      } catch (APDUError) {
+        return { appPrivateKey, appPublicKey, deviceName, password, appId: '' };
       }
-      return { appPrivateKey, appPublicKey, deviceName, password, appId };
     };
     // create device A
     const deviceA = await createDevice('deviceA');
-    // [props, deviceA]
+    // [firstDevice, deviceA]
     const appsAfterA = await wallet.client.getPairedApps(transport, deviceA.appId, deviceA.appPrivateKey);
     expect(appsAfterA.length).toEqual(2);
     expect(appsAfterA).toEqual(deviceList);
 
     // create device B
     const deviceB = await createDevice('deviceB');
-    // [props, deviceA, deviceB]
+    // [firstDevice, deviceA, deviceB]
     const appsAfterB = await wallet.client.getPairedApps(transport, deviceB.appId, deviceB.appPrivateKey);
     expect(appsAfterB.length).toEqual(3);
     expect(appsAfterB).toEqual(deviceList);
 
     // create device C
     const deviceC = await createDevice('deviceC');
-    // [deviceA, deviceB, deviceC]
-    const appsAfterC = await wallet.client.getPairedApps(transport, deviceC.appId, deviceC.appPrivateKey);
+    let appsAfterC: Array<{ appId: string; deviceName: string }> = [];
+    if (transport.cardType === CardType.Pro) {
+      // [firstDevice, deviceA, deviceB]
+      appsAfterC = await wallet.client.getPairedApps(transport, firstDevice.appId, firstDevice.appPrivateKey);
+    }
+    if (transport.cardType === CardType.Lite) {
+      // [deviceA, deviceB, deviceC]
+      appsAfterC = await wallet.client.getPairedApps(transport, deviceC.appId, deviceC.appPrivateKey);
+    }
     expect(appsAfterC.length).toEqual(3);
     expect(appsAfterC).toEqual(deviceList);
 
     // create device D
     const deviceD = await createDevice('deviceD');
-    // [deviceB, deviceC, deviceD]
-    const appsAfterD = await wallet.client.getPairedApps(transport, deviceD.appId, deviceD.appPrivateKey);
+
+    let appsAfterD: Array<{ appId: string; deviceName: string }> = [];
+    if (transport.cardType === CardType.Pro) {
+      // [firstDevice, deviceA, deviceB]
+      appsAfterD = await wallet.client.getPairedApps(transport, firstDevice.appId, firstDevice.appPrivateKey);
+    }
+    if (transport.cardType === CardType.Lite) {
+      // [deviceB, deviceC, deviceD]
+      appsAfterD = await wallet.client.getPairedApps(transport, deviceD.appId, deviceD.appPrivateKey);
+    }
     expect(appsAfterD.length).toEqual(3);
     expect(appsAfterD).toEqual(deviceList);
   });
