@@ -103,14 +103,14 @@ function getSequencesHash(transaction: Transaction, hashType: number, reusedValu
   return reusedValues.sequencesHash;
 }
 
-function getSigOpCountsHash(transaction: Transaction, hashType: number, reusedValues: any): Buffer {
+function getSigOpCountsHash(transaction: Transaction, hashType: number, reusedValues: ReusedValues): Buffer {
   if (isSigHashAnyoneCanPay(hashType)) {
     return zeroHash();
   }
 
   if (!reusedValues.sigOpCountsHash) {
     const hashWriter = new HashWriter();
-    transaction.inputs.forEach((_) => hashWriter.writeUInt8(1));
+    transaction.inputs.forEach(() => hashWriter.writeUInt8(1));
     reusedValues.sigOpCountsHash = hashWriter.finalize();
   }
 

@@ -101,7 +101,7 @@ export function decodeAddress(address: string) {
   };
 }
 
-export function payToAddrScript(address: string) {
+export function payToAddrScript(address: string): Buffer {
   const { payload } = decodeAddress(address);
   return Buffer.concat([Buffer.from([0x20]), payload, Buffer.from([0xac])], 34);
 }
