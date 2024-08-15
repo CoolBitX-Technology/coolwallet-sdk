@@ -73,7 +73,7 @@ interface ReusedValues {
   previousOutputsHash?: Buffer;
   sequencesHash?: Buffer;
   sigOpCountsHash?: Buffer;
-  outputsBuffer?: Buffer;
+  outputsHash?: Buffer;
 }
 function getPreviousOutputsHash(transaction: Transaction, hashType: number, reusedValues: ReusedValues): Buffer {
   if (isSigHashAnyoneCanPay(hashType)) {
@@ -115,6 +115,67 @@ function getSigOpCountsHash(transaction: Transaction, hashType: number, reusedVa
   }
 
   return reusedValues.sigOpCountsHash;
+}
+
+function getOutputsHash(
+  transaction: Transaction,
+  inputIndex: number,
+  hashType: number,
+  reusedValues: ReusedValues
+): Buffer {
+  if (isSigHashNone(hashType)) {
+    return zeroHash();
+  }
+
+  // SigHashSingle: If the relevant output exists - return its hash, otherwise return zero-hash
+  if (isSigHashSingle(hashType)) {
+    if (inputIndex >= transaction.outputs.length) {
+      return zeroHash();
+    }
+
+    const hashWriter = new HashWriter();
+    return hashWriter.finalize();
+  }
+
+  if (!reusedValues.outputsHash) {
+    const hashWriter = new HashWriter();
+    transaction.outputs.forEach((output: TransactionOutput) => hashTxOut(hashWriter, output));
+    reusedValues.outputsHash = hashWriter.finalize();
+  }
+
+  return reusedValues.outputsHash;
+}
+
+export function calculateSigHash(
+  transaction: Transaction,
+  hashType: number,
+  inputIndex: number,
+  reusedValues = {}
+): Buffer {
+  const hashWriter = new HashWriter();
+
+  hashWriter.writeUInt16LE(transaction.version);
+  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, reusedValues));
+  hashWriter.writeHash(getSequencesHash(transaction, hashType, reusedValues));
+  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, reusedValues));
+
+  const input = transaction.inputs[inputIndex];
+  const utxo = transaction.utxos[inputIndex];
+  hashOutpoint(hashWriter, input);
+  hashWriter.writeUInt16LE(0); // TODO: USE REAL SCRIPT VERSION
+  hashWriter.writeVarBytes(utxo.pkScript);
+  hashWriter.writeUInt64LE(new BigNumber(utxo.amount));
+  hashWriter.writeUInt64LE(new BigNumber(input.sequence));
+  hashWriter.writeUInt8(1); // sigOpCount
+
+  hashWriter.writeHash(getOutputsHash(transaction, inputIndex, hashType, reusedValues));
+  hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime));
+  hashWriter.writeHash(zeroSubnetworkID()); // TODO: USE REAL SUBNETWORK ID
+  hashWriter.writeUInt64LE(new BigNumber(0)); // TODO: USE REAL GAS
+  hashWriter.writeHash(zeroHash()); // TODO: USE REAL PAYLOAD HASH
+  hashWriter.writeUInt8(hashType);
+
+  return hashWriter.finalize();
 }
 
 export async function getTransferArgumentBuffer(transaction: Transaction, addressIndex: number): Promise<Buffer> {

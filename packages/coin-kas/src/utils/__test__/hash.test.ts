@@ -1,4 +1,4 @@
-import { getTransferArgumentBuffer, getUtxoArgumentBuffer } from '../hash';
+import { calculateSigHash, getTransferArgumentBuffer, getUtxoArgumentBuffer, SIGHASH_ALL } from '../hash';
 import { testAddressIndex, testTransaction } from './testData';
 
 describe('Test hash.ts', () => {
@@ -22,5 +22,13 @@ describe('Test hash.ts', () => {
     expect(utxoArgument).toMatchInlineSnapshot(
       `"328000002c8001b20780000000000000000000000021aa1aff85fc054381f8536d1ab8dbe68f1673a7c67b7ad7816431603c58d32e010000000000220000000000000020b1b89146cea93cf8bec6fa3d4d79c26586ac09a1e8ebf37aa5904629f63c857daccef3668c00000000000000000000000001"`
     );
+  });
+
+  it('Test before sign schnorr', async () => {
+    testTransaction.inputs.forEach((_input, index) => {
+      const sigHashBuffer = calculateSigHash(testTransaction, SIGHASH_ALL, index, {});
+      const sigHash = sigHashBuffer.toString('hex');
+      expect(sigHash).toMatchInlineSnapshot(`"5f0fff866d90ff84dbad16155f93fc02811ac97b033c50123c27af46d715ba7d"`);
+    });
   });
 });
