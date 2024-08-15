@@ -36,7 +36,7 @@ export function validate(condition: boolean, message: string) {
   }
 }
 
-export function validChecksum(prefix: string, payload: Uint8Array) {
+export function validChecksum(prefix: string, payload: Uint8Array): boolean {
   const prefixData = prefixToArray(prefix);
   const data = new Uint8Array(prefix.length + 1 + payload.length);
   data.set(prefixData);
@@ -84,13 +84,13 @@ export function validateOutputs(outputs: Output[]): void {
   });
 }
 
-export function validateChange(changeValue?: string | number) {
+export function validateChange(changeValue?: string | number): void {
   if (!changeValue) return;
   const isValidChange = new BigNumber(changeValue).isPositive();
   validate(isValidChange, `validate: invalid change value: ${changeValue}`);
 }
 
-export function validateDustThreshold(transferAmount: string | number, dustSize = "600") {
+export function validateDustThreshold(transferAmount: string | number, dustSize = "600"): void {
   const isValidTransferAmount = new BigNumber(transferAmount).isGreaterThanOrEqualTo(new BigNumber(dustSize));
   validate(isValidTransferAmount, `validate: transfer amount is below the dust threshold(${dustSize})`);
 }
@@ -106,7 +106,7 @@ function validateMass(mass: number): void {
   validate(isValidMass, `validate: transaction mass exceeds the maximum allowed mass(${maxAllowMass})`);
 }
 
-export function validateTransaction(transaction: Transaction, fee: string) {
+export function validateTransaction(transaction: Transaction, fee: string): void {
   validateChange(transaction?.outputs[1]?.amount);
   const minimumFee = transaction.estimateFee(1000);
   validateFee(minimumFee, fee);

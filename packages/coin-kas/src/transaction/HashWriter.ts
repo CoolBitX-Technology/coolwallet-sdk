@@ -31,66 +31,66 @@ export class HashWriter {
   bufLen = 0;
   bufs: Buffer[] = [];
 
-  toBuffer() {
+  toBuffer(): Buffer {
     return this.concat();
   }
 
-  concat() {
+  concat(): Buffer {
     return Buffer.concat(this.bufs, this.bufLen);
   }
 
-  write(buf: Buffer) {
+  write(buf: Buffer): HashWriter {
     this.bufs.push(buf);
     this.bufLen += buf.length;
     return this;
   }
 
-  writeReverse(buf: Buffer) {
+  writeReverse(buf: Buffer): HashWriter {
     this.bufs.push(buf.reverse());
     this.bufLen += buf.length;
     return this;
   }
 
-  writeHash(hash: Buffer) {
+  writeHash(hash: Buffer): HashWriter {
     this.write(hash);
     return this;
   }
 
-  writeVarBytes(buf: Buffer) {
+  writeVarBytes(buf: Buffer): HashWriter {
     this.writeUInt64LE(new BigNumber(buf.length));
     this.write(buf);
     return this;
   }
 
-  writeUInt8(n: number) {
+  writeUInt8(n: number): HashWriter {
     const buf = Buffer.alloc(1);
     buf.writeUInt8(n);
     this.write(buf);
     return this;
   }
 
-  writeUInt16LE(n: number) {
+  writeUInt16LE(n: number): HashWriter {
     const buf = Buffer.alloc(2);
     buf.writeUInt16LE(n);
     this.write(buf);
     return this;
   }
 
-  writeUInt32LE(n: number) {
+  writeUInt32LE(n: number): HashWriter {
     const buf = Buffer.alloc(4);
     buf.writeUInt32LE(n, 0);
     this.write(buf);
     return this;
   }
 
-  writeUInt64LE(bn: BigNumber) {
+  writeUInt64LE(bn: BigNumber): HashWriter {
     const buf = Buffer.alloc(8);
     buf.writeBigUInt64LE(BigInt(bn.toFixed()));
     this.write(buf);
     return this;
   }
 
-  finalize() {
+  finalize(): Buffer {
     return Buffer.from(blake.blake2b(this.toBuffer(), TransactionSigningHashKey, 32));
   }
 }

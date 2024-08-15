@@ -38,32 +38,32 @@ export const SIGHASH_SINGLE = 0b00000100;
 export const SIGHASH_ANYONECANPAY = 0b10000000;
 export const SIGHASH_MASK = 0b00000111;
 
-function isSigHashNone(hashType: number) {
+function isSigHashNone(hashType: number): boolean {
   return (hashType & SIGHASH_MASK) === SIGHASH_NONE;
 }
 
-function isSigHashSingle(hashType: number) {
+function isSigHashSingle(hashType: number): boolean {
   return (hashType & SIGHASH_MASK) === SIGHASH_SINGLE;
 }
 
-function isSigHashAnyoneCanPay(hashType: number) {
+function isSigHashAnyoneCanPay(hashType: number): boolean {
   return (hashType & SIGHASH_ANYONECANPAY) === SIGHASH_ANYONECANPAY;
 }
 
-function zeroHash() {
+function zeroHash(): Buffer {
   return Buffer.alloc(32);
 }
 
-function zeroSubnetworkID() {
+function zeroSubnetworkID(): Buffer {
   return Buffer.alloc(20);
 }
 
-function hashOutpoint(hashWriter: HashWriter, input: TransactionInput) {
+function hashOutpoint(hashWriter: HashWriter, input: TransactionInput): void {
   hashWriter.writeHash(fromHex(input.previousOutpoint.transactionId));
   hashWriter.writeUInt32LE(input.previousOutpoint.index);
 }
 
-function hashTxOut(hashWriter: HashWriter, output: TransactionOutput) {
+function hashTxOut(hashWriter: HashWriter, output: TransactionOutput): void {
   hashWriter.writeUInt64LE(new BigNumber(output.amount));
   hashWriter.writeUInt16LE(0); // TODO: USE REAL SCRIPT VERSION
   hashWriter.writeVarBytes(fromHex(output.scriptPublicKey.scriptPublicKey));
@@ -75,7 +75,7 @@ interface ReusedValues {
   sigOpCountsHash?: Buffer;
   outputsBuffer?: Buffer;
 }
-function getPreviousOutputsHash(transaction: Transaction, hashType: number, reusedValues: ReusedValues) {
+function getPreviousOutputsHash(transaction: Transaction, hashType: number, reusedValues: ReusedValues): Buffer {
   if (isSigHashAnyoneCanPay(hashType)) {
     return zeroHash();
   }
@@ -89,7 +89,7 @@ function getPreviousOutputsHash(transaction: Transaction, hashType: number, reus
   return reusedValues.previousOutputsHash;
 }
 
-function getSequencesHash(transaction: Transaction, hashType: number, reusedValues: any) {
+function getSequencesHash(transaction: Transaction, hashType: number, reusedValues: ReusedValues): Buffer {
   if (isSigHashSingle(hashType) || isSigHashAnyoneCanPay(hashType) || isSigHashNone(hashType)) {
     return zeroHash();
   }
@@ -103,7 +103,7 @@ function getSequencesHash(transaction: Transaction, hashType: number, reusedValu
   return reusedValues.sequencesHash;
 }
 
-function getSigOpCountsHash(transaction: Transaction, hashType: number, reusedValues: any) {
+function getSigOpCountsHash(transaction: Transaction, hashType: number, reusedValues: any): Buffer {
   if (isSigHashAnyoneCanPay(hashType)) {
     return zeroHash();
   }
@@ -117,7 +117,7 @@ function getSigOpCountsHash(transaction: Transaction, hashType: number, reusedVa
   return reusedValues.sigOpCountsHash;
 }
 
-export async function getTransferArgumentBuffer(transaction: Transaction, addressIndex: number) {
+export async function getTransferArgumentBuffer(transaction: Transaction, addressIndex: number): Promise<Buffer> {
   const hashType = SIGHASH_ALL;
   const output = transaction.outputs[0];
   const change = transaction.outputs?.[1];
@@ -152,7 +152,11 @@ export async function getTransferArgumentBuffer(transaction: Transaction, addres
   return hashWriter.toBuffer();
 }
 
-export async function getUtxoArgumentBuffer(input: TransactionInput, utxo: TransactionUtxo, addressIndex: number) {
+export async function getUtxoArgumentBuffer(
+  input: TransactionInput,
+  utxo: TransactionUtxo,
+  addressIndex: number
+): Promise<Buffer> {
   const hashWriter = new HashWriter();
   // se path
   const sePath = await getPath(COIN_TYPE, addressIndex);

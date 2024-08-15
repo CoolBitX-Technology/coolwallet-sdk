@@ -1,4 +1,4 @@
-import { TransactionInput, TransactionOutput, TransactionUtxo, TxData } from '../config/type';
+import { TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/type';
 import { payToAddrScript } from '../utils/address';
 import { toHex } from '../utils/utils';
 import { SIGHASH_ALL } from '../utils/hash';
@@ -13,7 +13,7 @@ export class Transaction {
   subnetworkId: string = '0000000000000000000000000000000000000000';
   utxos: TransactionUtxo[] = [];
 
-  static fromTxData(txData: TxData) {
+  static fromTxData(txData: TxData): Transaction {
     return new Transaction(txData);
   }
 
@@ -63,24 +63,25 @@ export class Transaction {
     }
   }
 
-  addSignatures(signatures: Buffer[]) {
+  addSignatures(signatures: Buffer[]): Transaction {
     this.inputs.forEach((input, i) => {
       if (input.signatureScript.length > 0) return;
       const signature = signatures[i];
       input.signatureScript = toHex(Buffer.concat([Buffer.from([0x41]), signature, Buffer.from([SIGHASH_ALL])]));
     });
+    return this;
   }
 
-  getTxInfo() {
+  getTxInfo(): TxInfo {
     return getMassAndSize(this.inputs, this.outputs);
   }
 
-  estimateFee(feeRate = 1000) {
+  estimateFee(feeRate = 1000): number {
     const { mass } = this.getTxInfo();
     return minimumRequiredTransactionRelayFee(mass, feeRate);
   }
 
-  getMessage() {
+  getMessage(): string {
     return JSON.stringify({
       transaction: {
         version: this.version,

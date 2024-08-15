@@ -4,7 +4,7 @@ const SompiPerKaspa = 100_000_000;
 // MaxSompi is the maximum transaction amount allowed in sompi.
 const MaxSompi = 21_000_000 * SompiPerKaspa;
 // minimumRelayTransactionFee in sompi per 1kg (or 1000 grams)
-export function minimumRequiredTransactionRelayFee(mass: number, minimumRelayTransactionFee = 1000) {
+export function minimumRequiredTransactionRelayFee(mass: number, minimumRelayTransactionFee = 1000): number {
   let minimumFee = (mass * minimumRelayTransactionFee) / 1000;
 
   if (minimumFee === 0 && minimumRelayTransactionFee > 0) {
@@ -19,14 +19,14 @@ export function minimumRequiredTransactionRelayFee(mass: number, minimumRelayTra
   return minimumFee;
 }
 
-function estimatedOutpointSerializedSize() {
+function estimatedOutpointSerializedSize(): number {
   let txSize = 0;
   txSize += 32; // Previous tx ID
   txSize += 4; // Index (u32)
   return txSize;
 }
 
-function estimatedTransactionInputsSerializedSize(input: TransactionInput) {
+function estimatedTransactionInputsSerializedSize(input: TransactionInput): number {
   let txSize = 0;
   txSize += estimatedOutpointSerializedSize();
 
@@ -41,7 +41,7 @@ function estimatedTransactionInputsSerializedSize(input: TransactionInput) {
   return txSize;
 }
 
-function estimatedOutputsSerializedSize(output: TransactionOutput) {
+function estimatedOutputsSerializedSize(output: TransactionOutput): number {
   let txSize = 0;
   txSize += 8; // value (u64)
   txSize += 2; // output.ScriptPublicKey.Version (u16)
@@ -53,7 +53,7 @@ function estimatedOutputsSerializedSize(output: TransactionOutput) {
 const MassPerSigOp = 1000;
 const MassPerTxByte = 1;
 const MassPerScriptPubKeyByte = 10;
-function estimateTransactionSerializedSize(inputs: Array<TransactionInput>, outputs: Array<TransactionOutput>) {
+function estimateTransactionSerializedSize(inputs: Array<TransactionInput>, outputs: Array<TransactionOutput>): number {
   let txSize = 0;
   txSize += 2; // Tx version (u16)
   txSize += 8; // length of inputs (u64)
@@ -74,7 +74,7 @@ function estimateTransactionSerializedSize(inputs: Array<TransactionInput>, outp
   return txSize;
 }
 
-function calculateInputSigOpCounts(inputs: Array<TransactionInput>) {
+function calculateInputSigOpCounts(inputs: Array<TransactionInput>): number {
   let inputSigOpCounts = 0;
   inputs.forEach((input) => {
     if ('sigOpCount' in input) {
@@ -86,7 +86,7 @@ function calculateInputSigOpCounts(inputs: Array<TransactionInput>) {
   return inputSigOpCounts;
 }
 
-function calculateOutputsScriptPubKeySize(outputs: Array<TransactionOutput>) {
+function calculateOutputsScriptPubKeySize(outputs: Array<TransactionOutput>): number {
   let scriptPubKeySize = 0;
   outputs.forEach((output) => {
     scriptPubKeySize += 2; // version (uint16)
