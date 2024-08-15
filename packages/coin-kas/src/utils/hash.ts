@@ -183,6 +183,14 @@ export async function getTransferArgumentBuffer(transaction: Transaction, addres
   const output = transaction.outputs[0];
   const change = transaction.outputs?.[1];
   const hashWriter = new HashWriter();
+  // transaction version
+  hashWriter.writeUInt16LE(transaction.version);
+  // previous outpoint hash
+  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, {}));
+  // sequences hash
+  hashWriter.writeHash(getSequencesHash(transaction, hashType, {}));
+  // input sigOp counts hash
+  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, {}));
   // output amount + version + key length + script public key
   hashTxOut(hashWriter, output);
   // have change
@@ -192,14 +200,6 @@ export async function getTransferArgumentBuffer(transaction: Transaction, addres
   // se path
   const sePath = await getPath(COIN_TYPE, addressIndex);
   hashWriter.write(change ? Buffer.from(sePath, 'hex') : Buffer.alloc(21));
-  // transaction version
-  hashWriter.writeUInt16LE(transaction.version);
-  // previous outpoint hash
-  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, {}));
-  // sequences hash
-  hashWriter.writeHash(getSequencesHash(transaction, hashType, {}));
-  // input sigOp counts hash
-  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, {}));
   // lock time
   hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime));
   // sub network id
