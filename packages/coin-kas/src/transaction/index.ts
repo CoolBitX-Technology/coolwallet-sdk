@@ -13,7 +13,7 @@ export class Transaction {
   subnetworkId: string = '0000000000000000000000000000000000000000';
   utxos: TransactionUtxo[] = [];
 
-  static fromTxData(txData: TxData): Transaction {
+  static fromTxData(txData: TxData): this {
     return new Transaction(txData);
   }
 
@@ -63,7 +63,7 @@ export class Transaction {
     }
   }
 
-  addSignatures(signatures: Buffer[]): Transaction {
+  addSignatures(signatures: Buffer[]): this {
     this.inputs.forEach((input, i) => {
       if (input.signatureScript.length > 0) return;
       const signature = signatures[i];

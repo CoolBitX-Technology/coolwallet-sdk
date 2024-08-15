@@ -39,51 +39,51 @@ export class HashWriter {
     return Buffer.concat(this.bufs, this.bufLen);
   }
 
-  write(buf: Buffer): HashWriter {
+  write(buf: Buffer): this {
     this.bufs.push(buf);
     this.bufLen += buf.length;
     return this;
   }
 
-  writeReverse(buf: Buffer): HashWriter {
+  writeReverse(buf: Buffer): this {
     this.bufs.push(buf.reverse());
     this.bufLen += buf.length;
     return this;
   }
 
-  writeHash(hash: Buffer): HashWriter {
+  writeHash(hash: Buffer): this {
     this.write(hash);
     return this;
   }
 
-  writeVarBytes(buf: Buffer): HashWriter {
+  writeVarBytes(buf: Buffer): this {
     this.writeUInt64LE(new BigNumber(buf.length));
     this.write(buf);
     return this;
   }
 
-  writeUInt8(n: number): HashWriter {
+  writeUInt8(n: number): this {
     const buf = Buffer.alloc(1);
     buf.writeUInt8(n);
     this.write(buf);
     return this;
   }
 
-  writeUInt16LE(n: number): HashWriter {
+  writeUInt16LE(n: number): this {
     const buf = Buffer.alloc(2);
     buf.writeUInt16LE(n);
     this.write(buf);
     return this;
   }
 
-  writeUInt32LE(n: number): HashWriter {
+  writeUInt32LE(n: number): this {
     const buf = Buffer.alloc(4);
     buf.writeUInt32LE(n, 0);
     this.write(buf);
     return this;
   }
 
-  writeUInt64LE(bn: BigNumber): HashWriter {
+  writeUInt64LE(bn: BigNumber): this {
     const buf = Buffer.alloc(8);
     buf.writeBigUInt64LE(BigInt(bn.toFixed()));
     this.write(buf);
