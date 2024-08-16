@@ -25,7 +25,6 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     const { transport, appPrivateKey, appId, addressIndex } = signTxType;
     const changePublicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     const changeAddress = getAddressByPublicKey(changePublicKey);
-
-    signTransferTransaction(signTxType, changeAddress);
+    return signTransferTransaction(signTxType, changeAddress);
   }
 }

@@ -47,7 +47,7 @@ export function validChecksum(prefix: string, payload: Uint8Array): boolean {
 }
 
 function validateAmountIsPostive(value: string | number, errorMessage: string): void {
-  const isPositive = new BigNumber(value).isPositive();
+  const isPositive = new BigNumber(value).isGreaterThan(0);
   validate(isPositive, errorMessage)
 }
 
@@ -71,8 +71,8 @@ export function validateInputs(inputs: Input[]): void {
   validate(inputs.length > 0, 'validate: inputs length is zero');
   inputs.forEach((input, index) => {
     validate(isValidAddress(input.address), `validate: invalid input address with index: ${index}, address: ${input.address}`);
-    validateAmountIsPostive(input.value, `validate: invalid input value: ${input.value}`);
-    validate(input.txId.length > 0, `validate: invalid txId`);
+    validateAmountIsPostive(input.value, `validate: invalid input value: ${input.value} with index: ${index}, should be positive value`);
+    validate(input.txId.length > 0, `validate: invalid txId with index: ${index}`);
   });
 }
 
@@ -80,7 +80,7 @@ export function validateOutputs(outputs: Output[]): void {
   validate(outputs.length > 0, 'validate: outputs length is zero');
   outputs.forEach((output, index) => {
     validate(isValidAddress(output.address), `validate: invalid output address with index: ${index}, address: ${output.address}`);
-    validateAmountIsPostive(output.value, `validate: invalid output value: ${output.value}`);
+    validateAmountIsPostive(output.value, `validate: invalid output value: ${output.value} with index: ${index}, should be positive value`);
   });
 }
 
@@ -103,11 +103,11 @@ function validateFee(minimumFee: number, fee: string): void {
 function validateMass(mass: number): void {
   const maxAllowMass = 100000;
   const isValidMass = new BigNumber(mass).isLessThanOrEqualTo(new BigNumber(maxAllowMass));
-  validate(isValidMass, `validate: transaction mass exceeds the maximum allowed mass(${maxAllowMass})`);
+  validate(isValidMass, `validate: current mass: ${mass}, exceeds the maximum allowed mass(${maxAllowMass})`);
 }
 
 export function validateTransaction(transaction: Transaction, fee: string): void {
-  validateChange(transaction?.outputs[1]?.amount);
+  validateChange(transaction?.outputs?.[1]?.amount);
   const minimumFee = transaction.estimateFee(1000);
   validateFee(minimumFee, fee);
   const mass = transaction.getTxInfo().mass;

@@ -13,7 +13,7 @@ export class Transaction {
   subnetworkId: string = '0000000000000000000000000000000000000000';
   utxos: TransactionUtxo[] = [];
 
-  static fromTxData(txData: TxData): this {
+  static fromTxData(txData: TxData): Transaction {
     return new Transaction(txData);
   }
 
@@ -52,7 +52,7 @@ export class Transaction {
     });
 
     const changeAmount = new BigNumber(totalInput).minus(new BigNumber(totalOutput)).minus(new BigNumber(txData.fee));
-    if (new BigNumber(changeAmount).gte(new BigNumber(txData.dustSize || 546))) {
+    if (!changeAmount.isZero()) {
       this.outputs.push({
         scriptPublicKey: {
           version: 0,
