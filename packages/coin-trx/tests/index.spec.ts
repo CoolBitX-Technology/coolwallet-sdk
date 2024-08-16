@@ -31,8 +31,24 @@ describe('Test TRX SDK', () => {
       const address = await trxSDK.getAddress(transport, props.appPrivateKey, props.appId, ADDRESS_INDEX);
       expect(address).toMatchInlineSnapshot(`"TPLnAY8HgpgHBKj6Md9SJ2qXMfFyBEfa2r"`);
     });
+
+    it('returns chainCode and publicKey', async () => {
+      const result = await trxSDK.getAccountPubKeyAndChainCode(transport, props.appPrivateKey, props.appId);
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "accountChainCode": "63ead171b54c7ec64cab42cff1e9c785da7bf332bca88337aecfb4cfa0299705",
+          "accountPublicKey": "0225b317e6a232faae6cdbe365cf873d58185de26370ddc668ea4e5b62a67af3d7",
+        }
+      `);
+    });
+
+    it('returns address from address publicKey', () => {
+      const addressPublicKey = '02c940ec8261a71909a762a61677360f28db60f7ad683fbb471b5929ab55abbdd5';
+      const address = TRX.getAddressFromAddressPublicKey(addressPublicKey);
+      expect(address).toMatchInlineSnapshot(`"TPLnAY8HgpgHBKj6Md9SJ2qXMfFyBEfa2r"`);
+    });
   });
-  
+
   describe('Sign Transfer Tx', () => {
     it('sign for transfer 1 TRX', async () => {
       const options: NormalTradeData = {
