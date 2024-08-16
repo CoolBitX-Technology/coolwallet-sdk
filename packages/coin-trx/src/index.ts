@@ -153,4 +153,8 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
 
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
+
+  static getAddressFromAddressPublicKey(addressPublicKey: string): string {
+    return txUtil.pubKeyToAddress(addressPublicKey);
+  }
 }
