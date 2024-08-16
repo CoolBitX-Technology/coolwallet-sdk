@@ -178,7 +178,7 @@ export function calculateSigHash(
   return hashWriter.finalize();
 }
 
-export async function getTransferArgumentBuffer(transaction: Transaction, addressIndex: number): Promise<Buffer> {
+export async function getTransferArgumentBuffer(transaction: Transaction): Promise<Buffer> {
   const hashType = SIGHASH_ALL;
   const output = transaction.outputs[0];
   const change = transaction.outputs?.[1];
@@ -198,8 +198,12 @@ export async function getTransferArgumentBuffer(transaction: Transaction, addres
   // change amount
   hashWriter.writeUInt64LE(change ? new BigNumber(change.amount) : new BigNumber(0));
   // se path
-  const sePath = await getPath(COIN_TYPE, addressIndex);
-  hashWriter.write(change ? Buffer.from(sePath, 'hex') : Buffer.alloc(21));
+  if (change.addressIndex !== undefined) {
+    const sePath = await getPath(COIN_TYPE, change.addressIndex);
+    hashWriter.write(Buffer.from(sePath, 'hex'));
+  } else {
+    hashWriter.write(Buffer.alloc(21));
+  }
   // lock time
   hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime));
   // sub network id
@@ -215,12 +219,11 @@ export async function getTransferArgumentBuffer(transaction: Transaction, addres
 
 export async function getUtxoArgumentBuffer(
   input: TransactionInput,
-  utxo: TransactionUtxo,
-  addressIndex: number
+  utxo: TransactionUtxo
 ): Promise<Buffer> {
   const hashWriter = new HashWriter();
   // se path
-  const sePath = await getPath(COIN_TYPE, addressIndex);
+  const sePath = await getPath(COIN_TYPE, input.addressIndex);
   hashWriter.write(Buffer.from(sePath, 'hex'));
   // input outPoint
   hashOutpoint(hashWriter, input);

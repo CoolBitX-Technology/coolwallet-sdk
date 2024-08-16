@@ -3,63 +3,93 @@ export { Transport };
 
 export type Callback = () => void;
 
-export type SignTransferTxType = {
+export declare type SignTxType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  addressIndex: number;
-  txData: Omit<TxData, 'changeAddress'>;
+  scriptType: ScriptType;
+  inputs: Input[];
+  output: Output;
+  change?: Change;
+  version?: number;
   confirmCB?: Callback;
   authorizedCB?: Callback;
 };
 
-export type TxData = {
-  inputs: Input[];
-  outputs: Output[];
-  fee: string;
-  dustSize?: string;
-  changeAddress: string;
+export declare type Input = {
+  preTxHash: string;
+  preIndex: number;
+  preValue: string;
+  addressIndex: number;
+  sequence?: number;
+  pubkeyBuf?: Buffer;
+  purposeIndex?: number;
 };
 
-export type TransactionInput = {
+export declare type Output = {
+  value: string;
+  address: string;
+};
+
+export declare type Change = {
+  value: string;
+  addressIndex: number;
+  pubkeyBuf?: Buffer;
+  purposeIndex?: number;
+};
+
+export declare type TxData = {
+  version: number;
+  inputs: Input[];
+  output: Output;
+  change?: Change;
+  dustSize?: string;
+};
+
+export declare type TransactionInput = {
   previousOutpoint: Outpoint;
   signatureScript: string;
   sequence: string | number;
   sigOpCount: number;
+  addressIndex: number;
 };
 
-export type TransactionUtxo = { pkScript: Buffer; amount: string | number };
+export declare type TransactionUtxo = { pkScript: Buffer; amount: string | number };
 
-export type Outpoint = {
+export declare type Outpoint = {
   transactionId: string;
   index: number;
 };
 
-export type TransactionOutput = {
+export declare type TransactionOutput = {
   amount: string | number;
   scriptPublicKey: ScriptPublicKey;
+  addressIndex?: number;
 };
 
-export type ScriptPublicKey = {
+export declare type ScriptPublicKey = {
   version: number;
   scriptPublicKey: string;
 };
 
-export type Input = {
-  txId: string;
-  vout: number;
-  address: string;
-  value: string | number;
-};
-
-export type Output = {
-  address: string;
-  value: string | number;
-};
-
-export type TxInfo = {
+export declare type TxInfo = {
   txSize: number;
   mass: number;
+};
+
+export enum ScriptType {
+  P2PK = 0,
+}
+
+export declare type Payment = {
+  address: string;
+  outScript: Buffer;
+};
+
+export declare type Script = {
+  scriptType: ScriptType;
+  outScript: Buffer;
+  outHash?: Buffer;
 };
 
 export const TransactionSigningHashKey = Buffer.from('TransactionSigningHash');

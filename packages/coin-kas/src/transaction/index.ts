@@ -1,5 +1,5 @@
 import { TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/type';
-import { payToAddrScript } from '../utils/address';
+import { addressToOutScript, pubkeyToPayment } from '../utils/address';
 import { toHex } from '../utils/utils';
 import { SIGHASH_ALL } from '../utils/hash';
 import BigNumber from 'bignumber.js';
@@ -12,6 +12,7 @@ export class Transaction {
   lockTime: string = '0';
   subnetworkId: string = '0000000000000000000000000000000000000000';
   utxos: TransactionUtxo[] = [];
+  feeValue: string = '0';
 
   static fromTxData(txData: TxData): Transaction {
     return new Transaction(txData);
@@ -22,44 +23,48 @@ export class Transaction {
     txData.inputs.forEach((input) => {
       this.inputs.push({
         previousOutpoint: {
-          transactionId: input.txId,
-          index: input.vout,
+          transactionId: input.preTxHash,
+          index: input.preIndex,
         },
         signatureScript: '',
         sequence: '0',
         sigOpCount: 1,
+        addressIndex: input.addressIndex,
       });
 
+      const pubKey = input.pubkeyBuf?.toString('hex') as string;
       this.utxos.push({
-        pkScript: payToAddrScript(input.address),
-        amount: input.value,
+        pkScript: pubkeyToPayment(pubKey).outScript,
+        amount: input.preValue,
       });
 
-      totalInput = new BigNumber(input.value).plus(new BigNumber(totalInput)).toNumber();
+      totalInput = new BigNumber(input.preValue).plus(new BigNumber(totalInput)).toNumber();
     });
 
     let totalOutput = 0;
-    txData.outputs.forEach((output) => {
-      this.outputs.push({
-        scriptPublicKey: {
-          version: 0,
-          scriptPublicKey: toHex(payToAddrScript(output.address)),
-        },
-        amount: output.value,
-      });
-
-      totalOutput += new BigNumber(output.value).plus(new BigNumber(totalOutput)).toNumber();
+    const output = txData.output;
+    this.outputs.push({
+      scriptPublicKey: {
+        version: 0,
+        scriptPublicKey: toHex(addressToOutScript(output.address).outScript),
+      },
+      amount: output.value,
     });
+    totalOutput += new BigNumber(output.value).plus(new BigNumber(totalOutput)).toNumber();
 
-    const changeAmount = new BigNumber(totalInput).minus(new BigNumber(totalOutput)).minus(new BigNumber(txData.fee));
-    if (!changeAmount.isZero()) {
+    this.feeValue = new BigNumber(totalInput).minus(new BigNumber(totalOutput)).toFixed();
+    const change = txData.change;
+    if (change) {
+      const pubKey = change.pubkeyBuf?.toString('hex') as string;
       this.outputs.push({
         scriptPublicKey: {
           version: 0,
-          scriptPublicKey: toHex(payToAddrScript(txData.changeAddress)),
+          scriptPublicKey: toHex(pubkeyToPayment(pubKey).outScript),
         },
-        amount: changeAmount.toString(),
+        amount: change.value,
+        addressIndex: change.addressIndex,
       });
+      this.feeValue = new BigNumber(this.feeValue).minus(change.value).toFixed();
     }
   }
 

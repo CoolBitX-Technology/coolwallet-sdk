@@ -42,13 +42,12 @@ export async function getSigningActions(
   appId: string,
   appPrivateKey: string,
   transaction: Transaction,
-  addressIndex: number
 ): Promise<{
   actions: Array<Callback>;
 }> {
   const utxoArguments = transaction.inputs.map(async (input, index) => {
     const utxo = transaction.utxos[index];
-    const utxoArgumentBuf = await getUtxoArgumentBuffer(input, utxo, addressIndex);
+    const utxoArgumentBuf = await getUtxoArgumentBuffer(input, utxo, input.addressIndex);
     return utxoArgumentBuf.toString('hex');
   });
   const actions = utxoArguments.map((utxoArgument) => async () => {

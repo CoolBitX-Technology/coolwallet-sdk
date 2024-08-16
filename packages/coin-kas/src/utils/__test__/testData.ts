@@ -1,31 +1,31 @@
-import { TxData } from '../../config/type';
+import { TxData, Input, Output, Change } from '../../config/type';
 import { Transaction } from '../../transaction';
 
-export const testAddressIndex = 0;
 // input
-export const testNormalInput = {
-  txId: '21aa1aff85fc054381f8536d1ab8dbe68f1673a7c67b7ad7816431603c58d32e',
-  vout: 1,
-  address: 'kaspa:qzcm3y2xe65ne797cmar6ntecfjcdtqf585whum65kgyv20k8jzh6mpgwtm54',
-  value: 2355557326,
+export const testNormalInput: Input = {
+  preTxHash: '21aa1aff85fc054381f8536d1ab8dbe68f1673a7c67b7ad7816431603c58d32e',
+  preIndex: 1,
+  pubkeyBuf: Buffer.from('b1b89146cea93cf8bec6fa3d4d79c26586ac09a1e8ebf37aa5904629f63c857d', 'hex'),
+  purposeIndex: 44,
+  preValue: '2355557326',
+  addressIndex: 0,
 };
-
-export const testInputWithInvalidAddress = {
+export const testInputWithInvalidInputPublicKey = {
   ...testNormalInput,
-  address: 'kaspa:qzcm3y2xe65ne797cmar6ntecfjcdtqf585wm65kgyv20k8jzh6mpgwtm54',
+  pubkeyBuf: Buffer.alloc(0),
 };
 export const testInputWithoutTxId = {
   ...testNormalInput,
-  txId: '',
+  preTxHash: '',
 };
 export const testInputWithZeroAmount = {
   ...testNormalInput,
-  value: 0,
+  preValue: '0',
 };
 // output
-export const testNormalOutput = {
+export const testNormalOutput: Output = {
   address: 'kaspa:qq9rmfhgc758j4zquc8yvcngd0qhekt90qqf2czvshvdzdlq7jq8jphmvr028',
-  value: 1000,
+  value: '1000',
 };
 export const testOutputWithInvalidAddress = {
   ...testNormalOutput,
@@ -33,46 +33,60 @@ export const testOutputWithInvalidAddress = {
 };
 export const testOutputWithZeroAmount = {
   ...testNormalOutput,
-  value: 0,
+  value: '0',
 };
-
 export const testOutputValueWithTooManyDecimals = {
   ...testNormalOutput,
-  value: 49991291000000000,
+  value: '49991291000000000',
 };
-
 export const testOutputValueLessThanDust = {
   ...testNormalOutput,
-  value: 546,
+  value: '546',
 };
-
 export const testOutputValueMax = {
   ...testNormalOutput,
-  value: 2355547146,
+  value: '2355547146',
 };
-
 export const testOutputTooLargeValue = {
   ...testNormalOutput,
-  value: 2355580000,
+  value: '2355580000',
 };
-
+// change
+export const testNormalChange: Change = {
+  value: '2355546146',
+  pubkeyBuf: Buffer.from('b1b89146cea93cf8bec6fa3d4d79c26586ac09a1e8ebf37aa5904629f63c857d', 'hex'),
+  purposeIndex: 44,
+  addressIndex: 0,
+};
+export const testInsufficientFeeChange: Change = {
+  ...testNormalChange, 
+  value: '2355555326',
+};
+export const testTooLargeChange: Change = {
+  ...testNormalChange,
+  value: '1978668132840',
+};
+export const testInvalidChange: Change = {
+  ...testNormalChange,
+  value: '-32854',
+};
 // txData
 export const testTxData: TxData = {
+  version: 0,
   inputs: [testNormalInput],
-  outputs: [testNormalOutput],
-  fee: '10180',
-  changeAddress: 'kaspa:qzcm3y2xe65ne797cmar6ntecfjcdtqf585whum65kgyv20k8jzh6mpgwtm54',
+  output: testNormalOutput,
+  change: testNormalChange,
   dustSize: '600',
 };
 export const testTransaction: Transaction = Transaction.fromTxData(testTxData);
-const tooLargeInputs = [];
-for(let i=0;i<840;i++) {
-  tooLargeInputs.push(testNormalInput);
+const testTooLargeInputs = [];
+for (let i = 0; i < 840; i++) {
+  testTooLargeInputs.push(testNormalInput);
 }
 export const testTxDataWithLargeInputs: TxData = {
-  inputs: tooLargeInputs,
-  outputs: [testNormalInput],
-  fee: '200000',
-  changeAddress: 'kaspa:qzcm3y2xe65ne797cmar6ntecfjcdtqf585whum65kgyv20k8jzh6mpgwtm54',
+  ...testTxData,
+  inputs: testTooLargeInputs,
+  output: testNormalOutput,
+  change: testTooLargeChange,
   dustSize: '600',
 };
