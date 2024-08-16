@@ -1,10 +1,11 @@
 import { auth } from '.';
+import { error } from '..';
 import { commands } from '../apdu/execute/command';
 import { executeCommand } from '../apdu/execute/execute';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { APDUError } from '../error/errorHandle';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 
 /**
  * backup seed in SE.
@@ -92,6 +93,9 @@ export const exportBackupData = async (
   appPrivateKey: string,
   backupCardId: string
 ): Promise<string> => {
+  if (transport.cardType === CardType.Pro) {
+    throw new error.SDKError(exportBackupData.name, `CoolWallet PRO does not support this command.`);
+  }
   const backupCardIdLength = new Uint8Array(2);
   const backupCardIdBuf = Buffer.from(backupCardId, 'hex');
   backupCardIdLength[0] = (backupCardIdBuf.length >> 8) & 0xff;
@@ -126,6 +130,9 @@ export const exportBackupData = async (
  * @returns
  */
 export const importBackupData = async (transport: Transport, backupData: string): Promise<string> => {
+  if (transport.cardType === CardType.Pro) {
+    throw new error.SDKError(importBackupData.name, `CoolWallet PRO does not support this command.`);
+  }
   const { statusCode, msg } = await executeCommand(
     transport,
     commands.IMPORT_BACKUP_DATA,
