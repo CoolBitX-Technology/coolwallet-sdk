@@ -19,7 +19,6 @@ import {
   testTxData,
   testOutputValueLessThanDust,
   testOutputValueMax,
-  testOutputTooLargeValue,
   testTxDataWithLargeInputs,
   testInsufficientFeeChange,
   testInvalidChange,

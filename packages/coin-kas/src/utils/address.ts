@@ -56,12 +56,9 @@ export function getAddressByPublicKey(pubKey: string, prefix = 'kaspa') {
 }
 
 function getType(versionByte: number) {
-  switch (versionByte & 120) {
-    case 0:
-      return 'pubkey';
-    default:
-      throw new error.SDKError(getType.name, 'Invalid address type in version byte:' + versionByte);
-  }
+  const type = versionByte & 120;
+  validate(type !== 0, getType.name, 'Invalid address type in version byte:' + versionByte);
+  return 'pubkey';
 }
 
 function hasSingleCase(string: string) {
@@ -114,17 +111,11 @@ export function addressToOutScript(address: string): Script {
 }
 
 export function pubkeyToPayment(publicKey: string, scriptType = ScriptType.P2PK): Payment {
-  let payment: Payment;
-  switch (scriptType) {
-    case ScriptType.P2PK:
-      payment = {
-        address: getAddressByPublicKey(publicKey),
-        outScript: getScriptPublicKey(Buffer.from(publicKey, 'hex')),
-      };
-      validatePayment(payment, pubkeyToPayment.name, scriptType);
-      break;
-    default:
-      throw new error.SDKError(pubkeyToPayment.name, `Unsupport ScriptType '${scriptType}'`);
-  }
+  validate(scriptType === ScriptType.P2PK, pubkeyToPayment.name, `Unsupport ScriptType '${scriptType}'`);
+  const payment: Payment = {
+    address: getAddressByPublicKey(publicKey),
+    outScript: getScriptPublicKey(Buffer.from(publicKey, 'hex')),
+  };
+  validatePayment(payment, pubkeyToPayment.name, scriptType);
   return payment;
 }
