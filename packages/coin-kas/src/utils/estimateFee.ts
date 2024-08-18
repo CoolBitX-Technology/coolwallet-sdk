@@ -1,4 +1,4 @@
-import { TransactionInput, TransactionOutput, TxInfo } from '../config/type';
+import { TransactionInput, TransactionOutput, TxInfo } from '../config/types';
 
 const SompiPerKaspa = 100_000_000;
 // MaxSompi is the maximum transaction amount allowed in sompi.

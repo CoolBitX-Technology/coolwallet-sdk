@@ -25,7 +25,7 @@ SOFTWARE.
 // Modified by coolbitx in 2024
 import BigNumber from 'bignumber.js';
 import * as blake from 'blakejs';
-import { TransactionSigningHashKey } from '../config/type';
+import { TransactionSigningHashKey } from '../config/types';
 
 export class HashWriter {
   bufLen = 0;

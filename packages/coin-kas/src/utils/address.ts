@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 // Modified by coolbitx in 2024
-import { Payment, Script, ScriptType } from '../config/type';
+import { Payment, Script, ScriptType } from '../config/types';
 import { decode, encode } from './base32';
 import { checksumToArray, polymod } from './checksum';
 import { convert } from './convertBits';

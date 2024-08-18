@@ -3,7 +3,7 @@ import { coin as COIN, Transport } from '@coolwallet/core';
 import { COIN_TYPE } from './config/param';
 import { getAddressByPublicKey, addressToOutScript, pubkeyToPayment } from './utils/address';
 import signTransferTransaction from './sign';
-import { Script, ScriptType, SignTxType } from './config/type';
+import { Script, ScriptType, SignTxType } from './config/types';
 
 export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
   public addressToOutScript: (address: string) => Script;

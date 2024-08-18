@@ -1,4 +1,4 @@
-import { TxData, Input, Output, Change } from '../../config/type';
+import { TxData, Input, Output, Change } from '../../config/types';
 import { Transaction } from '../../transaction';
 
 // input

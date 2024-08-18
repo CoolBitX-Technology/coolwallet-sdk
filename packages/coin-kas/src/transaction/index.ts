@@ -1,4 +1,4 @@
-import { TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/type';
+import { TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/types';
 import { addressToOutScript, pubkeyToPayment } from '../utils/address';
 import { toHex } from '../utils/utils';
 import { SIGHASH_ALL } from '../utils/hash';

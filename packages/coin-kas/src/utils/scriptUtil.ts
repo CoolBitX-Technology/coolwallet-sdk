@@ -2,7 +2,7 @@ import { apdu, Transport, utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
 import { Transaction } from '../transaction';
 import { getUtxoArgumentBuffer } from './hash';
-import { Callback } from '../config/type';
+import { Callback } from '../config/types';
 
 export function getSEPath(addressIndex: number): string {
   const pathLength = '0D';

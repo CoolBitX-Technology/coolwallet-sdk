@@ -24,7 +24,7 @@ SOFTWARE.
 // Modified by coolbitx in 2024
 
 import BigNumber from 'bignumber.js';
-import { TransactionInput, TransactionOutput, TransactionUtxo } from '../config/type';
+import { TransactionInput, TransactionOutput, TransactionUtxo } from '../config/types';
 import { Transaction } from '../transaction';
 import { HashWriter } from '../transaction/HashWriter';
 import { fromHex } from './utils';

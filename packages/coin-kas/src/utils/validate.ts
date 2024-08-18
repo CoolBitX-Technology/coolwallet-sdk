@@ -28,7 +28,7 @@ import { polymod } from './checksum';
 import { prefixToArray } from './utils';
 import { decodeAddress } from './address';
 import { Transaction } from '../transaction';
-import { ScriptType, Input, Output, Change, Payment } from '../config/type';
+import { ScriptType, Input, Output, Change, Payment } from '../config/types';
 import { error } from '@coolwallet/core';
 
 export function validate(condition: boolean, funcName: string, message: string) {

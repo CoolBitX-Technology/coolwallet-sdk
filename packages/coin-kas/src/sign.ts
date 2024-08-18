@@ -1,5 +1,5 @@
 import { tx } from '@coolwallet/core';
-import { SignTxType } from './config/type';
+import { SignTxType } from './config/types';
 import { SignatureType } from '@coolwallet/core/lib/transaction';
 import { Transaction } from './transaction';
 import {
