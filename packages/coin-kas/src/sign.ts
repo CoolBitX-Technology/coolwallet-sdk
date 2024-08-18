@@ -46,5 +46,6 @@ export default async function signTransferTransaction(signTxData: SignTxType): P
   )) as Array<Buffer>;
 
   transaction.addSignatures(signatures);
-  return transaction.getMessage();
+  const message = transaction.getMessage();
+  return Buffer.from(message, 'utf-8').toString('hex');
 }

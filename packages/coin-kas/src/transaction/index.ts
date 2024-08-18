@@ -9,7 +9,7 @@ export class Transaction {
   version: number = 0;
   inputs: TransactionInput[] = [];
   outputs: TransactionOutput[] = [];
-  lockTime: string = '0';
+  lockTime: number = 0;
   subnetworkId: string = '0000000000000000000000000000000000000000';
   utxos: TransactionUtxo[] = [];
   feeValue: string = '0';
@@ -27,44 +27,47 @@ export class Transaction {
           index: input.preIndex,
         },
         signatureScript: '',
-        sequence: '0',
+        sequence: 0,
         sigOpCount: 1,
         addressIndex: input.addressIndex,
       });
 
       const pubKey = input.pubkeyBuf?.toString('hex') as string;
+      const inputPreValueBN = new BigNumber(input.preValue);
       this.utxos.push({
         pkScript: pubkeyToPayment(pubKey).outScript,
-        amount: input.preValue,
+        amount: inputPreValueBN.toNumber(),
       });
 
-      totalInput = new BigNumber(input.preValue).plus(new BigNumber(totalInput)).toNumber();
+      totalInput = inputPreValueBN.plus(new BigNumber(totalInput)).toNumber();
     });
 
     let totalOutput = 0;
     const output = txData.output;
+    const outputValueBN = new BigNumber(output.value);
     this.outputs.push({
       scriptPublicKey: {
         version: 0,
         scriptPublicKey: toHex(addressToOutScript(output.address).outScript),
       },
-      amount: output.value,
+      amount: outputValueBN.toNumber(),
     });
-    totalOutput += new BigNumber(output.value).plus(new BigNumber(totalOutput)).toNumber();
+    totalOutput += outputValueBN.plus(new BigNumber(totalOutput)).toNumber();
 
     this.feeValue = new BigNumber(totalInput).minus(new BigNumber(totalOutput)).toFixed();
     const change = txData.change;
     if (change) {
       const pubKey = change.pubkeyBuf?.toString('hex') as string;
+      const changeValueBN = new BigNumber(change.value);
       this.outputs.push({
         scriptPublicKey: {
           version: 0,
           scriptPublicKey: toHex(pubkeyToPayment(pubKey).outScript),
         },
-        amount: change.value,
+        amount: changeValueBN.toNumber(),
         addressIndex: change.addressIndex,
       });
-      this.feeValue = new BigNumber(this.feeValue).minus(change.value).toFixed();
+      this.feeValue = new BigNumber(this.feeValue).minus(changeValueBN).toFixed();
     }
   }
 
