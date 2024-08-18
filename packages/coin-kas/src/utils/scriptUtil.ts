@@ -1,8 +1,8 @@
 import { apdu, Transport, utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
-import { Callback } from '../config/type';
 import { Transaction } from '../transaction';
 import { getUtxoArgumentBuffer } from './hash';
+import { Callback } from '../config/type';
 
 export function getSEPath(addressIndex: number): string {
   const pathLength = '0D';
@@ -47,7 +47,7 @@ export async function getSigningActions(
 }> {
   const utxoArguments = transaction.inputs.map(async (input, index) => {
     const utxo = transaction.utxos[index];
-    const utxoArgumentBuf = await getUtxoArgumentBuffer(input, utxo, input.addressIndex);
+    const utxoArgumentBuf = await getUtxoArgumentBuffer(input, utxo);
     return utxoArgumentBuf.toString('hex');
   });
   const actions = utxoArguments.map((utxoArgument) => async () => {
