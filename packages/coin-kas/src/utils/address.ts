@@ -29,13 +29,12 @@ import { checksumToArray, polymod } from './checksum';
 import { convert } from './convertBits';
 import { fromHex, getBitLength, prefixToArray } from './utils';
 import { validate, validatePayment, validChecksum } from './validate';
-import { error } from '@coolwallet/core';
 
 export function toXOnly(pubKey: Buffer): Buffer {
   return pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
 }
 
-export function getAddressByPublicKey(pubKey: string, prefix = 'kaspa') {
+export function getAddressByPublicKey(pubKey: string, scriptType = ScriptType.P2PK, prefix = 'kaspa') {
   const xOnlyPubKey = toXOnly(fromHex(pubKey)).toString('hex');
   const eight0 = [0, 0, 0, 0, 0, 0, 0, 0];
   const prefixData = prefixToArray(prefix).concat([0]);
