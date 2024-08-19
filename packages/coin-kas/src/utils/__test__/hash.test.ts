@@ -25,7 +25,6 @@ describe('Test hash.ts', () => {
   });
 
   it('Test before sign schnorr', async () => {
-    console.log('>>> input=',JSON.stringify(testTransaction, null, 2));
     testTransaction.inputs.forEach((_input, index) => {
       const sigHashBuffer = calculateSigHash(testTransaction, SIGHASH_ALL, index, {});
       const sigHash = sigHashBuffer.toString('hex');

@@ -2,6 +2,7 @@ import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 import KAS from '../src';
+import { ScriptType } from '../src/config/types';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
@@ -25,7 +26,7 @@ describe('Test KAS SDK', () => {
 
   it('Test Get Address', async () => {
     const addressIndex = 0;
-    const address = await kasSDK.getAddress(transport, props.appPrivateKey, props.appId, addressIndex);
+    const address = await kasSDK.getAddress(transport, props.appPrivateKey, props.appId, ScriptType.P2PK, addressIndex);
     expect(address).toEqual(testWalletInfo.address);
   });
 });

@@ -56,7 +56,7 @@ export function getAddressByPublicKey(pubKey: string, scriptType = ScriptType.P2
 
 function getType(versionByte: number) {
   const type = versionByte & 120;
-  validate(type !== 0, getType.name, 'Invalid address type in version byte:' + versionByte);
+  validate(type === 0, getType.name, 'Invalid address type in version byte:' + versionByte);
   return 'pubkey';
 }
 
