@@ -34,7 +34,7 @@ export function toXOnly(pubKey: Buffer): Buffer {
   return pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
 }
 
-export function getAddressByPublicKey(pubKey: string, scriptType = ScriptType.P2PK, prefix = 'kaspa') {
+export function getAddressByPublicKey(pubKey: string, scriptType = ScriptType.P2PK, prefix = 'kaspa'): string {
   const xOnlyPubKey = toXOnly(fromHex(pubKey)).toString('hex');
   const eight0 = [0, 0, 0, 0, 0, 0, 0, 0];
   const prefixData = prefixToArray(prefix).concat([0]);
@@ -54,7 +54,7 @@ export function getAddressByPublicKey(pubKey: string, scriptType = ScriptType.P2
   return `${prefix}:` + encode(payload);
 }
 
-function getType(versionByte: number) {
+function getType(versionByte: number): string {
   const type = versionByte & 120;
   validate(type === 0, getType.name, 'Invalid address type in version byte:' + versionByte);
   return 'pubkey';

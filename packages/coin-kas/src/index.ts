@@ -17,12 +17,12 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     transport: Transport,
     appPrivateKey: string,
     appId: string,
-    scriptType: ScriptType,
+    _scriptType: ScriptType,
     addressIndex: number,
     purpose?: number
   ): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
-    return getAddressByPublicKey(publicKey, scriptType);
+    return getAddressByPublicKey(publicKey);
   }
 
   async getAddressAndOutScript(
