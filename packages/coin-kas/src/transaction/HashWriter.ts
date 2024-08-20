@@ -30,6 +30,7 @@ import { TransactionSigningHashKey } from '../config/types';
 export class HashWriter {
   bufLen = 0;
   bufs: Buffer[] = [];
+  fields: string[] = [];
 
   toBuffer(): Buffer {
     return this.concat();
@@ -39,55 +40,88 @@ export class HashWriter {
     return Buffer.concat(this.bufs, this.bufLen);
   }
 
-  write(buf: Buffer): this {
+  write(buf: Buffer, name?: string): this {
     this.bufs.push(buf);
+    if (name) this.fields.push(name);
     this.bufLen += buf.length;
     return this;
   }
 
-  writeReverse(buf: Buffer): this {
+  writeReverse(buf: Buffer, name?: string): this {
     this.bufs.push(buf.reverse());
+    if (name) this.fields.push(name);
     this.bufLen += buf.length;
     return this;
   }
 
-  writeHash(hash: Buffer): this {
-    this.write(hash);
+  writeHash(hash: Buffer, name?: string): this {
+    this.write(hash, name);
     return this;
   }
 
-  writeVarBytes(buf: Buffer): this {
-    this.writeUInt64LE(new BigNumber(buf.length));
-    this.write(buf);
+  writeVarBytes(buf: Buffer, name?: string): this {
+    const lengthKey = name ? `${name}ReverseLength`: undefined;
+    this.writeUInt64LE(new BigNumber(buf.length), lengthKey);
+    this.write(buf, name);
     return this;
   }
 
-  writeUInt8(n: number): this {
+  writeUInt8(n: number, name?: string): this {
     const buf = Buffer.alloc(1);
     buf.writeUInt8(n);
-    this.write(buf);
+    this.write(buf, name);
     return this;
   }
 
-  writeUInt16LE(n: number): this {
+  writeUInt16BE(n: number, name?: string): this {
+    const buf = Buffer.alloc(2);
+    buf.writeUint16BE(n);
+    this.write(buf, name);
+    return this;
+  }
+
+  writeUInt16LE(n: number, name?: string): this {
     const buf = Buffer.alloc(2);
     buf.writeUInt16LE(n);
-    this.write(buf);
+    this.write(buf, name);
     return this;
   }
 
-  writeUInt32LE(n: number): this {
+  writeUInt32BE(n: number, name?: string): this {
+    const buf = Buffer.alloc(4);
+    buf.writeUint32BE(n);
+    this.write(buf, name);
+    return this;
+  }
+
+  writeUInt32LE(n: number, name?: string): this {
     const buf = Buffer.alloc(4);
     buf.writeUInt32LE(n, 0);
-    this.write(buf);
+    this.write(buf, name);
     return this;
   }
 
-  writeUInt64LE(bn: BigNumber): this {
+  writeUInt64BE(bn: BigNumber, name?: string): this {
+    const buf = Buffer.alloc(8);
+    buf.writeBigUInt64BE(BigInt(bn.toFixed()));
+    this.write(buf, name);
+    return this;
+  }
+
+  writeUInt64LE(bn: BigNumber, name?: string): this {
     const buf = Buffer.alloc(8);
     buf.writeBigUInt64LE(BigInt(bn.toFixed()));
-    this.write(buf);
+    this.write(buf, name);
     return this;
+  }
+
+  toLog(): string {
+    if (!this.fields || this.fields.length === 0) return;
+    let str = "";
+    this.bufs.map((buf, index)=>{
+      str += `// ${this.fields[index]}\n${buf.toString('hex')}\n`;
+    })
+    return str;
   }
 
   finalize(): Buffer {

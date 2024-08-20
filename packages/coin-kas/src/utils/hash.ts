@@ -24,7 +24,7 @@ SOFTWARE.
 // Modified by coolbitx in 2024
 
 import BigNumber from 'bignumber.js';
-import { TransactionInput, TransactionOutput, TransactionUtxo } from '../config/types';
+import { TransactionInput, TransactionOutput, TransactionSigningHashKey, TransactionUtxo } from '../config/types';
 import { Transaction } from '../transaction';
 import { HashWriter } from '../transaction/HashWriter';
 import { fromHex } from './utils';
@@ -59,14 +59,15 @@ function zeroSubnetworkID(): Buffer {
 }
 
 function hashOutpoint(hashWriter: HashWriter, input: TransactionInput): void {
-  hashWriter.writeHash(fromHex(input.previousOutpoint.transactionId));
-  hashWriter.writeUInt32LE(input.previousOutpoint.index);
+  hashWriter.writeHash(fromHex(input.previousOutpoint.transactionId), 'previousOutpoint.transactionId');
+  hashWriter.writeUInt32LE(input.previousOutpoint.index, 'reversePreviousOutpoint.index');
 }
 
-function hashTxOut(hashWriter: HashWriter, output: TransactionOutput): void {
-  hashWriter.writeUInt64LE(new BigNumber(output.amount));
-  hashWriter.writeUInt16LE(0); // TODO: USE REAL SCRIPT VERSION
-  hashWriter.writeVarBytes(fromHex(output.scriptPublicKey.scriptPublicKey));
+function hashTxOut(hashWriter: HashWriter, output: TransactionOutput, outputTotalLength?: number): void {
+  if (outputTotalLength) hashWriter.writeUInt16BE(outputTotalLength, 'outputTotalLength');
+  hashWriter.writeUInt64LE(new BigNumber(output.amount), 'outputReverseAmount');
+  hashWriter.writeUInt16LE(0, 'outputReverseScriptVersion'); // TODO: USE REAL SCRIPT VERSION
+  hashWriter.writeVarBytes(fromHex(output.scriptPublicKey.scriptPublicKey), 'outputScriptPublicKey');
 }
 
 interface ReusedValues {
@@ -154,27 +155,26 @@ export function calculateSigHash(
 ): Buffer {
   const hashWriter = new HashWriter();
 
-  hashWriter.writeUInt16LE(transaction.version);
-  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, reusedValues));
-  hashWriter.writeHash(getSequencesHash(transaction, hashType, reusedValues));
-  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, reusedValues));
+  hashWriter.writeUInt16LE(transaction.version, 'reverseTransactionVersion');
+  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, reusedValues), 'previousOutputsHash');
+  hashWriter.writeHash(getSequencesHash(transaction, hashType, reusedValues), 'sequencesOutputsHash');
+  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, reusedValues), 'sigOpCountsHash');
 
   const input = transaction.inputs[inputIndex];
   const utxo = transaction.utxos[inputIndex];
   hashOutpoint(hashWriter, input);
-  hashWriter.writeUInt16LE(0); // TODO: USE REAL SCRIPT VERSION
-  hashWriter.writeVarBytes(utxo.pkScript);
-  hashWriter.writeUInt64LE(new BigNumber(utxo.amount));
-  hashWriter.writeUInt64LE(new BigNumber(input.sequence));
-  hashWriter.writeUInt8(1); // sigOpCount
+  hashWriter.writeUInt16LE(0, 'outputReverseScriptVersion'); // TODO: USE REAL SCRIPT VERSION
+  hashWriter.writeVarBytes(utxo.pkScript, 'inputScriptPublicKey');
+  hashWriter.writeUInt64LE(new BigNumber(utxo.amount), 'inputReverseAmount');
+  hashWriter.writeUInt64LE(new BigNumber(input.sequence), 'inputReverseSequence');
+  hashWriter.writeUInt8(1, 'sigOpCount');
 
-  hashWriter.writeHash(getOutputsHash(transaction, inputIndex, hashType, reusedValues));
-  hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime));
-  hashWriter.writeHash(zeroSubnetworkID()); // TODO: USE REAL SUBNETWORK ID
-  hashWriter.writeUInt64LE(new BigNumber(0)); // TODO: USE REAL GAS
-  hashWriter.writeHash(zeroHash()); // TODO: USE REAL PAYLOAD HASH
-  hashWriter.writeUInt8(hashType);
-
+  hashWriter.writeHash(getOutputsHash(transaction, inputIndex, hashType, reusedValues), 'outputsHash');
+  hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime), 'reverseLockTime');
+  hashWriter.writeHash(zeroSubnetworkID(), 'subNetworkId'); // TODO: USE REAL SUBNETWORK ID
+  hashWriter.writeUInt64LE(new BigNumber(0), 'reverseGas'); // TODO: USE REAL GAS
+  hashWriter.writeHash(zeroHash(), 'payload'); // TODO: USE REAL PAYLOAD HASH
+  hashWriter.writeUInt8(hashType, 'hashType');
   return hashWriter.finalize();
 }
 
@@ -183,59 +183,42 @@ export async function getTransferArgumentBuffer(transaction: Transaction): Promi
   const output = transaction.outputs[0];
   const change = transaction.outputs?.[1];
   const hashWriter = new HashWriter();
-  // transaction version
-  hashWriter.writeUInt16LE(transaction.version);
-  // previous outpoint hash
-  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, {}));
-  // sequences hash
-  hashWriter.writeHash(getSequencesHash(transaction, hashType, {}));
-  // input sigOp counts hash
-  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, {}));
-  // output amount + version + key length + script public key
-  hashTxOut(hashWriter, output);
-  // have change
-  hashWriter.writeUInt8(change ? 1 : 0);
-  // change amount
-  hashWriter.writeUInt64LE(change ? new BigNumber(change.amount) : new BigNumber(0));
-  // se path
+  hashWriter.writeUInt16LE(transaction.version, 'reverseTransactionVersion');
+  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, {}), 'previousOutputsHash');
+  hashWriter.writeHash(getSequencesHash(transaction, hashType, {}), 'sequencesHash');
+  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, {}), 'sigOpCountsHash');
+  hashWriter.writeUInt32BE(0, 'zeroPadding');
+  
+  // 8 + 2 + 8 + 34 = 42
+  hashTxOut(hashWriter, output, 52);
+  hashWriter.writeUInt8(change ? 1 : 0, 'haveChange');
+  hashWriter.writeUInt64LE(change ? new BigNumber(change.amount) : new BigNumber(0), 'changeReverseAmount');
+  hashWriter.writeUInt16BE(TransactionSigningHashKey.length, 'keyLength');
+  hashWriter.write(TransactionSigningHashKey, 'hashKey');
   if (change.addressIndex !== undefined) {
     const sePath = await getPath(COIN_TYPE, change.addressIndex);
-    hashWriter.write(Buffer.from(sePath, 'hex'));
+    hashWriter.write(Buffer.from(sePath, 'hex'), 'sePath');
   } else {
-    hashWriter.write(Buffer.alloc(21));
+    hashWriter.write(Buffer.alloc(21), 'sePath');
   }
-  // lock time
-  hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime));
-  // sub network id
-  hashWriter.writeHash(zeroSubnetworkID()); // TODO: USE REAL SUBNETWORK ID
-  // empty gas
-  hashWriter.writeUInt64LE(new BigNumber(0)); // TODO: USE REAL GAS
-  // empty payload
-  hashWriter.writeHash(zeroHash()); // TODO: USE REAL PAYLOAD HASH
-  // hash type
-  hashWriter.writeUInt8(hashType);
+  
+  hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime), 'reverseLockTime');
+  hashWriter.writeHash(zeroSubnetworkID(), 'subNetworkId'); // TODO: USE REAL SUBNETWORK ID
+  hashWriter.writeUInt64LE(new BigNumber(0), 'reverseGas'); // TODO: USE REAL GAS
+  hashWriter.writeHash(zeroHash(), 'payload'); // TODO: USE REAL PAYLOAD HASH
+  hashWriter.writeUInt8(hashType, 'hashType');
   return hashWriter.toBuffer();
 }
 
-export async function getUtxoArgumentBuffer(
-  input: TransactionInput,
-  utxo: TransactionUtxo
-): Promise<Buffer> {
+export async function getUtxoArgumentBuffer(input: TransactionInput, utxo: TransactionUtxo): Promise<Buffer> {
   const hashWriter = new HashWriter();
-  // se path
   const sePath = await getPath(COIN_TYPE, input.addressIndex);
-  hashWriter.write(Buffer.from(sePath, 'hex'));
-  // input outPoint
+  hashWriter.write(Buffer.from(sePath, 'hex'), 'sePath');
   hashOutpoint(hashWriter, input);
-  // input script version
-  hashWriter.writeUInt16LE(0); // TODO: USE REAL SCRIPT VERSION
-  // input script
-  hashWriter.writeVarBytes(utxo.pkScript);
-  // input amount
-  hashWriter.writeUInt64LE(new BigNumber(utxo.amount));
-  // input sequence
-  hashWriter.writeUInt64LE(new BigNumber(input.sequence));
-  // input sigOpCount
-  hashWriter.writeUInt8(1);
+  hashWriter.writeUInt16LE(0, 'inputReverseScriptVersion'); // TODO: USE REAL SCRIPT VERSION
+  hashWriter.writeVarBytes(utxo.pkScript, 'inputScriptPublicKey');
+  hashWriter.writeUInt64LE(new BigNumber(utxo.amount), 'inputReverseAmount');
+  hashWriter.writeUInt64LE(new BigNumber(input.sequence), 'inputReverseSequence');
+  hashWriter.writeUInt8(1, 'inputSigOpCount');
   return hashWriter.toBuffer();
 }

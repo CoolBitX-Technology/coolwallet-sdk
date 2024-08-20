@@ -1,4 +1,3 @@
-
 import { coin as COIN, Transport } from '@coolwallet/core';
 import { COIN_TYPE } from './config/param';
 import { getAddressByPublicKey, addressToOutScript, pubkeyToPayment } from './utils/address';
@@ -7,7 +6,7 @@ import { Script, ScriptType, SignTxType } from './config/types';
 
 export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
   public addressToOutScript: (address: string) => Script;
-  
+
   constructor() {
     super(COIN_TYPE);
     this.addressToOutScript = addressToOutScript;
@@ -50,23 +49,11 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
   async signTransaction(signTxType: SignTxType): Promise<string> {
     const { inputs, transport, appPrivateKey, appId, change } = signTxType;
     for (const input of inputs) {
-      const pubkey = await this.getPublicKey(
-        transport,
-        appPrivateKey,
-        appId,
-        input.addressIndex,
-        input.purposeIndex
-      );
+      const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex, input.purposeIndex);
       input.pubkeyBuf = Buffer.from(pubkey, 'hex');
     }
     if (change) {
-      const pubkey = await this.getPublicKey(
-        transport,
-        appPrivateKey,
-        appId,
-        change.addressIndex,
-        change.purposeIndex
-      );
+      const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex, change.purposeIndex);
       change.pubkeyBuf = Buffer.from(pubkey, 'hex');
     }
     return signTransferTransaction(signTxType);
