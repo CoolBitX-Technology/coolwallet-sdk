@@ -116,8 +116,8 @@ export class HashWriter {
   }
 
   toLog(): string {
-    if (!this.fields || this.fields.length === 0) return;
     let str = "";
+    if (!this.fields || this.fields.length === 0) return str;
     this.bufs.map((buf, index)=>{
       str += `// ${this.fields[index]}\n${buf.toString('hex')}\n`;
     })
