@@ -17,10 +17,8 @@ console.log('ZKS USDC: ', buildTokenHex(ZKSYNC.tokens.USDC));
 console.log('ZKS WETH: ', buildTokenHex(ZKSYNC.tokens.WETH));
 console.log('BASE WETH: ', buildTokenHex(BASE.tokens.WETH));
 console.log('BASE USDbC: ', buildTokenHex(BASE.tokens.USDbC));
-console.log('BASE axlUSDC: ', buildTokenHex(BASE.tokens.axlUSDC))
+console.log('BASE axlUSDC: ', buildTokenHex(BASE.tokens.axlUSDC));
 console.log('BASE BSWAP: ', buildTokenHex(BASE.tokens.BSWAP));
-console.log('BASE BASE: ', buildTokenHex(BASE.tokens.BASE));
-
 
 const tokenGALA: BuildTokenHexInput = {
   symbol: 'GALA',
