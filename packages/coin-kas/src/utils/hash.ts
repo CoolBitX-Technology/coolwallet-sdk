@@ -30,6 +30,7 @@ import { HashWriter } from '../transaction/HashWriter';
 import { fromHex } from './utils';
 import { COIN_TYPE } from '../config/param';
 import { getPath } from '@coolwallet/core/lib/utils';
+import { PathType } from '@coolwallet/core/lib/config';
 
 /* eslint-disable no-bitwise */
 export const SIGHASH_ALL = 0b00000001;
@@ -37,6 +38,8 @@ export const SIGHASH_NONE = 0b00000010;
 export const SIGHASH_SINGLE = 0b00000100;
 export const SIGHASH_ANYONECANPAY = 0b10000000;
 export const SIGHASH_MASK = 0b00000111;
+
+export const HASH_BLAKE_2B_256_WITH_KEY = 0x13;
 
 function isSigHashNone(hashType: number): boolean {
   return (hashType & SIGHASH_MASK) === SIGHASH_NONE;
@@ -149,16 +152,16 @@ function getOutputsHash(
 
 export function calculateSigHash(
   transaction: Transaction,
-  hashType: number,
+  signHashType: number,
   inputIndex: number,
   reusedValues = {}
 ): Buffer {
   const hashWriter = new HashWriter();
 
   hashWriter.writeUInt16LE(transaction.version, 'reverseTransactionVersion');
-  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, reusedValues), 'previousOutputsHash');
-  hashWriter.writeHash(getSequencesHash(transaction, hashType, reusedValues), 'sequencesOutputsHash');
-  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, reusedValues), 'sigOpCountsHash');
+  hashWriter.writeHash(getPreviousOutputsHash(transaction, signHashType, reusedValues), 'previousOutputsHash');
+  hashWriter.writeHash(getSequencesHash(transaction, signHashType, reusedValues), 'sequencesOutputsHash');
+  hashWriter.writeHash(getSigOpCountsHash(transaction, signHashType, reusedValues), 'sigOpCountsHash');
 
   const input = transaction.inputs[inputIndex];
   const utxo = transaction.utxos[inputIndex];
@@ -169,50 +172,52 @@ export function calculateSigHash(
   hashWriter.writeUInt64LE(new BigNumber(input.sequence), 'inputReverseSequence');
   hashWriter.writeUInt8(1, 'sigOpCount');
 
-  hashWriter.writeHash(getOutputsHash(transaction, inputIndex, hashType, reusedValues), 'outputsHash');
+  hashWriter.writeHash(getOutputsHash(transaction, inputIndex, signHashType, reusedValues), 'outputsHash');
   hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime), 'reverseLockTime');
   hashWriter.writeHash(zeroSubnetworkID(), 'subNetworkId'); // TODO: USE REAL SUBNETWORK ID
   hashWriter.writeUInt64LE(new BigNumber(0), 'reverseGas'); // TODO: USE REAL GAS
   hashWriter.writeHash(zeroHash(), 'payload'); // TODO: USE REAL PAYLOAD HASH
-  hashWriter.writeUInt8(hashType, 'hashType');
+  hashWriter.writeUInt8(signHashType, 'signHashType');
   return hashWriter.finalize();
 }
 
 export async function getTransferArgumentBuffer(transaction: Transaction): Promise<Buffer> {
-  const hashType = SIGHASH_ALL;
+  const signHashType = SIGHASH_ALL;
+  const hashType = HASH_BLAKE_2B_256_WITH_KEY;
   const output = transaction.outputs[0];
   const change = transaction.outputs?.[1];
   const hashWriter = new HashWriter();
   hashWriter.writeUInt16LE(transaction.version, 'reverseTransactionVersion');
-  hashWriter.writeHash(getPreviousOutputsHash(transaction, hashType, {}), 'previousOutputsHash');
-  hashWriter.writeHash(getSequencesHash(transaction, hashType, {}), 'sequencesHash');
-  hashWriter.writeHash(getSigOpCountsHash(transaction, hashType, {}), 'sigOpCountsHash');
+  hashWriter.writeHash(getPreviousOutputsHash(transaction, signHashType, {}), 'previousOutputsHash');
+  hashWriter.writeHash(getSequencesHash(transaction, signHashType, {}), 'sequencesHash');
+  hashWriter.writeHash(getSigOpCountsHash(transaction, signHashType, {}), 'sigOpCountsHash');
   hashWriter.writeUInt32BE(0, 'zeroPadding');
-  
+
   // 8 + 2 + 8 + 34 = 42
-  hashTxOut(hashWriter, output, 52);
+  hashWriter.writeUInt8(hashType, 'hasType');
+  hashTxOut(hashWriter, output, 104);
   hashWriter.writeUInt8(change ? 1 : 0, 'haveChange');
   hashWriter.writeUInt64LE(change ? new BigNumber(change.amount) : new BigNumber(0), 'changeReverseAmount');
   hashWriter.writeUInt16BE(TransactionSigningHashKey.length, 'keyLength');
   hashWriter.write(TransactionSigningHashKey, 'hashKey');
   if (change.addressIndex !== undefined) {
-    const sePath = await getPath(COIN_TYPE, change.addressIndex);
+    const sePath = await getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP340);
     hashWriter.write(Buffer.from(sePath, 'hex'), 'sePath');
   } else {
     hashWriter.write(Buffer.alloc(21), 'sePath');
   }
-  
+
   hashWriter.writeUInt64LE(new BigNumber(transaction.lockTime), 'reverseLockTime');
   hashWriter.writeHash(zeroSubnetworkID(), 'subNetworkId'); // TODO: USE REAL SUBNETWORK ID
   hashWriter.writeUInt64LE(new BigNumber(0), 'reverseGas'); // TODO: USE REAL GAS
   hashWriter.writeHash(zeroHash(), 'payload'); // TODO: USE REAL PAYLOAD HASH
-  hashWriter.writeUInt8(hashType, 'hashType');
+  hashWriter.writeUInt8(signHashType, 'signHashType');
   return hashWriter.toBuffer();
 }
 
 export async function getUtxoArgumentBuffer(input: TransactionInput, utxo: TransactionUtxo): Promise<Buffer> {
   const hashWriter = new HashWriter();
-  const sePath = await getPath(COIN_TYPE, input.addressIndex);
+  const sePath = await getPath(COIN_TYPE, input.addressIndex, 5, PathType.BIP340);
   hashWriter.write(Buffer.from(sePath, 'hex'), 'sePath');
   hashOutpoint(hashWriter, input);
   hashWriter.writeUInt16LE(0, 'inputReverseScriptVersion'); // TODO: USE REAL SCRIPT VERSION
