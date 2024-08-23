@@ -93,8 +93,20 @@ export class Transaction {
     return JSON.stringify({
       transaction: {
         version: this.version,
-        inputs: this.inputs,
-        outputs: this.outputs,
+        inputs: this.inputs.map(({ previousOutpoint, signatureScript, sequence, sigOpCount }) => {
+          return {
+            previousOutpoint,
+            signatureScript,
+            sequence,
+            sigOpCount,
+          };
+        }),
+        outputs: this.outputs.map(({ amount, scriptPublicKey }) => {
+          return {
+            amount,
+            scriptPublicKey,
+          };
+        }),
         lockTime: this.lockTime,
         subnetworkId: this.subnetworkId,
       },

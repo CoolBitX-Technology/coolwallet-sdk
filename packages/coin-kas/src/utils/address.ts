@@ -97,8 +97,9 @@ export function decodeAddress(address: string) {
   };
 }
 
-function getScriptPublicKey(xOnlypublicKey: Buffer): Buffer {
-  return Buffer.concat([Buffer.from([0x20]), xOnlypublicKey, Buffer.from([0xac])], 34);
+function getScriptPublicKey(publicKey: Buffer): Buffer {
+  const xOnlyPubKey = toXOnly(publicKey);
+  return Buffer.concat([Buffer.from([0x20]), xOnlyPubKey, Buffer.from([0xac])], 34);
 }
 
 export function addressToOutScript(address: string): Script {

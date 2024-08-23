@@ -63,7 +63,6 @@ describe('Test address.ts', () => {
         "outScript": Object {
           "data": Array [
             32,
-            3,
             218,
             142,
             170,
@@ -96,6 +95,7 @@ describe('Test address.ts', () => {
             239,
             98,
             239,
+            172,
           ],
           "type": "Buffer",
         },
