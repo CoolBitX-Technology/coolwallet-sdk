@@ -8,6 +8,7 @@ if (process.env.NODE_ENV !== 'development') {
     debug: jest.fn(), // Mock console.debug
     log: jest.fn(), // Mock console.log
     warn: jest.fn(), // Mock console.warn
+  };
 }
 
 // Polyfill for crypto.getRandomValues in Node.js
