@@ -66,8 +66,7 @@ function hashOutpoint(hashWriter: HashWriter, input: TransactionInput): void {
   hashWriter.writeUInt32LE(input.previousOutpoint.index, 'reversePreviousOutpoint.index');
 }
 
-function hashTxOut(hashWriter: HashWriter, output: TransactionOutput, outputTotalLength?: number): void {
-  if (outputTotalLength) hashWriter.writeUInt16BE(outputTotalLength, 'outputTotalLength');
+function hashTxOut(hashWriter: HashWriter, output: TransactionOutput): void {
   hashWriter.writeUInt64LE(new BigNumber(output.amount), 'outputReverseAmount');
   hashWriter.writeUInt16LE(0, 'outputReverseScriptVersion'); // TODO: USE REAL SCRIPT VERSION
   hashWriter.writeVarBytes(fromHex(output.scriptPublicKey.scriptPublicKey), 'outputScriptPublicKey');
@@ -193,15 +192,15 @@ export async function getTransferArgumentBuffer(transaction: Transaction): Promi
   hashWriter.writeHash(getSigOpCountsHash(transaction, signHashType, {}), 'sigOpCountsHash');
   hashWriter.writeUInt32BE(0, 'zeroPadding');
 
-  // 8 + 2 + 8 + 34 = 42
   hashWriter.writeUInt8(hashType, 'hasType');
-  hashTxOut(hashWriter, output, 104);
+  hashWriter.writeUInt16BE(change ? 104 : 52, 'outputTotalLength');
+  hashTxOut(hashWriter, output);
   hashWriter.writeUInt8(change ? 1 : 0, 'haveChange');
   hashWriter.writeUInt64LE(change ? new BigNumber(change.amount) : new BigNumber(0), 'changeReverseAmount');
   hashWriter.writeUInt16BE(TransactionSigningHashKey.length, 'keyLength');
   hashWriter.write(TransactionSigningHashKey, 'hashKey');
   if (change.addressIndex !== undefined) {
-    const sePath = await getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP340);
+    const sePath = await getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP32);
     hashWriter.write(Buffer.from(sePath, 'hex'), 'sePath');
   } else {
     hashWriter.write(Buffer.alloc(21), 'sePath');
@@ -217,7 +216,8 @@ export async function getTransferArgumentBuffer(transaction: Transaction): Promi
 
 export async function getUtxoArgumentBuffer(input: TransactionInput, utxo: TransactionUtxo): Promise<Buffer> {
   const hashWriter = new HashWriter();
-  const sePath = await getPath(COIN_TYPE, input.addressIndex, 5, PathType.BIP340);
+  const sePath = await getPath(COIN_TYPE, input.addressIndex, 5, PathType.BIP32);
+  hashWriter.writeUInt8(21, 'pathLength');
   hashWriter.write(Buffer.from(sePath, 'hex'), 'sePath');
   hashOutpoint(hashWriter, input);
   hashWriter.writeUInt16LE(0, 'inputReverseScriptVersion'); // TODO: USE REAL SCRIPT VERSION

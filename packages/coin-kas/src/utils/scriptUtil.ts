@@ -2,10 +2,10 @@ import { apdu, Transport, utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
 import { Transaction } from '../transaction';
 import { getUtxoArgumentBuffer } from './hash';
-import { Callback } from '../config/types';
+import { Callback, TransactionSigningHashKey } from '../config/types';
 
 export function getSEPath(addressIndex: number): string {
-  const pathLength = '0D';
+  const pathLength = '15';
   const path = utils.getFullPath({ pathString: `44'/111111'/${addressIndex}'`, pathType: PathType.SLIP0010 });
   const SEPath = `${pathLength}${path}`;
   return SEPath;
@@ -41,7 +41,7 @@ export async function getSigningActions(
   transport: Transport,
   appId: string,
   appPrivateKey: string,
-  transaction: Transaction,
+  transaction: Transaction
 ): Promise<{
   actions: Array<Callback>;
 }> {
@@ -51,7 +51,13 @@ export async function getSigningActions(
     return utxoArgumentBuf.toString('hex');
   });
   const actions = utxoArguments.map((utxoArgument) => async () => {
-    return apdu.tx.executeUtxoSegmentScript(transport, appId, appPrivateKey, await utxoArgument);
+    return apdu.tx.executeUtxoSegmentScript(
+      transport,
+      appId,
+      appPrivateKey,
+      await utxoArgument,
+      TransactionSigningHashKey.toString('hex')
+    );
   });
   return { actions };
 }
