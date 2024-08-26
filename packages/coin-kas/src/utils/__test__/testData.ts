@@ -27,6 +27,10 @@ export const testNormalOutput: Output = {
   address: 'kaspa:qq9rmfhgc758j4zquc8yvcngd0qhekt90qqf2czvshvdzdlq7jq8jphmvr028',
   value: '1000',
 };
+export const testMaxOutput: Output = {
+  address: 'kaspa:qq9rmfhgc758j4zquc8yvcngd0qhekt90qqf2czvshvdzdlq7jq8jphmvr028',
+  value: '2355554326',
+};
 export const testOutputWithInvalidAddress = {
   ...testNormalOutput,
   address: 'kaspa:qq9rmfhgc758j4zyvcngd0qhekt90qqf2czvshvdzdlq7jq8jphmvr028',
@@ -79,6 +83,13 @@ export const testTxData: TxData = {
   dustSize: '600',
 };
 export const testTransaction: Transaction = Transaction.fromTxData(testTxData);
+export const testMaxTxData: TxData = {
+  version: 0,
+  inputs: [testNormalInput],
+  output: testMaxOutput,
+  dustSize: '600',
+};
+export const testMaxTransaction: Transaction = Transaction.fromTxData(testMaxTxData);
 const testTooLargeInputs = [];
 for (let i = 0; i < 840; i++) {
   testTooLargeInputs.push(testNormalInput);
