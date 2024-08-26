@@ -6,6 +6,8 @@ if (process.env.NODE_ENV !== 'development') {
   global.console = {
     ...console,
     debug: jest.fn(), // Mock console.debug
+    log: jest.fn(), // Mock console.log
+    warn: jest.fn(), // Mock console.warn
   };
 }
 
