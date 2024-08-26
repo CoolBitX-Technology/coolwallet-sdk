@@ -195,11 +195,12 @@ export async function getTransferArgumentBuffer(transaction: Transaction): Promi
   hashWriter.writeUInt8(hashType, 'hasType');
   hashWriter.writeUInt16BE(change ? 104 : 52, 'outputTotalLength');
   hashTxOut(hashWriter, output);
-  hashWriter.writeUInt8(change ? 1 : 0, 'haveChange');
+  const haveChange = change ? 1 : 0;
+  hashWriter.writeUInt8(haveChange, 'haveChange');
   hashWriter.writeUInt64LE(change ? new BigNumber(change.amount) : new BigNumber(0), 'changeReverseAmount');
   hashWriter.writeUInt16BE(TransactionSigningHashKey.length, 'keyLength');
   hashWriter.write(TransactionSigningHashKey, 'hashKey');
-  if (change.addressIndex !== undefined) {
+  if (haveChange && change?.addressIndex !== undefined) {
     const sePath = await getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP32);
     hashWriter.write(Buffer.from(sePath, 'hex'), 'sePath');
   } else {
