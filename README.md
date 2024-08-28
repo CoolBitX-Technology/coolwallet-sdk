@@ -65,6 +65,7 @@ Used to sign transactions of different cryptocurrencies.
 | [`@coolwallet/eth`](/packages/coin-eth)   | ![version](https://img.shields.io/npm/v/@coolwallet/eth) | Ethereum |
 | [`@coolwallet/evm`](/packages/coin-evm)   | ![version](https://img.shields.io/npm/v/@coolwallet/evm) | Some EVM coins |
 | [`@coolwallet/icx`](/packages/coin-icx)   | ![version](https://img.shields.io/npm/v/@coolwallet/icx) | Icon |
+| [`@coolwallet/kas`](/packages/coin-kas)   | ![version](https://img.shields.io/npm/v/@coolwallet/kas) | Icon |
 | [`@coolwallet/ltc`](/packages/coin-ltc)   | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LiteCoin |
 | [`@coolwallet/sol`](/packages/coin-sol)   | ![version](https://img.shields.io/npm/v/@coolwallet/sol) | Solana |
 | [`@coolwallet/ton`](/packages/coin-ton)   | ![version](https://img.shields.io/npm/v/@coolwallet/ton) | The Open Network |
