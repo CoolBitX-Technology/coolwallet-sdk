@@ -1,7 +1,7 @@
 import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
-import DOT from '../src';
+import DOT, { COIN_SPECIES } from '../src';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
@@ -9,7 +9,7 @@ type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
 describe('Test ADA SDK', () => {
   let transport: Transport;
   let props: Mandatory;
-  const dotSDK = new DOT();
+  const dotSDK = new DOT(COIN_SPECIES.DOT);
   const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
   beforeAll(async () => {
@@ -20,25 +20,12 @@ describe('Test ADA SDK', () => {
   describe('Test Get Address', () => {
     it('index 0 address', async () => {
       const address = await dotSDK.getAddress(transport, props.appPrivateKey, props.appId, 0);
-      expect(address).toEqual(
-        'addr1qyulu6ra4ennas49mn77n4cpxcy7862sdx25f4sw8ea5yh3yu4d4xk2aku478dgmuqmuk7s0eh96h63svdtv5qhquzvqu94v7k'
-      );
+      expect(address).toMatchInlineSnapshot(`"1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a"`);
     });
   });
 
-  describe.only('Test Transfer DOT', () => {
-    async function get_signed_tx_by_coolwallet_sdk(transaction: Transaction, txType: TxTypes) {
-      const option: Options = {
-        transport,
-        appPrivateKey: props.appPrivateKey,
-        appId: props.appId,
-        confirmCB: () => {},
-        authorizedCB: () => {},
-      };
-      return await dotSDK.signTransaction(transaction, option, txType);
-    }
-
-    it('stake with address 0', async () => {
+  describe('Test Transfer DOT', () => {
+    it('transfer with address 0', async () => {
       const signData = {
         transport,
         appPrivateKey: props.appPrivateKey,
