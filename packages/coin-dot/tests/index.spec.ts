@@ -1,7 +1,7 @@
 import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
-import DOT, { Transaction, Options, TxTypes } from '../src';
+import DOT from '../src';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
@@ -26,7 +26,7 @@ describe('Test ADA SDK', () => {
     });
   });
 
-  describe('Test Stake ADA', () => {
+  describe.only('Test Transfer DOT', () => {
     async function get_signed_tx_by_coolwallet_sdk(transaction: Transaction, txType: TxTypes) {
       const option: Options = {
         transport,
@@ -39,22 +39,33 @@ describe('Test ADA SDK', () => {
     }
 
     it('stake with address 0', async () => {
-      const transaction: Transaction = {
-        addrIndexes: [0],
-        inputs: [{ txId: '32f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a31', index: 1 }],
-        ttl: '0x7c33a67',
-        change: {
-          address:
-            'addr1qydsrjhhedvcafgjc25j4vwrp9jtys6u3fk2sekjhh0kn9rd8wkhd8cw7uqxu5lh002qahuyznn24f6d9dxh2fekhepq7a6wsr',
-          amount: 49610837,
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        transaction: {
+          method: {
+            destAddress: '16kyNo43vJxqPYEX2qFLAxEQZc9HRJo3YtRvPK5Wt5CnDBFu',
+            value: '11000000000',
+          },
+          fromAddress: '13Q8aoVFiN71TfaACgE56HqpMmtUbcNEMscZyDWgDZP45dfs',
+          blockHash: '0x275b7a5c52a2fd1b9756a0176b18d2e8ead49781273ee6e8d1a26eab477cc98b',
+          blockNumber: '22299307',
+          era: '128',
+          genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
+          nonce: '36',
+          specVersion: '1002007',
+          tip: '0',
+          transactionVersion: '26',
+          version: 4,
         },
-        poolKeyHash: 'e4abcf4408584601e7c707a8902996c0c291e1a3c8300b327ae3f6ab',
-        fee: '174081',
+        confirmCB: () => {},
+        authorizedCB: () => {},
       };
-      expect(
-        await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.StakeRegisterAndDelegate)
-      ).toMatchInlineSnapshot(
-        `"83a5008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a31010181825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67048282008200581c24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e09883028200581c24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098581ce4abcf4408584601e7c707a8902996c0c291e1a3c8300b327ae3f6aba10082825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd58407651721b452fd86599c72bca6b5b04e9e8ec565a86ded61ce7b486df6577e7167aa5ecc2a192cf0dc0e24994063c62e19e751079753cd73df27f8acd45019306825820a1f4068911137da3a62b19a40f9fc860263ba575ed11ae7339904af47c5537d2584064b3a468b7d173714c1e6e7bff640d75a4f3d378a9486ce18372385673adacd365904b293508f9d67b7a4a8c5b9c233a23ef3284f201cee73732fc2d53fba10bf6"`
+
+      expect(await dotSDK.signTransaction(signData)).toMatchInlineSnapshot(
+        `"0x490284006a1ca31b3d34a0a0775edd95402442ccc9ba8037693f95ae8d0ad1fa3468585c02a539c81c65ea10712c9457f945bb796be0117b6a82259a3afbe19216f87de4514fe95cb40fb1671d20994fa5ef792299045454a833f5f524ff8731b5cd3ea5c700b602900000050000feb67f53df1c98db22174203883bf335c0f437bda989c9d1b9cb1e1557f377710700aea68f02"`
       );
     });
   });
