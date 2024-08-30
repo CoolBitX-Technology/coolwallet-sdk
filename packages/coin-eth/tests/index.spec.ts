@@ -5,9 +5,13 @@ import isEmpty from 'lodash/isEmpty';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import * as utils from 'web3-utils';
 import Wallet from './utils/wallet';
-import ETH, { TOKENTYPE } from '../src';
+import ETH, { TOKENTYPE as tokens } from '../src';
+
+
 import * as Fixtures from './fixtures/transactions';
 import { signTx } from '../src/config/types';
+
+const TOKENTYPE = tokens.slice(0, 1);
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
