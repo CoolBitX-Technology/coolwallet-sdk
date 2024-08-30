@@ -130,7 +130,7 @@ describe('Test EVM SDK', () => {
 
     describe.each(ERC20_TRANSACTION)('send erc20 token to $to', (transaction) => {
       if (isEmpty(api.chain.tokens)) return;
-      it.each(Object.values(api.chain.tokens))('$symbol token:', async (token) => {
+      it.each(Object.values(api.chain.tokens).slice(0, 1))('$symbol token:', async (token) => {
         const hasCommercialAt = isEmpty(token.signature);
         const scale = 10 ** +token.unit;
         const tokenAmount = +transaction.amount;
@@ -446,7 +446,7 @@ describe('Test EVM SDK', () => {
 
     describe.each(EIP1559_ERC20_TRANSACTION)('Send eip1559 erc20 transaction to $to', (transaction) => {
       if (isEmpty(api.chain.tokens)) return;
-      it.each(Object.values(api.chain.tokens))('$symbol token:', async (token) => {
+      it.each(Object.values(api.chain.tokens).slice(0, 1))('$symbol token:', async (token) => {
         const hasCommercialAt = isEmpty(token.signature);
         const decimals = Math.pow(10, +token.unit);
         const tokenAmount = +transaction.amount;

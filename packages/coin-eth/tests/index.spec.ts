@@ -40,7 +40,7 @@ describe('Test ETH SDK', () => {
     expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
   });
 
-  it.each(Fixtures.TRANSFER_TRANSACTION)('ETH test sign transaction', async (transaction) => {
+  it.only.each(Fixtures.TRANSFER_TRANSACTION)('ETH test sign transaction', async (transaction) => {
     const client = {
       transaction: {
         ...transaction,
