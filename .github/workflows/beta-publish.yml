@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         token: ${{ secrets.DEVOPS_CW_SDK_DEVELOPMENT_TOKEN }}
 
@@ -21,7 +21,7 @@ jobs:
         git config --global user.email 'cw.tech@coolbitx.com'
 
     - name: Use Node.js 16.x
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 16
         registry-url: 'https://registry.npmjs.org'
