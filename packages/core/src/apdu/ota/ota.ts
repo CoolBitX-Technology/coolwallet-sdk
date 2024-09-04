@@ -1,25 +1,37 @@
 import { executeCommand } from '../execute/execute';
-import Transport from '../../transport';
+import Transport, { CardType } from '../../transport';
 import { commands } from '../execute/command';
 import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
-import * as SCRIPT from '../script/otaScript';
+import * as ProScript from '../script/pro/otaScript';
+import * as LiteScript from '../script/lite/otaScript';
 import { SDKError } from '../../error/errorHandle';
 import Progress from './Progress';
 import { getAPIOption, formatAPIResponse } from './api';
 import { insertScript, insertLoadScript, insertDeleteScript } from './scripts';
 import { backupRegisterData, deleteBackupRegisterData, recoverBackupData } from './backup';
 import {
-  SE_UPDATE_VER,
   CHALLENGE_URL,
   CRYPTOGRAM_URL,
-  MAIN_AID,
+  MAIN_AID_PRO,
   BACKUP_AID,
   CARDMANAGER_AID,
   SSD_AID,
+  getNewSeVersion,
+  getMainAppletAid,
 } from './constants';
 import type { AppletStatus, APIOptions, SEUpdateInfo } from './types';
 import { common, info, mcu, setting } from '../..';
+
+const getScripts = (cardType: CardType) => {
+  if (cardType === CardType.Pro) {
+    return ProScript;
+  } else if (cardType === CardType.Lite) {
+    return LiteScript;
+  } else {
+    throw new Error(`getScripts unknown cardType: ${cardType}`);
+  }
+};
 
 const safeGetSEVersion = async (transport: Transport): Promise<number> => {
   try {
@@ -35,7 +47,10 @@ const safeGetSEVersion = async (transport: Transport): Promise<number> => {
  * @param transport
  * @param appletCommand
  */
-export const selectApplet = async (transport: Transport, appletCommand: string = MAIN_AID): Promise<AppletStatus> => {
+export const selectApplet = async (
+  transport: Transport,
+  appletCommand: string = MAIN_AID_PRO
+): Promise<AppletStatus> => {
   const { statusCode } = await executeCommand(transport, commands.SELECT_APPLET, target.SE, appletCommand);
   if (statusCode === CODE._9000) {
     return { status: true, statusCode };
@@ -44,14 +59,14 @@ export const selectApplet = async (transport: Transport, appletCommand: string =
 };
 
 export const checkUpdate = async (transport: Transport): Promise<SEUpdateInfo> => {
+  const newSeVersion = getNewSeVersion(transport.cardType);
   const cardSEVersion = await safeGetSEVersion(transport);
-  const isNeedUpdate = SE_UPDATE_VER > cardSEVersion;
-  return { isNeedUpdate, curVersion: cardSEVersion, newVersion: SE_UPDATE_VER };
+  return { isNeedUpdate: newSeVersion > cardSEVersion, curVersion: cardSEVersion, newVersion: newSeVersion };
 };
 
 const safeCheckMainAppletExists = async (transport: Transport): Promise<boolean> => {
   try {
-    return !!(await selectApplet(transport, MAIN_AID));
+    return !!(await selectApplet(transport, getMainAppletAid(transport.cardType)));
   } catch (e) {
     console.error(e);
     return false;
@@ -66,7 +81,7 @@ const getProgressNums = (updateMCU: boolean): Array<number> => {
 const performBackupRegisterData = async (transport: Transport, appId: string, appPrivateKey: string): Promise<void> => {
   const cardSEVersion = await safeGetSEVersion(transport);
   const hasBackupScriptSEVersion = 76;
-  if (cardSEVersion < hasBackupScriptSEVersion) return; // SEVersion lower than 76 cannot do backup.
+  if (transport.cardType === CardType.Pro && cardSEVersion < hasBackupScriptSEVersion) return; // SEVersion lower than 76 cannot do backup.
 
   const isAppletExist = await safeCheckMainAppletExists(transport);
   if (!isAppletExist) return; // no need to do backup because no main applet.
@@ -130,7 +145,7 @@ export const updateSE = async (
   const progress = new Progress(getProgressNums(updateMCU));
 
   try {
-    await mcu.display.showUpdate(transport);
+    if (transport.cardType === CardType.Pro) await mcu.display.showUpdate(transport);
 
     progressCallback(progress.current()); // progress 14
     await performBackupRegisterData(transport, appId, appPrivateKey);
@@ -146,26 +161,32 @@ export const updateSE = async (
     await performApiChallenge(transport, cardId, callAPI);
 
     progressCallback(progress.next()); // progress 44
-    await insertDeleteScript(transport, SCRIPT.deleteScript);
+    await insertDeleteScript(transport, getScripts(transport.cardType).deleteScript);
     console.debug('Delete Card Manager Done');
 
     progressCallback(progress.next()); // progress 50
-    await insertLoadScript(transport, SCRIPT.loadScript, progressCallback, progress.current(), progress.next()); // From progress 50 to progress 88
+    await insertLoadScript(
+      transport,
+      getScripts(transport.cardType).loadScript,
+      progressCallback,
+      progress.current(),
+      progress.next()
+    ); // From progress 50 to progress 88
     console.debug('Load OTA Script Done');
 
-    await insertScript(transport, SCRIPT.installScript);
+    await insertScript(transport, getScripts(transport.cardType).installScript);
     console.debug('Insert Install Script Done');
 
-    await mcu.display.hideUpdate(transport); // Hide update from the card
+    if (transport.cardType === CardType.Pro) await mcu.display.hideUpdate(transport); // Hide update from the card
     await selectApplet(transport, CARDMANAGER_AID);
     await performRecoverBackupData(transport);
 
     progressCallback(progress.next()); // progress 100
     console.debug('Install OTA Script (SE Update) Done');
-    return SE_UPDATE_VER;
+    return getNewSeVersion(transport.cardType);
   } catch (e) {
     try {
-      await mcu.display.hideUpdate(transport);
+      if (transport.cardType === CardType.Pro) await mcu.display.hideUpdate(transport);
     } catch (ex) {
       console.error(`APDU.Other.finishUpdate Failed ${e}`);
     }
