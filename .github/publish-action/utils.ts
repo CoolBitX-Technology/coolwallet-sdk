@@ -36,22 +36,48 @@ export async function isLocalUpgraded(path: string) {
 }
 
 export async function buildAndPublish(path: string) {
+  console.log(`aaaaaaaaa15`)
+
   const { name, version } = getPackageInfo(path);
+  console.log(`aaaaaaaaa16`)
+
   try {
     const preRelease = semver.prerelease(version);
+    console.log(`aaaaaaaaa17`)
+
     const isBeta = betaList.includes('' + preRelease?.[0]);
+    console.log(`aaaaaaaaa18`)
+
     const installLogs = await command('npm', ['ci'], path);
+    console.log(`aaaaaaaaa19`)
+
     console.log('npm ci :', installLogs);
     const buildLogs = await command('npm', ['run', 'build'], path);
+    console.log(`aaaaaaaaa20`)
+
     console.log('npm run build :', buildLogs);
     let publishArgs = ['publish', '--access', 'public'];
+    console.log(`aaaaaaaaa21`)
+
     if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
+    console.log(`aaaaaaaaa22`)
+
     const result = await command('npm', publishArgs, path);
+    console.log(`aaaaaaaaa23`)
+
     console.log('npm publish :', result);
     await pushTag(`${name}@${version}`);
+    console.log(`aaaaaaaaa24`)
+
   } catch (e) {
+    console.log(`aaaaaaaaa25 e=${e}`)
+
     const error = e as Error;
+    console.log(`aaaaaaaaa26`)
+
     core.error(`Cannot publish package ${name}, reason: ${error.message}`)
+    console.log(`aaaaaaaaa27`)
+
   }
 }
 
