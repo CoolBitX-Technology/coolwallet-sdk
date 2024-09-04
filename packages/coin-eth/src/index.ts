@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, setting, Transport, info } from '@coolwallet/core';
+import { coin as COIN, setting, Transport, info, CardType } from '@coolwallet/core';
 import web3 from 'web3';
 import * as ethSign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
@@ -192,7 +192,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async signMessage(signMsgData: types.signMsg): Promise<string> {
-    await setting.auth.versionCheck(signMsgData.transport, 81);
+    if (signMsgData.transport.cardType === CardType.Pro) await setting.auth.versionCheck(signMsgData.transport, 81);
 
     const { transport, appPrivateKey, appId, addressIndex, message } = signMsgData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
@@ -203,7 +203,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async signTypedData(typedData: types.signTyped): Promise<string> {
-    await setting.auth.versionCheck(typedData.transport, 84);
+    if (typedData.transport.cardType === CardType.Pro) await setting.auth.versionCheck(typedData.transport, 84);
 
     const { transport, appPrivateKey, appId, addressIndex } = typedData;
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
