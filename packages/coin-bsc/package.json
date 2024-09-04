@@ -1,12 +1,13 @@
 {
   "name": "@coolwallet/bsc",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "Coolwallet BSC sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
   "license": "Apache-2.0",
   "scripts": {
     "test": "NODE_ENV=development jest --runInBand",
+    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
