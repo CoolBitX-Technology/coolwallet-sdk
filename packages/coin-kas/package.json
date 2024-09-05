@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/kas",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Coolwallet Kaspa sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -24,14 +24,14 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.28-beta.2"
+    "@coolwallet/core": "^1.1.29"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.28-beta.2"
+    "@coolwallet/core": "^1.1.29"
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
