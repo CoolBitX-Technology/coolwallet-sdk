@@ -17,7 +17,7 @@ import { getSigningActions, getSigningPreActions } from './utils/scriptUtil';
 export default async function signTransferTransaction(signTxData: SignTxType): Promise<string> {
   const { transport, appId, appPrivateKey, inputs, output, change, version = 0, confirmCB, authorizedCB } = signTxData;
   validateInputs(inputs);
-  validateOutput(output);
+  validateOutput(output, !!change);
   validateAmountCanDisplayOnProCard(output.value, 8);
   validateDustThreshold(output.value);
   if (change) validateChange(change);

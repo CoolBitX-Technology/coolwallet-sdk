@@ -47,9 +47,18 @@ export function validChecksum(prefix: string, payload: Uint8Array): boolean {
   return polymod(data) === 0;
 }
 
+function validateAmountIsGreaterThan(
+  value: string | number,
+  checkValue: string | number,
+  funcName: string,
+  errorMessage: string
+): void {
+  const isValid = new BigNumber(value).isGreaterThan(checkValue);
+  validate(isValid, funcName, errorMessage);
+}
+
 function validateAmountIsPostive(value: string | number, funcName: string, errorMessage: string): void {
-  const isPositive = new BigNumber(value).isGreaterThan(0);
-  validate(isPositive, funcName, errorMessage);
+  validateAmountIsGreaterThan(value, 0, funcName, errorMessage);
 }
 
 function isValidAddress(address: string): boolean {
@@ -85,16 +94,14 @@ export function validateInputs(inputs: Input[]): void {
   });
 }
 
-export function validateOutput(output: Output): void {
-  validate(
-    isValidAddress(output.address),
-    validateOutput.name,
-    `validate: invalid output address: ${output.address}`
-  );
-  validateAmountIsPostive(
+export function validateOutput(output: Output, haveChange: boolean): void {
+  validate(isValidAddress(output.address), validateOutput.name, `validate: invalid output address: ${output.address}`);
+  const checkValue = haveChange ? 19999999 : 0; 
+  validateAmountIsGreaterThan(
     output.value,
+    checkValue,
     validateOutput.name,
-    `validate: invalid output value: ${output.value} should be positive value`
+    `validate: invalid output value: ${output.value} should be greater than ${checkValue}`
   );
 }
 
