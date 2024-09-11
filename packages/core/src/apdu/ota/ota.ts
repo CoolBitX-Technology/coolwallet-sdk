@@ -21,6 +21,15 @@ import {
 import type { AppletStatus, APIOptions, SEUpdateInfo } from './types';
 import { common, info, mcu, setting } from '../..';
 
+const safeGetSEVersion = async (transport: Transport): Promise<number> => {
+  try {
+    return await info.getSEVersion(transport);
+  } catch (e) {
+    console.error(e);
+    return 0;
+  }
+};
+
 /**
  *
  * @param transport
@@ -35,14 +44,68 @@ export const selectApplet = async (transport: Transport, appletCommand: string =
 };
 
 export const checkUpdate = async (transport: Transport): Promise<SEUpdateInfo> => {
-  let cardSEVersion;
-  try {
-    cardSEVersion = await info.getSEVersion(transport);
-  } catch (error) {
-    cardSEVersion = 0;
-  }
+  const cardSEVersion = await safeGetSEVersion(transport);
   const isNeedUpdate = SE_UPDATE_VER > cardSEVersion;
   return { isNeedUpdate, curVersion: cardSEVersion, newVersion: SE_UPDATE_VER };
+};
+
+const safeCheckMainAppletExists = async (transport: Transport): Promise<boolean> => {
+  try {
+    return !!(await selectApplet(transport, MAIN_AID));
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+};
+
+const getProgressNums = (updateMCU: boolean): Array<number> => {
+  const progressNum = [14, 28, 36, 44, 50, 88, 100];
+  return updateMCU ? progressNum.map((num) => Math.floor(num / 2)) : progressNum;
+};
+
+const performBackupRegisterData = async (transport: Transport, appId: string, appPrivateKey: string): Promise<void> => {
+  const cardSEVersion = await safeGetSEVersion(transport);
+  const hasBackupScriptSEVersion = 76;
+  if (cardSEVersion < hasBackupScriptSEVersion) return; // SEVersion lower than 76 cannot do backup.
+
+  const isAppletExist = await safeCheckMainAppletExists(transport);
+  if (!isAppletExist) return; // no need to do backup because no main applet.
+
+  const isCardRecognized = await common.hi(transport, appId);
+  if (!isCardRecognized) return; // don't do backup becuase card cannot recognize device(appId).
+
+  const { walletCreated } = await info.getCardInfo(transport);
+  console.debug(`isCardRecognized: ${isCardRecognized}, walletStatus: ${walletCreated}`);
+
+  await deleteBackupRegisterData(transport, appId, appPrivateKey);
+  if (walletCreated) await backupRegisterData(transport, appId, appPrivateKey);
+};
+
+const performRecoverBackupData = async (transport: Transport): Promise<void> => {
+  const isAppletExist = await safeCheckMainAppletExists(transport);
+  if (!isAppletExist) return; // no need to recover because no main applet.
+
+  console.debug('Start checking recovery');
+  const isNeedRecover = await setting.backup.checkBackupStatus(transport);
+
+  console.debug(`isNeedRecover: ${isNeedRecover}`);
+  if (isNeedRecover === true) await recoverBackupData(transport);
+};
+
+const performApiChallenge = async (
+  transport: Transport,
+  cardId: string,
+  callAPI: (url: string, options: APIOptions) => Promise<Response>
+): Promise<void> => {
+  console.debug('mutual Authorization Start----');
+  const options = await getAPIOption(cardId);
+  const challengeResponse = await callAPI(CHALLENGE_URL, options);
+  console.debug('cardID: ', cardId);
+  const challengeObj = await formatAPIResponse(transport, challengeResponse);
+  const challengeOptions = await getAPIOption(cardId, challengeObj.outputData);
+  const cryptogramResponse = await callAPI(CRYPTOGRAM_URL, challengeOptions);
+  await formatAPIResponse(transport, cryptogramResponse);
+  console.debug('mutual Authorization Done----');
 };
 
 /**
@@ -61,103 +124,44 @@ export const updateSE = async (
   appId: string,
   appPrivateKey: string,
   progressCallback: (progress: number) => void,
-  callAPI: (url: string, options: APIOptions) => Promise<any>,
+  callAPI: (url: string, options: APIOptions) => Promise<Response>,
   updateMCU = false
 ): Promise<number> => {
-  // BackupApplet
-  let cardSEVersion;
-  try {
-    cardSEVersion = await info.getSEVersion(transport);
-  } catch (e) {
-    console.error(e);
-    cardSEVersion = 0;
-  }
-  let progressNum = [14, 28, 36, 44, 50, 88, 100];
+  const progress = new Progress(getProgressNums(updateMCU));
 
-  if (updateMCU) {
-    progressNum = progressNum.map((num) => Math.floor(num / 2));
-  }
-  const progress = new Progress(progressNum);
   try {
     await mcu.display.showUpdate(transport);
 
     progressCallback(progress.current()); // progress 14
-
-    const hasBackupScriptSEVersion = 76;
-    let isAppletExist;
-    try {
-      isAppletExist = await selectApplet(transport);
-    } catch (e) {
-      console.error(e);
-      isAppletExist = false;
-    }
-
-    if (isAppletExist) {
-      if (cardSEVersion >= hasBackupScriptSEVersion) {
-        const isCardRecognized = await common.hi(transport, appId);
-
-        const { walletCreated } = await info.getCardInfo(transport);
-        console.debug(`isCardRecognized: ${isCardRecognized}, walletStatus: ${walletCreated}`);
-
-        if (isCardRecognized) {
-          await deleteBackupRegisterData(transport, appId, appPrivateKey);
-          if (walletCreated) {
-            await backupRegisterData(transport, appId, appPrivateKey);
-          }
-        }
-      }
-    }
-
+    await performBackupRegisterData(transport, appId, appPrivateKey);
     await selectApplet(transport, CARDMANAGER_AID);
-    const { statusCode } = await selectApplet(transport, BACKUP_AID);
-    progressCallback(progress.next()); // progress 28
-    console.debug(`selectBackUpSeedApplet statusCode: ${statusCode}`);
+    await selectApplet(transport, BACKUP_AID);
 
     // get ssd applet and authorize
+    progressCallback(progress.next()); // progress 28
     await selectApplet(transport, CARDMANAGER_AID);
     await selectApplet(transport, SSD_AID);
+
     progressCallback(progress.next()); // progress 36
+    await performApiChallenge(transport, cardId, callAPI);
 
-    console.debug('mutual Authorization Start----');
-    const options = await getAPIOption(cardId);
-    const challengeResponse = await callAPI(CHALLENGE_URL, options);
-    console.debug('cardID: ', cardId);
-    const challengeObj = await formatAPIResponse(transport, challengeResponse);
-    const challengeOptions = await getAPIOption(cardId, challengeObj.outputData);
-    const cryptogramResponse = await callAPI(CRYPTOGRAM_URL, challengeOptions);
-    await formatAPIResponse(transport, cryptogramResponse);
-    console.debug('mutual Authorization Done----');
-
-    progressCallback(progress.next()); // progress 4
+    progressCallback(progress.next()); // progress 44
     await insertDeleteScript(transport, SCRIPT.deleteScript);
     console.debug('Delete Card Manager Done');
 
     progressCallback(progress.next()); // progress 50
-    // From progress 50 to progress 88
-    await insertLoadScript(transport, SCRIPT.loadScript, progressCallback, progress.current(), progress.next());
+    await insertLoadScript(transport, SCRIPT.loadScript, progressCallback, progress.current(), progress.next()); // From progress 50 to progress 88
     console.debug('Load OTA Script Done');
 
     await insertScript(transport, SCRIPT.installScript);
+    console.debug('Insert Install Script Done');
 
     await mcu.display.hideUpdate(transport); // Hide update from the card
-
     await selectApplet(transport, CARDMANAGER_AID);
-    isAppletExist = await selectApplet(transport);
-    console.debug(`isAppletExist: ${isAppletExist}`);
-
-    if (isAppletExist) {
-      // start recover backupData
-      console.debug('Start checking recovery');
-      const isNeedRecover = await setting.backup.checkBackupStatus(transport);
-      console.debug(`isNeedRecover: ${isNeedRecover}`);
-      if (isNeedRecover === true) {
-        await recoverBackupData(transport);
-      }
-    }
+    await performRecoverBackupData(transport);
 
     progressCallback(progress.next()); // progress 100
     console.debug('Install OTA Script (SE Update) Done');
-
     return SE_UPDATE_VER;
   } catch (e) {
     try {
