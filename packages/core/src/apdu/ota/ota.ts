@@ -14,7 +14,6 @@ import {
   CHALLENGE_URL,
   CRYPTOGRAM_URL,
   MAIN_AID_PRO,
-  BACKUP_AID,
   CARDMANAGER_AID,
   SSD_AID,
   getNewSeVersion,
@@ -142,6 +141,7 @@ export const updateSE = async (
   callAPI: (url: string, options: APIOptions) => Promise<Response>,
   updateMCU = false
 ): Promise<number> => {
+  const SCRIPT = getScripts(transport.cardType);
   const progress = new Progress(getProgressNums(updateMCU));
 
   try {
@@ -149,32 +149,23 @@ export const updateSE = async (
 
     progressCallback(progress.current()); // progress 14
     await performBackupRegisterData(transport, appId, appPrivateKey);
-    await selectApplet(transport, CARDMANAGER_AID);
-    await selectApplet(transport, BACKUP_AID);
 
     // get ssd applet and authorize
     progressCallback(progress.next()); // progress 28
-    await selectApplet(transport, CARDMANAGER_AID);
     await selectApplet(transport, SSD_AID);
 
     progressCallback(progress.next()); // progress 36
     await performApiChallenge(transport, cardId, callAPI);
 
     progressCallback(progress.next()); // progress 44
-    await insertDeleteScript(transport, getScripts(transport.cardType).deleteScript);
+    await insertDeleteScript(transport, SCRIPT.deleteScript);
     console.debug('Delete Card Manager Done');
 
     progressCallback(progress.next()); // progress 50
-    await insertLoadScript(
-      transport,
-      getScripts(transport.cardType).loadScript,
-      progressCallback,
-      progress.current(),
-      progress.next()
-    ); // From progress 50 to progress 88
+    await insertLoadScript(transport, SCRIPT.loadScript, progressCallback, progress.current(), progress.next()); // From progress 50 to progress 88
     console.debug('Load OTA Script Done');
 
-    await insertScript(transport, getScripts(transport.cardType).installScript);
+    await insertScript(transport, SCRIPT.installScript);
     console.debug('Insert Install Script Done');
 
     if (transport.cardType === CardType.Pro) await mcu.display.hideUpdate(transport); // Hide update from the card
