@@ -79,6 +79,7 @@ export function decodeAddress(address: string) {
 
   const convertedBits = convert(payload.slice(0, -8), 5, 8, true);
   const versionByte = convertedBits[0];
+
   const hashOrPublicKey = convertedBits.slice(1);
   const bitLength = getBitLength(hashOrPublicKey);
 
@@ -90,8 +91,15 @@ export function decodeAddress(address: string) {
 
   const type = getType(versionByte);
 
+  const hashOrPublicKeyBuffer = Buffer.from(hashOrPublicKey);
+  validate(
+    getAddressByPublicKey(hashOrPublicKeyBuffer.toString('hex')) === address,
+    decodeAddress.name,
+    'Wrong public key from address: ' + address
+  );
+
   return {
-    payload: Buffer.from(hashOrPublicKey),
+    payload: hashOrPublicKeyBuffer,
     prefix,
     type,
   };

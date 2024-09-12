@@ -1,4 +1,4 @@
-import { addressToOutScript, getAddressByPublicKey, pubkeyToPayment } from '../address';
+import { addressToOutScript, decodeAddress, getAddressByPublicKey, pubkeyToPayment } from '../address';
 
 describe('Test address.ts', () => {
   it('Test getAddressByPublicKey', async () => {
@@ -101,5 +101,17 @@ describe('Test address.ts', () => {
         },
       }
     `);
+  });
+
+  it('Test decodeAddress throws error if address is different between decodeAddress and getAddressByPublicKey', () => {
+    try {
+      const address = 'kaspa:qyp2d6tctf8wkahskz4hv3xpe3llknrc3jl66798elnjvr2gewzrdggx6fnfh3y';
+      decodeAddress(address);
+      fail('Expected error to be thrown');
+    } catch (error) {
+      expect(error).toMatchInlineSnapshot(
+        `[Error: error function: decodeAddress, message: Wrong public key from address: kaspa:qyp2d6tctf8wkahskz4hv3xpe3llknrc3jl66798elnjvr2gewzrdggx6fnfh3y]`
+      );
+    }
   });
 });
