@@ -5,12 +5,23 @@ import { CMD_LEN, PID } from './configs/commands';
 import NfcManager from 'react-native-nfc-manager';
 import { CardType } from '@coolwallet/core/lib/transport';
 
+type ErrorCallback = (error: Error) => void;
+
 class NFCTransport implements Transport {
   cardType: CardType;
+  errorCallbacks: Map<string, ErrorCallback> = new Map();
 
   constructor(cardType = CardType.Lite) {
     this.cardType = cardType;
   }
+
+  addErrorListener = (key: string, callback: ErrorCallback) => {
+    this.errorCallbacks.set(key, callback);
+  };
+
+  removeErrorListener = (key: string) => {
+    this.errorCallbacks.delete(key);
+  };
 
   request = async (command: string, packets: string): Promise<string> => {
     if (!command.startsWith(PID + CMD_LEN)) {
@@ -37,7 +48,13 @@ class NFCTransport implements Transport {
       return numberArrayToHexString(response);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
-      throw new TransportError(this.request.name, errorMessage);
+      const transportError = new TransportError(this.request.name, errorMessage);
+
+      for (const callback of this.errorCallbacks.values()) {
+        callback(transportError);
+      }
+
+      throw transportError;
     }
   };
 }
