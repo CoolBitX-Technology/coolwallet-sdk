@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { inspect } from 'node:util';
 import * as bip39 from 'bip39';
 import base58 from 'bs58';
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolwallet/testing-library';
 import { Keypair, Transaction, SystemProgram, PublicKey, StakeProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
@@ -35,13 +35,23 @@ describe('Test Solana SDK', () => {
 
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   let walletAddress = '';
 
   const wallet = new HDWallet(CURVE.ED25519);
   const bip32Path = (addressIndex: number) => `m/44'/501'/${addressIndex}'/0'`;
 
   beforeAll(async () => {
-    transport = (await createTransport())!;
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
     const address = await sol.getAddress(transport, props.appPrivateKey, props.appId, 0);
     walletAddress = address;

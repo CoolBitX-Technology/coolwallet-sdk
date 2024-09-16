@@ -21,7 +21,11 @@ describe('Test TRX SDK', () => {
       cardType = CardType.Pro;
     }
 
-    transport = (await createTransport(undefined, cardType))!;
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
   });
 

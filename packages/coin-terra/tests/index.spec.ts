@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import Terra, { DENOMTYPE, DENOMTYPE_CLASSIC, TOKENTYPE, CHAIN_ID, SignDataType } from '../src';
@@ -36,6 +36,7 @@ describe('Test Terra SDK', () => {
 
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   let walletAddress = '';
 
   const chain = CHAIN_ID.MAIN;
@@ -49,7 +50,16 @@ describe('Test Terra SDK', () => {
   const wallet = mainnet.wallet(mk);
 
   beforeAll(async () => {
-    transport = (await createTransport())!;
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
     const address = await coinTerra.getAddress(transport, props.appPrivateKey, props.appId, 0);
     walletAddress = address;

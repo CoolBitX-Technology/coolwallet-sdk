@@ -1,4 +1,4 @@
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolwallet/testing-library';
 import * as bip39 from 'bip39';
@@ -31,6 +31,7 @@ describe('Test IOTX SDK', () => {
 
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   let walletAddress = '';
   const options: Options = {
     confirmCB: undefined,
@@ -42,7 +43,16 @@ describe('Test IOTX SDK', () => {
   const addressIndex = getRandInt(10);
 
   beforeAll(async () => {
-    transport = (await createTransport())!;
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
     options.transport = transport;
     options.appPrivateKey = props.appPrivateKey;
@@ -160,7 +170,7 @@ describe('Test IOTX SDK', () => {
       recipient: getRandWallet(),
       tokenDecimals: 18,
       tokenSymbol: getRandTokenName(getRandInt(2) + 3),
-      tokenAddress: getRandWallet()
+      tokenAddress: getRandWallet(),
     };
     const signedTx = await iotx.signXRC20Token(transaction, options);
     const envelop = new Envelop(
@@ -169,9 +179,9 @@ describe('Test IOTX SDK', () => {
       transaction.gasLimit.toString(),
       transaction.gasPrice.toString()
     );
-    transaction.data = utils.encodeXRC20TokenInfo(transaction.recipient, transaction.amount);//.toString('hex');
+    transaction.data = utils.encodeXRC20TokenInfo(transaction.recipient, transaction.amount); //.toString('hex');
     envelop.execution = {
-      amount: '0',//transaction.amount.toString(),
+      amount: '0', //transaction.amount.toString(),
       contract: transaction.tokenAddress,
       data: transaction.data,
     };
@@ -188,7 +198,7 @@ describe('Test IOTX SDK', () => {
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
       .messagePage('IOTX')
-      .messagePage('@'+transaction.tokenSymbol)
+      .messagePage('@' + transaction.tokenSymbol)
       .addressPage(transaction.recipient.toLowerCase())
       .amountPage(+rawAmount)
       .wrapPage('PRESS', 'BUTToN')
@@ -349,7 +359,7 @@ describe('Test IOTX SDK', () => {
       payload: Buffer.from(transaction.payload, 'hex'),
     };
     const res = SealedEnvelop.sign(antenaAcc.privateKey, antenaAcc.publicKey, envelop);
-    
+
     try {
       expect(signedTx).toEqual(Buffer.from(res.bytestream()).toString('hex'));
     } catch (e) {

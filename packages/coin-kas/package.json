@@ -5,7 +5,9 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "NODE_ENV=development jest --runInBand",
+    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
@@ -23,18 +25,15 @@
   ],
   "author": "coolwallet-team",
   "license": "ISC",
-  "peerDependencies": {
-    "@coolwallet/core": "^1.1.29"
-  },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.29"
+    "@babel/preset-typescript": "^7.7.7"
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
+    "@coolwallet/core": "^2.0.0-beta.18",
     "@types/bn.js": "^5.1.1",
     "bitcoinjs-lib": "^6.1.5",
     "bn.js": "^5.2.1",
