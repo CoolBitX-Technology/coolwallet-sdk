@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, setting, Transport } from '@coolwallet/core';
+import { CardType, coin as COIN, setting, Transport } from '@coolwallet/core';
 import * as sign from './sign';
 import { pubKeyToAddress } from './utils/ethUtils';
 import * as types from './config/types';
@@ -166,7 +166,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
    * @return {Promise<String>}
    */
   async signMessage(signMsgData: types.signMsg): Promise<string> {
-    await setting.auth.versionCheck(signMsgData.transport, 81);
+    if (signMsgData.transport.cardType === CardType.Pro) await setting.auth.versionCheck(signMsgData.transport, 81);
 
     const publicKey = await this.getPublicKey(
       signMsgData.transport,
@@ -189,7 +189,7 @@ export default class BSC extends COIN.ECDSACoin implements COIN.Coin {
    * @param {Function} authorizedCB
    */
   async signTypedData(typedData: types.signTyped) {
-    await setting.auth.versionCheck(typedData.transport, 84);
+    if (typedData.transport.cardType === CardType.Pro) await setting.auth.versionCheck(typedData.transport, 84);
     const publicKey = await this.getPublicKey(
       typedData.transport,
       typedData.appPrivateKey,

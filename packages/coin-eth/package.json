@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/eth",
-  "version": "1.1.21",
+  "version": "2.0.0-beta.3",
   "description": "Coolwallet Ethereum sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -13,10 +13,8 @@
     "ci-test": "NODE_ENV=production jest --runInBand",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
-  "peerDependencies": {
-    "@coolwallet/core": "^1.1.16"
-  },
   "dependencies": {
+    "@coolwallet/core": "^2.0.0-beta.14",
     "elliptic": "^6.5.1",
     "eth-sig-util": "^2.5.3",
     "keccak": "^3.0.2",
@@ -31,7 +29,6 @@
     "@babel/plugin-transform-runtime": "^7.16.5",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.16",
     "@metamask/eth-sig-util": "^5.1.0",
     "@types/elliptic": "^6.4.14",
     "@types/eth-sig-util": "^2.1.1",

@@ -2,51 +2,23 @@
 // Sending the data sequentially is more preferred than sending the data parallel.
 
 /* eslint-disable no-await-in-loop */
-import { executeCommand } from '../execute/execute';
-import Transport from '../../transport';
-import { commands } from '../execute/command';
-import { target } from '../../config/param';
-import { SDKError } from '../../error/errorHandle';
-import { program_A as ProgramA } from '../script/dfuScript/program_A';
-import { program_B as ProgramB } from '../script/dfuScript/program_B';
-import { sig_A as SigA } from '../script/dfuScript/sig_A';
-import { sig_B as SigB } from '../script/dfuScript/sig_B';
+import Transport from '../transport';
+import { target } from '../config/param';
+import { SDKError } from '../error/errorHandle';
 import { assemblyDFUcommand } from './utils';
-
-import type { MCUInfo, MCUVersion, UpdateInfo } from './types';
+import type { UpdateInfo } from './types';
+import { executeCommand } from '../apdu/execute/execute';
+import { commands } from '../apdu/execute/command';
+import { program_A as ProgramA } from '../apdu/script/dfuScript/program_A';
+import { program_B as ProgramB } from '../apdu/script/dfuScript/program_B';
+import { sig_A as SigA } from '../apdu/script/dfuScript/sig_A';
+import { sig_B as SigB } from '../apdu/script/dfuScript/sig_B';
+import { info } from '..';
 
 const MCU_UPDATE_VER = '150B0909';
 
-const getMCUVersion = async (transport: Transport): Promise<MCUVersion> => {
-  // Data[0..2]: Command echo
-  // Data[3..4]: Block Mark
-  // Data[5]: Year
-  // Data[6]: Month
-  // Data[7]: Day
-  // Data[8]: Hour
-  // Data[9]: Data[0..9] XOR
-  const { outputData } = await executeCommand(transport, commands.GET_MCU_VERSION, target.MCU);
-  const blockMark = outputData.slice(6, 10); // 3900
-  const cardMCUVersion = outputData.slice(10, 18).toUpperCase();
-  return { fwStatus: blockMark, cardMCUVersion };
-};
-
-const getMCUInfo = async (transport: Transport): Promise<MCUInfo> => {
-  // HW_Version[9]
-  // FW_Version[17]
-  // Device_ID_Length[20](Not fixed, ex. CoolWallet CWP000000)
-  // HW Status[3]
-  // Mode[1]
-  // Battery[1]
-  const { outputData } = await executeCommand(transport, commands.GET_MCU_INFO, target.MCU);
-  const hardwareVersion = Buffer.from(outputData.slice(0, 18), 'hex').toString('ascii');
-  const firmwareVersion = Buffer.from(outputData.slice(18, 52), 'hex').toString('ascii');
-  const battery = parseInt(outputData.slice(-2), 16).toString() + '%';
-  return { hardwareVersion, firmwareVersion, battery };
-};
-
-const checkUpdate = async (transport: Transport): Promise<UpdateInfo> => {
-  const { cardMCUVersion } = await getMCUVersion(transport);
+export const checkUpdate = async (transport: Transport): Promise<UpdateInfo> => {
+  const { cardMCUVersion } = await info.getMCUVersion(transport);
   const isNeedUpdate = parseInt(MCU_UPDATE_VER, 16) > parseInt(cardMCUVersion, 16);
   return {
     isNeedUpdate,
@@ -55,15 +27,15 @@ const checkUpdate = async (transport: Transport): Promise<UpdateInfo> => {
   };
 };
 
-const sendFWsign = async (transport: Transport, data: string): Promise<void> => {
+export const sendFWsign = async (transport: Transport, data: string): Promise<void> => {
   await executeCommand(transport, commands.SEND_FW_SIGN, target.MCU, data);
 };
 
-const resetFW = async (transport: Transport): Promise<void> => {
+export const resetFW = async (transport: Transport): Promise<void> => {
   await executeCommand(transport, commands.FW_RESET, target.MCU);
 };
 
-const updateFW = async (
+export const updateFW = async (
   transport: Transport,
   P1: string,
   P2: string,
@@ -72,7 +44,7 @@ const updateFW = async (
   return executeCommand(transport, commands.FW_UPDATE, target.MCU, data, P1, P2);
 };
 
-const executeDFU = async (
+export const executeDFU = async (
   transport: Transport,
   DFUCmd: {
     apduCmd: { p1: string; p2: string; packets: string }[];
@@ -108,7 +80,7 @@ const executeDFU = async (
   return mcuLatestVersion;
 };
 
-const updateMCU = async (
+export const updateMCU = async (
   transport: Transport,
   progressCallback: (progress: number) => void,
   updateSE = false
@@ -117,7 +89,7 @@ const updateMCU = async (
   let program;
   try {
     /* pre-update */
-    const MCUVersion = await getMCUVersion(transport);
+    const MCUVersion = await info.getMCUVersion(transport);
 
     if (MCUVersion.fwStatus === '3900') {
       sig = SigA;
@@ -143,5 +115,3 @@ const updateMCU = async (
     throw new SDKError(updateMCU.name, `${e} MCU Update Failed, 00000, MCUUpdate`);
   }
 };
-
-export { getMCUVersion, getMCUInfo, checkUpdate, sendFWsign, resetFW, updateFW, updateMCU, executeDFU };

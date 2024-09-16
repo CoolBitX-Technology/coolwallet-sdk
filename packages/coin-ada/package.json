@@ -14,13 +14,11 @@
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "dependencies": {
+    "@coolwallet/core": "^2.0.0-beta.14",
     "@ethersproject/bignumber": "^5.5.0",
     "bech32": "^2.0.0",
     "bip32-ed25519": "^0.0.4",
     "blake2b": "^2.1.3"
-  },
-  "peerDependencies": {
-    "@coolwallet/core": "^1.1.26"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",

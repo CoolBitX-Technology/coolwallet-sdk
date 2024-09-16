@@ -1,74 +1,30 @@
-import set from 'lodash/set';
-import isNil from 'lodash/isNil';
-import { executeCommand } from './execute/execute';
+import { APDUError } from '../error/errorHandle';
+import { commands } from '../apdu/execute/command';
 import Transport from '../transport';
-import { commands } from './execute/command';
+import { executeCommand } from '../apdu/execute/execute';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
-import { APDUError, SDKError } from '../error/errorHandle';
-import { getCommandSignature } from '../setting/auth';
+import { getCommandSignature } from './auth';
+import { getCardInfo } from '../info';
+import { error } from '..';
+import { auth } from '.';
 
 /**
- * Get basic card information
+ * Reset CoolWallet (clear all data)
  * @param {Transport} transport
+ * @return {Promise<boolean>}
  */
-export const getCardInfo = async (
-  transport: Transport
-): Promise<{
-  paired: boolean;
-  locked: boolean;
-  walletCreated: boolean;
-  showDetail: boolean;
-  pairRemainTimes: number;
-  accountDigest: string;
-  accountDigest20?: string;
-  cardanoSeed?: string;
-}> => {
-  try {
-    const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_CARD_INFO, target.SE);
-    const databuf = Buffer.from(outputData, 'hex');
-    const pairStatus = databuf.slice(0, 1).toString('hex');
-    const lockedStatus = databuf.slice(1, 2).toString('hex');
-    const pairRemainTimes = parseInt(databuf.slice(2, 3).toString('hex'), 16);
-    const walletStatus = databuf.slice(3, 4).toString('hex');
-    const accountDigest = databuf.slice(4, 9).toString('hex');
-    const displayType = databuf.slice(9, 10).toString('hex');
-    let bipEd25519IsInit;
-    if (databuf.length >= 11) {
-      bipEd25519IsInit = databuf.slice(10, 11).toString('hex');
-    }
-    let accountDigest20;
-    if (databuf.length > 11) {
-      accountDigest20 = databuf.slice(11, 31).toString('hex');
-    }
-
-    if (accountDigest === '81c69f2d90' || accountDigest === '3d84ba58bf' || accountDigest === '83ccf4aab1') {
-      throw new APDUError(commands.GET_CARD_INFO, statusCode, msg);
-    }
-
-    const paired = pairStatus === '01';
-    const locked = lockedStatus === '01';
-    const walletCreated = walletStatus === '01';
-    const showDetail = displayType === '00';
-    const result = {
-      paired,
-      locked,
-      walletCreated,
-      showDetail,
-      pairRemainTimes,
-      accountDigest,
-    };
-    if (!isNil(bipEd25519IsInit)) set(result, 'cardanoSeed', bipEd25519IsInit === '01');
-    if (!isNil(accountDigest20)) set(result, 'accountDigest20', accountDigest20);
-
-    return result;
-  } catch (e) {
-    throw new SDKError(getCardInfo.name, 'Bad Firmware statusCode. Please reset your CoolWalletS.');
+export const resetCard = async (transport: Transport): Promise<boolean> => {
+  const { statusCode, msg } = await executeCommand(transport, commands.RESET_PAIR, target.SE);
+  if (statusCode === CODE._9000) {
+    return true;
+  } else {
+    throw new APDUError(commands.RESET_PAIR, statusCode, msg);
   }
 };
 
 /**
- * Update last used keyId to store in CWS.
+ * Update last used keyId to store in CoolWallet.
  * @param {Transport} transport
  * @param {Array<{KeyId: string, coinType: string}>} dataArr
  * @param {string} P1
@@ -110,7 +66,7 @@ export const updateKeyId = async (
 };
 
 /**
- * Fetch last used keyId from CWS
+ * Fetch last used keyId from CoolWallet
  * @param {Transport} transport
  * @param {string} P1
  */
@@ -138,8 +94,10 @@ export const getLastKeyId = async (transport: Transport, P1: string) => {
 /**
  *
  * @param {Transport} transport
- * @param {string} signature
- * @param {boolean} detailFlag 00 if want to show detail, 01 otherwise
+ * @param {string} appId
+ * @param {string} appId
+ * @param {string} appPrivKey
+ * @param {boolean} showDetail
  */
 export const toggleDisplayAddress = async (
   transport: Transport,
@@ -147,6 +105,9 @@ export const toggleDisplayAddress = async (
   appPrivKey: string,
   showDetailFlag: boolean
 ) => {
+  if (transport.cardType === 'Lite') {
+    throw new error.SDKError(executeCommand.name, `CoolWallet LITE does not support MCU command.`);
+  }
   const { showDetail } = await getCardInfo(transport);
   const detailFlag = showDetailFlag ? '00' : '01';
   if (showDetail === showDetailFlag) {
@@ -181,5 +142,41 @@ export const toggleDisplayAddress = async (
     return showDetailFlag;
   } else {
     throw new APDUError(commands.CHANGE_DISPLAY_TYPE, statusCode, msg);
+  }
+};
+
+/**
+ * Toggle Lock card (01 to lock, 00 to unluch)
+ * @param {Transport} transport
+ * @param {string} appId
+ * * @param {string} appPrivKey
+ * @param {boolean} freezePair
+ */
+export const switchLockStatus = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  freezePair: boolean
+) => {
+  const pairLockStatus = freezePair ? '01' : '00';
+  const signature = await auth.getCommandSignature(
+    transport,
+    appId,
+    appPrivKey,
+    commands.CHANGE_PAIR_STATUS,
+    '',
+    pairLockStatus
+  );
+
+  const { statusCode, msg } = await executeCommand(
+    transport,
+    commands.CHANGE_PAIR_STATUS,
+    target.SE,
+    signature,
+    pairLockStatus,
+    undefined
+  );
+  if (statusCode !== CODE._9000) {
+    throw new APDUError(commands.CHANGE_PAIR_STATUS, statusCode, msg);
   }
 };

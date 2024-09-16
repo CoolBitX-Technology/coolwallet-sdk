@@ -66,6 +66,7 @@ async function run() {
   await checkAndPublish(context, 'packages/transport-web-ble');
   await checkAndPublish(context, 'packages/transport-jre-http');
   await checkAndPublish(context, 'packages/testing-library');
+  await checkAndPublish(context, 'packages/transport-react-native-nfc');
 }
 
 try {

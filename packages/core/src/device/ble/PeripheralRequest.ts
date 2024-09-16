@@ -6,7 +6,7 @@
 import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
 import { delay } from '../../utils';
-import Transport from '../../transport';
+import { BleTransport } from '../../transport';
 import { MCU_FINISH_CODE, COMMAND_FINISH_CODE, PACKET_DATA_SIZE } from '../constants';
 import { byteArrayToHex, hexToByteArray } from './utils';
 
@@ -14,15 +14,15 @@ import { byteArrayToHex, hexToByteArray } from './utils';
  * PeripheralRequest is responsible for peripheral data communication.
  * @class
  *
- * @param {Transport} transport internal transport, which must be specified with different platforms
+ * @param {BleTransport} transport internal transport, which must be specified with different platforms
  * @param {boolean} isFinish since the device can only accept one kind of command once, a flag is needed to determine whether another command is executing.
  */
 export default class PeripheralRequest {
-  private transport: Transport;
+  private transport: BleTransport;
 
   private isFinish = true;
 
-  constructor(transport: Transport) {
+  constructor(transport: BleTransport) {
     this.transport = transport;
   }
 
