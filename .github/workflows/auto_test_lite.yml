@@ -9,7 +9,7 @@ env:
   REGISTRY: asia-northeast1-docker.pkg.dev
 
 jobs:
-  test-pro-card:
+  test-lite-card:
     runs-on: ubuntu-latest
 
     steps:
@@ -57,10 +57,10 @@ jobs:
       run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
     - name: Pull Docker image
-      run: docker pull ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+      run: docker pull ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet-lite/jcvm
 
     - name: Run Docker container
-      run: docker run -d --name coolwallet-jcvm-jre-http -p 9527:9527 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+      run: docker run -d --name coolwallet-jcvm-jre-http -p 9527:9527 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet-lite/jcvm
 
     - name: Dump node environment
       working-directory: sdk
