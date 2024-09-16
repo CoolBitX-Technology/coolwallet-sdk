@@ -168,8 +168,10 @@ export const executeUtxoSegmentScript = async (
   transport: Transport,
   appId: string,
   appPrivKey: string,
-  utxoArgument: string
+  utxoArgument: string,
+  hashKey?: string
 ) => {
+  utxoArgument = hashKey ? utxoArgument + hashKey : utxoArgument;
   if (utxoArgument.length > 2147483648 * 2) throw new Error('argument too long');
 
   const args = utxoArgument.match(/.{2,3800}/g);
@@ -189,6 +191,7 @@ export const executeUtxoSegmentScript = async (
       counter -= 255;
     }
     const p1 = counter.toString(16).padStart(2, '0');
+    const p2 = hashKey ? (hashKey.length / 2).toString(16).padStart(2, '0') : undefined;
     const signature = await getCommandSignature(
       transport,
       appId,
@@ -196,7 +199,7 @@ export const executeUtxoSegmentScript = async (
       commands.EXECUTE_UTXO_SEGMENT_SCRIPT,
       v,
       p1,
-      undefined
+      p2
     );
     const { outputData, statusCode, msg } = await executeCommand(
       transport,
@@ -204,7 +207,7 @@ export const executeUtxoSegmentScript = async (
       target.SE,
       v + signature,
       p1,
-      undefined
+      p2
     );
     if (i === total) {
       if (outputData) {

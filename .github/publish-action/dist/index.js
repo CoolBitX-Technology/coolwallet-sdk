@@ -12571,44 +12571,41 @@ function run() {
                     return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ltc')];
                 case 19:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-matic')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sol')];
                 case 20:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sol')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-terra')];
                 case 21:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-terra')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-theta')];
                 case 22:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-theta')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ton')];
                 case 23:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ton')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-trx')];
                 case 24:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-trx')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
                 case 25:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
                 case 26:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xtz')];
                 case 27:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xtz')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zen')];
                 case 28:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zen')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
                 case 29:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
                 case 30:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
-                case 31:
-                    _a.sent();
                     return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
-                case 32:
+                case 31:
                     _a.sent();
                     return [4 /*yield*/, checkAndPublish(context, 'packages/transport-react-native-nfc')];
                 case 33:

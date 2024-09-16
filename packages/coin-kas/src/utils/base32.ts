@@ -83,7 +83,7 @@ export function encode(data: Uint8Array): string {
   for (let i = 0; i < data.length; ++i) {
     const value = data[i];
     /* eslint-disable yoda */
-    validate(0 <= value && value < 32, 'Invalid value: ' + value + '.');
+    validate(0 <= value && value < 32, encode.name, 'Invalid value: ' + value + '.');
     base32 += CHARSET[value];
   }
   return base32;
@@ -101,7 +101,7 @@ export function decode(str: string): Uint8Array {
   const data = new Uint8Array(str.length);
   for (let i = 0; i < str.length; ++i) {
     const value = str[i];
-    validate(value in CHARSET_INVERSE_INDEX, 'Invalid value: ' + value + '.');
+    validate(value in CHARSET_INVERSE_INDEX, decode.name, 'Invalid value: ' + value + '.');
     data[i] = CHARSET_INVERSE_INDEX[value];
   }
   return data;
