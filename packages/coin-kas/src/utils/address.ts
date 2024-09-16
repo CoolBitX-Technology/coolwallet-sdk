@@ -23,17 +23,18 @@ SOFTWARE.
 */
 
 // Modified by coolbitx in 2024
-import { decode, encode } from "./base32";
-import { checksumToArray, polymod } from "./checksum";
-import { convert } from "./convertBits";
-import { fromHex, getBitLength, prefixToArray } from "./utils";
-import { validate, validChecksum } from "./validate";
+import { Payment, Script, ScriptType } from '../config/types';
+import { decode, encode } from './base32';
+import { checksumToArray, polymod } from './checksum';
+import { convert } from './convertBits';
+import { fromHex, getBitLength, prefixToArray } from './utils';
+import { validate, validatePayment, validChecksum } from './validate';
 
 export function toXOnly(pubKey: Buffer): Buffer {
   return pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
 }
 
-export function getAddressByPublicKey(pubKey: string, prefix = 'kaspa') {
+export function getAddressByPublicKey(pubKey: string, prefix = 'kaspa'): string {
   const xOnlyPubKey = toXOnly(fromHex(pubKey)).toString('hex');
   const eight0 = [0, 0, 0, 0, 0, 0, 0, 0];
   const prefixData = prefixToArray(prefix).concat([0]);
@@ -53,15 +54,10 @@ export function getAddressByPublicKey(pubKey: string, prefix = 'kaspa') {
   return `${prefix}:` + encode(payload);
 }
 
-function getType(versionByte: number) {
-  switch (versionByte & 120) {
-    case 0:
-      return 'pubkey';
-    case 8:
-      return 'scripthash';
-    default:
-      throw new Error('Invalid address type in version byte:' + versionByte);
-  }
+function getType(versionByte: number): string {
+  const type = versionByte & 120;
+  validate(type === 0, getType.name, 'Invalid address type in version byte:' + versionByte);
+  return 'pubkey';
 }
 
 function hasSingleCase(string: string) {
@@ -69,34 +65,65 @@ function hasSingleCase(string: string) {
 }
 
 export function decodeAddress(address: string) {
-  validate(hasSingleCase(address), 'Mixed case');
+  validate(hasSingleCase(address), decodeAddress.name, 'Mixed case');
   address = address.toLowerCase();
 
   const pieces = address.split(':');
-  validate(pieces.length === 2, 'Invalid format: ' + address);
+  validate(pieces.length === 2, decodeAddress.name, 'Invalid format: ' + address);
 
   const prefix = pieces[0];
-  validate(prefix === 'kaspa', 'Invalid prefix: ' + address);
+  validate(prefix === 'kaspa', decodeAddress.name, 'Invalid prefix: ' + address);
   const encodedPayload = pieces[1];
   const payload = decode(encodedPayload);
-  validate(validChecksum(prefix, payload), 'Invalid checksum: ' + address);
+  validate(validChecksum(prefix, payload), decodeAddress.name, 'Invalid checksum: ' + address);
 
   const convertedBits = convert(payload.slice(0, -8), 5, 8, true);
   const versionByte = convertedBits[0];
+
   const hashOrPublicKey = convertedBits.slice(1);
   const bitLength = getBitLength(hashOrPublicKey);
 
   if (versionByte === 1) {
-    validate(bitLength === 264, 'Invalid hash size: ' + address);
+    validate(bitLength === 264, decodeAddress.name, 'Invalid hash size: ' + address);
   } else {
-    validate(bitLength === 256, 'Invalid hash size: ' + address);
+    validate(bitLength === 256, decodeAddress.name, 'Invalid hash size: ' + address);
   }
 
   const type = getType(versionByte);
 
+  const hashOrPublicKeyBuffer = Buffer.from(hashOrPublicKey);
+  validate(
+    getAddressByPublicKey(hashOrPublicKeyBuffer.toString('hex')) === address,
+    decodeAddress.name,
+    'Wrong public key from address: ' + address
+  );
+
   return {
-    payload: Buffer.from(hashOrPublicKey),
+    payload: hashOrPublicKeyBuffer,
     prefix,
     type,
   };
+}
+
+function getScriptPublicKey(publicKey: Buffer): Buffer {
+  const xOnlyPubKey = toXOnly(publicKey);
+  return Buffer.concat([Buffer.from([0x20]), xOnlyPubKey, Buffer.from([0xac])], 34);
+}
+
+export function addressToOutScript(address: string): Script {
+  const { payload: xOnlyPublicKey } = decodeAddress(address);
+  return {
+    scriptType: ScriptType.P2PK,
+    outScript: getScriptPublicKey(xOnlyPublicKey),
+  };
+}
+
+export function pubkeyToPayment(publicKey: string, scriptType = ScriptType.P2PK): Payment {
+  validate(scriptType === ScriptType.P2PK, pubkeyToPayment.name, `Unsupport ScriptType '${scriptType}'`);
+  const payment: Payment = {
+    address: getAddressByPublicKey(publicKey),
+    outScript: getScriptPublicKey(Buffer.from(publicKey, 'hex')),
+  };
+  validatePayment(payment, pubkeyToPayment.name, scriptType);
+  return payment;
 }

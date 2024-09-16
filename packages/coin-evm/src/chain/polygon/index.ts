@@ -3,9 +3,9 @@ import { ChainProps } from '../types';
 
 class PolygonChain extends ChainProps {
   id = 137;
-  symbol = 'MATIC';
+  symbol = 'POL';
   signature =
-    `30450221008d9a2ecb25c6debb817709fe6ac7b83d48e43b93d789d45ba803be59ea15904f022048579648bc83e84c55d127a2b845d3c6f41ea418752a131f179a048e3f26212f`.padStart(
+    `3044022061fc28a961fc34520960442a878b11f8baf122a4f55e4cd14594045b7424af6102206af31c36928e9fc9b6f9181e2bde2061bf40ace65464f5c0683a3d72a23fed1d`.padStart(
       144,
       '0'
     );

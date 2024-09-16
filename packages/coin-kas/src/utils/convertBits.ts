@@ -34,7 +34,7 @@ export function convert(data: Uint8Array, from: number, to: number, strictMode: 
   let bits = 0;
   for (let i = 0; i < data.length; ++i) {
     const value = data[i];
-    validate(value >= 0 && value >> from === 0, 'Invalid value: ' + value + '.');
+    validate(value >= 0 && value >> from === 0, convert.name, 'Invalid value: ' + value + '.');
     accumulator = (accumulator << from) | value;
     bits += from;
     while (bits >= to) {
@@ -51,6 +51,7 @@ export function convert(data: Uint8Array, from: number, to: number, strictMode: 
   } else {
     validate(
       bits < from && ((accumulator << (to - bits)) & mask) === 0,
+      convert.name,
       'Input cannot be converted to ' + to + ' bits without padding, but strict mode was used.'
     );
   }
