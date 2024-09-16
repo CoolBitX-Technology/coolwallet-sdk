@@ -1,4 +1,4 @@
-name: Test on Pull Request to Master
+name: Test on Pull Request to Master or beta
 
 on: 
   pull_request:
@@ -28,18 +28,18 @@ jobs:
       with:
         credentials_json: ${{ secrets.DEV_CP_GCP_SVC_GITHUB_RUNNER_KEY_FILE }}
 
-    - name: Fetch master branch from upstream repository
+    - name: Fetch base branch from upstream repository
       run: |
         cd ${{ github.workspace }}/sdk
         git remote add upstream https://github.com/CoolBitX-Technology/coolwallet-sdk.git
-        git fetch upstream master
+        git fetch upstream ${{ github.event.pull_request.base.ref }}
 
     - name: Get list of modified files and check for modified package.json in coin directories
       id: modified_files
       working-directory: sdk
       run: |
         # cd ${{ github.workspace }}/sdk
-        MODIFIED_FILES=$(git diff --name-only upstream/master)
+        MODIFIED_FILES=$(git diff --name-only upstream/${{ github.event.pull_request.base.ref }})
         echo "$MODIFIED_FILES"
 
         MODIFIED_COINS=""
