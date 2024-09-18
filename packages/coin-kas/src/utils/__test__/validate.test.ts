@@ -143,7 +143,7 @@ describe('Test validate.ts', () => {
     it('Test transaction with too large mass', async () => {
       const transaction = Transaction.fromTxData(testTxDataWithLargeInputs);
       expect(() => validateTransaction(transaction)).toThrowErrorMatchingInlineSnapshot(
-        `"error function: validateMass, message: validate: current mass: 101038, exceeds the maximum allowed mass(100000)"`
+        `"error function: validateMass, message: validate: current mass: 940038, exceeds the maximum allowed mass(100000)"`
       );
     });
   });
