@@ -78,7 +78,9 @@ export declare type TxInfo = {
 };
 
 export enum ScriptType {
-  P2PK = 0,
+  P2PK_SCHNORR = 0,
+  P2PK_ECDSA = 1,
+  // P2SH = 8,      // not support pubKeyToHash
 }
 
 export declare type Payment = {

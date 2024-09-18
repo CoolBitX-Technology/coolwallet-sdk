@@ -1,5 +1,5 @@
-import { TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/types';
-import { addressToOutScript, pubkeyToPayment } from '../utils/address';
+import { ScriptType, TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/types';
+import { addressToOutScript, pubkeyOrScriptHashToPayment, toXOnly } from '../utils/address';
 import { toHex } from '../utils/utils';
 import { SIGHASH_ALL } from '../utils/hash';
 import BigNumber from 'bignumber.js';
@@ -33,9 +33,10 @@ export class Transaction {
       });
 
       const pubKey = input.pubkeyBuf?.toString('hex') as string;
+      const xonlyPublicKey = toXOnly(pubKey)
       const inputPreValueBN = new BigNumber(input.preValue);
       this.utxos.push({
-        pkScript: pubkeyToPayment(pubKey).outScript,
+        pkScript: pubkeyOrScriptHashToPayment(xonlyPublicKey, ScriptType.P2PK_SCHNORR).outScript,
         amount: inputPreValueBN.toNumber(),
       });
 
@@ -58,11 +59,12 @@ export class Transaction {
     const change = txData.change;
     if (change) {
       const pubKey = change.pubkeyBuf?.toString('hex') as string;
+      const xonlyPublicKey = toXOnly(pubKey)
       const changeValueBN = new BigNumber(change.value);
       this.outputs.push({
         scriptPublicKey: {
           version: 0,
-          scriptPublicKey: toHex(pubkeyToPayment(pubKey).outScript),
+          scriptPublicKey: toHex(pubkeyOrScriptHashToPayment(xonlyPublicKey, ScriptType.P2PK_SCHNORR).outScript),
         },
         amount: changeValueBN.toNumber(),
         addressIndex: change.addressIndex,

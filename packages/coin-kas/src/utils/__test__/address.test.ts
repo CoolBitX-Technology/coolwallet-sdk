@@ -1,117 +1,94 @@
-import { addressToOutScript, decodeAddress, getAddressByPublicKey, pubkeyToPayment } from '../address';
+import { ScriptType } from '../../config/types';
+import {
+  addressToOutScript,
+  decodeAddress,
+  getAddressByPublicKeyOrScriptHash,
+  pubkeyOrScriptHashToPayment,
+  toXOnly,
+} from '../address';
 
 describe('Test address.ts', () => {
-  it('Test getAddressByPublicKey', async () => {
+  it('Test getAddressByPublicKey with version 0', async () => {
     const publicKey = '03da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62ef';
+    const xOnlyPubKey = toXOnly(publicKey);
     const expectedAddress = 'kaspa:qrdga25hhaz9wd5p3rrcaynxrl0jm9kwze4jyhgdcmqu8cezaa3w7xh9a3xd9';
-    expect(getAddressByPublicKey(publicKey)).toBe(expectedAddress);
+    expect(getAddressByPublicKeyOrScriptHash(xOnlyPubKey, 0)).toBe(expectedAddress);
   });
 
-  it('Test addressToOutScript', async () => {
-    const address = 'kaspa:qrdga25hhaz9wd5p3rrcaynxrl0jm9kwze4jyhgdcmqu8cezaa3w7xh9a3xd9';
-    expect(addressToOutScript(address)).toMatchInlineSnapshot(`
-      Object {
-        "outScript": Object {
-          "data": Array [
-            32,
-            218,
-            142,
-            170,
-            151,
-            191,
-            68,
-            87,
-            54,
-            129,
-            136,
-            199,
-            142,
-            146,
-            102,
-            31,
-            223,
-            45,
-            150,
-            206,
-            22,
-            107,
-            34,
-            93,
-            13,
-            198,
-            193,
-            195,
-            227,
-            34,
-            239,
-            98,
-            239,
-            172,
-          ],
-          "type": "Buffer",
-        },
-        "scriptType": 0,
-      }
-    `);
-  });
-
-  it('Test pubkeyToPayment', async () => {
+  it('Test getAddressByPublicKey with version 1', async () => {
     const publicKey = '03da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62ef';
-    expect(pubkeyToPayment(publicKey)).toMatchInlineSnapshot(`
-      Object {
-        "address": "kaspa:qrdga25hhaz9wd5p3rrcaynxrl0jm9kwze4jyhgdcmqu8cezaa3w7xh9a3xd9",
-        "outScript": Object {
-          "data": Array [
-            32,
-            218,
-            142,
-            170,
-            151,
-            191,
-            68,
-            87,
-            54,
-            129,
-            136,
-            199,
-            142,
-            146,
-            102,
-            31,
-            223,
-            45,
-            150,
-            206,
-            22,
-            107,
-            34,
-            93,
-            13,
-            198,
-            193,
-            195,
-            227,
-            34,
-            239,
-            98,
-            239,
-            172,
-          ],
-          "type": "Buffer",
-        },
-      }
-    `);
+    const expectedAddress = 'kaspa:qypa4r42j7l5g4eksxyv0r5jvc0a7tvkectxkgjaphrvrslrythk9mc0huhkd8a';
+    expect(getAddressByPublicKeyOrScriptHash(publicKey, 1)).toBe(expectedAddress);
   });
 
-  it('Test decodeAddress throws error if address is different between decodeAddress and getAddressByPublicKey', () => {
-    try {
-      const address = 'kaspa:qyp2d6tctf8wkahskz4hv3xpe3llknrc3jl66798elnjvr2gewzrdggx6fnfh3y';
-      decodeAddress(address);
-      fail('Expected error to be thrown');
-    } catch (error) {
-      expect(error).toMatchInlineSnapshot(
-        `[Error: error function: decodeAddress, message: Wrong public key from address: kaspa:qyp2d6tctf8wkahskz4hv3xpe3llknrc3jl66798elnjvr2gewzrdggx6fnfh3y]`
-      );
-    }
+  it('Test getAddressByPublicKey with version 8', async () => {
+    const scriptHash = 'b815f3841cfb87b8fd834b2c1cba9a8790fb5f568cc7b3a377acd71350d08691';
+    const expectedAddress = 'kaspa:pzuptuuyrnac0w8asd9jc896n2rep76l26xv0varw7kdwy6s6zrfzvsukssy2';
+    expect(getAddressByPublicKeyOrScriptHash(scriptHash, 8)).toBe(expectedAddress);
+  });
+
+  it('Test addressToOutScript with version 0 address', async () => {
+    const address = 'kaspa:qrdga25hhaz9wd5p3rrcaynxrl0jm9kwze4jyhgdcmqu8cezaa3w7xh9a3xd9';
+    const { scriptType, outScript, outHash } = addressToOutScript(address);
+    expect(scriptType).toBe(0);
+    expect(outScript.toString('hex')).toMatchInlineSnapshot(
+      `"20da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62efac"`
+    );
+    expect(outHash).toBeUndefined();
+  });
+
+  it('Test addressToOutScript with version 1 address', async () => {
+    const address = 'kaspa:qypmrwy3gm82j08chmr0502d08pxtp4vpxs736ln02jeq33f7c7g2lgk5a8egc4';
+    const { scriptType, outScript, outHash } = addressToOutScript(address);
+    expect(scriptType).toBe(1);
+    expect(outScript.toString('hex')).toMatchInlineSnapshot(
+      `"2103b1b89146cea93cf8bec6fa3d4d79c26586ac09a1e8ebf37aa5904629f63c857dab"`
+    );
+    expect(outHash).toBeUndefined();
+  });
+
+  it('Test addressToOutScript with version 8 address', async () => {
+    const address = 'kaspa:pzuptuuyrnac0w8asd9jc896n2rep76l26xv0varw7kdwy6s6zrfzvsukssy2';
+    const { scriptType, outScript, outHash } = addressToOutScript(address);
+    expect(scriptType).toBe(8);
+    expect(outScript.toString('hex')).toMatchInlineSnapshot(
+      `"aa20b815f3841cfb87b8fd834b2c1cba9a8790fb5f568cc7b3a377acd71350d0869187"`
+    );
+    expect(outHash?.toString('hex')).toMatchInlineSnapshot(
+      `"b815f3841cfb87b8fd834b2c1cba9a8790fb5f568cc7b3a377acd71350d08691"`
+    );
+  });
+
+  it('Test addressToOutScript with unsupported version address', async () => {
+    const address = 'kaspa:q2cm3y2xe65ne797cmar6ntecfjcdtqf585whum65kgyv20k8jzhmtq5q5qe6c9';
+    expect(() => addressToOutScript(address)).toThrowErrorMatchingInlineSnapshot(
+      `"error function: decodeAddress, message: Unsupported version: 2 with address:kaspa:q2cm3y2xe65ne797cmar6ntecfjcdtqf585whum65kgyv20k8jzhmtq5q5qe6c9"`
+    );
+  });
+
+  it('Test pubkeyOrScriptHashToPayment with xonly publicKey', async () => {
+    const publicKey = '03da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62ef';
+    const xonlyPublicKey = toXOnly(publicKey);
+    const { address, outScript } = pubkeyOrScriptHashToPayment(xonlyPublicKey, ScriptType.P2PK_SCHNORR);
+    expect(address).toMatchInlineSnapshot(`"kaspa:qrdga25hhaz9wd5p3rrcaynxrl0jm9kwze4jyhgdcmqu8cezaa3w7xh9a3xd9"`);
+    expect(outScript.toString('hex')).toMatchInlineSnapshot(
+      `"20da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62efac"`
+    );
+  });
+
+  it('Test pubkeyOrScriptHashToPayment with publicKey', async () => {
+    const publicKey = '03da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62ef';
+    const { address, outScript } = pubkeyOrScriptHashToPayment(publicKey, ScriptType.P2PK_ECDSA);
+    expect(address).toMatchInlineSnapshot(`"kaspa:qypa4r42j7l5g4eksxyv0r5jvc0a7tvkectxkgjaphrvrslrythk9mc0huhkd8a"`);
+    expect(outScript.toString('hex')).toMatchInlineSnapshot(
+      `"2103da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62efab"`
+    );
+  });
+
+  it('Test decodeAddress throws error if address with unknown version', () => {
+    const address = 'kaspa:q2cm3y2xe65ne797cmar6ntecfjcdtqf585whum65kgyv20k8jzhmtq5q5qe6c9';
+    expect(() => decodeAddress(address)).toThrowErrorMatchingInlineSnapshot(
+      `"error function: decodeAddress, message: Unsupported version: 2 with address:kaspa:q2cm3y2xe65ne797cmar6ntecfjcdtqf585whum65kgyv20k8jzhmtq5q5qe6c9"`
+    );
   });
 });

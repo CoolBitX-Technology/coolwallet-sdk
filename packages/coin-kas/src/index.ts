@@ -1,6 +1,11 @@
 import { coin as COIN, Transport } from '@coolwallet/core';
 import { COIN_TYPE } from './config/param';
-import { getAddressByPublicKey, addressToOutScript, pubkeyToPayment } from './utils/address';
+import {
+  getAddressByPublicKeyOrScriptHash,
+  addressToOutScript,
+  pubkeyOrScriptHashToPayment,
+  toXOnly,
+} from './utils/address';
 import signTransferTransaction from './sign';
 import { Script, ScriptType, SignTxType } from './config/types';
 
@@ -16,12 +21,13 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     transport: Transport,
     appPrivateKey: string,
     appId: string,
-    _scriptType: ScriptType,
+    scriptType: ScriptType,
     addressIndex: number,
     purpose?: number
   ): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
-    return getAddressByPublicKey(publicKey);
+    const processedPublicKey = scriptType === ScriptType.P2PK_SCHNORR ? toXOnly(publicKey) : publicKey;
+    return getAddressByPublicKeyOrScriptHash(processedPublicKey, scriptType);
   }
 
   async getAddressAndOutScript(
@@ -33,7 +39,8 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     purpose?: number
   ): Promise<{ address: string; outScript: Buffer }> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
-    return pubkeyToPayment(publicKey, scriptType);
+    const processedPublicKey = scriptType === ScriptType.P2PK_SCHNORR ? toXOnly(publicKey) : publicKey;
+    return pubkeyOrScriptHashToPayment(processedPublicKey, scriptType);
   }
 
   async getAddressAndOutScriptByAccountKey(
@@ -43,7 +50,8 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     scriptType: ScriptType
   ): Promise<{ address: string; outScript: Buffer }> {
     const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
-    return pubkeyToPayment(publicKey, scriptType);
+    const processedPublicKey = scriptType === ScriptType.P2PK_SCHNORR ? toXOnly(publicKey) : publicKey;
+    return pubkeyOrScriptHashToPayment(processedPublicKey, scriptType);
   }
 
   async signTransaction(signTxType: SignTxType): Promise<string> {
