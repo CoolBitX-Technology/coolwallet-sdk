@@ -1,4 +1,4 @@
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, DisplayBuilder, getTxDetail } from '@coolwallet/testing-library';
 import { coins } from '@cosmjs/stargate';
@@ -14,6 +14,7 @@ import { decodeBech32 } from '../src/utils/crypto';
 
 let props: PromiseValue<ReturnType<typeof initialize>>;
 let transport: Transport;
+let cardType: CardType;
 const CHAINS: TestChain[] = [
   {
     name: 'ATOM',
@@ -47,7 +48,16 @@ const mnemonic = bip39.generateMnemonic();
 
 describe('Test Cosmos SDK', () => {
   beforeAll(async () => {
-    transport = (await createTransport())!;
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
   });
 

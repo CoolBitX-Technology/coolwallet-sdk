@@ -11,7 +11,9 @@
     "build:ts": "babel src --out-dir lib --extensions \".ts\" --source-maps inline",
     "build": "del-cli lib && npm run build:types && npm run build:ts",
     "test": "NODE_ENV=development jest --runInBand",
-    "ci-test": "NODE_ENV=production jest --runInBand"
+    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import * as bip39 from 'bip39';
 import isEmpty from 'lodash/isEmpty';
@@ -16,16 +16,22 @@ const CHAIN_ID = 1;
 describe('Test ETH SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   const wallet = new Wallet();
   const eth = new ETH();
   const mnemonic = bip39.generateMnemonic();
 
   beforeAll(async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    transport = (await createTransport())!;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
     await wallet.setMnemonic(mnemonic);
   });

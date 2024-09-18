@@ -1,4 +1,4 @@
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 import KAS from '../src';
@@ -17,10 +17,20 @@ const testWalletInfo = {
 
 describe('Test KAS SDK', () => {
   let transport: Transport;
+  let cardType: CardType;
   let props: Mandatory;
 
   beforeAll(async () => {
-    transport = (await createTransport())!;
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, testWalletInfo.mnemonic);
   });
 
