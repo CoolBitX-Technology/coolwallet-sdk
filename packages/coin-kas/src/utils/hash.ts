@@ -149,6 +149,17 @@ function getOutputsHash(
   return reusedValues.outputsHash;
 }
 
+function getOutputsTotalLength(outputs: TransactionOutput[]) {
+  return outputs.reduce((acc, output)=>{
+    const outputAmount = 8;
+    const scriptPublicKeyLength = 8;
+    const version = 2;
+    const scriptPublicKey = output.scriptPublicKey.scriptPublicKey.length/2;
+    const outputTotalLength = outputAmount + scriptPublicKeyLength + version + scriptPublicKey;
+    return acc + outputTotalLength;
+  }, 0)
+}
+
 export function calculateSigHash(
   transaction: Transaction,
   signHashType: number,
@@ -193,7 +204,9 @@ export async function getTransferArgumentBuffer(transaction: Transaction): Promi
   hashWriter.writeUInt32BE(0, 'zeroPadding');
 
   hashWriter.writeUInt8(hashType, 'hasType');
-  hashWriter.writeUInt16BE(change ? 104 : 52, 'outputTotalLength');
+  hashWriter.writeUInt16BE(getOutputsTotalLength(transaction.outputs), 'outputTotalLength');
+  
+  hashWriter.writeUInt8(output.scriptPublicKey.version, 'outputScriptVersion'); // TODO: REMOVE & REPLACED BY outputReverseScriptVersion
   hashTxOut(hashWriter, output);
   const haveChange = change ? 1 : 0;
   hashWriter.writeUInt8(haveChange, 'haveChange');
