@@ -35,8 +35,10 @@ export class Transaction {
       const pubKey = input.pubkeyBuf?.toString('hex') as string;
       const xonlyPublicKey = toXOnly(pubKey)
       const inputPreValueBN = new BigNumber(input.preValue);
+      const scriptType = ScriptType.P2PK_SCHNORR;
       this.utxos.push({
-        pkScript: pubkeyOrScriptHashToPayment(xonlyPublicKey, ScriptType.P2PK_SCHNORR).outScript,
+        version: scriptType,
+        pkScript: pubkeyOrScriptHashToPayment(xonlyPublicKey, scriptType).outScript,
         amount: inputPreValueBN.toNumber(),
       });
 
@@ -46,10 +48,11 @@ export class Transaction {
     let totalOutput = 0;
     const output = txData.output;
     const outputValueBN = new BigNumber(output.value);
+    const { outScript, scriptType } = addressToOutScript(output.address);
     this.outputs.push({
       scriptPublicKey: {
-        version: 0,
-        scriptPublicKey: toHex(addressToOutScript(output.address).outScript),
+        version: scriptType,
+        scriptPublicKey: toHex(outScript),
       },
       amount: outputValueBN.toNumber(),
     });
@@ -61,10 +64,11 @@ export class Transaction {
       const pubKey = change.pubkeyBuf?.toString('hex') as string;
       const xonlyPublicKey = toXOnly(pubKey)
       const changeValueBN = new BigNumber(change.value);
+      const scriptType = ScriptType.P2PK_SCHNORR;
       this.outputs.push({
         scriptPublicKey: {
-          version: 0,
-          scriptPublicKey: toHex(pubkeyOrScriptHashToPayment(xonlyPublicKey, ScriptType.P2PK_SCHNORR).outScript),
+          version: scriptType,
+          scriptPublicKey: toHex(pubkeyOrScriptHashToPayment(xonlyPublicKey, scriptType).outScript),
         },
         amount: changeValueBN.toNumber(),
         addressIndex: change.addressIndex,
@@ -106,7 +110,10 @@ export class Transaction {
         outputs: this.outputs.map(({ amount, scriptPublicKey }) => {
           return {
             amount,
-            scriptPublicKey,
+            scriptPublicKey: {
+              version: 0, // TODO: USE REAL SCRIPT VERSION
+              scriptPublicKey: scriptPublicKey.scriptPublicKey,
+            },
           };
         }),
         lockTime: this.lockTime,

@@ -54,7 +54,7 @@ export declare type TransactionInput = {
   addressIndex: number;
 };
 
-export declare type TransactionUtxo = { pkScript: Buffer; amount: string | number };
+export declare type TransactionUtxo = { pkScript: Buffer; amount: string | number, version: number };
 
 export declare type Outpoint = {
   transactionId: string;
