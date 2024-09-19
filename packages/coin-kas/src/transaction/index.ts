@@ -1,5 +1,10 @@
 import { ScriptType, TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/types';
-import { addressToOutScript, pubkeyOrScriptHashToPayment, toXOnly } from '../utils/address';
+import {
+  addressToOutScript,
+  getPubkeyOrScriptHash,
+  getScriptType,
+  pubkeyOrScriptHashToPayment,
+} from '../utils/address';
 import { toHex } from '../utils/utils';
 import { SIGHASH_ALL } from '../utils/hash';
 import BigNumber from 'bignumber.js';
@@ -32,16 +37,16 @@ export class Transaction {
         addressIndex: input.addressIndex,
       });
 
-      const pubKey = input.pubkeyBuf?.toString('hex') as string;
-      const xonlyPublicKey = toXOnly(pubKey)
       const inputPreValueBN = new BigNumber(input.preValue);
-      const scriptType = ScriptType.P2PK_SCHNORR;
+      const pubKey = input.pubkeyBuf?.toString('hex') as string;
+      
+      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(input.scriptType, pubKey);
       this.utxos.push({
-        version: scriptType,
-        pkScript: pubkeyOrScriptHashToPayment(xonlyPublicKey, scriptType).outScript,
+        version: 0,
+        pkScript: pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion).outScript,
+        scriptType: input.scriptType,
         amount: inputPreValueBN.toNumber(),
       });
-
       totalInput = inputPreValueBN.plus(new BigNumber(totalInput)).toNumber();
     });
 
@@ -51,7 +56,8 @@ export class Transaction {
     const { outScript, scriptType } = addressToOutScript(output.address);
     this.outputs.push({
       scriptPublicKey: {
-        version: scriptType,
+        version: 0,
+        scriptType,
         scriptPublicKey: toHex(outScript),
       },
       amount: outputValueBN.toNumber(),
@@ -61,14 +67,15 @@ export class Transaction {
     this.feeValue = new BigNumber(totalInput).minus(new BigNumber(totalOutput)).toFixed();
     const change = txData.change;
     if (change) {
-      const pubKey = change.pubkeyBuf?.toString('hex') as string;
-      const xonlyPublicKey = toXOnly(pubKey)
       const changeValueBN = new BigNumber(change.value);
-      const scriptType = ScriptType.P2PK_SCHNORR;
+      const pubKey = change.pubkeyBuf?.toString('hex') as string;
+      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(change.scriptType, pubKey);
+      const { outScript } = pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
       this.outputs.push({
         scriptPublicKey: {
-          version: scriptType,
-          scriptPublicKey: toHex(pubkeyOrScriptHashToPayment(xonlyPublicKey, scriptType).outScript),
+          version: 0,
+          scriptType: change.scriptType,
+          scriptPublicKey: toHex(outScript),
         },
         amount: changeValueBN.toNumber(),
         addressIndex: change.addressIndex,

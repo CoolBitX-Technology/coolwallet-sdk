@@ -1,4 +1,4 @@
-import { TxData, Input, Output, Change } from '../../config/types';
+import { TxData, Input, Output, Change, ScriptType } from '../../config/types';
 import { Transaction } from '../../transaction';
 
 // input
@@ -9,6 +9,7 @@ export const testNormalInput: Input = {
   purposeIndex: 44,
   preValue: '2355557326',
   addressIndex: 0,
+  scriptType: ScriptType.P2PK_SCHNORR,
 };
 export const testInputWithInvalidInputPublicKey = {
   ...testNormalInput,
@@ -69,6 +70,7 @@ export const testNormalChange: Change = {
   pubkeyBuf: Buffer.from('b1b89146cea93cf8bec6fa3d4d79c26586ac09a1e8ebf37aa5904629f63c857d', 'hex'),
   purposeIndex: 44,
   addressIndex: 0,
+  scriptType: ScriptType.P2PK_SCHNORR,
 };
 export const testInsufficientFeeChange: Change = {
   ...testNormalChange, 
