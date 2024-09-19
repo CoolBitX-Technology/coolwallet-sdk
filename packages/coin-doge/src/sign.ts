@@ -46,9 +46,9 @@ export async function signTransaction(signTxData: signTxType): Promise<string> {
     transport,
     preActions,
     actions,
+    signatureType,
     confirmCB,
     authorizedCB,
-    signatureType
   );
   const transaction = txUtil.composeFinalTransaction(preparedData, signatures as Buffer[]);
   return transaction.toString('hex');

@@ -1,4 +1,4 @@
-import { Transport, apdu, error, utils } from '@coolwallet/core';
+import { Transport, apdu, error, tx, utils } from '@coolwallet/core';
 import * as bufferUtil from './bufferUtil';
 import * as txUtil from './transactionUtil';
 import * as varuint from './varuintUtil';
@@ -32,7 +32,7 @@ export async function getScriptSigningActions(
   });
 
   const actions = utxoArguments.map((utxoArgument) => async () => {
-    return apdu.tx.executeUtxoSegmentScript(transport, appId, appPrivateKey, await utxoArgument);
+    return tx.command.executeUtxoSegmentScript(transport, appId, appPrivateKey, await utxoArgument);
   });
   return { actions };
 }
@@ -51,12 +51,12 @@ export function getScriptSigningPreActions(
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    await tx.command.executeScript(transport, appId, appPrivateKey, argument);
   };
   preActions.push(sendArgument);
 
