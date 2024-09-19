@@ -38,12 +38,12 @@ export class Transaction {
 
       const inputPreValueBN = new BigNumber(input.preValue);
       const pubKey = input.pubkeyBuf?.toString('hex') as string;
-      
-      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(input.scriptType, pubKey);
+      const scriptType = input.scriptType as ScriptType;
+      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, pubKey);
       this.utxos.push({
         version: 0,
         pkScript: pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion).outScript,
-        scriptType: input.scriptType as ScriptType,
+        scriptType,
         amount: inputPreValueBN.toNumber(),
       });
       totalInput = inputPreValueBN.plus(new BigNumber(totalInput)).toNumber();
@@ -52,12 +52,13 @@ export class Transaction {
     let totalOutput = 0;
     const output = txData.output;
     const outputValueBN = new BigNumber(output.value);
-    const { outScript, scriptType } = addressToOutScript(output.address);
+    const { scriptType, outScript, outPubkeyOrHash } = addressToOutScript(output.address);
     this.outputs.push({
       scriptPublicKey: {
         version: 0,
         scriptType,
         scriptPublicKey: toHex(outScript),
+        publicKeyOrScriptHash: toHex(outPubkeyOrHash),
       },
       amount: outputValueBN.toNumber(),
     });
@@ -68,13 +69,15 @@ export class Transaction {
     if (change) {
       const changeValueBN = new BigNumber(change.value);
       const pubKey = change.pubkeyBuf?.toString('hex') as string;
-      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(change.scriptType, pubKey);
+      const scriptType = change.scriptType as ScriptType;
+      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, pubKey);
       const { outScript } = pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
       this.outputs.push({
         scriptPublicKey: {
           version: 0,
-          scriptType: change.scriptType as ScriptType,
+          scriptType,
           scriptPublicKey: toHex(outScript),
+          publicKeyOrScriptHash: pubkeyOrScriptHash,
         },
         amount: changeValueBN.toNumber(),
         addressIndex: change.addressIndex,

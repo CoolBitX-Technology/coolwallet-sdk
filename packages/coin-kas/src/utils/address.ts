@@ -189,7 +189,7 @@ export function addressToOutScript(address: string): Script {
   return {
     scriptType: getScriptType(addressVersion),
     outScript: getScriptPublicKey(publicKeyOrScripthash, addressVersion),
-    outHash: addressVersion === 8 ? publicKeyOrScripthash : undefined,
+    outPubkeyOrHash: publicKeyOrScripthash,
   };
 }
 
@@ -237,7 +237,10 @@ export function getPubkeyOrScriptHash(
         addressVersion,
       };
     default:
-      throw new error.SDKError(getPubkeyOrScriptHash.name, `Unsupported scriptType: ${scriptType}, publicKey: ${pubkeyHex}`);
+      throw new error.SDKError(
+        getPubkeyOrScriptHash.name,
+        `Unsupported scriptType: ${scriptType}, publicKey: ${pubkeyHex}`
+      );
   }
 }
 

@@ -68,8 +68,9 @@ function hashOutpoint(hashWriter: HashWriter, input: TransactionInput): void {
 
 function hashTxOut(hashWriter: HashWriter, output: TransactionOutput): void {
   hashWriter.writeUInt64LE(new BigNumber(output.amount), 'outputReverseAmount');
-  hashWriter.writeUInt16LE(0, 'outputReverseScriptVersion'); // TODO: USE REAL SCRIPT VERSION
-  hashWriter.writeVarBytes(fromHex(output.scriptPublicKey.scriptPublicKey), 'outputScriptPublicKey');
+  const { version, scriptPublicKey } = output.scriptPublicKey;
+  hashWriter.writeUInt16LE(version, 'outputReverseScriptVersion');
+  hashWriter.writeVarBytes(fromHex(scriptPublicKey), 'outputScriptPublicKey');
 }
 
 interface ReusedValues {
@@ -150,14 +151,10 @@ function getOutputsHash(
 }
 
 function getOutputsTotalLength(outputs: TransactionOutput[]) {
-  return outputs.reduce((acc, output)=>{
-    const outputAmount = 8;
-    const scriptPublicKeyLength = 8;
-    const version = 2;
-    const scriptPublicKey = output.scriptPublicKey.scriptPublicKey.length/2;
-    const outputTotalLength = outputAmount + scriptPublicKeyLength + version + scriptPublicKey;
-    return acc + outputTotalLength;
-  }, 0)
+  return outputs.reduce((acc, { scriptPublicKey }) => {
+    // 8 (outputAmount) + 8 (scriptPublicKeyLength) + 2 (version) + scriptPublicKey
+    return acc + 18 + scriptPublicKey.scriptPublicKey.length / 2;
+  }, 0);
 }
 
 export function calculateSigHash(
@@ -202,12 +199,35 @@ export async function getTransferArgumentBuffer(transaction: Transaction): Promi
   hashWriter.writeHash(getSequencesHash(transaction, signHashType, {}), 'sequencesHash');
   hashWriter.writeHash(getSigOpCountsHash(transaction, signHashType, {}), 'sigOpCountsHash');
   hashWriter.writeUInt32BE(0, 'zeroPadding');
-
   hashWriter.writeUInt8(hashType, 'hasType');
+
+  // output
   hashWriter.writeUInt16BE(getOutputsTotalLength(transaction.outputs), 'outputTotalLength');
-  
-  hashWriter.writeUInt8(output.scriptPublicKey.version, 'outputScriptVersion'); // TODO: REMOVE & REPLACED BY outputReverseScriptVersion
-  hashTxOut(hashWriter, output);
+  /**
+   * The format of publicKeyOrScriptHash is as follows:
+   *
+   * 1. X Only Public Key with padding:
+   *    Format: 00 + 32 bytes x-only public key, script type 00
+   *    Example: 00da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62ef
+   *
+   * 2. Public Key:
+   *    Format: 33 bytes public key, script type 01
+   *    Example: 03b1b89146cea93cf8bec6fa3d4d79c26586ac09a1e8ebf37aa5904629f63c857d
+   *
+   * 3. Script Hash with padding:
+   *    Format: 00 + 32 bytes script hash, script type 02
+   *    Example: 00b815f3841cfb87b8fd834b2c1cba9a8790fb5f568cc7b3a377acd71350d08691
+   *
+   * Note: All formats are padded to 33 bytes length for consistency
+   */
+  const { scriptType, version, scriptPublicKey, publicKeyOrScriptHash } = output.scriptPublicKey;
+  hashWriter.writeUInt8(scriptType, 'outputScriptType');
+  hashWriter.write(fromHex(publicKeyOrScriptHash.padStart(33 * 2, '0')), 'outputScriptPublicKey');
+  hashWriter.writeUInt64LE(new BigNumber(output.amount), 'outputReverseAmount');
+  hashWriter.writeUInt16LE(version, 'outputReverseScriptVersion');
+  hashWriter.writeUInt64LE(new BigNumber(fromHex(scriptPublicKey).length), 'outputReverseScriptPublicKeyLength');
+
+  // change
   const haveChange = change ? 1 : 0;
   hashWriter.writeUInt8(haveChange, 'haveChange');
   hashWriter.writeUInt64LE(change ? new BigNumber(change.amount) : new BigNumber(0), 'changeReverseAmount');

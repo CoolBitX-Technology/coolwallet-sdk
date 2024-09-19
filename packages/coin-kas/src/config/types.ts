@@ -78,6 +78,7 @@ export declare type ScriptPublicKey = {
   version: number;
   scriptType: ScriptType;
   scriptPublicKey: string;
+  publicKeyOrScriptHash: string;
 };
 
 export declare type TxInfo = {
@@ -105,7 +106,7 @@ export declare type Payment = {
 export declare type Script = {
   scriptType: ScriptType;
   outScript: Buffer;
-  outHash?: Buffer;
+  outPubkeyOrHash: Buffer;
 };
 
 export const TransactionSigningHashKey = Buffer.from('TransactionSigningHash');
