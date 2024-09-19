@@ -30,7 +30,7 @@ describe('Test DOGE SDK', () => {
     props = await initialize(transport, mnemonic);
   });
 
-  it('index 0 address', async () => {
+  it('Test Get index 0 address', async () => {
     const address = await dogeSDK.getAddress(transport, props.appPrivateKey, props.appId, ScriptType.P2PKH, 0, 44);
     expect(address).toMatchInlineSnapshot(`"DPsNjkrF3WBx6cCKQpd278JjLp3o4JuQWU"`);
   });
