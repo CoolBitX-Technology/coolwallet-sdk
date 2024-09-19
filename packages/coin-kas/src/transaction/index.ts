@@ -2,7 +2,6 @@ import { ScriptType, TransactionInput, TransactionOutput, TransactionUtxo, TxDat
 import {
   addressToOutScript,
   getPubkeyOrScriptHash,
-  getScriptType,
   pubkeyOrScriptHashToPayment,
 } from '../utils/address';
 import { toHex } from '../utils/utils';
@@ -44,7 +43,7 @@ export class Transaction {
       this.utxos.push({
         version: 0,
         pkScript: pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion).outScript,
-        scriptType: input.scriptType,
+        scriptType: input.scriptType as ScriptType,
         amount: inputPreValueBN.toNumber(),
       });
       totalInput = inputPreValueBN.plus(new BigNumber(totalInput)).toNumber();
@@ -74,7 +73,7 @@ export class Transaction {
       this.outputs.push({
         scriptPublicKey: {
           version: 0,
-          scriptType: change.scriptType,
+          scriptType: change.scriptType as ScriptType,
           scriptPublicKey: toHex(outScript),
         },
         amount: changeValueBN.toNumber(),

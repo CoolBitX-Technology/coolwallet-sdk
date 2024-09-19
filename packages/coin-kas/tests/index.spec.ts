@@ -35,7 +35,7 @@ describe('Test KAS SDK', () => {
       transport,
       appPrivateKey: props.appPrivateKey,
       appId: props.appId,
-      scriptType: ScriptType.P2PK,
+      scriptType: ScriptType.P2PK_SCHNORR,
       inputs: [
         {
           preIndex: 1,
@@ -66,7 +66,7 @@ describe('Test KAS SDK', () => {
       transport,
       appPrivateKey: props.appPrivateKey,
       appId: props.appId,
-      scriptType: ScriptType.P2PK,
+      scriptType: ScriptType.P2PK_SCHNORR,
       inputs: [
         {
           preIndex: 1,
@@ -96,7 +96,7 @@ describe('Test KAS SDK', () => {
       transport,
       appPrivateKey: props.appPrivateKey,
       appId: props.appId,
-      scriptType: ScriptType.P2PK,
+      scriptType: ScriptType.P2PK_SCHNORR,
       inputs: [
         {
           preIndex: 1,

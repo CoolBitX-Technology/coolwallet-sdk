@@ -24,7 +24,7 @@ export declare type Input = {
   sequence?: number;
   pubkeyBuf?: Buffer;
   purposeIndex?: number;
-  scriptType: ScriptType;
+  scriptType?: ScriptType;
 };
 
 export declare type Output = {
@@ -37,7 +37,7 @@ export declare type Change = {
   addressIndex: number;
   pubkeyBuf?: Buffer;
   purposeIndex?: number;
-  scriptType: ScriptType;
+  scriptType?: ScriptType;
 };
 
 export declare type TxData = {

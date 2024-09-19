@@ -55,14 +55,16 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async signTransaction(signTxType: SignTxType): Promise<string> {
-    const { inputs, transport, appPrivateKey, appId, change } = signTxType;
+    const { inputs, transport, appPrivateKey, appId, change, scriptType } = signTxType;
     for (const input of inputs) {
       const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex, input.purposeIndex);
       input.pubkeyBuf = Buffer.from(pubkey, 'hex');
+      input.scriptType = scriptType;
     }
     if (change) {
       const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, change.addressIndex, change.purposeIndex);
       change.pubkeyBuf = Buffer.from(pubkey, 'hex');
+      change.scriptType = scriptType;
     }
     return signTransferTransaction(signTxType);
   }
