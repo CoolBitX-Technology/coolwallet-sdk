@@ -24,6 +24,7 @@ export declare type Input = {
   sequence?: number;
   pubkeyBuf?: Buffer;
   purposeIndex?: number;
+  scriptType: ScriptType;
 };
 
 export declare type Output = {
@@ -36,6 +37,7 @@ export declare type Change = {
   addressIndex: number;
   pubkeyBuf?: Buffer;
   purposeIndex?: number;
+  scriptType: ScriptType;
 };
 
 export declare type TxData = {
@@ -54,7 +56,12 @@ export declare type TransactionInput = {
   addressIndex: number;
 };
 
-export declare type TransactionUtxo = { pkScript: Buffer; amount: string | number, version: number };
+export declare type TransactionUtxo = {
+  version: number;
+  pkScript: Buffer;
+  amount: string | number;
+  scriptType: ScriptType;
+};
 
 export declare type Outpoint = {
   transactionId: string;
@@ -69,6 +76,7 @@ export declare type TransactionOutput = {
 
 export declare type ScriptPublicKey = {
   version: number;
+  scriptType: ScriptType;
   scriptPublicKey: string;
 };
 
@@ -80,7 +88,13 @@ export declare type TxInfo = {
 export enum ScriptType {
   P2PK_SCHNORR = 0,
   P2PK_ECDSA = 1,
-  // P2SH = 8,      // not support pubKeyToHash
+  P2SH = 2, // not support pubKeyToHash
+}
+
+export enum AddressVersion {
+  PUBKEY = 0,
+  PUBKEY_ECDSA = 1,
+  SCRIPT_HASH = 8,
 }
 
 export declare type Payment = {

@@ -24,7 +24,7 @@ SOFTWARE.
 
 // Modified by coolbitx in 2024
 import { error } from '@coolwallet/core';
-import { Payment, Script, ScriptType } from '../config/types';
+import { AddressVersion, Payment, Script, ScriptType } from '../config/types';
 import { decode, encode } from './base32';
 import { checksumToArray, polymod } from './checksum';
 import { convert } from './convertBits';
@@ -39,7 +39,11 @@ export function toXOnly(pubKey: Buffer | string): string {
   return result.toString('hex');
 }
 
-export function getAddressByPublicKeyOrScriptHash(pubKeyOrScriptHash: string, version = 0, prefix = 'kaspa'): string {
+export function getAddressByPublicKeyOrScriptHash(
+  pubKeyOrScriptHash: string,
+  version = AddressVersion.PUBKEY,
+  prefix = 'kaspa'
+): string {
   const eight0 = [0, 0, 0, 0, 0, 0, 0, 0];
   const prefixData = prefixToArray(prefix).concat([0]);
 
@@ -80,7 +84,7 @@ function getType(versionByte: number) {
     case 8:
       return 'scripthash';
     default:
-      throw new error.SDKError(getType.name,'Invalid address type with version:' + versionByte);
+      throw new error.SDKError(getType.name, 'Invalid address type with version:' + versionByte);
   }
 }
 
@@ -88,25 +92,25 @@ function hasSingleCase(string: string) {
   return string === string.toLowerCase() || string === string.toUpperCase();
 }
 
-export function getVersionByAddress(address: string): number {
-  validate(hasSingleCase(address), getVersionByAddress.name, 'Mixed case');
+export function decodeAddressVersion(address: string): number {
+  validate(hasSingleCase(address), decodeAddressVersion.name, 'Mixed case');
   address = address.toLowerCase();
 
   const pieces = address.split(':');
-  validate(pieces.length === 2, getVersionByAddress.name, 'Invalid format: ' + address);
+  validate(pieces.length === 2, decodeAddressVersion.name, 'Invalid format: ' + address);
 
   const prefix = pieces[0];
-  validate(prefix === 'kaspa', getVersionByAddress.name, 'Invalid prefix: ' + address);
+  validate(prefix === 'kaspa', decodeAddressVersion.name, 'Invalid prefix: ' + address);
   const encodedPayload = pieces[1];
   const payload = decode(encodedPayload);
-  validate(validChecksum(prefix, payload), getVersionByAddress.name, 'Invalid checksum: ' + address);
+  validate(validChecksum(prefix, payload), decodeAddressVersion.name, 'Invalid checksum: ' + address);
 
   const convertedBits = convert(payload.slice(0, -8), 5, 8, true);
   return convertedBits[0];
 }
 
 export function decodeAddress(address: string) {
-  const version = getVersionByAddress(address);
+  const addressVersion = decodeAddressVersion(address);
   const pieces = address.split(':');
   const prefix = pieces[0];
   const encodedPayload = pieces[1];
@@ -116,22 +120,22 @@ export function decodeAddress(address: string) {
   const hashOrPublicKey = convertedBits.slice(1);
   const byteLength = getBitLength(hashOrPublicKey) / 8;
 
-  const expectedByteLength = version === 1 ? 33 : 32;
-  if (version === 0 || version === 1 || version === 8) {
+  const expectedByteLength = addressVersion === 1 ? 33 : 32;
+  if (addressVersion === 0 || addressVersion === 1 || addressVersion === 8) {
     validate(
       byteLength === expectedByteLength,
       decodeAddress.name,
-      `Invalid hash or public key byteLength: ${byteLength}, version: ${version}`
+      `Invalid hash or public key byteLength: ${byteLength}, version: ${addressVersion}`
     );
   } else {
-    throw new error.SDKError(decodeAddress.name, `Unsupported version: ${version} with address:${address}`);
+    throw new error.SDKError(decodeAddress.name, `Unsupported version: ${addressVersion} with address:${address}`);
   }
 
-  const type = getType(version);
+  const type = getType(addressVersion);
 
   const hashOrPublicKeyBuffer = Buffer.from(hashOrPublicKey);
   validate(
-    getAddressByPublicKeyOrScriptHash(hashOrPublicKeyBuffer.toString('hex'), version) === address,
+    getAddressByPublicKeyOrScriptHash(hashOrPublicKeyBuffer.toString('hex'), addressVersion) === address,
     decodeAddress.name,
     'Wrong public key from address: ' + address
   );
@@ -140,7 +144,7 @@ export function decodeAddress(address: string) {
     payload: hashOrPublicKeyBuffer,
     prefix,
     type,
-    version,
+    addressVersion,
   };
 }
 
@@ -164,11 +168,11 @@ function getEndingOpCode(version: number) {
   }
 }
 
-function getScriptPublicKey(publicKeyOrScripthash: Buffer, version: number): Buffer {
-  const endingOpCode = getEndingOpCode(version);
+function getScriptPublicKey(publicKeyOrScripthash: Buffer, addressVersion: AddressVersion): Buffer {
+  const endingOpCode = getEndingOpCode(addressVersion);
   const length = publicKeyOrScripthash.length;
   const lengthByte = Buffer.from([length]);
-  switch (version) {
+  switch (addressVersion) {
     case 0:
     case 1:
       return Buffer.concat([lengthByte, publicKeyOrScripthash, endingOpCode], length + 2);
@@ -176,24 +180,74 @@ function getScriptPublicKey(publicKeyOrScripthash: Buffer, version: number): Buf
       const prefixOpCode = Buffer.from([OP_CODE.OP_HASH256]);
       return Buffer.concat([prefixOpCode, lengthByte, publicKeyOrScripthash, endingOpCode], length + 3);
     default:
-      throw new Error(`Unsupported payToAddrScript version: ${version}`);
+      throw new Error(`Unsupported payToAddrScript address version: ${addressVersion}`);
   }
 }
 
 export function addressToOutScript(address: string): Script {
-  const { payload: publicKeyOrScripthash, version } = decodeAddress(address);
+  const { payload: publicKeyOrScripthash, addressVersion } = decodeAddress(address);
   return {
-    scriptType: version,
-    outScript: getScriptPublicKey(publicKeyOrScripthash, version),
-    outHash: version === 8 ? publicKeyOrScripthash : undefined,
+    scriptType: getScriptType(addressVersion),
+    outScript: getScriptPublicKey(publicKeyOrScripthash, addressVersion),
+    outHash: addressVersion === 8 ? publicKeyOrScripthash : undefined,
   };
 }
 
-export function pubkeyOrScriptHashToPayment(publicKeyOrScriptHash: string, scriptType: ScriptType): Payment {
+export function getScriptType(addressVersion: AddressVersion): ScriptType {
+  switch (addressVersion) {
+    case AddressVersion.PUBKEY:
+      return ScriptType.P2PK_SCHNORR;
+    case AddressVersion.PUBKEY_ECDSA:
+      return ScriptType.P2PK_ECDSA;
+    case AddressVersion.SCRIPT_HASH:
+      return ScriptType.P2SH;
+    default:
+      throw new error.SDKError(getScriptType.name, `Unsupported addressVersion: ${addressVersion}`);
+  }
+}
+
+export function getAddressVersion(scriptType: ScriptType): AddressVersion {
+  switch (scriptType) {
+    case ScriptType.P2PK_SCHNORR:
+      return AddressVersion.PUBKEY;
+    case ScriptType.P2PK_ECDSA:
+      return AddressVersion.PUBKEY_ECDSA;
+    case ScriptType.P2SH:
+      return AddressVersion.SCRIPT_HASH;
+    default:
+      throw new error.SDKError(getAddressVersion.name, `Unsupported scriptType: ${scriptType}`);
+  }
+}
+
+export function getPubkeyOrScriptHash(
+  scriptType: ScriptType,
+  publicKey: string | Buffer
+): { pubkeyOrScriptHash: string; addressVersion: AddressVersion } {
+  const pubkeyHex = Buffer.isBuffer(publicKey) ? publicKey.toString('hex') : publicKey;
+  const addressVersion = getAddressVersion(scriptType);
+  switch (scriptType) {
+    case ScriptType.P2PK_ECDSA:
+      return {
+        pubkeyOrScriptHash: pubkeyHex,
+        addressVersion,
+      };
+    case ScriptType.P2PK_SCHNORR:
+      return {
+        pubkeyOrScriptHash: toXOnly(pubkeyHex),
+        addressVersion,
+      };
+    default:
+      throw new error.SDKError(getPubkeyOrScriptHash.name, `Unsupported scriptType: ${scriptType}, publicKey: ${pubkeyHex}`);
+  }
+}
+
+export function pubkeyOrScriptHashToPayment(publicKeyOrScriptHash: string, addressVersion: AddressVersion): Payment {
+  const address = getAddressByPublicKeyOrScriptHash(publicKeyOrScriptHash, addressVersion);
+  const outScript = getScriptPublicKey(Buffer.from(publicKeyOrScriptHash, 'hex'), addressVersion);
   const payment: Payment = {
-    address: getAddressByPublicKeyOrScriptHash(publicKeyOrScriptHash, scriptType),
-    outScript: getScriptPublicKey(Buffer.from(publicKeyOrScriptHash, 'hex'), scriptType),
+    address,
+    outScript,
   };
-  validatePayment(payment, pubkeyOrScriptHashToPayment.name, scriptType);
+  validatePayment(payment, pubkeyOrScriptHashToPayment.name, addressVersion);
   return payment;
 }

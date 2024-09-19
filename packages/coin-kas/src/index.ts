@@ -4,10 +4,10 @@ import {
   getAddressByPublicKeyOrScriptHash,
   addressToOutScript,
   pubkeyOrScriptHashToPayment,
-  toXOnly,
+  getPubkeyOrScriptHash,
 } from './utils/address';
 import signTransferTransaction from './sign';
-import { Script, ScriptType, SignTxType } from './config/types';
+import { Payment, Script, ScriptType, SignTxType } from './config/types';
 
 export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
   public addressToOutScript: (address: string) => Script;
@@ -26,8 +26,8 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     purpose?: number
   ): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
-    const processedPublicKey = scriptType === ScriptType.P2PK_SCHNORR ? toXOnly(publicKey) : publicKey;
-    return getAddressByPublicKeyOrScriptHash(processedPublicKey, scriptType);
+    const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, publicKey);
+    return getAddressByPublicKeyOrScriptHash(pubkeyOrScriptHash, addressVersion);
   }
 
   async getAddressAndOutScript(
@@ -37,10 +37,10 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     scriptType: ScriptType,
     addressIndex: number,
     purpose?: number
-  ): Promise<{ address: string; outScript: Buffer }> {
+  ): Promise<Payment> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
-    const processedPublicKey = scriptType === ScriptType.P2PK_SCHNORR ? toXOnly(publicKey) : publicKey;
-    return pubkeyOrScriptHashToPayment(processedPublicKey, scriptType);
+    const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, publicKey);
+    return pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
   }
 
   async getAddressAndOutScriptByAccountKey(
@@ -48,10 +48,10 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     accChainCode: string,
     addressIndex: number,
     scriptType: ScriptType
-  ): Promise<{ address: string; outScript: Buffer }> {
+  ): Promise<Payment> {
     const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
-    const processedPublicKey = scriptType === ScriptType.P2PK_SCHNORR ? toXOnly(publicKey) : publicKey;
-    return pubkeyOrScriptHashToPayment(processedPublicKey, scriptType);
+    const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, publicKey);
+    return pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
   }
 
   async signTransaction(signTxType: SignTxType): Promise<string> {
