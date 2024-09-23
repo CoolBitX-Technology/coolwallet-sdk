@@ -38,12 +38,12 @@ export class Transaction {
 
       const inputPreValueBN = new BigNumber(input.preValue);
       const pubKey = input.pubkeyBuf?.toString('hex') as string;
-      const scriptType = input.scriptType as ScriptType;
-      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, pubKey);
+      const inputScriptType = input.scriptType as ScriptType;
+      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(inputScriptType, pubKey);
       this.utxos.push({
         version: 0,
         pkScript: pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion).outScript,
-        scriptType,
+        scriptType: inputScriptType,
         amount: inputPreValueBN.toNumber(),
       });
       totalInput = inputPreValueBN.plus(new BigNumber(totalInput)).toNumber();
@@ -52,11 +52,11 @@ export class Transaction {
     let totalOutput = 0;
     const output = txData.output;
     const outputValueBN = new BigNumber(output.value);
-    const { scriptType, outScript, outPubkeyOrHash } = addressToOutScript(output.address);
+    const { scriptType: outputScriptType, outScript, outPubkeyOrHash } = addressToOutScript(output.address);
     this.outputs.push({
       scriptPublicKey: {
         version: 0,
-        scriptType,
+        scriptType: outputScriptType,
         scriptPublicKey: toHex(outScript),
         publicKeyOrScriptHash: toHex(outPubkeyOrHash),
       },
@@ -69,14 +69,14 @@ export class Transaction {
     if (change) {
       const changeValueBN = new BigNumber(change.value);
       const pubKey = change.pubkeyBuf?.toString('hex') as string;
-      const scriptType = change.scriptType as ScriptType;
-      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, pubKey);
-      const { outScript } = pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
+      const changeScriptType = change.scriptType as ScriptType;
+      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(changeScriptType, pubKey);
+      const { outScript: changeScript } = pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
       this.outputs.push({
         scriptPublicKey: {
           version: 0,
-          scriptType,
-          scriptPublicKey: toHex(outScript),
+          scriptType: changeScriptType,
+          scriptPublicKey: toHex(changeScript),
           publicKeyOrScriptHash: pubkeyOrScriptHash,
         },
         amount: changeValueBN.toNumber(),

@@ -172,12 +172,12 @@ function getScriptPublicKey(publicKeyOrScripthash: Buffer, addressVersion: Addre
   const endingOpCode = getEndingOpCode(addressVersion);
   const length = publicKeyOrScripthash.length;
   const lengthByte = Buffer.from([length]);
+  const prefixOpCode = Buffer.from([OP_CODE.OP_HASH256]);
   switch (addressVersion) {
     case 0:
     case 1:
       return Buffer.concat([lengthByte, publicKeyOrScripthash, endingOpCode], length + 2);
     case 8:
-      const prefixOpCode = Buffer.from([OP_CODE.OP_HASH256]);
       return Buffer.concat([prefixOpCode, lengthByte, publicKeyOrScripthash, endingOpCode], length + 3);
     default:
       throw new Error(`Unsupported payToAddrScript address version: ${addressVersion}`);
@@ -186,9 +186,11 @@ function getScriptPublicKey(publicKeyOrScripthash: Buffer, addressVersion: Addre
 
 export function addressToOutScript(address: string): Script {
   const { payload: publicKeyOrScripthash, addressVersion } = decodeAddress(address);
+  const scriptType = getScriptType(addressVersion);
+  const outScript = getScriptPublicKey(publicKeyOrScripthash, addressVersion);
   return {
-    scriptType: getScriptType(addressVersion),
-    outScript: getScriptPublicKey(publicKeyOrScripthash, addressVersion),
+    scriptType,
+    outScript,
     outPubkeyOrHash: publicKeyOrScripthash,
   };
 }
