@@ -88,6 +88,19 @@ function getType(versionByte: number) {
   }
 }
 
+export function getScriptType(addressVersion: AddressVersion): ScriptType {
+  switch (addressVersion) {
+    case AddressVersion.PUBKEY:
+      return ScriptType.P2PK_SCHNORR;
+    case AddressVersion.PUBKEY_ECDSA:
+      return ScriptType.P2PK_ECDSA;
+    case AddressVersion.SCRIPT_HASH:
+      return ScriptType.P2SH;
+    default:
+      throw new error.SDKError(getScriptType.name, `Unsupported addressVersion: ${addressVersion}`);
+  }
+}
+
 function hasSingleCase(string: string) {
   return string === string.toLowerCase() || string === string.toUpperCase();
 }
@@ -193,19 +206,6 @@ export function addressToOutScript(address: string): Script {
     outScript,
     outPubkeyOrHash: publicKeyOrScripthash,
   };
-}
-
-export function getScriptType(addressVersion: AddressVersion): ScriptType {
-  switch (addressVersion) {
-    case AddressVersion.PUBKEY:
-      return ScriptType.P2PK_SCHNORR;
-    case AddressVersion.PUBKEY_ECDSA:
-      return ScriptType.P2PK_ECDSA;
-    case AddressVersion.SCRIPT_HASH:
-      return ScriptType.P2SH;
-    default:
-      throw new error.SDKError(getScriptType.name, `Unsupported addressVersion: ${addressVersion}`);
-  }
 }
 
 export function getAddressVersion(scriptType: ScriptType): AddressVersion {
