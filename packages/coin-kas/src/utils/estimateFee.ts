@@ -75,28 +75,14 @@ function estimateTransactionSerializedSize(inputs: Array<TransactionInput>, outp
 }
 
 function calculateInputSigOpCounts(inputs: Array<TransactionInput>): number {
-  let inputSigOpCounts = 0;
-  inputs.forEach((input) => {
-    if ('sigOpCount' in input) {
-      inputSigOpCounts = input.sigOpCount;
-    } else {
-      return 1;
-    }
-  });
-  return inputSigOpCounts;
+  return inputs.reduce((total, input) => total + input.sigOpCount, 0);
 }
 
 function calculateOutputsScriptPubKeySize(outputs: Array<TransactionOutput>): number {
-  let scriptPubKeySize = 0;
-  outputs.forEach((output) => {
-    scriptPubKeySize += 2; // version (uint16)
-    if ('scriptPublicKey' in output) {
-      scriptPubKeySize += output?.scriptPublicKey?.scriptPublicKey.length / 2;
-    } else {
-      scriptPubKeySize += 34;
-    }
-  });
-  return scriptPubKeySize;
+  return outputs.reduce((total, output) => {
+    // version (uint16) + scriptPublicKey
+    return total + 2 + output.scriptPublicKey.scriptPublicKey.length / 2;
+  }, 0);
 }
 
 export function getMassAndSize(inputs: Array<TransactionInput>, outputs: Array<TransactionOutput>): TxInfo {
