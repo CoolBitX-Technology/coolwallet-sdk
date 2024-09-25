@@ -1,5 +1,6 @@
 TEST_FIXTURE_SCOPES="--scope @coolwallet/core --scope @coolwallet/testing-library --scope @coolwallet/transport-jre-http"
-TEST_SCOPESS=(
+TEST_SCOPES=(
+  --scope @coolwallet/core
   --scope @coolwallet/btc
   --scope @coolwallet/dot
   --scope @coolwallet/kas
@@ -12,6 +13,7 @@ TEST_SCOPESS=(
   --scope @coolwallet/terra
   --scope @coolwallet/cosmos
   --scope @coolwallet/xtz
+  --scope @coolwallet/atom 
 )
 LERNA="npx lerna"
 
