@@ -18,7 +18,5 @@ TEST_SCOPES=(
 LERNA="npx lerna"
 
 $LERNA bootstrap $TEST_FIXTURE_SCOPES
-$LERNA run build $TEST_FIXTURE_SCOPES
 $LERNA bootstrap "${TEST_SCOPES[@]}"
-$LERNA run build "${TEST_SCOPES[@]}"
 $LERNA run test "${TEST_SCOPES[@]}" --concurrency 1
