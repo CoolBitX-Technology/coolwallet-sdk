@@ -6,7 +6,7 @@ import DOT, { COIN_SPECIES } from '../src';
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
 
-describe('Test ADA SDK', () => {
+describe('Test DOT SDK', () => {
   let transport: Transport;
   let props: Mandatory;
   const dotSDK = new DOT(COIN_SPECIES.DOT);

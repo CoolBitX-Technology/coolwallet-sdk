@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "jest --runInBand",
+    "ci-test-report": "NODE_ENV=development jest --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit" ,
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".js,.ts,\" --source-maps inline",
     "build": "del-cli lib; npm run build:types; npm run build:ts",

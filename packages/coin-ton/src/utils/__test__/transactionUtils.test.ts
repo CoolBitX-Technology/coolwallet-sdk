@@ -1,6 +1,6 @@
 import { finalizeTransferTransaction } from '../transactionUtils';
 
-describe('Test transactionUtils.ts', () => {
+describe('Test TON SDK', () => {
   it('Test composeFinalTransaction', async () => {
     const transaction = {
       toAddress: 'EQAW5QLk3XvW3HMbLqkE9wXkL9NdGpE1555tUxhdea8pVIbJ',

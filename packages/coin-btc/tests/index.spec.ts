@@ -46,7 +46,7 @@ describe('Test BTC SDK', () => {
     // P2WPKH
     const p2wpkh = await btc.getAddress(transport, props.appPrivateKey, props.appId, ScriptType.P2WPKH, 0);
     const { address: expected_p2wpkh } = bitcoin.payments.p2wpkh({ pubkey: publicKey });
-    expect(p2wpkh).toEqual(expected_p2wpkh);
+    expect(p2wpkh).toEqual('123');
   });
 
   it('BTC test sign P2PKH without change transaction', async () => {
