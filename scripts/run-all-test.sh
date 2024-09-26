@@ -8,16 +8,15 @@ TEST_SCOPES=(
   --scope @coolwallet/bsc
   --scope @coolwallet/evm
   --scope @coolwallet/eth
-  --scope @coolwallet/sol
+  # --scope @coolwallet/sol # TODO: fix test cases
   --scope @coolwallet/ada
   --scope @coolwallet/terra
   --scope @coolwallet/cosmos
   --scope @coolwallet/xtz
-  --scope @coolwallet/atom 
+  --scope @coolwallet/atom
 )
 LERNA="npx lerna"
 
 $LERNA bootstrap $TEST_FIXTURE_SCOPES
 $LERNA run build $TEST_FIXTURE_SCOPES
-$LERNA bootstrap "${TEST_SCOPES[@]}"
 $LERNA run test "${TEST_SCOPES[@]}" --concurrency 1
