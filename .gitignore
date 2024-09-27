@@ -3,3 +3,6 @@ packages/**/lib/
 **/.DS_Store 
 packages/**/coverage/
 packages/**/.nyc_output/
+
+scripts/reports
+scripts/allure-report
