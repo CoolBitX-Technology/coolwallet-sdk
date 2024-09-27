@@ -18,7 +18,7 @@ describe('Test ETH SDK', () => {
   let transport: Transport;
   const wallet = new Wallet();
   const eth = new ETH();
-  const mnemonic = bip39.generateMnemonic();
+  const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
   beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
