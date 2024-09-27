@@ -39,7 +39,7 @@ export const convertToDER = (sig: { r: string; s: string }): { r: string; s: str
   return derSignature;
 };
 
-export const getCanonicalSignature = (signature: { s?: any; r?: any }) => {
+export const getCanonicalSignature = (signature: { s?: any; r?: any, s32?: any }) => {
   const modulusString = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141';
   const modulus = new BN(modulusString, 16);
   const s = new BN(signature.s, 16);
@@ -54,14 +54,20 @@ export const getCanonicalSignature = (signature: { s?: any; r?: any }) => {
     canonicalS = t.toString(16);
   }
 
-  canonicalS = canonicalS.padStart(64, '0');
+  // handling s
+  const s32 = canonicalS.padStart(64, '0');
+  const slength = canonicalS.length % 2 === 0 ? canonicalS.length : canonicalS.length + 1;
+  canonicalS = canonicalS.padStart(slength, '0');
+  
+  // handing r
   const rBigNumber = r.toString(16);
-
-  const canonicalR = rBigNumber.padStart(64, '0');
+  const rlength = rBigNumber.length % 2 === 0 ? rBigNumber.length : rBigNumber.length + 1;
+  const canonicalR = rBigNumber.padStart(rlength, '0');
 
   const canonicalSignature = {
     r: canonicalR,
     s: canonicalS,
+    s32: s32,
   };
 
   return canonicalSignature;
