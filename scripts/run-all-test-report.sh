@@ -1,33 +1,31 @@
 TEST_FIXTURE_SCOPES="--scope @coolwallet/core --scope @coolwallet/testing-library --scope @coolwallet/transport-jre-http"
 TEST_SCOPES=(
-  @coolwallet/core
-  @coolwallet/btc
-  @coolwallet/dot
-  @coolwallet/kas
-  @coolwallet/ton
-  @coolwallet/bsc
-  @coolwallet/evm
-  @coolwallet/eth
+  --scope @coolwallet/core
+  --scope @coolwallet/btc
+  --scope @coolwallet/dot
+  --scope @coolwallet/kas
+  --scope @coolwallet/ton
+  --scope @coolwallet/bsc
+  --scope @coolwallet/evm
+  --scope @coolwallet/eth
   # --scope @coolwallet/sol # TODO: fix test cases
-  @coolwallet/ada
-  @coolwallet/terra
-  @coolwallet/cosmos
-  @coolwallet/xtz
-  @coolwallet/atom
+  --scope @coolwallet/ada
+  --scope @coolwallet/terra
+  --scope @coolwallet/cosmos
+  --scope @coolwallet/xtz
+  --scope @coolwallet/atom
 )
 LERNA="npx lerna"
 
 $LERNA bootstrap $TEST_FIXTURE_SCOPES
 $LERNA run build $TEST_FIXTURE_SCOPES
+$LERNA bootstrap "${TEST_SCOPES[@]}"
 
 # 移除之前的測試報告
 rm -rf scripts/reports scripts/allure-report
 
 # 執行測試
-for scope in "${TEST_SCOPES[@]}"; do
-  echo "Running tests for --scope $scope..."
-  $LERNA run ci-test-report --scope $scope --concurrency 1 || echo "Tests failed for $scope, continuing to next package."
-done
+$LERNA run ci-test-report "${TEST_SCOPES[@]}" --concurrency 1 --no-bail || echo "run tests completed"
 
 # 建立測試報告目錄
 mkdir -p scripts/reports/junit
@@ -44,7 +42,7 @@ done
 find packages -type f -name 'junit.xml' -exec rm -f {} +
 
 # 產生 Allure report 
-allure generate ./scripts/reports/junit --clean -o ./scripts/allure-report
+npx allure generate ./scripts/reports/junit --clean -o ./scripts/allure-report
 
 # open Allure report
-allure open ./scripts/allure-report
+npx allure open ./scripts/allure-report
