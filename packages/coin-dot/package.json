@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/dot",
-  "version": "1.1.7",
+  "version": "1.1.8.beta.0",
   "description": "Coolwallet polkadot sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -29,7 +29,7 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.1"
+    "@coolwallet/core": "^1.1.30-beta.1"
   },
   "repository": {
     "type": "git",
