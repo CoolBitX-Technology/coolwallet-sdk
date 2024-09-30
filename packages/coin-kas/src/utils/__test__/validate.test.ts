@@ -25,7 +25,7 @@ import {
   testNormalChange,
 } from './testData';
 
-describe('Test validate.ts', () => {
+describe('Test KAS SDK', () => {
   const decimals = 8;
   describe('Test validateInputs', () => {
     it('Test normal input', async () => {

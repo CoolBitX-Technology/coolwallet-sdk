@@ -8,7 +8,7 @@ import {
   toXOnly,
 } from '../address';
 
-describe('Test address.ts', () => {
+describe('Test KAS SDK', () => {
   it('Test getAddressByPublicKey with version 0', async () => {
     const publicKey = '03da8eaa97bf4457368188c78e92661fdf2d96ce166b225d0dc6c1c3e322ef62ef';
     const xOnlyPubKey = toXOnly(publicKey);

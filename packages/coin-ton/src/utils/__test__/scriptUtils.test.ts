@@ -1,6 +1,6 @@
 import { getArgument, getTransferTokenArgument, saveBitAsByte } from '../scriptUtils';
 
-describe('Test scriptUtils.ts', () => {
+describe('Test TON SDK', () => {
   describe('Test saveBitAsByte', () => {
     it.each`
       hex       | result
@@ -24,7 +24,7 @@ describe('Test scriptUtils.ts', () => {
       ${'3'}    | ${'0000000000000101'}
       ${'e'}    | ${'0000000001010100'}
       ${'f'}    | ${'0000000001010101'}
-    `('reslut="$result" if hex="$hex"', ({ hex, result }) => {
+    `('reslut=$result if hex=$hex', ({ hex, result }) => {
       expect(saveBitAsByte(hex)).toBe(result);
     });
   });

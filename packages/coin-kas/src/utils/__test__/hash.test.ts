@@ -6,7 +6,8 @@ import {
   testTransaction,
 } from './testData';
 
-describe('Test hash.ts', () => {
+
+  describe('Test KAS SDK', () => {
   it('Test getTransferArgument with v0 output address', async () => {
     console.log('transaction: ' + JSON.stringify(testTransaction, null, 2));
     const transferArgumentBuf = await getTransferArgumentBuffer(testTransaction);

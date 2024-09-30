@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js';
 
 
 
-describe('Transaction Util Test', function () {
+describe('Test Atom SDK', function () {
   const publicKey = '02f10d4579a3bfbd142afbf2ab36f02d6ec427cb8fbad65ebb00b77abbb4c34ca8'
   
   it('- Tx type: send', function () {

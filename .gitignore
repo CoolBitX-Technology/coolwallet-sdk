@@ -1,5 +1,8 @@
 node_modules
 packages/**/lib/
-**/.DS_Store 
+**/.DS_Store
 packages/**/coverage/
 packages/**/.nyc_output/
+
+scripts/reports
+scripts/allure-report
