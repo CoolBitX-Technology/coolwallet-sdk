@@ -136,5 +136,5 @@ jobs:
         publish_dir: allure-history
         
     - name: Set report URL
-      run: echo "REPORT_URL=https://coolbitx-technology.github.io/brian-test/all-services/${{ github.run_number }}" >> $GITHUB_ENV
+      run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"
           
