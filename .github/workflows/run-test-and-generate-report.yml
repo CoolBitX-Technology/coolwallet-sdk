@@ -11,7 +11,8 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
+    outputs:
+      upload_status: ${{ steps.set_status.outputs.upload_status }} 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -100,17 +101,26 @@ jobs:
           ${{ github.workspace }}/scripts/reports/junit/
 
     - name: Set upload status
+      id: set_status
       run: |
-        if [ "${{ steps.upload_result.outputs.artifact-name }}" == "" ]; then
-          echo "UPLOAD_STATUS=false" >> $GITHUB_ENV
+        if [ "${{ steps.upload_result.outputs.artifact-id }}" == "" ]; then
+          echo "upload_status=false" >> $GITHUB_ENV
+          echo "::set-output name=upload_status::false"
+          echo "upload_status is false"
         else
-          echo "UPLOAD_STATUS=true" >> $GITHUB_ENV
-        fi
+          echo "upload_status=true" >> $GITHUB_ENV
+          echo "::set-output name=upload_status::true"
+          echo "upload_status is true"
+        fi       
+
+    - name: Print upload status
+      run: |
+        echo "The upload status is $UPLOAD_STATUE"
   
   report:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if:  ${{ github.UPLOAD_STATUS }}== 'true' 
+    if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
     steps:            
     - name: Get Allure history
       uses: actions/checkout@v2
