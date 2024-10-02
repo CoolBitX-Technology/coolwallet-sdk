@@ -1,4 +1,4 @@
-name: Run Test and Generate Report
+name: Execute Test and Generate Report
 
 on: 
   pull_request:
@@ -92,15 +92,25 @@ jobs:
       run: sh scripts/handing-report.sh
 
     - name: Upload test result
+      id: upload_result
       uses: actions/upload-artifact@v4.3.6
       with:
         name: result
         path: |
           ${{ github.workspace }}/scripts/reports/junit/
 
+    - name: Set upload status
+      run: |
+        if [ "${{ steps.upload_result.outputs.artifact-name }}" == "" ]; then
+          echo "UPLOAD_STATUS=false" >> $GITHUB_ENV
+        else
+          echo "UPLOAD_STATUS=true" >> $GITHUB_ENV
+        fi
+  
   report:
     needs: build-and-push
     runs-on: ubuntu-latest
+    if:  ${{ github.UPLOAD_STATUS }}== 'true' 
     steps:            
     - name: Get Allure history
       uses: actions/checkout@v2
