@@ -1,4 +1,4 @@
-name: Execute Test and Generate Report
+name: Test and Generate Report
 
 on: 
   pull_request:
