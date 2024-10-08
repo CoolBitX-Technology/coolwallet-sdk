@@ -28,18 +28,18 @@ import type {
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
-const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS) };
-const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
-const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
-const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO) };
-const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM) };
-const coinFlare = { name: 'Flare', api: new EVM(CHAIN.FLARE) };
-const coinOKX = { name: 'OKX', api: new EVM(CHAIN.OKX) };
+const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS.id) };
+const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON.id) };
+const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC.id) };
+const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO.id) };
+const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM.id) };
+const coinFlare = { name: 'Flare', api: new EVM(CHAIN.FLARE.id) };
+const coinOKX = { name: 'OKX', api: new EVM(CHAIN.OKX.id) };
 // Layer 2
-const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM) };
-const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
-const coinZkSync = { name: 'zkSync', api: new EVM(CHAIN.ZKSYNC) };
-const coinBase = { name: 'Base', api: new EVM(CHAIN.BASE) };
+const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM.id) };
+const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM.id) };
+const coinZkSync = { name: 'zkSync', api: new EVM(CHAIN.ZKSYNC.id) };
+const coinBase = { name: 'Base', api: new EVM(CHAIN.BASE.id) };
 
 const TEST_COINS = [
   coinCronos,

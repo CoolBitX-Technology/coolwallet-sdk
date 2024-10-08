@@ -11,10 +11,29 @@ import * as SEArguments from './utils/arguments';
 import type { ChainProps } from './chain/types';
 import type * as Transaction from './transaction/types';
 
+import * as CHAIN from './chain';
+
+const CHAIN_MAP = CHAIN as Record<string, ChainProps>;
+
+function getChainById(chainId: number): ChainProps {
+  const chainEnums = Object.keys(CHAIN_MAP);
+
+  for (const chainEnum of chainEnums) {
+    const chain = CHAIN_MAP[chainEnum];
+    if (chain.id === chainId) {
+      return chain;
+    }
+  }
+
+  throw new Error(`getChainById >> with id ${chainId} not found`);
+  // return new CustomEvmChain(chainId);
+}
+
 class Evm extends COIN.ECDSACoin {
   chain: ChainProps;
 
-  constructor(chain: ChainProps) {
+  constructor(chainId: number) {
+    const chain = getChainById(chainId);
     super(chain.coinType);
     this.chain = chain;
   }
