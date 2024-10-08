@@ -10,7 +10,7 @@ import { pubKeyToAddress } from './utils/address';
 import * as SEArguments from './utils/arguments';
 import type { ChainProps } from './chain/types';
 import type * as Transaction from './transaction/types';
-
+import CustomEvm from './chain/customEvm';
 import * as CHAIN from './chain';
 
 const CHAIN_MAP = CHAIN as Record<string, ChainProps>;
@@ -24,9 +24,7 @@ function getChainById(chainId: number): ChainProps {
       return chain;
     }
   }
-
-  throw new Error(`getChainById >> with id ${chainId} not found`);
-  // return new CustomEvmChain(chainId);
+  return new CustomEvm(chainId);
 }
 
 class Evm extends COIN.ECDSACoin {

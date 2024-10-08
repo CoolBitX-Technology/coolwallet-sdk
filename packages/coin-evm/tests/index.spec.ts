@@ -40,6 +40,8 @@ const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM.id) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM.id) };
 const coinZkSync = { name: 'zkSync', api: new EVM(CHAIN.ZKSYNC.id) };
 const coinBase = { name: 'Base', api: new EVM(CHAIN.BASE.id) };
+// custom evm
+const customCoinScroll = { name: 'Scroll', api: new EVM(534352) };
 
 const TEST_COINS = [
   coinCronos,
@@ -53,6 +55,7 @@ const TEST_COINS = [
   coinOKX,
   coinZkSync,
   coinBase,
+  customCoinScroll,
 ];
 
 describe('Test EVM SDK', () => {
@@ -74,17 +77,19 @@ describe('Test EVM SDK', () => {
       wallet.coinType = api.coinType;
     });
 
-    it('Get address 0', async () => {
-      const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
-      const expectedAddress = await wallet.getAddress(0);
-      expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
-    });
+    describe('Recover address', () => {
+      it('Get address 0', async () => {
+        const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
+        const expectedAddress = await wallet.getAddress(0);
+        expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
+      });
 
-    it('Get address 0 from account key', async () => {
-      const accExtKey = await wallet.getAccountAddress();
-      const address = await api.getAddressByAccountKey(accExtKey.publicKey, accExtKey.chainCode, 0);
-      const expectedAddress = await wallet.getAddress(0);
-      expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
+      it('Get address 0 from account key', async () => {
+        const accExtKey = await wallet.getAccountAddress();
+        const address = await api.getAddressByAccountKey(accExtKey.publicKey, accExtKey.chainCode, 0);
+        const expectedAddress = await wallet.getAddress(0);
+        expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
+      });
     });
 
     it.each(TRANSFER_TRANSACTION)('Send transaction to $to', async (transaction) => {
