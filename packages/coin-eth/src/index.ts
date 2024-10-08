@@ -74,7 +74,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
   async signEIP1559Transfer(signTxData: types.signEIP1559Tx): Promise<string> {
     const version = await info.getSEVersion(signTxData.transport);
-    if (version < 311) {
+    if (signTxData.transport.cardType === 'Pro' && version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signTransferTransaction(data);
     }
@@ -89,7 +89,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
   async signEIP1559ERC20(signTxData: types.signEIP1559Tx, tokenSignature = ''): Promise<string> {
     const version = await info.getSEVersion(signTxData.transport);
-    if (version < 311) {
+    if (signTxData.transport.cardType === 'Pro' && version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signERC20Transaction(data, tokenSignature);
     }
@@ -104,7 +104,7 @@ export default class ETH extends COIN.ECDSACoin implements COIN.Coin {
 
   async signEIP1559Smart(signTxData: types.signEIP1559Tx): Promise<string> {
     const version = await info.getSEVersion(signTxData.transport);
-    if (version < 311) {
+    if (signTxData.transport.cardType === 'Pro' && version < 311) {
       const data: types.signTx = convertEIP1559IntoLegacyTx(signTxData);
       return this.signSmartContractTransaction(data);
     }
