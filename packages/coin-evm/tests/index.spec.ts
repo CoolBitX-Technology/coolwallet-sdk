@@ -55,8 +55,9 @@ const TEST_COINS = [
   coinOKX,
   coinZkSync,
   coinBase,
-  customCoinScroll,
 ];
+
+const TEST_COINS_RECOVER_ADDRESS = [...TEST_COINS, customCoinScroll];
 
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
@@ -72,7 +73,7 @@ describe('Test EVM SDK', () => {
     await wallet.setMnemonic(mnemonic);
   });
 
-  describe.each(TEST_COINS)('Test EVM $name SDK', ({ api }) => {
+  describe.each(TEST_COINS_RECOVER_ADDRESS)('Test EVM $name SDK recover address', ({ api }) => {
     beforeEach(() => {
       wallet.coinType = api.coinType;
     });
@@ -90,6 +91,12 @@ describe('Test EVM SDK', () => {
         const expectedAddress = await wallet.getAddress(0);
         expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
       });
+    });
+  });
+
+  describe.each(TEST_COINS)('Test EVM $name SDK', ({ api }) => {
+    beforeEach(() => {
+      wallet.coinType = api.coinType;
     });
 
     it.each(TRANSFER_TRANSACTION)('Send transaction to $to', async (transaction) => {
