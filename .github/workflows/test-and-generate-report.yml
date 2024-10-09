@@ -98,7 +98,7 @@ jobs:
       with:
         name: result
         path: |
-          ${{ github.workspace }}/scripts/reports/junit/
+          ${{ github.workspace }}/sdk/scripts/reports/junit/
 
     - name: Set upload status
       id: set_status
