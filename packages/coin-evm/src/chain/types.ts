@@ -15,7 +15,7 @@ interface TokenProps {
 }
 
 abstract class ChainProps {
-  abstract readonly id: number;
+  abstract id: number;
   abstract readonly symbol: string;
   abstract readonly signature: string;
   abstract readonly tokens: Record<string, TokenProps>;

@@ -28,18 +28,20 @@ import type {
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
-const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS) };
-const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON) };
-const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC) };
-const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO) };
-const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM) };
-const coinFlare = { name: 'Flare', api: new EVM(CHAIN.FLARE) };
-const coinOKX = { name: 'OKX', api: new EVM(CHAIN.OKX) };
+const coinCronos = { name: 'Cronos', api: new EVM(CHAIN.CRONOS.id) };
+const coinPolygon = { name: 'Polygon', api: new EVM(CHAIN.POLYGON.id) };
+const coinAvaxC = { name: 'Avax C', api: new EVM(CHAIN.AVAXC.id) };
+const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO.id) };
+const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM.id) };
+const coinFlare = { name: 'Flare', api: new EVM(CHAIN.FLARE.id) };
+const coinOKX = { name: 'OKX', api: new EVM(CHAIN.OKX.id) };
 // Layer 2
-const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM) };
-const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM) };
-const coinZkSync = { name: 'zkSync', api: new EVM(CHAIN.ZKSYNC) };
-const coinBase = { name: 'Base', api: new EVM(CHAIN.BASE) };
+const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM.id) };
+const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM.id) };
+const coinZkSync = { name: 'zkSync', api: new EVM(CHAIN.ZKSYNC.id) };
+const coinBase = { name: 'Base', api: new EVM(CHAIN.BASE.id) };
+// custom evm
+const customCoinScroll = { name: 'Scroll', api: new EVM(534352) };
 
 const TEST_COINS = [
   coinCronos,
@@ -55,6 +57,8 @@ const TEST_COINS = [
   coinBase,
 ];
 
+const TEST_COINS_RECOVER_ADDRESS = [...TEST_COINS, customCoinScroll];
+
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
@@ -69,22 +73,30 @@ describe('Test EVM SDK', () => {
     await wallet.setMnemonic(mnemonic);
   });
 
-  describe.each(TEST_COINS)('Test EVM $name SDK', ({ api }) => {
+  describe.each(TEST_COINS_RECOVER_ADDRESS)('Test EVM $name SDK recover address', ({ api }) => {
     beforeEach(() => {
       wallet.coinType = api.coinType;
     });
 
-    it('Get address 0', async () => {
-      const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
-      const expectedAddress = await wallet.getAddress(0);
-      expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
-    });
+    describe('Recover address', () => {
+      it('Get address 0', async () => {
+        const address = await api.getAddress(transport, props.appPrivateKey, props.appId, 0);
+        const expectedAddress = await wallet.getAddress(0);
+        expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
+      });
 
-    it('Get address 0 from account key', async () => {
-      const accExtKey = await wallet.getAccountAddress();
-      const address = await api.getAddressByAccountKey(accExtKey.publicKey, accExtKey.chainCode, 0);
-      const expectedAddress = await wallet.getAddress(0);
-      expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
+      it('Get address 0 from account key', async () => {
+        const accExtKey = await wallet.getAccountAddress();
+        const address = await api.getAddressByAccountKey(accExtKey.publicKey, accExtKey.chainCode, 0);
+        const expectedAddress = await wallet.getAddress(0);
+        expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
+      });
+    });
+  });
+
+  describe.each(TEST_COINS)('Test EVM $name SDK', ({ api }) => {
+    beforeEach(() => {
+      wallet.coinType = api.coinType;
     });
 
     it.each(TRANSFER_TRANSACTION)('Send transaction to $to', async (transaction) => {
