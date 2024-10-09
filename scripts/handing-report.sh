@@ -1,6 +1,6 @@
 echo "Starting to handle report"
 
-ls -l /packages/coin-ada
+ls -l packages/coin-ada
 
 # 建立測試報告目錄
 mkdir -p scripts/reports/junit
@@ -17,7 +17,7 @@ done
 
 echo "move junit file finished"
 
-ls -l /scripts/reports/junit
+ls -l scripts/reports/junit
 
 # 移除所有 junit.xml 文件
 find packages -type f -name 'junit.xml' -exec rm -f {} +
