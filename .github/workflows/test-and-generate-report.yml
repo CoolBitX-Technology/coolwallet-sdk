@@ -123,9 +123,10 @@ jobs:
     if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
     steps:            
     - name: Get Allure history
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       if: always()
       with:
+        token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
         ref: gh-pages
         path: gh-pages
         
@@ -151,7 +152,7 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       if: always()
       with:
-        github_token: ${{ secrets.COOLWALLET_TEAM_GH_RELEASE }}
+        github_token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
         publish_branch: gh-pages
         publish_dir: allure-history
         
