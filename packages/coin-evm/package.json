@@ -11,7 +11,7 @@
     "build": "del-cli lib && npm run build:types && npm run build:ts",
     "test": "NODE_ENV=development jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-report": "NODE_ENV=production jest --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
+    "ci-test-report": "NODE_ENV=development jest --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "repository": {
     "type": "git",
