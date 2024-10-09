@@ -1,5 +1,12 @@
+echo ">>> Starting to handle report"
+
+echo ">>> ls -l packages/coin-ada"
+ls -l packages/coin-ada
+
 # 建立測試報告目錄
 mkdir -p scripts/reports/junit
+
+echo ">>> mkdir file finished"
 
 # 移動測試報告
 for dir in packages/coin-* packages/core; do
@@ -9,5 +16,15 @@ for dir in packages/coin-* packages/core; do
   fi
 done
 
+echo ">>> move junit file finished"
+
+echo ">>> ls -l scripts/reports/junit"
+ls -l scripts/reports/junit
+
+echo ">>> pwd"
+pwd
+
 # 移除所有 junit.xml 文件
 find packages -type f -name 'junit.xml' -exec rm -f {} +
+
+echo ">>> remove junit file finished"
