@@ -9,8 +9,7 @@
     "build": "npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish",
     "test": "mocha -r ts-node/register tests/*.test.ts",
-    "testCover": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report",
-    "ci-test-report": "mocha -r ts-node/register tests/*.test.ts --reporter mocha-junit-reporter --reporter-options mochaFile=junit.xml"
+    "testCover": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report"
       },
   "keywords": [
     "atom",
