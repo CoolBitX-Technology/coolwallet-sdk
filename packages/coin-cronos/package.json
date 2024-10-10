@@ -16,7 +16,7 @@
     "eth-sig-util": "^3.0.1",
     "keccak": "^3.0.2",
     "rlp": "^2.2.7",
-    "web3": "^1.7.0"
+    "web3": "^4.7.0"
   },
   "peerDependencies": {
     "@coolwallet/core": "^1.1.1"
