@@ -129,7 +129,7 @@ jobs:
       uses: actions/checkout@v2
       if: always()
       with:
-        repository: CoolBitX-Technology/brian-test
+        repository: CoolBitX-Technology/coolwallet-sdk
         ref: gh-pages
         path: gh-pages
         
