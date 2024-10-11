@@ -24,7 +24,7 @@ jobs:
         token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
 
     - name: Authenticate gcloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.DEV_CP_GCP_SVC_GITHUB_RUNNER_KEY_FILE }}
 
