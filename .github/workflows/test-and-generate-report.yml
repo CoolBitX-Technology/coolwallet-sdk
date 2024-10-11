@@ -126,12 +126,13 @@ jobs:
     if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
     steps:            
     - name: Get Allure history
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
+      if: always()
+      continue-on-error: true
       with:
         repository: CoolBitX-Technology/coolwallet-sdk
         path: gh-pages
         ref: gh-pages
-        token: ${{ secrets.COOLWALLET_TEAM_GH_RELEASE }}
         
     - name: Download all artifacts
       uses: actions/download-artifact@v4
