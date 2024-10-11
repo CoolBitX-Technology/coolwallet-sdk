@@ -141,7 +141,6 @@ jobs:
       run: |
         mkdir allure-results
         mv -v ./result/* ./allure-results/
-        shell: bash
         
     - name: Build Test Report
       uses: simple-elf/allure-report-action@v1.7
@@ -156,7 +155,7 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       if: always()
       with:
-        github_token: ${{ secrets.COOLWALLET_TEAM_GH_RELEASE }}
+        github_token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
         publish_branch: gh-pages
         publish_dir: allure-history
         
