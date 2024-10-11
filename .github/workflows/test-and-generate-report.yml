@@ -54,6 +54,9 @@ jobs:
         MODIFIED_COINS=$(echo $MODIFIED_COINS | xargs)  # Trim leading/trailing whitespace
         echo "modified_coins=$MODIFIED_COINS" >> $GITHUB_OUTPUT
 
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
     - name: Docker auth
       run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
