@@ -146,11 +146,12 @@ jobs:
       uses: simple-elf/allure-report-action@v1.7
       if: always()
       with:
+        gh_pages: gh-pages
         allure_history: allure-history
         allure_results: allure-results
         subfolder: all-services
         keep_reports: 30
-        
+      
     - name: Publish test report
       uses: peaceiris/actions-gh-pages@v3
       if: always()
@@ -158,7 +159,7 @@ jobs:
         github_token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
         publish_branch: gh-pages
         publish_dir: allure-history
-        
+
     - name: Set report URL
       run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"
           
