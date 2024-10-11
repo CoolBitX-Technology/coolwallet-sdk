@@ -25,6 +25,7 @@ import type {
   EIP712TypedDataTransaction,
   LegacyTransaction,
 } from '../src/transaction/types';
+import CustomEvm from '../src/chain/customEvm';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
@@ -55,9 +56,8 @@ const TEST_COINS = [
   coinOKX,
   coinZkSync,
   coinBase,
+  customCoinScroll,
 ];
-
-const TEST_COINS_RECOVER_ADDRESS = [...TEST_COINS, customCoinScroll];
 
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
@@ -73,7 +73,7 @@ describe('Test EVM SDK', () => {
     await wallet.setMnemonic(mnemonic);
   });
 
-  describe.each(TEST_COINS_RECOVER_ADDRESS)('Test EVM $name SDK recover address', ({ api }) => {
+  describe.each(TEST_COINS)('Test EVM $name SDK recover address', ({ api }) => {
     beforeEach(() => {
       wallet.coinType = api.coinType;
     });
@@ -118,7 +118,16 @@ describe('Test EVM SDK', () => {
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
       let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
+
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
@@ -167,7 +176,17 @@ describe('Test EVM SDK', () => {
         const txDetail = await getTxDetail(transport, props.appId);
         const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
         let expectedTxDetail;
-        if (isEmpty(api.chain.layer2)) {
+
+        if (api.chain instanceof CustomEvm) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('c' + api.chain.id)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else if (isEmpty(api.chain.layer2)) {
           expectedTxDetail = new DisplayBuilder()
             .messagePage('TEST')
             .messagePage(api.chain.symbol)
@@ -235,7 +254,17 @@ describe('Test EVM SDK', () => {
         const txDetail = await getTxDetail(transport, props.appId);
         const tokenSymbol = (hasCommercialAt ? '@' : '') + unofficialToken.symbol;
         let expectedTxDetail;
-        if (isEmpty(api.chain.layer2)) {
+
+        if (api.chain instanceof CustomEvm) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('c' + api.chain.id)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else if (isEmpty(api.chain.layer2)) {
           expectedTxDetail = new DisplayBuilder()
             .messagePage('TEST')
             .messagePage(api.chain.symbol)
@@ -279,7 +308,15 @@ describe('Test EVM SDK', () => {
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
       let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
+
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
@@ -321,7 +358,14 @@ describe('Test EVM SDK', () => {
         const txDetail = await getTxDetail(transport, props.appId);
 
         let expectedTxDetail: string;
-        if (isEmpty(api.chain.layer2)) {
+        if (api.chain instanceof CustomEvm) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('c' + api.chain.id)
+            .wrapPage('SMART', '')
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else if (isEmpty(api.chain.layer2)) {
           expectedTxDetail = new DisplayBuilder()
             .messagePage('TEST')
             .messagePage(api.chain.symbol)
@@ -358,7 +402,14 @@ describe('Test EVM SDK', () => {
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
       let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .wrapPage('EIP712', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
@@ -395,7 +446,14 @@ describe('Test EVM SDK', () => {
       const txDetail = await getTxDetail(transport, props.appId);
 
       let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .wrapPage('MESSAGE', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
@@ -434,7 +492,15 @@ describe('Test EVM SDK', () => {
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
       let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
@@ -485,7 +551,16 @@ describe('Test EVM SDK', () => {
         const txDetail = await getTxDetail(transport, props.appId);
         const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
         let expectedTxDetail: string;
-        if (isEmpty(api.chain.layer2)) {
+        if (api.chain instanceof CustomEvm) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('c' + api.chain.id)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else if (isEmpty(api.chain.layer2)) {
           expectedTxDetail = new DisplayBuilder()
             .messagePage('TEST')
             .messagePage(api.chain.symbol)
@@ -529,7 +604,14 @@ describe('Test EVM SDK', () => {
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
       let expectedTxDetail: string;
-      if (isEmpty(api.chain.layer2)) {
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
         expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
           .messagePage(api.chain.symbol)
@@ -570,7 +652,14 @@ describe('Test EVM SDK', () => {
         // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
         let expectedTxDetail: string;
-        if (isEmpty(api.chain.layer2)) {
+        if (api.chain instanceof CustomEvm) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('c' + api.chain.id)
+            .wrapPage('SMART', '')
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else if (isEmpty(api.chain.layer2)) {
           expectedTxDetail = new DisplayBuilder()
             .messagePage('TEST')
             .messagePage(api.chain.symbol)
