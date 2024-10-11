@@ -1,5 +1,0 @@
-## Build
-
-```
-npm run build
-```
