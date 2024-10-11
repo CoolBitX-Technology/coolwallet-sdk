@@ -131,7 +131,6 @@ jobs:
         repository: CoolBitX-Technology/coolwallet-sdk
         path: gh-pages
         ref: gh-pages
-        submodules: recursive
         token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
         
     - name: Download all artifacts
