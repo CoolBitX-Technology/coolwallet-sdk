@@ -131,7 +131,7 @@ jobs:
         repository: CoolBitX-Technology/coolwallet-sdk
         path: gh-pages
         ref: gh-pages
-        token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
+        token: ${{ secrets.COOLWALLET_TEAM_GH_RELEASE }}
         
     - name: Download all artifacts
       uses: actions/download-artifact@v4
