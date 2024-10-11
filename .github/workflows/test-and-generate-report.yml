@@ -101,7 +101,7 @@ jobs:
       with:
         name: result
         path: |
-          ${{ github.workspace }}/scripts/reports/junit/
+          ${{ github.workspace }}/sdk/scripts/reports/junit/
 
     - name: Set upload status
       id: set_status
@@ -129,6 +129,7 @@ jobs:
       uses: actions/checkout@v2
       if: always()
       with:
+        repository: CoolBitX-Technology/brian-test
         ref: gh-pages
         path: gh-pages
         
@@ -159,5 +160,5 @@ jobs:
         publish_dir: allure-history
         
     - name: Set report URL
-      run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"
+      run: echo "REPORT_URL=https://coolbitx-technology.github.io/brian-test/all-services/${{ github.run_number }}"
           
