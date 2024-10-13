@@ -13,7 +13,7 @@
     "build": "npm run build:types && npm run build:ts && npm run move:terra",
     "test": "NODE_ENV=development jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-report": "NODE_ENV=development jest --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "peerDependencies": {
     "@coolwallet/core": "^1.1.23"

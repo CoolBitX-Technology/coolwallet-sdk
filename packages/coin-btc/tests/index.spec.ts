@@ -283,7 +283,7 @@ describe('Test BTC SDK', () => {
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
 
-    expect('123').toEqual(expectedTxDetail.toLowerCase());
+    expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
   });
 
   it('BTC test sign P2PKH USDT without change transaction', async () => {
