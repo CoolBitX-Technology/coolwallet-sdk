@@ -162,4 +162,3 @@ jobs:
 
     - name: Set report URL
       run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"
-          
