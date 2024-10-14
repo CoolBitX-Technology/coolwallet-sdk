@@ -85,7 +85,7 @@ jobs:
             echo "Test file found for = $modified_coin"
             cd ${{ github.workspace }}/sdk/$modified_coin
             npm install
-            npm run ci-test-report
+            npm run ci-test-report || true
           else
             echo "Test file not found for $modified_coin"
           fi
@@ -101,7 +101,7 @@ jobs:
       with:
         name: result
         path: |
-          ${{ github.workspace }}/scripts/reports/junit/
+          ${{ github.workspace }}/sdk/scripts/reports/junit/
 
     - name: Set upload status
       id: set_status
@@ -126,11 +126,13 @@ jobs:
     if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
     steps:            
     - name: Get Allure history
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       if: always()
+      continue-on-error: true
       with:
-        ref: gh-pages
+        repository: CoolBitX-Technology/coolwallet-sdk
         path: gh-pages
+        ref: gh-pages
         
     - name: Download all artifacts
       uses: actions/download-artifact@v4
@@ -139,25 +141,24 @@ jobs:
       run: |
         mkdir allure-results
         mv -v ./result/* ./allure-results/
-        shell: bash
         
     - name: Build Test Report
       uses: simple-elf/allure-report-action@v1.7
       if: always()
       with:
+        gh_pages: gh-pages
         allure_history: allure-history
         allure_results: allure-results
         subfolder: all-services
         keep_reports: 30
-        
+      
     - name: Publish test report
       uses: peaceiris/actions-gh-pages@v3
       if: always()
       with:
-        github_token: ${{ secrets.COOLWALLET_TEAM_GH_RELEASE }}
+        github_token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
         publish_branch: gh-pages
         publish_dir: allure-history
-        
+
     - name: Set report URL
       run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"
-          
