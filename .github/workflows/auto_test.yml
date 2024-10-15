@@ -24,7 +24,7 @@ jobs:
         token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
 
     - name: Authenticate gcloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.DEV_CP_GCP_SVC_GITHUB_RUNNER_KEY_FILE }}
 
@@ -53,6 +53,9 @@ jobs:
 
         MODIFIED_COINS=$(echo $MODIFIED_COINS | xargs)  # Trim leading/trailing whitespace
         echo "modified_coins=$MODIFIED_COINS" >> $GITHUB_OUTPUT
+    
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
 
     - name: Docker auth
       run: gcloud auth configure-docker ${{ env.REGISTRY }}
@@ -87,7 +90,7 @@ jobs:
             echo "Test file not found for $modified_coin"
           fi
         done
-        
+
   test-lite-card:
     runs-on: ubuntu-latest
 
