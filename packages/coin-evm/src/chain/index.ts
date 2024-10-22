@@ -1,5 +1,5 @@
 export { ARBITRUM, ARBITRUM_TEST } from './arbitrum';
-export { AURORA, AURORA_TEST } from './aurora';
+// export { AURORA, AURORA_TEST } from './aurora'; // TODO: production chain signature
 export { AVAXC, AVAXC_TEST } from './avaxc';
 export { CELO, CELO_TEST } from './celo';
 export { default as CRONOS } from './cronos';
