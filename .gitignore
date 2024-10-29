@@ -6,3 +6,4 @@ packages/**/.nyc_output/
 
 scripts/reports
 scripts/allure-report
+package-info.json
