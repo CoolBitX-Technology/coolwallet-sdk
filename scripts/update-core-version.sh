@@ -40,4 +40,4 @@ IGNORE_SCOPES=(
   --ignore @coolwallet/template
 )
 # 執行 lerna command
-npx lerna exec $IGNORE_SCOPES -- $command
+npx lerna exec "${IGNORE_SCOPES[@]}" -- $command
