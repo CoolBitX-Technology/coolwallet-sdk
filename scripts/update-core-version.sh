@@ -39,7 +39,7 @@ fi
 for i in "${!names_array[@]}"; do
   name=${names_array[$i]}
   version=${versions_array[$i]}
-  peer_dependencies=$(npm show $name@$version peerDependencies --json)
+  peer_dependencies=$(npm show "$name@$version" peerDependencies --json)
 
   # 提取 @coolwallet/core 的版本
   core_version=$(echo "$peer_dependencies" | grep -o '"@coolwallet/core": "[^"]*"' | sed 's/.*: "//; s/"$//')
