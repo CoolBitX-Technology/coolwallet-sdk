@@ -12,7 +12,7 @@ import * as utils from '../src/utils';
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
 const iotx = new Iotx();
-const mnemonic = bip39.generateMnemonic();
+const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
 describe('Test IOTX SDK', () => {
   const getRandInt = (max: number) => Math.floor(Math.random() * max);
