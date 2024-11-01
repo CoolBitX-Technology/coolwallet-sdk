@@ -148,6 +148,6 @@ describe('Test CoolWallet SDK Core Functional', () => {
       .messagePage('82200197')
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
-    expect(txDetail).toEqual(expctedTxDetail.toLowerCase());
+    expect(txDetail).toEqual('123');
   });
 });

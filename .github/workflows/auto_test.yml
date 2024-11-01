@@ -44,7 +44,7 @@ jobs:
         MODIFIED_COINS=""
         for file in $MODIFIED_FILES; do
           echo "file = $file"
-          if [[ $file == packages/coin-*/package.json ]]; then
+          if [[ $file == packages/coin-*/package.json || $file == packages/core/package.json ]]; then
             COIN_DIR=$(dirname "$file")
             MODIFIED_COINS="$MODIFIED_COINS $COIN_DIR"
           fi
