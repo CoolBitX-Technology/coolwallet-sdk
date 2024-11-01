@@ -43,7 +43,7 @@ const CHAINS: TestChain[] = [
     },
   },
 ];
-const mnemonic = bip39.generateMnemonic();
+const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
 describe('Test Cosmos SDK', () => {
   beforeAll(async () => {
