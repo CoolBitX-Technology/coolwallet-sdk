@@ -1,6 +1,6 @@
 name: Test on Pull Request to Master
 
-on: 
+on:
   pull_request:
     branches:
         - master
