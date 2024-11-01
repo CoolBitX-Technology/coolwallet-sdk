@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/ton",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "CoolWallet TON SDK",
   "main": "lib/index.js",
   "scripts": {
@@ -25,14 +25,14 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.24"
+    "@coolwallet/core": "^1.1.30"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.23",
+    "@coolwallet/core": "^1.1.30",
     "@types/ledgerhq__hw-transport-webusb": "^4.70.4"
   },
   "dependencies": {

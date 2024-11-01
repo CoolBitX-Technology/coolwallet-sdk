@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/aptos",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "description": "Coolwallet APTOS sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.22"
+    "@coolwallet/core": "^1.1.30"
   },
   "dependencies": {
     "@coolwallet/transport-jre-http": "^1.1.3",
@@ -34,7 +34,7 @@
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.22",
+    "@coolwallet/core": "^1.1.30",
     "@coolwallet/transport-web-ble": "^1.1.3",
     "jest": "^27.5.1"
   },

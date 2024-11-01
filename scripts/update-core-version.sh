@@ -8,6 +8,11 @@ IGNORE_SCOPES=(
    --ignore tester
    --ignore @coolwallet/testing-library
    --ignore @coolwallet/template
+   --ignore @coolwallet/avaxc
+   --ignore @coolwallet/bnb
+   --ignore @coolwallet/near
+   --ignore @coolwallet/theta
+   --ignore @coolwallet/vet
 )
 
 # 將 npm info 輸出到 JSON 文件
