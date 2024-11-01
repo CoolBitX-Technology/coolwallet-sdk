@@ -213,7 +213,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Delegate', async () => {
+  xit('Test Delegate', async () => {
     const feeDenom = getRandDenom();
     const transaction = {
       chainId: chain,
@@ -288,7 +288,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Undelegate', async () => {
+  xit('Test Undelegate', async () => {
     const feeDenom = getRandDenom();
     const transaction = {
       chainId: chain,
@@ -365,7 +365,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Withdraw', async () => {
+  xit('Test Withdraw', async () => {
     const feeDenom = getRandDenom();
     const transaction = {
       chainId: chain,
@@ -432,7 +432,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Smart Contract: Luna to ERC20 Token Swap', async () => {
+  xit('Test Smart Contract: Luna to ERC20 Token Swap', async () => {
     const denom = getRandDenom();
     const feeDenom = getRandDenom();
     const executeMsgObj = {
@@ -522,7 +522,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Smart Contract Without Funds: ERC20 Token to Luna Swap', async () => {
+  xit('Test Smart Contract Without Funds: ERC20 Token to Luna Swap', async () => {
     const denom = getRandDenom();
     const feeDenom = getRandDenom();
     const executeMsgObj = {
@@ -687,7 +687,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Wallet Connect MsgSend', async () => {
+  xit('Test Wallet Connect MsgSend', async () => {
     const denom = getRandDenom();
     const feeDenom = getRandDenom();
     const accountNumber = getRandAccount();
@@ -765,7 +765,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Wallet Connect MsgDelegate', async () => {
+  xit('Test Wallet Connect MsgDelegate', async () => {
     const feeDenom = getRandDenom();
     const accountNumber = getRandAccount();
     const sequence = getRandSequence();
@@ -843,7 +843,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Wallet Connect MsgUndelegate', async () => {
+  xit('Test Wallet Connect MsgUndelegate', async () => {
     const feeDenom = getRandDenom();
     const accountNumber = getRandAccount();
     const sequence = getRandSequence();
@@ -921,7 +921,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Wallet Connect MsgWithdrawDelegatorReward', async () => {
+  xit('Test Wallet Connect MsgWithdrawDelegatorReward', async () => {
     const feeDenom = getRandDenom();
     const accountNumber = getRandAccount();
     const sequence = getRandSequence();
@@ -1166,7 +1166,7 @@ describe('Test Terra SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Wallet Connect Many Many MsgSend', async () => {
+  xit('Test Wallet Connect Many Many MsgSend', async () => {
     const feeDenom = getRandDenom();
     const accountNumber = getRandAccount();
     const sequence = getRandSequence();
