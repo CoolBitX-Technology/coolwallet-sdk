@@ -1,6 +1,5 @@
 import { BASE, OKX, ZKSYNC, OPTIMISM, AVAXC } from '../src/chain';
 import { TokenProps } from '../src/chain/types';
-import { TOKENTYPE as ETH_TOKENS } from '../../coin-eth/src/config/tokenType';
 
 type BuildTokenHexInput = Pick<TokenProps, 'symbol' | 'unit' | 'contractAddress'>;
 const buildTokenHex = (token: BuildTokenHexInput) => {
