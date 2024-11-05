@@ -1081,5 +1081,19 @@ export const TOKENTYPE = [
     contractAddress: '0x856c4efb76c1d1ae02e20ceb03a2a6a08b0b8dc3',
     signature: `12044F455448000000856C4EFB76C1D1AE02E20CEB03A2A6A08B0B8DC33045022030610B479289FF2BE9609D41C442E9360F5294D6D340DFB9044D2314C1ECC3D1022100E24DEFF561606EDECEFDA4BCD20FD668088CAC7DA0245B4F54D93E8AE2CA8454`,
   },
+  {
+    name: 'Euro Coin',
+    symbol: 'EURC',
+    unit: '6',
+    contractAddress: '0x1abaea1f7c830bd89acc67ec4af516284b1bc33c',
+    signature: ``,
+  },
+  {
+    name: 'WalletConnect',
+    symbol: 'WCT',
+    unit: '18',
+    contractAddress: '0x61cc6aF18C351351148815c5F4813A16DEe7A7E4',
+    signature: ``,
+  },
 ];
 // signature : [unit-1B][symbol_length-1B][symbol-7B][contractAddress-20B][signature]

@@ -34,4 +34,11 @@ export const TOKEN_INFO = [
     address: 'SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt',
     signature: `060353524d00000000068310861A98327D0550574D84418AA6E10C3352DDAA7FD7F58152CCEEB238873044022019757bf6141014d7dc89cdc1bcfdf8f99d069e1e60addb0c71f666074f423ac6022053c9d1a1ba5740389f4b964655fa1cf03c37eaf7cde61cf3cff3e967e86e5c85`,
   },
+  {
+    name: 'EURC',
+    symbol: 'EURC',
+    decimals: 6,
+    address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
+    signature: ``,
+  },
 ];
