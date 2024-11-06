@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# sh scripts/update-core-version.sh    
+# sh scripts/update-core-version.sh
  
 IGNORE_SCOPES=(
    --ignore @coolwallet/core
@@ -67,5 +67,8 @@ done
 
 # # 執行 lerna command
 echo "IGNORE_SCOPES: ${IGNORE_SCOPES[@]}"
-npx lerna exec  "${IGNORE_SCOPES[@]}" -- "$command" && \
-npx lerna exec  "${IGNORE_SCOPES[@]}" -- npm version patch
+npx lerna exec  "${IGNORE_SCOPES[@]}" -- "$command" 
+
+# 等到 2.x 回 master 再加上 version patch 邏輯
+# && \
+# npx lerna exec  "${IGNORE_SCOPES[@]}" -- npm version patch
