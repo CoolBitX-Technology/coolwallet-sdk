@@ -49,12 +49,3 @@ console.log('OP USDC.e: ', buildTokenHex(OPTIMISM.tokens['USDC.e']));
 console.log('OP USDC: ', buildTokenHex(OPTIMISM.tokens.USDC));
 console.log('OP WCT: ', buildTokenHex(OPTIMISM.tokens.WCT));
 console.log('AVAXC EURC: ', buildTokenHex(AVAXC.tokens.EURC));
-
-console.log(
-  'SOL EURC: ',
-  buildTokenHex({
-    symbol: 'EURC',
-    unit: '6',
-    contractAddress: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
-  })
-);
