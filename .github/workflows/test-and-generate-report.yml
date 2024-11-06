@@ -76,7 +76,7 @@ jobs:
 
     - name: Set up test fixture
       working-directory: sdk
-      run: sh scripts/install-test-fixture.sh
+      run: ./scripts/install-test-fixture.sh
 
     - name: Run tests for all modified coin project
       run: |

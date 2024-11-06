@@ -1,3 +1,5 @@
+#!/bin/bash
+
 TEST_FIXTURE_SCOPES=(
   --scope @coolwallet/core
   --scope @coolwallet/testing-library
