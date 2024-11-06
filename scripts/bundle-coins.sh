@@ -1,3 +1,4 @@
+#!/bin/bash
 TEST_FIXTURE_SCOPES=(
   --scope @coolwallet/eth
   --scope @coolwallet/evm
