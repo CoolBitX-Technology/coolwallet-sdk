@@ -442,7 +442,7 @@ describe('Test TON SDK', () => {
         };
         await expect_both_coolwallet_and_tonweb_signed_tx_is_same(transaction);
       });
-      it('transfer: jettonAmount is 100000000000000 will throw error', async () => {
+      it('transfer: jettonAmount is 100000000000000 will do blind transfer', async () => {
         const transaction = {
           ...baseTransaction,
           payload: { ...baseTransaction.payload, jettonAmount: '100000000000000' },
