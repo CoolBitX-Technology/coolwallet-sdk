@@ -39,11 +39,9 @@ export function checkTransferTransaction(transaction: TransferTransaction): void
 }
 
 export function checkTransferTokenTransaction(transaction: TransferTokenTransaction): void {
-  const { amount, toAddress: fromTokenAccount, payload, tokenInfo } = transaction;
+  const { amount, toAddress: fromTokenAccount, payload } = transaction;
 
   const { jettonAmount, toAddress, forwardAmount, forwardPayload, responseAddress } = payload;
-
-  checkAmountCanDisplayOnProCard(jettonAmount, tokenInfo.decimals);
 
   checkAmountNotZero(amount);
   checkAmountNotZero(jettonAmount);
