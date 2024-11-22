@@ -4,7 +4,6 @@ import * as scriptUtil from './utils/scriptUtil';
 import * as txUtil from './utils/transactionUtil';
 import * as params from './config/params';
 import * as type from './config/types';
-import BigNumber from 'bignumber.js';
 
 export { RESOURCE_CODE } from './config/params';
 export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
@@ -105,18 +104,9 @@ export default class TRX extends COIN.ECDSACoin implements COIN.Coin {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
 
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
-    
-    const tokenAmount = transaction.contract.amount;
-    const decimals = transaction.option.info.decimals;
-    const humanAmount = new BigNumber(tokenAmount).shiftedBy(-decimals);
-    const humanAmountLimit = new BigNumber(1).shiftedBy(8); // 100_000_000
-
-    let script = params.TRC20.script + params.TRC20.signature;
-    if (humanAmount.gte(humanAmountLimit)) {
-      script = params.TRC20_BLIND.script + params.TRC20_BLIND.signature;
-    }
-
+    const script = params.TRC20.script + params.TRC20.signature;
     const argument = await scriptUtil.getTRC20Argument(transaction, addressIndex);
+
     return trxSign.signTransaction(signTxData, script, argument, publicKey);
   }
 
