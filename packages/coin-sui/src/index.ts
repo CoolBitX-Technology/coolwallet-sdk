@@ -22,7 +22,7 @@ export default class Sui extends COIN.EDDSACoin implements COIN.Coin {
     return this.getAddressFromPublic(base64);
   }
 
-  async signTransaction(_signTxType: SignTxType): Promise<string> {
+  async signTransaction(): Promise<string> {
     throw new Error('Not implemented');
   }
 }

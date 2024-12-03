@@ -46,7 +46,3 @@ export function normalizeSuiAddress(value: string, forceAdd0x: boolean = false):
   }
   return `0x${address.padStart(SUI_ADDRESS_LENGTH * 2, '0')}`;
 }
-
-export function normalizeSuiObjectId(value: string, forceAdd0x: boolean = false): ObjectId {
-  return normalizeSuiAddress(value, forceAdd0x);
-}

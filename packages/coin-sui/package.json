@@ -1,5 +1,5 @@
 {
-  "name": "@coolwallet/kas",
+  "name": "@coolwallet/sui",
   "version": "1.0.0-beta.0",
   "description": "Coolwallet Sui sdk",
   "main": "lib/index.js",

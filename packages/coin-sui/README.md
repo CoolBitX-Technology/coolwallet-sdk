@@ -25,7 +25,7 @@ const appId = 'appId that had been registered by wallet';
 
 const addressIndex = 0;
 
-const address = await sui.getAddress(transport, appPrivateKey, appId, scriptType, 0);
+const address = await sui.getAddress(transport, appPrivateKey, appId, 0);
 
 // TODO implement
 ```
@@ -44,14 +44,13 @@ The Sui address generated is compatible to BIP44 and Base32 with **account** and
 m/44'/784'/0'/0/{i}
 ```
 
-In the design of current hardware, we only support path `m/44'/111111'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
+In the design of current hardware, we only support path `m/44'/784'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
 
 ```javascript
 async getAddress(
     transport: Transport, 
     appPrivateKey: string, 
     appId: string, 
-    scriptType: ScriptType, 
     addressIndex: number
 ): Promise<string> 
 ```
