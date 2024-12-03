@@ -4,6 +4,7 @@
   "description": "Coolwallet Sui sdk",
   "main": "lib/index.js",
   "scripts": {
+    "list:token": "babel-node -x \".ts\" tools/token.ts",
     "test": "NODE_ENV=development jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
     "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
+    "@babel/node": "^7.26.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
     "@coolwallet/core": "^1.1.30"
