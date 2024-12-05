@@ -2,6 +2,7 @@ TEST_FIXTURE_SCOPES="--scope @coolwallet/core --scope @coolwallet/testing-librar
 TEST_SCOPES=(
   --scope @coolwallet/core
   --scope @coolwallet/btc
+  --scope @coolwallet/bch
   --scope @coolwallet/dot
   --scope @coolwallet/kas
   --scope @coolwallet/ton
