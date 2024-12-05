@@ -5,7 +5,7 @@ import * as params from './config/params';
 import * as txUtil from './utils/transactionUtil';
 
 export default class BCH extends COIN.ECDSACoin implements COIN.Coin {
-  public ScriptType: any;
+  public ScriptType: typeof types.ScriptType;
   public addressToOutScript: (address: string) => {
     scriptType: types.ScriptType;
     outScript: Buffer;

@@ -6,6 +6,7 @@ import * as types from '../config/types';
 import * as params from '../config/params';
 
 export async function getArgument(
+  scriptType: types.ScriptType,
   inputs: Array<types.Input>,
   output: types.Output,
   change?: types.Change,
@@ -33,7 +34,7 @@ export async function getArgument(
       throw new Error('Public Key not exists !!');
     }
     haveChange = bufferUtil.toVarUintBuffer(1);
-    changeScriptType = bufferUtil.toVarUintBuffer(outputType);
+    changeScriptType = bufferUtil.toVarUintBuffer(scriptType);
     changeAmount = bufferUtil.toUintBuffer(change.value, 8);
     // const addressIdHex = "00".concat(change.addressIndex.toString(16).padStart(6, "0"));
     changePath = Buffer.from(await utils.getPath(params.COIN_TYPE, change.addressIndex), 'hex');
@@ -82,7 +83,7 @@ export async function getScriptSigningActions(
   actions: Array<Function>
 }> {
   const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = "00" + await getArgument(inputs, output, change);// keylength zero
+  const argument = "00" + await getArgument(scriptType, inputs, output, change);// keylength zero
 
   const preActions = [];
   const sendScript = async () => {
