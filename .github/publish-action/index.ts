@@ -63,6 +63,7 @@ async function run() {
   await checkAndPublish(context, 'packages/coin-xrp');
   await checkAndPublish(context, 'packages/coin-xtz');
   await checkAndPublish(context, 'packages/coin-zen');
+  await checkAndPublish(context, 'packages/coin-sui');
   await checkAndPublish(context, 'packages/transport-web-ble');
   await checkAndPublish(context, 'packages/transport-jre-http');
   await checkAndPublish(context, 'packages/testing-library');
