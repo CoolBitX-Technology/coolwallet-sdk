@@ -4,7 +4,7 @@
   "description": "Coolwallet Bitcoin Cash sdk",
   "main": "lib/index.js",
   "scripts": {
-    "test": "NODE_ENV=development jest",
+    "test": "NODE_ENV=development jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
     "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
     "build:types": "tsc --emitDeclarationOnly",
