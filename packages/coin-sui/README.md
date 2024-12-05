@@ -11,7 +11,7 @@ npm i @coolwallet/sui
 ## Usage
 
 ```javascript
-import KAS from '@coolwallet/sui';
+import Sui from '@coolwallet/sui';
 import { crypto } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-web-ble';
 
@@ -41,10 +41,10 @@ Get address by address index.
 The Sui address generated is compatible to BIP44 and Base32 with **account** and **change** set to 0, which means calling `getAddress` with `addressIndex = i` will get the address of folllowing path:
 
 ```none
-m/44'/784'/0'/0/{i}
+m/44'/784'/0'/0'/{i}'
 ```
 
-In the design of current hardware, we only support path `m/44'/784'/0'/0/{i}` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
+In the design of current hardware, we only support path `m/44'/784'/0'/0'/{i}'` for speed optimization. This might change in the future and we will then open a more general interface to deal with custom path.
 
 ```javascript
 async getAddress(
