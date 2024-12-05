@@ -18,7 +18,7 @@ export const parseDERsignature = (signature: string) => {
  * @param {{r:string, s:string}}
  * @return {Buffer}
  */
-export const convertToDER = (sig: { r: string; s: string }): { r: string; s: string } => {
+export const convertToDER = (sig: { r: string; s: string }): Buffer => {
   let canRBuffer = Buffer.from(sig.r, 'hex');
   let canSBuffer = Buffer.from(sig.s, 'hex');
 
