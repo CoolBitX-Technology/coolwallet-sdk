@@ -16,7 +16,7 @@
     "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.30"
+    "@coolwallet/core": "^1.1.31"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",
@@ -25,7 +25,7 @@
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
     "@babel/types": "^7.17.0",
-    "@coolwallet/core": "^1.1.30",
+    "@coolwallet/core": "^1.1.31",
     "@terra-money/terra.js": "^3.1.2",
     "@types/node": "^14.0.13",
     "esbuild": "^0.14.38",
