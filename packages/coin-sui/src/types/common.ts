@@ -13,7 +13,6 @@ function getHexByteLength(value: string): number {
   return /^(0x|0X)/.test(value) ? (value.length - 2) / 2 : value.length / 2;
 }
 
-// TODO - can we automatically sync this with rust length definition?
 // Source of truth is
 // https://github.com/MystenLabs/sui/blob/acb2b97ae21f47600e05b0d28127d88d0725561d/crates/sui-types/src/base_types.rs#L67
 // which uses the Move account address length
