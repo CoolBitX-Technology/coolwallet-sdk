@@ -36,13 +36,10 @@
     "@coolwallet/core": "^1.1.30"
   },
   "dependencies": {
-    "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
+    "@mysten/sui": "^1.14.3",
     "@types/bn.js": "^5.1.1",
-    "bech32": "^2.0.0",
     "bignumber.js": "^8.0.2",
-    "blakejs": "^1.2.1",
-    "bn.js": "^5.2.1",
-    "superstruct": "^1.0.3"
+    "bn.js": "^5.2.1"
   },
   "repository": {
     "type": "git",
