@@ -1,6 +1,6 @@
-import { PathType } from "@coolwallet/core/lib/config";
-import { utils } from "@coolwallet/core";
-import { Transaction } from "@mysten/sui/transactions";
+import { PathType } from '@coolwallet/core/lib/config';
+import { utils } from '@coolwallet/core';
+import { Transaction } from '@mysten/sui/transactions';
 import { messageWithIntent } from '@mysten/sui/dist/cjs/cryptography/intent';
 import * as types from '../config/types';
 
@@ -57,6 +57,28 @@ async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number
   return SEPath + header + intentMessageHex;
 }
 
+async function getTokenTransferArguments(
+  rawTx: Transaction,
+  addressIndex: number,
+  tokenInfo?: types.TOKENTYPE
+): Promise<string> {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
+  const SEPath = `11${path}`;
+  console.debug('SUI.getTokenTransferArguments >>> SEPath: ', SEPath);
+
+  const txBytes = await rawTx.build();
+  const intentMessage = messageWithIntent('TransactionData', txBytes);
+  const intentMessageHex = Buffer.from(intentMessage).toString('hex');
+  console.debug('SUI.getTokenTransferArguments >>> intentMessage: ', intentMessageHex);
+
+  // TODO: toke info 如何帶入
+  const toAddressHexIndex = getToAddressHexIndex(rawTx, intentMessageHex);
+  const amountHexIndex = getSendAmountHexIndex(rawTx, intentMessageHex);
+  const header = toAddressHexIndex + amountHexIndex;
+  console.debug('SUI.getTokenTransferArguments >>> header: ', header);
+  return SEPath + intentMessageHex;
+}
+
 async function getSmartContractArguments(rawTx: Transaction, addressIndex: number): Promise<string> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
   const SEPath = `11${path}`;
@@ -70,4 +92,4 @@ async function getSmartContractArguments(rawTx: Transaction, addressIndex: numbe
   return SEPath + intentMessageHex;
 }
 
-export { getCoinTransferArguments, getSmartContractArguments };
+export { getCoinTransferArguments, getTokenTransferArguments, getSmartContractArguments };
