@@ -2,6 +2,7 @@ import { PathType } from "@coolwallet/core/lib/config";
 import { utils } from "@coolwallet/core";
 import { Transaction } from "@mysten/sui/transactions";
 import { messageWithIntent } from '@mysten/sui/dist/cjs/cryptography/intent';
+import * as types from '../config/types';
 
 /**
  * getTransferArguments
@@ -56,4 +57,17 @@ async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number
   return SEPath + header + intentMessageHex;
 }
 
-export { getCoinTransferArguments };
+async function getSmartContractArguments(rawTx: Transaction, addressIndex: number): Promise<string> {
+  const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
+  const SEPath = `11${path}`;
+  console.debug('SUI.getSmartContractArguments >>> SEPath: ', SEPath);
+
+  const txBytes = await rawTx.build();
+  const intentMessage = messageWithIntent('TransactionData', txBytes);
+  const intentMessageHex = Buffer.from(intentMessage).toString('hex');
+  console.debug('SUI.getSmartContractArguments >>> intentMessage: ', intentMessageHex);
+
+  return SEPath + intentMessageHex;
+}
+
+export { getCoinTransferArguments, getSmartContractArguments };
