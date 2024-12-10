@@ -21,13 +21,18 @@ function getTargetIndex(source: string, target: string) {
 
 function getToAddressHexIndex(rawTx: Transaction, hex: string): string {
   const transferObjects = rawTx.getData().commands.filter((command) => command.TransferObjects);
-  const toAddressIndex = transferObjects[0].TransferObjects?.address.Input;
+  const toAddressObject = transferObjects[0].TransferObjects?.address as {
+    $kind: 'Input';
+    Input: number;
+    type?: 'pure';
+  };
+  const toAddressIndex = toAddressObject.Input;
   const toAddressBase64 = rawTx.getData().inputs[toAddressIndex].Pure?.bytes;
   if (!toAddressBase64) throw new Error(`getCoinTransferArguments.getToAddressHexIndex >>> toAddressBase64 not found`);
   const toAddress = Buffer.from(toAddressBase64, 'base64').toString('hex');
   const toAddressHexIndex = getTargetIndex(hex, toAddress);
 
-  // sdk 取 index 的單位是 byte (2個位元)，因此要先將 index 除二再 hex
+  // sdk 取 index 的單位是 byte ()，因此要先將 index 除二再 hex
   const toAddressHexIndexByByte = new BigNumber(toAddressHexIndex).dividedBy(2).toString(16).padStart(4, '0');
 
   return toAddressHexIndexByByte;
@@ -35,7 +40,12 @@ function getToAddressHexIndex(rawTx: Transaction, hex: string): string {
 
 function getSendAmountHexIndex(rawTx: Transaction, hex: string): string {
   const splitCoins = rawTx.getData().commands.filter((command) => command.SplitCoins);
-  const sendAmountIndex = splitCoins[0].SplitCoins?.amounts[0].Input;
+  const sendAmountObject = splitCoins[0].SplitCoins?.amounts[0] as {
+    $kind: 'Input';
+    Input: number;
+    type?: 'pure';
+  };
+  const sendAmountIndex = sendAmountObject.Input;
   const sendAmountBase64 = rawTx.getData().inputs[sendAmountIndex].Pure?.bytes;
   if (!sendAmountBase64)
     throw new Error(`getCoinTransferArguments.getSendAmountHexIndex >>> sendAmountBase64 not found`);
