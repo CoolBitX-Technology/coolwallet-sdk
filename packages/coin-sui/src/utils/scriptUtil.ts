@@ -3,6 +3,7 @@ import { utils } from '@coolwallet/core';
 import { Transaction } from '@mysten/sui/transactions';
 import { messageWithIntent } from '@mysten/sui/dist/cjs/cryptography/intent';
 import * as types from '../config/types';
+import BigNumber from 'bignumber.js';
 
 /**
  * getTransferArguments
@@ -24,8 +25,12 @@ function getToAddressHexIndex(rawTx: Transaction, hex: string): string {
   const toAddressBase64 = rawTx.getData().inputs[toAddressIndex].Pure?.bytes;
   if (!toAddressBase64) throw new Error(`getCoinTransferArguments.getToAddressHexIndex >>> toAddressBase64 not found`);
   const toAddress = Buffer.from(toAddressBase64, 'base64').toString('hex');
-  const toAddressHexIndex = getTargetIndex(hex, toAddress).toString(16).padStart(4, '0');
-  return toAddressHexIndex;
+  const toAddressHexIndex = getTargetIndex(hex, toAddress);
+
+  // sdk 取 index 的單位是 byte (2個位元)，因此要先將 index 除二再 hex
+  const toAddressHexIndexByByte = new BigNumber(toAddressHexIndex).dividedBy(2).toString(16).padStart(4, '0');
+
+  return toAddressHexIndexByByte;
 }
 
 function getSendAmountHexIndex(rawTx: Transaction, hex: string): string {
@@ -35,8 +40,10 @@ function getSendAmountHexIndex(rawTx: Transaction, hex: string): string {
   if (!sendAmountBase64)
     throw new Error(`getCoinTransferArguments.getSendAmountHexIndex >>> sendAmountBase64 not found`);
   const sendAmountLittleEndian = Buffer.from(sendAmountBase64, 'base64').toString('hex');
-  const amountHexIndex = getTargetIndex(hex, sendAmountLittleEndian).toString(16).padStart(4, '0');
-  return amountHexIndex;
+  console.log(`sendAmountLittleEndian= ${sendAmountLittleEndian}`);
+  const amountHexIndex = getTargetIndex(hex, sendAmountLittleEndian);
+  const amountHexIndexByByte = new BigNumber(amountHexIndex).dividedBy(2).toString(16).padStart(4, '0');
+  return amountHexIndexByByte;
 }
 
 async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number): Promise<string> {
