@@ -1,11 +1,11 @@
 import { Transport } from "@coolwallet/core";
 import { Transaction } from '@mysten/sui/transactions';
 
-export type TOKENTYPE = {
+export type TokenInfo = {
   name: string;
   symbol: string;
   decimals: number;
-  address: string;
+  suiCoinType: string;
 };
 
 export type TransactionArgs = {
@@ -14,7 +14,7 @@ export type TransactionArgs = {
   appId: string;
   transaction: Transaction;
   addressIndex: number;
-  tokenInfo?: TOKENTYPE;
+  tokenInfo?: TokenInfo;
   confirmCB?(): void;
   authorizedCB?(): void;
 };

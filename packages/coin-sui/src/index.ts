@@ -4,7 +4,7 @@ import { PathType } from '@coolwallet/core/lib/config';
 import { Ed25519PublicKey } from '@mysten/sui/dist/cjs/keypairs/ed25519/publickey';
 import { TransactionArgs } from './config/types';
 import { signAllTransaction } from './sign';
-export { TOKENTYPE } from './config/types';
+export { TokenInfo as TOKENINFO } from './config/types';
 export { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 
 export default class Sui extends COIN.EDDSACoin implements COIN.Coin {

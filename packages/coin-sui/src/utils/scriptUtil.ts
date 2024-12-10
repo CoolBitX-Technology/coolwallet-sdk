@@ -57,10 +57,19 @@ async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number
   return SEPath + header + intentMessageHex;
 }
 
+function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
+  const tokenDecimalsHex = Buffer.from([tokenInfo.decimals]).toString('hex'); // 06
+  const scriptTokenSymbol = tokenInfo.symbol.slice(0, 7).toUpperCase(); // USDC
+  const tokenSymbolLengthHex = Buffer.from([scriptTokenSymbol.length]).toString('hex'); // 04
+  const tokenSymbolHex = Buffer.from(scriptTokenSymbol).toString('hex').padEnd(14, '0'); // 55534443000000
+
+  return tokenDecimalsHex + tokenSymbolLengthHex + tokenSymbolHex;
+}
+
 async function getTokenTransferArguments(
   rawTx: Transaction,
   addressIndex: number,
-  tokenInfo?: types.TOKENTYPE
+  tokenInfo: types.TokenInfo
 ): Promise<string> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
   const SEPath = `11${path}`;
@@ -71,12 +80,12 @@ async function getTokenTransferArguments(
   const intentMessageHex = Buffer.from(intentMessage).toString('hex');
   console.debug('SUI.getTokenTransferArguments >>> intentMessage: ', intentMessageHex);
 
-  // TODO: toke info 如何帶入
   const toAddressHexIndex = getToAddressHexIndex(rawTx, intentMessageHex);
   const amountHexIndex = getSendAmountHexIndex(rawTx, intentMessageHex);
-  const header = toAddressHexIndex + amountHexIndex;
+  const tokenInfoArgs = getTokenInfoArgs(tokenInfo);
+  const header = toAddressHexIndex + amountHexIndex + tokenInfoArgs; // 00ba 00a6 060455534443000000
   console.debug('SUI.getTokenTransferArguments >>> header: ', header);
-  return SEPath + intentMessageHex;
+  return SEPath + header + intentMessageHex;
 }
 
 async function getSmartContractArguments(rawTx: Transaction, addressIndex: number): Promise<string> {
