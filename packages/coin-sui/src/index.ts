@@ -1,9 +1,9 @@
 import { coin as COIN, Transport, utils } from '@coolwallet/core';
-import { COIN_TYPE, SCRIPT } from './config/param';
+import { COIN_TYPE } from './config/param';
 import { PathType } from '@coolwallet/core/lib/config';
 import { Ed25519PublicKey } from '@mysten/sui/dist/cjs/keypairs/ed25519/publickey';
-import { TransactionArgs } from './config/types';
-import { signAllTransaction } from './sign';
+import { CoinTransactionArgs, SmartTransactionArgs, TokenTransactionArgs } from './config/types';
+import { signSmartTransaction } from './sign';
 export { TokenInfo as TOKENINFO } from './config/types';
 export { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 
@@ -19,10 +19,15 @@ export default class Sui extends COIN.EDDSACoin implements COIN.Coin {
     return new Ed25519PublicKey(base64).toSuiAddress();
   }
 
-  async signTransaction(transactionArgs: TransactionArgs): Promise<string> {
-    const { tokenInfo } = transactionArgs;
-    const script = !tokenInfo ? SCRIPT.TRANSFER.scriptWithSignature : SCRIPT.TOKEN_TRANSFER.scriptWithSignature;
-    const argument = !tokenInfo ? SCRIPT.TRANSFER.argument : SCRIPT.TOKEN_TRANSFER.argument;
-    signAllTransaction(transactionArgs, script, argument);
+  async signTransaction(transactionArgs: CoinTransactionArgs): Promise<string> {
+    throw new Error(`To do implement`);
+  }
+
+  async signTransferTokenTransaction(transactionArgs: TokenTransactionArgs) {
+    throw new Error(`To do implement`);
+  }
+
+  async signSmartContractTransaction(transactionArgs: SmartTransactionArgs) {
+    return signSmartTransaction(transactionArgs);
   }
 }
