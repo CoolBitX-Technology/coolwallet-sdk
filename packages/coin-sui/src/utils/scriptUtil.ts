@@ -24,7 +24,7 @@ function getToAddressHexIndex(rawTx: Transaction, hex: string): string {
   const toAddressBase64 = rawTx.getData().inputs[toAddressIndex].Pure?.bytes;
   if (!toAddressBase64) throw new Error(`getCoinTransferArguments.getToAddressHexIndex >>> toAddressBase64 not found`);
   const toAddress = Buffer.from(toAddressBase64, 'base64').toString('hex');
-  const toAddressHexIndex = getTargetIndex(hex, toAddress).toString(16).padStart(3, '0');
+  const toAddressHexIndex = getTargetIndex(hex, toAddress).toString(16).padStart(4, '0');
   return toAddressHexIndex;
 }
 
@@ -35,7 +35,7 @@ function getSendAmountHexIndex(rawTx: Transaction, hex: string): string {
   if (!sendAmountBase64)
     throw new Error(`getCoinTransferArguments.getSendAmountHexIndex >>> sendAmountBase64 not found`);
   const sendAmountLittleEndian = Buffer.from(sendAmountBase64, 'base64').toString('hex');
-  const amountHexIndex = getTargetIndex(hex, sendAmountLittleEndian).toString(16).padStart(3, '0');
+  const amountHexIndex = getTargetIndex(hex, sendAmountLittleEndian).toString(16).padStart(4, '0');
   return amountHexIndex;
 }
 
