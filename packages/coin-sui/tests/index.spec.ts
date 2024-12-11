@@ -42,7 +42,7 @@ describe('Test Sui SDK', () => {
     });
   });
 
-  describe('Test Sign Transfer', () => {
+  describe('Test Sign Coin Transfer', () => {
     async function get_signed_tx_by_coolwallet_sdk(transactionInfo: CoinTransactionInfo, addressIndex: number) {
       const signData: CoinTransactionArgs = {
         transport,
@@ -146,6 +146,156 @@ describe('Test Sui SDK', () => {
         `"checkParams: address is invalid. address=0x2fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09"`
       );
     });
+
+    it('Test Coin Transfer Transaction Failed With Invalid Gas Payment Object Id', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.1';
+      const addressIndex = 0;
+      const invalidGasPayment = [
+        {
+          objectId: '0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd',
+          version: 428891992,
+          digest: 'GsuLrrruMfrn6tNpPqGMvXDujTG9QcxRpF1332MCThF4',
+        },
+      ];
+
+      const transactionInfo: CoinTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: invalidGasPayment,
+        gasPrice: coinFeeInfo.gasPrice,
+        gasBudget: coinFeeInfo.gasBudget,
+      };
+
+      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas payment objectId is not valid. objectId=0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd"`
+      );
+    });
+
+    it('Test Coin Transfer Transaction Failed With Empty Gas Payment', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.1';
+      const addressIndex = 0;
+      const transactionInfo: CoinTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: [],
+        gasPrice: coinFeeInfo.gasPrice,
+        gasBudget: coinFeeInfo.gasBudget,
+      };
+
+      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas payment not found."`
+      );
+    });
+
+    it('Test Coin Transfer Transaction Failed With 0 As Gas Price', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.1';
+      const addressIndex = 0;
+
+      const transactionInfo: CoinTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: coinFeeInfo.payment,
+        gasPrice: '0',
+        gasBudget: coinFeeInfo.gasBudget,
+      };
+
+      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas price is invalid. gas price=0"`
+      );
+    });
+
+    it('Test Coin Transfer Transaction Failed With Empty String As Gas Price', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.1';
+      const addressIndex = 0;
+
+      const transactionInfo: CoinTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: coinFeeInfo.payment,
+        gasPrice: '',
+        gasBudget: coinFeeInfo.gasBudget,
+      };
+
+      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas price is invalid. gas price="`
+      );
+    });
+
+    it('Test Coin Transfer Transaction Failed With Invalid String As Gas Price', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.1';
+      const addressIndex = 0;
+
+      const transactionInfo: CoinTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: coinFeeInfo.payment,
+        gasPrice: 'Invalid String',
+        gasBudget: coinFeeInfo.gasBudget,
+      };
+
+      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas price is invalid. gas price=Invalid String"`
+      );
+    });
+
+    it('Test Coin Transfer Transaction Failed With 0 As Gas Budget', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.1';
+      const addressIndex = 0;
+
+      const transactionInfo: CoinTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: coinFeeInfo.payment,
+        gasPrice: coinFeeInfo.gasPrice,
+        gasBudget: '0',
+      };
+
+      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas budget is invalid. gas price=0"`
+      );
+    });
+
+    it('Test Coin Transfer Transaction Failed With Empty String As Gas Budget', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.1';
+      const addressIndex = 0;
+
+      const transactionInfo: CoinTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: coinFeeInfo.payment,
+        gasPrice: coinFeeInfo.gasPrice,
+        gasBudget: '',
+      };
+
+      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas budget is invalid. gas price="`
+      );
+    });
+
+    it('Test Coin Transfer Transaction Failed With Invalid String As Gas Budget', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.1';
+      const addressIndex = 0;
+
+      const transactionInfo: CoinTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: coinFeeInfo.payment,
+        gasPrice: coinFeeInfo.gasPrice,
+        gasBudget: 'Invalid String',
+      };
+
+      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas budget is invalid. gas price=Invalid String"`
+      );
+    });
   });
 
   describe('Test Sign Smart Transaction', () => {
@@ -218,7 +368,7 @@ describe('Test Sui SDK', () => {
     });
   });
 
-  describe('Test Sign Token Transfer Transaction', () => {
+  describe.only('Test Sign Token Transfer Transaction', () => {
     async function get_signed_tx_by_coolwallet_sdk(
       transaction: TokenTransactionInfo,
       tokenInfo: TokenInfo,
@@ -279,246 +429,283 @@ describe('Test Sui SDK', () => {
       };
       await expect_both_coolwallet_and_suiSdk_signed_tx_is_same(transactionInfo, tokenInfo, addressIndex);
     });
+
+    it('Test Token Transfer Transaction Failed With Invalid Gas Payment Object Id', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+      const invalidGasPayment = [
+        {
+          objectId: '0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd',
+          version: 428891992,
+          digest: 'GsuLrrruMfrn6tNpPqGMvXDujTG9QcxRpF1332MCThF4',
+        },
+      ];
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: invalidGasPayment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas payment objectId is not valid. objectId=0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd"`
+      );
+    });
+
+    it('Test Token Transfer Transaction Failed With Empty Gas Payment', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: [],
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas payment not found."`);
+    });
+
+    it('Test Token Transfer Transaction Failed With 0 As Gas Price', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: '0',
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas price is invalid. gas price=0"`);
+    });
+
+    it('Test Token Transfer Transaction Failed With Empty String As Gas Price', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: '',
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas price is invalid. gas price="`);
+    });
+
+    it('Test Token Transfer Transaction Failed With Invalid String As Gas Price', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: 'Invalid String',
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas price is invalid. gas price=Invalid String"`);
+    });
+
+    it('Test Token Transfer Transaction Failed With 0 As Gas Budget', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: '0',
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas budget is invalid. gas budget=0"`);
+    });
+
+    it('Test Token Transfer Transaction Failed With Empty String As Gas Budget', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: '',
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas budget is invalid. gas budget="`);
+    });
+
+    it('Test Token Transfer Transaction Failed With Invalid String As Gas Budget', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: 'Invalid String',
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas budget is invalid. gas budget=Invalid String"`);
+    });
+
+    it('Test Token Transfer Transaction Failed With Empty Coin Objects', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: [],
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: token transfer's coin objects not found."`);
+    });
+
+    it('Test Token Transfer Transaction Failed With Invalid Coin Objects Id', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+      const addressIndex = 0;
+      const invalidCoinObjects = [
+        {
+          objectId: '0xc7af6c6bcdebc855af9867b8048f9f12fccaf9796787fe58cff9c9214dde4e',
+          version: 428892013,
+          digest: 'GUFd3NxnDsWZmDayuFYt85T1jjXjXHtC1iqFxHxt3U66',
+        },
+      ];
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: invalidCoinObjects,
+      };
+
+      expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: gas payment objectId is not valid. objectId=0xc7af6c6bcdebc855af9867b8048f9f12fccaf9796787fe58cff9c9214dde4e"`
+      );
+    });
   });
-
-  // error: invalid gas payment
-  it('Test Coin Transfer with gas payment invalid object id will throw error ', async () => {
-    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
-    const amount = '0.1';
-    const invalidGasPayment = [
-      {
-        objectId: '0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd',
-        version: 428891992,
-        digest: 'GsuLrrruMfrn6tNpPqGMvXDujTG9QcxRpF1332MCThF4',
-      },
-    ];
-
-    const transactionInfo: CoinTransactionInfo = {
-      amount,
-      toAddress,
-      gasPayment: invalidGasPayment,
-      gasPrice: coinFeeInfo.gasPrice,
-      gasBudget: coinFeeInfo.gasBudget,
-    };
-
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transactionInfo,
-      addressIndex: 0,
-    };
-
-    expect(suiSDK.signTransferTransaction(signTxData)).rejects.toThrowError();
-  });
-
-  it('Test Token Transfer Transaction with gas payment legnth 0 will throw error ', async () => {
-    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
-    const amount = '0.001';
-
-    const tokenInfo: TokenInfo = {
-      name: 'USD Coin',
-      symbol: 'USDC',
-      decimals: 6,
-      suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
-    };
-
-    const transactionInfo: TokenTransactionInfo = {
-      amount,
-      toAddress,
-      gasPayment: [],
-      gasPrice: tokenFeeInfo.gasPrice,
-      gasBudget: tokenFeeInfo.gasBudget,
-      coinObjects: tokenFeeInfo.coinObjects,
-    };
-
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transactionInfo,
-      tokenInfo,
-      addressIndex: 0,
-    };
-
-    expect(suiSDK.signTokenTransferTransaction(signTxData)).rejects.toThrowError();
-  });
-
-  // error: invalid gas price
-  it('Test Coin Transfer with empty string gas price will throw error', async () => {
-    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
-    const amount = '0.1';
-
-    const transactionInfo: CoinTransactionInfo = {
-      amount,
-      toAddress,
-      gasPayment: coinFeeInfo.payment,
-      gasPrice: '',
-      gasBudget: coinFeeInfo.gasBudget,
-    };
-
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transactionInfo,
-      addressIndex: 0,
-    };
-
-    expect(suiSDK.signTransferTransaction(signTxData)).rejects.toThrowError();
-  });
-
-  it('Test Token Transfer Transaction with invalid string gas price will throw error', async () => {
-    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
-    const amount = '0.001';
-
-    const tokenInfo: TokenInfo = {
-      name: 'USD Coin',
-      symbol: 'USDC',
-      decimals: 6,
-      suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
-    };
-
-    const transactionInfo: TokenTransactionInfo = {
-      amount,
-      toAddress,
-      gasPayment: tokenFeeInfo.payment,
-      gasPrice: 'invalidString',
-      gasBudget: tokenFeeInfo.gasBudget,
-      coinObjects: tokenFeeInfo.coinObjects,
-    };
-
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transactionInfo,
-      tokenInfo,
-      addressIndex: 0,
-    };
-
-    expect(suiSDK.signTokenTransferTransaction(signTxData)).rejects.toThrowError();
-  });
-
-  it('Test Token Transfer Transaction with 0 gas price will throw error', async () => {
-    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
-    const amount = '0.001';
-
-    const tokenInfo: TokenInfo = {
-      name: 'USD Coin',
-      symbol: 'USDC',
-      decimals: 6,
-      suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
-    };
-
-    const transactionInfo: TokenTransactionInfo = {
-      amount,
-      toAddress,
-      gasPayment: tokenFeeInfo.payment,
-      gasPrice: '0',
-      gasBudget: tokenFeeInfo.gasBudget,
-      coinObjects: tokenFeeInfo.coinObjects,
-    };
-
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transactionInfo,
-      tokenInfo,
-      addressIndex: 0,
-    };
-
-    expect(suiSDK.signTokenTransferTransaction(signTxData)).rejects.toThrowError();
-  });
-
-  // error: invalid gas budget
-  it('Test Coin Transfer with empty string gas price will throw error', async () => {
-    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
-    const amount = '0.1';
-
-    const transactionInfo: CoinTransactionInfo = {
-      amount,
-      toAddress,
-      gasPayment: coinFeeInfo.payment,
-      gasPrice: coinFeeInfo.gasPrice,
-      gasBudget: '',
-    };
-
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transactionInfo,
-      addressIndex: 0,
-    };
-
-    expect(suiSDK.signTransferTransaction(signTxData)).rejects.toThrowError();
-  });
-
-  it('Test Token Transfer Transaction with invalid string gas price will throw error', async () => {
-    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
-    const amount = '0.001';
-
-    const tokenInfo: TokenInfo = {
-      name: 'USD Coin',
-      symbol: 'USDC',
-      decimals: 6,
-      suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
-    };
-
-    const transactionInfo: TokenTransactionInfo = {
-      amount,
-      toAddress,
-      gasPayment: tokenFeeInfo.payment,
-      gasPrice: tokenFeeInfo.gasPrice,
-      gasBudget: 'invalidString',
-      coinObjects: tokenFeeInfo.coinObjects,
-    };
-
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transactionInfo,
-      tokenInfo,
-      addressIndex: 0,
-    };
-
-    expect(suiSDK.signTokenTransferTransaction(signTxData)).rejects.toThrowError();
-  });
-
-  it('Test Token Transfer Transaction with 0 gas price will throw error', async () => {
-    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
-    const amount = '0.001';
-
-    const tokenInfo: TokenInfo = {
-      name: 'USD Coin',
-      symbol: 'USDC',
-      decimals: 6,
-      suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
-    };
-
-    const transactionInfo: TokenTransactionInfo = {
-      amount,
-      toAddress,
-      gasPayment: tokenFeeInfo.payment,
-      gasPrice: tokenFeeInfo.gasPrice,
-      gasBudget: '0',
-      coinObjects: tokenFeeInfo.coinObjects,
-    };
-
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transactionInfo,
-      tokenInfo,
-      addressIndex: 0,
-    };
-
-    expect(suiSDK.signTokenTransferTransaction(signTxData)).rejects.toThrowError();
-  });
-
-  // coin object
 });

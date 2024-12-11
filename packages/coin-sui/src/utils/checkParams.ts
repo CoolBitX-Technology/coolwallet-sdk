@@ -31,13 +31,13 @@ function checkGasPaymentIsValid(gasPayment: Array<CoinObject>): void {
 // Check gas price is not zero or empty
 function checkGasPriceNotZero(gasPrice: string): void {
   const gasPriceBN = new BigNumber(gasPrice);
-  if (!gasPriceBN.isGreaterThan(0)) throw new Error(`checkParams: gas price is invalid. gaas price=${gasPrice}`);
+  if (!gasPriceBN.isGreaterThan(0)) throw new Error(`checkParams: gas price is invalid. gas price=${gasPrice}`);
 }
 
 // Check gas budget is not zero
 function checkGasBudgetNotZero(gasBudget: string): void {
   const gasBudgetBN = new BigNumber(gasBudget);
-  if (!gasBudgetBN.isGreaterThan(0)) throw new Error(`checkParams: gas budget is invalid. gaas price=${gasBudget}`);
+  if (!gasBudgetBN.isGreaterThan(0)) throw new Error(`checkParams: gas budget is invalid. gas budget=${gasBudget}`);
 }
 
 // Check coin objects count is not zero and object id is valid
