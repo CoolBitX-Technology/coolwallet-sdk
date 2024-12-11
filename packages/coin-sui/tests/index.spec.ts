@@ -4,7 +4,8 @@ import { initialize } from '@coolwallet/testing-library';
 import Sui from '../src';
 import { Transaction } from '@mysten/sui/transactions';
 import BigNumber from 'bignumber.js';
-import { coinFeeInfo } from './testData';
+import { coinFeeInfo, tokenFeeInfo } from './testData';
+import { CoinTransactionInfo, TokenInfo, TokenTransactionInfo } from '../src/config/types';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
@@ -58,6 +59,67 @@ describe('Test Sui SDK', () => {
     const signedTx = await suiSDK.signSmartContractTransaction(signTxData);
     expect(signedTx).toMatchInlineSnapshot(
       `"00c0228d76eefa4fd633a29f5410cfa904b9a332121bac9f78ee7aa3488df6d49e192a98f0a9f2a0c7d6603f4fe6be79774bb5aec754403718b03a6789e7a23f0f8b60e34e59fcce2cfa2b4d5f3fc91e80f354a728ced7b7f1b394faeda0ab3176"`
+    );
+  });
+
+  it('Test Coin Transfer Transaction Success', async () => {
+    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+    const amount = '0.1';
+
+    const transactionInfo: CoinTransactionInfo = {
+      amount,
+      toAddress,
+      gasPayment: coinFeeInfo.payment,
+      gasPrice: coinFeeInfo.gasPrice,
+      gasBudget: coinFeeInfo.gasBudget,
+    };
+
+    const signTxData = {
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      transactionInfo,
+      addressIndex: 0,
+    };
+
+    const signedTx = await suiSDK.signTransferTransaction(signTxData);
+    expect(signedTx).toMatchInlineSnapshot(
+      `"00c0228d76eefa4fd633a29f5410cfa904b9a332121bac9f78ee7aa3488df6d49e192a98f0a9f2a0c7d6603f4fe6be79774bb5aec754403718b03a6789e7a23f0f8b60e34e59fcce2cfa2b4d5f3fc91e80f354a728ced7b7f1b394faeda0ab3176"`
+    );
+  });
+
+  it('Test Token Transfer Transaction Success', async () => {
+    const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+    const amount = '0.001';
+
+    const tokenInfo: TokenInfo = {
+      name: 'USD Coin',
+      symbol: 'USDC',
+      decimals: 6,
+      suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+    };
+
+    const transactionInfo: TokenTransactionInfo = {
+      amount,
+      toAddress,
+      gasPayment: tokenFeeInfo.payment,
+      gasPrice: tokenFeeInfo.gasPrice,
+      gasBudget: tokenFeeInfo.gasBudget,
+      coinObjects: tokenFeeInfo.coinObjects,
+    };
+
+    const signTxData = {
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      transactionInfo,
+      tokenInfo,
+      addressIndex: 0,
+    };
+
+    const signedTx = await suiSDK.signTokenTransferTransaction(signTxData);
+    expect(signedTx).toMatchInlineSnapshot(
+      `"00a69c48043c3199a808eadf736b7e6854cef6ee02c36b1259821777bf2fd06d369bcb2aad35ce3f1513fbfe2e80e34a4403a903d060966bc8b09df774f9b2c60a8b60e34e59fcce2cfa2b4d5f3fc91e80f354a728ced7b7f1b394faeda0ab3176"`
     );
   });
 });

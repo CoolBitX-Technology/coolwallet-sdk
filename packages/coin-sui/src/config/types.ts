@@ -15,7 +15,7 @@ export interface CoinTransactionInfo {
 }
 
 export interface TokenTransactionInfo extends CoinTransactionInfo {
-  coinObject: Array<CoinObject>;
+  coinObjects: Array<CoinObject>;
 }
 
 type BaseTransactionArgs = {
