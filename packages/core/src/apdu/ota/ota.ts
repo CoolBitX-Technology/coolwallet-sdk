@@ -113,7 +113,7 @@ const performApiChallenge = async (
   apiSecret: string
 ): Promise<void> => {
   console.debug('mutual Authorization Start----');
-  const options = await getAPIOption(cardId);
+  const options = await getAPIOption({ cardId, apiSecret });
   const challengeResponse = await callAPI(getChallengeUrl(transport.cardType), options);
   console.debug('cardID: ', cardId);
   const challengeObj = await formatAPIResponse(transport, challengeResponse);
