@@ -1,11 +1,11 @@
 import BigNumber from 'bignumber.js';
-import { isValidSuiAddress } from '@mysten/sui/utils';
-import { SUI_DECIMALS } from '@mysten/sui/utils';
-import { CoinTransactionInfo, TokenTransactionInfo } from '../config/types';
+import { isValidSuiAddress, SUI_DECIMALS } from '@mysten/sui/utils';
+import { CoinTransactionInfo, TokenInfo, TokenTransactionInfo } from '../config/types';
+import { Transaction } from '@mysten/sui/transactions';
 
 // The Pro card cannot display 9-digit integer numbers, so the transaction amount is limited
-function checkAmountCanDisplayOnProCard(transferAmount: string, decimals: string | number): void {
-  if (new BigNumber(transferAmount).shiftedBy(-decimals).isGreaterThanOrEqualTo('100000000'))
+function checkAmountCanDisplayOnProCard(unitAmount: string, decimals: string | number): void {
+  if (new BigNumber(unitAmount).shiftedBy(-decimals).isGreaterThanOrEqualTo('100000000'))
     throw new Error(`checkParams: pro card cannot display 9 digits`);
 }
 
@@ -21,15 +21,22 @@ function checkAddressIsValid(address: string): void {
 
 export function checkTransferTransaction(transactionInfo: CoinTransactionInfo): void {
   const { amount, toAddress } = transactionInfo;
-  checkAmountCanDisplayOnProCard(amount, SUI_DECIMALS);
+  const unitAmount = new BigNumber(amount).shiftedBy(SUI_DECIMALS).toFixed();
+  checkAmountCanDisplayOnProCard(unitAmount, SUI_DECIMALS);
   checkAmountNotZero(amount);
   checkAddressIsValid(toAddress);
 }
 
-export function checkTransferTokenTransaction(transactionInfo: TokenTransactionInfo): void {
-  const { amount, toAddress } = transactionInfo;
+export function checkSmartTransaction(transaction: Transaction, fromAddress: string): void {
+  const sender = transaction.getData().sender;
+  if (sender !== fromAddress) throw new Error(`checkParams: sender is not equal to ${fromAddress}, sender=${sender}`);
+}
 
-  checkAmountCanDisplayOnProCard(amount, SUI_DECIMALS);
+export function checkTransferTokenTransaction(transactionInfo: TokenTransactionInfo, tokenInfo: TokenInfo): void {
+  const { amount, toAddress } = transactionInfo;
+  const { decimals } = tokenInfo;
+  const unitAmount = new BigNumber(amount).shiftedBy(decimals).toFixed();
+  checkAmountCanDisplayOnProCard(unitAmount, decimals);
   checkAmountNotZero(amount);
   checkAddressIsValid(toAddress);
 }
