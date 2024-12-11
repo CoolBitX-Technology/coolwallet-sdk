@@ -260,7 +260,7 @@ describe('Test Sui SDK', () => {
       };
 
       expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"checkParams: gas budget is invalid. gas price=0"`
+        `"checkParams: gas budget is invalid. gas budget=0"`
       );
     });
 
@@ -278,7 +278,7 @@ describe('Test Sui SDK', () => {
       };
 
       expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"checkParams: gas budget is invalid. gas price="`
+        `"checkParams: gas budget is invalid. gas budget="`
       );
     });
 
@@ -296,7 +296,7 @@ describe('Test Sui SDK', () => {
       };
 
       expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"checkParams: gas budget is invalid. gas price=Invalid String"`
+        `"checkParams: gas budget is invalid. gas budget=Invalid String"`
       );
     });
   });
