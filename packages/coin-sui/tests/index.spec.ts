@@ -96,9 +96,9 @@ describe('Test Sui SDK', () => {
         gasPrice: coinFeeInfo.gasPrice,
         gasBudget: coinFeeInfo.gasBudget,
       };
-      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"checkParams: not support amount 0"`
-      );
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: not support amount 0"`);
     });
 
     it('Test Coin Transfer Transaction Success With 99999999 SUI', async () => {
@@ -126,9 +126,9 @@ describe('Test Sui SDK', () => {
         gasPrice: coinFeeInfo.gasPrice,
         gasBudget: coinFeeInfo.gasBudget,
       };
-      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"checkParams: pro card cannot display 9 digits"`
-      );
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: pro card cannot display 9 digits"`);
     });
 
     it('Test Coin Transfer Transaction Failed With Invalid To Address', async () => {
@@ -142,7 +142,9 @@ describe('Test Sui SDK', () => {
         gasPrice: coinFeeInfo.gasPrice,
         gasBudget: coinFeeInfo.gasBudget,
       };
-      expect(get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"checkParams: address is invalid. address=0x2fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09"`
       );
     });
@@ -342,7 +344,7 @@ describe('Test Sui SDK', () => {
         fromAddress
       );
 
-      expect_both_coolwallet_and_suiSdk_signed_tx_is_same(transaction, addressIndex);
+      await expect_both_coolwallet_and_suiSdk_signed_tx_is_same(transaction, addressIndex);
     });
 
     it('Test Smart Transaction Failed With Different Sender', async () => {
@@ -458,11 +460,37 @@ describe('Test Sui SDK', () => {
         coinObjects: tokenFeeInfo.coinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"checkParams: gas payment objectId is not valid. objectId=0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd"`
       );
+    });
+
+    it('Test Token Transfer Transaction Failed With 0 USDC', async () => {
+      const addressIndex = 0;
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0';
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: not support amount 0"`);
     });
 
     it('Test Token Transfer Transaction Failed With Empty Gas Payment', async () => {
@@ -486,7 +514,7 @@ describe('Test Sui SDK', () => {
         coinObjects: tokenFeeInfo.coinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas payment not found."`);
     });
@@ -512,7 +540,7 @@ describe('Test Sui SDK', () => {
         coinObjects: tokenFeeInfo.coinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas price is invalid. gas price=0"`);
     });
@@ -538,7 +566,7 @@ describe('Test Sui SDK', () => {
         coinObjects: tokenFeeInfo.coinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas price is invalid. gas price="`);
     });
@@ -564,7 +592,7 @@ describe('Test Sui SDK', () => {
         coinObjects: tokenFeeInfo.coinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas price is invalid. gas price=Invalid String"`);
     });
@@ -590,7 +618,7 @@ describe('Test Sui SDK', () => {
         coinObjects: tokenFeeInfo.coinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas budget is invalid. gas budget=0"`);
     });
@@ -616,7 +644,7 @@ describe('Test Sui SDK', () => {
         coinObjects: tokenFeeInfo.coinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas budget is invalid. gas budget="`);
     });
@@ -642,7 +670,7 @@ describe('Test Sui SDK', () => {
         coinObjects: tokenFeeInfo.coinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas budget is invalid. gas budget=Invalid String"`);
     });
@@ -668,7 +696,7 @@ describe('Test Sui SDK', () => {
         coinObjects: [],
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: token transfer's coin objects not found."`);
     });
@@ -701,10 +729,62 @@ describe('Test Sui SDK', () => {
         coinObjects: invalidCoinObjects,
       };
 
-      expect(
+      await expect(
         get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"checkParams: gas payment objectId is not valid. objectId=0xc7af6c6bcdebc855af9867b8048f9f12fccaf9796787fe58cff9c9214dde4e"`
+      );
+    });
+
+    it('Test Token Transfer Transaction Failed With 0 USDC', async () => {
+      const addressIndex = 0;
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0';
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: not support amount 0"`);
+    });
+
+    it('Test Token Transfer Transaction Failed With Invalid To Address', async () => {
+      const addressIndex = 0;
+      const toAddress = '0xfd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '0.001';
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transactionInfo, tokenInfo, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"checkParams: address is invalid. address=0xfd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09"`
       );
     });
   });

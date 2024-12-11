@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { isValidSuiAddress, isValidSuiObjectId, SUI_DECIMALS } from '@mysten/sui/utils';
-import { CoinObject, CoinTransactionInfo, TokenInfo, TokenTransactionInfo } from '../config/types';
+import { CoinObject, CoinTransactionInfo, TokenTransactionInfo } from '../config/types';
 import { Transaction } from '@mysten/sui/transactions';
 
 // The Pro card cannot display 9-digit integer numbers, so the transaction amount is limited
@@ -65,11 +65,8 @@ export function checkSmartTransaction(transaction: Transaction, fromAddress: str
   if (sender !== fromAddress) throw new Error(`checkParams: sender is not equal to ${fromAddress}, sender=${sender}`);
 }
 
-export function checkTransferTokenTransaction(transactionInfo: TokenTransactionInfo, tokenInfo: TokenInfo): void {
+export function checkTransferTokenTransaction(transactionInfo: TokenTransactionInfo): void {
   const { amount, toAddress, gasPayment, gasPrice, gasBudget, coinObjects } = transactionInfo;
-  const { decimals } = tokenInfo;
-  const unitAmount = new BigNumber(amount).shiftedBy(decimals).toFixed();
-  checkAmountCanDisplayOnProCard(unitAmount, decimals);
   checkAmountNotZero(amount);
   checkAddressIsValid(toAddress);
   checkGasPaymentIsValid(gasPayment);

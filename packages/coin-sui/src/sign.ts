@@ -78,8 +78,9 @@ export async function signTokenTransferTransaction(transactionArgs: TokenTransac
   const { transport, appId, appPrivateKey, addressIndex, transactionInfo, tokenInfo, confirmCB, authorizedCB } =
     transactionArgs;
 
-  const script = param.SCRIPT.TOKEN_TRANSFER.scriptWithSignature;
+  checkTransferTokenTransaction(transactionInfo);
 
+  const script = param.SCRIPT.TOKEN_TRANSFER.scriptWithSignature;
   // TODO: 若 token amount 大於特定數量就要改走 smart script
   checkTransferTokenTransaction(transactionInfo, tokenInfo);
 
