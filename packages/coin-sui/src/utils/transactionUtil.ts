@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { CoinTransactionInfo, TokenTransactionInfo } from '../config/types';
 import { Transaction } from '@mysten/sui/transactions';
-import { SUI_DECIMALS } from '@mysten/sui/utils';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 
 export function getKeyPair(mnemonic: string, addressIndex: number) {
@@ -14,7 +13,6 @@ export function convertToUnitAmount(humanAmount: string, decmials: number) {
 
 export function getCoinTransaction(transactionInfo: CoinTransactionInfo, fromAddress: string) {
   const { toAddress, amount, gasPayment, gasPrice, gasBudget } = transactionInfo;
-  const sendAmount = convertToUnitAmount(amount, SUI_DECIMALS);
 
   const tx = new Transaction();
   tx.setSender(fromAddress);
@@ -22,14 +20,13 @@ export function getCoinTransaction(transactionInfo: CoinTransactionInfo, fromAdd
   tx.setGasPayment(gasPayment);
   tx.setGasPrice(new BigNumber(gasPrice).toNumber());
 
-  const [coin] = tx.splitCoins(tx.gas, [sendAmount]);
+  const [coin] = tx.splitCoins(tx.gas, [amount]);
   tx.transferObjects([coin], toAddress);
   return tx;
 }
 
 export function getTokenTransaction(transactionInfo: TokenTransactionInfo, fromAddress: string, decimals: number) {
   const { toAddress, amount, gasPayment, gasPrice, gasBudget, coinObjects } = transactionInfo;
-  const sendAmount = convertToUnitAmount(amount, decimals);
 
   const tx = new Transaction();
   tx.setSender(fromAddress);
@@ -46,7 +43,7 @@ export function getTokenTransaction(transactionInfo: TokenTransactionInfo, fromA
   }
   // split
   const { digest, objectId, version } = coinObjects[0];
-  const [coin] = tx.splitCoins(tx.objectRef({ digest, objectId, version }), [sendAmount]);
+  const [coin] = tx.splitCoins(tx.objectRef({ digest, objectId, version }), [amount]);
   tx.transferObjects([coin], toAddress);
   return tx;
 }

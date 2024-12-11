@@ -7,7 +7,7 @@ export interface CoinObject {
   digest: string;
 }
 export interface CoinTransactionInfo {
-  amount: string;
+  amount: string; // unit amount
   toAddress: string;
   gasPayment: Array<CoinObject>;
   gasPrice: string;
