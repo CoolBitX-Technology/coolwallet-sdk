@@ -56,6 +56,8 @@ describe('Test Sui SDK', () => {
     };
 
     const signedTx = await suiSDK.signSmartContractTransaction(signTxData);
-    expect(signedTx).toMatchInlineSnapshot();
+    expect(signedTx).toMatchInlineSnapshot(
+      `"00c0228d76eefa4fd633a29f5410cfa904b9a332121bac9f78ee7aa3488df6d49e192a98f0a9f2a0c7d6603f4fe6be79774bb5aec754403718b03a6789e7a23f0f8b60e34e59fcce2cfa2b4d5f3fc91e80f354a728ced7b7f1b394faeda0ab3176"`
+    );
   });
 });

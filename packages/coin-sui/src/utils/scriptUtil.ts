@@ -58,7 +58,8 @@ function getSendAmountHexIndex(rawTx: Transaction, hex: string): string {
 
 async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number): Promise<string> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
-  const SEPath = `11${path}`;
+  const pathLength = '15';
+  const SEPath = `${pathLength}${path}`;
   console.debug('SUI.getCoinTransferArguments >>> SEPath: ', SEPath);
 
   const txBytes = await rawTx.build();
@@ -89,7 +90,8 @@ async function getTokenTransferArguments(
   tokenInfo: types.TokenInfo
 ): Promise<string> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
-  const SEPath = `11${path}`;
+  const pathLength = '15';
+  const SEPath = `${pathLength}${path}`;
   console.debug('SUI.getTokenTransferArguments >>> SEPath: ', SEPath);
 
   const txBytes = await rawTx.build();
@@ -107,7 +109,8 @@ async function getTokenTransferArguments(
 
 async function getSmartContractArguments(rawTx: Transaction, addressIndex: number): Promise<string> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
-  const SEPath = `11${path}`;
+  const pathLength = '15';
+  const SEPath = `${pathLength}${path}`;
   console.debug('SUI.getSmartContractArguments >>> SEPath: ', SEPath);
 
   const txBytes = await rawTx.build();
