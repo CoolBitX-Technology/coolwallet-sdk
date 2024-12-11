@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
-import { isValidSuiAddress, SUI_DECIMALS } from '@mysten/sui/utils';
-import { CoinTransactionInfo, TokenInfo, TokenTransactionInfo } from '../config/types';
+import { isValidSuiAddress, isValidSuiObjectId, SUI_DECIMALS } from '@mysten/sui/utils';
+import { CoinObject, CoinTransactionInfo, TokenInfo, TokenTransactionInfo } from '../config/types';
 import { Transaction } from '@mysten/sui/transactions';
 
 // The Pro card cannot display 9-digit integer numbers, so the transaction amount is limited
@@ -19,12 +19,45 @@ function checkAddressIsValid(address: string): void {
   if (!isValidSuiAddress(address)) throw new Error(`checkParams: address is invalid. address=${address}`);
 }
 
+// Check Gas Payment count is not zero and object id is valid
+function checkGasPaymentIsValid(gasPayment: Array<CoinObject>): void {
+  if (gasPayment.length === 0) throw new Error(`checkParams: gas payment not found.`);
+  gasPayment.forEach((object) => {
+    if (!isValidSuiObjectId(object.objectId))
+      throw new Error(`checkParams: gas payment objectId is not valid. objectId=${object.objectId}`);
+  });
+}
+
+// Check gas price is not zero or empty
+function checkGasPriceNotZero(gasPrice: string): void {
+  const gasPriceBN = new BigNumber(gasPrice);
+  if (!gasPriceBN.isGreaterThan(0)) throw new Error(`checkParams: gas price is invalid. gaas price=${gasPrice}`);
+}
+
+// Check gas budget is not zero
+function checkGasBudgetNotZero(gasBudget: string): void {
+  const gasBudgetBN = new BigNumber(gasBudget);
+  if (!gasBudgetBN.isGreaterThan(0)) throw new Error(`checkParams: gas budget is invalid. gaas price=${gasBudget}`);
+}
+
+// Check coin objects count is not zero and object id is valid
+function checkCoinObjectsIsValid(coinObjects: Array<CoinObject>): void {
+  if (coinObjects.length === 0) throw new Error(`checkParams: token transfer's coin objects not found.`);
+  coinObjects.forEach((object) => {
+    if (!isValidSuiObjectId(object.objectId))
+      throw new Error(`checkParams: gas payment objectId is not valid. objectId=${object.objectId}`);
+  });
+}
+
 export function checkTransferTransaction(transactionInfo: CoinTransactionInfo): void {
-  const { amount, toAddress } = transactionInfo;
+  const { amount, toAddress, gasPayment, gasPrice, gasBudget } = transactionInfo;
   const unitAmount = new BigNumber(amount).shiftedBy(SUI_DECIMALS).toFixed();
-  checkAmountCanDisplayOnProCard(unitAmount, SUI_DECIMALS);
+  checkAmountCanDisplayOnProCard(unitAmount, SUI_DECIMALS); // only for coin because token will do smart script if the length overflow.
   checkAmountNotZero(amount);
   checkAddressIsValid(toAddress);
+  checkGasPaymentIsValid(gasPayment);
+  checkGasPriceNotZero(gasPrice);
+  checkGasBudgetNotZero(gasBudget);
 }
 
 export function checkSmartTransaction(transaction: Transaction, fromAddress: string): void {
@@ -33,10 +66,14 @@ export function checkSmartTransaction(transaction: Transaction, fromAddress: str
 }
 
 export function checkTransferTokenTransaction(transactionInfo: TokenTransactionInfo, tokenInfo: TokenInfo): void {
-  const { amount, toAddress } = transactionInfo;
+  const { amount, toAddress, gasPayment, gasPrice, gasBudget, coinObjects } = transactionInfo;
   const { decimals } = tokenInfo;
   const unitAmount = new BigNumber(amount).shiftedBy(decimals).toFixed();
   checkAmountCanDisplayOnProCard(unitAmount, decimals);
   checkAmountNotZero(amount);
   checkAddressIsValid(toAddress);
+  checkGasPaymentIsValid(gasPayment);
+  checkGasPriceNotZero(gasPrice);
+  checkGasBudgetNotZero(gasBudget);
+  checkCoinObjectsIsValid(coinObjects); // only for token
 }

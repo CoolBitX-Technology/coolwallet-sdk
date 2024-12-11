@@ -5,7 +5,7 @@ import { getCoinTransferArguments, getSmartContractArguments, getTokenTransferAr
 import { CoinTransactionArgs, SmartTransactionArgs, TokenTransactionArgs } from './config/types';
 import { getPublicKey, getSuiAddressByPublicKey } from './utils/addressUtil';
 import { getCoinTransaction, getTokenTransaction } from './utils/transactionUtil';
-import { checkSmartTransaction, checkTransferTransaction } from './utils/checkParams';
+import { checkSmartTransaction, checkTransferTokenTransaction, checkTransferTransaction } from './utils/checkParams';
 
 export async function signSmartTransaction(transactionArgs: SmartTransactionArgs): Promise<string> {
   const {
@@ -20,7 +20,7 @@ export async function signSmartTransaction(transactionArgs: SmartTransactionArgs
 
   const publicKey = await getPublicKey(transport, appPrivateKey, appId, addressIndex);
   const fromAddress = getSuiAddressByPublicKey(publicKey);
-  
+
   checkSmartTransaction(transaction, fromAddress);
 
   const script = param.SCRIPT.SMART_CONTRACT.scriptWithSignature;
@@ -81,6 +81,7 @@ export async function signTokenTransferTransaction(transactionArgs: TokenTransac
   const script = param.SCRIPT.TOKEN_TRANSFER.scriptWithSignature;
 
   // TODO: 若 token amount 大於特定數量就要改走 smart script
+  checkTransferTokenTransaction(transactionInfo, tokenInfo);
 
   const publicKey = await getPublicKey(transport, appPrivateKey, appId, addressIndex);
   const fromAddress = getSuiAddressByPublicKey(publicKey);
