@@ -8,7 +8,7 @@ export function getKeyPair(mnemonic: string, addressIndex: number) {
   return Ed25519Keypair.deriveKeypair(mnemonic, `m/44'/784'/0'/0'/${addressIndex}'`);
 }
 
-function convertToUnitAmount(humanAmount: string, decmials: number) {
+export function convertToUnitAmount(humanAmount: string, decmials: number) {
   return new BigNumber(humanAmount).shiftedBy(decmials).toFixed();
 }
 

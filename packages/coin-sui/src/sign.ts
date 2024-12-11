@@ -6,6 +6,7 @@ import { CoinTransactionArgs, SmartTransactionArgs, TokenTransactionArgs } from 
 import { getPublicKey, getSuiAddressByPublicKey } from './utils/addressUtil';
 import { getCoinTransaction, getTokenTransaction } from './utils/transactionUtil';
 import { checkSmartTransaction, checkTransferTokenTransaction, checkTransferTransaction } from './utils/checkParams';
+import BigNumber from 'bignumber.js';
 
 export async function signSmartTransaction(transactionArgs: SmartTransactionArgs): Promise<string> {
   const {
@@ -80,17 +81,20 @@ export async function signTokenTransferTransaction(transactionArgs: TokenTransac
 
   checkTransferTokenTransaction(transactionInfo);
 
-  const script = param.SCRIPT.TOKEN_TRANSFER.scriptWithSignature;
-  // TODO: 若 token amount 大於特定數量就要改走 smart script
-  checkTransferTokenTransaction(transactionInfo, tokenInfo);
-
   const publicKey = await getPublicKey(transport, appPrivateKey, appId, addressIndex);
   const fromAddress = getSuiAddressByPublicKey(publicKey);
-  console.log(`Token fromAddress= ${fromAddress}`);
   const { decimals } = tokenInfo;
   const transaction = getTokenTransaction(transactionInfo, fromAddress, decimals);
 
-  const argument = await getTokenTransferArguments(transaction, addressIndex, tokenInfo);
+  // 若 token amount 大於特定數量就要改走 smart script
+  let script = param.SCRIPT.TOKEN_TRANSFER.scriptWithSignature
+  let argument = await getTokenTransferArguments(transaction, addressIndex, tokenInfo);
+  const humanAmountLimit = new BigNumber(1).shiftedBy(8);
+  if (new BigNumber(transactionInfo.amount).isGreaterThanOrEqualTo(humanAmountLimit)) {
+    script = param.SCRIPT.SMART_CONTRACT.scriptWithSignature;
+    argument = await getSmartContractArguments(transaction, addressIndex);
+  }
+
   const preActions = [() => apdu.tx.sendScript(transport, script)];
   const action = () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
 

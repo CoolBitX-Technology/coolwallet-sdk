@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { isValidSuiAddress, isValidSuiObjectId, SUI_DECIMALS } from '@mysten/sui/utils';
 import { CoinObject, CoinTransactionInfo, TokenTransactionInfo } from '../config/types';
 import { Transaction } from '@mysten/sui/transactions';
+import { convertToUnitAmount } from './transactionUtil';
 
 // The Pro card cannot display 9-digit integer numbers, so the transaction amount is limited
 function checkAmountCanDisplayOnProCard(unitAmount: string, decimals: string | number): void {
@@ -51,8 +52,8 @@ function checkCoinObjectsIsValid(coinObjects: Array<CoinObject>): void {
 
 export function checkTransferTransaction(transactionInfo: CoinTransactionInfo): void {
   const { amount, toAddress, gasPayment, gasPrice, gasBudget } = transactionInfo;
-  const unitAmount = new BigNumber(amount).shiftedBy(SUI_DECIMALS).toFixed();
-  checkAmountCanDisplayOnProCard(unitAmount, SUI_DECIMALS); // only for coin because token will do smart script if the length overflow.
+  const unitAmount = convertToUnitAmount(amount, SUI_DECIMALS);
+  checkAmountCanDisplayOnProCard(unitAmount, SUI_DECIMALS);
   checkAmountNotZero(amount);
   checkAddressIsValid(toAddress);
   checkGasPaymentIsValid(gasPayment);

@@ -787,5 +787,50 @@ describe('Test Sui SDK', () => {
         `"checkParams: address is invalid. address=0xfd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09"`
       );
     });
+
+    it('Test Token Transfer Transaction Success With 99999999 USDC', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '99999999';
+      const addressIndex = 0;
+
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+      await expect_both_coolwallet_and_suiSdk_signed_tx_is_same(transactionInfo, tokenInfo, addressIndex);
+    });
+
+    it('Test Token Transfer Transaction Success With 100000000 USDC', async () => {
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = '100000000';
+      const addressIndex = 0;
+      const tokenInfo: TokenInfo = {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        suiCoinType: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      };
+
+      const transactionInfo: TokenTransactionInfo = {
+        amount,
+        toAddress,
+        gasPayment: tokenFeeInfo.payment,
+        gasPrice: tokenFeeInfo.gasPrice,
+        gasBudget: tokenFeeInfo.gasBudget,
+        coinObjects: tokenFeeInfo.coinObjects,
+      };
+      await expect_both_coolwallet_and_suiSdk_signed_tx_is_same(transactionInfo, tokenInfo, addressIndex);
+    });
   });
 });
