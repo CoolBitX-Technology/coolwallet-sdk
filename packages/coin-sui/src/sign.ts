@@ -5,7 +5,7 @@ import { getCoinTransferArguments, getSmartContractArguments, getTokenTransferAr
 import { CoinTransactionArgs, SmartTransactionArgs, TokenTransactionArgs } from './config/types';
 import { getPublicKey, getSuiAddressByPublicKey } from './utils/addressUtil';
 import { getCoinTransaction, getTokenTransaction } from './utils/transactionUtil';
-import { checkTransferTransaction } from './utils/checkParams';
+import { checkSmartTransaction, checkTransferTransaction } from './utils/checkParams';
 
 export async function signSmartTransaction(transactionArgs: SmartTransactionArgs): Promise<string> {
   const {
@@ -17,6 +17,11 @@ export async function signSmartTransaction(transactionArgs: SmartTransactionArgs
     confirmCB,
     authorizedCB,
   } = transactionArgs;
+
+  const publicKey = await getPublicKey(transport, appPrivateKey, appId, addressIndex);
+  const fromAddress = getSuiAddressByPublicKey(publicKey);
+  
+  checkSmartTransaction(transaction, fromAddress);
 
   const script = param.SCRIPT.SMART_CONTRACT.scriptWithSignature;
   const argument = await getSmartContractArguments(transaction, addressIndex);
@@ -35,7 +40,6 @@ export async function signSmartTransaction(transactionArgs: SmartTransactionArgs
 
   const signatureHex = signature.toString('hex');
 
-  const publicKey = await getPublicKey(transport, appPrivateKey, appId, addressIndex);
   const eddsaType = '00';
   const signedTx = eddsaType + signatureHex + publicKey;
   return signedTx;
@@ -49,7 +53,6 @@ export async function signCoinTransferTransaction(transactionArgs: CoinTransacti
   const script = param.SCRIPT.TRANSFER.scriptWithSignature;
   const publicKey = await getPublicKey(transport, appPrivateKey, appId, addressIndex);
   const fromAddress = getSuiAddressByPublicKey(publicKey);
-  console.log(`Sui fromAddress= ${fromAddress}`);
   const transaction = getCoinTransaction(transactionInfo, fromAddress);
   const argument = await getCoinTransferArguments(transaction, addressIndex);
 

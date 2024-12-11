@@ -2,6 +2,11 @@ import BigNumber from 'bignumber.js';
 import { CoinTransactionInfo, TokenTransactionInfo } from '../config/types';
 import { Transaction } from '@mysten/sui/transactions';
 import { SUI_DECIMALS } from '@mysten/sui/utils';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+
+export function getKeyPair(mnemonic: string, addressIndex: number) {
+  return Ed25519Keypair.deriveKeypair(mnemonic, `m/44'/784'/0'/0'/${addressIndex}'`);
+}
 
 function convertToUnitAmount(humanAmount: string, decmials: number) {
   return new BigNumber(humanAmount).shiftedBy(decmials).toFixed();

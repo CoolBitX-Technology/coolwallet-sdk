@@ -19,15 +19,15 @@ export default class Sui extends COIN.EDDSACoin implements COIN.Coin {
     return new Ed25519PublicKey(base64).toSuiAddress();
   }
 
+  async signTransaction(transactionArgs: SmartTransactionArgs) {
+    return signSmartTransaction(transactionArgs);
+  }
+
   async signTransferTransaction(transactionArgs: CoinTransactionArgs): Promise<string> {
     return signCoinTransferTransaction(transactionArgs);
   }
 
   async signTokenTransferTransaction(transactionArgs: TokenTransactionArgs) {
     return signTokenTransferTransaction(transactionArgs);
-  }
-
-  async signSmartContractTransaction(transactionArgs: SmartTransactionArgs) {
-    return signSmartTransaction(transactionArgs);
   }
 }
