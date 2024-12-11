@@ -1,12 +1,12 @@
 import { CardType } from '../../transport';
 
 const SE_UPDATE_VER_PRO = 341;
-const SE_UPDATE_VER_GO = 2;
+const SE_UPDATE_VER_GO = 11;
 
 const CHALLENGE_URL = 'https://ota.cbx.io/api/challenge';
 const CRYPTOGRAM_URL = 'https://ota.cbx.io/api/cryptogram';
-const CHALLENGE_URL_V2 = 'https://vas.wallet.cbx.io/ota/challenge';
-const CRYPTOGRAM_URL_V2 = 'https://vas.wallet.cbx.io/ota/cryptogram';
+const CHALLENGE_URL_V2 = 'https://vas.wallet.cbx.io/ota/api/challenge';
+const CRYPTOGRAM_URL_V2 = 'https://vas.wallet.cbx.io/ota/api/cryptogram';
 const MAIN_AID_PRO = '436f6f6c57616c6c657450524f'; // CoolWalletPRO
 const MAIN_AID_GO = '436f6f6c57616c6c65744c495445'; // CoolWalletLITE
 const BACKUP_AID = '4261636b75704170706c6574';
