@@ -1,7 +1,7 @@
 import { PathType } from '@coolwallet/core/lib/config';
 import { utils } from '@coolwallet/core';
 import { Transaction } from '@mysten/sui/transactions';
-import { messageWithIntent } from '@mysten/sui/dist/cjs/cryptography/intent';
+import { messageWithIntent } from '@mysten/sui/cryptography';
 import * as types from '../config/types';
 import BigNumber from 'bignumber.js';
 
@@ -56,7 +56,7 @@ function getSendAmountHexIndex(rawTx: Transaction, hex: string): string {
   return amountHexIndexByByte;
 }
 
-async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number): Promise<string> {
+async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number): Promise<types.ArgumentWithBytes> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
   const pathLength = '15';
   const SEPath = `${pathLength}${path}`;
@@ -72,7 +72,10 @@ async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number
   const header = toAddressHexIndex + amountHexIndex;
   console.debug('SUI.getCoinTransferArguments >>> header: ', header);
 
-  return SEPath + header + intentMessageHex;
+  return {
+    argument: SEPath + header + intentMessageHex,
+    bytes: Buffer.from(txBytes).toString('base64'),
+  };
 }
 
 function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
@@ -88,12 +91,12 @@ async function getTokenTransferArguments(
   rawTx: Transaction,
   addressIndex: number,
   tokenInfo: types.TokenInfo
-): Promise<string> {
+): Promise<types.ArgumentWithBytes> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
   const pathLength = '15';
   const SEPath = `${pathLength}${path}`;
   console.debug('SUI.getTokenTransferArguments >>> SEPath: ', SEPath);
-
+  
   const txBytes = await rawTx.build();
   const intentMessage = messageWithIntent('TransactionData', txBytes);
   const intentMessageHex = Buffer.from(intentMessage).toString('hex');
@@ -104,10 +107,13 @@ async function getTokenTransferArguments(
   const tokenInfoArgs = getTokenInfoArgs(tokenInfo);
   const header = toAddressHexIndex + amountHexIndex + tokenInfoArgs; // 00ba 00a6 060455534443000000
   console.debug('SUI.getTokenTransferArguments >>> header: ', header);
-  return SEPath + header + intentMessageHex;
+  return {
+    argument: SEPath + header + intentMessageHex,
+    bytes: Buffer.from(txBytes).toString('base64'),
+  };
 }
 
-async function getSmartContractArguments(rawTx: Transaction, addressIndex: number): Promise<string> {
+async function getSmartContractArguments(rawTx: Transaction, addressIndex: number): Promise<types.ArgumentWithBytes> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
   const pathLength = '15';
   const SEPath = `${pathLength}${path}`;
@@ -118,7 +124,10 @@ async function getSmartContractArguments(rawTx: Transaction, addressIndex: numbe
   const intentMessageHex = Buffer.from(intentMessage).toString('hex');
   console.debug('SUI.getSmartContractArguments >>> intentMessage: ', intentMessageHex);
 
-  return SEPath + intentMessageHex;
+  return {
+    argument: SEPath + intentMessageHex,
+    bytes: Buffer.from(txBytes).toString('base64'),
+  };
 }
 
 export { getCoinTransferArguments, getTokenTransferArguments, getSmartContractArguments };
