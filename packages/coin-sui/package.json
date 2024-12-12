@@ -37,9 +37,7 @@
   },
   "dependencies": {
     "@mysten/sui": "^1.14.3",
-    "@types/bn.js": "^5.1.1",
-    "bignumber.js": "^8.0.2",
-    "bn.js": "^5.2.1"
+    "bignumber.js": "^8.0.2"
   },
   "repository": {
     "type": "git",
