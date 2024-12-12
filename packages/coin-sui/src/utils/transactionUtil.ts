@@ -3,15 +3,15 @@ import { CoinTransactionInfo, TokenTransactionInfo } from '../config/types';
 import { Transaction } from '@mysten/sui/transactions';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 
-export function getKeyPair(mnemonic: string, addressIndex: number) {
+export function getKeyPair(mnemonic: string, addressIndex: number): Ed25519Keypair {
   return Ed25519Keypair.deriveKeypair(mnemonic, `m/44'/784'/0'/0'/${addressIndex}'`);
 }
 
-export function convertToUnitAmount(humanAmount: string, decmials: number) {
+export function convertToUnitAmount(humanAmount: string, decmials: number): string {
   return new BigNumber(humanAmount).shiftedBy(decmials).toFixed();
 }
 
-export function getCoinTransaction(transactionInfo: CoinTransactionInfo, fromAddress: string) {
+export function getCoinTransaction(transactionInfo: CoinTransactionInfo, fromAddress: string): Transaction {
   const { toAddress, amount, gasPayment, gasPrice, gasBudget } = transactionInfo;
 
   const tx = new Transaction();
@@ -25,7 +25,7 @@ export function getCoinTransaction(transactionInfo: CoinTransactionInfo, fromAdd
   return tx;
 }
 
-export function getTokenTransaction(transactionInfo: TokenTransactionInfo, fromAddress: string, decimals: number) {
+export function getTokenTransaction(transactionInfo: TokenTransactionInfo, fromAddress: string): Transaction {
   const { toAddress, amount, gasPayment, gasPrice, gasBudget, coinObjects } = transactionInfo;
 
   const tx = new Transaction();

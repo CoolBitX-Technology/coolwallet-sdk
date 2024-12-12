@@ -83,8 +83,7 @@ export async function signTokenTransferTransaction(transactionArgs: TokenTransac
 
   const publicKey = await getPublicKey(transport, appPrivateKey, appId, addressIndex);
   const fromAddress = getSuiAddressByPublicKey(publicKey);
-  const { decimals } = tokenInfo;
-  const transaction = getTokenTransaction(transactionInfo, fromAddress, decimals);
+  const transaction = getTokenTransaction(transactionInfo, fromAddress);
 
   // 若 token amount 大於特定數量就要改走 smart script
   let script = param.SCRIPT.TOKEN_TRANSFER.scriptWithSignature
