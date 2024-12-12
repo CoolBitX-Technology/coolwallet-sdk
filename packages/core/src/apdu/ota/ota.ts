@@ -48,6 +48,17 @@ export const checkUpdate = async (transport: Transport): Promise<SEUpdateInfo> =
   return { isNeedUpdate, curVersion: cardSEVersion, newVersion: SE_UPDATE_VER };
 };
 
+interface UpdateSeParams {
+  transport: Transport;
+  cardId: string;
+  appId: string;
+  appPrivateKey: string;
+  progressCallback: (progress: number) => void;
+  callAPI: (url: string, options: APIOptions) => Promise<any>;
+  updateMCU?: boolean;
+  apiSecret: string;
+}
+
 /**
  *
  * @param transport
@@ -58,16 +69,16 @@ export const checkUpdate = async (transport: Transport): Promise<SEUpdateInfo> =
  * @param callAPI callAPI(url, options): Function of calling api
  * @param updateMCU
  */
-export const updateSE = async (
-  transport: Transport,
-  cardId: string,
-  appId: string,
-  appPrivateKey: string,
-  progressCallback: (progress: number) => void,
-  callAPI: (url: string, options: APIOptions) => Promise<any>,
+export const updateSE = async ({
+  transport,
+  cardId,
+  appId,
+  appPrivateKey,
+  progressCallback,
+  callAPI,
   updateMCU = false,
-  apiSecret: string
-): Promise<number> => {
+  apiSecret,
+}: UpdateSeParams): Promise<number> => {
   // BackupApplet
   let cardSEVersion;
   try {
