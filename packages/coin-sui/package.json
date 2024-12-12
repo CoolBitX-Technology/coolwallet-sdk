@@ -1,9 +1,10 @@
 {
   "name": "@coolwallet/sui",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "Coolwallet Sui sdk",
   "main": "lib/index.js",
   "scripts": {
+    "list:token": "babel-node -x \".ts\" tools/token.ts",
     "test": "NODE_ENV=development jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
     "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
@@ -29,18 +30,14 @@
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
+    "@babel/node": "^7.26.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
     "@coolwallet/core": "^1.1.31"
   },
   "dependencies": {
-    "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
-    "@types/bn.js": "^5.1.1",
-    "bech32": "^2.0.0",
-    "bignumber.js": "^8.0.2",
-    "blakejs": "^1.2.1",
-    "bn.js": "^5.2.1",
-    "superstruct": "^1.0.3"
+    "@mysten/sui": "^1.14.3",
+    "bignumber.js": "^8.0.2"
   },
   "repository": {
     "type": "git",
