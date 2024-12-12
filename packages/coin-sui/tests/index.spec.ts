@@ -369,6 +369,66 @@ describe('Test Sui SDK', () => {
         `"checkParams: sender is not equal to 0xa03edf19e35d72de8ec72f553b9fee4866520608def61adcb848cda03ae024db, sender=0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09"`
       );
     });
+
+    it('Test Smart Transaction Failed With Empty Gas Payment', async () => {
+      const addressIndex = 0;
+      const fromAddress = '0xa03edf19e35d72de8ec72f553b9fee4866520608def61adcb848cda03ae024db';
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = convertToUnitAmount('0.1', SUI_DECIMALS);
+      const transaction = getCoinTransaction(
+        {
+          amount,
+          toAddress,
+          gasPayment: [],
+          gasPrice: coinFeeInfo.gasPrice,
+          gasBudget: coinFeeInfo.gasBudget,
+        },
+        fromAddress
+      );
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transaction, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas payment not found."`);
+    });
+
+    it('Test Smart Transaction Failed With 0 As Gas Price', async () => {
+      const addressIndex = 0;
+      const fromAddress = '0xa03edf19e35d72de8ec72f553b9fee4866520608def61adcb848cda03ae024db';
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = convertToUnitAmount('0.1', SUI_DECIMALS);
+      const transaction = getCoinTransaction(
+        {
+          amount,
+          toAddress,
+          gasPayment: coinFeeInfo.payment,
+          gasPrice: '0',
+          gasBudget: coinFeeInfo.gasBudget,
+        },
+        fromAddress
+      );
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transaction, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas price is invalid. gas price=0"`);
+    });
+
+    it('Test Smart Transaction Failed With 0 As Gas Budget', async () => {
+      const addressIndex = 0;
+      const fromAddress = '0xa03edf19e35d72de8ec72f553b9fee4866520608def61adcb848cda03ae024db';
+      const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
+      const amount = convertToUnitAmount('0.1', SUI_DECIMALS);
+      const transaction = getCoinTransaction(
+        {
+          amount,
+          toAddress,
+          gasPayment: coinFeeInfo.payment,
+          gasPrice: coinFeeInfo.gasPrice,
+          gasBudget: '0',
+        },
+        fromAddress
+      );
+      await expect(
+        get_signed_tx_by_coolwallet_sdk(transaction, addressIndex)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"checkParams: gas budget is invalid. gas budget=0"`);
+    });
   });
 
   describe('Test Sign Token Transfer Transaction', () => {

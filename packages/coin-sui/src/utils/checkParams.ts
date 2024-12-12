@@ -21,7 +21,7 @@ function checkAddressIsValid(address: string): void {
 
 // Check Gas Payment count is not zero and object id is valid
 function checkGasPaymentIsValid(gasPayment: Array<CoinObject>): void {
-  if (gasPayment.length === 0) throw new Error(`checkParams: gas payment not found.`);
+  if (!gasPayment ||gasPayment.length === 0) throw new Error(`checkParams: gas payment not found.`);
   gasPayment.forEach((object) => {
     if (!isValidSuiObjectId(object.objectId))
       throw new Error(`checkParams: gas payment objectId is not valid. objectId=${object.objectId}`);
@@ -29,13 +29,13 @@ function checkGasPaymentIsValid(gasPayment: Array<CoinObject>): void {
 }
 
 // Check gas price is not zero or empty
-function checkGasPriceNotZero(gasPrice: string): void {
+function checkGasPriceNotZero(gasPrice: string | number): void {
   const gasPriceBN = new BigNumber(gasPrice);
   if (!gasPriceBN.isGreaterThan(0)) throw new Error(`checkParams: gas price is invalid. gas price=${gasPrice}`);
 }
 
 // Check gas budget is not zero
-function checkGasBudgetNotZero(gasBudget: string): void {
+function checkGasBudgetNotZero(gasBudget: string | number): void {
   const gasBudgetBN = new BigNumber(gasBudget);
   if (!gasBudgetBN.isGreaterThan(0)) throw new Error(`checkParams: gas budget is invalid. gas budget=${gasBudget}`);
 }
@@ -49,6 +49,11 @@ function checkCoinObjectsIsValid(coinObjects: Array<CoinObject>): void {
   });
 }
 
+// Check sender is same as fromAddress
+function checkSenderIsSameAsFromAddress(fromAddress: string, sender: string | null | undefined): void {
+  if (sender !== fromAddress) throw new Error(`checkParams: sender is not equal to ${fromAddress}, sender=${sender}`);
+}
+
 export function checkTransferTransaction(transactionInfo: CoinTransactionInfo): void {
   const { amount, toAddress, gasPayment, gasPrice, gasBudget } = transactionInfo;
   checkAmountCanDisplayOnProCard(amount, SUI_DECIMALS);
@@ -60,8 +65,15 @@ export function checkTransferTransaction(transactionInfo: CoinTransactionInfo): 
 }
 
 export function checkSmartTransaction(transaction: Transaction, fromAddress: string): void {
-  const sender = transaction.getData().sender;
-  if (sender !== fromAddress) throw new Error(`checkParams: sender is not equal to ${fromAddress}, sender=${sender}`);
+  const data = transaction.getData();
+  checkSenderIsSameAsFromAddress(fromAddress, data.sender);
+  const gasData = data.gasData;
+  const payment = gasData.payment as CoinObject[] || [];
+  checkGasPaymentIsValid(payment);
+  const gasPrice = gasData.price || '0';
+  checkGasPriceNotZero(gasPrice);
+  const gasBudget = gasData.budget || '0';
+  checkGasBudgetNotZero(gasBudget);
 }
 
 export function checkTransferTokenTransaction(transactionInfo: TokenTransactionInfo): void {
