@@ -65,7 +65,8 @@ export const updateSE = async (
   appPrivateKey: string,
   progressCallback: (progress: number) => void,
   callAPI: (url: string, options: APIOptions) => Promise<any>,
-  updateMCU = false
+  updateMCU = false,
+  apiSecret: string
 ): Promise<number> => {
   // BackupApplet
   let cardSEVersion;
@@ -122,11 +123,11 @@ export const updateSE = async (
     progressCallback(progress.next()); // progress 36
 
     console.debug('mutual Authorization Start----');
-    const options = await getAPIOption(cardId);
+    const options = await getAPIOption({ cardId, apiSecret });
     const challengeResponse = await callAPI(CHALLENGE_URL, options);
     console.debug('cardID: ', cardId);
     const challengeObj = await formatAPIResponse(transport, challengeResponse);
-    const challengeOptions = await getAPIOption(cardId, challengeObj.outputData);
+    const challengeOptions = await getAPIOption({ cardId, challengeData: challengeObj.outputData, apiSecret });
     const cryptogramResponse = await callAPI(CRYPTOGRAM_URL, challengeOptions);
     await formatAPIResponse(transport, cryptogramResponse);
     console.debug('mutual Authorization Done----');
