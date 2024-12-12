@@ -2,8 +2,8 @@ import { PathType } from '@coolwallet/core/lib/config';
 import { utils } from '@coolwallet/core';
 import { Transaction } from '@mysten/sui/transactions';
 import { messageWithIntent } from '@mysten/sui/cryptography';
-import * as types from '../config/types';
 import BigNumber from 'bignumber.js';
+import { TokenInfo, ArgumentWithBytes } from '../config/types';
 
 /**
  * getTransferArguments
@@ -56,7 +56,7 @@ function getSendAmountHexIndex(rawTx: Transaction, hex: string): string {
   return amountHexIndexByByte;
 }
 
-async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number): Promise<types.ArgumentWithBytes> {
+async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number): Promise<ArgumentWithBytes> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
   const pathLength = '15';
   const SEPath = `${pathLength}${path}`;
@@ -78,7 +78,7 @@ async function getCoinTransferArguments(rawTx: Transaction, addressIndex: number
   };
 }
 
-function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
+function getTokenInfoArgs(tokenInfo: TokenInfo): string {
   const tokenDecimalsHex = Buffer.from([tokenInfo.decimals]).toString('hex'); // 06
   const scriptTokenSymbol = tokenInfo.symbol.slice(0, 7).toUpperCase(); // USDC
   const tokenSymbolLengthHex = Buffer.from([scriptTokenSymbol.length]).toString('hex'); // 04
@@ -90,8 +90,8 @@ function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
 async function getTokenTransferArguments(
   rawTx: Transaction,
   addressIndex: number,
-  tokenInfo: types.TokenInfo
-): Promise<types.ArgumentWithBytes> {
+  tokenInfo: TokenInfo
+): Promise<ArgumentWithBytes> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
   const pathLength = '15';
   const SEPath = `${pathLength}${path}`;
@@ -113,7 +113,7 @@ async function getTokenTransferArguments(
   };
 }
 
-async function getSmartContractArguments(rawTx: Transaction, addressIndex: number): Promise<types.ArgumentWithBytes> {
+async function getSmartContractArguments(rawTx: Transaction, addressIndex: number): Promise<ArgumentWithBytes> {
   const path = utils.getFullPath({ pathType: PathType.SLIP0010, pathString: `44'/784'/0'/0'/${addressIndex}'` });
   const pathLength = '15';
   const SEPath = `${pathLength}${path}`;

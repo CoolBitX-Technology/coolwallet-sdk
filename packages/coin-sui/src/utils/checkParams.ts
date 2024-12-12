@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { isValidSuiAddress, isValidSuiObjectId, SUI_DECIMALS } from '@mysten/sui/utils';
-import { CoinObject, CoinTransactionInfo, TokenTransactionInfo } from '../config/types';
-import { Transaction } from '@mysten/sui/transactions';
+import { CoinTransactionInfo, TokenTransactionInfo } from '../config/types';
+import { Transaction, ObjectRef } from '@mysten/sui/transactions';
 
 // The Pro card cannot display 9-digit integer numbers, so the transaction amount is limited
 function checkAmountCanDisplayOnProCard(unitAmount: string, decimals: string | number): void {
@@ -20,7 +20,7 @@ function checkAddressIsValid(address: string): void {
 }
 
 // Check Gas Payment count is not zero and object id is valid
-function checkGasPaymentIsValid(gasPayment: Array<CoinObject>): void {
+function checkGasPaymentIsValid(gasPayment?: Array<ObjectRef>): void {
   if (!gasPayment ||gasPayment.length === 0) throw new Error(`checkParams: gas payment not found.`);
   gasPayment.forEach((object) => {
     if (!isValidSuiObjectId(object.objectId))
@@ -41,8 +41,8 @@ function checkGasBudgetNotZero(gasBudget: string | number): void {
 }
 
 // Check coin objects count is not zero and object id is valid
-function checkCoinObjectsIsValid(coinObjects: Array<CoinObject>): void {
-  if (coinObjects.length === 0) throw new Error(`checkParams: token transfer's coin objects not found.`);
+function checkCoinObjectsIsValid(coinObjects?: Array<ObjectRef>): void {
+  if (!coinObjects ||coinObjects.length === 0) throw new Error(`checkParams: token transfer's coin objects not found.`);
   coinObjects.forEach((object) => {
     if (!isValidSuiObjectId(object.objectId))
       throw new Error(`checkParams: gas payment objectId is not valid. objectId=${object.objectId}`);
@@ -68,7 +68,7 @@ export function checkSmartTransaction(transaction: Transaction, fromAddress: str
   const data = transaction.getData();
   checkSenderIsSameAsFromAddress(fromAddress, data.sender);
   const gasData = data.gasData;
-  const payment = gasData.payment as CoinObject[] || [];
+  const payment = gasData.payment || [];
   checkGasPaymentIsValid(payment);
   const gasPrice = gasData.price || '0';
   checkGasPriceNotZero(gasPrice);

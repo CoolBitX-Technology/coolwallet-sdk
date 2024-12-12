@@ -1,21 +1,17 @@
 import { Transport } from '@coolwallet/core';
-import { Transaction } from '@mysten/sui/transactions';
+import { ObjectRef, Transaction } from '@mysten/sui/transactions';
 
-export interface CoinObject {
-  objectId: string;
-  version: number;
-  digest: string;
-}
+
 export interface CoinTransactionInfo {
   amount: string; // unit amount
   toAddress: string;
-  gasPayment: Array<CoinObject>;
+  gasPayment: Array<ObjectRef>;
   gasPrice: string;
   gasBudget: string;
 }
 
 export interface TokenTransactionInfo extends CoinTransactionInfo {
-  coinObjects: Array<CoinObject>;
+  coinObjects: Array<ObjectRef>;
 }
 
 type BaseTransactionArgs = {
@@ -27,8 +23,14 @@ type BaseTransactionArgs = {
   authorizedCB?(): void;
 };
 
-export type TokenInfo = {
+export type TOKEN_TYPE = {
   name: string;
+  symbol: string;
+  decimals: number;
+  suiCoinType: string;
+};
+
+export type TokenInfo = {
   symbol: string;
   decimals: number;
   suiCoinType: string;
