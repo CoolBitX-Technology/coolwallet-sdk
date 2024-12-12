@@ -1,0 +1,5 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Thu Dec 12 11:09:22 GMT 2024","Thu Dec 12 11:09:22 GMT 2024","132","","Test CoolWallet SDK Core Functional","","Test CoolWallet SDK Core Functional Test derive Curve25519 publicKey","","Test CoolWallet SDK Core Functional Test derive Curve25519 publicKey",""
+"passed","Thu Dec 12 11:09:18 GMT 2024","Thu Dec 12 11:09:18 GMT 2024","112","","Test Sui SDK","","Test Sui SDK Test retrieving the address at index 0.","","Test Sui SDK Test retrieving the address at index 0.",""
+"passed","Thu Dec 12 11:09:22 GMT 2024","Thu Dec 12 11:09:22 GMT 2024","233","","Test CoolWallet SDK Core Functional","","Test CoolWallet SDK Core Functional Test rlp erc20 execute script","","Test CoolWallet SDK Core Functional Test rlp erc20 execute script",""
+"passed","Thu Dec 12 11:09:22 GMT 2024","Thu Dec 12 11:09:22 GMT 2024","188","","Test CoolWallet SDK Core Functional","","Test CoolWallet SDK Core Functional Test algorand","","Test CoolWallet SDK Core Functional Test algorand",""

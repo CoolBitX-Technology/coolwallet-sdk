@@ -1,0 +1,1 @@
+{"total":2,"items":[{"uid":"b1da229de3eb334f31e3663b225327cc","name":"Test CoolWallet SDK Core Functional","statistic":{"failed":0,"broken":0,"skipped":0,"passed":3,"unknown":0,"total":3}},{"uid":"a59664261beb72fc384ad15a4d478422","name":"Test Sui SDK","statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1}}]}
