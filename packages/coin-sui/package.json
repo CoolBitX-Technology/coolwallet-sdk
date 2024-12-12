@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/sui",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Coolwallet Sui sdk",
   "main": "lib/index.js",
   "scripts": {
