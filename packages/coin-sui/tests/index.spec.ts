@@ -60,7 +60,7 @@ describe('Test Sui SDK', () => {
       const transaction = getCoinTransaction(transactionInfo, fromAddress);
       const keyPair = getKeyPair(testWalletInfo.mnemonic, addressIndex);
       const result = await transaction.sign({ signer: keyPair });
-      return Buffer.from(result.signature, 'base64').toString('hex');
+      return JSON.stringify(result);
     }
 
     async function expect_both_coolwallet_and_suiSdk_signed_tx_is_same(
@@ -316,7 +316,7 @@ describe('Test Sui SDK', () => {
     async function get_signed_tx_by_sui_sdk(transaction: Transaction, addressIndex: number) {
       const keyPair = getKeyPair(testWalletInfo.mnemonic, addressIndex);
       const result = await transaction.sign({ signer: keyPair });
-      return Buffer.from(result.signature, 'base64').toString('hex');
+      return JSON.stringify(result);
     }
 
     async function expect_both_coolwallet_and_suiSdk_signed_tx_is_same(
@@ -397,7 +397,7 @@ describe('Test Sui SDK', () => {
       const transaction = getTokenTransaction(transactionInfo, fromAddress, tokenInfo.decimals);
       const keyPair = getKeyPair(testWalletInfo.mnemonic, addressIndex);
       const result = await transaction.sign({ signer: keyPair });
-      return Buffer.from(result.signature, 'base64').toString('hex');
+      return JSON.stringify(result);
     }
 
     async function expect_both_coolwallet_and_suiSdk_signed_tx_is_same(

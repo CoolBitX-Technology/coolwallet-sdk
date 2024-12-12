@@ -44,3 +44,8 @@ export interface TokenTransactionArgs extends BaseTransactionArgs {
 export interface SmartTransactionArgs extends BaseTransactionArgs {
   transactionInfo: Transaction;
 }
+
+export interface ArgumentWithBytes {
+  bytes: string;
+  argument: string;
+}

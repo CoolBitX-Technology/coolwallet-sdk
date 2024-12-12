@@ -47,3 +47,10 @@ export function getTokenTransaction(transactionInfo: TokenTransactionInfo, fromA
   tx.transferObjects([coin], toAddress);
   return tx;
 }
+
+export function getBase64Signature(signature: Buffer, publicKey: string): string {
+  const signatureHex = signature.toString('hex');
+  const eddsaType = '00';
+  const signedTx = eddsaType + signatureHex + publicKey;
+  return Buffer.from(signedTx, 'hex').toString('base64');
+}
