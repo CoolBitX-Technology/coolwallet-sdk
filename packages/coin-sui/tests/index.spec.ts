@@ -302,18 +302,22 @@ describe('Test Sui SDK', () => {
   });
 
   describe('Test Sign Smart Transaction', () => {
-    async function get_signed_tx_by_coolwallet_sdk(transaction: Transaction, addressIndex: number) {
+    async function get_signed_tx_by_coolwallet_sdk(
+      transactionInfo: string | Uint8Array | Transaction,
+      addressIndex: number
+    ) {
       const signData: SmartTransactionArgs = {
         transport,
         appPrivateKey: props.appPrivateKey,
         appId: props.appId,
         addressIndex,
-        transactionInfo: transaction,
+        transactionInfo,
       };
       return await suiSDK.signTransaction(signData);
     }
 
-    async function get_signed_tx_by_sui_sdk(transaction: Transaction, addressIndex: number) {
+    async function get_signed_tx_by_sui_sdk(transactionInfo: string | Uint8Array | Transaction, addressIndex: number) {
+      const transaction = Transaction.from(transactionInfo);
       const keyPair = getKeyPair(testWalletInfo.mnemonic, addressIndex);
       const result = await transaction.sign({ signer: keyPair });
       return JSON.stringify(result);

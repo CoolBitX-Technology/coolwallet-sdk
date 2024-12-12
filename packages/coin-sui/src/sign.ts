@@ -7,6 +7,7 @@ import { getPublicKey, getSuiAddressByPublicKey } from './utils/addressUtil';
 import { getCoinTransaction, getBase64Signature, getTokenTransaction } from './utils/transactionUtil';
 import { checkSmartTransaction, checkTransferTokenTransaction, checkTransferTransaction } from './utils/checkParams';
 import BigNumber from 'bignumber.js';
+import { Transaction } from '@mysten/sui/transactions';
 
 export async function signSmartTransaction(transactionArgs: SmartTransactionArgs): Promise<string> {
   const {
@@ -14,7 +15,7 @@ export async function signSmartTransaction(transactionArgs: SmartTransactionArgs
     appId,
     appPrivateKey,
     addressIndex,
-    transactionInfo: transaction,
+    transactionInfo,
     confirmCB,
     authorizedCB,
   } = transactionArgs;
@@ -22,6 +23,12 @@ export async function signSmartTransaction(transactionArgs: SmartTransactionArgs
   const publicKey = await getPublicKey(transport, appPrivateKey, appId, addressIndex);
   const fromAddress = getSuiAddressByPublicKey(publicKey);
 
+  let transaction: Transaction;
+  if (typeof transactionInfo === 'string' || transactionInfo instanceof Uint8Array) {
+    transaction = Transaction.from(transactionInfo);
+  } else {
+    transaction = transactionInfo;
+  }
   checkSmartTransaction(transaction, fromAddress);
 
   const script = param.SCRIPT.SMART_CONTRACT.scriptWithSignature;

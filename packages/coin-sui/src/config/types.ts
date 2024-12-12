@@ -42,7 +42,7 @@ export interface TokenTransactionArgs extends BaseTransactionArgs {
   tokenInfo: TokenInfo;
 }
 export interface SmartTransactionArgs extends BaseTransactionArgs {
-  transactionInfo: Transaction;
+  transactionInfo: string | Uint8Array | Transaction;
 }
 
 export interface ArgumentWithBytes {
