@@ -1,4 +1,4 @@
-import { error, apdu, utils } from '@coolwallet/core';
+import { error, utils, tx } from '@coolwallet/core';
 import * as params from "../config/params";
 import * as cryptoUtil from "./cryptoUtil";
 import * as txUtil from "./transactionUtil";
@@ -112,12 +112,12 @@ export async function getScriptSigningActions(
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   }
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    await apdu.tx.executeScript(
+    await tx.command.executeScript(
       transport,
       appId,
       appPrivateKey,
@@ -148,7 +148,7 @@ export async function getScriptSigningActions(
 
   const actions = utxoArguments.map(
     (utxoArgument) => async () => {
-      return apdu.tx.executeUtxoScript(transport, appId, appPrivateKey, await utxoArgument, (scriptType === types.ScriptType.P2PKH) ? "10" : "11");
+      return tx.command.executeUtxoScript(transport, appId, appPrivateKey, await utxoArgument, (scriptType === types.ScriptType.P2PKH) ? "10" : "11");
     });
   return { preActions, actions };
 };
