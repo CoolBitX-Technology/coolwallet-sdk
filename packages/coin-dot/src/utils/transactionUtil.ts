@@ -1,4 +1,4 @@
-import { apdu } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 import { blake2b } from './cryptoUtil';
 import * as types from '../config/types';
 import * as dotUtil from './dotUtil';
@@ -31,7 +31,7 @@ export async function getCompleteSignature(
     return '';
   }
   const { r, s } = canonicalSignature;
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
+  const { signedTx } = await tx.command.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
   const payloaBlake2bHash = blake2b(signedTx);
   const v = ec.getKeyRecoveryParam(payloaBlake2bHash, canonicalSignature, keyPair.pub);
