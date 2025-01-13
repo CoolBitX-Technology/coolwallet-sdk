@@ -25,7 +25,7 @@ import {
   testNormalChange,
 } from './testData';
 
-describe('Test validate.ts', () => {
+describe('Test KAS SDK', () => {
   const decimals = 8;
   describe('Test validateInputs', () => {
     it('Test normal input', async () => {
@@ -143,7 +143,7 @@ describe('Test validate.ts', () => {
     it('Test transaction with too large mass', async () => {
       const transaction = Transaction.fromTxData(testTxDataWithLargeInputs);
       expect(() => validateTransaction(transaction)).toThrowErrorMatchingInlineSnapshot(
-        `"error function: validateMass, message: validate: current mass: 101038, exceeds the maximum allowed mass(100000)"`
+        `"error function: validateMass, message: validate: current mass: 940038, exceeds the maximum allowed mass(100000)"`
       );
     });
   });

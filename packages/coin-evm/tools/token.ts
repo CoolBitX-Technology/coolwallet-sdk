@@ -1,4 +1,4 @@
-import { BASE, OKX, ZKSYNC } from '../src/chain';
+import { BASE, OKX, ZKSYNC, OPTIMISM, AVAXC } from '../src/chain';
 import { TokenProps } from '../src/chain/types';
 
 type BuildTokenHexInput = Pick<TokenProps, 'symbol' | 'unit' | 'contractAddress'>;
@@ -20,9 +20,7 @@ console.log('BASE USDbC: ', buildTokenHex(BASE.tokens.USDbC));
 console.log('BASE axlUSDC: ', buildTokenHex(BASE.tokens.axlUSDC));
 console.log('BASE BSWAP: ', buildTokenHex(BASE.tokens.BSWAP));
 
-const tokenGALA: BuildTokenHexInput = {
-  symbol: 'GALA',
-  unit: '8',
-  contractAddress: '0xd1d2Eb1B1e90B638588728b4130137D262C87cae',
-};
-console.log('ETH GALA: ', buildTokenHex(tokenGALA));
+console.log('OP USDC.e: ', buildTokenHex(OPTIMISM.tokens['USDC.e']));
+console.log('OP USDC: ', buildTokenHex(OPTIMISM.tokens.USDC));
+console.log('OP WCT: ', buildTokenHex(OPTIMISM.tokens.WCT));
+console.log('AVAXC EURC: ', buildTokenHex(AVAXC.tokens.EURC));

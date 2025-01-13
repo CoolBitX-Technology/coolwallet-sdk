@@ -43,7 +43,7 @@ export const decryptSignatureFromSE = (
   encryptedSignature: string,
   signatureKey: string,
   signatureType: SignatureType
-): { r: string; s: string } | Buffer => {
+): { r: string; s: string; s32?: string } | Buffer => {
   const iv = Buffer.alloc(16);
   iv.fill(0);
   const sigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature);

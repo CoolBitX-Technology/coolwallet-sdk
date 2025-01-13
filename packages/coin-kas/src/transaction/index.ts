@@ -1,5 +1,9 @@
-import { TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/types';
-import { addressToOutScript, pubkeyToPayment } from '../utils/address';
+import { ScriptType, TransactionInput, TransactionOutput, TransactionUtxo, TxData, TxInfo } from '../config/types';
+import {
+  addressToOutScript,
+  getPubkeyOrScriptHash,
+  pubkeyOrScriptHashToPayment,
+} from '../utils/address';
 import { toHex } from '../utils/utils';
 import { SIGHASH_ALL } from '../utils/hash';
 import BigNumber from 'bignumber.js';
@@ -32,23 +36,29 @@ export class Transaction {
         addressIndex: input.addressIndex,
       });
 
-      const pubKey = input.pubkeyBuf?.toString('hex') as string;
       const inputPreValueBN = new BigNumber(input.preValue);
+      const pubKey = input.pubkeyBuf?.toString('hex') as string;
+      const inputScriptType = input.scriptType as ScriptType;
+      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(inputScriptType, pubKey);
       this.utxos.push({
-        pkScript: pubkeyToPayment(pubKey).outScript,
+        version: 0,
+        pkScript: pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion).outScript,
+        scriptType: inputScriptType,
         amount: inputPreValueBN.toNumber(),
       });
-
       totalInput = inputPreValueBN.plus(new BigNumber(totalInput)).toNumber();
     });
 
     let totalOutput = 0;
     const output = txData.output;
     const outputValueBN = new BigNumber(output.value);
+    const { scriptType: outputScriptType, outScript, outPubkeyOrHash } = addressToOutScript(output.address);
     this.outputs.push({
       scriptPublicKey: {
         version: 0,
-        scriptPublicKey: toHex(addressToOutScript(output.address).outScript),
+        scriptType: outputScriptType,
+        scriptPublicKey: toHex(outScript),
+        publicKeyOrScriptHash: toHex(outPubkeyOrHash),
       },
       amount: outputValueBN.toNumber(),
     });
@@ -57,12 +67,17 @@ export class Transaction {
     this.feeValue = new BigNumber(totalInput).minus(new BigNumber(totalOutput)).toFixed();
     const change = txData.change;
     if (change) {
-      const pubKey = change.pubkeyBuf?.toString('hex') as string;
       const changeValueBN = new BigNumber(change.value);
+      const pubKey = change.pubkeyBuf?.toString('hex') as string;
+      const changeScriptType = change.scriptType as ScriptType;
+      const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(changeScriptType, pubKey);
+      const { outScript: changeScript } = pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
       this.outputs.push({
         scriptPublicKey: {
           version: 0,
-          scriptPublicKey: toHex(pubkeyToPayment(pubKey).outScript),
+          scriptType: changeScriptType,
+          scriptPublicKey: toHex(changeScript),
+          publicKeyOrScriptHash: pubkeyOrScriptHash,
         },
         amount: changeValueBN.toNumber(),
         addressIndex: change.addressIndex,
@@ -104,7 +119,10 @@ export class Transaction {
         outputs: this.outputs.map(({ amount, scriptPublicKey }) => {
           return {
             amount,
-            scriptPublicKey,
+            scriptPublicKey: {
+              version: 0, // TODO: USE REAL SCRIPT VERSION
+              scriptPublicKey: scriptPublicKey.scriptPublicKey,
+            },
           };
         }),
         lockTime: this.lockTime,

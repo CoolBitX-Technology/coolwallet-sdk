@@ -7,7 +7,7 @@ import * as fs from 'fs';
 var messages = protobuf(fs.readFileSync('./src/config/cosmos.proto'))
 
 
-describe('Send Transaction Protobuf Test', async function () {
+describe('Test Atom SDK', async function () {
   const publicKey = '02f10d4579a3bfbd142afbf2ab36f02d6ec427cb8fbad65ebb00b77abbb4c34ca8'
   let body_bytes = ''
   let auth_info_bytes = ''

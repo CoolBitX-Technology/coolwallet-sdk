@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/atom",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "Cosmos API for CoolWalletS",
   "main": "lib/index.js",
   "scripts": {
@@ -9,7 +9,8 @@
     "build": "npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish",
     "test": "mocha -r ts-node/register tests/*.test.ts",
-    "testCover": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report"
+    "testCover": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report",
+    "ci-test-report": "mocha -r ts-node/register tests/*.test.ts --reporter mocha-junit-reporter --reporter-options mochaFile=junit.xml"
   },
   "keywords": [
     "atom",
@@ -25,14 +26,14 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.1"
+    "@coolwallet/core": "^1.1.31"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.1",
+    "@coolwallet/core": "^1.1.31",
     "@types/bech32": "^1.1.1",
     "@types/big.js": "^4.0.5",
     "@types/bn.js": "^4.11.6",

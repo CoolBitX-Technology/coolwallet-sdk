@@ -15,7 +15,7 @@ interface TokenProps {
 }
 
 abstract class ChainProps {
-  abstract readonly id: number;
+  abstract id: number;
   abstract readonly symbol: string;
   abstract readonly signature: string;
   abstract readonly tokens: Record<string, TokenProps>;
@@ -58,14 +58,14 @@ abstract class ChainProps {
     return Buffer.from(this.layer2 ?? '').toString('hex');
   }
 
-  private getChainId() {
+  protected getChainId() {
     const buffer = Buffer.allocUnsafe(6);
     buffer.writeIntBE(this.id, 0, 6);
     // Remove leading zeros.
     return Buffer.from(buffer.filter((b) => b !== 0)).toString('hex');
   }
 
-  private getHexBufferLength(hex: string) {
+  protected getHexBufferLength(hex: string) {
     return Math.ceil(hex.length / 2)
       .toString(16)
       .padStart(2, '0');

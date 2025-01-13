@@ -9,7 +9,7 @@ export const parseDERsignature = (signature: string) => {
   const decoded = bip66.decode(Buffer.from(signature, 'hex'));
   const obj = {
     r: decoded.r.toString('hex'),
-    s: decoded.s.toString('hex')
+    s: decoded.s.toString('hex'),
   };
   return obj;
 };
@@ -18,7 +18,7 @@ export const parseDERsignature = (signature: string) => {
  * @param {{r:string, s:string}}
  * @return {Buffer}
  */
-export const convertToDER = (sig: { r: string; s: string }): { r: string; s: string } => {
+export const convertToDER = (sig: { r: string; s: string }): Buffer => {
   let canRBuffer = Buffer.from(sig.r, 'hex');
   let canSBuffer = Buffer.from(sig.s, 'hex');
 
@@ -39,30 +39,35 @@ export const convertToDER = (sig: { r: string; s: string }): { r: string; s: str
   return derSignature;
 };
 
-export const getCanonicalSignature = (signature: { s?: any; r?: any }) => {
+export const getCanonicalSignature = (signature: { s?: any; r?: any, s32?: any }) => {
   const modulusString = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141';
   const modulus = new BN(modulusString, 16);
   const s = new BN(signature.s, 16);
   const r = new BN(signature.r, 16);
-  const T = modulus.sub(s);
+  const t = modulus.sub(s);
 
+  // bigNumber will cause s.length changed, so we need to pad it to 64 (string length which is equal to 32 bytes)
   let canonicalS;
-  if (s.ucmp(T) < 0) {
+  if (s.ucmp(t) < 0) {
     canonicalS = s.toString(16);
   } else {
-    canonicalS = T.toString(16);
+    canonicalS = t.toString(16);
   }
 
+  // handling s
+  const s32 = canonicalS.padStart(64, '0');
   const slength = canonicalS.length % 2 === 0 ? canonicalS.length : canonicalS.length + 1;
   canonicalS = canonicalS.padStart(slength, '0');
+  
+  // handing r
   const rBigNumber = r.toString(16);
-
   const rlength = rBigNumber.length % 2 === 0 ? rBigNumber.length : rBigNumber.length + 1;
   const canonicalR = rBigNumber.padStart(rlength, '0');
 
   const canonicalSignature = {
     r: canonicalR,
-    s: canonicalS
+    s: canonicalS,
+    s32: s32,
   };
 
   return canonicalSignature;

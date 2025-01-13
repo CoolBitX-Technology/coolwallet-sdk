@@ -11,12 +11,13 @@ npm install @coolwallet/evm
 ## Usage
 
 ```javascript
-import EVM, { CHAIN } from '@coolwallet/EVM';
+import EVM from '@coolwallet/evm';
 import { crypto } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-web-ble';
 
 // Select the chain
-const cronos = new EVM(CHAIN.CRONOS);
+const chainId = 137; // Polygon Mainnet
+const evm = new EVM(chainId);
 
 const transport = await createTransport();
 
@@ -26,7 +27,7 @@ const appId = 'appId that had been registered by wallet';
 
 const addressIndex = 0;
 
-const address = await cronos.getAddress(transport, appPrivateKey, appId, addressIndex);
+const address = await evm.getAddress(transport, appPrivateKey, appId, addressIndex);
 
 const transaction = {
   nonce: '0x21d',
@@ -45,7 +46,7 @@ const signTxData = {
   addressIndex,
 };
 
-const normalTx = await cronos.signTransaction(signTxData);
+const normalTx = await evm.signTransaction(signTxData);
 
 const signTxData = {
   transport,
@@ -76,7 +77,7 @@ const erc20SignTxData = {
   addressIndex,
 };
 
-const erc20Tx = await cronos.signERC20Transaction(erc20SignTxData);
+const erc20Tx = await evm.signERC20Transaction(erc20SignTxData);
 ```
 
 ## Methods

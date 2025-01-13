@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/sol",
-  "version": "1.1.12",
+  "version": "1.1.14",
   "description": "Coolwallet Solana sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -11,7 +11,8 @@
     "test": "NODE_ENV=development jest --runInBand",
     "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand"
+    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "list:token": "babel-node -x \".ts\" tools/token.ts"
   },
   "keywords": [
     "cryptocurrency",
@@ -35,12 +36,15 @@
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
+    "@babel/node": "^7.16.8",
+    "@babel/plugin-transform-runtime": "^7.25.9",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
     "@solana/spl-token": "^0.2.0",
     "@solana/web3.js": "^1.41.0",
     "@types/bs58": "^4.0.1",
-    "bip39": "^3.0.4"
+    "bip39": "^3.0.4",
+    "regenerator-runtime": "^0.14.1"
   },
   "repository": {
     "type": "git",

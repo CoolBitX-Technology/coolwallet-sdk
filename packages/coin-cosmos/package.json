@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/cosmos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Coolwallet Cosmos SDK",
   "main": "lib/index.js",
   "scripts": {
@@ -13,7 +13,8 @@
     "test": "NODE_ENV=development jest --runInBand",
     "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand"
+    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "repository": {
     "type": "git",
@@ -26,7 +27,7 @@
   },
   "homepage": "https://github.com/CoolBitX-Technology/coolwallet-sdk#readme",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.10"
+    "@coolwallet/core": "^1.1.31"
   },
   "dependencies": {
     "bech32": "^2.0.0",
@@ -40,7 +41,7 @@
     "@babel/node": "^7.16.8",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
-    "@coolwallet/core": "^1.1.10",
+    "@coolwallet/core": "^1.1.31",
     "@cosmjs/crypto": "^0.28.9",
     "@cosmjs/proto-signing": "^0.28.9",
     "@cosmjs/stargate": "^0.28.9",

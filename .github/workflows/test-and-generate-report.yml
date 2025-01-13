@@ -1,0 +1,164 @@
+name: Test and Generate Report
+
+on: 
+  pull_request:
+    branches:
+        - master
+
+env:
+  REGISTRY: asia-northeast1-docker.pkg.dev
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_status: ${{ steps.set_status.outputs.upload_status }} 
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        repository: CoolBitX-Technology/coolwallet-sdk
+        path: sdk
+        ref: ${{ github.event.pull_request.head.ref }}
+        submodules: recursive
+        token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
+
+    - name: Authenticate gcloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.DEV_CP_GCP_SVC_GITHUB_RUNNER_KEY_FILE }}
+
+    - name: Fetch master branch from upstream repository
+      run: |
+        cd ${{ github.workspace }}/sdk
+        git remote add upstream https://github.com/CoolBitX-Technology/coolwallet-sdk.git
+        git fetch upstream master
+
+    - name: Get list of modified files and check for modified package.json in coin directories
+      id: modified_files
+      working-directory: sdk
+      run: |
+        # cd ${{ github.workspace }}/sdk
+        MODIFIED_FILES=$(git diff --name-only upstream/master)
+        echo "$MODIFIED_FILES"
+
+        MODIFIED_COINS=""
+        for file in $MODIFIED_FILES; do
+          echo "file = $file"
+          if [[ $file == packages/coin-*/package.json || $file == packages/core/package.json ]]; then
+            COIN_DIR=$(dirname "$file")
+            MODIFIED_COINS="$MODIFIED_COINS $COIN_DIR"
+          fi
+        done
+
+        MODIFIED_COINS=$(echo $MODIFIED_COINS | xargs)  # Trim leading/trailing whitespace
+        echo "modified_coins=$MODIFIED_COINS" >> $GITHUB_OUTPUT
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Docker auth
+      run: gcloud auth configure-docker ${{ env.REGISTRY }}
+
+    - name: Pull Docker image
+      run: docker pull ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+
+    - name: Run Docker container
+      run: docker run -d --name coolwallet-jcvm-jre-http -p 9527:9527 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+
+    - name: Dump node environment
+      working-directory: sdk
+      run: 'echo "node: $(node -v) npm: $(npm -v)"'
+
+    - name: Install node modules
+      working-directory: sdk
+      run: npm install
+
+    - name: Set up test fixture
+      working-directory: sdk
+      run: ./scripts/install-test-fixture.sh
+
+    - name: Run tests for all modified coin project
+      run: |
+        for modified_coin in ${{ steps.modified_files.outputs.modified_coins }}; do
+          if [ -f "${{ github.workspace }}/sdk/$modified_coin/tests/index.spec.ts" ]; then
+            echo "Test file found for = $modified_coin"
+            cd ${{ github.workspace }}/sdk/$modified_coin
+            npm install
+            npm run ci-test-report || true
+          else
+            echo "Test file not found for $modified_coin"
+          fi
+        done
+
+    - name: Handing junit report
+      working-directory: sdk
+      run: sh scripts/handing-report.sh
+
+    - name: Upload test result
+      id: upload_result
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: result
+        path: |
+          ${{ github.workspace }}/sdk/scripts/reports/junit/
+
+    - name: Set upload status
+      id: set_status
+      run: |
+        if [ "${{ steps.upload_result.outputs.artifact-id }}" == "" ]; then
+          echo "upload_status=false" >> $GITHUB_ENV
+          echo "::set-output name=upload_status::false"
+          echo "upload_status is false"
+        else
+          echo "upload_status=true" >> $GITHUB_ENV
+          echo "::set-output name=upload_status::true"
+          echo "upload_status is true"
+        fi       
+
+    - name: Print upload status
+      run: |
+        echo "The upload status is $UPLOAD_STATUE"
+  
+  report:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
+    steps:            
+    - name: Get Allure history
+      uses: actions/checkout@v3
+      if: always()
+      continue-on-error: true
+      with:
+        repository: CoolBitX-Technology/coolwallet-sdk
+        path: gh-pages
+        ref: gh-pages
+        
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+        
+    - name: Move test result
+      run: |
+        mkdir allure-results
+        mv -v ./result/* ./allure-results/
+        
+    - name: Build Test Report
+      uses: simple-elf/allure-report-action@v1.7
+      if: always()
+      with:
+        gh_pages: gh-pages
+        allure_history: allure-history
+        allure_results: allure-results
+        subfolder: all-services
+        keep_reports: 30
+      
+    - name: Publish test report
+      uses: peaceiris/actions-gh-pages@v3
+      if: always()
+      with:
+        github_token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: allure-history
+
+    - name: Set report URL
+      run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"

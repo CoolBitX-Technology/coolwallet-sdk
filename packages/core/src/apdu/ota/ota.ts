@@ -109,18 +109,30 @@ const performRecoverBackupData = async (transport: Transport): Promise<void> => 
 const performApiChallenge = async (
   transport: Transport,
   cardId: string,
-  callAPI: (url: string, options: APIOptions) => Promise<Response>
+  callAPI: (url: string, options: APIOptions) => Promise<Response>,
+  apiSecret: string
 ): Promise<void> => {
   console.debug('mutual Authorization Start----');
-  const options = await getAPIOption(cardId);
+  const options = await getAPIOption({ cardId, apiSecret });
   const challengeResponse = await callAPI(CHALLENGE_URL, options);
   console.debug('cardID: ', cardId);
   const challengeObj = await formatAPIResponse(transport, challengeResponse);
-  const challengeOptions = await getAPIOption(cardId, challengeObj.outputData);
+  const challengeOptions = await getAPIOption({ cardId, challengeData: challengeObj.outputData, apiSecret });
   const cryptogramResponse = await callAPI(CRYPTOGRAM_URL, challengeOptions);
   await formatAPIResponse(transport, cryptogramResponse);
   console.debug('mutual Authorization Done----');
 };
+
+interface UpdateSeParams {
+  transport: Transport;
+  cardId: string;
+  appId: string;
+  appPrivateKey: string;
+  progressCallback: (progress: number) => void;
+  callAPI: (url: string, options: APIOptions) => Promise<any>;
+  updateMCU?: boolean;
+  apiSecret: string;
+}
 
 /**
  *
@@ -133,14 +145,16 @@ const performApiChallenge = async (
  * @param updateMCU
  */
 export const updateSE = async (
-  transport: Transport,
-  cardId: string,
-  appId: string,
-  appPrivateKey: string,
-  progressCallback: (progress: number) => void,
-  callAPI: (url: string, options: APIOptions) => Promise<Response>,
-  updateMCU = false
-): Promise<number> => {
+  {
+    transport,
+    cardId,
+    appId,
+    appPrivateKey,
+    progressCallback,
+    callAPI,
+    updateMCU = false,
+    apiSecret,
+  }: UpdateSeParams): Promise<number> => {
   const SCRIPT = getScripts(transport.cardType);
   const progress = new Progress(getProgressNums(updateMCU));
 
@@ -155,7 +169,7 @@ export const updateSE = async (
     await selectApplet(transport, SSD_AID);
 
     progressCallback(progress.next()); // progress 36
-    await performApiChallenge(transport, cardId, callAPI);
+    await performApiChallenge(transport, cardId, callAPI, apiSecret);
 
     progressCallback(progress.next()); // progress 44
     await insertDeleteScript(transport, SCRIPT.deleteScript);

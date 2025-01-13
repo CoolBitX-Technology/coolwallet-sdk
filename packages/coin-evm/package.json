@@ -12,7 +12,8 @@
     "test": "NODE_ENV=development jest --runInBand",
     "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand"
+    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "repository": {
     "type": "git",

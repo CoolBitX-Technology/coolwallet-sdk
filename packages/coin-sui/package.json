@@ -1,0 +1,56 @@
+{
+  "name": "@coolwallet/sui",
+  "version": "1.0.0-beta.2",
+  "description": "Coolwallet Sui sdk",
+  "main": "lib/index.js",
+  "scripts": {
+    "list:token": "babel-node -x \".ts\" tools/token.ts",
+    "test": "NODE_ENV=development jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:ts",
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
+  },
+  "keywords": [
+    "sui",
+    "coolwallet",
+    "javascript",
+    "hardwarewallet",
+    "cryptocurrency",
+    "coolbitx",
+    "transaction"
+  ],
+  "author": "coolwallet-team",
+  "license": "ISC",
+  "peerDependencies": {
+    "@coolwallet/core": "^1.1.31"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/node": "^7.26.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.7",
+    "@coolwallet/core": "^1.1.31"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.14.3",
+    "bignumber.js": "^8.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet3-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
+  }
+}

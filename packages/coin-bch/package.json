@@ -1,9 +1,12 @@
 {
   "name": "@coolwallet/bch",
-  "version": "1.1.4",
+  "version": "1.1.6",
   "description": "Coolwallet Bitcoin Cash sdk",
   "main": "lib/index.js",
   "scripts": {
+    "test": "NODE_ENV=development jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
@@ -28,14 +31,14 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "peerDependencies": {
-    "@coolwallet/core": "^1.1.16"
+    "@coolwallet/core": "^1.1.31"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.1",
+    "@coolwallet/core": "^1.1.31",
     "jest": "^26.0.1"
   },
   "dependencies": {
@@ -50,5 +53,12 @@
   },
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
+    "testTimeout": 60000,
+    "collectCoverage": true
   }
 }
