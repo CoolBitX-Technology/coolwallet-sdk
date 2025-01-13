@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/xtz",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Coolwallet Tezos sdk",
   "main": "lib/index.js",
   "author": "ucanlab-team",
@@ -12,7 +12,8 @@
     "test": "NODE_ENV=development jest --runInBand",
     "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand"
+    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "dependencies": {
     "@coolwallet/core": "^2.0.0-beta.18",

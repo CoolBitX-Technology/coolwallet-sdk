@@ -25,12 +25,18 @@ export function pubKeyToAddress(compressedPubkey: string, addressType: number): 
 export async function getCompleteSignature(
   transport: types.Transport,
   publicKey: string,
-  canonicalSignature: { r: string; s: string } | Buffer
+  canonicalSignature: { r: string; s: string; s32?: string } | Buffer
 ): Promise<string> {
   if (Buffer.isBuffer(canonicalSignature)) {
     return '';
   }
-  const { r, s } = canonicalSignature;
+  const { r, s32 } = canonicalSignature;
+
+  if (s32 === undefined) {
+    throw new Error('utils.transactionUtil.getCompleteSignature: s32 is undefined');
+  }
+
+  const s = s32;
   const { signedTx } = await tx.command.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
   const payloaBlake2bHash = blake2b(signedTx);

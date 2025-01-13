@@ -8,12 +8,21 @@ import jwt from '../../utils/jwt';
 
 import type { APIOptions, Command } from './types';
 
+interface APIOptionInput {
+  cardId: string;
+  challengeData?: string;
+  apiSecret: string;
+}
+
 /**
  *
  * @param data
  */
-const getAPIOption = async (cardId: string, challengeData = ''): Promise<APIOptions> => {
-  const secret = 'd579bf4a2883cecf610785c49623e1';
+const getAPIOption = async ({ cardId, challengeData = '', apiSecret }: APIOptionInput): Promise<APIOptions> => {
+  const secret = apiSecret;
+  if (!secret) {
+    throw new SDKError(getAPIOption.name, 'API Secret is required');
+  }
   // let payload = new TokenSigner('ES256K', secret).sign(data)
   // console.log(`signed token ${payload}`)
 

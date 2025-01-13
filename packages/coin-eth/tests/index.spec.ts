@@ -19,7 +19,7 @@ describe('Test ETH SDK', () => {
   let cardType: CardType;
   const wallet = new Wallet();
   const eth = new ETH();
-  const mnemonic = bip39.generateMnemonic();
+  const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
   beforeAll(async () => {
     if (process.env.CARD === 'lite') {

@@ -74,6 +74,7 @@ Used to sign transactions of different cryptocurrencies.
 | [`@coolwallet/xrp`](/packages/coin-xrp)   | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
 | [`@coolwallet/xtz`](/packages/coin-xtx)   | ![version](https://img.shields.io/npm/v/@coolwallet/xtz) | Tezos |
 | [`@coolwallet/zen`](/packages/coin-zen)   | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash |
+| [`@coolwallet/sui`](/packages/coin-sui)   | ![version](https://img.shields.io/npm/v/@coolwallet/sui) | Sui |
 
 
 ## Examples: Build ETH in web app

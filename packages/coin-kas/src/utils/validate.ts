@@ -28,7 +28,7 @@ import { polymod } from './checksum';
 import { prefixToArray } from './utils';
 import { decodeAddress } from './address';
 import { Transaction } from '../transaction';
-import { ScriptType, Input, Output, Change, Payment } from '../config/types';
+import { Input, Output, Change, Payment, AddressVersion } from '../config/types';
 import { error } from '@coolwallet/core';
 
 export function validate(condition: boolean, funcName: string, message: string): void {
@@ -165,7 +165,7 @@ export function validateTransaction(transaction: Transaction): void {
   validateFee(minimumFee, transaction.feeValue);
 }
 
-export function validatePayment(payment: Payment, funcName: string, scriptType: ScriptType): void {
-  if (!payment.address) throw new error.SDKError(funcName, `No address for scriptType:'${scriptType}'`);
-  if (!payment.outScript) throw new error.SDKError(funcName, `No output for scriptType:'${scriptType}'`);
+export function validatePayment(payment: Payment, funcName: string, addressVersion: AddressVersion): void {
+  if (!payment.address) throw new error.SDKError(funcName, `No address for version:'${addressVersion}'`);
+  if (!payment.outScript) throw new error.SDKError(funcName, `No output for version:'${addressVersion}'`);
 }

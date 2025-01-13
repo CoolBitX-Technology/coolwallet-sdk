@@ -7,6 +7,7 @@ import { apdu, tx } from '@coolwallet/core';
 import { SignatureType } from '@coolwallet/core/lib/transaction';
 import { checkTransferTokenTransaction } from './utils/checkParams';
 import { requireTransferTokenTransaction } from './utils/requireParams';
+import BigNumber from 'bignumber.js';
 
 export default async function signTransferTokenTransaction(signTxData: SignTransferTokenTxType): Promise<string> {
   const { transport, appId, appPrivateKey, addressIndex, transaction, confirmCB, authorizedCB } = signTxData;
@@ -15,7 +16,16 @@ export default async function signTransferTokenTransaction(signTxData: SignTrans
 
   const requiredTransaction = requireTransferTokenTransaction(transaction);
 
-  const script = param.TRANSFER_TOKEN.script + param.TRANSFER_TOKEN.signature;
+  const jettonAmount = requiredTransaction.payload.jettonAmount;
+  const jettonDecimals = requiredTransaction.tokenInfo.decimals;
+  const jettonHumanAmount = new BigNumber(jettonAmount).shiftedBy(-jettonDecimals);
+  const humanAmountLimit = new BigNumber(1).shiftedBy(8);
+  
+  let script = param.TRANSFER_TOKEN.script + param.TRANSFER_TOKEN.signature;
+  if (jettonHumanAmount.gte(humanAmountLimit)) {
+    script = param.TRANSFER_TOKEN_BLIND.script + param.TRANSFER_TOKEN_BLIND.signature;
+  }
+
   const argument = scriptUtil.getTransferTokenArgument(requiredTransaction, addressIndex);
 
   const preActions = [() => apdu.tx.sendScript(transport, script)];

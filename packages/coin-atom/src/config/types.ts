@@ -54,6 +54,7 @@ export interface MsgDelegate extends Cosmos {
   amount: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MsgUndelegate extends MsgDelegate {}
 
 export interface MsgWithdrawDelegationReward extends Cosmos {

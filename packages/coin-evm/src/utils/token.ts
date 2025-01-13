@@ -27,19 +27,20 @@ function getOfficialTokenByContractAddress(to: string, chain: ChainProps) {
  */
 function encodeTokenToSE(contractAddress: string, options?: Option): string {
   if (isNil(options)) return '';
-  let {
-    info: { symbol },
-  } = options;
-  const {
-    info: { decimals },
-  } = options;
-  const unit = formatHex((+decimals).toString(16));
+
+  const symbol = options.info.symbol;
+  const decimals = options.info.decimals;
+
+  let symbolFirst7Chars = symbol;
   if (symbol.length > 7) {
-    symbol = symbol.substring(0, 7);
+    symbolFirst7Chars = symbol.substring(0, 7);
   }
-  const len = formatHex(symbol.length.toString(16));
-  const sym = formatHex(Buffer.from(symbol, 'ascii').toString('hex'));
-  return unit + len + sym.padEnd(14, '0') + removeHex0x(contractAddress);
+
+  const decimalHex1 = formatHex((+decimals).toString(16));
+  const symbolLenHex1 = formatHex(symbolFirst7Chars.length.toString(16));
+  const symbolHex7 = formatHex(Buffer.from(symbolFirst7Chars, 'ascii').toString('hex'));
+  const contractAddressHex20 = removeHex0x(contractAddress);
+  return decimalHex1 + symbolLenHex1 + symbolHex7.padEnd(14, '0') + contractAddressHex20;
 }
 
 export { getOfficialTokenByContractAddress, encodeTokenToSE };
