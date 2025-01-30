@@ -1,0 +1,1 @@
+[{"uid":"37faf6a8ee8d83b8","name":"Test ZEN SDK zen tx with input tx type -5","time":{"start":1738206983000,"stop":1738206983000,"duration":0},"status":"skipped","severity":"normal"},{"uid":"4dddaadb79411e31","name":"Test ZEN SDK zen tx","time":{"start":1738206983000,"stop":1738206983963,"duration":963},"status":"passed","severity":"normal"}]
