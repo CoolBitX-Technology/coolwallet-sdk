@@ -52,6 +52,17 @@ describe('Test ICX SDK', () => {
       addressIndex: 0,
     };
     const signedTx = await icx.signTransaction(signTxData);
-    expect(signedTx);
+    expect(signedTx).toMatchInlineSnapshot(`
+      Object {
+        "from": "hx0253c17a665cec63c5c7778fac5c83dc6358da27",
+        "nid": "0x1",
+        "signature": "DVA0S590DoYlb7ELjynC7YYhBuhPd2wsvcT6rkVsv5F7won3lOmPhOJylPwrXrUa7p/Ztrva9vSv/PJ8gKXh+AA=",
+        "stepLimit": "0x186a0",
+        "timestamp": "0x62cb64fbceb38",
+        "to": "hxcaaa77cce63e18d1f32208a23e8365605cb314bc",
+        "value": "0x1313d92c1a9f32c400",
+        "version": "0x3",
+      }
+    `);
   });
 });
