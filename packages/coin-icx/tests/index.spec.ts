@@ -2,7 +2,6 @@ import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 
-
 import ICX from '../src';
 
 type PromiseValue<T> = T extends Promise<infer P> ? P : never;
@@ -22,8 +21,14 @@ describe('Test ICX SDK', () => {
     props = await initialize(transport, mnemonic);
   });
 
+  it(`get address`, async () => {
+    const address = await icx.getAddress(transport, props.appPrivateKey, props.appId, 0);
+    expect(address).toMatchInlineSnapshot(`"hx70c8b1428461fe3c9e9fdd85cc2b15d15193d64b"`);
+  });
+
   it('icx tx', async () => {
-    const param = '{"to":"hxcaaa77cce63e18d1f32208a23e8365605cb314bc","from":"hx0253c17a665cec63c5c7778fac5c83dc6358da27","stepLimit":"0x186a0","nid":"0x1","version":"0x3","timestamp":"0x62cb64fbceb38","value":"0x1313d92c1a9f32c400"}';
+    const param =
+      '{"to":"hxcaaa77cce63e18d1f32208a23e8365605cb314bc","from":"hx70c8b1428461fe3c9e9fdd85cc2b15d15193d64b","stepLimit":"0x186a0","nid":"0x1","version":"0x3","timestamp":"0x62cb64fbceb38","value":"0x1313d92c1a9f32c400"}';
     const signTxData = {
       transport,
       appPrivateKey: props.appPrivateKey,
