@@ -1,0 +1,1 @@
+[{"uid":"df8298184f89d8a1","name":"Test ICX SDK get address","time":{"start":1738210442000,"stop":1738210442429,"duration":429},"status":"passed","severity":"normal"},{"uid":"af4d6e50d5125fcb","name":"Test ICX SDK icx tx","time":{"start":1738210442000,"stop":1738210442415,"duration":415},"status":"passed","severity":"normal"}]
