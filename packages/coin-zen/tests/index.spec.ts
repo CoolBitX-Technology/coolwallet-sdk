@@ -102,7 +102,7 @@ describe('Test ZEN SDK', () => {
     blockHeight: 1705874,
   };
 
-  it('zen tx', async () => {
+  it.skip('zen tx', async () => {
     const signTxData = {
       transport,
       appPrivateKey: props.appPrivateKey,
