@@ -41,6 +41,7 @@ const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM.id) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM.id) };
 const coinZkSync = { name: 'zkSync', api: new EVM(CHAIN.ZKSYNC.id) };
 const coinBase = { name: 'Base', api: new EVM(CHAIN.BASE.id) };
+const coinCore = { name: 'Core', api: new EVM(CHAIN.CORE.id) };
 
 // custom evm
 const customCoinScroll = { name: 'Scroll', api: new EVM(534352) };
@@ -58,6 +59,8 @@ const TEST_COINS = [
   coinOKX,
   coinZkSync,
   coinBase,
+  coinCore,
+
   customCoinScroll,
   customCoinAurora,
 ];
