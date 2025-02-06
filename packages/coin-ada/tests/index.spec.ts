@@ -67,5 +67,33 @@ describe('Test ADA SDK', () => {
         .finalize();
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
+
+    it('abstain with address 0', async () => {
+      const transaction: Transaction = {
+        addrIndexes: [0],
+        inputs: [{ txId: '32f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a31', index: 1 }],
+        ttl: '0x7c33a67',
+        change: {
+          address:
+            'addr1qydsrjhhedvcafgjc25j4vwrp9jtys6u3fk2sekjhh0kn9rd8wkhd8cw7uqxu5lh002qahuyznn24f6d9dxh2fekhepq7a6wsr',
+          amount: 49610837,
+        },
+        fee: '174081',
+      };
+
+      expect(await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.Abstain)).toMatchInlineSnapshot(
+        `"83a5008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a31010181825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67a10082825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd58400ef5735ffe5b4747a7dac238c47436f1c69b468c88ef6938dac3de4bacdd66267d9f5114734b91826a4c5a8718ade2a6028a12acf6838ca0f1b940582dfa5306825820a1f4068911137da3a62b19a40f9fc860263ba575ed11ae7339904af47c5537d258404524044333b215266798237c7b6f79a4ea250c2842a499850d6168cf466970839691b253b5fd9a282514b97fc7276dc3acb6e04a8c74b03519c981e46c15200cf6"`
+      );
+
+      // assert tx detail
+      const txDetail = await getTxDetail(transport, props.appId);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ADA')
+        .messagePage('Abstain')
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
   });
 });
