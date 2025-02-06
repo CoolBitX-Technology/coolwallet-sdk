@@ -144,4 +144,8 @@ export default class ADA implements COIN.Coin {
   async signStakeWithdraw(transaction: Transaction, options: Options) {
     return this.signTransaction(transaction, options, TxTypes.StakeWithdraw);
   }
+
+  async signDRepAbstain(transaction: Transaction, options: Options) {
+    return this.signTransaction(transaction, options, TxTypes.Abstain);
+  }
 }
