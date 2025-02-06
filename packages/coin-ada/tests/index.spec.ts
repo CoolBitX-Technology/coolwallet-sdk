@@ -1,6 +1,6 @@
 import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
-import { initialize } from '@coolwallet/testing-library';
+import { DisplayBuilder, getTxDetail, initialize } from '@coolwallet/testing-library';
 import ADA, { Transaction, Options, TxTypes } from '../src';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
@@ -56,6 +56,16 @@ describe('Test ADA SDK', () => {
       ).toMatchInlineSnapshot(
         `"83a5008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a31010181825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67048282008200581c24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e09883028200581c24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098581ce4abcf4408584601e7c707a8902996c0c291e1a3c8300b327ae3f6aba10082825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd58407651721b452fd86599c72bca6b5b04e9e8ec565a86ded61ce7b486df6577e7167aa5ecc2a192cf0dc0e24994063c62e19e751079753cd73df27f8acd45019306825820a1f4068911137da3a62b19a40f9fc860263ba575ed11ae7339904af47c5537d2584064b3a468b7d173714c1e6e7bff640d75a4f3d378a9486ce18372385673adacd365904b293508f9d67b7a4a8c5b9c233a23ef3284f201cee73732fc2d53fba10bf6"`
       );
+
+      // assert tx detail
+      const txDetail = await getTxDetail(transport, props.appId);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ADA')
+        .messagePage('Delgt')
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
   });
 });
