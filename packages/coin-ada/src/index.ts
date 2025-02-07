@@ -57,30 +57,6 @@ export default class ADA implements COIN.Coin {
     return txHex.length / 2;
   }
 
-  getTransferSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.Transfer);
-  }
-
-  getStakeRegisterSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeRegister);
-  }
-
-  getStakeRegisterAndDelegateSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeRegisterAndDelegate);
-  }
-
-  getStakeDeregisterSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeDeregister);
-  }
-
-  getStakeDelegateSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeDelegate);
-  }
-
-  getStakeWithdrawSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeWithdraw);
-  }
-
   async signTransaction(transaction: Transaction, options: Options, txType = TxTypes.Transfer): Promise<string> {
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
     const internalTx = { ...transaction };
@@ -129,33 +105,5 @@ export default class ADA implements COIN.Coin {
 
     // const { signedTx: verifyTxBody } = await apdu.tx.getSignedHex(transport);
     // return signedTx;
-  }
-
-  async signTransfer(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.Transfer);
-  }
-
-  async signStakeRegister(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeRegister);
-  }
-
-  async signStakeRegisterAndDelegate(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeRegisterAndDelegate);
-  }
-
-  async signStakeDeregister(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeDeregister);
-  }
-
-  async signStakeDelegate(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeDelegate);
-  }
-
-  async signStakeWithdraw(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeWithdraw);
-  }
-
-  async signDRepAbstain(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.Abstain);
   }
 }
