@@ -107,11 +107,7 @@ export const genTxBody = (tx: Transaction, accPubKey: string, txType: TxTypes, i
 
   if (txType === TxTypes.StakeRegister) result += '048182008200581c' + stakeKeyHash;
   if (txType === TxTypes.StakeDeregister) result += '048182018200581c' + stakeKeyHash;
-  if (txType === TxTypes.Abstain) {
-    const hex = '04d901028183098200581c' + stakeKeyHash + '8102';
-    console.log('SDK Abstain 7 >> append hex=', hex);
-    result += hex;
-  }
+  if (txType === TxTypes.Abstain) result += '04d901028183098200581c' + stakeKeyHash + '8102';
 
   if (txType === TxTypes.StakeDelegate) {
     if (!tx.poolKeyHash) throw new Error('poolKeyHash is required');
