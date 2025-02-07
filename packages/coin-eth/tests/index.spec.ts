@@ -167,6 +167,61 @@ describe('Test ETH SDK', () => {
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
   });
+  
+  describe.only.each(Fixtures.ERC20_TRANSACTION)('ETH test sign erc20 transactions $to', (transaction) => {
+    it('Unofficial token THETA', async () => {
+      const unofficialToken =       {
+        name: 'Theta Token',
+        symbol: 'THETA',
+        unit: '18',
+        contractAddress: '0x3883f5e181fccaf8410fa61e12b59bad963fb645',
+        signature: ``,
+      };
+
+      const hasCommercialAt = isEmpty(unofficialToken.signature);
+      const scale = 10 ** +unofficialToken.unit;
+      const tokenAmount = +transaction.amount;
+      const amount = Math.floor(tokenAmount * scale).toString(16);
+      const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+      const client: signTx = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: {
+          chainId: CHAIN_ID,
+          ...transaction,
+          to: unofficialToken.contractAddress,
+          data: erc20Data,
+          option: {
+            info: {
+              symbol: unofficialToken.symbol,
+              decimals: unofficialToken.unit,
+            },
+          },
+        },
+        addressIndex: 0,
+      };
+      const signature = await eth.signTransaction(client);
+      const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
+      expect(signature).toEqual(expectedSignature);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const tokenSymbol = hasCommercialAt
+        ? ('@' + unofficialToken.symbol).substring(0, 8)
+        : unofficialToken.symbol.substring(0, 7);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .messagePage(tokenSymbol)
+        .addressPage(transaction.to.toLowerCase())
+        .amountPage(+tokenAmount)
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+  });
 
   it.each(Fixtures.SMART_CONTRACT_TRANSACTION)(
     'ETH test sign smart contract transaction $data',
