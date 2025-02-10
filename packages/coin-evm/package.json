@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/evm",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Coolwallet EVMOS sdk",
   "main": "lib/index.js",
   "scripts": {
