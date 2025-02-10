@@ -185,7 +185,7 @@ describe('Test ETH SDK', () => {
         signature: ``,
       },
     ];
-    it.each(unofficialToken)(' Unofficial token $symbol', async (token) => {
+    it.each(unofficialToken)('Unofficial token $symbol', async (token) => {
       const scale = 10 ** +token.unit;
       const tokenAmount = +transaction.amount;
       const amount = Math.floor(tokenAmount * scale).toString(16);
