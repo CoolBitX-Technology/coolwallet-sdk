@@ -168,7 +168,7 @@ describe('Test ETH SDK', () => {
     });
   });
 
-  describe.only.each(Fixtures.ERC20_TRANSACTION)('ETH test sign erc20 transactions $to', (transaction) => {
+  describe.each(Fixtures.ERC20_TRANSACTION)('ETH test sign erc20 transactions $to', (transaction) => {
     const unofficialToken = [
       {
         name: 'Theta Token',
