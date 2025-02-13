@@ -2,7 +2,7 @@ name: Check and publish npm packages
 
 on:
   push:
-    branches: [ master, stg*, hotfix*, beta ]
+    branches: [ master, stg*, hotfix*, beta, fix/test-publish ]
 
 jobs:
   check_and_publish_npm_packages:
