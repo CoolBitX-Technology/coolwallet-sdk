@@ -15920,9 +15920,11 @@ function command(cmd, args, cwd) {
         var stderr = '';
         command.stdout.on('data', function (data) {
             stdout += data.toString();
+            console.log('stdout :', stdout);
         });
         command.stderr.on('data', function (data) {
             stderr += data.toString();
+            console.log('stderr :', stderr);
         });
         command.on('error', function (err) {
             reject(err);
