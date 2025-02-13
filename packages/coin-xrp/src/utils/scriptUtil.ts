@@ -13,7 +13,9 @@ export const getPaymentArgument = async (
   // const addressIdxHex = "00".concat(addressIndex.toString(16).padStart(6, "0"));
   // const SEPath = `15328000002C800000908000000000000000${addressIdxHex}`;
   const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
-
+  if (!payment.Account || !payment.SigningPubKey) {
+    throw new Error("Account or SigningPubKey is not set");
+  }
   const argument =
     stringUtil.handleHex(txUtil.getAccount(payment.Account)) +
     stringUtil.handleHex(payment.SigningPubKey) +
