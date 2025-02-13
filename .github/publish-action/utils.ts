@@ -90,10 +90,12 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
     });
 
     command.on('error', (err) => {
+      console.log('reject error :', err);
       reject(err);
     });
 
     command.on('exit', (code) => {
+      console.log('exit :', code);
       if (code !== 0) reject(new Error(stderr));
       resolve(stdout);
     });

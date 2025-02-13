@@ -15927,9 +15927,11 @@ function command(cmd, args, cwd) {
             console.log('stderr :', stderr);
         });
         command.on('error', function (err) {
+            console.log('reject error :', err);
             reject(err);
         });
         command.on('exit', function (code) {
+            console.log('exit :', code);
             if (code !== 0)
                 reject(new Error(stderr));
             resolve(stdout);
