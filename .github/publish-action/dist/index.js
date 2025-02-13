@@ -15646,104 +15646,58 @@ function run() {
                 case 0:
                     context = github.context;
                     console.log('context :', context);
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/core')];
-                case 1:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ada')];
-                case 2:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-aptos')];
-                case 3:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-atom')];
-                case 4:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bch')];
-                case 5:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bnb')];
-                case 6:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bsc')];
-                case 7:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-btc')];
-                case 8:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-cro')];
-                case 9:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-cronos')];
-                case 10:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-doge')];
-                case 11:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-dot')];
-                case 12:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-etc')];
-                case 13:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-eth')];
-                case 14:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-evm')];
-                case 15:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-icx')];
-                case 16:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-iotx')];
-                case 17:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-kas')];
-                case 18:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ltc')];
-                case 19:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sol')];
-                case 20:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-terra')];
-                case 21:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-theta')];
-                case 22:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ton')];
-                case 23:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-trx')];
-                case 24:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
-                case 25:
-                    _a.sent();
+                    // await checkAndPublish(context, 'packages/core');
+                    // await checkAndPublish(context, 'packages/coin-ada');
+                    // await checkAndPublish(context, 'packages/coin-aptos');
+                    // await checkAndPublish(context, 'packages/coin-atom');
+                    // await checkAndPublish(context, 'packages/coin-bch');
+                    // await checkAndPublish(context, 'packages/coin-bnb');
+                    // await checkAndPublish(context, 'packages/coin-bsc');
+                    // await checkAndPublish(context, 'packages/coin-btc');
+                    // await checkAndPublish(context, 'packages/coin-cro');
+                    // await checkAndPublish(context, 'packages/coin-cronos');
+                    // await checkAndPublish(context, 'packages/coin-doge');
+                    // await checkAndPublish(context, 'packages/coin-dot');
+                    // await checkAndPublish(context, 'packages/coin-etc');
+                    // await checkAndPublish(context, 'packages/coin-eth');
+                    // await checkAndPublish(context, 'packages/coin-evm');
+                    // await checkAndPublish(context, 'packages/coin-icx');
+                    // await checkAndPublish(context, 'packages/coin-iotx');
+                    // await checkAndPublish(context, 'packages/coin-kas');
+                    // await checkAndPublish(context, 'packages/coin-ltc');
+                    // await checkAndPublish(context, 'packages/coin-sol');
+                    // await checkAndPublish(context, 'packages/coin-terra');
+                    // await checkAndPublish(context, 'packages/coin-theta');
+                    // await checkAndPublish(context, 'packages/coin-ton');
+                    // await checkAndPublish(context, 'packages/coin-trx');
+                    // await checkAndPublish(context, 'packages/coin-xlm');
                     return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
-                case 26:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xtz')];
-                case 27:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zen')];
-                case 28:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sui')];
-                case 29:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
-                case 30:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
-                case 31:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
-                case 32:
-                    _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-react-native-nfc')];
-                case 33:
+                case 1:
+                    // await checkAndPublish(context, 'packages/core');
+                    // await checkAndPublish(context, 'packages/coin-ada');
+                    // await checkAndPublish(context, 'packages/coin-aptos');
+                    // await checkAndPublish(context, 'packages/coin-atom');
+                    // await checkAndPublish(context, 'packages/coin-bch');
+                    // await checkAndPublish(context, 'packages/coin-bnb');
+                    // await checkAndPublish(context, 'packages/coin-bsc');
+                    // await checkAndPublish(context, 'packages/coin-btc');
+                    // await checkAndPublish(context, 'packages/coin-cro');
+                    // await checkAndPublish(context, 'packages/coin-cronos');
+                    // await checkAndPublish(context, 'packages/coin-doge');
+                    // await checkAndPublish(context, 'packages/coin-dot');
+                    // await checkAndPublish(context, 'packages/coin-etc');
+                    // await checkAndPublish(context, 'packages/coin-eth');
+                    // await checkAndPublish(context, 'packages/coin-evm');
+                    // await checkAndPublish(context, 'packages/coin-icx');
+                    // await checkAndPublish(context, 'packages/coin-iotx');
+                    // await checkAndPublish(context, 'packages/coin-kas');
+                    // await checkAndPublish(context, 'packages/coin-ltc');
+                    // await checkAndPublish(context, 'packages/coin-sol');
+                    // await checkAndPublish(context, 'packages/coin-terra');
+                    // await checkAndPublish(context, 'packages/coin-theta');
+                    // await checkAndPublish(context, 'packages/coin-ton');
+                    // await checkAndPublish(context, 'packages/coin-trx');
+                    // await checkAndPublish(context, 'packages/coin-xlm');
                     _a.sent();
                     return [2 /*return*/];
             }
@@ -15897,11 +15851,15 @@ function buildAndPublish(path) {
                     _b.label = 1;
                 case 1:
                     _b.trys.push([1, 6, , 7]);
+                    console.log('npm name :', name);
+                    console.log('npm version :', version);
                     preRelease = semver_1.default.prerelease(version);
+                    console.log('npm preRelease :', preRelease);
                     isBeta = betaList.includes('' + (preRelease === null || preRelease === void 0 ? void 0 : preRelease[0]));
                     return [4 /*yield*/, command('npm', ['ci'], path)];
                 case 2:
                     installLogs = _b.sent();
+                    console.log('npm isBeta :', isBeta);
                     console.log('npm ci :', installLogs);
                     return [4 /*yield*/, command('npm', ['run', 'build'], path)];
                 case 3:
