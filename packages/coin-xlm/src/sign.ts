@@ -1,6 +1,7 @@
 import { tx, apdu, utils } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtil';
 import { signTxType, PROTOCOL } from './config/types';
+import { SignatureType } from '@coolwallet/core/lib/transaction';
 
 // const accountIndexToKeyId = (coinType: string, accountIndex: number) => {
 //   const accountIndexHex = accountIndex.toString(16).padStart(2, '0');
@@ -20,22 +21,21 @@ export default async function signTransaction(
   const { script, argument } = await scriptUtil.getScriptAndArguments(transaction, transfer, protocol);
 
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    return apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    return tx.command.executeScript(transport, appId, appPrivateKey, argument);
   };
 
-  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
-    preActions,
+    preActions, 
     sendArgument,
-    true,
+    SignatureType.EDDSA,
     confirmCB,
     authorizedCB,
-    false
   );
   await utils.checkSupportScripts(transport);
 
