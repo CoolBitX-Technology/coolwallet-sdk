@@ -15616,6 +15616,8 @@ function checkAndPublish(context, path) {
                         return [2 /*return*/];
                     }
                     ref = context.ref.split('/')[2];
+                    console.log('path :', path);
+                    console.log('isCoreInstalled :', isCoreInstalled);
                     if (!(path != 'packages/core' && !isCoreInstalled)) return [3 /*break*/, 6];
                     if (!(ref === 'master')) return [3 /*break*/, 3];
                     return [4 /*yield*/, (0, utils_1.installCore)(false)];
