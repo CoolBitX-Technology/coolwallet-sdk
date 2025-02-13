@@ -38,9 +38,13 @@ export async function isLocalUpgraded(path: string) {
 export async function buildAndPublish(path: string) {
   const { name, version } = getPackageInfo(path);
   try {
+    console.log('npm name :', name);
+    console.log('npm version :', version);
     const preRelease = semver.prerelease(version);
+    console.log('npm preRelease :', preRelease);
     const isBeta = betaList.includes('' + preRelease?.[0]);
     const installLogs = await command('npm', ['ci'], path);
+    console.log('npm isBeta :', isBeta);
     console.log('npm ci :', installLogs);
     const buildLogs = await command('npm', ['run', 'build'], path);
     console.log('npm run build :', buildLogs);
