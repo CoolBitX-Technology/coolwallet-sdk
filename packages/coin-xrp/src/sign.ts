@@ -1,10 +1,10 @@
-import { apdu, tx } from "@coolwallet/core";
+import { tx } from '@coolwallet/core';
 import * as scriptUtil from "./utils/scriptUtil";
 import * as txUtil from "./utils/tracsactionUtil";
 import * as types from "./config/types";
 import * as params from "./config/params";
+import { SignatureType } from '@coolwallet/core/lib/transaction/type';
 
-// eslint-disable-next-line import/prefer-default-export
 export const signPayment = async (
   signTxData: types.signTxType,
   payment: types.Payment
@@ -17,12 +17,12 @@ export const signPayment = async (
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   }
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    return apdu.tx.executeScript(
+    return tx.command.executeScript(
       transport,
       appId,
       appPrivateKey,
@@ -30,14 +30,13 @@ export const signPayment = async (
     );
   }
 
-  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     sendArgument,
-    false,
+    SignatureType.DER,
     confirmCB,
-    authorizedCB,
-    false
+    authorizedCB
   );
   return txUtil.generateRawTx(signature.toString('hex'), payment);
 };
