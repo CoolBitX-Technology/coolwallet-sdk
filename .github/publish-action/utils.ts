@@ -51,7 +51,8 @@ export async function buildAndPublish(path: string) {
     await pushTag(`${name}@${version}`);
   } catch (e) {
     const error = e as Error;
-    core.error(`Cannot publish package ${name}, reason: ${error.message}`)
+    console.log(`Cannot publish package ${name}, reason:`);
+    console.log(error);
   }
 }
 

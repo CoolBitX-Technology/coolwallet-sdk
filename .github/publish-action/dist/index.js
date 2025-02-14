@@ -15766,25 +15766,6 @@ catch (e) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15826,7 +15807,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.buildAndPublish = exports.isLocalUpgraded = exports.installCore = void 0;
-var core = __importStar(__nccwpck_require__(2186));
 var semver_1 = __importDefault(__nccwpck_require__(1383));
 var child_process_1 = __nccwpck_require__(2081);
 var betaList = ['beta', 'hotfix', 'stg'];
@@ -15921,7 +15901,8 @@ function buildAndPublish(path) {
                 case 6:
                     e_2 = _b.sent();
                     error = e_2;
-                    core.error("Cannot publish package ".concat(name, ", reason: ").concat(error.message));
+                    console.log("Cannot publish package ".concat(name, ", reason:"));
+                    console.log(error);
                     return [3 /*break*/, 7];
                 case 7: return [2 /*return*/];
             }
