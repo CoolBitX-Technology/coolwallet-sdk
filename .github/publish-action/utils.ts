@@ -72,7 +72,7 @@ async function pushTag(tag: string) {
 function spiltErrorMessage(stdOut: string) {
   return stdOut
     .split('\n') // 先切割成行
-    .filter((line) => line.toLowerCase().startsWith('error')) // 過濾包含 "error" 的行
+    .filter((line) => line.toLowerCase().includes('error')) // 過濾包含 "error" 的行
     .join('\n'); // 再組合成字串
 }
 

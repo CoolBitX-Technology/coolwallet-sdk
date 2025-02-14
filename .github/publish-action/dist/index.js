@@ -15910,7 +15910,7 @@ function pushTag(tag) {
 function spiltErrorMessage(stdOut) {
     return stdOut
         .split('\n') // 先切割成行
-        .filter(function (line) { return line.toLowerCase().startsWith('error'); }) // 過濾包含 "error" 的行
+        .filter(function (line) { return line.toLowerCase().includes('error'); }) // 過濾包含 "error" 的行
         .join('\n'); // 再組合成字串
 }
 function command(cmd, args, cwd) {
