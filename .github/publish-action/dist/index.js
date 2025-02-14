@@ -15953,6 +15953,12 @@ function pushTag(tag) {
         });
     });
 }
+function spiltErrorMessage(output) {
+    return output
+        .split('\n')
+        .filter(function (line) { return line.toLowerCase().includes('error'); })
+        .join('\n');
+}
 function command(cmd, args, cwd) {
     return new Promise(function (resolve, reject) {
         var command = (0, child_process_1.spawn)(cmd, args, { cwd: cwd });
@@ -15965,11 +15971,18 @@ function command(cmd, args, cwd) {
             stderr += data.toString();
         });
         command.on('error', function (err) {
+            console.log('error:');
+            console.log(spiltErrorMessage(stdout));
+            console.log(spiltErrorMessage(stderr));
             reject(err);
         });
         command.on('exit', function (code) {
-            if (code !== 0)
+            if (code !== 0) {
+                console.log('exit:', code);
+                console.log(spiltErrorMessage(stdout));
+                console.log(spiltErrorMessage(stderr));
                 reject(new Error(stderr));
+            }
             resolve(stdout);
         });
     });
