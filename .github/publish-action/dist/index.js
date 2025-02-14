@@ -15964,6 +15964,7 @@ function command(cmd, args, cwd) {
         var command = (0, child_process_1.spawn)(cmd, args, { cwd: cwd });
         var stdout = '';
         var stderr = '';
+        var error = '';
         command.stdout.on('data', function (data) {
             stdout += data.toString();
         });
@@ -15979,9 +15980,9 @@ function command(cmd, args, cwd) {
         command.on('exit', function (code) {
             if (code !== 0) {
                 console.log('exit:', code);
-                console.log(spiltErrorMessage(stdout));
-                console.log(spiltErrorMessage(stderr));
-                reject(new Error(stderr));
+                error += spiltErrorMessage(stdout);
+                error += spiltErrorMessage(stderr);
+                reject(new Error(error));
             }
             resolve(stdout);
         });
