@@ -1,4 +1,4 @@
-import { tx, apdu, utils } from '@coolwallet/core';
+import { tx, utils } from '@coolwallet/core';
 import * as scriptUtil from './utils/scriptUtil';
 import { signTxType, PROTOCOL } from './config/types';
 import { SignatureType } from '@coolwallet/core/lib/transaction';
@@ -31,7 +31,7 @@ export default async function signTransaction(
 
   const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
-    preActions, 
+    preActions,
     sendArgument,
     SignatureType.EDDSA,
     confirmCB,
