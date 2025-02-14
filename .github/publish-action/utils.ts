@@ -51,7 +51,8 @@ export async function buildAndPublish(path: string) {
     await pushTag(`${name}@${version}`);
   } catch (e) {
     const error = e as Error;
-    core.error(`Cannot publish package ${name}, reason: ${error.message}`)
+    console.log(`Cannot publish package ${name}, reason:`);
+    console.log(error);
   }
 }
 
@@ -69,11 +70,19 @@ async function pushTag(tag: string) {
   console.log('git push --tags :', result);
 }
 
+function spiltErrorMessage(output: string) {
+  return output
+    .split('\n')
+    .filter((line) => line.toLowerCase().includes('error'))
+    .join('\n');
+}
+
 function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const command = spawn(cmd, args, { cwd });
     let stdout = '';
     let stderr = '';
+    let error = '';
 
     command.stdout.on('data', (data) => {
       stdout += data.toString();
@@ -84,11 +93,19 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
     });
 
     command.on('error', (err) => {
+      console.log('error:');
+      console.log(spiltErrorMessage(stdout));
+      console.log(spiltErrorMessage(stderr));
       reject(err);
     });
 
     command.on('exit', (code) => {
-      if (code !== 0) reject(new Error(stderr));
+      if (code !== 0) {
+        console.log('exit:', code);
+        error += spiltErrorMessage(stdout);
+        error += spiltErrorMessage(stderr);
+        reject(new Error(error));
+      }
       resolve(stdout);
     });
   });
