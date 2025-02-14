@@ -51,7 +51,8 @@ export async function buildAndPublish(path: string) {
     await pushTag(`${name}@${version}`);
   } catch (e) {
     const error = e as Error;
-    core.error(`Cannot publish package ${name}, reason: ${error.message}`)
+    console.log(`Cannot publish package ${name}, reason:`);
+    console.log(error);
   }
 }
 
@@ -81,6 +82,7 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
     const command = spawn(cmd, args, { cwd });
     let stdout = '';
     let stderr = '';
+    let error = '';
 
     command.stdout.on('data', (data) => {
       stdout += data.toString();
@@ -100,9 +102,9 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
     command.on('exit', (code) => {
       if (code !== 0) {
         console.log('exit code:', code);
-        console.log(spiltErrorMessage(stdout));
-        console.log(spiltErrorMessage(stderr));
-        reject(new Error(stderr));
+        error += spiltErrorMessage(stdout);
+        error += spiltErrorMessage(stderr);
+        reject(new Error(error));
       }
       resolve(stdout);
     });
