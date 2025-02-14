@@ -15910,7 +15910,7 @@ function pushTag(tag) {
 function spiltErrorMessage(stdOut) {
     return stdOut
         .split('\n') // 先切割成行
-        .filter(function (line) { return line.toLowerCase().includes('error'); }) // 過濾包含 "error" 的行
+        .filter(function (line) { return line.toLowerCase().startsWith('error'); }) // 過濾包含 "error" 的行
         .join('\n'); // 再組合成字串
 }
 function command(cmd, args, cwd) {
@@ -15925,14 +15925,16 @@ function command(cmd, args, cwd) {
             stderr += data.toString();
         });
         command.on('error', function (err) {
-            console.log('error stdout:', spiltErrorMessage(stdout));
-            console.log('error stderr:', spiltErrorMessage(stderr));
+            console.log('error:');
+            console.log(spiltErrorMessage(stdout));
+            console.log(spiltErrorMessage(stderr));
             reject(err);
         });
         command.on('exit', function (code) {
             if (code !== 0) {
-                console.log('exit stdout:', spiltErrorMessage(stdout));
-                console.log('exit stderr:', spiltErrorMessage(stderr));
+                console.log('exit code:', code);
+                console.log(spiltErrorMessage(stdout));
+                console.log(spiltErrorMessage(stderr));
                 reject(new Error(stderr));
             }
             resolve(stdout);

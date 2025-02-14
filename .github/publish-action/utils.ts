@@ -72,7 +72,7 @@ async function pushTag(tag: string) {
 function spiltErrorMessage(stdOut: string) {
   return stdOut
     .split('\n') // 先切割成行
-    .filter((line) => line.toLowerCase().includes('error')) // 過濾包含 "error" 的行
+    .filter((line) => line.toLowerCase().startsWith('error')) // 過濾包含 "error" 的行
     .join('\n'); // 再組合成字串
 }
 
@@ -91,15 +91,17 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
     });
 
     command.on('error', (err) => {
-      console.log('error stdout:', spiltErrorMessage(stdout));
-      console.log('error stderr:', spiltErrorMessage(stderr));
+      console.log('error:');
+      console.log(spiltErrorMessage(stdout));
+      console.log(spiltErrorMessage(stderr));
       reject(err);
     });
 
     command.on('exit', (code) => {
       if (code !== 0) {
-        console.log('exit stdout:', spiltErrorMessage(stdout));
-        console.log('exit stderr:', spiltErrorMessage(stderr));
+        console.log('exit code:', code);
+        console.log(spiltErrorMessage(stdout));
+        console.log(spiltErrorMessage(stderr));
         reject(new Error(stderr));
       }
       resolve(stdout);
