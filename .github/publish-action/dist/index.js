@@ -15616,8 +15616,6 @@ function checkAndPublish(context, path) {
                         return [2 /*return*/];
                     }
                     ref = context.ref.split('/')[2];
-                    console.log('path :', path);
-                    console.log('isCoreInstalled :', isCoreInstalled);
                     if (!(path != 'packages/core' && !isCoreInstalled)) return [3 /*break*/, 6];
                     if (!(ref === 'master')) return [3 /*break*/, 3];
                     return [4 /*yield*/, (0, utils_1.installCore)(false)];
@@ -15853,15 +15851,11 @@ function buildAndPublish(path) {
                     _b.label = 1;
                 case 1:
                     _b.trys.push([1, 6, , 7]);
-                    console.log('npm name :', name);
-                    console.log('npm version :', version);
                     preRelease = semver_1.default.prerelease(version);
-                    console.log('npm preRelease :', preRelease);
                     isBeta = betaList.includes('' + (preRelease === null || preRelease === void 0 ? void 0 : preRelease[0]));
                     return [4 /*yield*/, command('npm', ['ci'], path)];
                 case 2:
                     installLogs = _b.sent();
-                    console.log('npm isBeta :', isBeta);
                     console.log('npm ci :', installLogs);
                     return [4 /*yield*/, command('npm', ['run', 'build'], path)];
                 case 3:
@@ -15913,6 +15907,12 @@ function pushTag(tag) {
         });
     });
 }
+function spiltErrorMessage(stdOut) {
+    return stdOut
+        .split('\n') // 先切割成行
+        .filter(function (line) { return line.toLowerCase().includes('error'); }) // 過濾包含 "error" 的行
+        .join('\n'); // 再組合成字串
+}
 function command(cmd, args, cwd) {
     return new Promise(function (resolve, reject) {
         var command = (0, child_process_1.spawn)(cmd, args, { cwd: cwd });
@@ -15920,20 +15920,21 @@ function command(cmd, args, cwd) {
         var stderr = '';
         command.stdout.on('data', function (data) {
             stdout += data.toString();
-            console.log('stdout :', stdout);
         });
         command.stderr.on('data', function (data) {
             stderr += data.toString();
-            console.log('stderr :', stderr);
         });
         command.on('error', function (err) {
-            console.log('reject error :', err);
+            console.log('error stdout:', spiltErrorMessage(stdout));
+            console.log('error stderr:', spiltErrorMessage(stderr));
             reject(err);
         });
         command.on('exit', function (code) {
-            console.log('exit :', code);
-            if (code !== 0)
+            if (code !== 0) {
+                console.log('exit stdout:', spiltErrorMessage(stdout));
+                console.log('exit stderr:', spiltErrorMessage(stderr));
                 reject(new Error(stderr));
+            }
             resolve(stdout);
         });
     });

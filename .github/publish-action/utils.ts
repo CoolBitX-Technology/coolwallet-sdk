@@ -38,13 +38,9 @@ export async function isLocalUpgraded(path: string) {
 export async function buildAndPublish(path: string) {
   const { name, version } = getPackageInfo(path);
   try {
-    console.log('npm name :', name);
-    console.log('npm version :', version);
     const preRelease = semver.prerelease(version);
-    console.log('npm preRelease :', preRelease);
     const isBeta = betaList.includes('' + preRelease?.[0]);
     const installLogs = await command('npm', ['ci'], path);
-    console.log('npm isBeta :', isBeta);
     console.log('npm ci :', installLogs);
     const buildLogs = await command('npm', ['run', 'build'], path);
     console.log('npm run build :', buildLogs);
@@ -73,6 +69,13 @@ async function pushTag(tag: string) {
   console.log('git push --tags :', result);
 }
 
+function spiltErrorMessage(stdOut: string) {
+  return stdOut
+    .split('\n') // 先切割成行
+    .filter((line) => line.toLowerCase().includes('error')) // 過濾包含 "error" 的行
+    .join('\n'); // 再組合成字串
+}
+
 function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const command = spawn(cmd, args, { cwd });
@@ -81,22 +84,24 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
 
     command.stdout.on('data', (data) => {
       stdout += data.toString();
-      console.log('stdout :', stdout);
     });
 
     command.stderr.on('data', (data) => {
       stderr += data.toString();
-      console.log('stderr :', stderr);
     });
 
     command.on('error', (err) => {
-      console.log('reject error :', err);
+      console.log('error stdout:', spiltErrorMessage(stdout));
+      console.log('error stderr:', spiltErrorMessage(stderr));
       reject(err);
     });
 
     command.on('exit', (code) => {
-      console.log('exit :', code);
-      if (code !== 0) reject(new Error(stderr));
+      if (code !== 0) {
+        console.log('exit stdout:', spiltErrorMessage(stdout));
+        console.log('exit stderr:', spiltErrorMessage(stderr));
+        reject(new Error(stderr));
+      }
       resolve(stdout);
     });
   });

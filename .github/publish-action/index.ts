@@ -18,8 +18,6 @@ async function checkAndPublish(context: Context, path: string) {
   }
 
   const ref = context.ref.split('/')[2];
-  console.log('path :', path);
-  console.log('isCoreInstalled :', isCoreInstalled);
 
   if (path != 'packages/core' && !isCoreInstalled) {
     if (ref === 'master') {
