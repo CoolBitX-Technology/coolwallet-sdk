@@ -1,4 +1,4 @@
-import { apdu, Transport, utils } from '@coolwallet/core';
+import { tx, Transport, utils } from '@coolwallet/core';
 import { PathType } from '@coolwallet/core/lib/config';
 import { Transaction } from '../transaction';
 import { getUtxoArgumentBuffer } from './hash';
@@ -25,12 +25,12 @@ export function getSigningPreActions(
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    await tx.command.executeScript(transport, appId, appPrivateKey, argument);
   };
   preActions.push(sendArgument);
 
@@ -51,7 +51,7 @@ export async function getSigningActions(
     return utxoArgumentBuf.toString('hex');
   });
   const actions = utxoArguments.map((utxoArgument) => async () => {
-    return apdu.tx.executeUtxoSegmentScript(
+    return tx.command.executeUtxoSegmentScript(
       transport,
       appId,
       appPrivateKey,
