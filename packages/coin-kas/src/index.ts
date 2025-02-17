@@ -7,13 +7,15 @@ import {
   getPubkeyOrScriptHash,
 } from './utils/address';
 import signTransferTransaction from './sign';
-import { Payment, Script, ScriptType, SignTxType } from './config/types';
+import * as types from './config/types';
 
 export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
-  public addressToOutScript: (address: string) => Script;
+  public ScriptType: any;
+  public addressToOutScript: (address: string) => types.Script;
 
   constructor() {
     super(COIN_TYPE);
+    this.ScriptType = types.ScriptType;
     this.addressToOutScript = addressToOutScript;
   }
 
@@ -21,7 +23,7 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     transport: Transport,
     appPrivateKey: string,
     appId: string,
-    scriptType: ScriptType,
+    scriptType: types.ScriptType,
     addressIndex: number,
     purpose?: number
   ): Promise<string> {
@@ -34,10 +36,10 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     transport: Transport,
     appPrivateKey: string,
     appId: string,
-    scriptType: ScriptType,
+    scriptType: types.ScriptType,
     addressIndex: number,
     purpose?: number
-  ): Promise<Payment> {
+  ): Promise<types.Payment> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
     const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, publicKey);
     return pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
@@ -47,14 +49,14 @@ export default class KAS extends COIN.ECDSACoin implements COIN.Coin {
     accPublicKey: string,
     accChainCode: string,
     addressIndex: number,
-    scriptType: ScriptType
-  ): Promise<Payment> {
+    scriptType: types.ScriptType
+  ): Promise<types.Payment> {
     const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     const { pubkeyOrScriptHash, addressVersion } = getPubkeyOrScriptHash(scriptType, publicKey);
     return pubkeyOrScriptHashToPayment(pubkeyOrScriptHash, addressVersion);
   }
 
-  async signTransaction(signTxType: SignTxType): Promise<string> {
+  async signTransaction(signTxType: types.SignTxType): Promise<string> {
     const { inputs, transport, appPrivateKey, appId, change, scriptType } = signTxType;
     for (const input of inputs) {
       const pubkey = await this.getPublicKey(transport, appPrivateKey, appId, input.addressIndex, input.purposeIndex);
