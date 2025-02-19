@@ -3,7 +3,7 @@ import * as param from './config/param';
 import * as scriptUtil from './utils/scriptUtils';
 import * as transactionUtil from './utils/transactionUtils';
 import * as addressUtil from './utils/addressUtils';
-import { apdu, tx } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 import { SignatureType } from '@coolwallet/core/lib/transaction';
 import { checkTransferTokenTransaction } from './utils/checkParams';
 import { requireTransferTokenTransaction } from './utils/requireParams';
@@ -28,16 +28,16 @@ export default async function signTransferTokenTransaction(signTxData: SignTrans
 
   const argument = scriptUtil.getTransferTokenArgument(requiredTransaction, addressIndex);
 
-  const preActions = [() => apdu.tx.sendScript(transport, script)];
-  const actions = [() => apdu.tx.executeScript(transport, appId, appPrivateKey, argument)];
+  const preActions = [() => tx.command.sendScript(transport, script)];
+  const actions = [() => tx.command.executeScript(transport, appId, appPrivateKey, argument)];
 
   const signatures = (await tx.flow.getSignaturesFromCoolWalletV2(
     transport,
     preActions,
     actions,
+    SignatureType.EDDSA,
     confirmCB,
     authorizedCB,
-    SignatureType.EDDSA
   )) as Array<Buffer>;
 
   const publicKey = await addressUtil.getPublicKey(transport, appPrivateKey, appId, addressIndex);
