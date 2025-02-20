@@ -2,6 +2,12 @@ import * as types from '../config/types';
 import { TezosToolkit } from '@taquito/taquito';
 import axios from 'axios';
 
+export const getTokenInfo = async (contractAdr: string): Promise<any> => {
+  const url = `https://api.tzkt.io/v1/contracts/${contractAdr}`;
+  const { data: result } = await axios.get(url);
+  return result;
+};
+
 export const getTokenParameters = async (rawData: types.xtzToken): Promise<any> => {
   const { source, contractAddress, tokenAmount, tokenId, toAddress } = rawData;
   const url = 'https://mainnet.api.tez.ie/';
@@ -36,10 +42,4 @@ export const getTokenParameters = async (rawData: types.xtzToken): Promise<any> 
       .toTransferParams().parameter;
   }
   return params;
-};
-
-export const getTokenInfo = async (contractAdr: string): Promise<any> => {
-  const url = `https://api.tzkt.io/v1/contracts/${contractAdr}`;
-  const { data: result } = await axios.get(url);
-  return result;
 };
