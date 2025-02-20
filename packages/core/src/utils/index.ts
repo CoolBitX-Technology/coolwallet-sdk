@@ -1,7 +1,7 @@
 import * as bip39 from 'bip39';
 import pbkdf2 from 'pbkdf2';
 import isEmpty from 'lodash/isEmpty';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import { MSG } from '../config/status/msg';
 import { CODE } from '../config/status/code';
 import { PathType } from '../config/param';
@@ -198,7 +198,7 @@ export const createWalletByMnemonic = async (
 
   // mnemonic to ADA master key
   const version = await info.getSEVersion(transport);
-  if (version >= 317) {
+  if ((transport.cardType === CardType.Pro && version >= 317) || transport.cardType === CardType.Lite) {
     seeds[1] = createAdaMasterKeyByMnemonic(mnemonic);
   }
 
