@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { coin as COIN, Transport, utils, config, apdu, tx } from '@coolwallet/core';
+import { coin as COIN, Transport, utils, config, tx, mcu, CardType, error } from '@coolwallet/core';
 import {
   accountKeyToAddress,
   genFakeTxBody,
@@ -85,39 +85,44 @@ export default class ADA implements COIN.Coin {
     const witnesses = getArguments(internalTx, accPubKey, txType, this.isTestNet);
 
     // request CoolWallet to sign tx
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
     for (const witness of witnesses) {
-      const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, witness.arg);
+      const encryptedSig = await tx.command.executeScript(transport, appId, appPrivateKey, witness.arg);
       if (!encryptedSig) throw new Error('executeScript fails to return signature');
       witness.sig = encryptedSig;
     }
 
     if (typeof confirmCB === 'function') confirmCB();
 
-    // show information for verification
-
-    await apdu.tx.finishPrepare(transport);
-    await apdu.tx.getTxDetail(transport);
-
-    // resolve signature
-
-    const decryptingKey = await apdu.tx.getSignatureKey(transport);
-    if (typeof authorizedCB === 'function') {
-      authorizedCB();
+    if (transport.cardType === CardType.Pro) {
+      // show information for verification
+      await tx.command.finishPrepare(transport);
+      await tx.command.getTxDetail(transport);
+  
+      // resolve signature
+      const decryptingKey = await tx.command.getSignatureKey(transport);
+      if (typeof authorizedCB === 'function') {
+        authorizedCB();
+      }
+      for (const witness of witnesses) {
+        const encryptedSig = witness.sig;
+        const sig = tx.util.decryptSignatureFromSE(encryptedSig, decryptingKey, tx.SignatureType.EDDSA);
+        witness.sig = sig.toString('hex');
+      }
+      await tx.command.clearTransaction(transport);
+      await mcu.control.powerOff(transport);
+    } else if (transport.cardType === CardType.Lite) {
+      for (const witness of witnesses) {
+        const encryptedSig = witness.sig;
+        const sig = tx.util.formatSignature(encryptedSig, tx.SignatureType.EDDSA);
+        witness.sig = sig.toString('hex');
+      }
+    } else {
+      throw new error.SDKError(ADA.prototype.signTransaction.name, 'Not suppotrd card type.');
     }
-    for (const witness of witnesses) {
-      const encryptedSig = witness.sig;
-      const sig = tx.util.decryptSignatureFromSE(encryptedSig, decryptingKey, tx.SignatureType.EDDSA);
-      witness.sig = sig.toString('hex');
-    }
-    await apdu.tx.clearTransaction(transport);
-    await apdu.mcu.control.powerOff(transport);
 
     // construct the signed transaction
-
     const signedTx = '83' + genTxBody(internalTx, accPubKey, txType, this.isTestNet) + genWitness(witnesses) + 'f6';
-
-    // const { signedTx: verifyTxBody } = await apdu.tx.getSignedHex(transport);
     return signedTx;
   }
 
