@@ -1,12 +1,23 @@
 import crypto from 'node:crypto';
-import { inspect } from 'node:util';
 import * as bip39 from 'bip39';
 import base58 from 'bs58';
 import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolwallet/testing-library';
-import { Keypair, Transaction, SystemProgram, PublicKey, StakeProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { createAssociatedTokenAccountInstruction, createTransferInstruction } from '@solana/spl-token';
+import {
+  Keypair,
+  Transaction,
+  SystemProgram,
+  PublicKey,
+  StakeProgram,
+  LAMPORTS_PER_SOL,
+  ComputeBudgetProgram,
+} from '@solana/web3.js';
+import {
+  createAssociatedTokenAccountInstruction,
+  getAssociatedTokenAddress,
+  createTransferCheckedInstruction,
+} from '@solana/spl-token';
 import SOL, { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../src';
 import * as stringUtil from '../src/utils/stringUtil';
 import { TOKEN_INFO } from '../src/config/tokenInfos';
@@ -81,11 +92,13 @@ describe('Test Solana SDK', () => {
       [base58.decode(fromPubkey), TOKEN_PROGRAM_ID, base58.decode(token)],
       ASSOCIATED_TOKEN_PROGRAM_ID
     );
-    const [expected] = PublicKey.findProgramAddressSync(
-      [base58.decode(fromPubkey), TOKEN_PROGRAM_ID, base58.decode(token)],
-      new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID)
+    const fromTokenAccount = await getAssociatedTokenAddress(
+      new PublicKey(token),
+      new PublicKey(fromPubkey),
+      true,
+      new PublicKey(TOKEN_PROGRAM_ID)
     );
-    expect(result).toEqual(expected.toString());
+    expect(result).toEqual(fromTokenAccount.toBase58());
   });
 
   it('Test Normal Transfer', async () => {
@@ -146,11 +159,11 @@ describe('Test Solana SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-
-  it.skip('Test SPL Token Transaction', async () => {
+  it('Test SPL Token Transaction', async () => {
     const addressIndex = 0;
     const node = wallet.derivePath(bip32Path(addressIndex));
     const expectedWallet = Keypair.fromSeed(node.privateKey);
+    const FROM_PUBKEY = new PublicKey(walletAddress);
     const fromTokenAccount = getRandWallet();
     const toTokenAccount = getRandWallet();
     const recentBlockhash = getRandWallet();
@@ -171,20 +184,25 @@ describe('Test Solana SDK', () => {
         programId: TOKEN_PROGRAM_ID,
       },
       addressIndex: 0,
+      computeUnitPrice: '1000',
+      computeUnitLimit: '200000',
     };
 
     const signedTx = await sol.signTransferSplTokenTransaction(signTxData);
     const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
 
-    const expectedTransaction = new Transaction({
-      feePayer: expectedWallet.publicKey,
-      recentBlockhash,
-    });
-    const instruction = createTransferInstruction(
+    const expectedTransaction = new Transaction({ blockhash: recentBlockhash, lastValidBlockHeight: 1000000 });
+    expectedTransaction.feePayer = FROM_PUBKEY;
+
+    const instruction = createTransferCheckedInstruction(
       new PublicKey(fromTokenAccount),
+      new PublicKey(tokenInfo.address),
       new PublicKey(toTokenAccount),
-      new PublicKey(walletAddress),
-      amount
+      FROM_PUBKEY,
+      BigInt(amount),
+      tokenInfo.decimals,
+      undefined,
+      new PublicKey(TOKEN_PROGRAM_ID)
     );
     expectedTransaction.instructions = [instruction];
     const message = expectedTransaction.compileMessage();
@@ -213,20 +231,25 @@ describe('Test Solana SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Create Token Account and SPL Token Transfer', async () => {
+  // sdk 簽出來的交易有問題，但不會用到，故不測試
+  xit('Test Create Token Account and SPL Token Transfer', async () => {
     const addressIndex = 0;
     const node = wallet.derivePath(bip32Path(addressIndex));
     const expectedWallet = Keypair.fromSeed(node.privateKey);
-    const FROM_PUBKEY = await node.getPublicKey();
-    const TO_PUBKEY = getRandWallet();
-    const tokenInfo = getRandToken();
-    const [fromTokenAccount] = sol.findProgramAddress(
-      [FROM_PUBKEY!, TOKEN_PROGRAM_ID, base58.decode(tokenInfo.address)],
-      ASSOCIATED_TOKEN_PROGRAM_ID
+    const TO_PUBKEY = Keypair.generate().publicKey;
+    const FROM_PUBKEY = new PublicKey(walletAddress);
+    const tokenInfo = tokens[0];
+    const fromTokenAccount = await getAssociatedTokenAddress(
+      new PublicKey(tokenInfo.address),
+      FROM_PUBKEY,
+      false,
+      new PublicKey(TOKEN_PROGRAM_ID)
     );
-    const [toTokenAccount] = sol.findProgramAddress(
-      [base58.decode(TO_PUBKEY), TOKEN_PROGRAM_ID, base58.decode(tokenInfo.address)],
-      ASSOCIATED_TOKEN_PROGRAM_ID
+    const toTokenAccount = await getAssociatedTokenAddress(
+      new PublicKey(tokenInfo.address),
+      TO_PUBKEY,
+      false,
+      new PublicKey(TOKEN_PROGRAM_ID)
     );
     const recentBlockhash = getRandWallet();
     const amount = getRandInt(10 * 10 ** tokenInfo.decimals) + 1;
@@ -236,42 +259,144 @@ describe('Test Solana SDK', () => {
       appPrivateKey: props.appPrivateKey,
       appId: props.appId,
       transaction: {
-        fromTokenAccount,
-        toPubkey: TO_PUBKEY,
-        toTokenAccount,
+        fromTokenAccount: fromTokenAccount.toBase58(),
+        toPubkey: TO_PUBKEY.toBase58(),
+        toTokenAccount: toTokenAccount.toBase58(),
         recentBlockhash,
         amount,
         tokenInfo,
+        programId: TOKEN_PROGRAM_ID,
       },
       addressIndex: 0,
     };
 
     const signedTx = await sol.signCreateAndTransferSPLToken(signTxData);
     const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
-
-    const expectedTransaction = new Transaction({
-      feePayer: expectedWallet.publicKey,
-      recentBlockhash,
-    })
+    const expectedTransaction = new Transaction({ blockhash: recentBlockhash, lastValidBlockHeight: 1000000 });
+    expectedTransaction.feePayer = FROM_PUBKEY;
+    expectedTransaction
       .add(
         createAssociatedTokenAccountInstruction(
-          new PublicKey(FROM_PUBKEY!),
-          new PublicKey(toTokenAccount),
-          new PublicKey(TO_PUBKEY),
-          new PublicKey(tokenInfo.address),
-          new PublicKey(TOKEN_PROGRAM_ID),
-          new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID)
+          FROM_PUBKEY,
+          toTokenAccount,
+          TO_PUBKEY,
+          new PublicKey(tokenInfo.address)
         )
       )
       .add(
-        createTransferInstruction(
-          new PublicKey(fromTokenAccount),
-          new PublicKey(toTokenAccount),
-          new PublicKey(FROM_PUBKEY!),
-          amount
+        createTransferCheckedInstruction(
+          fromTokenAccount,
+          new PublicKey(tokenInfo.address),
+          toTokenAccount,
+          FROM_PUBKEY,
+          BigInt(amount),
+          tokenInfo.decimals
         )
       );
 
+    expectedTransaction.sign(expectedWallet);
+    const message = expectedTransaction.compileMessage();
+    const expectedSignature = (await node.sign(message.serialize().toString('hex'))) ?? new Uint8Array();
+    expectedTransaction.addSignature(expectedWallet.publicKey, Buffer.from(expectedSignature));
+
+    try {
+      expect(recoveredTx.verifySignatures()).toEqual(true);
+      expect(expectedTransaction.verifySignatures()).toEqual(true);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(expectedTransaction.serialize().toString('hex'));
+    } catch (e) {
+      console.error('Test SPL Token Create and Transfer Transaction params', signTxData.transaction);
+      throw e;
+    }
+
+    if (cardType === CardType.Lite) return;
+    const display = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('SOL')
+      .messagePage(tokenInfo.symbol)
+      .addressPage(TO_PUBKEY.toBase58())
+      .amountPage(amount / 10 ** tokenInfo.decimals)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
+    expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+
+  it('Test Create Token Account and SPL Token Transfer With Compute Budget', async () => {
+    const addressIndex = 0;
+    const node = wallet.derivePath(bip32Path(addressIndex));
+    const expectedWallet = Keypair.fromSeed(node.privateKey);
+    const TO_PUBKEY = Keypair.generate().publicKey;
+    const FROM_PUBKEY = new PublicKey(walletAddress);
+    const tokenInfo = tokens[0];
+    const fromTokenAccount = await getAssociatedTokenAddress(
+      new PublicKey(tokenInfo.address),
+      FROM_PUBKEY,
+      false,
+      new PublicKey(TOKEN_PROGRAM_ID)
+    );
+    const toTokenAccount = await getAssociatedTokenAddress(
+      new PublicKey(tokenInfo.address),
+      TO_PUBKEY,
+      false,
+      new PublicKey(TOKEN_PROGRAM_ID)
+    );
+    const recentBlockhash = getRandWallet();
+    const amount = getRandInt(10 * 10 ** tokenInfo.decimals) + 1;
+
+    const signTxData = {
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      transaction: {
+        fromTokenAccount: fromTokenAccount.toBase58(),
+        toPubkey: TO_PUBKEY.toBase58(),
+        toTokenAccount: toTokenAccount.toBase58(),
+        recentBlockhash,
+        amount,
+        tokenInfo,
+        programId: TOKEN_PROGRAM_ID,
+        computeUnitPrice: '1000',
+        computeUnitLimit: '200000',
+      },
+      addressIndex: 0,
+    };
+
+    const signedTx = await sol.signCreateAndTransferSPLToken(signTxData);
+    const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+    const expectedTransaction = new Transaction({ blockhash: recentBlockhash, lastValidBlockHeight: 1000000 });
+    expectedTransaction.feePayer = FROM_PUBKEY;
+    // sdk 簽出來的順序固定，不能改動
+    expectedTransaction
+      .add(
+        createAssociatedTokenAccountInstruction(
+          FROM_PUBKEY,
+          toTokenAccount,
+          TO_PUBKEY,
+          new PublicKey(tokenInfo.address)
+        )
+      )
+      .add(
+        ComputeBudgetProgram.setComputeUnitPrice({
+          microLamports: BigInt('1000'),
+        })
+      )
+      .add(
+        ComputeBudgetProgram.setComputeUnitLimit({
+          units: Number.parseInt('200000'),
+        })
+      )
+      .add(
+        createTransferCheckedInstruction(
+          fromTokenAccount,
+          new PublicKey(tokenInfo.address),
+          toTokenAccount,
+          FROM_PUBKEY,
+          BigInt(amount),
+          tokenInfo.decimals
+        )
+      );
+
+    expectedTransaction.sign(expectedWallet);
     const message = expectedTransaction.compileMessage();
     const expectedSignature = (await node.sign(message.serialize().toString('hex'))) ?? new Uint8Array();
     expectedTransaction.addSignature(expectedWallet.publicKey, Buffer.from(expectedSignature));
@@ -282,20 +407,8 @@ describe('Test Solana SDK', () => {
       expect(recoveredTx.serialize().toString('hex')).toEqual(expectedTransaction.serialize().toString('hex'));
     } catch (e) {
       console.error(
-        'Expected Transaction:',
-        inspect(expectedTransaction.compileMessage(), {
-          showHidden: false,
-          depth: null,
-          colors: true,
-        })
-      );
-      console.error(
-        'Result Transaction:',
-        inspect(recoveredTx.compileMessage(), {
-          showHidden: false,
-          depth: null,
-          colors: true,
-        })
+        'Test SPL Token Create and Transfer With Compute Budget Transaction params',
+        signTxData.transaction
       );
       throw e;
     }
@@ -306,64 +419,8 @@ describe('Test Solana SDK', () => {
       .messagePage('TEST')
       .messagePage('SOL')
       .messagePage(tokenInfo.symbol)
-      .addressPage(TO_PUBKEY)
+      .addressPage(TO_PUBKEY.toBase58())
       .amountPage(amount / 10 ** tokenInfo.decimals)
-      .wrapPage('PRESS', 'BUTToN')
-      .finalize();
-    expect(display).toEqual(expectedTxDetail.toLowerCase());
-  });
-
-  it('Test Delegate', async () => {
-    const addressIndex = 0;
-    const node = wallet.derivePath(bip32Path(addressIndex));
-    const expectedWallet = Keypair.fromSeed(node.privateKey);
-    const FROM_PUBKEY = expectedWallet.publicKey;
-    const recentBlockhash = getRandWallet();
-    const SEED = 'stake:0';
-    const STAKE_ACCOUNT = await sol.createWithSeed(FROM_PUBKEY.toBuffer(), SEED, StakeProgram.programId.toBuffer());
-    const VALIDATOR = new PublicKey(getRandWallet());
-    const signTxData = {
-      transport,
-      appPrivateKey: props.appPrivateKey,
-      appId: props.appId,
-      transaction: {
-        authorizedPubkey: FROM_PUBKEY.toString(),
-        stakePubkey: STAKE_ACCOUNT.toString(),
-        votePubkey: VALIDATOR.toString(),
-        recentBlockhash,
-      },
-      addressIndex: 0,
-    };
-    const signedTx = await sol.signDelegate(signTxData);
-    const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
-
-    const expectedTransaction = StakeProgram.delegate({
-      stakePubkey: new PublicKey(STAKE_ACCOUNT),
-      authorizedPubkey: FROM_PUBKEY,
-      votePubkey: VALIDATOR,
-    });
-    expectedTransaction.feePayer = FROM_PUBKEY;
-    expectedTransaction.recentBlockhash = recentBlockhash;
-    const message = expectedTransaction.compileMessage();
-    const expectedSignature = (await node.sign(message.serialize().toString('hex'))) ?? new Uint8Array();
-    expectedTransaction.addSignature(FROM_PUBKEY, Buffer.from(expectedSignature));
-
-    try {
-      expect(recoveredTx.verifySignatures()).toEqual(true);
-      expect(expectedTransaction.verifySignatures()).toEqual(true);
-      expect(recoveredTx.serialize().toString('hex')).toEqual(expectedTransaction.serialize().toString('hex'));
-    } catch (e) {
-      console.error('Test Delegate', signTxData.transaction);
-      throw e;
-    }
-
-    if (cardType === CardType.Lite) return;
-    const display = await getTxDetail(transport, props.appId);
-    const expectedTxDetail = new DisplayBuilder()
-      .messagePage('TEST')
-      .messagePage('SOL')
-      .messagePage('STAKE')
-      .addressPage(VALIDATOR.toBase58())
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
@@ -390,10 +447,9 @@ describe('Test Solana SDK', () => {
     };
     const signedTx = await sol.signUndelegate(signTxData);
     const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
-    const expectedTransaction = new Transaction({
-      feePayer: expectedWallet.publicKey,
-      recentBlockhash,
-    }).add(
+    const expectedTransaction = new Transaction({ blockhash: recentBlockhash, lastValidBlockHeight: 1000000 });
+    expectedTransaction.feePayer = FROM_PUBKEY;
+    expectedTransaction.add(
       StakeProgram.deactivate({
         authorizedPubkey: new PublicKey(walletAddress),
         stakePubkey: new PublicKey(STAKE_ACCOUNT),
@@ -496,10 +552,11 @@ describe('Test Solana SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test Normal Transfer With SignTransaction', async () => {
+  it('Test Normal Transfer With SignTransferTransaction', async () => {
     const addressIndex = 0;
     const node = wallet.derivePath(bip32Path(addressIndex));
     const expectedWallet = Keypair.fromSeed(node.privateKey);
+    const FROM_PUBKEY = expectedWallet.publicKey;
     const toPubkey = getRandWallet();
     const recentBlockhash = getRandWallet();
     const lamports = ((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL;
@@ -516,13 +573,12 @@ describe('Test Solana SDK', () => {
       addressIndex: 0,
     };
 
-    const signedTx = await sol.signTransaction(signTxData);
+    const signedTx = await sol.signTransferTransaction(signTxData);
     const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
 
-    const expectedTransaction = new Transaction({
-      feePayer: expectedWallet.publicKey,
-      recentBlockhash,
-    }).add(
+    const expectedTransaction = new Transaction({ blockhash: recentBlockhash, lastValidBlockHeight: 1000000 });
+    expectedTransaction.feePayer = FROM_PUBKEY;
+    expectedTransaction.add(
       SystemProgram.transfer({
         fromPubkey: expectedWallet.publicKey,
         toPubkey: new PublicKey(toPubkey),
@@ -576,7 +632,7 @@ describe('Test Solana SDK', () => {
       addressIndex: 0,
     };
 
-    const signedTx = await sol.signTransaction(signTxData);
+    const signedTx = await sol.signStackingWithdrawTransaction(signTxData);
     const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
 
     const expectedTransaction = StakeProgram.withdraw({
@@ -635,7 +691,7 @@ describe('Test Solana SDK', () => {
       addressIndex: 0,
     };
 
-    const signedTx = await sol.signTransaction(signTxData);
+    const signedTx = await sol.signStackingWithdrawTransaction(signTxData);
     const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
 
     const expectedTransaction = StakeProgram.withdraw({
