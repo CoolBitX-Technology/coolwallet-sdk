@@ -5,9 +5,7 @@ import * as types from './config/types';
 import * as params from './config/params';
 import * as sign from './sign';
 import { SDKError } from '@coolwallet/core/lib/error';
-
 import { MsgWithdrawDelegationReward, MsgUndelegate, MsgDelegate, MsgSend, CHAIN_ID, TX_TYPE } from './config/types';
-
 export { Transport, MsgWithdrawDelegationReward, MsgUndelegate, MsgDelegate, MsgSend, CHAIN_ID, TX_TYPE };
 
 export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
