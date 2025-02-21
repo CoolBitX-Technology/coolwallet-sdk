@@ -26,7 +26,7 @@ export default class ATOM extends COIN.ECDSACoin implements COIN.Coin {
   }
 
   async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
-    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     return txUtil.publicKeyToAddress(publicKey);
   }
 
