@@ -76,13 +76,6 @@ export const TOKENS = {
     contractAddress: '0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3',
     signature: '',
   },
-  MATIC: {
-    name: 'Matic Token',
-    symbol: 'MATIC',
-    unit: '18',
-    contractAddress: '0x0000000000000000000000000000000000001010',
-    signature: '',
-  },
   CRO: {
     name: 'Crypto.com Coin',
     symbol: 'CRO',
