@@ -1,1 +1,0 @@
-{"total":2,"items":[{"uid":"ad438d5da0fce65c1bf5499282240b1c","name":"Test scriptUtil.getXXXArguments function","statistic":{"failed":4,"broken":0,"skipped":0,"passed":0,"unknown":0,"total":4}},{"uid":"a59664261beb72fc384ad15a4d478422","name":"Test Sui SDK","statistic":{"failed":0,"broken":0,"skipped":0,"passed":34,"unknown":0,"total":34}}]}
