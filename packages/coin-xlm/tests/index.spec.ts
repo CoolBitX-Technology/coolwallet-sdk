@@ -446,7 +446,7 @@ describe('Test XLM SDK', () => {
     });
   });
 
-  describe.only('Test KAU CoinType', () => {
+  describe('Test KAU CoinType', () => {
     let transport: Transport;
     let props: Mandatory;
     let cardType: CardType;
