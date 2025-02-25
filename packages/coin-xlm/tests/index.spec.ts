@@ -8,27 +8,26 @@ type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
 
 describe('Test XLM SDK', () => {
+  let transport: Transport;
+  let props: Mandatory;
+  let cardType: CardType;
+  const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
+  beforeAll(async () => {
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
+    props = await initialize(transport, mnemonic);
+  });
   describe('Test XLM CoinType', () => {
-    let transport: Transport;
-    let props: Mandatory;
-    let cardType: CardType;
     const xlmSDK = new XLM(types.COIN_SPECIES.XLM);
-    const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
-
-    beforeAll(async () => {
-      if (process.env.CARD === 'lite') {
-        cardType = CardType.Lite;
-      } else {
-        cardType = CardType.Pro;
-      }
-
-      if (cardType === CardType.Lite) {
-        transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
-      } else {
-        transport = (await createTransport())!;
-      }
-      props = await initialize(transport, mnemonic);
-    });
 
     it('Test Get index 0 address', async () => {
       const address = await xlmSDK.getAddress(transport, props.appPrivateKey, props.appId, types.PROTOCOL.BIP44);
@@ -228,26 +227,7 @@ describe('Test XLM SDK', () => {
   });
 
   describe('Test KAG CoinType', () => {
-    let transport: Transport;
-    let props: Mandatory;
-    let cardType: CardType;
     const xlmSDK = new XLM(types.COIN_SPECIES.KAG);
-    const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
-
-    beforeAll(async () => {
-      if (process.env.CARD === 'lite') {
-        cardType = CardType.Lite;
-      } else {
-        cardType = CardType.Pro;
-      }
-
-      if (cardType === CardType.Lite) {
-        transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
-      } else {
-        transport = (await createTransport())!;
-      }
-      props = await initialize(transport, mnemonic);
-    });
 
     it('Test Get index 0 address', async () => {
       const address = await xlmSDK.getAddress(transport, props.appPrivateKey, props.appId, types.PROTOCOL.BIP44);
@@ -447,26 +427,7 @@ describe('Test XLM SDK', () => {
   });
 
   describe('Test KAU CoinType', () => {
-    let transport: Transport;
-    let props: Mandatory;
-    let cardType: CardType;
     const xlmSDK = new XLM(types.COIN_SPECIES.KAU);
-    const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
-
-    beforeAll(async () => {
-      if (process.env.CARD === 'lite') {
-        cardType = CardType.Lite;
-      } else {
-        cardType = CardType.Pro;
-      }
-
-      if (cardType === CardType.Lite) {
-        transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
-      } else {
-        transport = (await createTransport())!;
-      }
-      props = await initialize(transport, mnemonic);
-    });
 
     it('Test Get index 0 address', async () => {
       const address = await xlmSDK.getAddress(transport, props.appPrivateKey, props.appId, types.PROTOCOL.BIP44);
