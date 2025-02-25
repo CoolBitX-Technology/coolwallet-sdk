@@ -76,13 +76,6 @@ export const TOKENS = {
     contractAddress: '0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3',
     signature: '',
   },
-  MATIC: {
-    name: 'Matic Token',
-    symbol: 'MATIC',
-    unit: '18',
-    contractAddress: '0x0000000000000000000000000000000000001010',
-    signature: '',
-  },
   CRO: {
     name: 'Crypto.com Coin',
     symbol: 'CRO',
@@ -96,5 +89,19 @@ export const TOKENS = {
     unit: '18',
     contractAddress: '0x692597b009d13c4049a947cab2239b7d6517875f',
     signature: '',
+  },
+  ORDER: {
+    name: 'Orderly Network',
+    symbol: 'ORDER',
+    unit: '18',
+    contractAddress: '0x4e200fe2f3efb977d5fd9c430a41531fb04d97b8',
+    signature: `12054f5244455200004e200fe2f3efb977d5fd9c430a41531fb04d97b83046022100CE9691A0307B991B2E0364D3D77EDA3633E28B16B2D3E42C5B938B9103B0948F022100C40F1A21755629C06763DA8A344B8C5395F32B2A272E91450FDD38CB37FBAD30`,
+  },
+  AAVE: {
+    name: 'Aave Token',
+    symbol: 'AAVE',
+    unit: '18',
+    contractAddress: '0xd6df932a45c0f255f85145f286ea0b292b21c90b',
+    signature: `120441415645000000D6DF932A45C0F255F85145F286EA0B292B21C90B30450220331FF4095457825A96BBDEF0C497A01373B64C54438B87FE94417FECA18EC526022100BD041ACE2E780A90B67F127AB0AE1C8B7BABF2E2BDFE1610800BC9AB2281A171`,
   },
 };

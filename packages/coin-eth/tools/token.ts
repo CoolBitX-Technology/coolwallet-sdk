@@ -27,3 +27,8 @@ const buildTokenHex = (symbol: string) => {
 console.log('ETH GALA: ', buildTokenHex('GALA'));
 console.log('ETH EURC: ', buildTokenHex('EURC'));
 console.log('ETH WCT: ', buildTokenHex('WCT'));
+<<<<<<< HEAD
+=======
+console.log('ETH ORDER: ', buildTokenHex('ORDER'));
+console.log('ETH AAVE: ', buildTokenHex('AAVE'));
+>>>>>>> master

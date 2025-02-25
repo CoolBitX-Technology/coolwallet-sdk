@@ -1,4 +1,4 @@
-name: Unit tests
+name: Test and Generate Report
 
 on:
   pull_request:
@@ -45,7 +45,7 @@ jobs:
         MODIFIED_COINS=""
         for file in $MODIFIED_FILES; do
           echo "file = $file"
-          if [[ $file == packages/coin-*/package.json ]]; then
+          if [[ $file == packages/coin-*/package.json || $file == packages/core/package.json ]]; then
             COIN_DIR=$(dirname "$file")
             MODIFIED_COINS="$MODIFIED_COINS $COIN_DIR"
           fi
@@ -55,7 +55,7 @@ jobs:
         echo "modified_coins=$MODIFIED_COINS" >> $GITHUB_OUTPUT
     
     - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+      uses: google-github-actions/setup-gcloud@v2  
 
     - name: Docker auth
       run: gcloud auth configure-docker ${{ env.REGISTRY }}

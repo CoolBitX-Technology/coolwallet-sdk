@@ -15,6 +15,7 @@ export enum TxTypes {
   StakeDeregister,
   StakeWithdraw,
   StakeRegisterAndDelegate,
+  Abstain,
 }
 
 export interface Options {

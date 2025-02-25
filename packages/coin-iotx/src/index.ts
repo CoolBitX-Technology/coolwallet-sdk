@@ -1,4 +1,4 @@
-import { coin as COIN, Transport, apdu, tx } from '@coolwallet/core';
+import { coin as COIN, Transport, tx, mcu } from '@coolwallet/core';
 import * as utils from './utils';
 import * as params from './config/params';
 import { TxTypes } from './config/types';
@@ -42,8 +42,8 @@ export default class IOTX extends COIN.ECDSACoin implements COIN.Coin {
 
     // request CoolWallet to sign tx
 
-    await apdu.tx.sendScript(transport, signScript);
-    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, signArguments);
+    await tx.command.sendScript(transport, signScript);
+    const encryptedSig = await tx.command.executeScript(transport, appId, appPrivateKey, signArguments);
     if (!encryptedSig) throw new Error('executeScript fails to return signature');
 
     // const { signedTx } = await apdu.tx.getSignedHex(transport);
@@ -51,11 +51,11 @@ export default class IOTX extends COIN.ECDSACoin implements COIN.Coin {
 
     // verification and return signed tx
 
-    await apdu.tx.finishPrepare(transport);
-    await apdu.tx.getTxDetail(transport);
-    const decryptingKey = await apdu.tx.getSignatureKey(transport);
-    await apdu.tx.clearTransaction(transport);
-    await apdu.mcu.control.powerOff(transport);
+    await tx.command.finishPrepare(transport);
+    await tx.command.getTxDetail(transport);
+    const decryptingKey = await tx.command.getSignatureKey(transport);
+    await tx.command.clearTransaction(transport);
+    await mcu.control.powerOff(transport);
     const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
     const signedTx = utils.getSignedTransaction(transaction, sig as { r: string; s: string }, publicKey, txType);
     return signedTx;
