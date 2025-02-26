@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { BASE, OKX, ZKSYNC, OPTIMISM, AVAXC } from '../src/chain';
-=======
 import { BASE, OKX, ZKSYNC, OPTIMISM, AVAXC, POLYGON, ARBITRUM, CORE } from '../src/chain';
->>>>>>> master
 import { TokenProps } from '../src/chain/types';
 
 type BuildTokenHexInput = Pick<TokenProps, 'symbol' | 'unit' | 'contractAddress'>;
@@ -57,9 +53,6 @@ console.log('BASE AAVE: ', buildTokenHex(BASE.tokens.AAVE));
 console.log('OP USDC.e: ', buildTokenHex(OPTIMISM.tokens['USDC.e']));
 console.log('OP USDC: ', buildTokenHex(OPTIMISM.tokens.USDC));
 console.log('OP WCT: ', buildTokenHex(OPTIMISM.tokens.WCT));
-<<<<<<< HEAD
-console.log('AVAXC EURC: ', buildTokenHex(AVAXC.tokens.EURC));
-=======
 console.log('OP ORDER: ', buildTokenHex(OPTIMISM.tokens.ORDER));
 console.log('OP USDT: ', buildTokenHex(OPTIMISM.tokens.USDT));
 console.log('OP DAI: ', buildTokenHex(OPTIMISM.tokens.DAI));
@@ -76,4 +69,3 @@ console.log('AVAXC ORDER: ', buildTokenHex(AVAXC.tokens.ORDER));
 console.log('CORE stCORE: ', buildTokenHex(CORE.tokens.stCORE));
 console.log('CORE USDT: ', buildTokenHex(CORE.tokens.USDT));
 console.log('CORE USDC: ', buildTokenHex(CORE.tokens.USDC));
->>>>>>> master

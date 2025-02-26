@@ -29,7 +29,4 @@ const buildTokenHex = (symbol: string) => {
 
 console.log('SOL USDT:', buildTokenHex('USDT'));
 console.log('SOL EURC:', buildTokenHex('EURC'));
-<<<<<<< HEAD
-=======
 console.log('SOL ORDER:', buildTokenHex('ORDER'));
->>>>>>> master
