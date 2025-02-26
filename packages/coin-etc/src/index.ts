@@ -1,4 +1,4 @@
-import { coin as COIN, Transport, utils, config, apdu, tx } from '@coolwallet/core';
+import { coin as COIN, Transport, utils, config, tx, mcu, CardType, error } from '@coolwallet/core';
 
 const bip32 = require('bip32');
 const elliptic = require('elliptic');
@@ -99,7 +99,7 @@ export default class ETC implements COIN.Coin {
         '0'
       );
 
-    await apdu.tx.sendScript(transport, script + scriptSig);
+    await tx.command.sendScript(transport, script + scriptSig);
 
     // 2. Form arguments
 
@@ -120,24 +120,31 @@ export default class ETC implements COIN.Coin {
 
     // 3. Validation and The Encrypted Signature ***
 
-    const encryptedSig = await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    const encryptedSig = await tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
     if (typeof transaction.confirmCB === 'function') {
       transaction.confirmCB();
     }
-    await apdu.tx.finishPrepare(transport);
-    await apdu.tx.getTxDetail(transport);
-    const decryptingKey = await apdu.tx.getSignatureKey(transport);
-    if (typeof transaction.authorizedCB === 'function') {
-      transaction.authorizedCB();
+    let sig;
+    if (transport.cardType === CardType.Pro) {
+      await tx.command.finishPrepare(transport);
+      await tx.command.getTxDetail(transport);
+      const decryptingKey = await tx.command.getSignatureKey(transport);
+      if (typeof transaction.authorizedCB === 'function') {
+        transaction.authorizedCB();
+      }
+      await tx.command.clearTransaction(transport);
+      await mcu.control.powerOff(transport);
+      sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
+    } else if (transport.cardType === CardType.Lite) {
+      sig = tx.util.formatSignature(encryptedSig!, tx.SignatureType.Canonical);
+    } else {
+      throw new error.SDKError(ETC.prototype.signTransaction.name, 'Not suppotrd card type.');
     }
-    await apdu.tx.clearTransaction(transport);
-    await apdu.mcu.control.powerOff(transport);
-    const sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
 
     // 4. construct the signed transaction and return the result
 
-    const { signedTx } = await apdu.tx.getSignedHex(transport);
+    const { signedTx } = await tx.command.getSignedHex(transport);
     const rawTx = getRawTx(transaction);
     const rawData = rlp.encode(rawTx);
     if (rawData.toString('hex') !== signedTx) {
