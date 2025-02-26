@@ -122,11 +122,11 @@ export default class ETC implements COIN.Coin {
 
     const encryptedSig = await tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
-    if (typeof transaction.confirmCB === 'function') {
-      transaction.confirmCB();
-    }
     let sig;
     if (transport.cardType === CardType.Pro) {
+      if (typeof transaction.confirmCB === 'function') {
+        transaction.confirmCB();
+      }
       await tx.command.finishPrepare(transport);
       await tx.command.getTxDetail(transport);
       const decryptingKey = await tx.command.getSignatureKey(transport);
