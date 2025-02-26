@@ -36,9 +36,6 @@ export const signTransaction = async (
     confirmCB,
     authorizedCB
   );
-
-  const { signedTx } = await tx.command.getSignedHex(transport);
-  console.debug("signedTx: ", signedTx);
   
   if (!Buffer.isBuffer(canonicalSignature)) {
     const atomSignature = await txUtil.genAtomSigFromSESig(canonicalSignature);
