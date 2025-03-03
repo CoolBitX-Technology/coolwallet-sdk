@@ -1,20 +1,20 @@
-import { CardType, Transport } from '@coolwallet/core';
+import { Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, DisplayBuilder, getTxDetail } from '@coolwallet/testing-library';
 import { coins } from '@cosmjs/stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
-import * as bip39 from 'bip39';
 import CosmosSDK, { getCoin, CHAIN } from '../src';
 import * as ATOM_TESTS from './fixtures/atom';
 import * as KAVA_TESTS from './fixtures/kava';
 import * as THOR_TESTS from './fixtures/thor';
 import { CosmosWallet } from './utils';
-import type { PromiseValue, TestChain } from './types';
+import type { TestChain } from './types';
 import { decodeBech32 } from '../src/utils/crypto';
+import { CardType } from '../../core/lib';
 
-let props: PromiseValue<ReturnType<typeof initialize>>;
-let transport: Transport;
-let cardType: CardType;
+type PromiseValue<T> = T extends Promise<infer V> ? V : never;
+type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
+
 const CHAINS: TestChain[] = [
   {
     name: 'ATOM',
@@ -47,12 +47,17 @@ const CHAINS: TestChain[] = [
 const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
 describe('Test Cosmos SDK', () => {
+  let transport: Transport;
+  let cardType: CardType;
+  let props: Mandatory;
+  
   beforeAll(async () => {
     if (process.env.CARD === 'lite') {
       cardType = CardType.Lite;
     } else {
       cardType = CardType.Pro;
     }
+
     if (cardType === CardType.Lite) {
       transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
     } else {

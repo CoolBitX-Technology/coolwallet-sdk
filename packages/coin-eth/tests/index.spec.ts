@@ -1,6 +1,5 @@
 import { CardType, Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
-import * as bip39 from 'bip39';
 import isEmpty from 'lodash/isEmpty';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import * as utils from 'web3-utils';
@@ -64,20 +63,19 @@ describe('Test ETH SDK', () => {
     const signature = await eth.signTransaction(client);
     const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
     expect(signature).toEqual(expectedSignature);
-    if (cardType === CardType.Pro) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage('ETH')
-        .addressPage(transaction.to.toLowerCase())
-        .amountPage(+transaction.value)
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+    if (cardType !== CardType.Pro) return;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const txDetail = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('ETH')
+      .addressPage(transaction.to.toLowerCase())
+      .amountPage(+transaction.value)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
 
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-    }
+    expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
   });
 
   describe.each(Fixtures.ERC20_TRANSACTION)('ETH test sign erc20 transactions $to', (transaction) => {
@@ -107,21 +105,20 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        const expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage('ETH')
-          .messagePage(token.symbol.substring(0, 7))
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+tokenAmount)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .messagePage(token.symbol.substring(0, 7))
+        .addressPage(transaction.to.toLowerCase())
+        .amountPage(+tokenAmount)
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
 
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
 
     it('Unofficial token', async () => {
@@ -159,24 +156,84 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        const tokenSymbol = hasCommercialAt
-          ? ('@' + unofficialToken.symbol).substring(0, 8)
-          : unofficialToken.symbol.substring(0, 7);
-        const expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage('ETH')
-          .messagePage(tokenSymbol)
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+tokenAmount)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const tokenSymbol = hasCommercialAt
+        ? ('@' + unofficialToken.symbol).substring(0, 8)
+        : unofficialToken.symbol.substring(0, 7);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .messagePage(tokenSymbol)
+        .addressPage(transaction.to.toLowerCase())
+        .amountPage(+tokenAmount)
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
 
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+  });
+
+  describe.each(Fixtures.ERC20_TRANSACTION)('ETH test sign erc20 transactions $to', (transaction) => {
+    const unofficialToken = [
+      {
+        name: 'Theta Token',
+        symbol: 'THETA',
+        unit: '18',
+        contractAddress: '0x3883f5e181fccaf8410fa61e12b59bad963fb645',
+        signature: ``,
+      },
+      {
+        name: 'Zilliqa',
+        symbol: 'ZIL',
+        unit: '12',
+        contractAddress: '0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27',
+        signature: ``,
+      },
+    ];
+    it.each(unofficialToken)('Unofficial token $symbol', async (token) => {
+      const scale = 10 ** +token.unit;
+      const tokenAmount = +transaction.amount;
+      const amount = Math.floor(tokenAmount * scale).toString(16);
+      const erc20Data = `0xa9059cbb${transaction.to.slice(2).padStart(64, '0')}${amount.padStart(64, '0')}`;
+      const client: signTx = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: {
+          chainId: CHAIN_ID,
+          ...transaction,
+          to: token.contractAddress,
+          data: erc20Data,
+          option: {
+            info: {
+              symbol: token.symbol,
+              decimals: token.unit,
+            },
+          },
+        },
+        addressIndex: 0,
+      };
+      const signature = await eth.signTransaction(client);
+      const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
+      expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const tokenSymbol = ('@' + token.symbol).substring(0, 8);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .messagePage(tokenSymbol)
+        .addressPage(transaction.to.toLowerCase())
+        .amountPage(+tokenAmount)
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
   });
 
@@ -204,19 +261,18 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        const expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage('ETH')
-          .wrapPage('SMART', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .wrapPage('SMART', '')
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
 
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   );
 
@@ -244,19 +300,18 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        const expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage('ETH')
-          .wrapPage('SMART', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .wrapPage('SMART', '')
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
 
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   );
 
@@ -273,19 +328,18 @@ describe('Test ETH SDK', () => {
     const signature = await eth.signTypedData(client);
     const expectedSignature = await wallet.signTypedData(typedData);
     expect(signature).toEqual(expectedSignature);
-    if (cardType === CardType.Pro) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage('ETH')
-        .wrapPage('EIP712', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+    if (cardType !== CardType.Pro) return;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const txDetail = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('ETH')
+      .wrapPage('EIP712', '')
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
 
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-    }
+    expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
   });
 
   it.each(Fixtures.MESSAGE_TRANSACTION)('ETH test sign message transaction', async (message) => {
@@ -300,19 +354,18 @@ describe('Test ETH SDK', () => {
     const signature = await eth.signMessage(client);
     const expectedSignature = await wallet.signMessage(message);
     expect(signature).toEqual(expectedSignature);
-    if (cardType === CardType.Pro) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage('ETH')
-        .wrapPage('MESSAGE', '')
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+    if (cardType !== CardType.Pro) return;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const txDetail = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('ETH')
+      .wrapPage('MESSAGE', '')
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
 
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-    }
+    expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
   });
 
   it.each(Fixtures.EIP1559_TRANSFER_TRANSACTION)('ETH test sign eip1559 transaction', async (transaction) => {
@@ -339,20 +392,19 @@ describe('Test ETH SDK', () => {
     const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, CHAIN_ID);
     console.log('expectedSignature: ' + expectedSignature);
     expect(signature).toEqual(expectedSignature);
-    if (cardType === CardType.Pro) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const txDetail = await getTxDetail(transport, props.appId);
-      const expectedTxDetail = new DisplayBuilder()
-        .messagePage('TEST')
-        .messagePage('ETH')
-        .addressPage(transaction.to.toLowerCase())
-        .amountPage(+transaction.value)
-        .wrapPage('PRESS', 'BUTToN')
-        .finalize();
+    if (cardType !== CardType.Pro) return;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const txDetail = await getTxDetail(transport, props.appId);
+    const expectedTxDetail = new DisplayBuilder()
+      .messagePage('TEST')
+      .messagePage('ETH')
+      .addressPage(transaction.to.toLowerCase())
+      .amountPage(+transaction.value)
+      .wrapPage('PRESS', 'BUTToN')
+      .finalize();
 
-      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-    }
+    expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
   });
 
   describe.each(Fixtures.EIP1559_ERC20_TRANSACTION)('ETH test sign eip1559 erc20 transactions $to', (transaction) => {
@@ -382,21 +434,20 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signEIP1559Transaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        const expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage('ETH')
-          .messagePage(token.symbol)
-          .addressPage(transaction.to.toLowerCase())
-          .amountPage(+tokenAmount)
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .messagePage(token.symbol)
+        .addressPage(transaction.to.toLowerCase())
+        .amountPage(+tokenAmount)
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
 
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
   });
 
@@ -424,19 +475,18 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signEIP1559Transaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        const expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage('ETH')
-          .wrapPage('SMART', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .wrapPage('SMART', '')
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
 
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   );
 
@@ -464,19 +514,18 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signEIP1559Transaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        const expectedTxDetail = new DisplayBuilder()
-          .messagePage('TEST')
-          .messagePage('ETH')
-          .wrapPage('SMART', '')
-          .wrapPage('PRESS', 'BUTToN')
-          .finalize();
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      const expectedTxDetail = new DisplayBuilder()
+        .messagePage('TEST')
+        .messagePage('ETH')
+        .wrapPage('SMART', '')
+        .wrapPage('PRESS', 'BUTToN')
+        .finalize();
 
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     }
   );
 });

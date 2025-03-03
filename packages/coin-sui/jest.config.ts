@@ -4,7 +4,7 @@ import type { Config } from '@jest/types';
 const config: Config.InitialOptions = {
   verbose: false,
   automock: false,
-  testMatch: ['**/index.spec.(js|ts)', '**/*.test.(js|ts)'],
+  testMatch: ['**/coin-sui/tests/index.spec.(js|ts)', '**/coin-sui/tests/*.test.(js|ts)'],
   setupFilesAfterEnv: ['../../jest.setup.js'],
   moduleNameMapper: {
     '@mysten/sui/keypairs/ed25519': '<rootDir>/node_modules/@mysten/sui/dist/cjs/keypairs/ed25519/index.js',

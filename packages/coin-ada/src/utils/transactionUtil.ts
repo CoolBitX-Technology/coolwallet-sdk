@@ -80,6 +80,7 @@ export const genFakeTxBody = (tx: Transaction, txType: TxTypes, isTestNet = fals
   if (txType === TxTypes.StakeRegister) result += '0'.repeat(72);
   if (txType === TxTypes.StakeRegisterAndDelegate) result += '0'.repeat(200);
   if (txType === TxTypes.StakeDeregister) result += '0'.repeat(72);
+  if (txType === TxTypes.Abstain) result += '0'.repeat(82);
   if (txType === TxTypes.StakeDelegate) result += '0'.repeat(132);
   if (txType === TxTypes.StakeWithdraw) {
     if (!tx.withdrawAmount) throw new Error('withdrawAmount is required');
@@ -106,6 +107,8 @@ export const genTxBody = (tx: Transaction, accPubKey: string, txType: TxTypes, i
 
   if (txType === TxTypes.StakeRegister) result += '048182008200581c' + stakeKeyHash;
   if (txType === TxTypes.StakeDeregister) result += '048182018200581c' + stakeKeyHash;
+  if (txType === TxTypes.Abstain) result += '04d901028183098200581c' + stakeKeyHash + '8102';
+
   if (txType === TxTypes.StakeDelegate) {
     if (!tx.poolKeyHash) throw new Error('poolKeyHash is required');
     result += '048183028200581c' + stakeKeyHash + '581c' + tx.poolKeyHash;

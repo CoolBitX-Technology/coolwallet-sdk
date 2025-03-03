@@ -211,6 +211,7 @@ describe('Test Terra SDK', () => {
     const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(sendOpt));
     expect(signedTxE).toEqual(signedTxSDKE);
 
+    if (cardType !== CardType.Pro) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')

@@ -1,6 +1,6 @@
 import { utils, config } from '@coolwallet/core';
 import { MajorType, Integer, Output, Witness, TxTypes, Transaction } from '../config/types';
-import { TRANSFER, REGISTER, REGISTER_AND_DELEGATE, DELEGATE, DEREGISTER, WITHDRAW } from '../config/params';
+import { TRANSFER, REGISTER, REGISTER_AND_DELEGATE, DELEGATE, DEREGISTER, WITHDRAW, ABSTAIN } from '../config/params';
 import {
   derivePubKeyFromAccountToIndex,
   decodeAddress,
@@ -54,6 +54,7 @@ export const getScript = (txType: TxTypes): string => {
   if (txType === TxTypes.StakeDelegate) return DELEGATE.scriptWithSignature;
   if (txType === TxTypes.StakeDeregister) return DEREGISTER.scriptWithSignature;
   if (txType === TxTypes.StakeWithdraw) return WITHDRAW.scriptWithSignature;
+  if (txType === TxTypes.Abstain) return ABSTAIN.scriptWithSignature;
   throw new Error('txType is not recognized');
 }
 
@@ -77,7 +78,7 @@ export const getArguments = (
       + getUintArgument(ttl)
       + genInputs(inputs);
   }
-  if (txType === TxTypes.StakeRegister || txType === TxTypes.StakeDeregister) {
+  if (txType === TxTypes.StakeRegister || txType === TxTypes.StakeDeregister || txType === TxTypes.Abstain) {
     argument = getChangeArgument(change, isTestNet)
       + getUintArgument(fee)
       + getUintArgument(ttl)
