@@ -46,33 +46,15 @@ export default class ADA implements COIN.Coin {
 
   getTransactionSize(transaction: RawTransaction, txType = TxTypes.Transfer): number {
     const internalTx = { ...transaction, fee: 170000 };
-    const txHex =
-      '83' + genFakeTxBody(internalTx, txType, this.isTestNet) + genFakeWitness(internalTx.addrIndexes, txType) + 'f6';
+
+    let txHex = genFakeTxBody(internalTx, txType, this.isTestNet) + genFakeWitness(internalTx.addrIndexes, txType);
+    if (txType === TxTypes.Abstain) {
+      txHex = '84' + txHex + 'f5f6';
+    } else {
+      txHex = '83' + txHex + 'f6';
+    }
+
     return txHex.length / 2;
-  }
-
-  getTransferSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.Transfer);
-  }
-
-  getStakeRegisterSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeRegister);
-  }
-
-  getStakeRegisterAndDelegateSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeRegisterAndDelegate);
-  }
-
-  getStakeDeregisterSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeDeregister);
-  }
-
-  getStakeDelegateSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeDelegate);
-  }
-
-  getStakeWithdrawSize(transaction: RawTransaction) {
-    return this.getTransactionSize(transaction, TxTypes.StakeWithdraw);
   }
 
   async signTransaction(transaction: Transaction, options: Options, txType = TxTypes.Transfer): Promise<string> {
@@ -122,31 +104,14 @@ export default class ADA implements COIN.Coin {
     }
 
     // construct the signed transaction
-    const signedTx = '83' + genTxBody(internalTx, accPubKey, txType, this.isTestNet) + genWitness(witnesses) + 'f6';
-    return signedTx;
-  }
 
-  async signTransfer(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.Transfer);
-  }
+    if (txType === TxTypes.Abstain) {
+      return '84' + genTxBody(internalTx, accPubKey, txType, this.isTestNet) + genWitness(witnesses) + 'f5f6';
+    } else {
+      return '83' + genTxBody(internalTx, accPubKey, txType, this.isTestNet) + genWitness(witnesses) + 'f6';
+    }
 
-  async signStakeRegister(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeRegister);
-  }
-
-  async signStakeRegisterAndDelegate(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeRegisterAndDelegate);
-  }
-
-  async signStakeDeregister(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeDeregister);
-  }
-
-  async signStakeDelegate(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeDelegate);
-  }
-
-  async signStakeWithdraw(transaction: Transaction, options: Options) {
-    return this.signTransaction(transaction, options, TxTypes.StakeWithdraw);
+    // const { signedTx: verifyTxBody } = await apdu.tx.getSignedHex(transport);
+    // return signedTx;
   }
 }

@@ -41,6 +41,7 @@ const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM.id) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM.id) };
 const coinZkSync = { name: 'zkSync', api: new EVM(CHAIN.ZKSYNC.id) };
 const coinBase = { name: 'Base', api: new EVM(CHAIN.BASE.id) };
+const coinCore = { name: 'Core', api: new EVM(CHAIN.CORE.id) };
 
 // custom evm
 const customCoinScroll = { name: 'Scroll', api: new EVM(534352) };
@@ -58,6 +59,8 @@ const TEST_COINS = [
   coinOKX,
   coinZkSync,
   coinBase,
+  coinCore,
+
   customCoinScroll,
   customCoinAurora,
 ];
@@ -128,41 +131,40 @@ describe('Test EVM SDK', () => {
       const signature = await api.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        let expectedTxDetail: string;
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
 
-        if (api.chain instanceof CustomEvm) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage('c' + api.chain.id)
-            .addressPage(transaction.to.toLowerCase())
-            .amountPage(+transaction.value)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else if (isEmpty(api.chain.layer2)) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .addressPage(transaction.to.toLowerCase())
-            .amountPage(+transaction.value)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.layer2)
-            .messagePage(api.chain.symbol)
-            .addressPage(transaction.to.toLowerCase())
-            .amountPage(+transaction.value)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        }
-
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
       }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
 
     describe.each(ERC20_TRANSACTION)('send erc20 token to $to', (transaction) => {
@@ -187,49 +189,48 @@ describe('Test EVM SDK', () => {
         const signature = await api.signTransaction(client);
         const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
         expect(signature).toEqual(expectedSignature);
-        if (cardType === CardType.Pro) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const txDetail = await getTxDetail(transport, props.appId);
-          const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
-          let expectedTxDetail;
+        if (cardType !== CardType.Pro) return;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const txDetail = await getTxDetail(transport, props.appId);
+        const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
+        let expectedTxDetail;
 
-          if (api.chain instanceof CustomEvm) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage('c' + api.chain.id)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else if (isEmpty(api.chain.layer2)) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.symbol)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.layer2)
-              .messagePage(api.chain.symbol)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          }
+        if (api.chain instanceof CustomEvm) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('c' + api.chain.id)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        }
 
-          try {
-            expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-          } catch (e) {
-            console.error('send erc20 token to ', token);
-            throw e;
-          }
+        try {
+          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        } catch (e) {
+          console.error('send erc20 token to ', token);
+          throw e;
         }
       });
 
@@ -267,45 +268,44 @@ describe('Test EVM SDK', () => {
         const signature = await api.signTransaction(client);
         const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
         expect(signature).toEqual(expectedSignature);
-        if (cardType === CardType.Pro) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const txDetail = await getTxDetail(transport, props.appId);
-          const tokenSymbol = (hasCommercialAt ? '@' : '') + unofficialToken.symbol;
-          let expectedTxDetail;
+        if (cardType !== CardType.Pro) return;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const txDetail = await getTxDetail(transport, props.appId);
+        const tokenSymbol = (hasCommercialAt ? '@' : '') + unofficialToken.symbol;
+        let expectedTxDetail;
 
-          if (api.chain instanceof CustomEvm) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage('c' + api.chain.id)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else if (isEmpty(api.chain.layer2)) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.symbol)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.layer2)
-              .messagePage(api.chain.symbol)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          }
-
-          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        if (api.chain instanceof CustomEvm) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('c' + api.chain.id)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
         }
+
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
       });
     });
 
@@ -324,12 +324,62 @@ describe('Test EVM SDK', () => {
       const signature = await api.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
+
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+
+    it.each(SMART_CONTRACT_SEGMENT_TRANSACTION)(
+      'Send smart contract segment transaction to $to',
+      async (transaction) => {
+        const client: LegacyTransaction = {
+          transaction: {
+            ...transaction,
+            value: utils.toHex(utils.toWei(transaction.value, 'ether')),
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+
+        const signature = await api.signTransaction(client);
+        const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+
+        if (cardType !== CardType.Pro) return;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
         let expectedTxDetail: string;
-
         if (api.chain instanceof CustomEvm) {
           expectedTxDetail = new DisplayBuilder()
             .messagePage('TEST')
@@ -355,58 +405,6 @@ describe('Test EVM SDK', () => {
         }
 
         expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-      }
-    });
-
-    it.each(SMART_CONTRACT_SEGMENT_TRANSACTION)(
-      'Send smart contract segment transaction to $to',
-      async (transaction) => {
-        const client: LegacyTransaction = {
-          transaction: {
-            ...transaction,
-            value: utils.toHex(utils.toWei(transaction.value, 'ether')),
-          },
-          transport,
-          appPrivateKey: props.appPrivateKey,
-          appId: props.appId,
-          addressIndex: 0,
-        };
-
-        const signature = await api.signTransaction(client);
-        const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
-        expect(signature).toEqual(expectedSignature);
-
-        if (cardType === CardType.Pro) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const txDetail = await getTxDetail(transport, props.appId);
-          let expectedTxDetail: string;
-          if (api.chain instanceof CustomEvm) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage('c' + api.chain.id)
-              .wrapPage('SMART', '')
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else if (isEmpty(api.chain.layer2)) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.symbol)
-              .wrapPage('SMART', '')
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.layer2)
-              .messagePage(api.chain.symbol)
-              .wrapPage('SMART', '')
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          }
-
-          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-        }
       }
     );
 
@@ -468,37 +466,36 @@ describe('Test EVM SDK', () => {
       const expectedSignature = await wallet.signTypedData(client.typedData);
       expect(signature).toEqual(expectedSignature);
 
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        let expectedTxDetail: string;
-        if (api.chain instanceof CustomEvm) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage('c' + api.chain.id)
-            .wrapPage('EIP712', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else if (isEmpty(api.chain.layer2)) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .wrapPage('EIP712', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.layer2)
-            .messagePage(api.chain.symbol)
-            .wrapPage('EIP712', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        }
-
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .wrapPage('EIP712', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('EIP712', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('EIP712', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
       }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
 
     it.each(MESSAGE_TRANSACTION)('Send message transaction to $to', async (transaction) => {
@@ -513,36 +510,35 @@ describe('Test EVM SDK', () => {
       const signature = await api.signMessage(client);
       const expectedSignature = await wallet.signMessage(client.message);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-
-        let expectedTxDetail: string;
-        if (api.chain instanceof CustomEvm) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage('c' + api.chain.id)
-            .wrapPage('MESSAGE', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else if (isEmpty(api.chain.layer2)) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .wrapPage('MESSAGE', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.layer2)
-            .messagePage(api.chain.symbol)
-            .wrapPage('MESSAGE', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        }
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .wrapPage('MESSAGE', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('MESSAGE', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('MESSAGE', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
       }
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
 
     it.each(EIP1559_TRANSFER_TRANSACTION)('Send eip1559 transaction to $to', async (transaction) => {
@@ -560,40 +556,39 @@ describe('Test EVM SDK', () => {
       const signature = await api.signEIP1559Transaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
-        let expectedTxDetail: string;
-        if (api.chain instanceof CustomEvm) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage('c' + api.chain.id)
-            .addressPage(transaction.to.toLowerCase())
-            .amountPage(+transaction.value)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else if (isEmpty(api.chain.layer2)) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .addressPage(transaction.to.toLowerCase())
-            .amountPage(+transaction.value)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.layer2)
-            .messagePage(api.chain.symbol)
-            .addressPage(transaction.to.toLowerCase())
-            .amountPage(+transaction.value)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        }
-
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .addressPage(transaction.to.toLowerCase())
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
       }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
 
     describe.each(EIP1559_ERC20_TRANSACTION)('Send eip1559 erc20 transaction to $to', (transaction) => {
@@ -620,44 +615,43 @@ describe('Test EVM SDK', () => {
         const signature = await api.signEIP1559Transaction(client);
         const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
         expect(signature).toEqual(expectedSignature);
-        if (cardType === CardType.Pro) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const txDetail = await getTxDetail(transport, props.appId);
-          const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
-          let expectedTxDetail: string;
-          if (api.chain instanceof CustomEvm) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage('c' + api.chain.id)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else if (isEmpty(api.chain.layer2)) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.symbol)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.layer2)
-              .messagePage(api.chain.symbol)
-              .messagePage(tokenSymbol)
-              .addressPage(transaction.to.toLowerCase())
-              .amountPage(+tokenAmount)
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          }
-
-          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        if (cardType !== CardType.Pro) return;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const txDetail = await getTxDetail(transport, props.appId);
+        const tokenSymbol = (hasCommercialAt ? '@' : '') + token.symbol;
+        let expectedTxDetail: string;
+        if (api.chain instanceof CustomEvm) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('c' + api.chain.id)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else if (isEmpty(api.chain.layer2)) {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+        } else {
+          expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage(api.chain.layer2)
+            .messagePage(api.chain.symbol)
+            .messagePage(tokenSymbol)
+            .addressPage(transaction.to.toLowerCase())
+            .amountPage(+tokenAmount)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
         }
+
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
       });
     });
 
@@ -676,7 +670,56 @@ describe('Test EVM SDK', () => {
       const signature = await api.signEIP1559SmartContractTransaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
+      let expectedTxDetail: string;
+      if (api.chain instanceof CustomEvm) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('c' + api.chain.id)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (isEmpty(api.chain.layer2)) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.layer2)
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+    });
+
+    it.each(EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION)(
+      'Send eip1559 smart contract segment transaction to $to',
+      async (transaction) => {
+        const client: EIP1559Transaction = {
+          transaction: {
+            ...transaction,
+            value: utils.toHex(utils.toWei(transaction.value, 'ether')),
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+
+        const signature = await api.signEIP1559Transaction(client);
+        const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+        if (cardType !== CardType.Pro) return;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
@@ -707,57 +750,6 @@ describe('Test EVM SDK', () => {
 
         expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
       }
-    });
-
-    it.each(EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION)(
-      'Send eip1559 smart contract segment transaction to $to',
-      async (transaction) => {
-        const client: EIP1559Transaction = {
-          transaction: {
-            ...transaction,
-            value: utils.toHex(utils.toWei(transaction.value, 'ether')),
-          },
-          transport,
-          appPrivateKey: props.appPrivateKey,
-          appId: props.appId,
-          addressIndex: 0,
-        };
-
-        const signature = await api.signEIP1559Transaction(client);
-        const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
-        expect(signature).toEqual(expectedSignature);
-        if (cardType === CardType.Pro) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const txDetail = await getTxDetail(transport, props.appId);
-          let expectedTxDetail: string;
-          if (api.chain instanceof CustomEvm) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage('c' + api.chain.id)
-              .wrapPage('SMART', '')
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else if (isEmpty(api.chain.layer2)) {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.symbol)
-              .wrapPage('SMART', '')
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          } else {
-            expectedTxDetail = new DisplayBuilder()
-              .messagePage('TEST')
-              .messagePage(api.chain.layer2)
-              .messagePage(api.chain.symbol)
-              .wrapPage('SMART', '')
-              .wrapPage('PRESS', 'BUTToN')
-              .finalize();
-          }
-
-          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
-        }
-      }
     );
   });
 
@@ -777,55 +769,54 @@ describe('Test EVM SDK', () => {
       const signature = await api.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
-      if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const txDetail = await getTxDetail(transport, props.appId);
+      if (cardType !== CardType.Pro) return;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txDetail = await getTxDetail(transport, props.appId);
 
-        const validatorId = parseInt(transaction.data.slice(10, 74), 16);
-        const validatorDisplay = 'ID ' + validatorId;
+      const validatorId = parseInt(transaction.data.slice(10, 74), 16);
+      const validatorDisplay = 'ID ' + validatorId;
 
-        let expectedTxDetail = '';
-        const programId = transaction.data.slice(0, 10);
-        if (programId.toLowerCase() === api.chain.stakingInfo.delegate) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .wrapPage('Delgt', '')
-            .messagePage(validatorDisplay)
-            .amountPage(+transaction.value)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else if (programId.toLowerCase() === api.chain.stakingInfo.withdraw) {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .wrapPage('Withdr', '')
-            .messagePage(validatorDisplay)
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else if (programId.toLowerCase() === api.chain.stakingInfo.undelegate) {
-          const parsedVal = parseInt(transaction.data.slice(138, 202), 16);
-          const scale = 10 ** -18;
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .wrapPage('Undelgt', '')
-            .messagePage(validatorDisplay)
-            .amountPage(+(parsedVal * scale))
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        } else {
-          expectedTxDetail = new DisplayBuilder()
-            .messagePage('TEST')
-            .messagePage(api.chain.symbol)
-            .wrapPage('SMART', '')
-            .wrapPage('PRESS', 'BUTToN')
-            .finalize();
-        }
-
-        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      let expectedTxDetail = '';
+      const programId = transaction.data.slice(0, 10);
+      if (programId.toLowerCase() === api.chain.stakingInfo.delegate) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Delgt', '')
+          .messagePage(validatorDisplay)
+          .amountPage(+transaction.value)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (programId.toLowerCase() === api.chain.stakingInfo.withdraw) {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Withdr', '')
+          .messagePage(validatorDisplay)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else if (programId.toLowerCase() === api.chain.stakingInfo.undelegate) {
+        const parsedVal = parseInt(transaction.data.slice(138, 202), 16);
+        const scale = 10 ** -18;
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('Undelgt', '')
+          .messagePage(validatorDisplay)
+          .amountPage(+(parsedVal * scale))
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+      } else {
+        expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage(api.chain.symbol)
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
       }
+
+      expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
   });
 });

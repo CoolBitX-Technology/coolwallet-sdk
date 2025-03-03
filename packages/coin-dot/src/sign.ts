@@ -47,7 +47,6 @@ export const signTransaction = async (
     confirmCB,
     authorizedCB
   );
-  
   const signature = await txUtil.getCompleteSignature(transport, publicKey, canonicalSignature)
   console.debug("signature: ", signature)
 

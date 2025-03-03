@@ -4,7 +4,6 @@
   "description": "Coolwallet Sui sdk",
   "main": "lib/index.js",
   "scripts": {
-    "list:token": "babel-node -x \".ts\" tools/token.ts",
     "test": "NODE_ENV=development jest --runInBand",
     "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
@@ -34,9 +33,9 @@
     "@babel/preset-typescript": "^7.7.7"
   },
   "dependencies": {
+    "@coolwallet/core": "^2.0.0-beta.19",
     "@mysten/sui": "^1.14.3",
-    "bignumber.js": "^8.0.2",
-    "@coolwallet/core": "^2.0.0-beta.19"
+    "bignumber.js": "^8.0.2"
   },
   "repository": {
     "type": "git",

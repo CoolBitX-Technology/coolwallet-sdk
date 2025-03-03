@@ -1,7 +1,8 @@
-import * as core from '@coolwallet/core';
+import { tx, error } from '@coolwallet/core';
 import * as types from './config/types';
 import { AuthInfo, Fee, ModeInfo, Msg, SignerInfo, SimplePublicKey, Tx, TxBody } from './terra/@terra-core';
 import * as txUtil from './utils/transactionUtils';
+import { SignatureType } from '@coolwallet/core/lib/transaction';
 
 async function signTransaction(
   signData: types.SignDataType,
@@ -12,26 +13,25 @@ async function signTransaction(
 ): Promise<string> {
   const { transport, appId, appPrivateKey, confirmCB, authorizedCB, transaction } = signData;
 
-  const preActions = [() => core.apdu.tx.sendScript(transport, script)];
-  const action = () => core.apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  const preActions = [() => tx.command.sendScript(transport, script)];
+  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
-  const canonicalSignature = await core.tx.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
-    false,
+    SignatureType.Canonical,
     confirmCB,
-    authorizedCB,
-    true
+    authorizedCB
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
     const terraSignature = await txUtil.genTERRASigFromSESig(canonicalSignature);
     const messages = Array.isArray(msgs) ? msgs : [msgs];
-    const tx = txUtil.createMsgTx(messages, transaction, publicKey, terraSignature);
-    return Buffer.from(tx.toBytes()).toString('base64');
+    const msgTx = txUtil.createMsgTx(messages, transaction, publicKey, terraSignature);
+    return Buffer.from(msgTx.toBytes()).toString('base64');
   } else {
-    throw new core.error.SDKError(signTransaction.name, 'canonicalSignature type error');
+    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
 }
 
@@ -44,19 +44,18 @@ async function signSegmentTransaction(
 ): Promise<string> {
   const { transport, appId, appPrivateKey, confirmCB, authorizedCB, transaction } = signData;
   const preActions = [
-    () => core.apdu.tx.sendScript(transport, script),
-    () => core.apdu.tx.executeScript(transport, appId, appPrivateKey, argument),
+    () => tx.command.sendScript(transport, script),
+    () => tx.command.executeScript(transport, appId, appPrivateKey, argument),
   ];
-  const action = () => core.apdu.tx.executeSegmentScript(transport, appId, appPrivateKey, txBodyHex);
+  const action = () => tx.command.executeSegmentScript(transport, appId, appPrivateKey, txBodyHex);
 
-  const canonicalSignature = await core.tx.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
-    false,
+    SignatureType.Canonical,
     confirmCB,
-    authorizedCB,
-    true
+    authorizedCB
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
@@ -71,10 +70,10 @@ async function signSegmentTransaction(
     // Generate AuthInfo
     const authInfo = new AuthInfo([signerInfo], fee);
     const txBody = TxBody.fromData({ messages: transaction.msgs, memo: transaction.memo });
-    const tx = new Tx(txBody, authInfo, [terraSignature]).toBytes();
-    return Buffer.from(tx).toString('base64');
+    const msgTx = new Tx(txBody, authInfo, [terraSignature]).toBytes();
+    return Buffer.from(msgTx).toString('base64');
   } else {
-    throw new core.error.SDKError(signTransaction.name, 'canonicalSignature type error');
+    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
 }
 
