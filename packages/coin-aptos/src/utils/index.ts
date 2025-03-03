@@ -5,8 +5,6 @@ import { coin as COIN, Transport, utils, config } from '@coolwallet/core';
 import * as params from '../config/params';
 import { Integer, Transaction } from '../config/types';
 
-export { getPublicKeyByKeyIndex, publicKeyToAuthenticationKey, getScript, getArgument, getSignedTx };
-
 function getPath(keyIndex: number) {
   const path = utils.getFullPath({
     pathType: config.PathType.SLIP0010,
@@ -22,7 +20,7 @@ async function getPublicKeyByKeyIndex(transport: Transport, appId: string, appPr
 }
 
 function publicKeyToAuthenticationKey(publicKey: string) {
-  const publicKeyAndScheme = Buffer.concat([Buffer.from(publicKey, 'hex'), Buffer.alloc(1)]);
+  const publicKeyAndScheme = new Uint8Array([...Buffer.from(publicKey, 'hex'), ...Buffer.alloc(1)]);
   const authenticationKey = sha3_256(publicKeyAndScheme);
   return authenticationKey;
 }
@@ -100,3 +98,5 @@ function getSignedTx(tx: Transaction, publicKey: string, sig?: string): string {
   signedTx += sig ? checkHex(sig, 128) : '0'.repeat(128);
   return signedTx;
 }
+
+export { getPublicKeyByKeyIndex, publicKeyToAuthenticationKey, getScript, getArgument, getSignedTx };
