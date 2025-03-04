@@ -4,7 +4,7 @@ import * as types from './config/types';
 import * as params from './config/params';
 import * as txUtil from './utils/transactionUtil';
 
-export type ScriptType = types.ScriptType;
+export const ScriptType = types.ScriptType;
 
 export default class ZEN extends COIN.ECDSACoin implements COIN.Coin {
   public addressToOutScript: (address: string) => { scriptType: types.ScriptType; outScript: Buffer; outHash?: Buffer };
@@ -43,7 +43,16 @@ export default class ZEN extends COIN.ECDSACoin implements COIN.Coin {
     addressIndex: number,
     scriptType: types.ScriptType
   ): Promise<{ address: string; outScript: Buffer }> {
-    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    return this.getAddressAndOutScriptByAccountKeySync(accPublicKey, accChainCode, addressIndex, scriptType);
+  }
+
+  getAddressAndOutScriptByAccountKeySync(
+    accPublicKey: string,
+    accChainCode: string,
+    addressIndex: number,
+    scriptType: types.ScriptType
+  ): { address: string; outScript: Buffer } {
+    const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     return txUtil.pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
   }
 
