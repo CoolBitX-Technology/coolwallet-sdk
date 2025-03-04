@@ -1,11 +1,8 @@
 import { CardType, Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
-import isEmpty from 'lodash/isEmpty';
 import { createTransport } from '@coolwallet/transport-jre-http';
-import * as utils from 'web3-utils';
 import CRO, { TX_TYPE } from '../src';
-import { CHAIN_ID, MsgSend, SignMsgSendType } from '../src/config/types';
-// import { signTx } from '../src/config/types';
+import { CHAIN_ID, SignMsgSendType } from '../src/config/types';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
@@ -63,8 +60,6 @@ describe('Test CRO SDK', () => {
       const expectedSignature = `Cp8BCowBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmwKKmNybzF5YTNwdTlreTRjbDJhcDI3Y3lxeHh5cDk3OHZwOW14dmF5Mnp3ZxIqY3JvMTh3ZDhhajRwdzA5OXN6ZmM4enBrbXE5bXhmdTN5bW15OWRxazNuGhIKB2Jhc2Vjcm8SBzEwMDAwMDASDkZyb21Cb3NzV2FsbGV0EmoKUApGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQI8vvwdZw+4rUq79lte1v5TsXevidg1V7lriZi8y1pw+hIECgIIARgIEhYKEAoHYmFzZWNybxIFMzk3MDAQu54JGkDPlRNBcX3wCZIKmNsbOXMumRop9fFQW/A9da82lGfg5Efz0HVrsOSS1FFy3TvI0g9VBAe13mmmoZy/w0rfJa0v`;
       expect(signature).toEqual(expectedSignature);
       if (cardType === CardType.Pro) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
         const expectedTxDetail = new DisplayBuilder()
           .messagePage('TEST')
