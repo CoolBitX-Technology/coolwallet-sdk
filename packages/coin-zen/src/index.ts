@@ -3,7 +3,10 @@ import { signTransaction } from './sign';
 import * as types from './config/types';
 import * as params from './config/params';
 import * as txUtil from './utils/transactionUtil';
-export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
+
+export type ScriptType = types.ScriptType;
+
+export default class ZEN extends COIN.ECDSACoin implements COIN.Coin {
   public addressToOutScript: (address: string) => { scriptType: types.ScriptType; outScript: Buffer; outHash?: Buffer };
 
   constructor() {
