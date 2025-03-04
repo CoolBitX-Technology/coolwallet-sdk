@@ -6,10 +6,15 @@
   "author": "coolwallet-team",
   "license": "Apache-2.0",
   "scripts": {
+    "test": "NODE_ENV=development jest --runInBand",
+    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx,.js\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
-    "test": "jest --verbose"
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",
