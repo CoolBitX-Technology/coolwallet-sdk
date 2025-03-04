@@ -4,12 +4,10 @@ import * as types from './config/types';
 import * as params from './config/params';
 import * as txUtil from './utils/transactionUtil';
 export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
-  public ScriptType: any;
-  public addressToOutScript: Function;
+  public addressToOutScript: (address: string) => { scriptType: types.ScriptType; outScript: Buffer; outHash?: Buffer };
 
   constructor() {
     super(params.COIN_TYPE);
-    this.ScriptType = types.ScriptType;
     this.addressToOutScript = txUtil.addressToOutScript;
   }
 
