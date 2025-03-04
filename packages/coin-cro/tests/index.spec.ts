@@ -31,7 +31,7 @@ describe('Test CRO SDK', () => {
   });
 
   describe('Test Get Address', () => {
-    it('ETH test get address 0', async () => {
+    it('CRO test get address 0', async () => {
       const address = await croSDK.getAddress(transport, props.appPrivateKey, props.appId, 0);
       const expectedAddress = 'cro1y2lk8ex0geseke743t7snntkw9aql090x8p4d6';
       expect(address.toLowerCase()).toEqual(expectedAddress.toLowerCase());
@@ -39,7 +39,7 @@ describe('Test CRO SDK', () => {
   });
 
   describe('Sign Transfer Tx', () => {
-    it('ETH test sign transaction', async () => {
+    it('CRO test sign transaction', async () => {
       const client: SignMsgSendType = {
         transport,
         appPrivateKey: props.appPrivateKey,
