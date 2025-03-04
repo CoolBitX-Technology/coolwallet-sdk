@@ -6,8 +6,7 @@ export const TRANSFER = {
     '304502204b1911ba2d52c9fb0c87552fc47b31f25e9ae13ab4887d14d467bd3eb84baa26022100dc36343d426045e3f5f0d1223e4ed0d0eab3e6ab33a5d7bbb9de09870f478604'.padStart(
       144,
       '0'
-    )
+    ),
 };
 
-
-export const COIN_TYPE = '8000004A'
+export const COIN_TYPE = '8000004A';
