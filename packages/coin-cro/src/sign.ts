@@ -28,9 +28,6 @@ export const signTransaction = async (
     authorizedCB
   );
 
-  const { signedTx } = await tx.command.getSignedHex(transport);
-  console.debug('signedTx: ', signedTx);
-
   if (!Buffer.isBuffer(canonicalSignature)) {
     const croSignature = await txUtil.genCROSigFromSESig(canonicalSignature);
     return croSignature;
