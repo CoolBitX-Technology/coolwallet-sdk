@@ -11,13 +11,13 @@ import { getAPIOption, formatAPIResponse } from './api';
 import { insertScript, insertLoadScript, insertDeleteScript } from './scripts';
 import { backupRegisterData, deleteBackupRegisterData, recoverBackupData } from './backup';
 import {
-  CHALLENGE_URL,
-  CRYPTOGRAM_URL,
   MAIN_AID_PRO,
   CARDMANAGER_AID,
   SSD_AID,
   getNewSeVersion,
   getMainAppletAid,
+  getChallengeUrl,
+  getCryptogramUrl,
 } from './constants';
 import type { AppletStatus, APIOptions, SEUpdateInfo } from './types';
 import { common, info, mcu, setting } from '../..';
@@ -114,11 +114,11 @@ const performApiChallenge = async (
 ): Promise<void> => {
   console.debug('mutual Authorization Start----');
   const options = await getAPIOption({ cardId, apiSecret });
-  const challengeResponse = await callAPI(CHALLENGE_URL, options);
+  const challengeResponse = await callAPI(getChallengeUrl(transport.cardType), options);
   console.debug('cardID: ', cardId);
   const challengeObj = await formatAPIResponse(transport, challengeResponse);
   const challengeOptions = await getAPIOption({ cardId, challengeData: challengeObj.outputData, apiSecret });
-  const cryptogramResponse = await callAPI(CRYPTOGRAM_URL, challengeOptions);
+  const cryptogramResponse = await callAPI(getCryptogramUrl(transport.cardType), challengeOptions);
   await formatAPIResponse(transport, cryptogramResponse);
   console.debug('mutual Authorization Done----');
 };
