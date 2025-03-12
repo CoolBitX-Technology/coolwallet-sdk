@@ -268,8 +268,8 @@ export const getSignedHex = async (transport: Transport): Promise<{ signedTx: st
  * @return {Promse<boolean>}
  */
 export const finishPrepare = async (transport: Transport): Promise<boolean> => {
-  if (transport.cardType === CardType.Lite) {
-    throw new SDKError(finishPrepare.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new SDKError(finishPrepare.name, `CoolWallet Go does not support this command.`);
   }
   const { statusCode, msg } = await executeCommand(transport, commands.FINISH_PREPARE, target.SE);
   if (statusCode === CODE._9000) {
@@ -285,8 +285,8 @@ export const finishPrepare = async (transport: Transport): Promise<boolean> => {
  * @return {Promise<string>}
  */
 export const getSignatureKey = async (transport: Transport): Promise<string> => {
-  if (transport.cardType === CardType.Lite) {
-    throw new SDKError(getSignatureKey.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new SDKError(getSignatureKey.name, `CoolWallet Go does not support this command.`);
   }
   const { outputData: signatureKey, statusCode, msg } = await executeCommand(transport, commands.GET_TX_KEY, target.SE);
   if (signatureKey) {
@@ -316,8 +316,8 @@ export const clearTransaction = async (transport: Transport): Promise<boolean> =
  * @return {Promise<boolean>} true: success, false: canceled.
  */
 export const getTxDetail = async (transport: Transport): Promise<boolean> => {
-  if (transport.cardType === CardType.Lite) {
-    throw new SDKError(getTxDetail.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new SDKError(getTxDetail.name, `CoolWallet Go does not support this command.`);
   }
   const { statusCode, msg } = await executeCommand(transport, commands.GET_TX_DETAIL, target.SE);
   if (statusCode === CODE._9000) {

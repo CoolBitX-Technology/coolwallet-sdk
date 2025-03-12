@@ -10,8 +10,8 @@ import { CODE } from '../config/status/code';
  * @param {Transport} transport
  */
 export const cancelAPDU = async (transport: Transport) => {
-  if (transport.cardType === CardType.Lite) {
-    throw new error.SDKError(cancelAPDU.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(cancelAPDU.name, `CoolWallet Go does not support this command.`);
   }
   const { statusCode, msg } = await executeCommand(transport, commands.CANCEL_APDU, target.MCU);
   if (statusCode !== CODE._9000) {
@@ -25,8 +25,8 @@ export const cancelAPDU = async (transport: Transport) => {
  * @return {Promise<boolean>}
  */
 export const powerOff = async (transport: Transport): Promise<boolean> => {
-  if (transport.cardType === CardType.Lite) {
-    throw new error.SDKError(powerOff.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(powerOff.name, `CoolWallet Go does not support this command.`);
   }
   try {
     await executeCommand(transport, commands.PWR_OFF, target.MCU);

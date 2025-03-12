@@ -4,7 +4,7 @@ import { commands } from '../execute/command';
 import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
 import * as ProScript from '../script/pro/otaScript';
-import * as LiteScript from '../script/lite/otaScript';
+import * as GoScript from '../script/go/otaScript';
 import { SDKError } from '../../error/errorHandle';
 import Progress from './Progress';
 import { getAPIOption, formatAPIResponse } from './api';
@@ -25,8 +25,8 @@ import { common, info, mcu, setting } from '../..';
 const getScripts = (cardType: CardType) => {
   if (cardType === CardType.Pro) {
     return ProScript;
-  } else if (cardType === CardType.Lite) {
-    return LiteScript;
+  } else if (cardType === CardType.Go) {
+    return GoScript;
   } else {
     throw new Error(`getScripts unknown cardType: ${cardType}`);
   }

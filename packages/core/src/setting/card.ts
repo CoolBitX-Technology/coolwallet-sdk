@@ -1,6 +1,6 @@
 import { APDUError } from '../error/errorHandle';
 import { commands } from '../apdu/execute/command';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import { executeCommand } from '../apdu/execute/execute';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
@@ -105,8 +105,8 @@ export const toggleDisplayAddress = async (
   appPrivKey: string,
   showDetailFlag: boolean
 ) => {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(executeCommand.name, `CoolWallet LITE does not support MCU command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(executeCommand.name, `CoolWallet Go does not support MCU command.`);
   }
   const { showDetail } = await getCardInfo(transport);
   const detailFlag = showDetailFlag ? '00' : '01';

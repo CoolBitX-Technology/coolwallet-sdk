@@ -6,7 +6,7 @@ type TransportDevice = BluetoothDevice | RNBlePlxDevice;
 
 enum CardType {
   Pro = 'Pro',
-  Lite = 'Lite',
+  Go = 'Go',
 }
 
 interface Transport {

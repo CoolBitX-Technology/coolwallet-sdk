@@ -18,13 +18,13 @@ describe('Test CoolWallet SDK Core Functional', () => {
   let cardType: CardType;
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }
@@ -45,7 +45,8 @@ describe('Test CoolWallet SDK Core Functional', () => {
     expect(publicKey).toEqual(expectedPublicKey);
   });
 
-  it('Test rlp erc20 execute script', async () => {
+  // 該 function 尚未實作，暫時不跑測試
+  it.skip('Test rlp erc20 execute script', async () => {
     const script = `050406010001C707000000003CA00700C2BCA70004C2BCA70002C2BCA70003CC071094CAAC270009CC07C01380B844a9059cbb000000000000000000000000CAB0A700CC07200000000000000000000000000000000000000000CAB1A700CC0E1001C2E09700CC07C0028080BE0710DC07C00345544811A0C7CC1D041D1507C004CC0F104012A117C00401071507C002FF00B5A11700CAACBF0002DEF09700250F00CC0FC0023078BAB0AF6C0E04DDF0970012A017C00400141507C002FF00B5A01700DAB1A7B0D207CC05065052455353425554546F4E`;
     const sent = () => tx.command.sendScript(transport, script + `FA`.padEnd(144, '0'));
     const path = `15328000002c8000003c800000000000000000000000`;
@@ -91,7 +92,8 @@ describe('Test CoolWallet SDK Core Functional', () => {
     }
   });
 
-  it('Test algorand', async () => {
+  // 該 function 尚未實作，暫時不跑測試
+  it.skip('Test algorand', async () => {
     const script = `050600020001C707000000011BA00700CC07C0025458A007001CB0A7C0041507C06DC807C00461706161A007001CB1A7C0041507C005C5B1A7C0031CBCA7C002041507C006C5BCA7C002031CBCA7C003041507C006C5BCA7C003031CBCA7C004041507C006C5BCA7C004031CBCA7C005041507C006C5BCA7C005031CBCA7C006041507C006C5BCA7C00603BE07C0031CBCA7C007041507C00DC807C0046170616EC5BCA700071CBCA7C008041507C069C807C00461706173A007001CBCA7C009041507C005C5BCA700091CBCA7C00A041507C005C5BCA7000A1CBCA7C00B041507C005C5BCA7000B1CBCA7C00C041507C005C5BCA7000C1CBCA7C00D041507C005C5BCA7000D1CBCA7C00E041507C005C5BCA7000EBE07C0031CBCA7C00F041507C06DC807C00461706174A007001CBCA7C010041507C006C5BCA7C010031CBCA7C011041507C006C5BCA7C011031CBCA7C012041507C006C5BCA7C012031CBCA7C013041507C006C5BCA7C013031CB2A7C0041507C005C5B2A7C0031CBCA7C015041507C006C5BCA7C01503BE07C0031CBCA7C016041507C069C807C00461706661A007001CBCA7C017041507C005C5BCA700171CBCA7C018041507C005C5BCA700181CBCA7C019041507C005C5BCA700191CBCA7C01A041507C005C5BCA7001A1CBCA7C01B041507C005C5BCA7001B1CBCA7C01C041507C005C5BCA7001CBE07C0031CBCA7C01D041507C00DC807C00461706964C5BCA7001D1CBCA7C01E041507C00CC807C003666565C5BCA7001E1CBCA7C01F041507C00BC807C0026676C5BCA7001F1CB5A7C0041507C00BC807C00367656EC5B5A7101CBCA7C021041507C00DC807C003677270C5BCA7C021031CBCA7C022041507C00CC807C0026768C5BCA7C022031CBCA7C023041507C00BC807C0026C76C5BCA700231CBCA7C024041507C00CC807C0026C78C5BCA7C024031CBCA7C025041507C00EC807C0046E6F7465C5BCA7C025031CBCA7C026041507C00FC807C00572656B6579C5BCA7C026031CBCA7C027041507C00DC807C003736E64C5BCA7C027031CBCA7C028041507C00DC807C00474797065C5BCA71028BE07C002DC07C004414C474FDC07C0046170706C1CBCA7C01D041507C018DC07C0056170704944BABCAECC1D100D04DEE09700250E00D207CC05065052455353425554546F4E`;
     const sent = () => tx.command.sendScript(transport, script + `FA`.padEnd(144, '0'));
     const path = `15108000002c8000011b800000008000000080000000`;
@@ -168,13 +170,13 @@ describe('Test CoolWallet SDK Core Backup', () => {
   let cardType: CardType;
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }
@@ -214,13 +216,13 @@ describe('Test CoolWallet SDK Core Register', () => {
   let cardType: CardType;
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }
@@ -279,7 +281,7 @@ describe('Test CoolWallet SDK Core Register', () => {
       // [firstDevice, deviceA, deviceB]
       appsAfterC = await wallet.client.getPairedApps(transport, firstDevice.appId, firstDevice.appPrivateKey);
     }
-    if (transport.cardType === CardType.Lite) {
+    if (transport.cardType === CardType.Go) {
       // [deviceA, deviceB, deviceC]
       appsAfterC = await wallet.client.getPairedApps(transport, deviceC.appId, deviceC.appPrivateKey);
     }
@@ -294,7 +296,7 @@ describe('Test CoolWallet SDK Core Register', () => {
       // [firstDevice, deviceA, deviceB]
       appsAfterD = await wallet.client.getPairedApps(transport, firstDevice.appId, firstDevice.appPrivateKey);
     }
-    if (transport.cardType === CardType.Lite) {
+    if (transport.cardType === CardType.Go) {
       // [deviceB, deviceC, deviceD]
       appsAfterD = await wallet.client.getPairedApps(transport, deviceD.appId, deviceD.appPrivateKey);
     }

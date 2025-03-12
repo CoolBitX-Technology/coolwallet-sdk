@@ -5,7 +5,7 @@ import * as crypto from '../crypto/index';
 import { CODE } from '../config/status/code';
 import { SDKError, APDUError } from '../error/errorHandle';
 import * as setting from '../setting/index';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import { error } from '..';
 
 /**
@@ -164,8 +164,8 @@ export async function setSeed(
  * @param {number} strength
  */
 export async function initSecureRecovery(transport: Transport, strength: number) {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(initSecureRecovery.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(initSecureRecovery.name, `CoolWallet Go does not support this command.`);
   }
   const P1 = strength.toString(16).padStart(2, '0');
   const { statusCode } = await executeCommand(
@@ -185,8 +185,8 @@ export async function initSecureRecovery(transport: Transport, strength: number)
  * @param {number} index
  */
 export async function setSecureRecoveryIdx(transport: Transport, index: number) {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(setSecureRecoveryIdx.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(setSecureRecoveryIdx.name, `CoolWallet Go does not support this command.`);
   }
   const P1 = index.toString(16).padStart(2, '0');
   const { statusCode } = await executeCommand(
@@ -206,8 +206,8 @@ export async function setSecureRecoveryIdx(transport: Transport, index: number) 
  * @param {string} type
  */
 export async function cancelSecureRecovery(transport: Transport, type: string) {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(cancelSecureRecovery.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(cancelSecureRecovery.name, `CoolWallet Go does not support this command.`);
   }
   let P1;
   if (type === '00') {
@@ -233,8 +233,8 @@ export async function cancelSecureRecovery(transport: Transport, type: string) {
  * @param {Transport} transport
  */
 export async function getSecureRecoveryStatus(transport: Transport) {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(getSecureRecoveryStatus.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(getSecureRecoveryStatus.name, `CoolWallet Go does not support this command.`);
   }
   const { statusCode, outputData } = await executeCommand(
     transport,
@@ -252,8 +252,8 @@ export async function getSecureRecoveryStatus(transport: Transport) {
  * @param {Transport} transport
  */
 export async function initMcuSetSeed(transport: Transport) {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(initMcuSetSeed.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(initMcuSetSeed.name, `CoolWallet Go does not support this command.`);
   }
   const { statusCode, outputData } = await executeCommand(
     transport,

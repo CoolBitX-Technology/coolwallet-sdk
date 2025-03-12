@@ -198,7 +198,7 @@ export const createWalletByMnemonic = async (
 
   // mnemonic to ADA master key
   const version = await info.getSEVersion(transport);
-  if ((transport.cardType === CardType.Pro && version >= 317) || transport.cardType === CardType.Lite) {
+  if ((transport.cardType === CardType.Pro && version >= 317) || transport.cardType === CardType.Go) {
     seeds[1] = createAdaMasterKeyByMnemonic(mnemonic);
   }
 
