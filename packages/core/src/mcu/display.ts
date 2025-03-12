@@ -27,7 +27,7 @@ export const showUpdate = async (transport: Transport) => {
  * @param {Transport} transport
  */
 export const hideUpdate = async (transport: Transport) => {
-  if (transport.cardType === 'Go') {
+  if (transport.cardType === CardType.Go) {
     throw new error.SDKError(hideUpdate.name, `CoolWallet Go does not support this command.`);
   }
   const { statusCode, msg } = await executeCommand(transport, commands.FINISH_UPDATE, target.MCU);
@@ -64,7 +64,7 @@ export const updateBalance = async (
   appPrivKey: string,
   data: Array<{ balance: number; coinType: string }>
 ) => {
-  if (transport.cardType === 'Go') {
+  if (transport.cardType === CardType.Go) {
     throw new error.SDKError(updateBalance.name, `CoolWallet Go does not support this command.`);
   }
   const defaultBalance = '0.0';
