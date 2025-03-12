@@ -5,9 +5,9 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "NODE_ENV=development jest --runInBand",
-    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
+    "test-go": "NODE_ENV=development CARD=go jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
     "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
@@ -27,7 +27,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "dependencies": {
-    "@coolwallet/core": "^2.0.0-beta.20",
+    "@coolwallet/core": "^2.0.0-beta.21",
     "elliptic": "^6.5.1",
     "icon-sdk-js": "0.0.18",
     "js-sha3": "^0.8.0"
