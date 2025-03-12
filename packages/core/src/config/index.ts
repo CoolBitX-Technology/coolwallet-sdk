@@ -83,9 +83,9 @@ async function getSEPublicKey(transport: Transport): Promise<string> {
       masterPublicKey = SE_KEY_PARAM.Pro.chipTransMasterPublicKey;
       masterChainCode = SE_KEY_PARAM.Pro.chipTransMasterChainCode;
     }
-  } else if (transport.cardType === CardType.Lite) {
-    masterPublicKey = SE_KEY_PARAM.Lite.chipMasterPublicKey;
-    masterChainCode = SE_KEY_PARAM.Lite.chipMasterChainCode;
+  } else if (transport.cardType === CardType.Go) {
+    masterPublicKey = SE_KEY_PARAM.Go.chipMasterPublicKey;
+    masterChainCode = SE_KEY_PARAM.Go.chipMasterChainCode;
   } else {
     throw new SDKError('getSEPublicKey', 'unknown card type: ' + transport.cardType);
   }

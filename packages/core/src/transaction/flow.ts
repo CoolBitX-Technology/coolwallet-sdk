@@ -77,7 +77,7 @@ export const getSingleSignatureFromCoolWalletV2 = async (
     // decrpt signature
     const signature = txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType);
     return signature;
-  } else if (transport.cardType === CardType.Lite) {
+  } else if (transport.cardType === CardType.Go) {
     return txUtil.formatSignature(encryptedSignature, signatureType);
   } else {
     throw new error.SDKError(getSingleSignatureFromCoolWalletV2.name, 'Not suppotrd card type.');
@@ -137,7 +137,7 @@ export const getSignaturesFromCoolWalletV2 = async (
       txUtil.decryptSignatureFromSE(encryptedSignature, signatureKey, signatureType)
     );
     return signatures;
-  } else if (transport.cardType === CardType.Lite) {
+  } else if (transport.cardType === CardType.Go) {
     // decrpt signature
     const signatures = encryptedSignatureArray.map((encryptedSignature) =>
       txUtil.formatSignature(encryptedSignature, signatureType)

@@ -1,4 +1,4 @@
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { APDUError } from '../error/errorHandle';
@@ -13,8 +13,8 @@ import { commands } from '../apdu/execute/command';
  * @param {Transport} transport
  */
 export const showUpdate = async (transport: Transport) => {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(showUpdate.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === CardType.Go) {
+    throw new error.SDKError(showUpdate.name, `CoolWallet Go does not support this command.`);
   }
   const { statusCode, msg } = await executeCommand(transport, commands.START_UPDATE, target.MCU);
   if (statusCode !== CODE._9000) {
@@ -27,8 +27,8 @@ export const showUpdate = async (transport: Transport) => {
  * @param {Transport} transport
  */
 export const hideUpdate = async (transport: Transport) => {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(hideUpdate.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === 'Go') {
+    throw new error.SDKError(hideUpdate.name, `CoolWallet Go does not support this command.`);
   }
   const { statusCode, msg } = await executeCommand(transport, commands.FINISH_UPDATE, target.MCU);
   if (statusCode !== CODE._9000) {
@@ -64,8 +64,8 @@ export const updateBalance = async (
   appPrivKey: string,
   data: Array<{ balance: number; coinType: string }>
 ) => {
-  if (transport.cardType === 'Lite') {
-    throw new error.SDKError(updateBalance.name, `CoolWallet LITE does not support this command.`);
+  if (transport.cardType === 'Go') {
+    throw new error.SDKError(updateBalance.name, `CoolWallet Go does not support this command.`);
   }
   const defaultBalance = '0.0';
   const coinTypes = ['00', '3c', '02', '90'];

@@ -19,12 +19,12 @@ describe('Test CoolWallet SDK Core Functional', () => {
 
   beforeAll(async () => {
     if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }
@@ -169,12 +169,12 @@ describe('Test CoolWallet SDK Core Backup', () => {
 
   beforeAll(async () => {
     if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }
@@ -215,12 +215,12 @@ describe('Test CoolWallet SDK Core Register', () => {
 
   beforeAll(async () => {
     if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }
@@ -279,7 +279,7 @@ describe('Test CoolWallet SDK Core Register', () => {
       // [firstDevice, deviceA, deviceB]
       appsAfterC = await wallet.client.getPairedApps(transport, firstDevice.appId, firstDevice.appPrivateKey);
     }
-    if (transport.cardType === CardType.Lite) {
+    if (transport.cardType === CardType.Go) {
       // [deviceA, deviceB, deviceC]
       appsAfterC = await wallet.client.getPairedApps(transport, deviceC.appId, deviceC.appPrivateKey);
     }
@@ -294,7 +294,7 @@ describe('Test CoolWallet SDK Core Register', () => {
       // [firstDevice, deviceA, deviceB]
       appsAfterD = await wallet.client.getPairedApps(transport, firstDevice.appId, firstDevice.appPrivateKey);
     }
-    if (transport.cardType === CardType.Lite) {
+    if (transport.cardType === CardType.Go) {
       // [deviceB, deviceC, deviceD]
       appsAfterD = await wallet.client.getPairedApps(transport, deviceD.appId, deviceD.appPrivateKey);
     }
