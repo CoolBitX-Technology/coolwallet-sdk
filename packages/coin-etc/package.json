@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/etc",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "description": "clone this project to build your own coin package",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -11,9 +11,9 @@
     "build": "npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish",
     "test": "NODE_ENV=development jest --runInBand",
-    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
+    "test-go": "NODE_ENV=development CARD=go jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
     "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "devDependencies": {
@@ -37,6 +37,6 @@
     "bip32": "^2.0.4",
     "keccak": "^3.0.2",
     "rlp": "^2.2.7",
-    "@coolwallet/core": "2.0.0-beta.19"
+    "@coolwallet/core": "2.0.0-beta.21"
   }
 }
