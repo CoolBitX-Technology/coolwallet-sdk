@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/kas",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "description": "Coolwallet Kaspa sdk",
   "main": "lib/index.js",
   "scripts": {
