@@ -18,7 +18,7 @@ describe('Test CoolWallet SDK Core Functional', () => {
   let cardType: CardType;
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
+    if (process.env.CARD === 'go') {
       cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
@@ -168,7 +168,7 @@ describe('Test CoolWallet SDK Core Backup', () => {
   let cardType: CardType;
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
+    if (process.env.CARD === 'go') {
       cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
@@ -214,7 +214,7 @@ describe('Test CoolWallet SDK Core Register', () => {
   let cardType: CardType;
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
+    if (process.env.CARD === 'go') {
       cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
