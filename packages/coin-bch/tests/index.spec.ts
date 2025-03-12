@@ -16,14 +16,14 @@ describe('Test BCH SDK', () => {
   const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo card';
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
 
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }
