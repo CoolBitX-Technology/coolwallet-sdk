@@ -93,7 +93,7 @@ export default class ADA implements COIN.Coin {
       }
       await tx.command.clearTransaction(transport);
       await mcu.control.powerOff(transport);
-    } else if (transport.cardType === CardType.Lite) {
+    } else if (transport.cardType === CardType.Go) {
       for (const witness of witnesses) {
         const encryptedSig = witness.sig;
         const sig = tx.util.formatSignature(encryptedSig, tx.SignatureType.EDDSA);
