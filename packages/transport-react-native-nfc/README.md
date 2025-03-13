@@ -1,7 +1,7 @@
 # transport-react-native-nfc
 
 ## Introduction
-`@coolwallet/transport-react-native-nfc` is a TypeScript SDK designed to facilitate NFC (Near Field Communication) interactions, particularly for accessing and managing NFC-enabled CoolWallet Lite cards. This SDK provides functions to simplify sending APDU commands to NFC devices.
+`@coolwallet/transport-react-native-nfc` is a TypeScript SDK designed to facilitate NFC (Near Field Communication) interactions, particularly for accessing and managing NFC-enabled CoolWallet Go cards. This SDK provides functions to simplify sending APDU commands to NFC devices.
 
 ## Features
 - **NFC Initialization:** Easily initialize and configure NFC communication.
@@ -23,7 +23,7 @@ yarn add @coolwallet/transport-react-native-nfc
 import { NFCTransport } from '@coolwallet/transport-react-native-nfc'
 import { CardType } from '@coolwallet/core/lib/transport';
 
-const nfcTransport = new NFCTransport(CardType.Lite);
+const nfcTransport = new NFCTransport(CardType.Go);
 
 const apduCommand = '00A404000E436F6F6C57616C6C65744C495445';
 

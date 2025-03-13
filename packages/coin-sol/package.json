@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/sol",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "description": "Coolwallet Solana sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -9,9 +9,9 @@
     "build": "npm run build:types && npm run build:ts",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish",
     "test": "NODE_ENV=development jest --runInBand",
-    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
+    "test-go": "NODE_ENV=development CARD=go jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
     "list:token": "babel-node -x \".ts\" tools/token.ts"
   },
   "keywords": [
@@ -26,7 +26,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "dependencies": {
-    "@coolwallet/core": "^2.0.0-beta.19",
+    "@coolwallet/core": "^2.0.0-beta.21",
     "@solana/buffer-layout": "^4.0.1",
     "bn.js": "^5.2.0",
     "bs58": "^4.0.1",

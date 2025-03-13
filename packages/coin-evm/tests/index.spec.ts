@@ -72,15 +72,15 @@ describe('Test EVM SDK', () => {
   const wallet = new Wallet();
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
 
     const mnemonic = bip39.generateMnemonic();
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }

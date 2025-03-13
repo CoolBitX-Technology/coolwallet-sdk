@@ -11,7 +11,7 @@ class NFCTransport implements Transport {
   cardType: CardType;
   errorCallbacks: Map<string, ErrorCallback> = new Map();
 
-  constructor(cardType = CardType.Lite) {
+  constructor(cardType = CardType.Go) {
     this.cardType = cardType;
   }
 

@@ -32,7 +32,7 @@ async function initialize(transport: Transport, mnemonic: string): Promise<Manda
 }
 
 async function getTxDetail(transport: Transport, appId: string): Promise<string> {
-  if (transport.cardType === CardType.Lite) {
+  if (transport.cardType === CardType.Go) {
     return '';
   }
   await common.hi(transport, appId);

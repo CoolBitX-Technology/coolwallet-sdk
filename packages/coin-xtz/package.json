@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/xtz",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "description": "Coolwallet Tezos sdk",
   "main": "lib/index.js",
   "author": "ucanlab-team",
@@ -10,14 +10,14 @@
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
     "test": "NODE_ENV=development jest --runInBand",
-    "test-lite": "NODE_ENV=development CARD=lite jest --runInBand",
+    "test-go": "NODE_ENV=development CARD=go jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-lite": "NODE_ENV=production CARD=lite jest --runInBand",
+    "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
     "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "dependencies": {
-    "@coolwallet/core": "2.0.0-beta.19",
+    "@coolwallet/core": "2.0.0-beta.21",
     "@taquito/local-forging": "^12.0.0",
     "@taquito/taquito": "^12.0.0",
     "blake2b": "^2.1.3"

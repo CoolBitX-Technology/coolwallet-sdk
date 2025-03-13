@@ -53,13 +53,13 @@ describe('Test Solana SDK', () => {
   const bip32Path = (addressIndex: number) => `m/44'/501'/${addressIndex}'/0'`;
 
   beforeAll(async () => {
-    if (process.env.CARD === 'lite') {
-      cardType = CardType.Lite;
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
     } else {
       cardType = CardType.Pro;
     }
-    if (cardType === CardType.Lite) {
-      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
     } else {
       transport = (await createTransport())!;
     }
@@ -147,7 +147,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -218,7 +218,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -308,7 +308,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -413,7 +413,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -468,7 +468,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -539,7 +539,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -598,7 +598,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -656,7 +656,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')
@@ -715,7 +715,7 @@ describe('Test Solana SDK', () => {
       throw e;
     }
 
-    if (cardType === CardType.Lite) return;
+    if (cardType === CardType.Go) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')

@@ -136,7 +136,7 @@ export default class ETC implements COIN.Coin {
       await tx.command.clearTransaction(transport);
       await mcu.control.powerOff(transport);
       sig = tx.util.decryptSignatureFromSE(encryptedSig!, decryptingKey, tx.SignatureType.Canonical);
-    } else if (transport.cardType === CardType.Lite) {
+    } else if (transport.cardType === CardType.Go) {
       sig = tx.util.formatSignature(encryptedSig!, tx.SignatureType.Canonical);
     } else {
       throw new error.SDKError(ETC.prototype.signTransaction.name, 'Not suppotrd card type.');
