@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/sol",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "Coolwallet Solana sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -27,7 +27,7 @@
   "license": "ISC",
   "dependencies": {
     "@coolwallet/core": "^2.0.0-beta.21",
-    "@solana/buffer-layout": "^4.0.1",
+    "@solana/buffer-layout": "4.0.0",
     "bn.js": "^5.2.0",
     "bs58": "^4.0.1",
     "js-sha256": "^0.9.0",
