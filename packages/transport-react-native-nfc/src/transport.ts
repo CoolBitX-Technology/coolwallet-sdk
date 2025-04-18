@@ -24,8 +24,11 @@ class NFCTransport implements Transport {
   };
 
   request = async (command: string, packets: string): Promise<string> => {
+    const start = Date.now();
+
     console.log('NFCTransport request command=', command);
     console.log('NFCTransport request packets=', packets);
+
     if (!command.startsWith(PID + CMD_LEN)) {
       throw new TransportError(this.request.name, 'Unknown command payload.');
     }
@@ -50,6 +53,8 @@ class NFCTransport implements Transport {
       console.log('NFCTransport responseBytes length=', response.length);
       const responseHex = numberArrayToHexString(response);
       console.log('NFCTransport responseHex=', responseHex);
+      const end = Date.now();
+      console.log('NFCTransport time taken=', end - start);
       return responseHex;
 
     } catch (error) {
