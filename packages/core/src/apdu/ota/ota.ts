@@ -190,6 +190,8 @@ export const updateSE = async (
     console.debug('Install OTA Script (SE Update) Done');
     return getNewSeVersion(transport.cardType);
   } catch (e) {
+    console.log('updateSE error=', e);
+    console.log('updateSE error stack=', (e as Error).stack);
     try {
       if (transport.cardType === CardType.Pro) await mcu.display.hideUpdate(transport);
     } catch (ex) {
