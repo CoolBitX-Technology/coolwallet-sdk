@@ -54,6 +54,7 @@ const insertLoadScript = async (
       await executeCommand(transport, script, target.SE, packets);
       progressCallback(Math.round(floor + idx * step));
       idx += 1;
+      console.log(`aaaaaaaa insertLoadScript idx=${idx}`)
     }
   } catch (e) {
     throw new SDKError(insertLoadScript.name, `Load Script Failed! ${e}`);

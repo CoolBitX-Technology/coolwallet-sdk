@@ -50,9 +50,11 @@ export const executeAPDU = async (
         const command = '00097F8000000000000000';
         const data = '';
         if (transport.requestAPDUV2) {
-          await transport.requestAPDUV2({ command, data }, 'MCU_CMD');
+          const r1 = await transport.requestAPDUV2({ command, data }, 'MCU_CMD');
+          console.log(`aaaaaaaaaa requestAPDUV2 r1=${JSON.stringify(r1)}`)
         } else {
-          await transport.request(command, data);
+          const r2 = await transport.request(command, data);
+          console.log(`aaaaaaaaaa request r2=${JSON.stringify(r2)}`)
         }
         commandCounter.count = 0;
       }
@@ -67,6 +69,8 @@ export const executeAPDU = async (
       return { statusCode, msg, outputData: response.outputData };
     }
     const response = await transport.request(apdu.command, apdu.data);
+    console.log(`aaaaaaaaaa request response=${JSON.stringify(response)}`)
+
     let statusCode;
     let outputData;
     if (executedTarget === target.SE) {
@@ -87,6 +91,8 @@ export const executeAPDU = async (
     statusCode = statusCode.toUpperCase();
     return { statusCode, msg, outputData };
   } catch (error) {
+    console.log(`aaaaaaaa error=${error}`)
+    console.log(`aaaaaaaa error=${(error as Error)?.message}`)
     throw new SDKError(executeAPDU.name, `executeAPDU error: ${error}`);
   }
 };
@@ -125,5 +131,8 @@ export const executeCommand = async (
   const apdu = util.assemblyCommandAndData(command.CLA, command.INS, P1, P2, data);
   console.debug(`Execute Command: ${JSON.stringify(command)}`);
   console.debug(`Execute Target: ${executedTarget}`);
-  return executeAPDU(transport, apdu, executedTarget);
+  const r =  await executeAPDU(transport, apdu, executedTarget);
+  console.debug(`Execute return: ${JSON.stringify(r)}`);
+
+  return r;
 };
