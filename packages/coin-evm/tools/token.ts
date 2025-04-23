@@ -11,7 +11,7 @@ const buildTokenHex = (token: BuildTokenHexInput) => {
   return `${unitHex}${symbolLengthHex}${symbolHex}${address}`;
 };
 
-console.log('ARB USD₮0: ', buildTokenHex(ARBITRUM.tokens['USD₮0']));
+console.log('ARB USD₮0: ', buildTokenHex(ARBITRUM.tokens['USDT0']));
 console.log('ARB USDC.e: ', buildTokenHex(ARBITRUM.tokens['USDC.e']));
 console.log('ARB DAI: ', buildTokenHex(ARBITRUM.tokens.DAI));
 console.log('ARB WBTC: ', buildTokenHex(ARBITRUM.tokens.WBTC));
