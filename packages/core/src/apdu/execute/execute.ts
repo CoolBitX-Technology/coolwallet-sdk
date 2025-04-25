@@ -14,7 +14,7 @@ const commandCounter = {
 /**
  * @param {Transport} transport
  * @param {{command:string, data:string}} apdu
- * @param {string} commandType SE or MCU
+ * @param {string} executedTarget SE or MCU
  */
 export const executeAPDU = async (
   transport: Transport,
@@ -64,6 +64,13 @@ export const executeAPDU = async (
       const response = await transport.requestAPDUV2(apdu, executedTarget === target.SE ? 'BLE_CMD' : 'MCU_CMD');
       const statusCode = response.status.toUpperCase();
       const msg = util.getReturnMsg(statusCode);
+      console.debug(`
+        Response:
+        {
+          statusCode: ${statusCode}
+          outputData: ${response.outputData}
+        }
+        `);
       return { statusCode, msg, outputData: response.outputData };
     }
     const response = await transport.request(apdu.command, apdu.data);
@@ -85,9 +92,16 @@ export const executeAPDU = async (
 
     const msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();
+    console.debug(`
+      Response:
+      {
+        statusCode: ${statusCode}
+        outputData: ${outputData}
+      }
+      `);
     return { statusCode, msg, outputData };
-  } catch (error) {
-    throw new SDKError(executeAPDU.name, `executeAPDU error: ${error}`);
+  } catch (err) {
+    throw new SDKError(executeAPDU.name, `executeAPDU error: ${err}`);
   }
 };
 
