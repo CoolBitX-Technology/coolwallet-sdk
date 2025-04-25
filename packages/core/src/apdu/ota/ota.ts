@@ -217,23 +217,29 @@ export const updateSEPart1 = async ({
     }
 
     progressCallback(progress.current()); // progress 14
+    console.log('updateSEPart1 >> performBackupRegisterData');
     await performBackupRegisterData(transport, appId, appPrivateKey);
 
     // get ssd applet and authorize
     progressCallback(progress.next()); // progress 28
+    console.log('updateSEPart1 >> selectApplet(transport, SSD_AID)');
     await selectApplet(transport, SSD_AID);
 
     progressCallback(progress.next()); // progress 36
+    console.log('updateSEPart1 >> performApiChallenge');
     await performApiChallenge(transport, cardId, callAPI, apiSecret);
 
     progressCallback(progress.next()); // progress 44
+    console.log('updateSEPart1 >> insertDeleteScript');
     await insertDeleteScript(transport, SCRIPT.deleteScript);
     console.debug('Delete Card Manager Done');
 
     progressCallback(progress.next()); // progress 50
+    console.log('updateSEPart1 >> insertLoadScript');
     await insertLoadScript(transport, SCRIPT.loadScript, progressCallback, progress.current(), progress.next()); // From progress 50 to progress 88
     console.debug('Load OTA Script Done');
 
+    console.log('updateSEPart1 >> insertScript');
     await insertScript(transport, SCRIPT.installScript);
     console.debug('Insert Install Script Done');
 
