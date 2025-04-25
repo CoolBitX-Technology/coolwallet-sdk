@@ -250,11 +250,13 @@ export const updateSEPart1 = async ({
   }
 };
 
-export const updateSEPart2 = async ({ transport, progressCallback }: UpdateSeParams): Promise<number> => {
+export const updateSEPart2 = async ({ transport }: { transport: Transport }): Promise<number> => {
+  console.debug('updateSEPart2 >> selectApplet(transport, CARDMANAGER_AID)');
   await selectApplet(transport, CARDMANAGER_AID);
+
+  console.debug('updateSEPart2 >> performRecoverBackupData');
   await performRecoverBackupData(transport);
 
-  progressCallback(100); // progress 100
-  console.debug('Install OTA Script (SE Update) Done');
+  console.debug('updateSEPart2 >> Install OTA Script (SE Update) Done');
   return getNewSeVersion(transport.cardType);
 };
