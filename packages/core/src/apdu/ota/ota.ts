@@ -144,17 +144,16 @@ interface UpdateSeParams {
  * @param callAPI callAPI(url, options): Function of calling api
  * @param updateMCU
  */
-export const updateSE = async (
-  {
-    transport,
-    cardId,
-    appId,
-    appPrivateKey,
-    progressCallback,
-    callAPI,
-    updateMCU = false,
-    apiSecret,
-  }: UpdateSeParams): Promise<number> => {
+export const updateSE = async ({
+  transport,
+  cardId,
+  appId,
+  appPrivateKey,
+  progressCallback,
+  callAPI,
+  updateMCU = false,
+  apiSecret,
+}: UpdateSeParams): Promise<number> => {
   const SCRIPT = getScripts(transport.cardType);
   const progress = new Progress(getProgressNums(updateMCU));
 
@@ -193,8 +192,77 @@ export const updateSE = async (
     try {
       if (transport.cardType === CardType.Pro) await mcu.display.hideUpdate(transport);
     } catch (ex) {
+      console.error(`APDU.ota.updateSE Failed ${e}`);
+    }
+    throw new SDKError(updateSE.name, `${e}, 'SE Update Failed', '00000', 'SEUpdate'`);
+  }
+};
+
+export const updateSEPart1 = async ({
+  transport,
+  cardId,
+  appId,
+  appPrivateKey,
+  progressCallback,
+  callAPI,
+  updateMCU = false,
+  apiSecret,
+}: UpdateSeParams): Promise<void> => {
+  const SCRIPT = getScripts(transport.cardType);
+  const progress = new Progress(getProgressNums(updateMCU));
+
+  try {
+    if (transport.cardType === CardType.Pro) {
+      await mcu.display.showUpdate(transport);
+    }
+
+    progressCallback(progress.current()); // progress 14
+    console.log('updateSEPart1 >> performBackupRegisterData');
+    await performBackupRegisterData(transport, appId, appPrivateKey);
+
+    // get ssd applet and authorize
+    progressCallback(progress.next()); // progress 28
+    console.log('updateSEPart1 >> selectApplet(transport, SSD_AID)');
+    await selectApplet(transport, SSD_AID);
+
+    progressCallback(progress.next()); // progress 36
+    console.log('updateSEPart1 >> performApiChallenge');
+    await performApiChallenge(transport, cardId, callAPI, apiSecret);
+
+    progressCallback(progress.next()); // progress 44
+    console.log('updateSEPart1 >> insertDeleteScript');
+    await insertDeleteScript(transport, SCRIPT.deleteScript);
+    console.debug('Delete Card Manager Done');
+
+    progressCallback(progress.next()); // progress 50
+    console.log('updateSEPart1 >> insertLoadScript');
+    await insertLoadScript(transport, SCRIPT.loadScript, progressCallback, progress.current(), progress.next()); // From progress 50 to progress 88
+    console.debug('Load OTA Script Done');
+
+    console.log('updateSEPart1 >> insertScript');
+    await insertScript(transport, SCRIPT.installScript);
+    console.debug('Insert Install Script Done');
+
+    if (transport.cardType === CardType.Pro) {
+      await mcu.display.hideUpdate(transport); // Hide update from the card
+    }
+  } catch (e) {
+    try {
+      if (transport.cardType === CardType.Pro) await mcu.display.hideUpdate(transport);
+    } catch (ex) {
       console.error(`APDU.Other.finishUpdate Failed ${e}`);
     }
     throw new SDKError(updateSE.name, `${e}, 'SE Update Failed', '00000', 'SEUpdate'`);
   }
+};
+
+export const updateSEPart2 = async ({ transport }: { transport: Transport }): Promise<number> => {
+  console.debug('updateSEPart2 >> selectApplet(transport, CARDMANAGER_AID)');
+  await selectApplet(transport, CARDMANAGER_AID);
+
+  console.debug('updateSEPart2 >> performRecoverBackupData');
+  await performRecoverBackupData(transport);
+
+  console.debug('updateSEPart2 >> Install OTA Script (SE Update) Done');
+  return getNewSeVersion(transport.cardType);
 };

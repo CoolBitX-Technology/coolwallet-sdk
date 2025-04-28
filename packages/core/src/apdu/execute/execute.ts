@@ -14,7 +14,7 @@ const commandCounter = {
 /**
  * @param {Transport} transport
  * @param {{command:string, data:string}} apdu
- * @param {string} commandType SE or MCU
+ * @param {string} executedTarget SE or MCU
  */
 export const executeAPDU = async (
   transport: Transport,
@@ -86,8 +86,8 @@ export const executeAPDU = async (
     const msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();
     return { statusCode, msg, outputData };
-  } catch (error) {
-    throw new SDKError(executeAPDU.name, `executeAPDU error: ${error}`);
+  } catch (err) {
+    throw new SDKError(executeAPDU.name, `executeAPDU error: ${err}`);
   }
 };
 
