@@ -5,6 +5,9 @@ import { keccak_256 } from '@noble/hashes/sha3';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, HDWallet, CURVE, DisplayBuilder, getTxDetail } from '@coolwallet/testing-library';
 import { SignatureType } from '../src/transaction';
+import { resetCard } from '../src/setting/card';
+import { backupRegisterData, deleteBackupRegisterData } from '../src/apdu/ota/backup';
+import { getCardInfo } from '../src/info';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
@@ -302,5 +305,136 @@ describe('Test CoolWallet SDK Core Register', () => {
     }
     expect(appsAfterD.length).toEqual(3);
     expect(appsAfterD).toEqual(deviceList);
+  });
+});
+
+describe('Seed backup and recovery in OTA (firmware update) flow', () => {
+  let props: PromiseValue<ReturnType<typeof initialize>>;
+  let transport: Transport;
+  let cardType: CardType;
+
+  function _backupRegisterData() {
+    return backupRegisterData(transport, props.appId, props.appPrivateKey);
+  }
+
+  function _deleteBackupRegisterData() {
+    return deleteBackupRegisterData(transport, props.appId, props.appPrivateKey);
+  }
+
+  function _recoverBackupData() {
+    return setting.backup.recoverSeed(transport);
+  }
+
+  function _checkBackupStatus() {
+    return setting.backup.checkBackupStatus(transport);
+  }
+
+  function _resetCard() {
+    return resetCard(transport);
+  }
+
+  function _getCardInfo() {
+    return getCardInfo(transport);
+  }
+
+  beforeAll(async () => {
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
+  });
+
+  beforeEach(async () => {
+    props = await initialize(transport, mnemonic);
+    await _deleteBackupRegisterData(); // clear backup data to keep test environment clean
+  });
+
+  describe('Delete Register Data', () => {
+    it(`delete failed: the appId can't be recognized`, async () => {
+      await expect(_resetCard()).resolves.toMatchInlineSnapshot(`true`);
+      await expect(_deleteBackupRegisterData()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"error function: deleteBackupRegisterData, message: Delete backup register data failed Error: command info: {\\"CLA\\":\\"80\\",\\"INS\\":\\"84\\",\\"P1\\":\\"00\\",\\"P2\\":\\"00\\"}, returnCode: 609D, message: appid need registered"`
+      );
+    });
+
+    it(`delete succeeds with no backup data and supports repeated execution`, async () => {
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`false`);
+      await expect(_deleteBackupRegisterData()).resolves.toMatchInlineSnapshot(`undefined`);
+      await expect(_deleteBackupRegisterData()).resolves.toMatchInlineSnapshot(`undefined`);
+      await expect(_deleteBackupRegisterData()).resolves.toMatchInlineSnapshot(`undefined`);
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`false`);
+    });
+
+    it(`delete succeeds`, async () => {
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`false`);
+      await expect(_backupRegisterData()).resolves.toMatchInlineSnapshot(`undefined`);
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`true`); // check backup success
+      await expect(_deleteBackupRegisterData()).resolves.toMatchInlineSnapshot(`undefined`);
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`false`); // check delete success
+    });
+  });
+
+  describe('Backup Register Data', () => {
+    it(`backup failed: no register data`, async () => {
+      await expect(_resetCard()).resolves.toMatchInlineSnapshot(`true`);
+      await expect(_backupRegisterData()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"error function: backupRegisterData, message: Backup register data failed Error: command info: {\\"CLA\\":\\"80\\",\\"INS\\":\\"80\\",\\"P1\\":\\"00\\",\\"P2\\":\\"00\\"}, returnCode: 6881, message: logical channel not suppoered"`
+      );
+    });
+
+    it(`backup failed: not supports repeated execution`, async () => {
+      // backup for the first time is successful
+      await expect(_backupRegisterData()).resolves.toMatchInlineSnapshot(`undefined`);
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`true`);
+
+      // backup for the second time fails
+      await expect(_backupRegisterData()).rejects.toMatchInlineSnapshot(
+        `[Error: error function: backupRegisterData, message: Backup register data failed Error: command info: {"CLA":"80","INS":"80","P1":"00","P2":"00"}, returnCode: 6985, message: conditions not satisfied]`
+      );
+
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`true`);
+    });
+
+    it(`backup succeeds`, async () => {
+      await expect(_backupRegisterData()).resolves.toMatchInlineSnapshot(`undefined`);
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`true`);
+    });
+  });
+
+  describe('Recover Register Data', () => {
+    it(`recover failed: no backup data`, async () => {
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`false`); // no backup data
+      await expect(_recoverBackupData()).rejects.toMatchInlineSnapshot(
+        `[Error: command info: {"CLA":"80","INS":"82","P1":"00","P2":"00"}, returnCode: 6985, message: conditions not satisfied]`
+      );
+    });
+
+    it(`recover succeeds`, async () => {
+      // check wallet exists
+      expect((await _getCardInfo()).walletCreated).toMatchInlineSnapshot(`true`);
+
+      // backup
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`false`);
+      await expect(_backupRegisterData()).resolves.toMatchInlineSnapshot(`undefined`);
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`true`);
+
+      // reset
+      await expect(_resetCard()).resolves.toMatchInlineSnapshot(`true`);
+      expect((await _getCardInfo()).walletCreated).toMatchInlineSnapshot(`false`);
+
+      // recover
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`true`);
+      await expect(_recoverBackupData()).resolves.toMatchInlineSnapshot(`true`);
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`false`);
+
+      // check wallet has been recovered successfully
+      expect((await _getCardInfo()).walletCreated).toMatchInlineSnapshot(`true`);
+    });
   });
 });
