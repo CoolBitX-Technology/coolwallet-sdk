@@ -85,14 +85,21 @@ const performBackupRegisterData = async (transport: Transport, appId: string, ap
   const isAppletExist = await safeCheckMainAppletExists(transport);
   if (!isAppletExist) return; // no need to do backup because no main applet.
 
-  const isCardRecognized = await common.hi(transport, appId);
-  if (!isCardRecognized) return; // don't do backup becuase card cannot recognize device(appId).
+  try {
+    console.debug('performBackupRegisterData >> deleteBackupRegisterData try');
+    await deleteBackupRegisterData(transport, appId, appPrivateKey);
+    console.debug('performBackupRegisterData >> deleteBackupRegisterData success');
+  } catch (e) {
+    console.debug('performBackupRegisterData >> deleteBackupRegisterData failed');
+  }
 
   const { walletCreated } = await info.getCardInfo(transport);
-  console.debug(`isCardRecognized: ${isCardRecognized}, walletStatus: ${walletCreated}`);
-
-  await deleteBackupRegisterData(transport, appId, appPrivateKey);
-  if (walletCreated) await backupRegisterData(transport, appId, appPrivateKey);
+  const hasBackup = await setting.backup.checkBackupStatus(transport);
+  if (walletCreated && !hasBackup) {
+    console.debug('performBackupRegisterData >> backupRegisterData try');
+    await backupRegisterData(transport, appId, appPrivateKey);
+    console.debug('performBackupRegisterData >> backupRegisterData success');
+  }
 };
 
 const performRecoverBackupData = async (transport: Transport): Promise<void> => {
