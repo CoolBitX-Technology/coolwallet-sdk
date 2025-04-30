@@ -94,8 +94,8 @@ const performBackupRegisterData = async (transport: Transport, appId: string, ap
   }
 
   const { walletCreated } = await info.getCardInfo(transport);
-  const isNeedRecover = await setting.backup.checkBackupStatus(transport);
-  if (walletCreated && isNeedRecover) {
+  const hasBackup = await setting.backup.checkBackupStatus(transport);
+  if (walletCreated && !hasBackup) {
     console.debug('performBackupRegisterData >> backupRegisterData try');
     await backupRegisterData(transport, appId, appPrivateKey);
     console.debug('performBackupRegisterData >> backupRegisterData success');
