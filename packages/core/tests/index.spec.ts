@@ -313,8 +313,8 @@ describe('Seed backup and recovery in OTA (firmware update) flow', () => {
   let transport: Transport;
   let cardType: CardType;
 
-  function _backupRegisterData() {
-    return backupRegisterData(transport, props.appId, props.appPrivateKey);
+  function _backupRegisterData(appId = props.appId) {
+    return backupRegisterData(transport, appId, props.appPrivateKey);
   }
 
   function _deleteBackupRegisterData() {
@@ -398,6 +398,12 @@ describe('Seed backup and recovery in OTA (firmware update) flow', () => {
         `[Error: error function: backupRegisterData, message: Backup register data failed Error: command info: {"CLA":"80","INS":"80","P1":"00","P2":"00"}, returnCode: 6985, message: conditions not satisfied]`
       );
 
+      await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`true`);
+    });
+
+    it(`backup succeeds even if the appId can't be recognized`, async () => {
+      const unrecognizedAppId = '3577776ffd8fb4f1f0cf57ce5f391840b4633309';
+      await expect(_backupRegisterData(unrecognizedAppId)).resolves.toMatchInlineSnapshot(`undefined`);
       await expect(_checkBackupStatus()).resolves.toMatchInlineSnapshot(`true`);
     });
 
