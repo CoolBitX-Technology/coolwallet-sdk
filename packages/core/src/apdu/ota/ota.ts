@@ -9,7 +9,7 @@ import { SDKError } from '../../error/errorHandle';
 import Progress from './Progress';
 import { getAPIOption, formatAPIResponse } from './api';
 import { insertScript, insertLoadScript, insertDeleteScript } from './scripts';
-import { backupRegisterData, deleteBackupRegisterData, recoverBackupData } from './backup';
+import { backupRegisterData, recoverBackupData } from './backup';
 import {
   MAIN_AID_PRO,
   CARDMANAGER_AID,
@@ -20,7 +20,7 @@ import {
   getCryptogramUrl,
 } from './constants';
 import type { AppletStatus, APIOptions, SEUpdateInfo } from './types';
-import { common, info, mcu, setting } from '../..';
+import { info, mcu, setting } from '../..';
 
 const getScripts = (cardType: CardType) => {
   if (cardType === CardType.Pro) {
