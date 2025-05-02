@@ -1,7 +1,7 @@
 import { CardType } from '../../transport';
 
 const SE_UPDATE_VER_PRO = 341;
-const SE_UPDATE_VER_GO = 11;
+const SE_UPDATE_VER_GO = 12;
 
 const CHALLENGE_URL = 'https://ota.cbx.io/api/challenge';
 const CRYPTOGRAM_URL = 'https://ota.cbx.io/api/cryptogram';
