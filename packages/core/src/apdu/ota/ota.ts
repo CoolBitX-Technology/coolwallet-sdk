@@ -9,7 +9,7 @@ import { SDKError } from '../../error/errorHandle';
 import Progress from './Progress';
 import { getAPIOption, formatAPIResponse } from './api';
 import { insertScript, insertLoadScript, insertDeleteScript } from './scripts';
-import { backupRegisterData, deleteBackupRegisterData, recoverBackupData } from './backup';
+import { backupRegisterData, recoverBackupData } from './backup';
 import {
   MAIN_AID_PRO,
   CARDMANAGER_AID,
@@ -20,7 +20,7 @@ import {
   getCryptogramUrl,
 } from './constants';
 import type { AppletStatus, APIOptions, SEUpdateInfo } from './types';
-import { common, info, mcu, setting } from '../..';
+import { info, mcu, setting } from '../..';
 
 const getScripts = (cardType: CardType) => {
   if (cardType === CardType.Pro) {
@@ -85,21 +85,15 @@ const performBackupRegisterData = async (transport: Transport, appId: string, ap
   const isAppletExist = await safeCheckMainAppletExists(transport);
   if (!isAppletExist) return; // no need to do backup because no main applet.
 
-  try {
-    console.debug('performBackupRegisterData >> deleteBackupRegisterData try');
-    await deleteBackupRegisterData(transport, appId, appPrivateKey);
-    console.debug('performBackupRegisterData >> deleteBackupRegisterData success');
-  } catch (e) {
-    console.debug('performBackupRegisterData >> deleteBackupRegisterData failed');
-  }
+  const hasBackup = await setting.backup.checkBackupStatus(transport);
+  if (hasBackup) return; // no need to do backup because backup already exists.
 
   const { walletCreated } = await info.getCardInfo(transport);
-  const hasBackup = await setting.backup.checkBackupStatus(transport);
-  if (walletCreated && !hasBackup) {
-    console.debug('performBackupRegisterData >> backupRegisterData try');
-    await backupRegisterData(transport, appId, appPrivateKey);
-    console.debug('performBackupRegisterData >> backupRegisterData success');
-  }
+  if (!walletCreated) return; // no need to do backup because wallet not created.
+
+  console.debug('performBackupRegisterData >> backupRegisterData try');
+  await backupRegisterData(transport, appId, appPrivateKey);
+  console.debug('performBackupRegisterData >> backupRegisterData success');
 };
 
 const performRecoverBackupData = async (transport: Transport): Promise<void> => {
