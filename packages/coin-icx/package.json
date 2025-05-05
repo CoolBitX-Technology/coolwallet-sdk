@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/icx",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0",
   "description": "CoolWallet Icon sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -27,7 +27,7 @@
   "author": "coolwallet-team",
   "license": "ISC",
   "dependencies": {
-    "@coolwallet/core": "^2.0.0-beta.21",
+    "@coolwallet/core": "^2.0.0",
     "elliptic": "^6.5.1",
     "icon-sdk-js": "0.0.18",
     "js-sha3": "^0.8.0"

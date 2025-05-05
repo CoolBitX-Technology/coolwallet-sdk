@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/bch",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0",
   "description": "Coolwallet Bitcoin Cash sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -40,11 +40,11 @@
     "jest": "^26.0.1"
   },
   "dependencies": {
+    "@coolwallet/core": "^2.0.0",
     "@types/bn.js": "^4.11.6",
     "bchaddrjs": "^0.4.9",
     "bitcore-lib-cash": "^8.20.5",
-    "bn.js": "^5.1.1",
-    "@coolwallet/core": "2.0.0-beta.21"
+    "bn.js": "^5.1.1"
   },
   "repository": {
     "type": "git",

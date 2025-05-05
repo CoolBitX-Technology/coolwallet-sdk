@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/ton",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0",
   "description": "CoolWallet TON SDK",
   "main": "lib/index.js",
   "scripts": {
@@ -34,7 +34,7 @@
     "@types/ledgerhq__hw-transport-webusb": "^4.70.4"
   },
   "dependencies": {
-    "@coolwallet/core": "^2.0.0-beta.21",
+    "@coolwallet/core": "^2.0.0",
     "@types/bn.js": "^5.1.1",
     "bignumber.js": "^8.0.2",
     "bip32": "^2.0.4",

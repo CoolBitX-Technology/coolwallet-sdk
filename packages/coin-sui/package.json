@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/sui",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0",
   "description": "Coolwallet Sui sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -33,7 +33,7 @@
     "@babel/preset-typescript": "^7.7.7"
   },
   "dependencies": {
-    "@coolwallet/core": "^2.0.0-beta.21",
+    "@coolwallet/core": "^2.0.0",
     "@mysten/sui": "^1.14.3",
     "bignumber.js": "^8.0.2"
   },

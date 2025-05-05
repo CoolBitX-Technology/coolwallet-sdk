@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/xtz",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0",
   "description": "Coolwallet Tezos sdk",
   "main": "lib/index.js",
   "author": "ucanlab-team",
@@ -17,7 +17,7 @@
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "dependencies": {
-    "@coolwallet/core": "2.0.0-beta.21",
+    "@coolwallet/core": "^2.0.0",
     "@taquito/local-forging": "^12.0.0",
     "@taquito/taquito": "^12.0.0",
     "blake2b": "^2.1.3"
