@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/etc",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0",
   "description": "clone this project to build your own coin package",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -33,10 +33,10 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
   "dependencies": {
+    "@coolwallet/core": "^2.0.0",
     "@types/keccak": "^3.0.1",
     "bip32": "^2.0.4",
     "keccak": "^3.0.2",
-    "rlp": "^2.2.7",
-    "@coolwallet/core": "2.0.0-beta.21"
+    "rlp": "^2.2.7"
   }
 }

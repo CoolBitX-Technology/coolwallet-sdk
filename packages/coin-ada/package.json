@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/ada",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0",
   "description": "Coolwallet Cardano sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -17,7 +17,7 @@
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "dependencies": {
-    "@coolwallet/core": "2.0.0-beta.21",
+    "@coolwallet/core": "^2.0.0",
     "@ethersproject/bignumber": "^5.5.0",
     "bech32": "^2.0.0",
     "bip32-ed25519": "^0.0.4",

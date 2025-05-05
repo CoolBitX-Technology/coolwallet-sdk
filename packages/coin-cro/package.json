@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/cro",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0",
   "description": "Coolwallet Crypto.org Chain sdk",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -34,7 +34,7 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
   "dependencies": {
-    "@coolwallet/core": "2.0.0-beta.21",
+    "@coolwallet/core": "^2.0.0",
     "@cosmostation/cosmosjs": "^0.11.1",
     "@types/keccak": "^3.0.1",
     "bech32": "^2.0.0",

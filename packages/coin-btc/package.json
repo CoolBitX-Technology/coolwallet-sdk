@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/btc",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0",
   "description": "Coolwallet Bitcoin sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -39,10 +39,10 @@
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
+    "@coolwallet/core": "^2.0.0",
     "@types/bn.js": "^5.1.1",
     "bitcoinjs-lib": "^6.1.5",
-    "bn.js": "^5.2.1",
-    "@coolwallet/core": "2.0.0-beta.21"
+    "bn.js": "^5.2.1"
   },
   "repository": {
     "type": "git",
