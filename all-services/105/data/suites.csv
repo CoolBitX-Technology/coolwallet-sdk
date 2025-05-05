@@ -1,4 +1,0 @@
-"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
-"passed","Mon Jan 20 03:25:15 GMT 2025","Mon Jan 20 03:25:15 GMT 2025","452","","Test TRX SDK","","Test TRX SDK Test Get Address Address","","Test TRX SDK Test Get Address Address",""
-"passed","Mon Jan 20 03:25:15 GMT 2025","Mon Jan 20 03:25:15 GMT 2025","1","","Test TRX SDK","","Test TRX SDK Test Get Address returns chainCode and publicKey","","Test TRX SDK Test Get Address returns chainCode and publicKey",""
-"passed","Mon Jan 20 03:25:15 GMT 2025","Mon Jan 20 03:25:15 GMT 2025","626","","Test TRX SDK","","Test TRX SDK Sign Transfer Tx sign for transfer 1 TRX","","Test TRX SDK Sign Transfer Tx sign for transfer 1 TRX",""
