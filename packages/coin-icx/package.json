@@ -1,16 +1,18 @@
 {
   "name": "@coolwallet/icx",
-  "version": "1.1.4",
+  "version": "2.0.0",
   "description": "CoolWallet Icon sdk",
   "main": "lib/index.js",
   "scripts": {
+    "test": "NODE_ENV=development jest --runInBand",
+    "test-go": "NODE_ENV=development CARD=go jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
-    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish",
-    "test": "NODE_ENV=development jest --runInBand",
-    "ci-test": "NODE_ENV=production jest --runInBand",
-    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "keywords": [
     "icx",
@@ -24,10 +26,8 @@
   ],
   "author": "coolwallet-team",
   "license": "ISC",
-  "peerDependencies": {
-    "@coolwallet/core": "^1.1.31"
-  },
   "dependencies": {
+    "@coolwallet/core": "^2.0.0",
     "elliptic": "^6.5.1",
     "icon-sdk-js": "0.0.18",
     "js-sha3": "^0.8.0"
@@ -37,8 +37,7 @@
     "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.31"
+    "@babel/preset-typescript": "^7.7.7"
   },
   "repository": {
     "type": "git",

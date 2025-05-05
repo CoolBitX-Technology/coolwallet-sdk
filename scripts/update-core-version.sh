@@ -13,6 +13,10 @@ IGNORE_SCOPES=(
    --ignore @coolwallet/near
    --ignore @coolwallet/theta
    --ignore @coolwallet/vet
+   --ignore @coolwallet/cosmos
+   --ignore @coolwallet/cronos
+   --ignore @coolwallet/iotx
+   --ignore @coolwallet/transport-web-ble
 )
 
 # 將 npm info 輸出到 JSON 文件
@@ -44,15 +48,15 @@ fi
 for i in "${!names_array[@]}"; do
   name=${names_array[$i]}
   version=${versions_array[$i]}
-  peer_dependencies=$(npm show "$name@$version" peerDependencies --json)
+  dependencies=$(npm show "$name@$version" dependencies --json)
 
   # 提取 @coolwallet/core 的版本
-  core_version=$(echo "$peer_dependencies" | grep -o '"@coolwallet/core": "[^"]*"' | sed 's/.*: "//; s/"$//')
+  core_version=$(echo "$dependencies" | grep -o '"@coolwallet/core": "[^"]*"' | sed 's/.*: "//; s/"$//')
 
   if [ -z "$core_version" ]; then
-   echo "No peer dependencies found for $name@$version."
+   echo "No dependencies found for $name@$version."
   else
-   echo "Peer Dependencies for $name@$version:"
+   echo "Dependencies for $name@$version:"
    echo "$core_version"
 
    if [ "$core_latest_version" = "$core_version" ]; then
@@ -62,7 +66,7 @@ for i in "${!names_array[@]}"; do
 done
 
 # # 組出要執行的 command
- command="npm install @coolwallet/core@$core_latest_version --save-peer"
+ command="npm install @coolwallet/core@$core_latest_version --save"
  echo "command: $command"
 
 # # 執行 lerna command
@@ -71,4 +75,4 @@ npx lerna exec  "${IGNORE_SCOPES[@]}" -- "$command"
 
 # 等到 2.x 回 master 再加上 version patch 邏輯
 # && \
-# npx lerna exec  "${IGNORE_SCOPES[@]}" -- npm version patch
+npx lerna exec  "${IGNORE_SCOPES[@]}" -- npm version patch

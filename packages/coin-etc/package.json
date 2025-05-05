@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/etc",
-  "version": "1.1.8",
+  "version": "2.0.0",
   "description": "clone this project to build your own coin package",
   "main": "lib/index.js",
   "author": "coolwallet-team",
@@ -9,10 +9,12 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
-    "test": "jest --verbose"
-  },
-  "peerDependencies": {
-    "@coolwallet/core": "^1.1.31"
+    "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish",
+    "test": "NODE_ENV=development jest --runInBand",
+    "test-go": "NODE_ENV=development CARD=go jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -20,7 +22,6 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.31",
     "@types/node": "^14.0.13",
     "typescript": "^4.4.3"
   },
@@ -32,6 +33,7 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
   "dependencies": {
+    "@coolwallet/core": "^2.0.0",
     "@types/keccak": "^3.0.1",
     "bip32": "^2.0.4",
     "keccak": "^3.0.2",

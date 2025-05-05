@@ -337,6 +337,18 @@ export const commands = {
     P1: '00',
     P2: '00',
   },
+  EXPORT_BACKUP_DATA: {
+    CLA: '80',
+    INS: '88',
+    P1: '00',
+    P2: '00',
+  },
+  IMPORT_BACKUP_DATA: {
+    CLA: '80',
+    INS: '8A',
+    P1: '00',
+    P2: '00',
+  },
   DELETE_REGISTER_BACKUP: {
     CLA: '80',
     INS: '84',

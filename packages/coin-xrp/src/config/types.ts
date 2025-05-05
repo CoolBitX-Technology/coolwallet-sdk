@@ -21,8 +21,8 @@ export type Payment = {
 
   Amount: string;
   Fee: string;
-  SigningPubKey: string;
-  Account: string;
+  SigningPubKey?: string;
+  Account?: string;
   Destination: string;
   TxnSignature?: string;
 };

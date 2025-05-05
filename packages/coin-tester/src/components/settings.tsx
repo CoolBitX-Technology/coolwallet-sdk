@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import crypto from 'crypto';
 import { Container } from 'react-bootstrap';
-import { Transport, apdu, tx, utils, config } from '@coolwallet/core';
+import { Transport, apdu, tx, utils, config, info } from '@coolwallet/core';
 import * as bip39 from 'bip39';
 import { NoInput, OneInput, ObjInputs } from '../utils/componentMaker';
 
@@ -80,14 +80,15 @@ function Settings(props: Props) {
 
   const getMCUVersion = async () => {
     handleState(async () => {
-      const data = await apdu.mcu.dfu.getMCUInfo(transport!);
+      const data = await info.getMCUInfo(transport!);
+      // const data = await apdu.mcu.dfu.getMCUInfo(transport!);
       return data.firmwareVersion;
     }, setMCUVersion);
   };
 
   const getBattery = async () => {
     handleState(async () => {
-      const data = await apdu.mcu.dfu.getMCUInfo(transport!);
+      const data = await info.getMCUInfo(transport!);
       return data.battery;
     }, setBattery);
   };
@@ -102,14 +103,14 @@ function Settings(props: Props) {
 
   const getCardMode = async () => {
     handleState(async () => {
-      const data = await apdu.general.getSEMode(transport!);
+      const data = await info.getSEMode(transport!);
       return data;
     }, setCardMode);
   };
 
   const upgradeSE = async () => {
     handleState(async () => {
-      const cardId = await apdu.general.getCardId(transport!);
+      const cardId = await info.getCardId(transport!);
       const appId = localStorage.getItem('appId');
       if (!appId) throw new Error('No Appid stored, please register!');
       await apdu.ota.updateSE(

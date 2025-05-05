@@ -1,7 +1,8 @@
 /* eslint-disable no-param-reassign */
-import * as core from '@coolwallet/core';
+import { tx, error } from '@coolwallet/core';
 import * as types from './config/types'
 import * as txUtil from './util/transactionUtil' 
+import { SignatureType } from '@coolwallet/core/lib/transaction';
 
 
 export const signTransaction = async (
@@ -13,14 +14,13 @@ export const signTransaction = async (
   const { transport, appId, appPrivateKey, confirmCB, authorizedCB } = signData
 
   const preActions = [];
-  let action;
   const sendScript = async () => {
-    await core.apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
   preActions.push(sendScript);
 
-  action = async () => {
-    return core.apdu.tx.executeScript(
+  const action = async () => {
+    return tx.command.executeScript(
       transport,
       appId,
       appPrivateKey,
@@ -28,24 +28,20 @@ export const signTransaction = async (
     );
   };
   
-  const canonicalSignature = await core.tx.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
-    false,
+    SignatureType.Canonical,
     confirmCB,
-    authorizedCB,
-    true
+    authorizedCB
   );
-
-  const { signedTx } = await core.apdu.tx.getSignedHex(transport);
-  console.debug("signedTx: ", signedTx);
   
   if (!Buffer.isBuffer(canonicalSignature)) {
     const atomSignature = await txUtil.genAtomSigFromSESig(canonicalSignature);
     return atomSignature;
   } else {
-    throw new core.error.SDKError(signTransaction.name, 'canonicalSignature type error');
+    throw new error.SDKError(signTransaction.name, 'canonicalSignature type error');
   }
 
 };

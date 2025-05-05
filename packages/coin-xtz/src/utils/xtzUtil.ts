@@ -4,7 +4,7 @@ import * as forger from '@taquito/local-forging'
 import { ForgeParams, OpKind } from "@taquito/taquito";
 
 export async function getFormatReveal(rawData: types.xtzReveal): Promise<hexString> {
-  let tx: ForgeParams = {
+  const tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
       {
@@ -23,7 +23,7 @@ export async function getFormatReveal(rawData: types.xtzReveal): Promise<hexStri
 }
 
 export async function getFormatTransfer(rawData: types.xtzTransaction): Promise<hexString> {
-  let tx: ForgeParams = {
+  const tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
       {
@@ -43,7 +43,7 @@ export async function getFormatTransfer(rawData: types.xtzTransaction): Promise<
 }
 
 export async function getFormatOrigination(rawData: types.xtzOrigination): Promise<hexString> {
-  let tx: ForgeParams = {
+  const tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
       {
@@ -62,7 +62,7 @@ export async function getFormatOrigination(rawData: types.xtzOrigination): Promi
 }
 
 export async function getFormatDelegation(rawData: types.xtzDelegation): Promise<hexString> {
-  let tx: ForgeParams = {
+  const tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
       {
@@ -81,7 +81,7 @@ export async function getFormatDelegation(rawData: types.xtzDelegation): Promise
 }
 
 export async function getFormatUndelegation(rawData: types.xtzDelegation): Promise<hexString> {
-  let tx: ForgeParams = {
+  const tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
       {
@@ -99,7 +99,7 @@ export async function getFormatUndelegation(rawData: types.xtzDelegation): Promi
 }
 
 export async function getFormatSmart(rawData: types.xtzSmart): Promise<hexString> {
-  let tx: ForgeParams = {
+  const tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
       {
@@ -123,7 +123,7 @@ export async function getFormatSmart(rawData: types.xtzSmart): Promise<hexString
 }
 
 export async function getFormatToken(rawData: types.xtzToken, param: any): Promise<hexString> {
-  let tx: ForgeParams = {
+  const tx: ForgeParams = {
     branch: rawData.branch,
     contents: [
       {

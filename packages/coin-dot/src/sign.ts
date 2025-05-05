@@ -1,10 +1,6 @@
-import { apdu, tx } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 import * as txUtil from './utils/transactionUtil';
-
-
-const elliptic = require('elliptic');
-// eslint-disable-next-line new-cap
-const ec = new elliptic.ec("secp256k1");
+import { SignatureType } from '@coolwallet/core/lib/transaction';
 /**
  * sign TRX Transaction
  * @param {Transport} transport
@@ -31,32 +27,30 @@ export const signTransaction = async (
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
 
   preActions.push(sendScript);
 
-  const action = async () => apdu.tx.executeScript(
+  const action = async () => tx.command.executeScript(
     transport,
     appId,
     appPrivateKey,
     argument
   );
 
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
-    false,
+    SignatureType.Canonical,
     confirmCB,
-    authorizedCB,
-    true
+    authorizedCB
   );
-  
   const signature = await txUtil.getCompleteSignature(transport, publicKey, canonicalSignature)
   console.debug("signature: ", signature)
 
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
+  const { signedTx } = await tx.command.getSignedHex(transport);
   console.debug("signedTx: ", signedTx)
 
   return '02' + signature

@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { inspect } from 'node:util';
 import * as bip39 from 'bip39';
 import BigNumber from 'bignumber.js';
-import { apdu, Transport, config, utils, crypto as cwCrypto } from '@coolwallet/core';
+import { Transport, CardType } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import * as VeChain from 'thor-devkit';
@@ -14,6 +14,7 @@ const mnemonic = bip39.generateMnemonic();
 
 let props: PromiseValue<ReturnType<typeof initialize>>;
 let transport: Transport;
+let cardType: CardType;
 const privKey = VeChain.mnemonic.derivePrivateKey(mnemonic.split(' '));
 const vetSDK = new VetSDK();
 
@@ -24,7 +25,16 @@ const toWei = (n: number, d = 18) => {
 
 describe('Test VeChain SDK', () => {
   beforeAll(async () => {
-    transport = (await createTransport())!;
+    if (process.env.CARD === 'lite') {
+      cardType = CardType.Lite;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Lite) {
+      transport = (await createTransport('http://localhost:9527', CardType.Lite))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
   });
 
@@ -58,7 +68,7 @@ describe('Test VeChain SDK', () => {
         },
       ],
       gasPriceCoef: 0,
-      gas: 0xC350,
+      gas: 0xc350,
       dependsOn: '',
       nonce,
     };
@@ -107,7 +117,7 @@ describe('Test VeChain SDK', () => {
         },
       ],
       gasPriceCoef: 0,
-      gas: 0xC350,
+      gas: 0xc350,
       dependsOn: '',
       nonce,
     };
@@ -157,7 +167,7 @@ describe('Test VeChain SDK', () => {
         },
       ],
       gasPriceCoef: 0,
-      gas: 0xC350,
+      gas: 0xc350,
       dependsOn: '',
       nonce,
     };

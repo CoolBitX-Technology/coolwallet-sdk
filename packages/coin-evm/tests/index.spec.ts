@@ -1,4 +1,4 @@
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import * as bip39 from 'bip39';
 import isEmpty from 'lodash/isEmpty';
@@ -68,11 +68,22 @@ const TEST_COINS = [
 describe('Test EVM SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   const wallet = new Wallet();
 
   beforeAll(async () => {
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+
     const mnemonic = bip39.generateMnemonic();
-    transport = (await createTransport())!;
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     props = await initialize(transport, mnemonic);
@@ -120,6 +131,7 @@ describe('Test EVM SDK', () => {
       const signature = await api.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -177,6 +189,7 @@ describe('Test EVM SDK', () => {
         const signature = await api.signTransaction(client);
         const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
         expect(signature).toEqual(expectedSignature);
+        if (cardType !== CardType.Pro) return;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
@@ -255,6 +268,7 @@ describe('Test EVM SDK', () => {
         const signature = await api.signTransaction(client);
         const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
         expect(signature).toEqual(expectedSignature);
+        if (cardType !== CardType.Pro) return;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
@@ -310,6 +324,7 @@ describe('Test EVM SDK', () => {
       const signature = await api.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -359,10 +374,11 @@ describe('Test EVM SDK', () => {
         const signature = await api.signTransaction(client);
         const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
         expect(signature).toEqual(expectedSignature);
+
+        if (cardType !== CardType.Pro) return;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
-
         let expectedTxDetail: string;
         if (api.chain instanceof CustomEvm) {
           expectedTxDetail = new DisplayBuilder()
@@ -392,6 +408,51 @@ describe('Test EVM SDK', () => {
       }
     );
 
+    it.each(SMART_CONTRACT_SEGMENT_TRANSACTION)(
+      'Send smart contract segment transaction to $to',
+      async (transaction) => {
+        const client: LegacyTransaction = {
+          transaction: {
+            ...transaction,
+            value: utils.toHex(utils.toWei(transaction.value, 'ether')),
+          },
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          addressIndex: 0,
+        };
+
+        const signature = await api.signTransaction(client);
+        const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
+        expect(signature).toEqual(expectedSignature);
+        if (cardType === CardType.Pro) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const txDetail = await getTxDetail(transport, props.appId);
+
+          let expectedTxDetail: string;
+          if (isEmpty(api.chain.layer2)) {
+            expectedTxDetail = new DisplayBuilder()
+              .messagePage('TEST')
+              .messagePage(api.chain.symbol)
+              .wrapPage('SMART', '')
+              .wrapPage('PRESS', 'BUTToN')
+              .finalize();
+          } else {
+            expectedTxDetail = new DisplayBuilder()
+              .messagePage('TEST')
+              .messagePage(api.chain.layer2)
+              .messagePage(api.chain.symbol)
+              .wrapPage('SMART', '')
+              .wrapPage('PRESS', 'BUTToN')
+              .finalize();
+          }
+
+          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        }
+      }
+    );
+
     it.each(TYPED_DATA_TRANSACTION)('Send transaction to $to', async (transaction) => {
       const client: EIP712TypedDataTransaction = {
         typedData: transaction.typedData(api.chain.id),
@@ -404,6 +465,8 @@ describe('Test EVM SDK', () => {
       const signature = await api.signTypedData(client);
       const expectedSignature = await wallet.signTypedData(client.typedData);
       expect(signature).toEqual(expectedSignature);
+
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -447,10 +510,10 @@ describe('Test EVM SDK', () => {
       const signature = await api.signMessage(client);
       const expectedSignature = await wallet.signMessage(client.message);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
-
       let expectedTxDetail: string;
       if (api.chain instanceof CustomEvm) {
         expectedTxDetail = new DisplayBuilder()
@@ -475,7 +538,6 @@ describe('Test EVM SDK', () => {
           .wrapPage('PRESS', 'BUTToN')
           .finalize();
       }
-
       expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
     });
 
@@ -494,6 +556,7 @@ describe('Test EVM SDK', () => {
       const signature = await api.signEIP1559Transaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -552,6 +615,7 @@ describe('Test EVM SDK', () => {
         const signature = await api.signEIP1559Transaction(client);
         const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
         expect(signature).toEqual(expectedSignature);
+        if (cardType !== CardType.Pro) return;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
@@ -606,6 +670,7 @@ describe('Test EVM SDK', () => {
       const signature = await api.signEIP1559SmartContractTransaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -654,6 +719,7 @@ describe('Test EVM SDK', () => {
         const signature = await api.signEIP1559Transaction(client);
         const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, api.chain.id);
         expect(signature).toEqual(expectedSignature);
+        if (cardType !== CardType.Pro) return;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const txDetail = await getTxDetail(transport, props.appId);
@@ -703,6 +769,7 @@ describe('Test EVM SDK', () => {
       const signature = await api.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, api.chain.id);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);

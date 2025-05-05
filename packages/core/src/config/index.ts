@@ -1,10 +1,10 @@
 import crypto from 'crypto';
-import * as general from '../apdu/general';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import { SHA256 } from '../crypto/hash';
 import { SE_KEY_PARAM, PathType } from './param';
 import { ec as EC } from 'elliptic';
-import { apdu } from '..';
+import { info } from '..';
+import { SDKError } from '../error';
 
 const secp256k1 = new EC('secp256k1');
 
@@ -47,6 +47,18 @@ function getCompressedPublicKey(publicKey: string) {
   return prefix + publicKey.substring(2, 66);
 }
 
+function hexToAscii(hex: string) {
+  let asciiStr = '';
+
+  for (let i = 0; i < hex.length; i += 2) {
+    const hexPair = hex.substr(i, 2);
+    const decimal = parseInt(hexPair, 16);
+    asciiStr += String.fromCharCode(decimal);
+  }
+
+  return asciiStr;
+}
+
 /**
  * Using card id to generate public key.
  *
@@ -54,21 +66,30 @@ function getCompressedPublicKey(publicKey: string) {
  * @return {Promise<string>} SEPublicKey
  */
 async function getSEPublicKey(transport: Transport): Promise<string> {
-  const cardId = await general.getCardId(transport);
-  console.debug('cardId: ' + cardId);
+  const cardId = await info.getCardId(transport);
+  console.debug('cardId: ' + hexToAscii(cardId));
   const cardIdHash = SHA256(cardId).toString('hex');
   const parseCardIdHash = parseInt(cardIdHash.slice(0, 2), 16) & 0x7f;
   const index = parseCardIdHash.toString(16).padStart(2, '0') + cardIdHash.slice(2, 8);
-  const seVersion = await apdu.general.getSEVersion(transport);
+  const seVersion = await info.getSEVersion(transport);
+  console.debug('SE version: ' + seVersion);
   let masterPublicKey;
   let masterChainCode;
-  if (seVersion < 338) {
-    masterPublicKey = SE_KEY_PARAM.chipEncMasterPublicKey;
-    masterChainCode = SE_KEY_PARAM.chipEncMasterChainCode;
+  if (transport.cardType === CardType.Pro) {
+    if (seVersion < 338) {
+      masterPublicKey = SE_KEY_PARAM.Pro.chipMasterPublicKey;
+      masterChainCode = SE_KEY_PARAM.Pro.chipMasterChainCode;
+    } else {
+      masterPublicKey = SE_KEY_PARAM.Pro.chipTransMasterPublicKey;
+      masterChainCode = SE_KEY_PARAM.Pro.chipTransMasterChainCode;
+    }
+  } else if (transport.cardType === CardType.Go) {
+    masterPublicKey = SE_KEY_PARAM.Go.chipMasterPublicKey;
+    masterChainCode = SE_KEY_PARAM.Go.chipMasterChainCode;
   } else {
-    masterPublicKey = SE_KEY_PARAM.chipTransMasterPublicKey;
-    masterChainCode = SE_KEY_PARAM.chipTransMasterChainCode;
+    throw new SDKError('getSEPublicKey', 'unknown card type: ' + transport.cardType);
   }
+
   const compressedPublicKey = getCompressedPublicKey(masterPublicKey);
 
   const addend = sha512(Buffer.from(masterChainCode, 'hex'), Buffer.from(compressedPublicKey + index, 'hex')).toString(

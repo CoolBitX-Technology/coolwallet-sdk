@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 
@@ -10,15 +10,21 @@ type PromiseValue<T> = T extends Promise<infer P> ? P : never;
 describe('Test ICX SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   const icx = new ICX();
   const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
   beforeAll(async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    transport = (await createTransport())!;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
   });
 
