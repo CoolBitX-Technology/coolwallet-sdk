@@ -1,4 +1,4 @@
-import { tx, apdu } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 import * as param from './config/param';
 import { SignatureType } from '@coolwallet/core/lib/transaction';
 import { getCoinTransferArguments, getSmartContractArguments, getTokenTransferArguments } from './utils/scriptUtil';
@@ -34,16 +34,16 @@ export async function signSmartTransaction(transactionArgs: SmartTransactionArgs
   const script = param.SCRIPT.SMART_CONTRACT.scriptWithSignature;
   const { argument, bytes } = await getSmartContractArguments(transaction, addressIndex);
 
-  const preActions = [() => apdu.tx.sendScript(transport, script)];
-  const action = () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  const preActions = [() => tx.command.sendScript(transport, script)];
+  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
   const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
+    SignatureType.EDDSA,
     confirmCB,
     authorizedCB,
-    SignatureType.EDDSA
   );
 
   const base64Signature = getBase64Signature(signature as Buffer, publicKey);
@@ -64,16 +64,16 @@ export async function signCoinTransferTransaction(transactionArgs: CoinTransacti
   const transaction = getCoinTransaction(transactionInfo, fromAddress);
   const { argument, bytes } = await getCoinTransferArguments(transaction, addressIndex);
 
-  const preActions = [() => apdu.tx.sendScript(transport, script)];
-  const action = () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  const preActions = [() => tx.command.sendScript(transport, script)];
+  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
   const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
+    SignatureType.EDDSA,
     confirmCB,
     authorizedCB,
-    SignatureType.EDDSA
   );
 
   const base64Signature = getBase64Signature(signature as Buffer, publicKey);
@@ -103,16 +103,16 @@ export async function signTokenTransferTransaction(transactionArgs: TokenTransac
   }
 
   const { argument, bytes } = argumentWithBytes;
-  const preActions = [() => apdu.tx.sendScript(transport, script)];
-  const action = () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  const preActions = [() => tx.command.sendScript(transport, script)];
+  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
   const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
+    SignatureType.EDDSA,
     confirmCB,
     authorizedCB,
-    SignatureType.EDDSA
   );
 
   const base64Signature = getBase64Signature(signature as Buffer, publicKey);

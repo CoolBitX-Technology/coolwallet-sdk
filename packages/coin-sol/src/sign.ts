@@ -1,4 +1,4 @@
-import { tx, apdu } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 import * as types from './config/types';
 import { Message, MessageV0, VersionedMessage } from './message';
 
@@ -15,16 +15,16 @@ async function executeScriptWithPreActions(
 ): Promise<Buffer | { r: string; s: string }> {
   const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = signData;
 
-  const preActions = [() => apdu.tx.sendScript(transport, script)];
-  const action = () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  const preActions = [() => tx.command.sendScript(transport, script)];
+  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
   return tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
+    SignatureType.EDDSA,
     confirmCB,
     authorizedCB,
-    SignatureType.EDDSA
   );
 }
 
@@ -38,9 +38,9 @@ async function signAllTransactions(
     transport,
     preActions,
     actions,
+    SignatureType.EDDSA,
     confirmCB,
     authorizedCB,
-    SignatureType.EDDSA
   )) as Array<Buffer>;
 
   return signatures.map((signature) => {

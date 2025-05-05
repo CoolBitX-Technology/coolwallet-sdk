@@ -45,26 +45,25 @@ export const signTransaction = async (
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
 
   preActions.push(sendScript);
 
-  const action = async () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  const action = async () => tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
-    false,
+    tx.SignatureType.Canonical,
     confirmCB,
-    authorizedCB,
-    true
+    authorizedCB
   );
 
   if (Buffer.isBuffer(canonicalSignature)) return '';
   const { r, s } = canonicalSignature;
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
+  const { signedTx } = await tx.command.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
   const v = ec.getKeyRecoveryParam(sha256(Buffer.from(signedTx, 'hex')), canonicalSignature, keyPair.pub);
 

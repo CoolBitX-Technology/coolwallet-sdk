@@ -1,4 +1,4 @@
-import { apdu, tx, error } from '@coolwallet/core';
+import { tx, error } from '@coolwallet/core';
 import isNil from 'lodash/isNil';
 import RLP from 'rlp';
 import {
@@ -27,17 +27,16 @@ async function signSingleTransaction(
   publicKey?: string
 ): Promise<SignatureData> {
   const { transport, appId, appPrivateKey } = client;
-  const preActions = [() => apdu.tx.sendScript(transport, script)];
-  const action = () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  const preActions = [() => tx.command.sendScript(transport, script)];
+  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, argument);
 
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
-    false,
+    tx.SignatureType.Canonical,
     client.confirmCB,
-    client.authorizedCB,
-    true
+    client.authorizedCB
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
@@ -60,19 +59,17 @@ async function signLegacyTransactionSegmentally(
   const rawPayload = getLegacyRawHex(transaction, chainId);
 
   const preActions = [
-    () => apdu.tx.sendScript(transport, script),
-    () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument),
+    () => tx.command.sendScript(transport, script),
+    () => tx.command.executeScript(transport, appId, appPrivateKey, argument),
   ];
-  const action = () => apdu.tx.executeSegmentScript(transport, appId, appPrivateKey, formatHex(data));
-
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const action = () => tx.command.executeSegmentScript(transport, appId, appPrivateKey, formatHex(data));
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
-    false,
+    tx.SignatureType.Canonical,
     client.confirmCB,
-    client.authorizedCB,
-    true
+    client.authorizedCB
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {
@@ -98,19 +95,18 @@ async function signEIP1559TransactionSegmentally(
   const rawPayload = getEIP1559RawHex(transaction, chainId);
 
   const preActions = [
-    () => apdu.tx.sendScript(transport, script),
-    () => apdu.tx.executeScript(transport, appId, appPrivateKey, argument),
+    () => tx.command.sendScript(transport, script),
+    () => tx.command.executeScript(transport, appId, appPrivateKey, argument),
   ];
-  const action = () => apdu.tx.executeSegmentScript(transport, appId, appPrivateKey, formatHex(data));
+  const action = () => tx.command.executeSegmentScript(transport, appId, appPrivateKey, formatHex(data));
 
-  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const canonicalSignature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     action,
-    false,
+    tx.SignatureType.Canonical,
     client.confirmCB,
-    client.authorizedCB,
-    true
+    client.authorizedCB
   );
 
   if (!Buffer.isBuffer(canonicalSignature)) {

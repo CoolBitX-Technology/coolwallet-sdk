@@ -1,9 +1,13 @@
 {
   "name": "@coolwallet/ltc",
-  "version": "1.1.6",
+  "version": "2.0.0",
   "description": "Coolwallet LiteCoin sdk",
   "main": "lib/index.js",
   "scripts": {
+    "test": "NODE_ENV=development jest --runInBand",
+    "test-go": "NODE_ENV=development CARD=go jest --runInBand",
+    "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:ts",
@@ -25,18 +29,15 @@
   ],
   "author": "coolwallet-team",
   "license": "ISC",
-  "peerDependencies": {
-    "@coolwallet/core": "^1.1.31"
-  },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.31",
     "jest": "^26.0.1"
   },
   "dependencies": {
+    "@coolwallet/core": "^2.0.0",
     "@types/bn.js": "^4.11.6",
     "bitcoinjs-lib": "^5.1.7",
     "bn.js": "^5.1.1",

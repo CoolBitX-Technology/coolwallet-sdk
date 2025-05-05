@@ -1,13 +1,23 @@
-import { Transport, apdu, error } from '@coolwallet/core';
+import { CardType, Transport, error } from '@coolwallet/core';
 import * as cryptoUtil from './cryptoUtil';
 import * as bufferUtil from './bufferUtil';
 import * as txUtil from './transactionUtil';
 import * as varuint from './varuintUtil';
 import { COIN_TYPE } from '../config/param';
-import { utils } from '@coolwallet/core';
+import { utils, tx } from '@coolwallet/core';
 import { ScriptType, Input, Output, Change, PreparedData, Callback } from '../config/types';
 import { pubkeyToAddressAndOutScript, toReverseUintBuffer } from './transactionUtil';
 import { PathType } from '@coolwallet/core/lib/config/param';
+import { shouldUseLegacyScript10Or11, shouldUseLegacyUtxoScript } from './versionUtil';
+
+// script type 14, 15 only support for se version greater than 330.
+const getExtraTransactionType = (cardType: CardType, seVersion: number, redeemScriptType: ScriptType) => {
+  if (shouldUseLegacyScript10Or11(cardType, seVersion)) {
+    return redeemScriptType === ScriptType.P2PKH ? '10' : '11';
+  } else {
+    return redeemScriptType === ScriptType.P2PKH ? '14' : '15';
+  }
+};
 
 const getPath = async (addressIndex: number, purpose?: number, pathType?: PathType) => {
   let path = await utils.getPath(COIN_TYPE, addressIndex, 5, pathType, purpose);
@@ -25,7 +35,7 @@ export async function getScriptSigningActions(
 ): Promise<{
   actions: Array<Callback>;
 }> {
-  if (seVersion <= 331 || redeemScriptType === ScriptType.P2PKH) {
+  if (shouldUseLegacyUtxoScript(transport.cardType, seVersion) || redeemScriptType === ScriptType.P2PKH) {
     const utxoArguments = preparedData.preparedInputs.map(async (preparedInput) => {
       const path = await getPath(preparedInput.addressIndex);
       const SEPath = Buffer.from(`${path}`, 'hex');
@@ -47,15 +57,9 @@ export async function getScriptSigningActions(
       return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
     });
 
+    const extraTransactionType = getExtraTransactionType(transport.cardType, seVersion, redeemScriptType);
     const actions = utxoArguments.map((utxoArgument) => async () => {
-      return apdu.tx.executeUtxoScript(
-        transport,
-        appId,
-        appPrivateKey,
-        await utxoArgument,
-        // script type 14, 15 only support for se version greater than 330.
-        redeemScriptType === ScriptType.P2PKH ? (seVersion > 330 ? '14' : '10') : seVersion > 330 ? '15' : '11'
-      );
+      return tx.command.executeUtxoScript(transport, appId, appPrivateKey, await utxoArgument, extraTransactionType);
     });
     return { actions };
   } else if (redeemScriptType === ScriptType.P2TR) {
@@ -64,7 +68,7 @@ export async function getScriptSigningActions(
         await getPath(preparedInput.addressIndex, preparedInput.purposeIndex, PathType.BIP340),
         'hex'
       );
-      return apdu.tx.executeUtxoSegmentScript(
+      return tx.command.executeUtxoSegmentScript(
         transport,
         appId,
         appPrivateKey,
@@ -101,7 +105,7 @@ export async function getScriptSigningActions(
     });
 
     const actions = utxoArguments.map((utxoArgument) => async () => {
-      return apdu.tx.executeUtxoSegmentScript(transport, appId, appPrivateKey, await utxoArgument);
+      return tx.command.executeUtxoSegmentScript(transport, appId, appPrivateKey, await utxoArgument);
     });
     return { actions };
   }
@@ -122,12 +126,12 @@ export function getScriptSigningPreActions(
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
   preActions.push(sendScript);
 
   const sendArgument = async () => {
-    await apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+    await tx.command.executeScript(transport, appId, appPrivateKey, argument);
   };
   preActions.push(sendArgument);
 

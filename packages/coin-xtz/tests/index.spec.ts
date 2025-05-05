@@ -1,42 +1,48 @@
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolwallet/testing-library';
-import * as bip39 from 'bip39';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { localForger } from '@taquito/local-forging';
 import {
   OpKind,
   OperationContentsReveal,
   OperationContentsTransaction,
-  OperationContentsDelegation
+  OperationContentsDelegation,
 } from '@taquito/rpc';
 
 import XTZ from '../src';
 import * as codecUtil from '../src/utils/codecUtil';
-import type {
-  SignTxData,
-  xtzTransaction,
-  xtzReveal,
-  xtzDelegation
-} from '../src/config/types';
+import type { SignTxData, xtzTransaction, xtzReveal, xtzDelegation } from '../src/config/types';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
+
+const testWalletInfo = {
+  mnemonic: 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo card',
+  address: 'tz1SRHdhAfRXLhePtJemonhEshg4ErQhivci',
+};
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const blake2b = require('blake2b');
 
-
 describe('Test XTZ SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   const xtz = new XTZ();
   const wallet = new HDWallet(CURVE.ED25519);
 
   beforeAll(async () => {
-    const mnemonic = bip39.generateMnemonic();
-    console.log('mnemonic :', mnemonic);
-    transport = (await createTransport())!;
-    props = await initialize(transport, mnemonic);
-    await wallet.setMnemonic(mnemonic);
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
+    props = await initialize(transport, testWalletInfo.mnemonic);
+    wallet.setMnemonic(testWalletInfo.mnemonic);
   });
 
   it('XTZ: get address 0', async () => {
@@ -83,12 +89,15 @@ describe('Test XTZ SDK', () => {
     // check signature
     const signedTx = await xtz.signReveal(signTxData, operation);
     const txHex = await localForger.forge({ branch, contents: [content] });
-    const hashHex = blake2b(32).update(Buffer.from('03' + txHex, 'hex')).digest('hex');
+    const hashHex = blake2b(32)
+      .update(Buffer.from('03' + txHex, 'hex'))
+      .digest('hex');
     const expectedSigUint8Array = await node.sign(hashHex);
-    const expectedTx = txHex + Buffer.from(expectedSigUint8Array??'').toString('hex');
+    const expectedTx = txHex + Buffer.from(expectedSigUint8Array ?? '').toString('hex');
     expect(signedTx).toEqual(expectedTx);
 
     // check screen display
+    if (cardType === CardType.Go) return;
     const txDetail = await getTxDetail(transport, props.appId);
     console.log('txDetail :', txDetail);
     const expectedTxDetail = new DisplayBuilder()
@@ -105,7 +114,6 @@ describe('Test XTZ SDK', () => {
     const addressIndex = 0;
     const node = wallet.derivePath(`m/44'/1729'/${addressIndex}'/0'`);
     const publicKey = await node.getPublicKey();
-    const public_key = codecUtil.pubKeyHexToStr(publicKey?.toString('hex') ?? '');
     const address = codecUtil.pubKeyToAddress(publicKey?.toString('hex') ?? '');
 
     const kind = OpKind.TRANSACTION;
@@ -119,10 +127,24 @@ describe('Test XTZ SDK', () => {
     const destination = 'tz1YU2zoyCkXPKEA4jknSpCpMs7yUndVNe3S';
 
     const operation: xtzTransaction = {
-      branch, source, fee, counter, gas_limit, storage_limit, amount, destination
+      branch,
+      source,
+      fee,
+      counter,
+      gas_limit,
+      storage_limit,
+      amount,
+      destination,
     };
     const content: OperationContentsTransaction = {
-      kind, source, fee, counter, gas_limit, storage_limit, amount, destination
+      kind,
+      source,
+      fee,
+      counter,
+      gas_limit,
+      storage_limit,
+      amount,
+      destination,
     };
 
     const { appPrivateKey, appId } = props;
@@ -136,13 +158,16 @@ describe('Test XTZ SDK', () => {
     // check signature
     const signedTx = await xtz.signTransaction(signTxData, operation);
     const txHex = await localForger.forge({ branch, contents: [content] });
-    const hashHex = blake2b(32).update(Buffer.from('03' + txHex, 'hex')).digest('hex');
+    const hashHex = blake2b(32)
+      .update(Buffer.from('03' + txHex, 'hex'))
+      .digest('hex');
     const expectedSigUint8Array = await node.sign(hashHex);
-    const expectedTx = txHex + Buffer.from(expectedSigUint8Array??'').toString('hex');
+    const expectedTx = txHex + Buffer.from(expectedSigUint8Array ?? '').toString('hex');
     expect(signedTx).toEqual(expectedTx);
     console.log('signedTx :', signedTx);
 
     // check screen display
+    if (cardType === CardType.Go) return;
     const txDetail = await getTxDetail(transport, props.appId);
     console.log('txDetail :', txDetail);
     const expectedTxDetail = new DisplayBuilder()
@@ -160,7 +185,6 @@ describe('Test XTZ SDK', () => {
     const addressIndex = 0;
     const node = wallet.derivePath(`m/44'/1729'/${addressIndex}'/0'`);
     const publicKey = await node.getPublicKey();
-    const public_key = codecUtil.pubKeyHexToStr(publicKey?.toString('hex') ?? '');
     const address = codecUtil.pubKeyToAddress(publicKey?.toString('hex') ?? '');
 
     const kind = OpKind.DELEGATION;
@@ -186,13 +210,16 @@ describe('Test XTZ SDK', () => {
     // check signature
     const signedTx = await xtz.signDelegation(signTxData, operation);
     const txHex = await localForger.forge({ branch, contents: [content] });
-    const hashHex = blake2b(32).update(Buffer.from('03' + txHex, 'hex')).digest('hex');
+    const hashHex = blake2b(32)
+      .update(Buffer.from('03' + txHex, 'hex'))
+      .digest('hex');
     const expectedSigUint8Array = await node.sign(hashHex);
-    const expectedTx = txHex + Buffer.from(expectedSigUint8Array??'').toString('hex');
+    const expectedTx = txHex + Buffer.from(expectedSigUint8Array ?? '').toString('hex');
     expect(signedTx).toEqual(expectedTx);
     console.log('signedTx :', signedTx);
 
     // check screen display
+    if (cardType === CardType.Go) return;
     const txDetail = await getTxDetail(transport, props.appId);
     console.log('txDetail :', txDetail);
     const expectedTxDetail = new DisplayBuilder()
@@ -209,7 +236,6 @@ describe('Test XTZ SDK', () => {
     const addressIndex = 0;
     const node = wallet.derivePath(`m/44'/1729'/${addressIndex}'/0'`);
     const publicKey = await node.getPublicKey();
-    const public_key = codecUtil.pubKeyHexToStr(publicKey?.toString('hex') ?? '');
     const address = codecUtil.pubKeyToAddress(publicKey?.toString('hex') ?? '');
 
     const kind = OpKind.DELEGATION;
@@ -234,13 +260,16 @@ describe('Test XTZ SDK', () => {
     // check signature
     const signedTx = await xtz.signUndelegation(signTxData, operation);
     const txHex = await localForger.forge({ branch, contents: [content] });
-    const hashHex = blake2b(32).update(Buffer.from('03' + txHex, 'hex')).digest('hex');
+    const hashHex = blake2b(32)
+      .update(Buffer.from('03' + txHex, 'hex'))
+      .digest('hex');
     const expectedSigUint8Array = await node.sign(hashHex);
-    const expectedTx = txHex + Buffer.from(expectedSigUint8Array??'').toString('hex');
+    const expectedTx = txHex + Buffer.from(expectedSigUint8Array ?? '').toString('hex');
     expect(signedTx).toEqual(expectedTx);
     console.log('signedTx :', signedTx);
 
     // check screen display
+    if (cardType === CardType.Go) return;
     const txDetail = await getTxDetail(transport, props.appId);
     console.log('txDetail :', txDetail);
     const expectedTxDetail = new DisplayBuilder()
@@ -253,4 +282,3 @@ describe('Test XTZ SDK', () => {
     expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
   });
 });
-

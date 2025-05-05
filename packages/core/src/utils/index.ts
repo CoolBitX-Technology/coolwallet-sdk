@@ -1,12 +1,12 @@
 import * as bip39 from 'bip39';
 import pbkdf2 from 'pbkdf2';
 import isEmpty from 'lodash/isEmpty';
-import { tx, wallet, general } from '../apdu';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import { MSG } from '../config/status/msg';
 import { CODE } from '../config/status/code';
 import { PathType } from '../config/param';
 import { SDKError } from '../error/errorHandle';
+import { info, tx, wallet } from '..';
 
 function hardenPath(index: number) {
   return (Math.floor(index) + 0x80000000).toString(16);
@@ -144,7 +144,7 @@ export const assemblyCommandAndData = (
 };
 
 export const checkSupportScripts = async (transport: Transport) => {
-  const { statusCode } = await tx.getSignedHex(transport);
+  const { statusCode } = await tx.command.getSignedHex(transport);
   if (statusCode === CODE._9000) {
     return true;
   } else if (statusCode === CODE._6D00) {
@@ -159,6 +159,31 @@ export const createSeedByApp = async (wordNumber: number, randomBytes: (size: nu
   return bip39.generateMnemonic(strength, randomBytes);
 };
 
+const createAdaMasterKeyByMnemonic = (mnemonic: string): Buffer => {
+  const entropy = bip39.mnemonicToEntropy(mnemonic);
+  const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
+  key[0] &= 0b11111000;
+  key[31] &= 0b00011111;
+  key[31] |= 0b01000000;
+  return key;
+};
+
+const createBip39SeedByMnemonic = async (mnemonic: string): Promise<Buffer> => {
+  return bip39.mnemonicToSeed(mnemonic);
+};
+
+export const createSeedsHexByMnemonic = async (mnemonic: string): Promise<string> => {
+  const seeds: Array<Buffer> = [];
+
+  // mnemonic to seed
+  seeds[0] = await createBip39SeedByMnemonic(mnemonic);
+
+  // mnemonic to ADA master key
+  seeds[1] = createAdaMasterKeyByMnemonic(mnemonic);
+
+  return Buffer.concat(seeds).toString('hex');
+};
+
 export const createWalletByMnemonic = async (
   transport: Transport,
   appId: string,
@@ -167,24 +192,18 @@ export const createWalletByMnemonic = async (
   SEPublicKey: string
 ): Promise<void> => {
   const seeds: Array<Buffer> = [];
-  const version = await general.getSEVersion(transport);
 
   // mnemonic to seed
-  seeds[0] = await bip39.mnemonicToSeed(mnemonic);
+  seeds[0] = await createBip39SeedByMnemonic(mnemonic);
 
   // mnemonic to ADA master key
-  if (version >= 317) {
-    const entropy = bip39.mnemonicToEntropy(mnemonic);
-    const key = pbkdf2.pbkdf2Sync('', Buffer.from(entropy, 'hex'), 4096, 96, 'sha512');
-    key[0] &= 0b11111000;
-    key[31] &= 0b00011111;
-    key[31] |= 0b01000000;
-
-    seeds[1] = key;
+  const version = await info.getSEVersion(transport);
+  if ((transport.cardType === CardType.Pro && version >= 317) || transport.cardType === CardType.Go) {
+    seeds[1] = createAdaMasterKeyByMnemonic(mnemonic);
   }
 
   const seedHex = Buffer.concat(seeds).toString('hex');
-  return wallet.setSeed(transport, appId, appPrivateKey, seedHex, SEPublicKey);
+  return wallet.secret.setSeed(transport, appId, appPrivateKey, seedHex, SEPublicKey);
 };
 
 /**

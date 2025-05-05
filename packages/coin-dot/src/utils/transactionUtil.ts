@@ -1,4 +1,4 @@
-import { apdu } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 import { blake2b } from './cryptoUtil';
 import * as types from '../config/types';
 import * as dotUtil from './dotUtil';
@@ -30,14 +30,8 @@ export async function getCompleteSignature(
   if (Buffer.isBuffer(canonicalSignature)) {
     return '';
   }
-  const { r, s32 } = canonicalSignature;
-
-  if (s32 === undefined) {
-    throw new Error('utils.transactionUtil.getCompleteSignature: s32 is undefined');
-  }
-
-  const s = s32;
-  const { signedTx } = await apdu.tx.getSignedHex(transport);
+  const { r, s } = canonicalSignature; // without s32
+  const { signedTx } = await tx.command.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
   const payloaBlake2bHash = blake2b(signedTx);
   const v = ec.getKeyRecoveryParam(payloaBlake2bHash, canonicalSignature, keyPair.pub);

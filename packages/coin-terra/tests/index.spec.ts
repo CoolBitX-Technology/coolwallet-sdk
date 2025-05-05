@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
 import Terra, { DENOMTYPE, DENOMTYPE_CLASSIC, TOKENTYPE, CHAIN_ID, SignDataType } from '../src';
@@ -36,6 +36,7 @@ describe('Test Terra SDK', () => {
 
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   let walletAddress = '';
 
   const chain = CHAIN_ID.MAIN;
@@ -49,7 +50,16 @@ describe('Test Terra SDK', () => {
   const wallet = mainnet.wallet(mk);
 
   beforeAll(async () => {
-    transport = (await createTransport())!;
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
     const address = await coinTerra.getAddress(transport, props.appPrivateKey, props.appId, 0);
     walletAddress = address;
@@ -201,6 +211,7 @@ describe('Test Terra SDK', () => {
     const signedTxSDKE = mainnet.tx.encode(await wallet.createAndSignTx(sendOpt));
     expect(signedTxE).toEqual(signedTxSDKE);
 
+    if (cardType !== CardType.Pro) return;
     const display = await getTxDetail(transport, props.appId);
     const expectedTxDetail = new DisplayBuilder()
       .messagePage('TEST')

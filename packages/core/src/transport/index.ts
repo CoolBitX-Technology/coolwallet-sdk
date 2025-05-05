@@ -4,6 +4,18 @@ import PeripheralRequest from '../device/ble/PeripheralRequest';
 
 type TransportDevice = BluetoothDevice | RNBlePlxDevice;
 
+enum CardType {
+  Pro = 'Pro',
+  Go = 'Go',
+}
+
+interface Transport {
+  cardType: CardType;
+  requestAPDUV2?: (apdu: { command: string; data: string }, target: string) => Promise<any>;
+
+  request(command: string, packets: string): Promise<string>;
+}
+
 /**
  * Transport is an abstract class.
  * All class that implement this abstract class will need to implements following methods:
@@ -25,16 +37,16 @@ type TransportDevice = BluetoothDevice | RNBlePlxDevice;
  * // readDataFromCard will use responseCharacteristic to read value from card.
  * readDataFromCard(): Promise<number[]>;
  */
-abstract class Transport {
+abstract class BleTransport implements Transport {
   [key: string]: any;
-
   peripheral: PeripheralRequest;
-
   device: TransportDevice;
+  cardType: CardType;
 
-  constructor(device: TransportDevice) {
+  constructor(device: TransportDevice, cardType?: CardType) {
     this.device = device;
     this.peripheral = new PeripheralRequest(this);
+    this.cardType = cardType ?? CardType.Pro;
   }
 
   abstract sendCommandToCard(command: number[]): Promise<void>;
@@ -79,5 +91,5 @@ interface BleManager {
   disconnect(): Promise<void>;
 }
 
-export { BleManager };
+export { BleManager, BleTransport, CardType };
 export default Transport;

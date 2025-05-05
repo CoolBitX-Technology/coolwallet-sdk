@@ -1,4 +1,4 @@
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 import TRX from '../src';
@@ -10,11 +10,22 @@ type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
 describe('Test TRX SDK', () => {
   let transport: Transport;
   let props: Mandatory;
+  let cardType: CardType;
   const trxSDK = new TRX();
   const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
   beforeAll(async () => {
-    transport = (await createTransport())!;
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
   });
 
@@ -35,11 +46,11 @@ describe('Test TRX SDK', () => {
       `);
     });
 
-    // it('returns address from address publicKey', () => {
-    //   const addressPublicKey = '02c940ec8261a71909a762a61677360f28db60f7ad683fbb471b5929ab55abbdd5';
-    //   const address = TRX.getAddressFromAddressPublicKey(addressPublicKey);
-    //   expect(address).toMatchInlineSnapshot(`"TPLnAY8HgpgHBKj6Md9SJ2qXMfFyBEfa2r"`);
-    // });
+    it('returns address from address publicKey', () => {
+      const addressPublicKey = '02c940ec8261a71909a762a61677360f28db60f7ad683fbb471b5929ab55abbdd5';
+      const address = TRX.getAddressFromAddressPublicKey(addressPublicKey);
+      expect(address).toMatchInlineSnapshot(`"TPLnAY8HgpgHBKj6Md9SJ2qXMfFyBEfa2r"`);
+    });
   });
 
   describe('Sign Transfer Tx', () => {

@@ -2,6 +2,7 @@ import { tx } from '@coolwallet/core';
 import * as types from './config/types';
 import * as txUtil from './utils/transactionUtil';
 import * as scriptUtil from './utils/scriptUtil';
+import { SignatureType } from '@coolwallet/core/lib/transaction';
 
 export async function signTransaction(
 	signTxData: types.signTxType
@@ -30,14 +31,13 @@ export async function signTransaction(
 		output,
 		change,
 	));
-	const signatures = await tx.flow.getSignaturesFromCoolWallet(
+	const signatures = await tx.flow.getSignaturesFromCoolWalletV2(
 		transport,
 		preActions,
 		actions,
-		false,
+		SignatureType.DER,
 		signTxData.confirmCB,
 		signTxData.authorizedCB,
-		false
 	);
 	const transaction = txUtil.composeFinalTransaction(scriptType, preparedData, signatures as Buffer[]);
 	return transaction.toString('hex');

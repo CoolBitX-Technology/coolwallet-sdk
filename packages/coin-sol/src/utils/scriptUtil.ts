@@ -5,7 +5,7 @@ import * as types from '../config/types';
 import { createSignInMessage } from './signIn';
 import { Transaction } from './Transaction';
 import { VersionedMessage } from '../message';
-import { apdu } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 
 /**
  * getTransferArguments
@@ -134,7 +134,7 @@ export function getScriptSigningPreActions(
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
   preActions.push(sendScript);
 
@@ -146,9 +146,9 @@ function getScriptSigningActions(signData: types.signVersionedTransactions): {
 } {
   const { transport, appPrivateKey, appId, addressIndex } = signData;
   const versionedTxs = signData.transaction;
-  const actions = versionedTxs.map((tx) => async () => {
-    const argument = getSignVersionedArguments(tx.message, addressIndex);
-    return apdu.tx.executeScript(transport, appId, appPrivateKey, argument);
+  const actions = versionedTxs.map((versionedTx) => async () => {
+    const argument = getSignVersionedArguments(versionedTx.message, addressIndex);
+    return tx.command.executeScript(transport, appId, appPrivateKey, argument);
   });
   return { actions };
 }

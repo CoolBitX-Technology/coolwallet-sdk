@@ -15742,6 +15742,9 @@ function run() {
                     return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
                 case 32:
                     _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-react-native-nfc')];
+                case 33:
+                    _a.sent();
                     return [2 /*return*/];
             }
         });
@@ -15763,25 +15766,6 @@ catch (e) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15823,7 +15807,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.buildAndPublish = exports.isLocalUpgraded = exports.installCore = void 0;
-var core = __importStar(__nccwpck_require__(2186));
 var semver_1 = __importDefault(__nccwpck_require__(1383));
 var child_process_1 = __nccwpck_require__(2081);
 var betaList = ['beta', 'hotfix', 'stg'];
@@ -15918,7 +15901,8 @@ function buildAndPublish(path) {
                 case 6:
                     e_2 = _b.sent();
                     error = e_2;
-                    core.error("Cannot publish package ".concat(name, ", reason: ").concat(error.message));
+                    console.log("Cannot publish package ".concat(name, ", reason:"));
+                    console.log(error);
                     return [3 /*break*/, 7];
                 case 7: return [2 /*return*/];
             }
@@ -15950,11 +15934,18 @@ function pushTag(tag) {
         });
     });
 }
+function spiltErrorMessage(output) {
+    return output
+        .split('\n')
+        .filter(function (line) { return line.toLowerCase().includes('error'); })
+        .join('\n');
+}
 function command(cmd, args, cwd) {
     return new Promise(function (resolve, reject) {
         var command = (0, child_process_1.spawn)(cmd, args, { cwd: cwd });
         var stdout = '';
         var stderr = '';
+        var error = '';
         command.stdout.on('data', function (data) {
             stdout += data.toString();
         });
@@ -15962,11 +15953,18 @@ function command(cmd, args, cwd) {
             stderr += data.toString();
         });
         command.on('error', function (err) {
+            console.log('error:');
+            console.log(spiltErrorMessage(stdout));
+            console.log(spiltErrorMessage(stderr));
             reject(err);
         });
         command.on('exit', function (code) {
-            if (code !== 0)
-                reject(new Error(stderr));
+            if (code !== 0) {
+                console.log('exit:', code);
+                error += spiltErrorMessage(stdout);
+                error += spiltErrorMessage(stderr);
+                reject(new Error(error));
+            }
             resolve(stdout);
         });
     });

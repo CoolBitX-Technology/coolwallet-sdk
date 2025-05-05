@@ -1,5 +1,6 @@
-import { apdu, tx } from '@coolwallet/core';
+import { tx } from '@coolwallet/core';
 import { SignTxData } from './config/types';
+import { SignatureType } from '@coolwallet/core/lib/transaction';
 
 /*
  * sign XTZ Operation in CoolWallet
@@ -7,8 +8,7 @@ import { SignTxData } from './config/types';
 export const signTransaction = async (
   signTxData: SignTxData,
   script: string,
-  argument: string,
-  publicKey: string
+  argument: string
 ): Promise<string> => {
   const {
     transport, appPrivateKey, appId, confirmCB, authorizedCB
@@ -16,26 +16,25 @@ export const signTransaction = async (
 
   const preActions = [];
   const sendScript = async () => {
-    await apdu.tx.sendScript(transport, script);
+    await tx.command.sendScript(transport, script);
   };
 
   preActions.push(sendScript);
 
-  const sendArgument = async () => apdu.tx.executeScript(
+  const sendArgument = async () => tx.command.executeScript(
     transport,
     appId,
     appPrivateKey,
     argument
   );
 
-  const signature = await tx.flow.getSingleSignatureFromCoolWallet(
+  const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
     sendArgument,
-    true,
+    SignatureType.EDDSA,
     confirmCB,
     authorizedCB,
-    false
   );
   
   return signature.toString('hex');

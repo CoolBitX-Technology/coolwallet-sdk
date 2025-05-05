@@ -40,9 +40,9 @@ export default async function signTransferTransaction(signTxData: SignTxType): P
     transport,
     preActions,
     actions,
+    SignatureType.Schnorr,
     confirmCB,
     authorizedCB,
-    SignatureType.Schnorr
   )) as Array<Buffer>;
 
   transaction.addSignatures(signatures);

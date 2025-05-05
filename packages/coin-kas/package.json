@@ -1,11 +1,13 @@
 {
   "name": "@coolwallet/kas",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "Coolwallet Kaspa sdk",
   "main": "lib/index.js",
   "scripts": {
     "test": "NODE_ENV=development jest --runInBand",
+    "test-go": "NODE_ENV=development CARD=go jest --runInBand",
     "ci-test": "NODE_ENV=production jest --runInBand",
+    "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
     "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit",
     "build:types": "tsc --emitDeclarationOnly",
     "build:ts": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
@@ -24,18 +26,15 @@
   ],
   "author": "coolwallet-team",
   "license": "ISC",
-  "peerDependencies": {
-    "@coolwallet/core": "^1.1.31"
-  },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
-    "@babel/preset-typescript": "^7.7.7",
-    "@coolwallet/core": "^1.1.31"
+    "@babel/preset-typescript": "^7.7.7"
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
+    "@coolwallet/core": "^2.0.0",
     "@types/bn.js": "^5.1.1",
     "bignumber.js": "^8.0.2",
     "bitcoinjs-lib": "^6.1.5",

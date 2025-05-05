@@ -1,6 +1,5 @@
-import { Transport } from '@coolwallet/core';
+import { CardType, Transport } from '@coolwallet/core';
 import { initialize, getTxDetail, DisplayBuilder } from '@coolwallet/testing-library';
-import * as bip39 from 'bip39';
 import isEmpty from 'lodash/isEmpty';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import * as utils from 'web3-utils';
@@ -16,16 +15,22 @@ const CHAIN_ID = 1;
 describe('Test ETH SDK', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
+  let cardType: CardType;
   const wallet = new Wallet();
   const eth = new ETH();
   const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
   beforeAll(async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    transport = (await createTransport())!;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
     props = await initialize(transport, mnemonic);
     await wallet.setMnemonic(mnemonic);
   });
@@ -58,6 +63,7 @@ describe('Test ETH SDK', () => {
     const signature = await eth.signTransaction(client);
     const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
     expect(signature).toEqual(expectedSignature);
+    if (cardType !== CardType.Pro) return;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const txDetail = await getTxDetail(transport, props.appId);
@@ -99,6 +105,7 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -149,6 +156,7 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -211,6 +219,7 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -252,6 +261,7 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -290,6 +300,7 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signTransaction(client);
       const expectedSignature = await wallet.signTransaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -317,6 +328,7 @@ describe('Test ETH SDK', () => {
     const signature = await eth.signTypedData(client);
     const expectedSignature = await wallet.signTypedData(typedData);
     expect(signature).toEqual(expectedSignature);
+    if (cardType !== CardType.Pro) return;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const txDetail = await getTxDetail(transport, props.appId);
@@ -342,6 +354,7 @@ describe('Test ETH SDK', () => {
     const signature = await eth.signMessage(client);
     const expectedSignature = await wallet.signMessage(message);
     expect(signature).toEqual(expectedSignature);
+    if (cardType !== CardType.Pro) return;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const txDetail = await getTxDetail(transport, props.appId);
@@ -375,8 +388,11 @@ describe('Test ETH SDK', () => {
     };
 
     const signature = await eth.signEIP1559Transaction(client);
+    console.log('signature: ' + signature);
     const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, CHAIN_ID);
+    console.log('expectedSignature: ' + expectedSignature);
     expect(signature).toEqual(expectedSignature);
+    if (cardType !== CardType.Pro) return;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const txDetail = await getTxDetail(transport, props.appId);
@@ -418,6 +434,7 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signEIP1559Transaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -458,6 +475,7 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signEIP1559Transaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);
@@ -496,6 +514,7 @@ describe('Test ETH SDK', () => {
       const signature = await eth.signEIP1559Transaction(client);
       const expectedSignature = await wallet.signEIP1559Transaction(client.transaction, CHAIN_ID);
       expect(signature).toEqual(expectedSignature);
+      if (cardType !== CardType.Pro) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txDetail = await getTxDetail(transport, props.appId);

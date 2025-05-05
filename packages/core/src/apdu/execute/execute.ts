@@ -1,9 +1,10 @@
 import isNil from 'lodash/isNil';
 import { CommandType } from './command';
 import * as util from '../../utils';
-import Transport from '../../transport/index';
+import Transport, { CardType } from '../../transport/index';
 import { SDKError } from '../../error/errorHandle';
 import { target } from '../../config/param';
+import { error } from '../..';
 
 const commandCounter = {
   command: '',
@@ -13,7 +14,7 @@ const commandCounter = {
 /**
  * @param {Transport} transport
  * @param {{command:string, data:string}} apdu
- * @param {string} commandType SE or MCU
+ * @param {string} executedTarget SE or MCU
  */
 export const executeAPDU = async (
   transport: Transport,
@@ -85,8 +86,8 @@ export const executeAPDU = async (
     const msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();
     return { statusCode, msg, outputData };
-  } catch (error) {
-    throw new SDKError(executeAPDU.name, `executeAPDU error: ${error}`);
+  } catch (err) {
+    throw new SDKError(executeAPDU.name, `executeAPDU error: ${err}`);
   }
 };
 
@@ -111,6 +112,9 @@ export const executeCommand = async (
   params2?: string
   // forceUseSC: boolean = false,
 ): Promise<{ statusCode: string; msg: string; outputData: string }> => {
+  if (transport.cardType === CardType.Go && executedTarget === target.MCU) {
+    throw new error.SDKError(executeCommand.name, `CoolWallet Go does not support MCU command.`);
+  }
   const P1 = params1 ?? command.P1;
   const P2 = params2 ?? command.P2;
 

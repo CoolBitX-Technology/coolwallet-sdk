@@ -1,8 +1,7 @@
-import * as stringUtil from "./stringUtil";
+import * as stringUtil from './stringUtil';
 const { sha3_256 } = require('js-sha3');
 const elliptic = require('elliptic');
 const ec = new elliptic.ec('secp256k1');
-
 
 export const pubKeyToAddress = (compressedPubkey: string): string => {
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
@@ -12,7 +11,6 @@ export const pubKeyToAddress = (compressedPubkey: string): string => {
   const address = `hx${sha3_256(publicKey).slice(-40)}`;
   return address;
 };
-
 
 export const generateRawTx = async (
   canonicalSignature: any,
@@ -45,12 +43,10 @@ export function generateHashKey(obj: any): string {
   return result;
 }
 
-
 function objTraverse(obj: any) {
   let result = '';
   result += '{';
-  let keys;
-  keys = Object.keys(obj);
+  const keys = Object.keys(obj);
   keys.sort();
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
@@ -129,11 +125,7 @@ function escapeString(value: string) {
   return newString;
 }
 
-const generateFullCanonicalSig = (
-  canonicalSignature: any,
-  phraseToSign: string,
-  compressedPubkey: string
-) => {
+const generateFullCanonicalSig = (canonicalSignature: any, phraseToSign: string, compressedPubkey: string) => {
   const keyPair = ec.keyFromPublic(compressedPubkey, 'hex');
 
   const hashcode = sha3_256.update(phraseToSign).hex();
@@ -155,4 +147,3 @@ const generateFullCanonicalSig = (
 
   return r + s + v;
 };
-
