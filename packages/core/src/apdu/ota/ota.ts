@@ -65,7 +65,9 @@ export const checkUpdate = async (transport: Transport): Promise<SEUpdateInfo> =
 
 const safeCheckMainAppletExists = async (transport: Transport): Promise<boolean> => {
   try {
-    return !!(await selectApplet(transport, getMainAppletAid(transport.cardType)));
+    const appletStatus = await selectApplet(transport, getMainAppletAid(transport.cardType));
+    const hasApplet = appletStatus.status;
+    return hasApplet;
   } catch (e) {
     console.error(e);
     return false;
