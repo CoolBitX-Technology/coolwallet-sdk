@@ -1,7 +1,8 @@
 # Changelog
 
-## 2.0.1-beta.2
+## 2.0.1
 
+- 🐛 fix: create wallet from seed issue (Go SE 13) (#997)
 - 🐛 fix: firmware update failed if no applet (#1001)
 
 ## 1.2.0-beta.0
