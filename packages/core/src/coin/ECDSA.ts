@@ -2,14 +2,15 @@ import { getPublicKeyByPath, derivePubKey } from './derive';
 import Transport from '../transport';
 import * as utils from '../utils';
 import { PathType } from '../config/param';
-
-const EC = require('elliptic').ec;
+import { CanonicalSignature } from './config/types';
+import { ec as EC } from 'elliptic';
+import BN from 'bn.js';
 
 export default class ECDSACoin {
   coinType: string;
 
   accExtendPublicKeyMap: Map<number, { publicKey: string; chainCode: string; indexPublicKeys: Map<number, string> }>;
-  ec: any;
+  ec: EC;
 
   constructor(coinType: string, curvePara?: string) {
     this.coinType = coinType;
@@ -99,4 +100,18 @@ export default class ECDSACoin {
   reset = (): void => {
     this.accExtendPublicKeyMap.clear();
   };
+
+  getRecoveryParam(
+    message: string,
+    canonicalSignature: CanonicalSignature,
+    publicKey: string
+  ): number {
+    const keyPair = this.ec.keyFromPublic(publicKey, 'hex');
+    const recoveryParam = this.ec.getKeyRecoveryParam(
+      Buffer.from(message, 'hex') as unknown as Error,
+      canonicalSignature,
+      keyPair.getPublic() as any,
+    );
+    return recoveryParam;
+  }
 }
