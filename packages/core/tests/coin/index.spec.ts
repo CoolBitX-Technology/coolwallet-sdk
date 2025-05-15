@@ -18,8 +18,7 @@ describe('Test signECDSA', () => {
   let transport: Transport;
 
   beforeAll(async () => {
-    // console.log('process.env.CARD', process.env.CARD);
-    // if (process.env.CARD !== 'go') throw new Error('CARD must be go');
+    if (process.env.CARD !== 'go') throw new Error('CARD must be go');
     const cardType = CardType.Go;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     transport = (await createTransport('http://localhost:9527', cardType))!;

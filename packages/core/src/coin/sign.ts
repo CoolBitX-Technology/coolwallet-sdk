@@ -1,4 +1,4 @@
-import { config, tx, utils } from '..';
+import { CardType, config, tx, utils } from '..';
 import { ECDSA } from './config/params';
 import { SignTxData, SignTxResult } from './config/types';
 
@@ -16,6 +16,10 @@ export async function signECDSA(signTxData: SignTxData): Promise<SignTxResult> {
     confirmCB,
     authorizedCB,
   } = signTxData;
+
+  if (transport.cardType !== CardType.Go) {
+    throw new Error(`signECDSA >>> not support card type: ${transport.cardType}`);
+  }
 
   const script = ECDSA.script + ECDSA.signature;
   const path = await utils.getPath(coinType, addressIndex, depth, pathType);
