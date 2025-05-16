@@ -10,7 +10,7 @@ export async function signECDSA(coinType: string, signTxHashData: SignTxHashData
     purpose = 44,
     depth = 5,
     pathType = config.PathType.BIP32,
-    txHash: hashTx,
+    txHash,
     appId,
     appPrivateKey,
     signatureType = SignatureType.Canonical,
@@ -25,7 +25,7 @@ export async function signECDSA(coinType: string, signTxHashData: SignTxHashData
   const script = ECDSA.script + ECDSA.signature;
   const path = await utils.getPath(coinType, addressIndex, depth, pathType, purpose);
   const pathByteLength = (path.length / 2).toString(16).padStart(2, '0');
-  const argument = pathByteLength + path + hashTx;
+  const argument = pathByteLength + path + txHash;
 
   const preActions = [];
   const sendScript = async () => {
