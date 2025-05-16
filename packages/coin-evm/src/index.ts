@@ -246,7 +246,7 @@ class Evm extends COIN.ECDSACoin {
   }
 }
 
-export type * from './transaction/types';
+export * from './transaction/types';
 export * from './utils/signature';
 export * from './utils/rawTransaction';
 export * as CHAIN from './chain';
