@@ -4,21 +4,21 @@ import { SignatureType } from '../../transaction';
 
 export { Transport };
 
-export type SignTxData = {
+export type SignTxHashData = {
   transport: Transport;
-  coinType: string;
   addressIndex: number;
   depth?: number;
+  purpose?: number;
   pathType?: PathType;
   appPrivateKey: string;
   appId: string;
-  message: string;
-  signatureType: SignatureType;
+  txHash: string;
+  signatureType?: SignatureType;
   confirmCB?(): void;
   authorizedCB?(): void;
 };
 
-export type SignTxResult = CanonicalSignature | Buffer;
+export type SignTxHashResult = CanonicalSignature | Buffer;
 
 export type CanonicalSignature = {
   r: string;
