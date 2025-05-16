@@ -1,30 +1,32 @@
 import { CardType, config, tx, utils } from '..';
+import { SignatureType } from '../transaction';
+import { removeHex0x } from '../utils';
 import { ECDSA } from './config/params';
-import { SignTxData, SignTxResult } from './config/types';
+import { SignTxHashData, SignTxHashResult } from './config/types';
 
-export async function signECDSA(signTxData: SignTxData): Promise<SignTxResult> {
+export async function signECDSA(coinType: string, signTxHashData: SignTxHashData): Promise<SignTxHashResult> {
   const {
     transport,
-    coinType,
     addressIndex,
+    purpose = 44,
     depth = 5,
     pathType = config.PathType.BIP32,
-    message,
+    txHash,
     appId,
     appPrivateKey,
-    signatureType,
+    signatureType = SignatureType.Canonical,
     confirmCB,
     authorizedCB,
-  } = signTxData;
+  } = signTxHashData;
 
   if (transport.cardType !== CardType.Go) {
     throw new Error(`signECDSA >>> not support card type: ${transport.cardType}`);
   }
 
   const script = ECDSA.script + ECDSA.signature;
-  const path = await utils.getPath(coinType, addressIndex, depth, pathType);
+  const path = await utils.getPath(coinType, addressIndex, depth, pathType, purpose);
   const pathByteLength = (path.length / 2).toString(16).padStart(2, '0');
-  const argument = pathByteLength + path + message;
+  const argument = pathByteLength + path + removeHex0x(txHash);
 
   const preActions = [];
   const sendScript = async () => {

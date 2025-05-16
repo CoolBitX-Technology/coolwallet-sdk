@@ -2,9 +2,9 @@ import { getPublicKeyByPath, derivePubKey } from './derive';
 import Transport from '../transport';
 import * as utils from '../utils';
 import { PathType } from '../config/param';
-import { CanonicalSignature } from './config/types';
+import { SignTxHashData, SignTxHashResult } from './config/types';
 import { ec as EC } from 'elliptic';
-import BN from 'bn.js';
+import { signECDSA } from './sign';
 
 export default class ECDSACoin {
   coinType: string;
@@ -101,17 +101,10 @@ export default class ECDSACoin {
     this.accExtendPublicKeyMap.clear();
   };
 
-  getRecoveryParam(
-    message: string,
-    canonicalSignature: CanonicalSignature,
-    publicKey: string
-  ): number {
-    const keyPair = this.ec.keyFromPublic(publicKey, 'hex');
-    const recoveryParam = this.ec.getKeyRecoveryParam(
-      Buffer.from(message, 'hex') as unknown as Error,
-      canonicalSignature,
-      keyPair.getPublic() as any,
-    );
-    return recoveryParam;
+  /**
+   * sign tx hash with ecdsa
+   */
+  async signTxHash(signTxHashData: SignTxHashData): Promise<SignTxHashResult> {
+    return signECDSA(this.coinType, signTxHashData);
   }
 }
