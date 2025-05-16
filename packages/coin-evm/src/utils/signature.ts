@@ -36,6 +36,20 @@ export const composeSignedTransaction = (
   return `${prefix}${Buffer.from(serializedTx).toString('hex')}`;
 };
 
+export const getRecoveryParam = async (
+  dataHash: Buffer,
+  canonicalSignature: { r: string; s: string },
+  compressedPubkey?: string
+) => {
+  const keyPair = secp256k1.keyFromPublic(compressedPubkey!, 'hex');
+  const recoveryParam = secp256k1.getKeyRecoveryParam(
+    dataHash as unknown as Error,
+    canonicalSignature,
+    keyPair.getPublic() as any
+  );
+  return recoveryParam;
+};
+
 /**
  * Generate Canonical Signature from Der Signature
  *
@@ -47,16 +61,11 @@ export const composeSignedTransaction = (
 export const genEthSigFromSESig = async (
   canonicalSignature: { r: string; s: string },
   payload: Buffer,
-  compressedPubkey?: string
+  compressedPubkey?: string,
+  alreadyHash?: boolean,
 ): Promise<{ v: number; r: string; s: string }> => {
-  const data = createKeccakHash('keccak256').update(payload).digest();
-  const keyPair = secp256k1.keyFromPublic(compressedPubkey!, 'hex');
-
-  const recoveryParam = secp256k1.getKeyRecoveryParam(
-    data as unknown as Error,
-    canonicalSignature,
-    keyPair.getPublic() as any
-  );
+  const dataHash = alreadyHash ? payload : createKeccakHash('keccak256').update(payload).digest();
+  const recoveryParam = await getRecoveryParam(dataHash, canonicalSignature, compressedPubkey);
   const v = recoveryParam;
   const { r } = canonicalSignature;
   const { s } = canonicalSignature;
