@@ -212,3 +212,10 @@ export const createWalletByMnemonic = async (
  * @returns {Promise<void>}
  */
 export const delay = (d: number): Promise<void> => new Promise((r) => setTimeout(r, d));
+
+/* 
+ * remove 0x prefix from hex string
+ * @param {string} hex - The hex string to remove the 0x prefix from.
+ * @returns {string} The hex string without the 0x prefix.
+ */
+export const removeHex0x = (hex: string) => (hex.slice(0, 2) === '0x' ? hex.slice(2) : hex);

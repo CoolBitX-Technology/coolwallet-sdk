@@ -1,5 +1,6 @@
 import { CardType, config, tx, utils } from '..';
 import { SignatureType } from '../transaction';
+import { removeHex0x } from '../utils';
 import { ECDSA } from './config/params';
 import { SignTxHashData, SignTxHashResult } from './config/types';
 
@@ -25,7 +26,7 @@ export async function signECDSA(coinType: string, signTxHashData: SignTxHashData
   const script = ECDSA.script + ECDSA.signature;
   const path = await utils.getPath(coinType, addressIndex, depth, pathType, purpose);
   const pathByteLength = (path.length / 2).toString(16).padStart(2, '0');
-  const argument = pathByteLength + path + txHash;
+  const argument = pathByteLength + path + removeHex0x(txHash);
 
   const preActions = [];
   const sendScript = async () => {
