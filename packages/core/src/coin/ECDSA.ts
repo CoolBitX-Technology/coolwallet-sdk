@@ -2,7 +2,7 @@ import { getPublicKeyByPath, derivePubKey } from './derive';
 import Transport from '../transport';
 import * as utils from '../utils';
 import { PathType } from '../config/param';
-import { CanonicalSignature, SignTxHashData, SignTxHashResult } from './config/types';
+import { SignTxHashData, SignTxHashResult } from './config/types';
 import { ec as EC } from 'elliptic';
 import { signECDSA } from './sign';
 

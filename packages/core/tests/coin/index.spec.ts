@@ -19,7 +19,7 @@ const getRecoveryParam = (txHash: string, canonicalSignature: CanonicalSignature
   const recoveryParam = secp256k1.getKeyRecoveryParam(
     Buffer.from(txHash, 'hex') as unknown as Error,
     canonicalSignature,
-    keyPair.getPublic() as any,
+    keyPair.getPublic() as unknown as any,
   );
   return recoveryParam;
 
