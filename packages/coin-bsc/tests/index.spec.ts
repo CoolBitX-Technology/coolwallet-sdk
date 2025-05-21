@@ -32,7 +32,7 @@ describe('Test BSC SDK', () => {
   describe('Test Get Address', () => {
     it('index 0 address', async () => {
       const address = await bscSDK.getAddress(transport, props.appPrivateKey, props.appId, 0);
-      expect(address).toMatchInlineSnapshot(`"test"`);
+      expect(address).toMatchInlineSnapshot(`"0xD636FafC6a63aCb618d367CA1CBa10f660AD8820"`);
     });
   });
 
