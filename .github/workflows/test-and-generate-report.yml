@@ -162,3 +162,15 @@ jobs:
 
     - name: Set report URL
       run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"
+
+    - name: Check for test failures
+      if: always()
+      run: |
+        if grep -r '"status":"failed"' allure-results; then
+          echo "HAS_TEST_FAILURES=true" >> $GITHUB_ENV
+          FAILED_COUNT=$(grep -r '"status":"failed"' allure-results | wc -l)
+          echo "FAILED_COUNT=$FAILED_COUNT" >> $GITHUB_ENV
+          echo "發現 $FAILED_COUNT 個失敗的測試案例" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "沒有發現失敗的測試案例" >> $GITHUB_STEP_SUMMARY
+        fi
