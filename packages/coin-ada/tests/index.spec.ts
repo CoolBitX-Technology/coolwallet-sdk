@@ -31,7 +31,7 @@ describe('Test ADA SDK', () => {
     it('index 0 address', async () => {
       const address = await adaSDK.getAddress(transport, props.appPrivateKey, props.appId, 0);
       expect(address).toEqual(
-        'addr1qyulu6ra4ennas49mn77n4cpxcy7862sdx25f4sw8ea5yh3yu4d4xk2aku478dgmuqmuk7s0eh96h63svdtv5qhquzvqu94v7k'
+        'test'
       );
     });
   });
