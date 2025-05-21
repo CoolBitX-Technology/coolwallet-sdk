@@ -22,7 +22,8 @@ export default class BTC extends COIN.ECDSACoin implements COIN.Coin {
     purpose?: number
   ): Promise<string> {
     let publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex, purpose);
-    if (scriptType === ScriptType.P2TR) {
+    //if (scriptType === ScriptType.P2TR) { for test
+    if (scriptType === ScriptType.P2SH_P2WPKH) {
       publicKey = tweak(publicKey);
     }
     const { address } = pubkeyToAddressAndOutScript(Buffer.from(publicKey, 'hex'), scriptType);
