@@ -12,7 +12,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-      upload_status: ${{ steps.set_status.outputs.upload_status }} 
+      upload_status: ${{ steps.set_status.outputs.upload_status }}
+      has_test_failures: ${{ steps.test_execution.outputs.has_test_failures }} 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -79,17 +80,30 @@ jobs:
       run: ./scripts/install-test-fixture.sh
 
     - name: Run tests for all modified coin project
+      id: test_execution
       run: |
+        ALL_TESTS_PASSED=true
+
         for modified_coin in ${{ steps.modified_files.outputs.modified_coins }}; do
           if [ -f "${{ github.workspace }}/sdk/$modified_coin/tests/index.spec.ts" ]; then
             echo "Test file found for = $modified_coin"
             cd ${{ github.workspace }}/sdk/$modified_coin
             npm install
-            npm run ci-test-report || true
+            npm run ci-test-report
+            if [ $? -ne 0 ]; then
+              ALL_TESTS_PASSED=false
+              echo "Tests for $modified_coin failed or contained failing tests"
+            fi  
           else
             echo "Test file not found for $modified_coin"
           fi
         done
+
+        if [ "$ALL_TESTS_PASSED" = "false" ]; then
+          echo "HAS_TEST_FAILURES=true" >> $GITHUB_OUTPUT
+        else
+          echo "HAS_TEST_FAILURES=false" >> $GITHUB_OUTPUT
+        fi
 
     - name: Handing junit report
       working-directory: sdk
@@ -161,16 +175,16 @@ jobs:
         publish_dir: allure-history
 
     - name: Set report URL
-      run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"
+      run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}" >> $GITHUB_ENV
 
-    - name: Check for test failures
+    - name: Report error to Slack
       if: always()
       run: |
-        if grep -r '"status":"failed"' allure-results; then
-          echo "HAS_TEST_FAILURES=true" >> $GITHUB_ENV
-          FAILED_COUNT=$(grep -r '"status":"failed"' allure-results | wc -l)
-          echo "FAILED_COUNT=$FAILED_COUNT" >> $GITHUB_ENV
-          echo "發現 $FAILED_COUNT 個失敗的測試案例" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ needs.build-and-push.outputs.has_test_failures }}" = "true" ]; then
+          echo "::warning::測試執行中發現失敗案例"
+          echo "::warning::測試報告 URL: $REPORT_URL"
+          echo "測試報告 URL: $REPORT_URL" >> $GITHUB_STEP_SUMMARY
         else
-          echo "沒有發現失敗的測試案例" >> $GITHUB_STEP_SUMMARY
+          echo "::notice::所有測試都已通過"
+          echo "測試報告 URL: $REPORT_URL" >> $GITHUB_STEP_SUMMARY
         fi
