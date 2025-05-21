@@ -14,6 +14,7 @@ jobs:
     outputs:
       upload_status: ${{ steps.set_status.outputs.upload_status }}
       has_test_failures: ${{ steps.test_execution.outputs.has_test_failures }} 
+      failed_coins: ${{ steps.test_execution.outputs.failed_coins }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -83,6 +84,7 @@ jobs:
       id: test_execution
       run: |
         ALL_TESTS_PASSED=true
+        FAILED_COINS=""
 
         for modified_coin in ${{ steps.modified_files.outputs.modified_coins }}; do
           if [ -f "${{ github.workspace }}/sdk/$modified_coin/tests/index.spec.ts" ]; then
@@ -90,18 +92,27 @@ jobs:
             cd ${{ github.workspace }}/sdk/$modified_coin
             npm install
             npm run ci-test-report || {
-              ALL_TESTS_PASSED=false
-              echo "Tests for $modified_coin failed or contained failing tests"
-            }  
+                ALL_TESTS_PASSED=false
+                COIN_NAME=$(basename "$modified_coin")
+                if [ -z "$FAILED_COINS" ]; then
+                  FAILED_COINS="$COIN_NAME"
+                else
+                  FAILED_COINS="$FAILED_COINS, $COIN_NAME"
+                fi
+                echo "::warning::Tests for $COIN_NAME failed"
+              }
           else
             echo "Test file not found for $modified_coin"
           fi
         done
 
         if [ "$ALL_TESTS_PASSED" = "false" ]; then
-          echo "HAS_TEST_FAILURES=true" >> $GITHUB_OUTPUT
+          echo "has_test_failures=true" >> $GITHUB_OUTPUT
+          echo "failed_coins=$FAILED_COINS" >> $GITHUB_OUTPUT
+          echo "::error::Some tests failed: $FAILED_COINS"
         else
-          echo "HAS_TEST_FAILURES=false" >> $GITHUB_OUTPUT
+          echo "has_test_failures=false" >> $GITHUB_OUTPUT
+          echo "::notice::All tests passed successfully"
         fi
 
     - name: Handing junit report
@@ -176,14 +187,35 @@ jobs:
     - name: Set report URL
       run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}" >> $GITHUB_ENV
 
-    - name: Report error to Slack
-      if: always()
-      run: |
-        if [ "${{ needs.build-and-push.outputs.has_test_failures }}" = "true" ]; then
-          echo "::warning::測試執行中發現失敗案例"
-          echo "::warning::測試報告 URL: $REPORT_URL"
-          echo "測試報告 URL: $REPORT_URL" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "::notice::所有測試都已通過"
-          echo "測試報告 URL: $REPORT_URL" >> $GITHUB_STEP_SUMMARY
-        fi
+    - name: Report to Slack
+      if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
+      uses: 8398a7/action-slack@v3
+      with:
+          status: custom
+          fields: repo,commit,author,took
+          custom_payload: |
+            {
+              "attachments": [
+                {
+                  "color": "danger",
+                  "title": "Test Failure Notification",
+                  "text": "Failed coins*: ${{ needs.build-and-push.outputs.failed_coins }}",
+                  "actions": [
+                    {
+                      "type": "button",
+                      "text": "Test Report",
+                      "url": "${{ env.REPORT_URL }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": "PR",
+                      "url": "${{ github.event.pull_request.html_url }}"
+                    }
+                  ],
+                  "footer": "CoolWallet SDK Test",
+                  "ts": "${{ github.event.pull_request.updated_at }}"
+                }
+              ]
+            }
+      env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COOLBITX_BOT }}
