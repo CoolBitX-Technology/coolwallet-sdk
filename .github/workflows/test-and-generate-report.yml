@@ -89,11 +89,10 @@ jobs:
             echo "Test file found for = $modified_coin"
             cd ${{ github.workspace }}/sdk/$modified_coin
             npm install
-            npm run ci-test-report
-            if [ $? -ne 0 ]; then
+            npm run ci-test-report || {
               ALL_TESTS_PASSED=false
               echo "Tests for $modified_coin failed or contained failing tests"
-            fi  
+            }  
           else
             echo "Test file not found for $modified_coin"
           fi
