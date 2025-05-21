@@ -199,7 +199,7 @@ jobs:
                 {
                   "color": "danger",
                   "title": "Test Failure Notification",
-                  "text": "Failed coins*: ${{ needs.build-and-push.outputs.failed_coins }}",
+                  "text": "Failed coins: ${{ needs.build-and-push.outputs.failed_coins }}",
                   "actions": [
                     {
                       "type": "button",
