@@ -215,3 +215,9 @@ jobs:
             }
       env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COOLBITX_BOT }}
+
+    - name: Mark workflow as failed
+      if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
+      run: |
+        echo "::error::Test execution failed, please check the test report"
+        exit 1
