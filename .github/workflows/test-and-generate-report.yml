@@ -131,18 +131,14 @@ jobs:
       id: set_status
       run: |
         if [ "${{ steps.upload_result.outputs.artifact-id }}" == "" ]; then
-          echo "upload_status=false" >> $GITHUB_ENV
-          echo "::set-output name=upload_status::false"
-          echo "upload_status is false"
+          echo "upload_status=false" >> $GITHUB_OUTPUT
         else
-          echo "upload_status=true" >> $GITHUB_ENV
-          echo "::set-output name=upload_status::true"
-          echo "upload_status is true"
+          echo "upload_status=true" >> $GITHUB_OUTPUT
         fi       
 
     - name: Print upload status
       run: |
-        echo "The upload status is $UPLOAD_STATUE"
+        echo "The upload status is ${{ steps.set_status.outputs.upload_status }}"
   
   report:
     needs: build-and-push
@@ -150,7 +146,7 @@ jobs:
     if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
     steps:            
     - name: Get Allure history
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       if: always()
       continue-on-error: true
       with:
