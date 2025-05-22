@@ -39,7 +39,7 @@ describe('Test BTC SDK', () => {
         ScriptType.P2PKH,
         ADDRESS_INDEX
       );
-      expect(p2pkh).toMatchInlineSnapshot(`"test"`);
+      expect(p2pkh).toMatchInlineSnapshot(`"1CMC68vxfTR6hYiaUNvgmJ6MSfFantVUtT"`);
     });
 
     it('P2SH_P2WPKH', async () => {
