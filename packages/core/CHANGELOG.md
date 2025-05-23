@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.3
+- feat(core): add hooks to BleTransport
+
 ## 2.0.2
 - implement signECDSA to improve signing speed
 
