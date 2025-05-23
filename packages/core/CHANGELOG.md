@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+- implement signECDSA to improve signing speed
+
 ## 2.0.1
 
 - 🐛 fix: create wallet from seed issue (Go SE 13) (#997)
