@@ -16,6 +16,10 @@ interface Transport {
   request(command: string, packets: string): Promise<string>;
 }
 
+interface BleTransportInitOptoins {
+  enablePeripheralLogs?: boolean
+}
+
 /**
  * Transport is an abstract class.
  * All class that implement this abstract class will need to implements following methods:
@@ -43,10 +47,10 @@ abstract class BleTransport implements Transport {
   device: TransportDevice;
   cardType: CardType;
 
-  constructor(device: TransportDevice, cardType?: CardType) {
+  constructor(device: TransportDevice, options?: BleTransportInitOptoins) {
     this.device = device;
-    this.peripheral = new PeripheralRequest(this);
-    this.cardType = cardType ?? CardType.Pro;
+    this.peripheral = new PeripheralRequest(this, options?.enablePeripheralLogs);
+    this.cardType = CardType.Pro;
   }
 
   abstract sendCommandToCard(command: number[]): Promise<void>;
