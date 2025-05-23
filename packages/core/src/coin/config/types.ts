@@ -1,4 +1,4 @@
-import { Transport } from '@coolwallet/core';
+import { Transport } from '../../index';
 import { PathType } from '../../config';
 import { SignatureType } from '../../transaction';
 
