@@ -25,12 +25,11 @@ const getRecoveryParam = (txHash: string, canonicalSignature: CanonicalSignature
 
 };
 
-describe('Test signECDSA', () => {
+(process.env.CARD === 'go' ? describe : describe.skip)('Test signECDSA', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
 
   beforeAll(async () => {
-    if (process.env.CARD !== 'go') throw new Error('CARD must be go');
     const cardType = CardType.Go;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     transport = (await createTransport('http://localhost:9527', cardType))!;

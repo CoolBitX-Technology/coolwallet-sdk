@@ -431,7 +431,14 @@ describe('Test EVM SDK', () => {
           const txDetail = await getTxDetail(transport, props.appId);
 
           let expectedTxDetail: string;
-          if (isEmpty(api.chain.layer2)) {
+          if (api.chain instanceof CustomEvm) {
+            expectedTxDetail = new DisplayBuilder()
+              .messagePage('TEST')
+              .messagePage('c' + api.chain.id)
+              .wrapPage('SMART', '')
+              .wrapPage('PRESS', 'BUTToN')
+              .finalize();
+          } else if (isEmpty(api.chain.layer2)) {
             expectedTxDetail = new DisplayBuilder()
               .messagePage('TEST')
               .messagePage(api.chain.symbol)
