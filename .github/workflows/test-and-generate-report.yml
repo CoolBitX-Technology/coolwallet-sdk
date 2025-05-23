@@ -12,7 +12,9 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-      upload_status: ${{ steps.set_status.outputs.upload_status }} 
+      upload_status: ${{ steps.set_status.outputs.upload_status }}
+      has_test_failures: ${{ steps.test_execution.outputs.has_test_failures }} 
+      failed_coins: ${{ steps.test_execution.outputs.failed_coins }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -79,17 +81,39 @@ jobs:
       run: ./scripts/install-test-fixture.sh
 
     - name: Run tests for all modified coin project
+      id: test_execution
       run: |
+        ALL_TESTS_PASSED=true
+        FAILED_COINS=""
+
         for modified_coin in ${{ steps.modified_files.outputs.modified_coins }}; do
           if [ -f "${{ github.workspace }}/sdk/$modified_coin/tests/index.spec.ts" ]; then
             echo "Test file found for = $modified_coin"
             cd ${{ github.workspace }}/sdk/$modified_coin
             npm install
-            npm run ci-test-report || true
+            npm run ci-test-report || {
+                ALL_TESTS_PASSED=false
+                COIN_NAME=$(basename "$modified_coin")
+                if [ -z "$FAILED_COINS" ]; then
+                  FAILED_COINS="$COIN_NAME"
+                else
+                  FAILED_COINS="$FAILED_COINS, $COIN_NAME"
+                fi
+                echo "::warning::Tests for $COIN_NAME failed"
+              }
           else
             echo "Test file not found for $modified_coin"
           fi
         done
+
+        if [ "$ALL_TESTS_PASSED" = "false" ]; then
+          echo "has_test_failures=true" >> $GITHUB_OUTPUT
+          echo "failed_coins=$FAILED_COINS" >> $GITHUB_OUTPUT
+          echo "::error::Some tests failed: $FAILED_COINS"
+        else
+          echo "has_test_failures=false" >> $GITHUB_OUTPUT
+          echo "::notice::All tests passed successfully"
+        fi
 
     - name: Handing junit report
       working-directory: sdk
@@ -107,18 +131,14 @@ jobs:
       id: set_status
       run: |
         if [ "${{ steps.upload_result.outputs.artifact-id }}" == "" ]; then
-          echo "upload_status=false" >> $GITHUB_ENV
-          echo "::set-output name=upload_status::false"
-          echo "upload_status is false"
+          echo "upload_status=false" >> $GITHUB_OUTPUT
         else
-          echo "upload_status=true" >> $GITHUB_ENV
-          echo "::set-output name=upload_status::true"
-          echo "upload_status is true"
+          echo "upload_status=true" >> $GITHUB_OUTPUT
         fi       
 
     - name: Print upload status
       run: |
-        echo "The upload status is $UPLOAD_STATUE"
+        echo "The upload status is ${{ steps.set_status.outputs.upload_status }}"
   
   report:
     needs: build-and-push
@@ -126,7 +146,7 @@ jobs:
     if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
     steps:            
     - name: Get Allure history
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       if: always()
       continue-on-error: true
       with:
@@ -161,4 +181,43 @@ jobs:
         publish_dir: allure-history
 
     - name: Set report URL
-      run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}"
+      run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}" >> $GITHUB_ENV
+
+    - name: Report to Slack
+      if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
+      uses: 8398a7/action-slack@v3
+      with:
+          status: custom
+          fields: repo,commit,author,took
+          custom_payload: |
+            {
+              "attachments": [
+                {
+                  "color": "danger",
+                  "title": "Test Failure Notification",
+                  "text": "Failed coins: ${{ needs.build-and-push.outputs.failed_coins }}",
+                  "actions": [
+                    {
+                      "type": "button",
+                      "text": "Test Report",
+                      "url": "${{ env.REPORT_URL }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": "PR",
+                      "url": "${{ github.event.pull_request.html_url }}"
+                    }
+                  ],
+                  "footer": "CoolWallet SDK Test",
+                  "ts": "${{ github.event.pull_request.updated_at }}"
+                }
+              ]
+            }
+      env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COOLBITX_BOT }}
+
+    - name: Mark workflow as failed
+      if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
+      run: |
+        echo "::error::Test execution failed, please check the test report"
+        exit 1
