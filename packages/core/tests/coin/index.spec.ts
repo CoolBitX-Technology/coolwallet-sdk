@@ -38,10 +38,6 @@ const getRecoveryParam = (txHash: string, canonicalSignature: CanonicalSignature
   });
 
   it('should sign eth transaction hash correctly', async () => {
-    if (process.env.CARD !== 'go') {
-      console.log('Skipping test as CARD is not go');
-      return;
-    }
     //    private static final String RLP_ARGUMENT = "a3255ecfe3f6727a62d938f4c29b2f73c361b26c" // to
     //            + "00000000000000989680" // value
     //            + "00000000000000000001" // gasTipCap
