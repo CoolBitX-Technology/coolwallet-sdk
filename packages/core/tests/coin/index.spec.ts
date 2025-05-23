@@ -25,12 +25,11 @@ const getRecoveryParam = (txHash: string, canonicalSignature: CanonicalSignature
 
 };
 
-describe('Test signECDSA', () => {
+(process.env.CARD === 'go' ? describe : describe.skip)('Test signECDSA', () => {
   let props: PromiseValue<ReturnType<typeof initialize>>;
   let transport: Transport;
 
   beforeAll(async () => {
-    if (process.env.CARD !== 'go') throw new Error('CARD must be go');
     const cardType = CardType.Go;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     transport = (await createTransport('http://localhost:9527', cardType))!;
@@ -39,6 +38,10 @@ describe('Test signECDSA', () => {
   });
 
   it('should sign eth transaction hash correctly', async () => {
+    if (process.env.CARD !== 'go') {
+      console.log('Skipping test as CARD is not go');
+      return;
+    }
     //    private static final String RLP_ARGUMENT = "a3255ecfe3f6727a62d938f4c29b2f73c361b26c" // to
     //            + "00000000000000989680" // value
     //            + "00000000000000000001" // gasTipCap
