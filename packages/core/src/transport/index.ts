@@ -57,8 +57,17 @@ abstract class BleTransport implements Transport {
 
   abstract readDataFromCard(): Promise<number[]>;
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  async onBeforeRequest(command: string, packets: string): Promise<void> {}
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  async onAfterRequest(result: string): Promise<void> {}
+
   request = async (command: string, packets: string): Promise<string> => {
-    return this.peripheral.sendAPDU(command, packets);
+    await this.onBeforeRequest(command, packets);
+    const result = await this.peripheral.sendAPDU(command, packets);
+    await this.onAfterRequest(result);
+    return result;
   };
 }
 
