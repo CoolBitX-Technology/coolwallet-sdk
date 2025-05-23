@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/testing-library",
-  "version": "2.0.0-beta.5",
+  "version": "2.0.0",
   "description": "Testing library for CoolWallet SDKs",
   "main": "lib/index.js",
   "scripts": {
