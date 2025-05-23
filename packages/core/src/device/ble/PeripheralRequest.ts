@@ -19,12 +19,19 @@ import { byteArrayToHex, hexToByteArray } from './utils';
  */
 export default class PeripheralRequest {
   private transport: BleTransport;
-
+  private enablePeripheralLogs?: boolean;
   private isFinish = true;
 
-  constructor(transport: BleTransport) {
+  constructor(transport: BleTransport, enablePeripheralLogs?: boolean) {
     this.transport = transport;
+    this.enablePeripheralLogs = enablePeripheralLogs;
   }
+
+  private debugLog = (message: string, ...args: unknown[]) => {
+    if (this.enablePeripheralLogs) {
+      console.debug(message, ...args);
+    }
+  };
 
   /**
    * Split the data into array and send them to card separately.
@@ -37,7 +44,7 @@ export default class PeripheralRequest {
       const from = pivot * PACKET_DATA_SIZE;
       const to = from + PACKET_DATA_SIZE;
       const data = packets.slice(from, to);
-      console.debug('_sendDataToCard data', data);
+      this.debugLog('PeripheralRequest.sendDataToCard >> data=', data);
       await this.transport.sendDataToCard([pivot + 1, data.length, ...data]);
     }
   }
@@ -52,7 +59,7 @@ export default class PeripheralRequest {
     while (true) {
       const resultDataRaw = await this.transport.readDataFromCard();
       const resultData = byteArrayToHex(resultDataRaw);
-      console.debug('_readDataFromCard resultData', resultData);
+      this.debugLog('PeripheralRequest.readDataFromCard >> resultData=', resultData);
       if (resultData === MCU_FINISH_CODE) {
         return depot;
       }
@@ -70,7 +77,7 @@ export default class PeripheralRequest {
     while (true) {
       if (this.isFinish) return '';
       const statusCode = await this.transport.checkCardStatus();
-      console.debug('_checkCardStatus statusCode', statusCode);
+      this.debugLog('PeripheralRequest.checkCardStatus >> statusCode=', statusCode);
       if (statusCode === COMMAND_FINISH_CODE) {
         this.isFinish = true;
         return this.readDataFromCard();
@@ -88,7 +95,7 @@ export default class PeripheralRequest {
    */
   sendAPDU = async (command: string, packets: string): Promise<string> => {
     const bytesCommand = hexToByteArray(command);
-    console.debug('sendCommandToCard statusCode', command);
+    this.debugLog('PeripheralRequest.sendAPDU >> command=', command);
     this.isFinish = false;
     await this.transport.sendCommandToCard(bytesCommand);
 
