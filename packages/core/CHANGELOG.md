@@ -1,10 +1,11 @@
 # Changelog
 
 ## 2.0.3
-- feat(core): add hooks to BleTransport
+- feat(core): add hooks to BleTransport (#1010)
+- fix(core): update cardInfo.cardanoSeed type from string to boolean (#1014)
 
 ## 2.0.2
-- implement signECDSA to improve signing speed
+- implement signECDSA to improve signing speed (#1005)
 
 ## 2.0.1
 
