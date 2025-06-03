@@ -101,7 +101,7 @@ export const getCardInfo = async (
   pairRemainTimes: number;
   accountDigest: string;
   accountDigest20?: string;
-  cardanoSeed?: string;
+  hasCardanoSeed?: boolean;
 }> => {
   try {
     const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_CARD_INFO, target.SE);
@@ -137,7 +137,7 @@ export const getCardInfo = async (
       pairRemainTimes,
       accountDigest,
     };
-    if (!isNil(bipEd25519IsInit)) set(result, 'cardanoSeed', bipEd25519IsInit === '01');
+    if (!isNil(bipEd25519IsInit)) set(result, 'hasCardanoSeed', bipEd25519IsInit === '01');
     if (!isNil(accountDigest20)) set(result, 'accountDigest20', accountDigest20);
 
     return result;
