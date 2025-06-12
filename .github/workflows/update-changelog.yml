@@ -43,9 +43,10 @@ jobs:
           git checkout -b "$BRANCH_NAME"
 
       - name: Setup GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
         run: |
-          echo "${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}" | gh auth login --with-token
-          gh auth status
+          gh auth status || echo "Auth failed, but continuing with GH_TOKEN"
 
       - name: Debug before script
         run: |
