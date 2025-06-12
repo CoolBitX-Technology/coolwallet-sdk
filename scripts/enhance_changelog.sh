@@ -1,29 +1,15 @@
 #!/bin/bash
 # sh scripts/enhance_changelog.sh 
 
-# 設定變數
 JSON_FILE="${1:-coolwallet_v2_tags.json}"
 REPO="CoolBitX-Technology/coolwallet-sdk"
 PACKAGES_DIR="packages"
 
 gh api "repos/$REPO/tags?per_page=100" --paginate  --jq '[.[] | select(.name | test("^@coolwallet/[^@]+@2\\."))] | sort_by(.name)' > coolwallet_v2_tags.json
 
-# 檢查 JSON 檔案是否存在
-if [ ! -f "$JSON_FILE" ]; then
-    echo "錯誤: 找不到檔案 $JSON_FILE"
-    echo "用法: $0 [json_file_path]"
-    exit 1
-fi
-
-# 建立輸出目錄（如果不存在的話）
-if [ ! -d "$PACKAGES_DIR" ]; then
-    echo "警告: 找不到 $PACKAGES_DIR 目錄，請確認你在 coolwallet-sdk 根目錄執行此 script"
-    exit 1
-fi
-
 echo "正在處理 $JSON_FILE 並取得 PR 資訊..."
 
-# 函數：取得 commit 對應的 PR title 和編號
+# 取得 commit 對應的 PR title 和編號
 get_pr_title() {
     local commit_sha=$1
     local pr_info
@@ -31,7 +17,7 @@ get_pr_title() {
     # 取得 PR title 和編號
     pr_info=$(gh api "repos/$REPO/commits/$commit_sha/pulls" --jq '.[0] | select(. != null) | "- " + .title + " (#" + (.number|tostring) + ")"' 2>/dev/null)
     
-    # 如果成功取得 PR 資訊
+    # echo PR 資訊
     if [ -n "$pr_info" ] && [ "$pr_info" != "- null (#null)" ]; then
         echo "$pr_info"
     fi
@@ -49,7 +35,7 @@ group_by(.name | split("@")[1] | split("/")[1]) |
 # 按照版本分組 (去掉 beta/alpha 後綴來分組)
 ($package_group | group_by(.name | split("@")[2] | split("-")[0])) as $version_groups |
 
-# 為每個版本組生成輸出
+# 為每個版本組生成輸出 coin-zen|2.1.0|@coolwallet/coin-zen@2.1.0:abc123,@coolwallet/coin-zen@2.1.0-beta.1:def456
 ($version_groups | reverse | .[] | 
   (.[0].name | split("@")[2] | split("-")[0]) as $base_version |
   $package_name + "|" + $base_version + "|" + ([.[] | .name + ":" + .commit.sha] | join(","))
@@ -69,18 +55,6 @@ group_by(.name | split("@")[1] | split("/")[1]) |
         
         output_file="$package_dir/CHANGELOG.md"
         
-        # 檢查 package 資料夾是否存在，且不是在 node_modules 中
-        if [ ! -d "$package_dir" ]; then
-            echo "警告: 找不到 $package_dir 資料夾，跳過 $package_name"
-            continue
-        fi
-        
-        # 確保不在 node_modules 目錄中建立檔案
-        if [[ "$package_dir" == *"node_modules"* ]]; then
-            echo "跳過 node_modules 中的路徑: $package_dir"
-            continue
-        fi
-        
         # 如果是新的 package，建立新檔案
         if [ ! -f "$output_file" ]; then
             echo "正在生成 $output_file..."
@@ -96,15 +70,11 @@ group_by(.name | split("@")[1] | split("/")[1]) |
             if [ -n "$commit_sha" ]; then
                 echo "正在處理 $tag_name..."
                 pr_line=$(get_pr_title "$commit_sha")
-                # 只有找到 PR title 時才寫入
                 if [ -n "$pr_line" ]; then
                     echo "$pr_line" >> "$output_file"
                 fi
             fi
-        done &
-        
-        # 限制同時執行的進程數量
-        (($(jobs -r | wc -l) >= 3)) && wait
+        done 
     fi
 done
 
