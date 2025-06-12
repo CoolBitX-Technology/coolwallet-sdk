@@ -12,11 +12,6 @@ on:
 jobs:
   update-changelog:
     runs-on: ubuntu-latest
-    permissions:        
-      contents: write
-      pull-requests: write
-      repository-projects: read
-    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -85,4 +80,4 @@ jobs:
           gh pr create -d -B master \
             -t "docs($PACKAGE_NAME): update $TAG_NAME" -b ""
         env:
-          GITHUB_TOKEN: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.COOLWALLET_APP_ADMIN }}
