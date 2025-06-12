@@ -80,4 +80,4 @@ jobs:
           gh pr create -d -B master \
             -t "docs($PACKAGE_NAME): update $TAG_NAME" -b ""
         env:
-          GITHUB_TOKEN: ${{ secrets.COOLWALLET_APP_ADMIN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
