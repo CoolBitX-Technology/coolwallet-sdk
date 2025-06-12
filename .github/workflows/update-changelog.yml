@@ -64,6 +64,7 @@ jobs:
       - name: Run script
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
         run: bash scripts/update_changelog.sh "$TAG_NAME"
 
       - name: Commit and push changes
