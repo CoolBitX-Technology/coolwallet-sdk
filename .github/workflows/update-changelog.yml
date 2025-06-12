@@ -12,6 +12,10 @@ on:
 jobs:
   update-changelog:
     runs-on: ubuntu-latest
+    permissions:        
+      contents: write
+      pull-requests: write
+      repository-projects: read
     
     steps:
       - name: Checkout
