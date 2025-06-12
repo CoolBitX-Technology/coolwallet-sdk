@@ -1,13 +1,9 @@
 name: Update Changelog
 
-# on:
-#   push:
-#     tags:
-#       - '@coolwallet/*@*'
 on:
   push:
-    branches:
-      - chore/produce-changelog-when-add-tag
+    tags:
+      - '@coolwallet/*@*'
 
 jobs:
   update-changelog:
@@ -20,8 +16,8 @@ jobs:
           
       - name: Create changelog branch
         run: |
-          #TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_NAME=${TAG_NAME:-"@coolwallet/zen@2.0.0"}
+          # e.g. TAG_NAME=${TAG_NAME:-"@coolwallet/zen@2.0.0"}
+          TAG_NAME=${GITHUB_REF#refs/tags/}
           
           if [[ "$TAG_NAME" =~ ^@coolwallet/(.+)@.* ]]; then
             PACKAGE_BASE="${BASH_REMATCH[1]}" 
