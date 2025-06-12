@@ -1,0 +1,65 @@
+name: Update Changelog
+
+# on:
+#   push:
+#     tags:
+#       - '@coolwallet/*@*'
+on:
+  push:
+    branches:
+      - chore/produce-changelog-when-add-tag
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Create changelog branch
+        run: |
+          #TAG_NAME=${GITHUB_REF#refs/tags/}
+          TAG_NAME=${TAG_NAME:-"@coolwallet/coin-zen@2.0.0"}
+          
+          if [[ "$TAG_NAME" =~ ^@coolwallet/(.+)@.* ]]; then
+            PACKAGE_BASE="${BASH_REMATCH[1]}"
+            if [[ "$PACKAGE_BASE" == coin-* ]]; then
+              PACKAGE_NAME="packages/$PACKAGE_BASE"
+              BRANCH_SUFFIX="${PACKAGE_BASE#coin-}"
+            else
+              PACKAGE_NAME="packages/$PACKAGE_BASE"
+              BRANCH_SUFFIX="$PACKAGE_BASE"
+            fi
+          fi
+          
+          BRANCH_NAME="docs/update-changelog-$BRANCH_SUFFIX"
+          
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          
+          git checkout -b "$BRANCH_NAME"
+
+      - name: Run script
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: bash scripts/update_changelog.sh "$TAG_NAME"
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'coolwallet team'
+          git config --global user.email 'cw.tech@coolbitx.com'
+          git add packages/*/CHANGELOG.md
+          git commit -m "docs: update changelog for $TAG_NAME"
+          git push -u origin "$BRANCH_NAME"
+
+      - name: Create Draft PR
+        run: |
+          
+          gh pr create -d -B master \
+            -t "docs($PACKAGE_NAME): update $TAG_NAME" 
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
