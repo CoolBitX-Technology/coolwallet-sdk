@@ -32,7 +32,7 @@ group_by(.name | split("@")[1] | split("/")[1]) |
 # 取得 package 名稱 (只取最後的部分，如 zen, ada, core)
 ($package_group[0].name | split("@")[1] | split("/")[1]) as $package_name |
 
-# 按照版本分組 (去掉 beta/alpha 後綴來分組)
+# 按照版本分組 (去掉 beta 來分組)
 ($package_group | group_by(.name | split("@")[2] | split("-")[0])) as $version_groups |
 
 # 為每個版本組生成輸出 coin-zen|2.1.0|@coolwallet/coin-zen@2.1.0:abc123,@coolwallet/coin-zen@2.1.0-beta.1:def456
