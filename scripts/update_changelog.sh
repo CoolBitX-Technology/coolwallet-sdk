@@ -27,9 +27,11 @@ changelog_file="$package_dir/CHANGELOG.md"
 echo "📁 $package_dir"
 
 # 取得 commit SHA 和 PR 資訊
+echo "TAG_NAME: $TAG_NAME"
 commit_sha=$(git rev-list -n 1 "$TAG_NAME")
+echo "commit_sha: $commit_sha"
 pr_line=$(gh api "repos/$REPO/commits/$commit_sha/pulls" --jq '.[0] | select(. != null) | "- " + .title + " (#" + (.number|tostring) + ")"' 2>/dev/null)
-
+echo "pr_line: $pr_line"
 echo "📝 $pr_line"
 
 # 檢查是否重複
