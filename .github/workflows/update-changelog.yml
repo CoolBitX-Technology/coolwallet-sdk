@@ -21,21 +21,20 @@ jobs:
           
       - name: Create changelog branch
         run: |
-          #TAG_NAME=${GITHUB_REF#refs/tags/}
+          TAG_NAME=${GITHUB_REF#refs/tags/}
           TAG_NAME=${TAG_NAME:-"@coolwallet/zen@2.0.0"}
           
           if [[ "$TAG_NAME" =~ ^@coolwallet/(.+)@.* ]]; then
-            PACKAGE_BASE="${BASH_REMATCH[1]}"
-            if [[ "$PACKAGE_BASE" == coin-* ]]; then
+            PACKAGE_BASE="${BASH_REMATCH[1]}" 
+            
+            if [ -d "packages/$PACKAGE_BASE" ]; then
               PACKAGE_NAME="packages/$PACKAGE_BASE"
-              BRANCH_SUFFIX="${PACKAGE_BASE#coin-}"
             else
-              PACKAGE_NAME="packages/$PACKAGE_BASE"
-              BRANCH_SUFFIX="$PACKAGE_BASE"
+              PACKAGE_NAME="packages/coin-$PACKAGE_BASE"
             fi
+            
+            BRANCH_NAME="docs/update-changelog-$PACKAGE_BASE"
           fi
-          
-          BRANCH_NAME="docs/update-changelog-$BRANCH_SUFFIX"
           
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
