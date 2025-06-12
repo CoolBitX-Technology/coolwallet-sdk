@@ -21,7 +21,7 @@ jobs:
       - name: Create changelog branch
         run: |
           #TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_NAME=${TAG_NAME:-"@coolwallet/zen@2.0.0"}
+          TAG_NAME=${TAG_NAME:-"@coolwallet/coin-zen@2.0.0"}
           
           if [[ "$TAG_NAME" =~ ^@coolwallet/(.+)@.* ]]; then
             PACKAGE_BASE="${BASH_REMATCH[1]}" 
@@ -38,27 +38,9 @@ jobs:
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "PACKAGE_BASE=$PACKAGE_BASE" >> $GITHUB_ENV
           
           git checkout -b "$BRANCH_NAME"
-
-      - name: Setup GitHub CLI
-        env:
-          GH_TOKEN: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
-        run: |
-          gh auth status || echo "Auth failed, but continuing with GH_TOKEN"
-
-      - name: Debug before script
-        run: |
-          echo "check file"
-          ls -la packages/coin-zen/ || echo "path not found"
-          ls -la packages/coin-zen/CHANGELOG.md || echo "CHANGELOG.md file not found"
-          
-          echo "check git"
-          git status
-          git tag | head -5
-          
-          echo "check GitHub CLI"
-          gh auth status || echo "GitHub CLI error"
 
       - name: Run script
         env:
@@ -78,6 +60,6 @@ jobs:
         run: |
           
           gh pr create -d -B master \
-            -t "docs($PACKAGE_NAME): update $TAG_NAME" -b ""
+            -t "docs($PACKAGE_BASE): update $TAG_NAME" -b ""
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
