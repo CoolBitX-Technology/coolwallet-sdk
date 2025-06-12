@@ -42,6 +42,19 @@ jobs:
           
           git checkout -b "$BRANCH_NAME"
 
+      - name: Debug before script
+        run: |
+          echo "check file"
+          ls -la packages/coin-zen/ || echo "path not found"
+          ls -la packages/coin-zen/CHANGELOG.md || echo "CHANGELOG.md file not found"
+          
+          echo "check git"
+          git status
+          git tag | head -5
+          
+          echo "check GitHub CLI"
+          gh auth status || echo "GitHub CLI error"
+
       - name: Run script
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
