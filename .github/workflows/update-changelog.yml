@@ -79,6 +79,6 @@ jobs:
         run: |
           
           gh pr create -d -B master \
-            -t "docs($PACKAGE_NAME): update $TAG_NAME" 
+            -t "docs($PACKAGE_NAME): update $TAG_NAME" -b ""
         env:
           GITHUB_TOKEN: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
