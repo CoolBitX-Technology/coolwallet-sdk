@@ -42,6 +42,11 @@ jobs:
           
           git checkout -b "$BRANCH_NAME"
 
+      - name: Setup GitHub CLI
+        run: |
+          echo "${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}" | gh auth login --with-token
+          gh auth status
+
       - name: Debug before script
         run: |
           echo "check file"
