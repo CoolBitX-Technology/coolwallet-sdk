@@ -32,12 +32,13 @@ Take a look at all the supported modules at [Coin Apps](#Coin-Apps). Used the ke
 
 ### Transport
 
-To communicate with CoolWallet device, you need to specify a bluetooth transport.
+Connect to a CoolWallet device by specifying the transport: bluetooth or nfc.
 
 | Package                                                                           | Version                                                                          | Description                      |
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------- |
 | [`@coolwallet/transport-web-ble`](/packages/transport-web-ble)                   | ![version](https://img.shields.io/npm/v/@coolwallet/transport-web-ble)          | Web Bluetooth transport          |
 | [`@coolwallet/transport-react-native-ble`](/packages/transport-react-native-ble) | ![version](https://img.shields.io/npm/v/@coolwallet/transport-react-native-ble) | React-Native Bluetooth transport |
+| [`@coolwallet/transport-react-native-nfc`](/packages/transport-react-native-nfc) | ![version](https://img.shields.io/npm/v/@coolwallet/transport-react-native-ble) | React-Native NFC transport |
 
 ### Core
 
@@ -68,17 +69,29 @@ Used to sign transactions of different cryptocurrencies.
 | [`@coolwallet/kas`](/packages/coin-kas)   | ![version](https://img.shields.io/npm/v/@coolwallet/kas) | Kaspa |
 | [`@coolwallet/ltc`](/packages/coin-ltc)   | ![version](https://img.shields.io/npm/v/@coolwallet/ltc) | LiteCoin |
 | [`@coolwallet/sol`](/packages/coin-sol)   | ![version](https://img.shields.io/npm/v/@coolwallet/sol) | Solana |
+| [`@coolwallet/sui`](/packages/coin-sui) | ![version](https://img.shields.io/npm/v/@coolwallet/sui) | Sui |
+| [`@coolwallet/terra`](/packages/coin-terra) | ![version](https://img.shields.io/npm/v/@coolwallet/terra) | Terra |
 | [`@coolwallet/ton`](/packages/coin-ton)   | ![version](https://img.shields.io/npm/v/@coolwallet/ton) | The Open Network |
 | [`@coolwallet/trx`](/packages/coin-trx)   | ![version](https://img.shields.io/npm/v/@coolwallet/trx) | Tron |
 | [`@coolwallet/xlm`](/packages/coin-xlm)   | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar/Kinesis |
 | [`@coolwallet/xrp`](/packages/coin-xrp)   | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
 | [`@coolwallet/xtz`](/packages/coin-xtx)   | ![version](https://img.shields.io/npm/v/@coolwallet/xtz) | Tezos |
 | [`@coolwallet/zen`](/packages/coin-zen)   | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash |
-| [`@coolwallet/sui`](/packages/coin-sui)   | ![version](https://img.shields.io/npm/v/@coolwallet/sui) | Sui |
 
 
-## Examples: Build ETH in web app
-### To connect to CoolWallet Pro via BLE
+## Examples: Connect to CoolWallet and Build ETH App
+To communicate with a CoolWallet device, you must choose one transport method depending on your platform and device model:
+
+- Web BLE (CoolWallet Pro on web browsers)
+
+- React Native BLE (CoolWallet Pro on mobile apps)
+
+- React Native NFC (CoolWallet Go on mobile apps)
+
+Each method allows you to connect to the card and retrieve the Card Name or Card ID and SE Public Key.
+
+
+### Option 1: Web BLE (CoolWallet Pro on Web)
 
 
 ```
@@ -91,15 +104,13 @@ import WebBleTransport from "@coolwallet/transport-web-ble";
 import * as core from "@coolwallet/core";
 ```
 
-Create a connection to obtain the Card Name and SE Public Key.
-
 ```javascript
 
 connect = async () => {
 WebBleTransport.listen(async (error, device) => {
     const cardName = device.name;
     const transport = await WebBleTransport.connect(device);
-    const SEPublicKey = await core.config.getSEPublicKey(transport)
+    const SEPublicKey = await core.config.getSEPublicKey(transport);
     this.setState({ transport, cardName, SEPublicKey });
     localStorage.setItem('cardName', cardName)
     localStorage.setItem('SEPublicKey', SEPublicKey)
@@ -113,11 +124,56 @@ disconnect = () => {
 
 ```
 
-- transport: The object used to communicate with CoolWallet
-- SEPublicKey: The key used to authenticate SE.
+
+### Option 2: React Native BLE (CoolWallet Pro on Mobile)
 
 
-### Register application with CoolWallet Pro
+```
+npm install @coolwallet/core
+npm install @coolwallet/transport-react-native-ble
+```
+
+```javascript
+import RNBleTransport from '@coolwallet/transport-react-native-ble'
+import { confing, info } from '@coolwallet/core';
+```
+
+```javascript
+
+const transport =  RNBleTransport.connect(deviceOrId);
+const cardId = await info.getCardId(transport);
+const SEPublicKey = await core.config.getSEPublicKey(transport);
+```
+
+
+### Option 3: React Native NFC (CoolWallet Go on Mobile)
+
+
+```
+npm install @coolwallet/core
+npm install @coolwallet/transport-react-native-nfc
+```
+
+```javascript
+import NFCTransport from '@coolwallet/transport-react-native-nfc';
+import { confing, info } from '@coolwallet/core';
+```
+
+```javascript
+
+const transport = new NfcTransport();
+const cardId = await info.getCardId(transport);
+const SEPublicKey = await core.config.getSEPublicKey(transport);
+
+```
+
+Notes
+- transport: The communication bridge between your app and the CoolWallet device.
+- SEPublicKey: The Secure Element's public key, used for card authentication.
+- cardName or cardId: The identifier of the connected card.
+
+
+### Register application with CoolWallet Device
 
 Obtain app key pairs.
 
@@ -137,9 +193,9 @@ const SEPublicKey = localStorage.getItem('SEPublicKey')
 const appId = await apdu.pair.register(transport, appPublicKey, password, name, SEPublicKey);
 ```
 
-- password: Pairing password for the app to establish the connection with CoolWallet Pro. The password could be supplied by the user (max length: 8).
+- password: Pairing password for the app to establish the connection with CoolWallet Device. The password could be supplied by the user (max length: 8).
 
-NOTE: A single CoolWallet Pro could only be paired to 3 apps.
+NOTE: A single CoolWallet Device could only be paired to 3 apps.
 
 
 ### Create / Recover the wallet
@@ -236,4 +292,4 @@ const signedTx = await ETH.signTransaction(signTxData);
 
 ## Contributing
 
-If you're interested to develop new coin for CoolWallet Pro, please see [CONTRIBUTING](./CONTRIBUTING.md) for more information.
+If you're interested to develop new coin for CoolWallet Device, please see [CONTRIBUTING](./CONTRIBUTING.md) for more information.
