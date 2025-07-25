@@ -38,7 +38,7 @@ Connect to a CoolWallet device by specifying the transport: bluetooth or nfc.
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------- |
 | [`@coolwallet/transport-web-ble`](/packages/transport-web-ble)                   | ![version](https://img.shields.io/npm/v/@coolwallet/transport-web-ble)          | Web Bluetooth transport          |
 | [`@coolwallet/transport-react-native-ble`](/packages/transport-react-native-ble) | ![version](https://img.shields.io/npm/v/@coolwallet/transport-react-native-ble) | React-Native Bluetooth transport |
-| [`@coolwallet/transport-react-native-nfc`](/packages/transport-react-native-nfc) | ![version](https://img.shields.io/npm/v/@coolwallet/transport-react-native-ble) | React-Native NFC transport |
+| [`@coolwallet/transport-react-native-nfc`](/packages/transport-react-native-nfc) | ![version](https://img.shields.io/npm/v/@coolwallet/transport-react-native-nfc) | React-Native NFC transport |
 
 ### Core
 
