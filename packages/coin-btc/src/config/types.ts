@@ -3,20 +3,6 @@ export { Transport };
 
 export type Callback = () => void;
 
-export type signUSDTTxType = {
-  transport: Transport;
-  appPrivateKey: string;
-  appId: string;
-  scriptType: ScriptType;
-  inputs: Input[];
-  output: Output;
-  value: string;
-  change?: Change;
-  version?: number;
-  confirmCB?: Callback;
-  authorizedCB?: Callback;
-};
-
 export type signTxType = {
   transport: Transport;
   appPrivateKey: string;
@@ -75,8 +61,4 @@ export enum ScriptType {
   P2WPKH = 2,
   P2WSH = 3,
   P2TR = 4,
-}
-
-export enum OmniType {
-  USDT = 31,
 }

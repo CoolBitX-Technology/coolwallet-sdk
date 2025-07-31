@@ -1,9 +1,9 @@
 import { tx, error, info } from '@coolwallet/core';
-import { ScriptType, OmniType, PreparedData, Callback } from './config/types';
+import { ScriptType, PreparedData, Callback } from './config/types';
 import * as param from './config/param';
 import * as txUtil from './utils/transactionUtil';
 import * as scriptUtil from './utils/scriptUtil';
-import { signTxType, signUSDTTxType, Transport } from './config/types';
+import { signTxType, Transport } from './config/types';
 import { SignatureType } from '@coolwallet/core/lib/transaction/type';
 import { shouldUseLegacyUtxoScript } from './utils/versionUtil';
 
@@ -86,8 +86,6 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
     inputs,
     output,
     change,
-    /*value=*/ null,
-    /*omniType=*/ null,
     version
   );
   const seVersion = await info.getSEVersion(transport);
@@ -109,62 +107,6 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
 
   return signTransaction(
-    transport,
-    appId,
-    appPrivateKey,
-    preActions,
-    redeemScriptType,
-    preparedData,
-    seVersion,
-    confirmCB,
-    authorizedCB
-  );
-}
-
-export async function signUSDTransaction(signUSDTTxData: signUSDTTxType): Promise<string> {
-  const {
-    scriptType: redeemScriptType,
-    transport,
-    inputs,
-    output,
-    change,
-    version,
-    appId,
-    appPrivateKey,
-    confirmCB,
-    authorizedCB,
-    value,
-  } = signUSDTTxData;
-
-  checkRedeemScriptType(redeemScriptType);
-
-  const omniType = OmniType.USDT;
-
-  const { preparedData } = txUtil.createUnsignedTransactions(
-    redeemScriptType,
-    inputs,
-    output,
-    change,
-    value,
-    omniType,
-    version
-  );
-  const seVersion = await info.getSEVersion(transport);
-
-  let script;
-  let argument;
-
-  if (shouldUseLegacyUtxoScript(transport.cardType, seVersion) || redeemScriptType === ScriptType.P2PKH) {
-    script = param.USDT.script + param.USDT.signature;
-    argument = await scriptUtil.getUSDTArgument(redeemScriptType, inputs, output, value, change);
-  } else {
-    script = param.NEW_USDT.script + param.NEW_USDT.signature;
-    argument = await scriptUtil.getUSDTNewArgument(redeemScriptType, inputs, output, value, change);
-  }
-
-  const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
-
-  return await signTransaction(
     transport,
     appId,
     appPrivateKey,
