@@ -4,7 +4,7 @@ import { error } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuintUtil';
 import * as cryptoUtil from './cryptoUtil';
-import { ScriptType, OmniType, Input, Output, Change, PreparedData } from '../config/types';
+import { ScriptType, Input, Output, Change, PreparedData } from '../config/types';
 
 bitcoin.initEccLib(ecc);
 
@@ -12,12 +12,6 @@ export function toReverseUintBuffer(numberOrString: number | string, byteSize: n
   const bn = new BN(numberOrString);
   const buf = Buffer.from(bn.toArray()).reverse();
   return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
-}
-
-function toUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
-  const bn = new BN(numberOrString);
-  const buf = Buffer.from(bn.toArray());
-  return Buffer.alloc(byteSize).fill(buf, byteSize - buf.length, byteSize);
 }
 
 function toXOnly(pubKey: Buffer): Buffer {
@@ -97,8 +91,6 @@ export function createUnsignedTransactions(
   inputs: Array<Input>,
   output: Output,
   change?: Change | null,
-  value?: string | null,
-  omniType?: OmniType | null,
   version = 1,
   lockTime = 0
 ): {
@@ -132,35 +124,7 @@ export function createUnsignedTransactions(
   const { scriptType: outputType, outScript: outputScript } = addressToOutScript(output.address);
   const outputScriptLen = varuint.encode(outputScript.length);
 
-  let outputArray;
-  if (!omniType) {
-    outputArray = [Buffer.concat([toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])];
-  } else {
-    const omni = Buffer.concat([
-      Buffer.from('omni', 'ascii'),
-      toUintBuffer(0, 2), // Transaction version
-      toUintBuffer(0, 2), // Transaction type
-      toUintBuffer(omniType, 4), // Currency identifier
-      toUintBuffer(value as string, 8),
-    ]);
-    const omniLen = varuint.encode(omni.length);
-    const omniScript = Buffer.concat([
-      Buffer.from('6a', 'hex'), // OP_RETURN
-      omniLen,
-      omni,
-    ]);
-    const omniScriptLen = varuint.encode(omniScript.length);
-    outputArray = [
-      Buffer.concat([
-        toReverseUintBuffer(546, 8),
-        outputScriptLen,
-        outputScript,
-        toUintBuffer(0, 8),
-        omniScriptLen,
-        omniScript,
-      ]),
-    ];
-  }
+  const outputArray = [Buffer.concat([toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])];
   if (change) {
     if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
     const changeValue = toReverseUintBuffer(change.value, 8);
@@ -169,7 +133,7 @@ export function createUnsignedTransactions(
     outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
   }
 
-  let outputsCountNum = omniType ? 2 : 1;
+  let outputsCountNum = 1;
   outputsCountNum = change ? outputsCountNum + 1 : outputsCountNum;
   const outputsCount = varuint.encode(outputsCountNum);
   const outputsBuf = Buffer.concat(outputArray);
