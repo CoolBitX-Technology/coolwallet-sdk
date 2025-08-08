@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+- 🐛 [CW-25091] fix(rn): avaxc, celo, thundercore testnet signing failed (upgrade @coolwallet/evm:2.0.2) (#1029)
+
 
 ## 2.0.1
 - chore: bump evm, core and testing-library to stable version (#1009)
