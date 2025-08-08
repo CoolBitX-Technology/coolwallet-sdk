@@ -1,4 +1,4 @@
-import { TOKENS, TEST_TOKENS } from './token';
+import { TOKENS } from './token';
 import { ChainProps } from '../types';
 
 class CeloChain extends ChainProps {
@@ -12,12 +12,4 @@ class CeloChain extends ChainProps {
   tokens = TOKENS;
 }
 
-class CeloTestChain extends ChainProps {
-  id = 44787;
-  symbol = 'CELO';
-  signature = `FA`.padEnd(144, '0');
-  tokens = TEST_TOKENS;
-}
-
 export const CELO = new CeloChain();
-export const CELO_TEST = new CeloTestChain();
