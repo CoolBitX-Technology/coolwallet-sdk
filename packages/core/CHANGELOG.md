@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.4
+- feat(core): update @coolwallet/core 2.0.4 to export variable MCU_UPDATE_VER (#1031)
+
 ## 2.0.3
 - feat(core): add hooks to BleTransport (#1010)
 - chore(core): add logs control of PeripheralRequest (#1012)
