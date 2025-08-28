@@ -15,7 +15,7 @@ import { sig_A as SigA } from '../apdu/script/dfuScript/sig_A';
 import { sig_B as SigB } from '../apdu/script/dfuScript/sig_B';
 import { info } from '..';
 
-const MCU_UPDATE_VER = '150B0909';
+export const MCU_UPDATE_VER = '150B0909';
 
 export const checkUpdate = async (transport: Transport): Promise<UpdateInfo> => {
   const { cardMCUVersion } = await info.getMCUVersion(transport);
