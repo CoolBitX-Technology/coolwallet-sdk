@@ -1,9 +1,23 @@
 import { Transport } from '@coolwallet/core';
 
+// export enum MajorType {
+//   Uint = 0,
+//   Byte = 2,
+//   Text = 3,
+//   Array = 4,
+//   Map = 5,
+//   Tag = 6,
+// }
+
 export enum MajorType {
-  Uint = 0,
-  Byte = 2,
-  Array = 4,
+  Uint = 0, // (unsigned integer)
+  NegInt = 1, // (negative integer)
+  Byte = 2, // (byte string, bstr)
+  Text = 3, // (UTF-8 text string)
+  Array = 4, // (array)
+  Map = 5, // (map)
+  Tag = 6, // (semantic tag)
+  Simple = 7, // (simple values & floats)
 }
 
 export type Integer = string | number;
@@ -16,6 +30,7 @@ export enum TxTypes {
   StakeWithdraw,
   StakeRegisterAndDelegate,
   Abstain,
+  Message,
 }
 
 export interface Options {
@@ -54,4 +69,10 @@ export interface RawTransaction {
 
 export interface Transaction extends RawTransaction {
   fee: Integer;
+}
+
+export interface MessageTransaction {
+  receiveAddress: string;
+  addrIndex: number;
+  message: string;
 }

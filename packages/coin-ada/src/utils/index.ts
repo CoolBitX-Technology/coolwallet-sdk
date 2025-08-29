@@ -6,11 +6,7 @@ const bip32Edd25519 = require('bip32-ed25519');
 const blake2b = require('blake2b');
 const bs58 = require('bs58');
 
-export const derivePubKeyFromAccountToIndex = (
-  accountPubKey: Buffer,
-  roleIndex = 0,
-  index = 0
-): Buffer => {
+export const derivePubKeyFromAccountToIndex = (accountPubKey: Buffer, roleIndex = 0, index = 0): Buffer => {
   const rolePubKey = bip32Edd25519.derivePublic(accountPubKey, roleIndex);
   return bip32Edd25519.derivePublic(rolePubKey, index).slice(0, 32);
 };
@@ -29,18 +25,20 @@ export const accountKeyToAddress = (accPubkey: Buffer, addrIndex: number, isTest
   const addressBuff = Buffer.concat([
     isTestNet ? Buffer.allocUnsafe(1).fill(0x00) : Buffer.allocUnsafe(1).fill(0x01),
     paymentHash,
-    stakeHash
+    stakeHash,
   ]);
   const words = bech32.toWords(addressBuff);
 
-  if(isTestNet){
+  if (isTestNet) {
     return bech32.encode('addr_test', words, 200);
   }
   return bech32.encode('addr', words, 200);
 };
 
-export const decodeAddress = (address: string, isTestNet = false)
-: { addressBuff: Buffer, addressEncodeType: number } => {
+export const decodeAddress = (
+  address: string,
+  isTestNet = false
+): { addressBuff: Buffer; addressEncodeType: number } => {
   let addressBuff;
   let addressEncodeType;
   try {
@@ -48,22 +46,21 @@ export const decodeAddress = (address: string, isTestNet = false)
     addressBuff = Buffer.from(bech32.fromWords(words));
     const dataLen = addressBuff.length;
 
-    if(isTestNet){
+    if (isTestNet) {
       if (prefix === 'addr_test' && dataLen === 57) addressEncodeType = 1;
       if (prefix === 'addr_test' && dataLen === 29) addressEncodeType = 2;
-    }
-    else {
+    } else {
       if (prefix === 'addr' && dataLen === 57) addressEncodeType = 1;
       if (prefix === 'addr' && dataLen === 29) addressEncodeType = 2;
     }
 
     // not support staking address
     if (!addressEncodeType) throw new Error('address not supported');
-  } catch(err) {
+  } catch (err) {
     try {
       addressBuff = bs58.decode(address);
       addressEncodeType = 0;
-    } catch(_) {
+    } catch (_) {
       throw new Error('address format not recognized');
     }
   }
@@ -96,15 +93,6 @@ export const cborEncode = (majorType: MajorType, value: Integer): string => {
   return result;
 };
 
-export {
-  genFakeTxBody,
-  genTxBody,
-  genFakeWitness,
-  genWitness,
-  genInputs,
-} from './transactionUtil';
+export { genFakeTxBody, genTxBody, genFakeWitness, genWitness, genInputs } from './transactionUtil';
 
-export {
-  getScript,
-  getArguments,
-} from './scriptUtil';
+export { getScript, getArguments, getMessageArgument } from './scriptUtil';
