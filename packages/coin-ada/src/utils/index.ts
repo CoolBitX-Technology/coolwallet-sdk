@@ -76,16 +76,16 @@ export const cborEncode = (majorType: MajorType, value: Integer): string => {
     throw new Error('value is over support');
   } else if (bn.gt('0xffffffff')) {
     prefix += 27;
-    argument = bn.toHexString().substr(2).padStart(16, '0');
+    argument = bn.toHexString().slice(2).padStart(16, '0');
   } else if (bn.gt('0xffff')) {
     prefix += 26;
-    argument = bn.toHexString().substr(2).padStart(8, '0');
+    argument = bn.toHexString().slice(2).padStart(8, '0');
   } else if (bn.gt('0xff')) {
     prefix += 25;
-    argument = bn.toHexString().substr(2);
+    argument = bn.toHexString().slice(2);
   } else if (bn.gte('0x18')) {
     prefix += 24;
-    argument = bn.toHexString().substr(2);
+    argument = bn.toHexString().slice(2);
   } else {
     prefix += bn.toNumber();
   }

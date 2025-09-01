@@ -162,15 +162,15 @@ export default class ADA implements COIN.Coin {
 
     const protectedHeaders =
       'a2' + '0127' + '6761646472657373' + cborEncode(MajorType.Byte, addressBuff.length) + addressBuff.toString('hex');
-    const unprotectedHeaders = '686173686564' + 'f4';
+    const unprotectedHeaders = '66' + '686173686564' + 'f4';
     const payload = messageBuff.toString('hex');
     return (
       '84' +
-      +cborEncode(MajorType.Byte, protectedHeaders) +
+      +cborEncode(MajorType.Byte, Buffer.from(protectedHeaders, 'hex').length) +
       protectedHeaders +
       cborEncode(MajorType.Map, 1) +
       unprotectedHeaders +
-      cborEncode(MajorType.Byte, payload.length) +
+      cborEncode(MajorType.Byte, messageBuff.length) +
       payload +
       cborEncode(MajorType.Byte, Buffer.from(sig, 'hex').length) +
       sig
