@@ -140,7 +140,7 @@ export const getMessageArgument = (
   const address = addressBuff.toString('hex').padEnd(180, '0');
   let argument = addressLength + address;
 
-  const messageBuff = Buffer.from(message, 'ascii');
+  const messageBuff = Buffer.from(message, 'utf8');
   const messageLength = messageBuff.length;
   const messagePrefix = cborEncode(MajorType.Byte, messageLength);
   argument += messagePrefix.padStart(6, '0') + messageBuff.toString('hex');
