@@ -166,7 +166,7 @@ export default class ADA implements COIN.Coin {
     const payload = messageBuff.toString('hex');
     return (
       '84' +
-      +cborEncode(MajorType.Byte, Buffer.from(protectedHeaders, 'hex').length) +
+      cborEncode(MajorType.Byte, Buffer.from(protectedHeaders, 'hex').length) +
       protectedHeaders +
       cborEncode(MajorType.Map, 1) +
       unprotectedHeaders +
