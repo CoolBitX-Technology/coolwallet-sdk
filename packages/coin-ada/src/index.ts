@@ -8,12 +8,15 @@ import {
   genWitness,
   getScript,
   getArguments,
+  getMessageArgument,
+  decodeAddress,
+  cborEncode,
 } from './utils';
 
-import { TxTypes } from './config/types';
+import { MajorType, TxTypes } from './config/types';
 export { TxTypes };
 
-import type { Options, RawTransaction, Transaction } from './config/types';
+import type { MessageTransaction, Options, RawTransaction, Transaction } from './config/types';
 
 export type { Options, RawTransaction, Transaction };
 
@@ -80,7 +83,7 @@ export default class ADA implements COIN.Coin {
       // show information for verification
       await tx.command.finishPrepare(transport);
       await tx.command.getTxDetail(transport);
-  
+
       // resolve signature
       const decryptingKey = await tx.command.getSignatureKey(transport);
       if (typeof authorizedCB === 'function') {
@@ -113,5 +116,64 @@ export default class ADA implements COIN.Coin {
 
     // const { signedTx: verifyTxBody } = await apdu.tx.getSignedHex(transport);
     // return signedTx;
+  }
+
+  async signMessage(transaction: MessageTransaction, options: Options): Promise<string> {
+    const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
+    const internalTx = { ...transaction };
+
+    // prepare data
+    const script = getScript(TxTypes.Message);
+    const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
+    const argument = getMessageArgument(internalTx, accPubKey, this.isTestNet);
+
+    // request CoolWallet to sign tx
+    await tx.command.sendScript(transport, script);
+
+    const encryptedSig = await tx.command.executeScript(transport, appId, appPrivateKey, argument);
+    if (!encryptedSig) throw new Error('executeScript fails to return signature');
+
+    if (typeof confirmCB === 'function') confirmCB();
+    let sig = '';
+    if (transport.cardType === CardType.Pro) {
+      // show information for verification
+      await tx.command.finishPrepare(transport);
+      await tx.command.getTxDetail(transport);
+
+      // resolve signature
+      const decryptingKey = await tx.command.getSignatureKey(transport);
+      if (typeof authorizedCB === 'function') {
+        authorizedCB();
+      }
+      sig = tx.util.decryptSignatureFromSE(encryptedSig, decryptingKey, tx.SignatureType.EDDSA).toString('hex');
+
+      await tx.command.clearTransaction(transport);
+      await mcu.control.powerOff(transport);
+    } else if (transport.cardType === CardType.Go) {
+      sig = tx.util.formatSignature(encryptedSig, tx.SignatureType.EDDSA).toString('hex');
+    } else {
+      throw new error.SDKError(ADA.prototype.signTransaction.name, 'Not suppotrd card type.');
+    }
+
+    // construct the signed transaction
+    const { receiveAddress, message } = transaction;
+    const { addressBuff } = decodeAddress(receiveAddress, this.isTestNet);
+    const messageBuff = Buffer.from(message, 'utf8');
+
+    const protectedHeaders =
+      'a2' + '0127' + '6761646472657373' + cborEncode(MajorType.Byte, addressBuff.length) + addressBuff.toString('hex');
+    const unprotectedHeaders = '66' + '686173686564' + 'f4';
+    const payload = messageBuff.toString('hex');
+    return (
+      '84' +
+      cborEncode(MajorType.Byte, Buffer.from(protectedHeaders, 'hex').length) +
+      protectedHeaders +
+      cborEncode(MajorType.Map, 1) +
+      unprotectedHeaders +
+      cborEncode(MajorType.Byte, messageBuff.length) +
+      payload +
+      cborEncode(MajorType.Byte, Buffer.from(sig, 'hex').length) +
+      sig
+    );
   }
 }
