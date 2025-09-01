@@ -158,7 +158,7 @@ export default class ADA implements COIN.Coin {
     // construct the signed transaction
     const { receiveAddress, message } = transaction;
     const { addressBuff } = decodeAddress(receiveAddress, this.isTestNet);
-    const messageBuff = Buffer.from(message, 'ascii');
+    const messageBuff = Buffer.from(message, 'utf8');
 
     const protectedHeaders =
       'a2' + '0127' + '6761646472657373' + cborEncode(MajorType.Byte, addressBuff.length) + addressBuff.toString('hex');
