@@ -115,11 +115,12 @@ describe('Test ADA SDK', () => {
   });
 
   describe('Test sign message', () => {
-    const sign_tx_by_coolwallet_sdk = async (message: string) => {
+    const sign_tx_by_coolwallet_sdk = async (message: string, rolePath: number = 0) => {
       const messageTransaction: MessageTransaction = {
         receiveAddress:
           'addr1qyulu6ra4ennas49mn77n4cpxcy7862sdx25f4sw8ea5yh3yu4d4xk2aku478dgmuqmuk7s0eh96h63svdtv5qhquzvqu94v7k',
         addrIndex: 0,
+        rolePath: rolePath,
         message: message,
       };
 
@@ -135,7 +136,7 @@ describe('Test ADA SDK', () => {
       return result;
     };
 
-    it('signMessage', async () => {
+    it('signMessage with addressIndex 0', async () => {
       expect(await sign_tx_by_coolwallet_sdk('')).toMatchInlineSnapshot(
         `"845846a20127676164647265737358390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098a166686173686564f4405840dd5bd6ea1608be992bee0d9241a2a2b6950f0ac849dd0d776ec4dbb73744d5f9aac5d6edb6f422023357dd55738bfe6f0584646646123d671dd918fa0fb5a40b"`
       );
@@ -152,6 +153,26 @@ describe('Test ADA SDK', () => {
 
       expect(await sign_tx_by_coolwallet_sdk('哈囉')).toMatchInlineSnapshot(
         `"845846a20127676164647265737358390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098a166686173686564f446e59388e59b895840a947491e93d58b6fd96e6c754b0c55edfa7f1d167bf9058767ae6b6e7332c721f39c767b790afc4eef8b49ec135327a86a1c7afcbe2fadf33c6fd711429ae800"`
+      );
+    });
+
+    it('signMessage with stake account', async () => {
+      expect(await sign_tx_by_coolwallet_sdk('', 2)).toMatchInlineSnapshot(
+        `"845846a20127676164647265737358390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098a166686173686564f4405840a5d66f5cbe953b351812ab03ab4890f9ab373859b0d92f4191c713de71862a236f6bfb6aa972b8223647518b38b569522c95199310b3114393f7f8e1f7cf3b0d"`
+      );
+
+      expect(await sign_tx_by_coolwallet_sdk('Hello', 2)).toMatchInlineSnapshot(
+        `"845846a20127676164647265737358390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098a166686173686564f44548656c6c6f5840fcf36c2d0cfd3545a071308cb39284293495f730725dbf5d125e8057ae917a953dd4bb65721a3152cdf34df1026fdfedcf7893c88bdc04bb3e99175d96b3460a"`
+      );
+
+      const message =
+        'STAR 883119566159 to addr1q9wak8qad35e0yat8f9z8h3an3zzhgchrw3hgz4gxx9xgsmeyvuad4hus4yc5dnrz4hghyg0an2lzs5dlkttk9z356kqgkvz3t 31a6bab50a84b8439adcfb786bb2020f6807e6e8fda629b424110fc7bb1c6b8b';
+      expect(await sign_tx_by_coolwallet_sdk(message, 2)).toMatchInlineSnapshot(
+        `"845846a20127676164647265737358390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098a166686173686564f458bd535441522038383331313935363631353920746f206164647231713977616b38716164333565307961743866397a386833616e337a7a6867636872773368677a34677878397867736d6579767561643468757334796335646e727a34686768796730616e326c7a7335646c6b74746b397a3335366b71676b767a337420333161366261623530613834623834333961646366623738366262323032306636383037653665386664613632396234323431313066633762623163366238625840a3886771c17e0bc127ce9684d90e377f8b0eab13043a0d1f7812bc6e7b1d126148740e6834d47974a041e8703e91d830333076573838c87480d5ea261554330b"`
+      );
+
+      expect(await sign_tx_by_coolwallet_sdk('哈囉', 2)).toMatchInlineSnapshot(
+        `"845846a20127676164647265737358390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098a166686173686564f446e59388e59b89584035929de8329519d8cccae74e862fa0d609ae3d24098333a289e272eb5bfa8ced5ed625e90768de30850e96c59062f611b156147921c4a5e684177a43ef97020e"`
       );
     });
   });

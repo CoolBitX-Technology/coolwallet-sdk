@@ -128,12 +128,8 @@ export const getArguments = (
   return witnesses;
 };
 
-export const getMessageArgument = (
-  messageTransaction: MessageTransaction,
-  accPubKey: string,
-  isTestNet = false
-): string => {
-  const { addrIndex, receiveAddress, message } = messageTransaction;
+export const getMessageArgument = (messageTransaction: MessageTransaction, isTestNet = false): string => {
+  const { addrIndex, rolePath, receiveAddress, message } = messageTransaction;
 
   const { addressBuff } = decodeAddress(receiveAddress, isTestNet);
   const addressLength = addressBuff.length.toString(16).padStart(2, '0');
@@ -145,6 +141,6 @@ export const getMessageArgument = (
   const messagePrefix = cborEncode(MajorType.Byte, messageLength);
   argument += messagePrefix.padStart(6, '0') + messageBuff.toString('hex');
 
-  const fullPath = getFullPath(0, addrIndex);
+  const fullPath = getFullPath(rolePath, addrIndex);
   return `15${fullPath}${argument}`;
 };
