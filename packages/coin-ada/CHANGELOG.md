@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.0.1
+- feat(ada): CW-25243 support signing message by stake account (@coolwallet/ada: 2.0.1-beta.1) (#1037)
 - feat(ADA): CW-25243 add sign message  (#1034)
 
 
