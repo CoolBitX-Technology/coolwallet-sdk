@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+- feat(ADA): CW-25243 add sign message  (#1034)
+
 
 ## 2.0.0
 - chore: upgrade coins versions to 2.0.0 (#992)
