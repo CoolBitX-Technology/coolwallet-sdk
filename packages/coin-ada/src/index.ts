@@ -124,8 +124,7 @@ export default class ADA implements COIN.Coin {
 
     // prepare data
     const script = getScript(TxTypes.Message);
-    const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
-    const argument = getMessageArgument(internalTx, accPubKey, this.isTestNet);
+    const argument = getMessageArgument(internalTx, this.isTestNet);
 
     // request CoolWallet to sign tx
     await tx.command.sendScript(transport, script);

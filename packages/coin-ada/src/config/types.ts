@@ -73,6 +73,7 @@ export interface Transaction extends RawTransaction {
 
 export interface MessageTransaction {
   receiveAddress: string;
+  rolePath: number;
   addrIndex: number;
   message: string;
 }
