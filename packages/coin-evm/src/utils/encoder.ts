@@ -1,4 +1,4 @@
-import omit from 'lodash/omit'
+import omit from 'lodash/omit';
 import { formatHex } from './string';
 import type { EIP1559Transaction, LegacyTransaction } from '../transaction/types';
 
@@ -50,7 +50,7 @@ class Structure {
 function encodeLegacyTransactionToSE(transaction: LegacyTransaction['transaction']) {
   const LegacyTransferTransactionStructure = new Structure([
     new Layout('to', 20),
-    new Layout('value', 10),
+    new Layout('value', 32),
     new Layout('gasPrice', 10),
     new Layout('gasLimit', 10),
     new Layout('nonce', 8),
@@ -98,7 +98,7 @@ function encodeLegacySmartContractSegmentTransactionToSE(transaction: LegacyTran
 function encodeEIP1559TransactionToSE(transaction: EIP1559Transaction['transaction']) {
   const EIP1559TransferTransactionStructure = new Structure([
     new Layout('to', 20),
-    new Layout('value', 10),
+    new Layout('value', 32),
     new Layout('gasTipCap', 10),
     new Layout('gasFeeCap', 10),
     new Layout('gasLimit', 10),
