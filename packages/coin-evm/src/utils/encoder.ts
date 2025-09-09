@@ -68,7 +68,7 @@ function encodeLegacyERC20TransactionToSE(transaction: LegacyTransaction['transa
 
   const LegacyERC20TransactionStructure = new Structure([
     new Layout('to', 20),
-    new Layout('amount', 12),
+    new Layout('amount', 32),
     new Layout('gasPrice', 10),
     new Layout('gasLimit', 10),
     new Layout('nonce', 8),
@@ -85,7 +85,7 @@ function encodeLegacySmartContractSegmentTransactionToSE(transaction: LegacyTran
 
   const LegacySmartContractTransactionStructure = new Structure([
     new Layout('to', 20),
-    new Layout('value', 10),
+    new Layout('value', 32),
     new Layout('gasPrice', 10),
     new Layout('gasLimit', 10),
     new Layout('nonce', 8),
@@ -117,7 +117,7 @@ function encodeEIP1559ERC20TransactionToSE(transaction: EIP1559Transaction['tran
 
   const EIP1559ERC20TransactionStructure = new Structure([
     new Layout('to', 20),
-    new Layout('amount', 12),
+    new Layout('amount', 32),
     new Layout('gasTipCap', 10),
     new Layout('gasFeeCap', 10),
     new Layout('gasLimit', 10),
@@ -134,7 +134,7 @@ function encodeEIP1559SmartContractSegmentTransactionToSE(transaction: EIP1559Tr
   };
   const EIP1559SmartContractTransactionStructure = new Structure([
     new Layout('to', 20),
-    new Layout('value', 10),
+    new Layout('value', 32),
     new Layout('gasTipCap', 10),
     new Layout('gasFeeCap', 10),
     new Layout('gasLimit', 10),
