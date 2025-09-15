@@ -55,11 +55,14 @@ class DisplayBuilder {
 
     const amountBN = new BigNumber(amount);
 
-    // Ensure integer part is 8 digits
-    const integerPart = amountBN.toFixed(0, BigNumber.ROUND_DOWN).padStart(8, '0').slice(-8);
+    const integerPart = amountBN
+      .toFixed(0, BigNumber.ROUND_DOWN) // remove decimal part and avoid rounding up
+      .padStart(8, '0') // ensure at least 8 digits with leading zeros
+      .slice(-8); // take 8 digits
 
-    // toFixed(8) ensures 8 decimal places with trailing zeros
-    const decimalPart = amountBN.toFixed(8, BigNumber.ROUND_DOWN).slice(-8);
+    const decimalPart = amountBN
+      .toFixed(8, BigNumber.ROUND_DOWN) // ensures 8 digits and avoid rounding up
+      .slice(-8); // take 8 digits
 
     this.response += integerPart + decimalPart;
     return this;
