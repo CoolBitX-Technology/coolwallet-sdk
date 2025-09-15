@@ -54,6 +54,15 @@ const SMART_CONTRACT_TRANSACTION = [
     value: '0',
     data: '0x6080604052348015610010576000'.padEnd(32, '0'),
   },
+  // use smart tx to send large amount of eth
+  {
+    nonce: '0xc',
+    gasPrice: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
+    value: '2000000000000000',
+    data: '0x'.padEnd(32, '0'),
+  },
 ];
 
 const SMART_CONTRACT_SEGMENT_TRANSACTION = [
@@ -78,6 +87,15 @@ const SMART_CONTRACT_SEGMENT_TRANSACTION = [
     gasLimit: '0x112f0e',
     to: '',
     value: '0',
+    data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
+  },
+  // use smart tx to send large amount of eth
+  {
+    nonce: '0xc',
+    gasPrice: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
+    value: '2000000000000000',
     data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
   },
 ];
@@ -206,6 +224,16 @@ const EIP1559_SMART_CONTRACT_TRANSACTION = [
     value: '0',
     data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
   },
+  // use smart tx to send large amount of eth
+  {
+    nonce: '0x0',
+    gasFeeCap: '0x91494C600',
+    gasTipCap: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '0x8A1628c2397F6cA75579A45E81EE3e17DF19720e',
+    value: '2000000000000000',
+    data: '0x',
+  },
 ];
 
 const EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION = [
@@ -233,6 +261,16 @@ const EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION = [
     gasTipCap: '0x91494C600',
     gasLimit: '0x5208',
     value: '0',
+    data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
+  },
+  // use smart tx to send large amount of eth
+  {
+    nonce: '0x0',
+    gasFeeCap: '0x91494C600',
+    gasTipCap: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '0x8A1628c2397F6cA75579A45E81EE3e17DF19720e',
+    value: '2000000000000000',
     data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
   },
 ];
