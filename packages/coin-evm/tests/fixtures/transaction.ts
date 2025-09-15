@@ -54,7 +54,7 @@ const SMART_CONTRACT_TRANSACTION = [
     value: '0',
     data: '0x6080604052348015610010576000'.padEnd(32, '0'),
   },
-  // use smart tx to send large amount of eth
+  // large amount tx
   {
     nonce: '0xc',
     gasPrice: '0x91494C600',
@@ -89,7 +89,7 @@ const SMART_CONTRACT_SEGMENT_TRANSACTION = [
     value: '0',
     data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
   },
-  // use smart tx to send large amount of eth
+  // large amount tx
   {
     nonce: '0xc',
     gasPrice: '0x91494C600',
@@ -224,7 +224,7 @@ const EIP1559_SMART_CONTRACT_TRANSACTION = [
     value: '0',
     data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
   },
-  // use smart tx to send large amount of eth
+  // large amount tx
   {
     nonce: '0x0',
     gasFeeCap: '0x91494C600',
@@ -263,7 +263,7 @@ const EIP1559_SMART_CONTRACT_SEGMENT_TRANSACTION = [
     value: '0',
     data: '0x608060405234801562000011576000'.padEnd(16000, '0'),
   },
-  // use smart tx to send large amount of eth
+  // large amount tx
   {
     nonce: '0x0',
     gasFeeCap: '0x91494C600',
