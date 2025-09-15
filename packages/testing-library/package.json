@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/testing-library",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Testing library for CoolWallet SDKs",
   "main": "lib/index.js",
   "scripts": {
@@ -34,7 +34,6 @@
     "@noble/ed25519": "^1.6.0",
     "@noble/hashes": "^1.0.0",
     "@noble/secp256k1": "^1.5.5",
-    "lodash": "^4.17.21",
-    "printf": "^0.6.1"
+    "bignumber.js": "^9.0.1"
   }
 }

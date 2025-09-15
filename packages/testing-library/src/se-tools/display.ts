@@ -1,5 +1,4 @@
-import printf from 'printf';
-import floor from 'lodash/floor';
+import BigNumber from 'bignumber.js';
 
 enum TYPE {
   ASC = '00',
@@ -53,8 +52,16 @@ class DisplayBuilder {
     this.response += convertToHex(totalLength);
     this.response += signal;
     this.response += TYPE.BCD;
-    const number = printf('%017.8f', floor(amount, 8));
-    this.response += number.substring(0, 8) + number.substring(9, 17);
+
+    const amountBN = new BigNumber(amount);
+
+    // Ensure integer part is 8 digits
+    const integerPart = amountBN.toFixed(0, BigNumber.ROUND_DOWN).padStart(8, '0').slice(-8);
+
+    // toFixed(8) ensures 8 decimal places with trailing zeros
+    const decimalPart = amountBN.toFixed(8, BigNumber.ROUND_DOWN).slice(-8);
+
+    this.response += integerPart + decimalPart;
     return this;
   }
 
