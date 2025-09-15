@@ -2,6 +2,7 @@ import base58Check from 'bs58check';
 import { HDWallet, CURVE } from '../src';
 import BIP32ECDSA from './fixtures/bip32_ecdsa.json';
 import BIP32ED25519 from './fixtures/bip32_ed25519.json';
+import DisplayBuilder from '../src/se-tools/display';
 
 const PUBLIC_KEY_SIZE = 33;
 const PRIVATE_KEY_SIZE = 32;
@@ -44,5 +45,26 @@ describe('Test Custom HDWallet', () => {
       const nodePublicKey = await node.getPublicKeyHex();
       expect(nodePublicKey).toEqual(expected.pubKey);
     });
+  });
+});
+
+describe('DisplayBuilder.amountPage', () => {
+  it.each`
+    amount               | expectedInteger | expectedDecimal
+    ${0}                 | ${'00000000'}   | ${'00000000'}
+    ${1}                 | ${'00000001'}   | ${'00000000'}
+    ${123.456}           | ${'00000123'}   | ${'45600000'}
+    ${12345678.12345678} | ${'12345678'}   | ${'12345678'}
+    ${0.00000001}        | ${'00000000'}   | ${'00000001'}
+    ${99999999.99999999} | ${'99999999'}   | ${'99999999'}
+    ${100000000}         | ${'00000000'}   | ${'00000000'}
+    ${0.12345678}        | ${'00000000'}   | ${'12345678'}
+    ${1.00000001}        | ${'00000001'}   | ${'00000001'}
+  `('should format amount $amount correctly', ({ amount, expectedInteger, expectedDecimal }) => {
+    const builder = new DisplayBuilder();
+    builder.amountPage(amount);
+    const result = builder.finalize();
+    const amountPayload = result.slice(6, 22);
+    expect(amountPayload).toBe(expectedInteger + expectedDecimal);
   });
 });
