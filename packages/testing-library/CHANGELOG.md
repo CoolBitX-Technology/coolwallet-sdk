@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+- fix(testing-library): decimals overflow issue in display.ts (#1043)
+
 
 ## 2.0.0
 - chore: bump evm, core and testing-library to stable version (#1009)
