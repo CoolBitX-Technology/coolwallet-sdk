@@ -42,7 +42,7 @@ class Evm extends COIN.ECDSACoin {
   }
 
   async getAddressByAccountKey(accPublicKey: string, accChainCode: string, addressIndex: number): Promise<string> {
-    const publicKey = await this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
+    const publicKey = this.getAddressPublicKey(accPublicKey, accChainCode, addressIndex);
     return pubKeyToAddress(publicKey);
   }
 
