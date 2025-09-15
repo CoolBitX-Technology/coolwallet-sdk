@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.3
+- feat(evm): support large amount smart tx (@coolwallet/evm: 2.0.3-beta.0) (#1039)
+
 ## 2.0.2
 - 🐛 [CW-25091] fix(rn): avaxc, celo, thundercore testnet signing failed (upgrade @coolwallet/evm:2.0.2) (#1029)
 
