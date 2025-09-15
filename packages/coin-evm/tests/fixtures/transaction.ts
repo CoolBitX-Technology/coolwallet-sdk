@@ -9,6 +9,14 @@ const TRANSFER_TRANSACTION = [
     value: '0.00001',
     data: '',
   },
+  {
+    nonce: '0x0',
+    gasPrice: '0x91494C600',
+    gasLimit: '0x5208',
+    to: '0x8A1628c2397F6cA75579A45E81EE3e17DF19720e',
+    value: '99999999.9999999',
+    data: '',
+  },
 ];
 
 const ERC20_TRANSACTION = [
