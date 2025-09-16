@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.0.3
+- chore(evm): update version from 2.0.3-beta.0 to 2.0.3 (#1046)
 - feat(evm): support large amount smart tx (@coolwallet/evm: 2.0.3-beta.0) (#1039)
 
 ## 2.0.2
