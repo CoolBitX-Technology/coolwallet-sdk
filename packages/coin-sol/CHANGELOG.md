@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.0.1
+- chore: bump evm and sol to formal version (#1050)
 - feat(USDC): CW-25511 add usdc token (#1048)
 
 
