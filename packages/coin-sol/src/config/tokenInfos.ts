@@ -51,7 +51,7 @@ export const TOKEN_INFO = [
   {
     name: 'USD Coin',
     symbol: 'USDC',
-    decimals: '6',
+    decimals: 6,
     address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     signature: `060455534443000000c6fa7af3bedbad3a3d65f36aabc97431b1bbe4c2d2f6e0e47ca60203452f5d613045022100833603bc3e559f9f19e717f22fc51e3d2aac8eca69c2b5ffebc9d8043442ba060220678d48ce3ba171cf5f427cd2335f782b8e5972bca7dfccd1a96053994df710e8`,
   },
