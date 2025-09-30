@@ -328,7 +328,7 @@ export class Message {
     instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
     let accountKeys = [...this.accountKeys];
     for (let i = this.accountKeys.length; i < 9; i++) {
-      accountKeys = accountKeys.concat(Buffer.alloc(32).toString('hex'));
+      accountKeys = accountKeys.concat(PADDING_PUBLICKEY);
     }
 
     const signDataLayout = BufferLayout.struct<
