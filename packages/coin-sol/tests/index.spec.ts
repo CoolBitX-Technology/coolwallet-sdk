@@ -231,8 +231,7 @@ describe('Test Solana SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  // sdk 簽出來的交易有問題，但不會用到，故不測試
-  xit('Test Create Token Account and SPL Token Transfer', async () => {
+  it('Test Create Token Account and SPL Token Transfer', async () => {
     const addressIndex = 0;
     const node = wallet.derivePath(bip32Path(addressIndex));
     const expectedWallet = Keypair.fromSeed(node.privateKey);
@@ -314,7 +313,7 @@ describe('Test Solana SDK', () => {
       .messagePage('TEST')
       .messagePage('SOL')
       .messagePage(tokenInfo.symbol)
-      .addressPage(TO_PUBKEY.toBase58())
+      .addressPage(toTokenAccount.toBase58())
       .amountPage(amount / 10 ** tokenInfo.decimals)
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
@@ -419,7 +418,7 @@ describe('Test Solana SDK', () => {
       .messagePage('TEST')
       .messagePage('SOL')
       .messagePage(tokenInfo.symbol)
-      .addressPage(TO_PUBKEY.toBase58())
+      .addressPage(toTokenAccount.toBase58())
       .amountPage(amount / 10 ** tokenInfo.decimals)
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
