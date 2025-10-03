@@ -13,7 +13,7 @@
     "testCover": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report",
     "ci-test": "NODE_ENV=production jest --runInBand",
     "ci-test-go": "NODE_ENV=production CARD=go jest --runInBand",
-    "ci-test-report": "mocha -r ts-node/register tests/*.test.ts --reporter mocha-junit-reporter --reporter-options mochaFile=junit.xml"
+    "ci-test-report": "NODE_ENV=production jest --no-bail --runInBand --reporters=default --reporters=jest-junit --testResultsProcessor=jest-junit"
   },
   "keywords": [
     "atom",
