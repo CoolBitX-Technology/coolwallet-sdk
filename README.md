@@ -76,7 +76,6 @@ Used to sign transactions of different cryptocurrencies.
 | [`@coolwallet/xlm`](/packages/coin-xlm)   | ![version](https://img.shields.io/npm/v/@coolwallet/xlm) | Stellar/Kinesis |
 | [`@coolwallet/xrp`](/packages/coin-xrp)   | ![version](https://img.shields.io/npm/v/@coolwallet/xrp) | Ripple |
 | [`@coolwallet/xtz`](/packages/coin-xtx)   | ![version](https://img.shields.io/npm/v/@coolwallet/xtz) | Tezos |
-| [`@coolwallet/zen`](/packages/coin-zen)   | ![version](https://img.shields.io/npm/v/@coolwallet/zen) | Zen Cash |
 
 
 ## Examples: Connect to CoolWallet and Build ETH App
