@@ -1,6 +1,5 @@
 import * as types from '../config/types';
 import { utils } from '@coolwallet/core';
-import * as params from '../config/params';
 import * as stringUtil from './stringUtil';
 
 async function addPath(argument: string, addressIndex: number, coinType: string) {
@@ -14,15 +13,31 @@ async function addPath(argument: string, addressIndex: number, coinType: string)
  * @returns
  */
 const getTradeArgument = async (rawData: types.FormatTransfer): Promise<string> => {
+  const { assetIdHex = '', metadataHash = '' } = rawData;
   const mortalEra = rawData.mortalEra.padStart(10, '0');
   const nonce = stringUtil.removeHex0x(rawData.nonce).padStart(10, '0');
   const tip = rawData.tip.padStart(10, '0');
+  const assetIdLength = assetIdHex.length;
+  const paddingAssetId = assetIdHex.padEnd(4, '0');
+  const mode = rawData.mode;
   const specVer = rawData.specVer.padStart(8, '0');
   const txVer = rawData.txVer.padStart(8, '0');
   const blockHash = stringUtil.removeHex0x(rawData.blockHash).padStart(64, '0');
   const genesisHash = stringUtil.removeHex0x(rawData.genesisHash).padStart(64, '0');
+  const paddingMetadataHash = stringUtil.removeHex0x(metadataHash).padStart(64, '0');
 
-  const argument = mortalEra + nonce + tip + specVer + txVer + genesisHash + blockHash;
+  const argument =
+    mortalEra +
+    nonce +
+    tip +
+    assetIdLength +
+    paddingAssetId +
+    mode +
+    specVer +
+    txVer +
+    genesisHash +
+    blockHash +
+    paddingMetadataHash;
   return argument;
 };
 

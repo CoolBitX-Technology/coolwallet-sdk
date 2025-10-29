@@ -40,6 +40,9 @@ export type dotTransaction = {
   tip: string;
   transactionVersion: string;
   version: number;
+  mode?: number;
+  assetId?: number;
+  metadataHash?: string;
 };
 
 export interface NormalTransferData extends SignTxData {
@@ -124,6 +127,11 @@ export interface FormatTransfer {
   txVer: string;
   blockHash: string;
   genesisHash: string;
+  assetIdHex?: string;
+  encodeAssetId: string;
+  mode: string;
+  metadataHash?: string;
+  encodeMetadataHash?: string;
 }
 
 export interface FormatNormalMethod {

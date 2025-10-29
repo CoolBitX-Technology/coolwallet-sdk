@@ -25,6 +25,11 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
   const txVer = formatVersion(rawData.transactionVersion);
   const genesisHash = rawData.genesisHash;
   const blockHash = rawData.blockHash;
+  const assetId = rawData.assetId ? rawData.assetId.toString(16) : undefined;
+  const encodeAssetId = assetId ? "01" + formatSCALECodec(assetId) : "00";
+  const mode = rawData.mode ? rawData.mode.toString(16) : "00"; // 防呆
+  const metadataHash = rawData.metadataHash;
+  const encodeMetadataHash = rawData.metadataHash ? "01" + rawData.metadataHash : "00";
 
   return {
     mortalEra,
@@ -36,6 +41,11 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
     txVer,
     blockHash,
     genesisHash,
+    assetIdHex: assetId,
+    encodeAssetId,
+    mode,
+    metadataHash,
+    encodeMetadataHash,
   };
 }
 
