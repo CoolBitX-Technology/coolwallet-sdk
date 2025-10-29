@@ -21,7 +21,7 @@ export const METHOD_CALL_INDEX = {
     chill: '0706',
   },
   KSM: {
-    transfer: '0a03',
+    transfer: '0a00',
     bond: '5900',
     bondExtra: '5901',
     unbond: '5902',

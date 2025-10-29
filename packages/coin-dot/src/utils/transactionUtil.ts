@@ -51,6 +51,8 @@ signature 	  0188ccf322696d4c5a9dd7dae01d72345dcbd26b9def1789f8cebfe6a143030723b
 MortalEra		  9500
 nonce		      84
 tip			      58
+assetId       00
+mode          00
 method		  
               call index  0500
                           00
@@ -67,7 +69,6 @@ export function getSubmitTransaction(
   signature: string,
   version: number
 ): string {
-  const mode = '00'; // skip checking the metadata hash, refer to: https://github.com/polkadot-fellows/runtimes/pull/337#issuecomment-2204079667
   const sumitTx =
     params.TX_ADDRESS_PRE +
     Buffer.from(decodeAddress(fromAddress)).toString('hex') +
@@ -75,7 +76,8 @@ export function getSubmitTransaction(
     formatTxData.mortalEra +
     formatTxData.encodeNonce +
     formatTxData.encodeTip +
-    mode +
+    formatTxData.encodeAssetId +
+    formatTxData.mode +
     methodString;
 
   const resultTx = dotUtil.addSignedTxLength(dotUtil.addVersion(sumitTx, version));

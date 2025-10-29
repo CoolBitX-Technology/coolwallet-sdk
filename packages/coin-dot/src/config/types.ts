@@ -129,9 +129,8 @@ export interface FormatTransfer {
   genesisHash: string;
   assetIdHex?: string;
   encodeAssetId: string;
-  mode: string;
+  mode: string; // skip checking the metadata hash, refer to: https://github.com/polkadot-fellows/runtimes/pull/337#issuecomment-2204079667
   metadataHash?: string;
-  encodeMetadataHash?: string;
 }
 
 export interface FormatNormalMethod {

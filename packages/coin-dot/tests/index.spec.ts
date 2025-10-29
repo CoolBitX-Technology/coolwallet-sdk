@@ -5,14 +5,13 @@ import DOT, { COIN_SPECIES } from '../src';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
+const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
-describe('Test Polkadot SDK', () => {
+describe('Test DOT SDK', () => {
   let transport: Transport;
   let cardType: CardType;
   let props: Mandatory;
   const dotSDK = new DOT(COIN_SPECIES.DOT);
-  const ksmSDK = new DOT(COIN_SPECIES.KSM);
-  const mnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abstract';
 
   beforeAll(async () => {
     if (process.env.CARD === 'go') {
@@ -28,20 +27,15 @@ describe('Test Polkadot SDK', () => {
     props = await initialize(transport, mnemonic);
   });
 
-  describe('Test Get Address', () => {
-    it('index 0 dot address', async () => {
+  describe('Test Get DOT Address', () => {
+    it('index 0 address', async () => {
       const address = await dotSDK.getAddress(transport, props.appPrivateKey, props.appId, 0);
-      expect(address).toMatchInlineSnapshot(`"1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a"`);
-    });
-
-    it('index 0 ksm address', async () => {
-      const address = await ksmSDK.getAddress(transport, props.appPrivateKey, props.appId, 0);
       expect(address).toMatchInlineSnapshot(`"1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a"`);
     });
   });
 
-  describe('Test Transfer', () => {
-    it('transfer dot with address 0', async () => {
+  describe('Test DOT Transfer', () => {
+    it('transfer with address 0', async () => {
       const signData = {
         transport,
         appPrivateKey: props.appPrivateKey,
@@ -62,17 +56,48 @@ describe('Test Polkadot SDK', () => {
           tip: '0',
           transactionVersion: '26',
           version: 4,
+          mode: 1,
         },
         confirmCB: () => {},
         authorizedCB: () => {},
       };
 
       expect(await dotSDK.signTransaction(signData)).toMatchInlineSnapshot(
-        `"0x490284006a1ca31b3d34a0a0775edd95402442ccc9ba8037693f95ae8d0ad1fa3468585c02a539c81c65ea10712c9457f945bb796be0117b6a82259a3afbe19216f87de4514fe95cb40fb1671d20994fa5ef792299045454a833f5f524ff8731b5cd3ea5c700b602900000050000feb67f53df1c98db22174203883bf335c0f437bda989c9d1b9cb1e1557f377710700aea68f02"`
+        `"0x4d0284006a1ca31b3d34a0a0775edd95402442ccc9ba8037693f95ae8d0ad1fa3468585c02090f28ad83f541984ec6648a1699288d4b76e16d39bbfbbd27ba746e4d381bdc5bff364c71306a18753a232c9e4544ae8cb31e6d2012c892390632054d96220401b60290000001050000feb67f53df1c98db22174203883bf335c0f437bda989c9d1b9cb1e1557f377710700aea68f02"`
       );
     });
+  });
+});
 
-    it('transfer ksm with address 0', async () => {
+describe('Test KSM SDK', () => {
+  let transport: Transport;
+  let cardType: CardType;
+  let props: Mandatory;
+  const ksmSDK = new DOT(COIN_SPECIES.KSM);
+
+  beforeAll(async () => {
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
+    props = await initialize(transport, mnemonic);
+  });
+
+  describe('Test Get KSM Address', () => {
+    it('index 0 address', async () => {
+      const address = await ksmSDK.getAddress(transport, props.appPrivateKey, props.appId, 0);
+      expect(address).toMatchInlineSnapshot(`"GP573vqT849Rg5y2vkfQjkZqVt2scGTYWrzxq2ZerxGoQH7"`);
+    });
+  });
+
+  describe('Test KSM Transfer', () => {
+    it('transfer with address 0', async () => {
       const signData = {
         transport,
         appPrivateKey: props.appPrivateKey,
@@ -83,7 +108,7 @@ describe('Test Polkadot SDK', () => {
             destAddress: 'F6JLMs2mn3RL8ttA4AmMLQCPBxfNqnEVXxsGtWxo3jBkCSF',
             value: '10000000000',
           },
-          fromAddress: '13Q8aoVFiN71TfaACgE56HqpMmtUbcNEMscZyDWgDZP45dfs',
+          fromAddress: 'GP573vqT849Rg5y2vkfQjkZqVt2scGTYWrzxq2ZerxGoQH7',
           blockHash: '0x70cdfca3963252730509012205f13520f937a988ec4308624228957e4ef62e51',
           blockNumber: '11402563',
           era: '128',
@@ -98,8 +123,8 @@ describe('Test Polkadot SDK', () => {
         authorizedCB: () => {},
       };
 
-      expect(await dotSDK.signTransaction(signData)).toMatchInlineSnapshot(
-        `"0x490284006a1ca31b3d34a0a0775edd95402442ccc9ba8037693f95ae8d0ad1fa3468585c02a539c81c65ea10712c9457f945bb796be0117b6a82259a3afbe19216f87de4514fe95cb40fb1671d20994fa5ef792299045454a833f5f524ff8731b5cd3ea5c700b602900000050000feb67f53df1c98db22174203883bf335c0f437bda989c9d1b9cb1e1557f377710700aea68f02"`
+      expect(await ksmSDK.signTransaction(signData)).toMatchInlineSnapshot(
+        `"0x4d028400a85cb7912f332232f986d85fa0946ea3fb34dec6dfe3505de03fc417ca8ecac402082b462f42fdc3e697dc923183ae7260ad2976f109780f024da7c18ca26c4eb64ab06dbd3ba8c6a24fd84564461a0f57e8af5b9eaecde7abb122ea09a429ce7b003604040000000a00006f55d899b0ce192aa28f914b39290de7b6c62e1c923bdd2b53221e575f09b4670700e40b5402"`
       );
     });
   });

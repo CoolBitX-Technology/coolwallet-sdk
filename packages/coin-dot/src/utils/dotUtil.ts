@@ -25,12 +25,11 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
   const txVer = formatVersion(rawData.transactionVersion);
   const genesisHash = rawData.genesisHash;
   const blockHash = rawData.blockHash;
-  const assetId = rawData.assetId ? rawData.assetId.toString(16) : undefined;
+  const assetId = stringUtil.toHexString(rawData.assetId);
   const encodeAssetId = assetId ? "01" + formatSCALECodec(assetId) : "00";
-  const mode = rawData.mode ? rawData.mode.toString(16) : "00"; // 防呆
+  if (rawData.mode && (rawData.mode > 256 || rawData.mode < 0)) throw new Error('getFormatTxData >>> invalid mode.');
+  const mode = rawData.mode ? stringUtil.toHexString(rawData.mode) as string : "00";
   const metadataHash = rawData.metadataHash;
-  const encodeMetadataHash = rawData.metadataHash ? "01" + rawData.metadataHash : "00";
-
   return {
     mortalEra,
     nonce,
@@ -45,7 +44,6 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
     encodeAssetId,
     mode,
     metadataHash,
-    encodeMetadataHash,
   };
 }
 
