@@ -9,16 +9,6 @@ export enum COIN_SPECIES {
   KSM = 'KSM',
 }
 
-export type Method = {
-  transfer: string;
-  bond: string;
-  bondExtra: string;
-  unbond: string;
-  nominate: string;
-  withdraw: string;
-  chill: string;
-};
-
 type SignTxData = {
   transport: Transport;
   appPrivateKey: string;
@@ -43,6 +33,7 @@ export type dotTransaction = {
   mode?: number;
   assetId?: number;
   metadataHash?: string;
+  callIndex: string;
 };
 
 export interface NormalTransferData extends SignTxData {
