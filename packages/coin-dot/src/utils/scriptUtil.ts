@@ -65,7 +65,6 @@ export const getNormalArgument = async (
   addressIndex: number,
   coinType: string
 ): Promise<string> => {
-  // const methodLen = dotUtil.getMethodLength(methodString).padStart(4, '0')
   const callIndex = method.callIndex.padStart(4, '0');
   const destAddress = method.destAddress.padStart(64, '0');
   const value = method.value.padStart(20, '0');
