@@ -14,7 +14,7 @@ async function addPath(argument: string, addressIndex: number, coinType: string)
  */
 const getTradeArgument = async (rawData: types.FormatTransfer): Promise<string> => {
   const { assetIdHex = '', metadataHash = '' } = rawData;
-  const mortalEra = rawData.mortalEra.padStart(4, '0');
+  const mortalEra = stringUtil.removeHex0x(rawData.mortalEra).padStart(4, '0');
   const nonce = stringUtil.removeHex0x(rawData.nonce).padStart(10, '0');
   const tip = rawData.tip.padStart(10, '0');
   const assetIdLength = assetIdHex.length.toString().padStart(2, '0');
