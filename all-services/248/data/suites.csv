@@ -1,0 +1,6 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Mon Nov 03 07:51:18 GMT 2025","Mon Nov 03 07:51:18 GMT 2025","342","","Test DOT SDK","","Test KSM SDK Test Get KSM Address test get index 0 address","","Test KSM SDK Test Get KSM Address test get index 0 address",""
+"passed","Mon Nov 03 07:51:18 GMT 2025","Mon Nov 03 07:51:18 GMT 2025","492","","Test DOT SDK","","Test KSM SDK Test KSM Transfer transfer with address 0 and metadatahash","","Test KSM SDK Test KSM Transfer transfer with address 0 and metadatahash",""
+"skipped","Mon Nov 03 07:51:18 GMT 2025","Mon Nov 03 07:51:18 GMT 2025","0","","Test DOT SDK","","Test DOT SDK Test DOT Transfer test transfer with address 0","","Test DOT SDK Test DOT Transfer test transfer with address 0",""
+"passed","Mon Nov 03 07:51:18 GMT 2025","Mon Nov 03 07:51:18 GMT 2025","355","","Test DOT SDK","","Test KSM SDK Test KSM Transfer transfer with address 0","","Test KSM SDK Test KSM Transfer transfer with address 0",""
+"passed","Mon Nov 03 07:51:18 GMT 2025","Mon Nov 03 07:51:18 GMT 2025","401","","Test DOT SDK","","Test DOT SDK Test Get DOT Address test get index 0 address","","Test DOT SDK Test Get DOT Address test get index 0 address",""
