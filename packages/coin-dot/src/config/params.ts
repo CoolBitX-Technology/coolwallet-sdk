@@ -10,27 +10,6 @@ export enum DOT_ADDRESS_TYPE {
   KSM = 2,
 }
 
-export const METHOD_CALL_INDEX = {
-  DOT: {
-    transfer: '0500',
-    bond: '0700',
-    bondExtra: '0701',
-    unbond: '0702',
-    nominate: '0705',
-    withdraw: '0703',
-    chill: '0706',
-  },
-  KSM: {
-    transfer: '0a00',
-    bond: '5900',
-    bondExtra: '5901',
-    unbond: '5902',
-    nominate: '5905',
-    withdraw: '5903',
-    chill: '5906',
-  },
-};
-
 export enum payeeType {
   staked = '00',
   stash = '01',
