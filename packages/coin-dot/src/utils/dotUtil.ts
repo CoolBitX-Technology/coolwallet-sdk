@@ -29,7 +29,7 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
   const encodeAssetId = assetIdHex ? '01' + formatSCALECodec(assetIdHex): '00';
   if (rawData.mode !== undefined && (rawData.mode > 255 || rawData.mode < 0))
     throw new Error('getFormatTxData >>> invalid mode.');
-  const mode = typeof rawData.mode === 'number' ? stringUtil.toHexString(rawData.mode) : '00';
+  const mode = typeof rawData.mode === 'number' ? stringUtil.toHexString(rawData.mode) as string : '00';
   const metadataHash = rawData.metadataHash;
   return {
     mortalEra,
