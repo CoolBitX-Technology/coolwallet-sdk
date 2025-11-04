@@ -9,16 +9,6 @@ export enum COIN_SPECIES {
   KSM = 'KSM',
 }
 
-export type Method = {
-  transfer: string;
-  bond: string;
-  bondExtra: string;
-  unbond: string;
-  nominate: string;
-  withdraw: string;
-  chill: string;
-};
-
 type SignTxData = {
   transport: Transport;
   appPrivateKey: string;
@@ -40,6 +30,10 @@ export type dotTransaction = {
   tip: string;
   transactionVersion: string;
   version: number;
+  mode?: number;
+  assetId?: number;
+  metadataHash?: string;
+  callIndex: string;
 };
 
 export interface NormalTransferData extends SignTxData {
@@ -124,6 +118,10 @@ export interface FormatTransfer {
   txVer: string;
   blockHash: string;
   genesisHash: string;
+  assetIdHex?: string;
+  encodeAssetId: string;
+  mode: string; // skip checking the metadata hash, refer to: https://github.com/polkadot-fellows/runtimes/pull/337#issuecomment-2204079667
+  metadataHash?: string;
 }
 
 export interface FormatNormalMethod {

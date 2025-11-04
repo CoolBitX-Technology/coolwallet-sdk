@@ -85,3 +85,8 @@ export function paddingString(binaryString: string): string {
   }
   return binaryString;
 }
+
+export function toHexString(value?: number): string| undefined {
+  if (value === undefined) return undefined;
+  return value.toString(16).padStart(2, '0');
+}

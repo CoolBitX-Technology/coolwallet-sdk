@@ -25,7 +25,12 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
   const txVer = formatVersion(rawData.transactionVersion);
   const genesisHash = rawData.genesisHash;
   const blockHash = rawData.blockHash;
-
+  const assetIdHex = stringUtil.toHexString(rawData.assetId);
+  const encodeAssetId = assetIdHex ? '01' + formatSCALECodec(assetIdHex): '00';
+  if (rawData.mode !== undefined && (rawData.mode > 255 || rawData.mode < 0))
+    throw new Error('getFormatTxData >>> invalid mode.');
+  const mode = typeof rawData.mode === 'number' ? stringUtil.toHexString(rawData.mode) : '00';
+  const metadataHash = rawData.metadataHash;
   return {
     mortalEra,
     nonce,
@@ -36,14 +41,18 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
     txVer,
     blockHash,
     genesisHash,
+    assetIdHex,
+    encodeAssetId,
+    mode,
+    metadataHash,
   };
 }
 
 export function getNormalMethod(
-  methodCallIndex: types.Method,
+  methodCallIndex: string,
   rawData: types.NormalMethod
 ): { method: types.FormatNormalMethod; methodString: string } {
-  const callIndex = methodCallIndex.transfer;
+  const callIndex = stringUtil.removeHex0x(methodCallIndex);
   const destAddress = Buffer.from(decodeAddress(rawData.destAddress)).toString('hex');
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16));
 
@@ -58,10 +67,10 @@ export function getNormalMethod(
 }
 
 export function getBondMethod(
-  methodCallIndex: types.Method,
+  methodCallIndex: string,
   rawData: types.BondMethod
 ): { method: types.FormatBondMethod; methodString: string } {
-  const callIndex = methodCallIndex.bond;
+  const callIndex = stringUtil.removeHex0x(methodCallIndex);
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16));
   const payeeType = rawData.payee;
 
@@ -76,10 +85,10 @@ export function getBondMethod(
 }
 
 export function getBondExtraMethod(
-  methodCallIndex: types.Method,
+  methodCallIndex: string,
   rawData: types.BondExtraMethod
 ): { method: types.FormatBondExtraMethod; methodString: string } {
-  const callIndex = methodCallIndex.bondExtra;
+  const callIndex = stringUtil.removeHex0x(methodCallIndex);
   const maxAdditional = stringUtil.paddingString(new BN(rawData.maxAdditional).toString(16));
 
   return {
@@ -92,10 +101,10 @@ export function getBondExtraMethod(
 }
 
 export function getUnbondMethod(
-  methodCallIndex: types.Method,
+  methodCallIndex: string,
   rawData: types.UnbondMethod
 ): { method: types.FormatUnbondMethod; methodString: string } {
-  const callIndex = methodCallIndex.unbond;
+  const callIndex = stringUtil.removeHex0x(methodCallIndex);
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16));
 
   return {
@@ -107,12 +116,11 @@ export function getUnbondMethod(
   };
 }
 
-// TODO
 export function getNominateMethod(
-  methodCallIndex: types.Method,
+  methodCallIndex: string,
   rawData: types.NominateMethod
 ): { method: types.FormatNominateMethod; methodString: string } {
-  const callIndex = methodCallIndex.nominate;
+  const callIndex = stringUtil.removeHex0x(methodCallIndex);
   const addressCount = rawData.targetAddresses.length.toString(16);
   const shiftTargetCount = formatSCALECodec(rawData.targetAddresses.length.toString());
   let targetsString = '';
@@ -131,10 +139,10 @@ export function getNominateMethod(
 }
 
 export function getWithdrawUnbondedMethod(
-  methodCallIndex: types.Method,
+  methodCallIndex: string,
   rawData: types.WithdrawUnbondedMethod
 ): { method: types.FormatWithdrawUnbondedTxMethod; methodString: string } {
-  const callIndex = methodCallIndex.withdraw;
+  const callIndex = stringUtil.removeHex0x(methodCallIndex);
   const numSlashingSpans = new BN(rawData.numSlashingSpans).toString(16);
 
   const formatNumSlashingSpans = stringUtil.reverse(stringUtil.paddingString(numSlashingSpans)).padEnd(8, '0');
@@ -148,8 +156,8 @@ export function getWithdrawUnbondedMethod(
   };
 }
 
-export function getChillMethod(methodCallIndex: types.Method): string {
-  return methodCallIndex.chill;
+export function getChillMethod(methodCallIndex: string): string {
+  return stringUtil.removeHex0x(methodCallIndex);
 }
 
 export function getMethodLength(methodString: string): string {

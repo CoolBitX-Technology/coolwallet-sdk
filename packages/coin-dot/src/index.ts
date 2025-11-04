@@ -16,20 +16,16 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
 
   addressType: any;
 
-  methodCallIndex: any;
-
   constructor(type: string) {
     switch (type) {
       case COIN_SPECIES.KSM:
         super(params.COIN_TYPE.KSM);
-        this.methodCallIndex = params.METHOD_CALL_INDEX.KSM;
         this.addressType = params.DOT_ADDRESS_TYPE.KSM;
         this.scriptParams = params.SCRIPT_PARAMS.KSM;
         break;
       case COIN_SPECIES.DOT:
       default:
         super(params.COIN_TYPE.DOT);
-        this.methodCallIndex = params.METHOD_CALL_INDEX.DOT;
         this.addressType = params.DOT_ADDRESS_TYPE.DOT;
         this.scriptParams = params.SCRIPT_PARAMS.DOT;
     }
@@ -53,7 +49,8 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
   async signTransaction(signTxData: types.NormalTransferData) {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const script = this.scriptParams.TRANSFER.script + this.scriptParams.TRANSFER.signature;
-    const { method, methodString } = dotUtil.getNormalMethod(this.methodCallIndex, transaction.method);
+
+    const { method, methodString } = dotUtil.getNormalMethod(transaction.callIndex, transaction.method);
     const formatTxData = dotUtil.getFormatTxData(transaction);
     const argument = await scriptUtil.getNormalArgument(formatTxData, method, addressIndex, this.coinType);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
@@ -66,7 +63,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
   async signBondTransaction(signTxData: types.BondData) {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const script = this.scriptParams.BOND.script + this.scriptParams.BOND.signature;
-    const { method, methodString } = dotUtil.getBondMethod(this.methodCallIndex, transaction.method);
+    const { method, methodString } = dotUtil.getBondMethod(transaction.callIndex, transaction.method);
     const formatTxData = dotUtil.getFormatTxData(transaction);
     const argument = await scriptUtil.getBondArgument(formatTxData, method, addressIndex, this.coinType);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
@@ -79,7 +76,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
   async signBondExtraTransaction(signTxData: types.BondExtraData) {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const script = this.scriptParams.BOND_EXTRA.script + this.scriptParams.BOND_EXTRA.signature;
-    const { method, methodString } = dotUtil.getBondExtraMethod(this.methodCallIndex, transaction.method);
+    const { method, methodString } = dotUtil.getBondExtraMethod(transaction.callIndex, transaction.method);
     const formatTxData = dotUtil.getFormatTxData(transaction);
     const argument = await scriptUtil.getBondExtraArgument(formatTxData, method, addressIndex, this.coinType);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
@@ -92,7 +89,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
   async signUnbondTransaction(signTxData: types.UnbondData) {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const script = this.scriptParams.UNBOND.script + this.scriptParams.UNBOND.signature;
-    const { method, methodString } = dotUtil.getUnbondMethod(this.methodCallIndex, transaction.method);
+    const { method, methodString } = dotUtil.getUnbondMethod(transaction.callIndex, transaction.method);
     const formatTxData = dotUtil.getFormatTxData(transaction);
     const argument = await scriptUtil.getUnbondArgument(formatTxData, method, addressIndex, this.coinType);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
@@ -104,7 +101,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
 
   async signNominateTransaction(signTxData: types.NominateData) {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
-    const { method, methodString } = dotUtil.getNominateMethod(this.methodCallIndex, transaction.method);
+    const { method, methodString } = dotUtil.getNominateMethod(transaction.callIndex, transaction.method);
 
     let script;
     if (transaction.method.targetAddresses.length > 5) {
@@ -125,7 +122,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
   async signWithdrawUnbondedTransaction(signTxData: types.WithdrawUnbondedData) {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const script = this.scriptParams.WITHDRAW.script + this.scriptParams.WITHDRAW.signature;
-    const { method, methodString } = dotUtil.getWithdrawUnbondedMethod(this.methodCallIndex, transaction.method);
+    const { method, methodString } = dotUtil.getWithdrawUnbondedMethod(transaction.callIndex, transaction.method);
     const formatTxData = dotUtil.getFormatTxData(transaction);
     const argument = await scriptUtil.getWithdrawUnbondedArgument(formatTxData, method, addressIndex, this.coinType);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
@@ -138,7 +135,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
   async signChillTransaction(signTxData: types.ChillData) {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     const script = this.scriptParams.CHILL.script + this.scriptParams.CHILL.signature;
-    const methodString = dotUtil.getChillMethod(this.methodCallIndex);
+    const methodString = dotUtil.getChillMethod(transaction.callIndex);
     const formatTxData = dotUtil.getFormatTxData(transaction);
     const argument = await scriptUtil.getChillArgument(formatTxData, methodString, addressIndex, this.coinType);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
