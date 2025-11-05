@@ -166,4 +166,4 @@ export interface ToBnOptions {
   isNegative?: boolean;
 }
 
-export type FnType = Function;
+export type FnType = (...args: unknown[]) => unknown;
