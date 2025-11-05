@@ -2,7 +2,7 @@ import * as types from '../config/types';
 
 const HEX_REGEX = /^0x[a-fA-F0-9]+$/;
 
-export function isHex(value: unknown, bitLength = -1, ignoreLength = false): value is string | string {
+export function isHex(value: unknown, bitLength = -1, ignoreLength = false): value is string {
   const isValidHex = value === '0x' || (isString(value) && HEX_REGEX.test(value.toString()));
 
   if (isValidHex && bitLength !== -1) {
