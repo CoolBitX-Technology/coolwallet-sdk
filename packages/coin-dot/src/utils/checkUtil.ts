@@ -12,7 +12,7 @@ export function isHex(value: unknown, bitLength = -1, ignoreLength = false): val
   return isValidHex && (ignoreLength || (value as string).length % 2 === 0);
 }
 
-export function isString(value: unknown): value is string | string {
+export function isString(value: unknown): value is string {
   return typeof value === 'string' || value instanceof String;
 }
 
