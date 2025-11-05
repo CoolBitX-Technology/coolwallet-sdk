@@ -1,19 +1,18 @@
-
-import * as types from '../config/types'
+import * as types from '../config/types';
 
 const HEX_REGEX = /^0x[a-fA-F0-9]+$/;
 
-export function isHex(value: unknown, bitLength = -1, ignoreLength = false): value is string | String {
+export function isHex(value: unknown, bitLength = -1, ignoreLength = false): value is string {
   const isValidHex = value === '0x' || (isString(value) && HEX_REGEX.test(value.toString()));
 
   if (isValidHex && bitLength !== -1) {
-    return (value as string).length === (2 + Math.ceil(bitLength / 4));
+    return (value as string).length === 2 + Math.ceil(bitLength / 4);
   }
 
-  return isValidHex && (ignoreLength || ((value as string).length % 2 === 0));
+  return isValidHex && (ignoreLength || (value as string).length % 2 === 0);
 }
 
-export function isString(value: unknown): value is string | String {
+export function isString(value: unknown): value is string {
   return typeof value === 'string' || value instanceof String;
 }
 
@@ -21,7 +20,7 @@ export function isBoolean(value: unknown): value is boolean {
   return typeof value === 'boolean';
 }
 
-export function isBigInt(value: unknown): value is BigInt {
+export function isBigInt(value: unknown): value is bigint {
   return typeof value === 'bigint';
 }
 

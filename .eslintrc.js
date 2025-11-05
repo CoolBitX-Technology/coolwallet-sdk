@@ -37,7 +37,7 @@ module.exports = {
       { SwitchCase: 1, ignoredNodes: ['ConditionalExpression', 'TSTypeParameterInstantiation', 'TSTypeLiteral'] },
     ],
     '@typescript-eslint/no-unused-expressions': ['error'],
-    '@typescript-eslint/no-use-before-define': ['error'],
+    '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
     'react/destructuring-assignment': 0,
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
     'no-use-before-define': 'off',

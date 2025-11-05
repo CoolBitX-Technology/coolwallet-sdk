@@ -1,4 +1,4 @@
-import * as types from "../config/types";
+import * as types from '../config/types';
 import * as checkUtil from './checkUtil';
 import BN from 'bn.js';
 
@@ -10,7 +10,7 @@ export const removeHex0x = (hex: string) => (hex.slice(0, 2) === '0x' ? hex.slic
 
 export const handleHex = (hex: string) => evenHexDigit(removeHex0x(hex));
 
-export function bnToBn<ExtToBn extends types.ToBn>(value?: ExtToBn | BN | BigInt | string | number | null): BN {
+export function bnToBn<ExtToBn extends types.ToBn>(value?: ExtToBn | BN | bigint | string | number | null): BN {
   if (!value) {
     return new BN(0);
   } else if (checkUtil.isHex(value)) {
@@ -22,7 +22,10 @@ export function bnToBn<ExtToBn extends types.ToBn>(value?: ExtToBn | BN | BigInt
   return numberToBn(value);
 }
 
-export function hexToBn(value?: string | number | null, options: types.ToBnOptions | boolean = { isLe: false, isNegative: false }): BN {
+export function hexToBn(
+  value?: string | number | null,
+  options: types.ToBnOptions | boolean = { isLe: false, isNegative: false }
+): BN {
   if (!value) {
     return new BN(0);
   }
@@ -31,7 +34,7 @@ export function hexToBn(value?: string | number | null, options: types.ToBnOptio
     isLe: false,
     isNegative: false,
     // Backwards-compatibility
-    ...(checkUtil.isBoolean(options) ? { isLe: options } : options)
+    ...(checkUtil.isBoolean(options) ? { isLe: options } : options),
   };
 
   const _value = hexStripPrefix(value as string);
@@ -66,27 +69,21 @@ export function hexHasPrefix(value?: string | null): boolean {
 }
 
 export function reverse(value: string): string {
-  return (value.match(/.{1,2}/g) || [])
-    .reverse()
-    .join('');
+  return (value.match(/.{1,2}/g) || []).reverse().join('');
 }
 
 export function numberToBn<ExtToBn extends types.ToBn>(value: number | ExtToBn | BN): BN {
-  return BN.isBN(value)
-    ? value
-    : checkUtil.isToBn(value)
-      ? value.toBn()
-      : new BN(value);
+  return BN.isBN(value) ? value : checkUtil.isToBn(value) ? value.toBn() : new BN(value);
 }
 
 export function paddingString(binaryString: string): string {
   if (binaryString.length % 2 != 0) {
-    return '0' + binaryString
+    return '0' + binaryString;
   }
   return binaryString;
 }
 
-export function toHexString(value?: number): string| undefined {
+export function toHexString(value?: number): string | undefined {
   if (value === undefined) return undefined;
   return value.toString(16).padStart(2, '0');
 }

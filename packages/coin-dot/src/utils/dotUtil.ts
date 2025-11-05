@@ -4,9 +4,7 @@ import BN from 'bn.js';
 import * as types from '../config/types';
 import * as params from '../config/params';
 import { SDKError } from '@coolwallet/core/lib/error';
-
-// eslint-disable-next-line new-cap
-const { decodeAddress } = require('@polkadot/keyring');
+import { decodeAddress } from '@polkadot/keyring';
 
 const MAX_U8 = new BN(2).pow(new BN(8 - 2)).subn(1);
 const MAX_U16 = new BN(2).pow(new BN(16 - 2)).subn(1);
@@ -26,10 +24,10 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
   const genesisHash = rawData.genesisHash;
   const blockHash = rawData.blockHash;
   const assetIdHex = stringUtil.toHexString(rawData.assetId);
-  const encodeAssetId = assetIdHex ? '01' + formatSCALECodec(assetIdHex): '00';
+  const encodeAssetId = assetIdHex ? '01' + formatSCALECodec(assetIdHex) : '00';
   if (rawData.mode !== undefined && (rawData.mode > 255 || rawData.mode < 0))
     throw new Error('getFormatTxData >>> invalid mode.');
-  const mode = typeof rawData.mode === 'number' ? stringUtil.toHexString(rawData.mode) as string : '00';
+  const mode = typeof rawData.mode === 'number' ? (stringUtil.toHexString(rawData.mode) as string) : '00';
   const metadataHash = rawData.metadataHash;
   return {
     mortalEra,
@@ -125,7 +123,7 @@ export function getNominateMethod(
   const shiftTargetCount = formatSCALECodec(rawData.targetAddresses.length.toString());
   let targetsString = '';
   rawData.targetAddresses.forEach((target) => {
-    targetsString += params.TX_ADDRESS_PRE + Buffer.from(decodeAddress(target, 0)).toString('hex');
+    targetsString += params.TX_ADDRESS_PRE + Buffer.from(decodeAddress(target, false, 0)).toString('hex');
   });
 
   return {
@@ -207,12 +205,12 @@ export function formatSCALECodec(value: string): string {
     case params.ValueMode.fourByteMode:
       formatValue = bigValue.shln(2).or(new BN('2'));
       break;
-    case params.ValueMode.bigIntegerMode:
+    case params.ValueMode.bigIntegerMode: {
       const length = Math.ceil(bigValue.toString(16).length / 2);
       const addCode = (length - 4).toString(2).padStart(6, '0') + '11';
-
       formatValue = bigValue.shln(8).add(new BN(addCode, 2));
       break;
+    }
     default:
       throw new SDKError(formatSCALECodec.name, 'input value should be less than 2 ** 536 - 1');
   }
@@ -229,15 +227,14 @@ export function formatSCALECodec(value: string): string {
 /**
  * 
 - `0b00`: single-byte mode; upper six bits are the LE encoding of the value (valid only for values of 0-63).
-- `0b01`: two-byte mode: upper six bits and the following byte is the LE encoding of the value (valid only for values `64-(2**14-1)`).
-- `0b10`: four-byte mode: upper six bits and the following three bytes are the LE encoding of the value (valid only for values `(2**14)-(2**30-1)`).
-- `0b11`: Big-integer mode: The upper six bits are the number of bytes following, less four. The value is contained, LE encoded, in the bytes following. The final (most significant) byte must be non-zero. Valid only for values `(2**30)-(2**536-1)`.
+- `0b01`: two-byte mode: upper six bits and the following byte is the LE encoding of the value (valid only for values `64-(2**14-1)`).
+- `0b10`: four-byte mode: upper six bits and the following three bytes are the LE encoding of the value (valid only for values `(2**14)-(2**30-1)`).
+- `0b11`: Big-integer mode: The upper six bits are the number of bytes following, less four. The value is contained, LE encoded, in the bytes following. The final (most significant) byte must be non-zero. Valid only for values `(2**30)-(2**536-1)`.
  * @param value 
  * @returns 
  */
 export function getValueMode(value: string): string {
   let mode;
-  const one = new BN(1);
   const bigValue = new BN(value);
   if (bigValue.cmp(new BN(64)) === -1) {
     mode = params.ValueMode.singleByteMode;
@@ -296,7 +293,7 @@ export function getSignedTxLength(_value: BN | number): Uint8Array {
 
   // adjust to the minimum number of bytes
   while (u8a[length - 1] === 0) {
-    length--;
+    length -= 1;
   }
 
   assert(length >= 4, 'Previous tests match anything less than 2^30; qed');
