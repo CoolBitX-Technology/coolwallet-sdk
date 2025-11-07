@@ -2,6 +2,7 @@
 
 ## 2.1.0
 
+- feat(dot): add test cases & fix nominate decode address error [CW-25986] (#1063)
 - feat(DOT): CW-25967 update dot script (#1061)
 - 🐛 fix(dot): type error (#1058)
 - [CW-25889] feat(ksm): support asset hub tx#1057
