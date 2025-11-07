@@ -60,22 +60,174 @@ describe('Test DOT SDK', () => {
     });
   });
 
-  // TODO: Handle after hard fork
-  xdescribe('Test DOT Transfer', () => {
+  describe('Test DOT Transfer', () => {
     it('test transfer with address 0', async () => {
       const signData = createSignData<NormalTx>(transport, props, {
         ...DOT_TX_PARAMS,
         method: {
-          destAddress: '16kyNo43vJxqPYEX2qFLAxEQZc9HRJo3YtRvPK5Wt5CnDBFu',
-          value: '11000000000',
+          destAddress: '12o5sCaGk9pt4fPFBcRFTcjqN9qWGTJAsk5rSZXBtHB8SQ4n',
+          value: '1000000000',
         },
-        mode: 1,
-        fromAddress: '13Q8aoVFiN71TfaACgE56HqpMmtUbcNEMscZyDWgDZP45dfs',
-        callIndex: '0x0500',
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        callIndex: '0x0a00',
       });
 
       expect(await dotSDK.signTransaction(signData)).toMatchInlineSnapshot(
-        `"0x4d0284006a1ca31b3d34a0a0775edd95402442ccc9ba8037693f95ae8d0ad1fa3468585c0211ec6e968ee65093c4d51397a6682f6dccfa95024272fa8bc873f4e44aa6b7c93accfa99d2f9f7292b6863efa6b429579174b64801ae9b2efcffd2e0e26d873501360404000001050000feb67f53df1c98db22174203883bf335c0f437bda989c9d1b9cb1e1557f377710700aea68f02"`
+        `"0x450284000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a02fa10414541a87afda8e13522f233c2c4491f1498175c8d4f0f0a1142c18828b3625ae325a6541199748c5ba2b27d2059e8d09fd8444ce0f2ec443add8f2cfbd8007601200000000a00004f61e69c0739123751bd988bcaa6c68975b1addd717f122b923d2cfd7a8737ae02286bee"`
+      );
+    });
+
+    it('transfer with address 0 and metadatahash', async () => {
+      const signData = createSignData<NormalTx>(transport, props, {
+        ...DOT_TX_PARAMS,
+        method: {
+          destAddress: '12o5sCaGk9pt4fPFBcRFTcjqN9qWGTJAsk5rSZXBtHB8SQ4n',
+          value: '1000000000',
+        },
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        mode: 1,
+        metadataHash: '0x0b6df28c23c317982d27980959dd38e49409ec41e9dbac3ff75f0e11f7d56bc7',
+        callIndex: '0x0a00',
+      });
+
+      expect(await dotSDK.signTransaction(signData)).toMatchInlineSnapshot(
+        `"0x450284000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a026217411bcd4a56bf7b1b4124483e8a0948921111adb8120bec679df4d5a0a2fe0e9c77b2b79857232b3e2d8740fd3277135c4b4039bc49676673ab185b611bc9017601200000010a00004f61e69c0739123751bd988bcaa6c68975b1addd717f122b923d2cfd7a8737ae02286bee"`
+      );
+    });
+  });
+
+  describe('Test DOT Bond', () => {
+    it('bond with address 0', async () => {
+      const signData = createSignData<BondTx>(transport, props, {
+        ...DOT_TX_PARAMS,
+        method: {
+          payee: payeeType.stash,
+          value: '100000000',
+        },
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        callIndex: '0x5900',
+      });
+
+      expect(await dotSDK.signBondTransaction(signData)).toMatchInlineSnapshot(
+        `"0xc50184000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a023d4b7d6ca4dece7eb00182d10ccb3129e7d0dc474469699cc8e196a20be44b4d3a97a92e1b5749636ce297f5e1d39b0837630c56b921eb69e3bcd7e261c203180076012000000059000284d71701"`
+      );
+    });
+  });
+
+  describe('Test DOT BondExtra', () => {
+    it('bond extra with address 0', async () => {
+      const signData = createSignData<BondExtraTx>(transport, props, {
+        ...DOT_TX_PARAMS,
+        method: {
+          maxAdditional: '100000000',
+        },
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        callIndex: '0x5901',
+      });
+
+      expect(await dotSDK.signBondExtraTransaction(signData)).toMatchInlineSnapshot(
+        `"0xc10184000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a028e495b8fe25f6381232c992bab72c529125845efdeed194242f932a4f2c594d511c276ec88cf5db532eea97f0f5f0a33669feb6d9025a79aa5230e45a43895c50076012000000059010284d717"`
+      );
+    });
+  });
+
+  describe('Test DOT Unbond', () => {
+    it('unbond with address 0', async () => {
+      const signData = createSignData<UnbondTx>(transport, props, {
+        ...DOT_TX_PARAMS,
+        method: {
+          value: '100000000',
+        },
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        callIndex: '0x5902',
+      });
+
+      expect(await dotSDK.signUnbondTransaction(signData)).toMatchInlineSnapshot(
+        `"0xc10184000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a0299ee18666d7f65acc21312dabff4c23763b752566a4b548ea14c5048726b445c49f286d54a879077e44857eb83aeb6e713196d18acdc831f2f01fc4953040a7a0176012000000059020284d717"`
+      );
+    });
+  });
+
+  describe('Test DOT Chill', () => {
+    it('chill with address 0', async () => {
+      const signData = createSignData(transport, props, {
+        ...DOT_TX_PARAMS,
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        callIndex: '0x5906',
+      });
+
+      expect(await dotSDK.signChillTransaction(signData)).toMatchInlineSnapshot(
+        `"0xb10184000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a02b61dc66a3469fb0e15467ad08698e3c07ba3c455b10b3bef3b3bf6a0a47c7eac1a5f4a76871e2bdb071fdd9666efadf8faa7e761afda77efd43b4ec032856360007601200000005906"`
+      );
+    });
+  });
+
+  describe('Test DOT Withdraw', () => {
+    it('withdraw with address 0', async () => {
+      const signData = createSignData<WithdrawUnbondedTx>(transport, props, {
+        ...DOT_TX_PARAMS,
+        method: {
+          numSlashingSpans: '0',
+        },
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        callIndex: '0x5903',
+      });
+
+      expect(await dotSDK.signWithdrawUnbondedTransaction(signData)).toMatchInlineSnapshot(
+        `"0xc10184000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a023aace9ebdd2fa7d0424468b06ce22358c7929d553b15744fc24ae4732bb169a328cd95cec38bd966cc6a89b7114017c2f82bde95a94e45913acf1e932db17f3700760120000000590300000000"`
+      );
+    });
+  });
+
+  describe('Test DOT Nominate', () => {
+    it('nominate with address 0 and single hash', async () => {
+      const signData = createSignData<NominateTx>(transport, props, {
+        ...DOT_TX_PARAMS,
+        method: {
+          targetAddresses: [
+            '15qomv8YFTpHrbiJKicP4oXfxRDyG4XEHZH7jdfJScnw2xnV',
+            '14QBQABMSFBsT3pDTaEQdshq7ZLmhzKiae2weZH45pw5ErYu',
+            '14AkAFBzukRhAFh1wyko1ZoNWnUyq7bY1XbjeTeCHimCzPU1',
+          ],
+        },
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        callIndex: '0x5905',
+      });
+
+      expect(await dotSDK.signNominateTransaction(signData)).toMatchInlineSnapshot(
+        `"0x410384000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a0283c978c6547f2dd9488dfe6dad7a60bf70a26c39c99137daa568a55f2f242c943312a0fcb7ef8c897b901a1a53b88da6559897245bda45ea0a4796e88aebe1e80076012000000059050c00d62a2b80ebcda1b2f14d2a903088759ce56482401fb4130cde32775d6d210a6a0096625a0cbd0931ad831add3bcaa6320950385aec23b3854c6ce987de1c9f8837008c23324b0cb29e4fd1a68cb08febe58b50e39d8afdb5f752d6c26c8ba52fc002"`
+      );
+    });
+
+    it('nominate with address 0 and double hash', async () => {
+      const signData = createSignData<NominateTx>(transport, props, {
+        ...DOT_TX_PARAMS,
+        method: {
+          targetAddresses: [
+            '15qomv8YFTpHrbiJKicP4oXfxRDyG4XEHZH7jdfJScnw2xnV',
+            '14QBQABMSFBsT3pDTaEQdshq7ZLmhzKiae2weZH45pw5ErYu',
+            '14AkAFBzukRhAFh1wyko1ZoNWnUyq7bY1XbjeTeCHimCzPU1',
+            '14Y626iStBUWcNtnmH97163BBJJ2f7jc1piGMZwEQfK3t8zw',
+            '121gZtuuG6sq3BZp1UKg8oRLRZvp89SAYSxXypwDJjaSRJR5',
+            '129TM37DNpyJqtRYYimSMp8aQZ8QW7Jg3b4qtSrRqjgAChQf',
+            '13giQQe5CS4AAjkz1roun8NYUmZAQ2KYp32qTnJHLTcw4VxW',
+            '15oKi7HoBQbwwdQc47k71q4sJJWnu5opn1pqoGx4NAEYZSHs',
+            '12YP2b7L7gcHabZqE7vJMyF9eSZA9W68gnvb8BzTYx4MUxRo',
+            '12ud6X3HTfWmV6rYZxiFo6f6QEDc1FF74k91vF76AmCDMT4j',
+            '145Vw57NN3Y4tqFNidLTmkhaMLD4HPoRtU91vioXrKcTcirS',
+            '1737bipUqNUHYjUB5HCezyYqto5ZjFiMSXNAX8fWktnD5AS',
+            '12GsUt6XbVMHvKt9NZNXBcXFvNCyTUiNhKpVnAjnLBYkZSj1',
+            '12Z3Bhjn42TPXy5re2CiYz1fqMd21i2XyBLmbekbjLXrqVBV',
+            '14aN2MKS7sMrof8ZPbUKs7C8CpuS939ymFf1BKgEGHmHd5jw',
+            '16Sud9b5uUfUi1HXdfwb3drbYBZBLPVvdKuZhwxz2n7HR12M',
+          ],
+        },
+        fromAddress: '1J49f2E6qxfqtRRaimeVbTMk6McXrVrtHTAmMKmLnayot9a',
+        callIndex: '0x5905',
+      });
+
+      expect(await dotSDK.signNominateTransaction(signData)).toMatchInlineSnapshot(
+        `"0xf50984000d01c5ec6bf35c943690d56744047de0c78eb5c9ddf6248fd1b747ef3bc05d2a024201ddf4d2fd8c7bd1ad44ee41d019e7223010ed8cea9a9a42701e50966287ed0171977c5b5e106faaa56272c7d66f7d7fe75e9c99a7198294fa2c2acb12c1580076012000000059054000d62a2b80ebcda1b2f14d2a903088759ce56482401fb4130cde32775d6d210a6a0096625a0cbd0931ad831add3bcaa6320950385aec23b3854c6ce987de1c9f8837008c23324b0cb29e4fd1a68cb08febe58b50e39d8afdb5f752d6c26c8ba52fc002009c6a3401d06cef30fdbb33901328f3611dae8253708779a5d66179c967582635002cc16da9d1f7271475075aa8eb5c6667714426b8c41dbecf92bdedfa462b71630032aee225f2714c573eec965a9dd1e1ca399636d9158ce068842f0558f360a4350076c26a1fb9acbdd56be00d4c44901856929b9d2a879caad6119ad0417e99494900d44533a4d21fd9d6f5d57c8cd05c61a6f23f9131cec8ae386b6b437db399ec3d00442afde41c8d0cff9680849824712996d0cd96906dba9697aa5110cd6d025e1500545e8064f8898a29d4811e09b207cf3302e5cefef16615f8580fcd8fa63a624e008823139e30d401f7a9422e68208ff3ad2f8e40e92c83af26e4002734760cb87e00049a9687c22bf19c419cfcc79a77b60b07faa3df2034d7cfa4635350571cbd32003856d90462030b27957c425b33bf8f8f669ab715580e7f64f36999a74cea39360044ab70adf9b1a6402cf14b3c61f98acf5bccabaf0030d537510166a21ee44d16009e2691c29d062502fade8144a0eac25be3369a271b3fdf2208a9d86cfec6f94800f0ef72b01055276dae281f6da1a1dd14c6276142afd3aed8f8b6c94b36d2a717"`
       );
     });
   });
@@ -233,6 +385,7 @@ describe('Test KSM SDK', () => {
         },
         fromAddress: 'GP573vqT849Rg5y2vkfQjkZqVt2scGTYWrzxq2ZerxGoQH7',
         callIndex: '0x5905',
+        nonce: '2',
       });
 
       expect(await ksmSDK.signNominateTransaction(signData)).toMatchInlineSnapshot(
@@ -259,6 +412,7 @@ describe('Test KSM SDK', () => {
             'F5YUotdVsSxgF9kuoC6UySCdJBQKUnP8ry5baevkHYqTV7T',
           ],
         },
+        nonce: '2',
         fromAddress: 'GP573vqT849Rg5y2vkfQjkZqVt2scGTYWrzxq2ZerxGoQH7',
         callIndex: '0x5905',
       });
