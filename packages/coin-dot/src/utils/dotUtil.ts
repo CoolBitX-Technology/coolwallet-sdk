@@ -49,10 +49,9 @@ export function getFormatTxData(rawData: types.dotTransaction): types.FormatTran
 export function getNormalMethod(
   methodCallIndex: string,
   rawData: types.NormalMethod,
-  addressType: params.DOT_ADDRESS_TYPE,
 ): { method: types.FormatNormalMethod; methodString: string } {
   const callIndex = stringUtil.removeHex0x(methodCallIndex);
-  const destAddress = Buffer.from(decodeAddress(rawData.destAddress, false, addressType)).toString('hex');
+  const destAddress = Buffer.from(decodeAddress(rawData.destAddress, false)).toString('hex');
   const value = stringUtil.paddingString(new BN(rawData.value).toString(16));
 
   return {
@@ -118,14 +117,13 @@ export function getUnbondMethod(
 export function getNominateMethod(
   methodCallIndex: string,
   rawData: types.NominateMethod,
-  addressType: params.DOT_ADDRESS_TYPE,
 ): { method: types.FormatNominateMethod; methodString: string } {
   const callIndex = stringUtil.removeHex0x(methodCallIndex);
   const addressCount = rawData.targetAddresses.length.toString(16);
   const shiftTargetCount = formatSCALECodec(rawData.targetAddresses.length.toString());
   let targetsString = '';
   rawData.targetAddresses.forEach((target) => {
-    targetsString += params.TX_ADDRESS_PRE + Buffer.from(decodeAddress(target, false, addressType)).toString('hex');
+    targetsString += params.TX_ADDRESS_PRE + Buffer.from(decodeAddress(target, false)).toString('hex');
   });
 
   return {

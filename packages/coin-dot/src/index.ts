@@ -51,7 +51,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
     const script = this.scriptParams.TRANSFER.script + this.scriptParams.TRANSFER.signature;
 
     // eslint-disable-next-line max-len
-    const { method, methodString } = dotUtil.getNormalMethod(transaction.callIndex, transaction.method, this.addressType);
+    const { method, methodString } = dotUtil.getNormalMethod(transaction.callIndex, transaction.method);
     const formatTxData = dotUtil.getFormatTxData(transaction);
     const argument = await scriptUtil.getNormalArgument(formatTxData, method, addressIndex, this.coinType);
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
@@ -103,7 +103,7 @@ export default class DOT extends COIN.ECDSACoin implements COIN.Coin {
   async signNominateTransaction(signTxData: types.NominateData) {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
     // eslint-disable-next-line max-len
-    const { method, methodString } = dotUtil.getNominateMethod(transaction.callIndex, transaction.method, this.addressType);
+    const { method, methodString } = dotUtil.getNominateMethod(transaction.callIndex, transaction.method);
 
     let script;
     if (transaction.method.targetAddresses.length > 5) {
