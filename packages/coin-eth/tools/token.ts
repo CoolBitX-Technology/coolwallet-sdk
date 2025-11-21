@@ -29,3 +29,4 @@ console.log('ETH EURC: ', buildTokenHex('EURC'));
 console.log('ETH WCT: ', buildTokenHex('WCT'));
 console.log('ETH ORDER: ', buildTokenHex('ORDER'));
 console.log('ETH AAVE: ', buildTokenHex('AAVE'));
+console.log('ETH LBTC: ', buildTokenHex('LBTC'));
