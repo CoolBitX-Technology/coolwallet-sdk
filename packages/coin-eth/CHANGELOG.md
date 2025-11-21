@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+- [CW-26115] feat(eth): add lbtc token (#1070)
+
 
 ## 2.0.0
 - chore: upgrade coins versions to 2.0.0 (#992)
