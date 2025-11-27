@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+- [CW-26170] feat(eth): add XAUt token (#1073)
+
 ## 2.0.1
 - [CW-26115] feat(eth): add lbtc token (#1070)
 
