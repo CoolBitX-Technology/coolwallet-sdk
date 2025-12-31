@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.0.1
+- ✨ [CW-26460] chore: upgrade xtz to 2.0.1 (#1082)
 - ✨ [CW-26453] feat(xtz): update reveal tx script & signature (#1077)
 
 
