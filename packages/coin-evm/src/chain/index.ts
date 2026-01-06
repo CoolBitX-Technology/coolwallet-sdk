@@ -16,3 +16,4 @@ export { default as LINEA } from './linea';
 export { default as BASE } from './base';
 export { default as DIS } from './dis';
 export { default as CORE } from './core';
+export { default as BSC } from './bsc';

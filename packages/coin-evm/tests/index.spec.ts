@@ -36,6 +36,7 @@ const coinCelo = { name: 'Celo', api: new EVM(CHAIN.CELO.id) };
 const coinFantom = { name: 'Fantom', api: new EVM(CHAIN.FANTOM.id) };
 const coinFlare = { name: 'Flare', api: new EVM(CHAIN.FLARE.id) };
 const coinOKX = { name: 'OKX', api: new EVM(CHAIN.OKX.id) };
+const coinBSC = { name: 'BSC', api: new EVM(CHAIN.BSC.id) };
 // Layer 2
 const coinArbitrum = { name: 'Arbitrum', api: new EVM(CHAIN.ARBITRUM.id) };
 const coinOptimism = { name: 'Optimism', api: new EVM(CHAIN.OPTIMISM.id) };
@@ -48,6 +49,7 @@ const customCoinScroll = { name: 'Scroll', api: new EVM(534352) };
 const customCoinAurora = { name: 'Aurora', api: new EVM(1313161554) };
 
 const TEST_COINS = [
+  coinBSC,
   coinCronos,
   coinPolygon,
   coinAvaxC,
