@@ -44,7 +44,7 @@
     "@coolwallet/core": "^1.1.31",
     "@cosmjs/crypto": "^0.28.9",
     "@cosmjs/proto-signing": "^0.28.9",
-    "@cosmjs/stargate": "^0.28.9",
+    "@cosmjs/stargate": "^0.33.1",
     "bip39": "^3.0.4",
     "del-cli": "^4.0.1",
     "typescript": "^4.7.2"
