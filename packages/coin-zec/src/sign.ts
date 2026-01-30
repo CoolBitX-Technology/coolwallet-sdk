@@ -15,6 +15,7 @@ export async function signTransaction(signTxData: types.signTxType): Promise<str
   const txVersion = params.txVersion.V4;
   const { preparedData } = txUtil.createUnsignedTransactions(scriptType, inputs, output, change);
   const { preActions, actions } = await scriptUtil.getScriptSigningActions(
+    txVersion,
     transport,
     scriptType,
     appId,

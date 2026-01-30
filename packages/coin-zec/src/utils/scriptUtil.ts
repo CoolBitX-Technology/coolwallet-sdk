@@ -4,88 +4,86 @@ import * as cryptoUtil from './cryptoUtil';
 import * as txUtil from './transactionUtil';
 import * as bufferUtil from './bufferUtil';
 import * as types from '../config/types';
+import rlp from 'rlp';
 
 export async function getArgument(
+  txVersion: params.txVersion,
   scriptType: types.ScriptType,
   inputs: Array<types.Input>,
   output: types.Output,
-  change?: types.Change
+  change?: types.Change,
+  lockTime = 0,
+  expiryHeight = 0
 ): Promise<string> {
-  const {
-    scriptType: outputType,
-    outScript: outputScript,
-    outHash: outputHash,
-  } = txUtil.addressToOutScript(output.address);
+  const transaction: Array<Buffer | Buffer[]> = [];
+  const versionBuf = bufferUtil.toUintBuffer(params.ZcashTxVersion[txVersion], 4);
+  transaction.push(versionBuf);
+  const groupIdBuf = bufferUtil.toUintBuffer(params.ZcashGroupId[txVersion], 4);
+  transaction.push(groupIdBuf);
+
+  const prevouts = inputs.map((input) => {
+    return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(), bufferUtil.toUintBuffer(input.preIndex, 4)]);
+  });
+  const hashPrevouts = cryptoUtil.blake2b256Personal(Buffer.concat(prevouts), Buffer.from('ZcashPrevoutHash'));
+  transaction.push(hashPrevouts);
+
+  const sequences = inputs.map((input) => {
+    return Buffer.concat([
+      input.sequence ? bufferUtil.toUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
+    ]);
+  });
+  const hashSequence = cryptoUtil.blake2b256Personal(Buffer.concat(sequences), Buffer.from('ZcashSequencHash'));
+  transaction.push(hashSequence);
+
+  const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
   if (!outputHash) {
     throw new error.SDKError(getArgument.name, `OutputHash Undefined`);
   }
-  let outputScriptType;
-  let outputHashBuf;
+  const outputAmount = bufferUtil.toUintBuffer(output.value, 8);
+  transaction.push(outputAmount);
+  const outputScriptType = bufferUtil.toUintBuffer(outputType, 1);
+  transaction.push(outputScriptType);
+  const outputDest = outputHash;
+  transaction.push(outputDest);
 
-  if (outputType === types.ScriptType.P2PKH) {
-    outputScriptType = bufferUtil.toUintBuffer(0, 1);
-    outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-  } else if (outputType === types.ScriptType.P2SH) {
-    outputScriptType = bufferUtil.toUintBuffer(1, 1);
-    outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-  } else {
-    throw new error.SDKError(getArgument.name, `Unsupport ScriptType : ${outputType}`);
-  }
-  const outputAmount = bufferUtil.toNonReverseUintBuffer(output.value, 8);
-  //[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
   let haveChange;
-  let changeScriptType;
   let changeAmount;
+  let changeScriptType;
   let changePath;
   if (change) {
     if (!change.pubkeyBuf) throw new error.SDKError(getArgument.name, 'Public Key not exists !!');
     haveChange = bufferUtil.toUintBuffer(1, 1);
+    changeAmount = bufferUtil.toUintBuffer(change.value, 8);
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
-
-    changeAmount = bufferUtil.toNonReverseUintBuffer(change.value, 8);
     changePath = Buffer.from(await utils.getPath(params.COIN_TYPE, change.addressIndex), 'hex');
   } else {
-    haveChange = Buffer.from('00', 'hex');
-    changeScriptType = Buffer.from('00', 'hex');
-    changeAmount = bufferUtil.toUintBuffer(0, 8); //)Buffer.from('0000000000000000', 'hex');
-    changePath = bufferUtil.toUintBuffer(0, 21); //Buffer.from('000000000000000000000000000000000000000000', 'hex');
+    haveChange = bufferUtil.toUintBuffer(0, 1);
+    changeAmount = Buffer.alloc(0);
+    changeScriptType = Buffer.alloc(0);
+    changePath = Buffer.alloc(0);
   }
-  const prevouts = inputs.map((input) => {
-    return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(), bufferUtil.toUintBuffer(input.preIndex, 4)]);
-  });
-  const hashPrevouts = cryptoUtil.hash256(Buffer.concat(prevouts));
-  const sequences = inputs.map((input) => {
-    return Buffer.concat([
-      input.sequence ? bufferUtil.toUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
-      //Buffer.from(input.sequence, 'hex').reverse(),
-      // toUintBuffer(input.preIndex, 4)
-    ]);
-  });
-  const hashSequence = cryptoUtil.hash256(Buffer.concat(sequences));
+  transaction.push(haveChange);
+  transaction.push(changeAmount);
+  transaction.push(changeScriptType);
+  transaction.push(changePath);
 
-  const address = output.address;
-  let Maddress;
-  if (address.startsWith('M')) {
-    Maddress = Buffer.from('01', 'hex');
-  } else {
-    Maddress = Buffer.from('00', 'hex');
-  }
+  const outputHashPersonal = Buffer.from('ZcashOutputsHash');
+  transaction.push(outputHashPersonal);
 
-  return Buffer.concat([
-    outputScriptType,
-    outputAmount,
-    outputHashBuf,
-    haveChange,
-    changeScriptType,
-    changeAmount,
-    changePath,
-    hashPrevouts,
-    hashSequence,
-    Maddress,
-  ]).toString('hex');
+  const lockTimeBuf = bufferUtil.toUintBuffer(lockTime, 4);
+  transaction.push(lockTimeBuf);
+
+  const expiryHeightBuf = bufferUtil.toUintBuffer(expiryHeight, 4);
+  transaction.push(expiryHeightBuf);
+
+  const hashTypeBuf = Buffer.from('81000000', 'hex');
+  transaction.push(hashTypeBuf);
+
+  return Buffer.from(rlp.encode(transaction)).toString('hex');
 }
 
 export async function getScriptSigningActions(
+  txVersion: params.txVersion,
   transport: types.Transport,
   scriptType: types.ScriptType,
   appId: string,
@@ -99,7 +97,7 @@ export async function getScriptSigningActions(
   actions: Array<Function>;
 }> {
   const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = '00' + (await getArgument(scriptType, inputs, output, change)); // keylength zero
+  const argument = '00' + (await getArgument(txVersion, scriptType, inputs, output, change)); // keylength zero
 
   const preActions = [];
   const sendScript = async () => {
@@ -135,22 +133,6 @@ export async function getScriptSigningActions(
       transactionSigningHashContext.toString('hex')
     );
   });
-
-  // const utxoArguments = transaction.inputs.map(async (input, index) => {
-  //   const utxo = transaction.utxos[index];
-  //   const utxoArgumentBuf = await getUtxoArgumentBuffer(input, utxo);
-  //   return utxoArgumentBuf.toString('hex');
-  // });
-  // const actions = utxoArguments.map((utxoArgument) => async () => {
-  //   return tx.command.executeUtxoSegmentScript(
-  //     transport,
-  //     appId,
-  //     appPrivateKey,
-  //     await utxoArgument,
-  //     TransactionSigningHashKey.toString('hex')
-  //   );
-  // });
-  // return { actions };
 
   return { preActions, actions };
 }
