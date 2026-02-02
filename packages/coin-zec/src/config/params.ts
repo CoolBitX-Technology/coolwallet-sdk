@@ -1,4 +1,5 @@
 import { Transport } from '@coolwallet/core';
+import type { Network } from 'bitcoinjs-lib';
 
 export { Transport };
 
@@ -10,6 +11,21 @@ export const TRANSFER = {
 export const COIN_TYPE = '80000085';
 
 export const BranchId = 0x4dec4df0; // (activated at block 3146400)
+
+export const ZCASH_NETWORK: Network = {
+  messagePrefix: '\x18Zcash Signed Message:\n',
+  pubKeyHash: 0x1cb8,
+  scriptHash: 0x1cbd,
+  bech32: 'zc',
+  bip32: {
+    public: 0x0488b21e,
+    private: 0x0488ade4,
+  },
+  wif: 0x80,
+};
+
+export const ZCASH_P2PKH_PREFIX = Buffer.from('1cb8', 'hex');
+export const ZCASH_P2SH_PREFIX = Buffer.from('1cbd', 'hex');
 
 export enum txVersion {
   V4 = 'V4',

@@ -2,7 +2,8 @@ import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 import ZEC from '../src';
-import { ScriptType, signTxType } from '../src/config/types';
+import { ScriptType } from '../src/config/types';
+import type { signTxType } from '../src/config/types';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
@@ -39,7 +40,7 @@ describe('Test ZEC SDK', () => {
         ScriptType.P2PKH,
         ADDRESS_INDEX
       );
-      expect(p2pkh).toMatchInlineSnapshot(`""`);
+      expect(p2pkh).toMatchInlineSnapshot(`"t1V9sXRC68WHVrBqtvG8bCx8Pw6PmXQKTHj"`);
     });
 
     // it('P2SH', async () => {

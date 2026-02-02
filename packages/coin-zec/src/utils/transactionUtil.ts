@@ -2,6 +2,7 @@ import { error } from '@coolwallet/core';
 import * as bufferUtil from './bufferUtil';
 import * as params from '../config/params';
 import * as bitcoin from 'bitcoinjs-lib';
+import bs58check from 'bs58check';
 import * as types from '../config/types';
 
 export function addressToOutScript(address: string): {
@@ -9,24 +10,28 @@ export function addressToOutScript(address: string): {
   outScript: Buffer;
   outHash?: Buffer;
 } {
-  const input = {
-    address: address,
-  };
   let scriptType;
   let payment;
-  if (address.startsWith('1CB8')) {
+  const decoded = bs58check.decode(address);
+  if (decoded.length !== 22) {
+    throw new error.SDKError(addressToOutScript.name, `Invalid Address '${address}'`);
+  }
+  const version = decoded.subarray(0, 2);
+  const hash = decoded.subarray(2);
+
+  if (version.equals(params.ZCASH_P2PKH_PREFIX)) {
     scriptType = types.ScriptType.P2PKH;
-    payment = bitcoin.payments.p2pkh(input);
-  } else if (address.startsWith('1CBD')) {
+    payment = bitcoin.payments.p2pkh({ hash });
+  } else if (version.equals(params.ZCASH_P2SH_PREFIX)) {
     scriptType = types.ScriptType.P2SH;
-    payment = bitcoin.payments.p2sh(input);
+    payment = bitcoin.payments.p2sh({ hash });
   } else {
     throw new error.SDKError(addressToOutScript.name, `Unsupport Address '${address}'`);
   }
 
   if (!payment.output) throw new error.SDKError(addressToOutScript.name, `No OutScript for Address '${address}'`);
   const outScript = payment.output;
-  const outHash = payment.hash;
+  const outHash = payment.hash ?? hash;
   return { scriptType, outScript, outHash };
 }
 
@@ -42,17 +47,20 @@ export function pubkeyToAddressAndOutScript(
   if (scriptType === types.ScriptType.P2PKH) {
     payment = bitcoin.payments.p2pkh(input);
   } else if (scriptType === types.ScriptType.P2SH) {
-    payment = bitcoin.payments.p2sh(input);
+    const redeem = bitcoin.payments.p2pkh(input);
+    payment = bitcoin.payments.p2sh({ redeem });
   } else {
     throw new error.SDKError(pubkeyToAddressAndOutScript.name, `Unsupport ScriptType '${scriptType}'`);
   }
-  if (!payment.address)
+  if (!payment.hash)
     throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No Address for ScriptType '${scriptType}'`);
   if (!payment.output)
     throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
-  if (!payment.hash)
-    throw new error.SDKError(pubkeyToAddressAndOutScript.name, `No OutScript for ScriptType '${scriptType}'`);
-  return { address: payment.address, outScript: payment.output, hash: payment.hash };
+  const address =
+    scriptType === types.ScriptType.P2PKH
+      ? bs58check.encode(Buffer.concat([params.ZCASH_P2PKH_PREFIX, payment.hash]))
+      : bs58check.encode(Buffer.concat([params.ZCASH_P2SH_PREFIX, payment.hash]));
+  return { address, outScript: payment.output, hash: payment.hash };
 }
 
 export function createUnsignedTransactions(
