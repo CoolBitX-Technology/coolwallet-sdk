@@ -10,17 +10,20 @@ export function hash256(buf: Buffer): Buffer {
 }
 
 export function blake2b256(input: Buffer): Buffer {
-  const out = Buffer.allocUnsafe(32);
+  const outBytes = new Uint8Array(32);
   const h = blake2b(32);
-  h.update(input);
-  h.digest(out);
-  return out;
+  h.update(Uint8Array.from(input));
+  h.digest(outBytes);
+  return Buffer.from(outBytes);
 }
 
 export function blake2b256Personal(input: Buffer, personalization: Buffer): Buffer {
-  const out = Buffer.allocUnsafe(32);
-  const h = blake2b(32, undefined, undefined, personalization);
-  h.update(input);
-  h.digest(out);
-  return out;
+  const inputBytes = Uint8Array.from(input);
+  const personalBytes = Uint8Array.from(personalization);
+  const outBytes = new Uint8Array(32);
+
+  const h = blake2b(32, undefined, undefined, personalBytes);
+  h.update(inputBytes);
+  h.digest(outBytes);
+  return Buffer.from(outBytes);
 }

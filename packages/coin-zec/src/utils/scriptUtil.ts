@@ -5,6 +5,7 @@ import * as txUtil from './transactionUtil';
 import * as bufferUtil from './bufferUtil';
 import * as types from '../config/types';
 import rlp from 'rlp';
+import BN from 'bn.js';
 
 export async function getArgument(
   txVersion: params.txVersion,
@@ -39,7 +40,7 @@ export async function getArgument(
   if (!outputHash) {
     throw new error.SDKError(getArgument.name, `OutputHash Undefined`);
   }
-  const outputAmount = bufferUtil.toUintBuffer(output.value, 8);
+  const outputAmount = Buffer.from(new BN(output.value).toArray());
   transaction.push(outputAmount);
   const outputScriptType = bufferUtil.toUintBuffer(outputType, 1);
   transaction.push(outputScriptType);
@@ -53,7 +54,7 @@ export async function getArgument(
   if (change) {
     if (!change.pubkeyBuf) throw new error.SDKError(getArgument.name, 'Public Key not exists !!');
     haveChange = bufferUtil.toUintBuffer(1, 1);
-    changeAmount = bufferUtil.toUintBuffer(change.value, 8);
+    changeAmount = Buffer.from(new BN(change.value).toArray());
     changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
     changePath = Buffer.from(await utils.getPath(params.COIN_TYPE, change.addressIndex), 'hex');
   } else {
@@ -79,7 +80,10 @@ export async function getArgument(
   const hashTypeBuf = Buffer.from('81000000', 'hex');
   transaction.push(hashTypeBuf);
 
-  return Buffer.from(rlp.encode(transaction)).toString('hex');
+  const rlpInput = transaction.map((item) =>
+    item instanceof Uint8Array ? item : Uint8Array.from(item as unknown as number[])
+  );
+  return Buffer.from(rlp.encode(rlpInput)).toString('hex');
 }
 
 export async function getScriptSigningActions(
@@ -113,11 +117,17 @@ export async function getScriptSigningActions(
   const utxoArguments = preparedData.preparedInputs.map(async (preparedInput) => {
     const SEPath = Buffer.from(`15${await utils.getPath(params.COIN_TYPE, preparedInput.addressIndex)}`, 'hex');
     const outPoint = preparedInput.preOutPointBuf;
+    let inputScript;
+    if (scriptType === types.ScriptType.P2PKH) {
+      const inputHash = cryptoUtil.hash160(preparedInput.pubkeyBuf);
+      inputScript = Buffer.concat([Buffer.from('1976a914', 'hex'), inputHash, Buffer.from('88ac', 'hex')]);
+    } else {
+      throw new error.SDKError(getScriptSigningActions.name, `Unsupport ScriptType '${scriptType}'`);
+    }
+    const inputAmount = preparedInput.preValueBuf;
+    const inputSequence = preparedInput.sequenceBuf;
 
-    const inputScriptType = bufferUtil.toUintBuffer(0, 1);
-    const inputAmount = preparedInput.preValueBuf.reverse();
-    const inputHash = cryptoUtil.hash160(preparedInput.pubkeyBuf);
-    return Buffer.concat([SEPath, outPoint, inputScriptType, inputAmount, inputHash]).toString('hex');
+    return Buffer.concat([SEPath, outPoint, inputScript, inputAmount, inputSequence]).toString('hex');
   });
 
   const branchIdBuf = Buffer.allocUnsafe(4);
