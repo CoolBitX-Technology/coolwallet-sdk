@@ -1,6 +1,6 @@
 import { CardType } from '../../transport';
 
-const SE_UPDATE_VER_PRO = 341;
+const SE_UPDATE_VER_PRO = 344;
 const SE_UPDATE_VER_GO = 13;
 
 const CHALLENGE_URL = 'https://ota.cbx.io/api/challenge';
