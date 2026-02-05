@@ -15730,17 +15730,20 @@ function run() {
                     return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sui')];
                 case 28:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zec')];
                 case 29:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
                 case 30:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
                 case 31:
                     _a.sent();
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-react-native-nfc')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
                 case 32:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-react-native-nfc')];
+                case 33:
                     _a.sent();
                     return [2 /*return*/];
             }
