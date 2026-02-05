@@ -15810,7 +15810,7 @@ exports.buildAndPublish = exports.isLocalUpgraded = exports.installCore = void 0
 var semver_1 = __importDefault(__nccwpck_require__(1383));
 var child_process_1 = __nccwpck_require__(2081);
 var betaList = ['beta', 'hotfix', 'stg'];
-var NPM_404_ERR_CODE = 'npm error code E404';
+var NPM_404_ERR_CODE = 'npm ERR! code E404';
 function installCore(isBeta) {
     if (isBeta === void 0) { isBeta = false; }
     return __awaiter(this, void 0, void 0, function () {
@@ -15837,24 +15837,25 @@ exports.installCore = installCore;
 function isLocalUpgraded(path) {
     var _a;
     return __awaiter(this, void 0, void 0, function () {
-        var _b, version, name, remoteVersion, _c, _d, e_1, error;
-        return __generator(this, function (_e) {
-            switch (_e.label) {
+        var _b, version, name, result, remoteVersion, e_1, error;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
                     _b = getPackageInfo(path), version = _b.version, name = _b.name;
                     console.log("".concat(name));
-                    _e.label = 1;
+                    _c.label = 1;
                 case 1:
-                    _e.trys.push([1, 3, , 4]);
-                    _d = (_c = semver_1.default).clean;
+                    _c.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, command('npm', ['view', name, 'version'])];
                 case 2:
-                    remoteVersion = (_a = _d.apply(_c, [_e.sent()])) !== null && _a !== void 0 ? _a : '';
+                    result = _c.sent();
+                    console.log('==npm view :', result);
+                    remoteVersion = (_a = semver_1.default.clean(result)) !== null && _a !== void 0 ? _a : '';
                     console.log("remote version: ".concat(remoteVersion));
                     console.log("local version: ".concat(version));
                     return [2 /*return*/, semver_1.default.gt(version, remoteVersion)];
                 case 3:
-                    e_1 = _e.sent();
+                    e_1 = _c.sent();
                     error = e_1;
                     if (error.message.includes(NPM_404_ERR_CODE)) {
                         console.log('Cannot find package in the npm registry, trying to publish it!');
@@ -15936,10 +15937,11 @@ function pushTag(tag) {
     });
 }
 function spiltErrorMessage(output) {
-    return output
+    var filtered = output
         .split('\n')
         .filter(function (line) { return line.toLowerCase().includes('error'); })
         .join('\n');
+    return filtered.trim() ? filtered : output;
 }
 function command(cmd, args, cwd) {
     return new Promise(function (resolve, reject) {
@@ -15962,8 +15964,11 @@ function command(cmd, args, cwd) {
         command.on('exit', function (code) {
             if (code !== 0) {
                 console.log('exit:', code);
-                error += spiltErrorMessage(stdout);
-                error += spiltErrorMessage(stderr);
+                error += spiltErrorMessage(stdout).trim();
+                error += spiltErrorMessage(stderr).trim();
+                if (!error.trim()) {
+                    error = "command failed with exit code ".concat(code);
+                }
                 reject(new Error(error));
             }
             resolve(stdout);
