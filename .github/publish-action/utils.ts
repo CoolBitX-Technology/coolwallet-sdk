@@ -72,10 +72,11 @@ async function pushTag(tag: string) {
 }
 
 function spiltErrorMessage(output: string) {
-  return output
+  const filtered = output
     .split('\n')
     .filter((line) => line.toLowerCase().includes('error'))
     .join('\n');
+  return filtered.trim() ? filtered : output;
 }
 
 function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
@@ -103,8 +104,11 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
     command.on('exit', (code) => {
       if (code !== 0) {
         console.log('exit:', code);
-        error += spiltErrorMessage(stdout);
-        error += spiltErrorMessage(stderr);
+        error += spiltErrorMessage(stdout).trim();
+        error += spiltErrorMessage(stderr).trim();
+        if (!error.trim()) {
+          error = `command failed with exit code ${code}`;
+        }
         reject(new Error(error));
       }
       resolve(stdout);

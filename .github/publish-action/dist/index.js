@@ -15936,10 +15936,11 @@ function pushTag(tag) {
     });
 }
 function spiltErrorMessage(output) {
-    return output
+    var filtered = output
         .split('\n')
         .filter(function (line) { return line.toLowerCase().includes('error'); })
         .join('\n');
+    return filtered.trim() ? filtered : output;
 }
 function command(cmd, args, cwd) {
     return new Promise(function (resolve, reject) {
@@ -15962,8 +15963,11 @@ function command(cmd, args, cwd) {
         command.on('exit', function (code) {
             if (code !== 0) {
                 console.log('exit:', code);
-                error += spiltErrorMessage(stdout);
-                error += spiltErrorMessage(stderr);
+                error += spiltErrorMessage(stdout).trim();
+                error += spiltErrorMessage(stderr).trim();
+                if (!error.trim()) {
+                    error = "command failed with exit code ".concat(code);
+                }
                 reject(new Error(error));
             }
             resolve(stdout);
