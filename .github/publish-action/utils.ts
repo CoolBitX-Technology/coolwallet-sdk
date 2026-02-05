@@ -1,4 +1,3 @@
-import * as core from '@actions/core';
 import semver from 'semver';
 import { spawn } from 'child_process';
 
@@ -19,11 +18,9 @@ export async function installCore(isBeta: boolean = false) {
  */
 export async function isLocalUpgraded(path: string) {
   const { version, name } = getPackageInfo(path);
-  console.log(`${name}`);
+  console.log(`package name: ${name}`);
   try {
-    const result = await command('npm', ['view', name, 'version']);
-    console.log('==npm view :', result);
-    const remoteVersion = semver.clean(result) ?? '';
+    const remoteVersion = semver.clean(await command('npm', ['view', name, 'version'])) ?? '';
     console.log(`remote version: ${remoteVersion}`);
     console.log(`local version: ${version}`);
     return semver.gt(version, remoteVersion);

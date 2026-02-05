@@ -15837,25 +15837,24 @@ exports.installCore = installCore;
 function isLocalUpgraded(path) {
     var _a;
     return __awaiter(this, void 0, void 0, function () {
-        var _b, version, name, result, remoteVersion, e_1, error;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var _b, version, name, remoteVersion, _c, _d, e_1, error;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
                 case 0:
                     _b = getPackageInfo(path), version = _b.version, name = _b.name;
-                    console.log("".concat(name));
-                    _c.label = 1;
+                    console.log("package name: ".concat(name));
+                    _e.label = 1;
                 case 1:
-                    _c.trys.push([1, 3, , 4]);
+                    _e.trys.push([1, 3, , 4]);
+                    _d = (_c = semver_1.default).clean;
                     return [4 /*yield*/, command('npm', ['view', name, 'version'])];
                 case 2:
-                    result = _c.sent();
-                    console.log('==npm view :', result);
-                    remoteVersion = (_a = semver_1.default.clean(result)) !== null && _a !== void 0 ? _a : '';
+                    remoteVersion = (_a = _d.apply(_c, [_e.sent()])) !== null && _a !== void 0 ? _a : '';
                     console.log("remote version: ".concat(remoteVersion));
                     console.log("local version: ".concat(version));
                     return [2 /*return*/, semver_1.default.gt(version, remoteVersion)];
                 case 3:
-                    e_1 = _c.sent();
+                    e_1 = _e.sent();
                     error = e_1;
                     if (error.message.includes(NPM_404_ERR_CODE)) {
                         console.log('Cannot find package in the npm registry, trying to publish it!');
