@@ -9,7 +9,10 @@
     /* Strict Type-Checking Options */
     "strict": true,                           /* Enable all strict type-checking options. */
     "allowSyntheticDefaultImports": true,     /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
-    "esModuleInterop": true                   /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
+    "esModuleInterop": true,                  /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
+    "lib": ["es2020", "dom", "dom.iterable", "esnext.disposable"], /* Include DOM for web-bluetooth types. */
+    "types": ["node"],                        /* Explicitly use Node.js types. */
+    "skipLibCheck": true                      /* Avoid lib type conflicts between DOM and Node. */
 
   },
   "include": ["src/**/*"],
