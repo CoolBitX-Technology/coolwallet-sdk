@@ -310,3 +310,71 @@ export const getCancelAllUnfreezeV2Argument = async (
 
   return addPath(argument, addressIndex);
 };
+
+export const getTwoTransfersArgument = async (
+  transaction: NormalContract | TRC20TransferContract,
+  addressIndex: number
+): Promise<string> => {
+  if ('feeLimit' in transaction) {
+    const isTrc20 = 'feeLimit' in transaction ? '01' : '00';
+
+    const { refBlockBytes, refBlockHash, expiration, timestamp, contract, feeLimit } =
+      transaction as TRC20TransferContract;
+
+    const { symbol, decimals, tokenSignature } = checkTokenInfo(transaction as TRC20TransferContract);
+
+    const ownerAddress = contract.ownerAddress;
+    const contractAddress = sanitizeAddress(contract.contractAddress);
+    const receiverAddress = sanitizeAddress(contract.receiverAddress);
+
+    const tokenInfo = getSetTokenPayload(contractAddress, symbol, decimals);
+    const signature = tokenSignature.padStart(144, '0');
+
+    const toAddress = ''.padStart(42, '0');
+    const argAmount = ''.padStart(20, '0');
+
+    const argument =
+      isTrc20 +
+      refBlockBytes +
+      refBlockHash +
+      numberToHex(expiration) +
+      ownerAddress +
+      toAddress + // coin transfer only
+      argAmount + // coin transfer only
+      numberToHex(timestamp) +
+      tokenInfo + // trc20 only
+      signature + // trc20 only
+      receiverAddress + // trc20 only
+      numberToHex(contract.amount, 24) + // trc20 only
+      numberToHex(feeLimit); // trc20 only
+
+    return addPath(argument, addressIndex);
+  } else {
+    const isTrc20 = 'feeLimit' in transaction ? '01' : '00';
+
+    const { refBlockBytes, refBlockHash, expiration, timestamp, contract } = transaction as NormalContract;
+    const { ownerAddress, toAddress, amount } = contract;
+
+    const tokenInfo = ''.padStart(58, '0');
+    const signature = ''.padStart(144, '0');
+    const receiverAddress = ''.padStart(40, '0');
+    const feeLimit = ''.padStart(20, '0');
+
+    const argument =
+      isTrc20 +
+      refBlockBytes +
+      refBlockHash +
+      numberToHex(expiration) +
+      ownerAddress +
+      toAddress + // coin transfer only
+      numberToHex(amount) + // coin transfer only
+      numberToHex(timestamp) +
+      tokenInfo + // trc20 only
+      signature + // trc20 only
+      receiverAddress + // trc20 only
+      numberToHex(contract.amount, 24) + // trc20 only
+      numberToHex(feeLimit); // trc20 only
+
+    return addPath(argument, addressIndex);
+  }
+};

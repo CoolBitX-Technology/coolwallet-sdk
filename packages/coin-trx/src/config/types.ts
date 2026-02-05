@@ -154,6 +154,11 @@ export interface TRC20TransferContract extends Transaction {
   option: Option;
 }
 
+export interface TwoTransferData extends SignTxData {
+  transaction1: NormalContract | TRC20TransferContract;
+  transaction2: NormalContract | TRC20TransferContract;
+}
+
 export type Option = {
   info: {
     symbol: string;
