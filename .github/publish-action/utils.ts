@@ -21,9 +21,7 @@ export async function isLocalUpgraded(path: string) {
   const { version, name } = getPackageInfo(path);
   console.log(`${name}`);
   try {
-    const result = await command('npm', ['view', name, 'version']);
-    console.log('==npm view :', result);
-    const remoteVersion = semver.clean(result) ?? '';
+    const remoteVersion = semver.clean(await command('npm', ['view', name, 'version'])) ?? '';
     console.log(`remote version: ${remoteVersion}`);
     console.log(`local version: ${version}`);
     return semver.gt(version, remoteVersion);
