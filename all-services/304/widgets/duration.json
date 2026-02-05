@@ -1,0 +1,1 @@
+[{"uid":"d974011b3b330113","name":"Test ZEC SDK Test Sign Transfer Tx P2PKH","time":{"start":1770313277000,"stop":1770313277255,"duration":255},"status":"passed","severity":"normal"},{"uid":"b23a0b19ca9ba3f5","name":"Test ZEC SDK Test Get Address P2PKH","time":{"start":1770313277000,"stop":1770313277298,"duration":298},"status":"passed","severity":"normal"}]
