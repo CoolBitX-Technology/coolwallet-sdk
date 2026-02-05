@@ -4,7 +4,7 @@ import { spawn } from 'child_process';
 
 const betaList = ['beta', 'hotfix', 'stg'];
 
-const NPM_404_ERR_CODE = 'npm error code E404';
+const NPM_404_ERR_CODE = 'npm ERR! code E404';
 
 export async function installCore(isBeta: boolean = false) {
   const packageName = isBeta ? '@coolwallet/core@beta' : '@coolwallet/core';
