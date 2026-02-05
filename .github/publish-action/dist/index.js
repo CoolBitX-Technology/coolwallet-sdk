@@ -15849,7 +15849,7 @@ function isLocalUpgraded(path) {
                     return [4 /*yield*/, command('npm', ['view', name, 'version'])];
                 case 2:
                     result = _c.sent();
-                    console.log('npm view :', result);
+                    console.log('==npm view :', result);
                     remoteVersion = (_a = semver_1.default.clean(result)) !== null && _a !== void 0 ? _a : '';
                     console.log("remote version: ".concat(remoteVersion));
                     console.log("local version: ".concat(version));
