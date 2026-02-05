@@ -15810,7 +15810,7 @@ exports.buildAndPublish = exports.isLocalUpgraded = exports.installCore = void 0
 var semver_1 = __importDefault(__nccwpck_require__(1383));
 var child_process_1 = __nccwpck_require__(2081);
 var betaList = ['beta', 'hotfix', 'stg'];
-var NPM_404_ERR_CODE = 'npm error code E404';
+var NPM_404_ERR_CODE = 'npm ERR! code E404';
 function installCore(isBeta) {
     if (isBeta === void 0) { isBeta = false; }
     return __awaiter(this, void 0, void 0, function () {
