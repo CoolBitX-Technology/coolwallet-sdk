@@ -15810,7 +15810,7 @@ exports.buildAndPublish = exports.isLocalUpgraded = exports.installCore = void 0
 var semver_1 = __importDefault(__nccwpck_require__(1383));
 var child_process_1 = __nccwpck_require__(2081);
 var betaList = ['beta', 'hotfix', 'stg'];
-var NPM_404_ERR_CODE = 'npm error code E404';
+var NPM_404_ERR_CODE = 'npm ERR! code E404';
 function installCore(isBeta) {
     if (isBeta === void 0) { isBeta = false; }
     return __awaiter(this, void 0, void 0, function () {
@@ -15842,7 +15842,7 @@ function isLocalUpgraded(path) {
             switch (_e.label) {
                 case 0:
                     _b = getPackageInfo(path), version = _b.version, name = _b.name;
-                    console.log("".concat(name));
+                    console.log("package name: ".concat(name));
                     _e.label = 1;
                 case 1:
                     _e.trys.push([1, 3, , 4]);
@@ -15936,10 +15936,11 @@ function pushTag(tag) {
     });
 }
 function spiltErrorMessage(output) {
-    return output
+    var filtered = output
         .split('\n')
         .filter(function (line) { return line.toLowerCase().includes('error'); })
         .join('\n');
+    return filtered.trim() ? filtered : output;
 }
 function command(cmd, args, cwd) {
     return new Promise(function (resolve, reject) {
@@ -15962,8 +15963,11 @@ function command(cmd, args, cwd) {
         command.on('exit', function (code) {
             if (code !== 0) {
                 console.log('exit:', code);
-                error += spiltErrorMessage(stdout);
-                error += spiltErrorMessage(stderr);
+                error += spiltErrorMessage(stdout).trim();
+                error += spiltErrorMessage(stderr).trim();
+                if (!error.trim()) {
+                    error = "command failed with exit code ".concat(code);
+                }
                 reject(new Error(error));
             }
             resolve(stdout);

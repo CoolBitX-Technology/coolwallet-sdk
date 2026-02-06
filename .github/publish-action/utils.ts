@@ -1,10 +1,9 @@
-import * as core from '@actions/core';
 import semver from 'semver';
 import { spawn } from 'child_process';
 
 const betaList = ['beta', 'hotfix', 'stg'];
 
-const NPM_404_ERR_CODE = 'npm error code E404';
+const NPM_404_ERR_CODE = 'npm ERR! code E404';
 
 export async function installCore(isBeta: boolean = false) {
   const packageName = isBeta ? '@coolwallet/core@beta' : '@coolwallet/core';
@@ -19,7 +18,7 @@ export async function installCore(isBeta: boolean = false) {
  */
 export async function isLocalUpgraded(path: string) {
   const { version, name } = getPackageInfo(path);
-  console.log(`${name}`);
+  console.log(`package name: ${name}`);
   try {
     const remoteVersion = semver.clean(await command('npm', ['view', name, 'version'])) ?? '';
     console.log(`remote version: ${remoteVersion}`);
@@ -72,10 +71,11 @@ async function pushTag(tag: string) {
 }
 
 function spiltErrorMessage(output: string) {
-  return output
+  const filtered = output
     .split('\n')
     .filter((line) => line.toLowerCase().includes('error'))
     .join('\n');
+  return filtered.trim() ? filtered : output;
 }
 
 function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
@@ -103,8 +103,11 @@ function command(cmd: string, args?: string[], cwd?: string): Promise<string> {
     command.on('exit', (code) => {
       if (code !== 0) {
         console.log('exit:', code);
-        error += spiltErrorMessage(stdout);
-        error += spiltErrorMessage(stderr);
+        error += spiltErrorMessage(stdout).trim();
+        error += spiltErrorMessage(stderr).trim();
+        if (!error.trim()) {
+          error = `command failed with exit code ${code}`;
+        }
         reject(new Error(error));
       }
       resolve(stdout);
