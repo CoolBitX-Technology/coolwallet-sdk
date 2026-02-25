@@ -10,7 +10,6 @@ import BN from 'bn.js';
 export async function getArgument(
   txVersion: params.txVersion,
   scriptType: types.ScriptType,
-  inputs: Array<types.Input>,
   output: types.Output,
   change?: types.Change,
   lockTime = 0,
@@ -21,19 +20,23 @@ export async function getArgument(
   transaction.push(versionBuf);
   const groupIdBuf = bufferUtil.toUintBuffer(params.ZcashGroupId[txVersion], 4);
   transaction.push(groupIdBuf);
+  // SIGHASH: ALL | ANYONECANPAY
+  // const prevouts = inputs.map((input) => {
+  //   return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(), bufferUtil.toUintBuffer(input.preIndex, 4)]);
+  // });
+  // const hashPrevouts = cryptoUtil.blake2b256Personal(Buffer.concat(prevouts), Buffer.from('ZcashPrevoutHash'));
 
-  const prevouts = inputs.map((input) => {
-    return Buffer.concat([Buffer.from(input.preTxHash, 'hex').reverse(), bufferUtil.toUintBuffer(input.preIndex, 4)]);
-  });
-  const hashPrevouts = cryptoUtil.blake2b256Personal(Buffer.concat(prevouts), Buffer.from('ZcashPrevoutHash'));
+  // const sequences = inputs.map((input) => {
+  //   return Buffer.concat([
+  //     input.sequence ? bufferUtil.toUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
+  //   ]);
+  // });
+  // const hashSequence = cryptoUtil.blake2b256Personal(Buffer.concat(sequences), Buffer.from('ZcashSequencHash'));
+
+  // SIGHASH: ALL | ANYONECANPAY
+  const hashPrevouts = Buffer.alloc(32);
   transaction.push(hashPrevouts);
-
-  const sequences = inputs.map((input) => {
-    return Buffer.concat([
-      input.sequence ? bufferUtil.toUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
-    ]);
-  });
-  const hashSequence = cryptoUtil.blake2b256Personal(Buffer.concat(sequences), Buffer.from('ZcashSequencHash'));
+  const hashSequence = Buffer.alloc(32);
   transaction.push(hashSequence);
 
   const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
@@ -92,7 +95,6 @@ export async function getScriptSigningActions(
   scriptType: types.ScriptType,
   appId: string,
   appPrivateKey: string,
-  inputs: Array<types.Input>,
   preparedData: types.PreparedData,
   output: types.Output,
   change: types.Change | undefined
@@ -101,7 +103,7 @@ export async function getScriptSigningActions(
   actions: Array<Function>;
 }> {
   const script = params.TRANSFER.script + params.TRANSFER.signature;
-  const argument = '00' + (await getArgument(txVersion, scriptType, inputs, output, change)); // keylength zero
+  const argument = '00' + (await getArgument(txVersion, scriptType, output, change)); // keylength zero
 
   const preActions = [];
   const sendScript = async () => {

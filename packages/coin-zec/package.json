@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/zec",
-  "version": "2.0.0",
+  "version": "2.0.1-beta.0",
   "description": "Coolwallet Zcash sdk",
   "main": "lib/index.js",
   "scripts": {
