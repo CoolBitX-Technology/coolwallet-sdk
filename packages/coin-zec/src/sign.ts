@@ -20,7 +20,6 @@ export async function signTransaction(signTxData: types.signTxType): Promise<str
     scriptType,
     appId,
     appPrivateKey,
-    inputs,
     preparedData,
     output,
     change
