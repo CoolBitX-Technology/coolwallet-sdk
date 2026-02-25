@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.5
+- fear(ZEC): CW-26066 add zcash (#1097)
+
 ## 2.0.4
 - feat(core): update @coolwallet/core 2.0.4 to export variable MCU_UPDATE_VER (#1031)
 
