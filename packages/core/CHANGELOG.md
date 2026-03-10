@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.6
+- feat(core): CW-27253 let Pro card use the same OTA domain as the Go card (@coolwallet/core: 2.0.6) (#1112)
+
 ## 2.0.5
 - fear(ZEC): CW-26066 add zcash (#1097)
 
