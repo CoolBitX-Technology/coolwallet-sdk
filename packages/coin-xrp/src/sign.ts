@@ -30,7 +30,5 @@ export const signPayment = async (signTxData: types.signTxType, payment: types.P
     confirmCB,
     authorizedCB
   );
-  const { signedTx } = await tx.command.getSignedHex(transport);
-  console.log('signedTx: ', signedTx);
   return txUtil.generateRawTx(signature.toString('hex'), payment);
 };

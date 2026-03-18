@@ -71,8 +71,8 @@ export const getPaymentArgument = async (
     transaction.push(toRlpBytes(payment.Sequence, 4));
     transaction.push(toRlpBytes(payment.DestinationTag, 4));
     transaction.push(toRlpBytes(payment.LastLedgerSequence, 4));
-    transaction.push(toRlpBytes(payment.Amount, 7));
-    transaction.push(toRlpBytes(payment.Fee, 7));
+    transaction.push(toRlpBytes(parseInt(payment.Amount), 7));
+    transaction.push(toRlpBytes(parseInt(payment.Fee), 7));
     transaction.push(toRlpBytes(payment.SigningPubKey, 33));
     transaction.push(toRlpBytes(txUtil.getAccount(payment.Account), 20));
     transaction.push(toRlpBytes(txUtil.getAccount(payment.Destination), 20));
