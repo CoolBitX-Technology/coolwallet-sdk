@@ -60,4 +60,59 @@ describe('Test XRP SDK', () => {
       );
     });
   });
+
+  describe('Test Transfer XRP with new script', () => {
+    it('transfer without flags and destination tag', async () => {
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        payment: {
+          TransactionType: 'Payment',
+          Sequence: 82710910,
+          LastLedgerSequence: 94113337,
+          Amount: '100000',
+          Fee: '10',
+          Destination: 'rwjPKE7LqyYYcccwRoJLuGn7TA1Jyw5c6v',
+        },
+        confirmCB: () => {},
+        authorizedCB: () => {},
+      };
+
+      expect(await xrpSDK.signTransaction(signData)).toMatchInlineSnapshot(
+        `"1200002404EE117E201B059C0E396140000000000186A068400000000000000A7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F174473045022100E409073A212176DAAED4E85E91559D61CF11008FD3ADB33B082BE67D819B3D74022042612B5847D7CD7AD7FB4028E65985777F1DD37C78AB9569D7F52D41418D53AC8114819863812B0B9EA1F48EF5297D2F4EE1119BD87283146ABD3AD2BD443171175B7E7FD6C0BF547A6C5A78"`
+      );
+    });
+
+    it('transfer with memo', async () => {
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        payment: {
+          TransactionType: 'Payment',
+          Sequence: 82710910,
+          LastLedgerSequence: 94113337,
+          Amount: '100000',
+          Fee: '10',
+          Destination: 'rwjPKE7LqyYYcccwRoJLuGn7TA1Jyw5c6v',
+          Memos: [
+            {
+              Memo: {
+                MemoData: '31303030303030', // withdraw 金額(1000000)的 hex code
+              },
+            },
+          ],
+        },
+        confirmCB: () => {},
+        authorizedCB: () => {},
+      };
+
+      expect(await xrpSDK.signTransaction(signData)).toMatchInlineSnapshot(
+        `"1200002404EE117E201B059C0E396140000000000186A068400000000000000A7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F17446304402203DED73580BD17306022CDF54925571855494E19E2A9EA4BF5E44255B0D6C388102207DB22FA1855079CE4062FA4626C014B1BBA7A75721896C9CE5EE6926FCD683DA8114819863812B0B9EA1F48EF5297D2F4EE1119BD87283146ABD3AD2BD443171175B7E7FD6C0BF547A6C5A78F9EA7D0731303030303030E1F1"`
+      );
+    });
+  });
 });
