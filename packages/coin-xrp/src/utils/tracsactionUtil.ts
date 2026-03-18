@@ -8,9 +8,7 @@ const codec = require('ripple-binary-codec');
 export const generateRawTx = (signature: string, payment: types.Payment): string => {
   /* eslint-disable-next-line no-param-reassign */
   payment.TxnSignature = signature.toUpperCase();
-  const tx = codec.encode(payment);
-  console.log('tx: ', tx);
-  return tx;
+  return codec.encode(payment);
 };
 
 // eslint-disable-next-line import/prefer-default-export
