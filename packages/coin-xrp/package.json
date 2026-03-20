@@ -37,7 +37,7 @@
     "@coolwallet/core": "^2.0.0",
     "@types/node": "^13.11.1",
     "base-x": "^3.0.7",
-    "ripple-binary-codec": "^0.2.6",
+    "ripple-binary-codec": "^2.7.0",
     "rlp": "^3.0.0",
     "typescript": "^3.8.3"
   },
