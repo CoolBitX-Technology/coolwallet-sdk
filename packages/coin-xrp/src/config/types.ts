@@ -29,7 +29,7 @@ export type Payment = {
 
 export type Memo = {
   MemoType?: string;
-  MemoData?: string;
+  MemoData: string;
   MemoFormat?: string;
 };
 
