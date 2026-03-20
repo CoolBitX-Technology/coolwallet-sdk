@@ -53,14 +53,13 @@ export const getPaymentArgument = async (
     throw new Error('Account or SigningPubKey is not set');
   }
   let argument;
-  console.log('newScript', newScript);
   if (!newScript) {
     argument =
       stringUtil.handleHex(txUtil.getAccount(payment.Account)) +
       stringUtil.handleHex(payment.SigningPubKey) +
       stringUtil.handleHex(txUtil.getAccount(payment.Destination)) +
-      stringUtil.handleHex(parseInt(payment.Amount).toString(16).padStart(16, '0')) +
-      stringUtil.handleHex(parseInt(payment.Fee).toString(16).padStart(16, '0')) +
+      stringUtil.handleHex(BigInt(payment.Amount).toString(16).padStart(16, '0')) +
+      stringUtil.handleHex(BigInt(payment.Fee).toString(16).padStart(16, '0')) +
       stringUtil.handleHex(payment.Sequence.toString(16).padStart(8, '0')) +
       stringUtil.handleHex(payment.LastLedgerSequence.toString(16).padStart(8, '0')) +
       stringUtil.handleHex(payment.DestinationTag!.toString(16).padStart(8, '0')) +

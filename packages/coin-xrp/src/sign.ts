@@ -8,7 +8,7 @@ import { SignatureType } from '@coolwallet/core/lib/transaction/type';
 export const signPayment = async (signTxData: types.signTxType, payment: types.Payment): Promise<string> => {
   const { transport, addressIndex, appId, appPrivateKey, confirmCB, authorizedCB } = signTxData;
   // Use the new script when memo exists, or flags/destination tag is missing.
-  const useNewScript = Boolean(payment.Memos || !payment.Flags || !payment.DestinationTag);
+  const useNewScript = Boolean(payment.Memos) || payment.Flags === undefined || payment.DestinationTag === undefined;
   const script = params.getScript(useNewScript);
   const argument = await scriptUtil.getPaymentArgument(addressIndex, payment, useNewScript);
 
@@ -59,5 +59,5 @@ export const signMessage = async (signMsgData: types.signMsgType): Promise<strin
     authorizedCB
   );
 
-  return signature.toString('hex');
+  return signature.toString('hex').toUpperCase();
 };
