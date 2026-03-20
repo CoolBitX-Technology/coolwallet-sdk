@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.0.1
+- fix(ZEC): update zec latest support script version (#1116)
 - fix(ZEC): update ANYONECANPAY sign parameter (#1109)
 
 
