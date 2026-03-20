@@ -28,14 +28,14 @@ export const toHexValue = (value: HexInput, byteLength?: number): string => {
 
 export const toRlpBytes = (value: PaymentInput, byteLength?: number): Uint8Array => {
   if (value === undefined) {
-    return Uint8Array.from('');
+    return Uint8Array.from(Buffer.from('', 'hex'));
   }
   return Uint8Array.from(Buffer.from(toHexValue(value, byteLength), 'hex'));
 };
 
 export const encodeMemoField = (value?: string): Uint8Array => {
   if (value === undefined) {
-    return Uint8Array.from('');
+    return Uint8Array.from(Buffer.from('', 'hex'));
   }
 
   const dataHex = stringUtil.handleHex(stringUtil.removeHex0x(value));
