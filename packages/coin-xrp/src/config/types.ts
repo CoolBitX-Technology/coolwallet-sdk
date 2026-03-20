@@ -14,20 +14,36 @@ export type signTxType = {
 
 export type Payment = {
   TransactionType: string;
-  Flags: number;
+  Flags?: number;
   Sequence: number;
-  DestinationTag: number;
+  DestinationTag?: number;
   LastLedgerSequence: number;
-
   Amount: string;
   Fee: string;
   SigningPubKey?: string;
   Account?: string;
   Destination: string;
   TxnSignature?: string;
+  Memos?: Array<{ Memo: Memo }>;
+};
+
+export type Memo = {
+  MemoType?: string;
+  MemoData: string;
+  MemoFormat?: string;
 };
 
 export type Transaction = {
   to: string;
   value: string;
+};
+
+export type signMsgType = {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  message: string;
+  addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 };

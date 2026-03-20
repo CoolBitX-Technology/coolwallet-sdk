@@ -35,7 +35,6 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
     const payment = signTxData.payment;
 
     payment.TransactionType = 'Payment';
-    payment.Flags = 2147483648;
     if (!payment.SigningPubKey) {
       payment.SigningPubKey = await this.getPublicKey(
         signTxData.transport,
@@ -50,5 +49,9 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
     }
 
     return xrpSign.signPayment(signTxData, payment);
+  }
+
+  async signMessage(signMsgData: types.signMsgType): Promise<string> {
+    return xrpSign.signMessage(signMsgData);
   }
 }

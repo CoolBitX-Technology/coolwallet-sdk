@@ -60,4 +60,78 @@ describe('Test XRP SDK', () => {
       );
     });
   });
+
+  describe('Test Transfer XRP with new script', () => {
+    it('transfer without flags and destination tag', async () => {
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        payment: {
+          TransactionType: 'Payment',
+          Sequence: 82710910,
+          LastLedgerSequence: 94113337,
+          Amount: '100000',
+          Fee: '10',
+          Destination: 'rwjPKE7LqyYYcccwRoJLuGn7TA1Jyw5c6v',
+        },
+        confirmCB: () => {},
+        authorizedCB: () => {},
+      };
+
+      expect(await xrpSDK.signTransaction(signData)).toMatchInlineSnapshot(
+        `"1200002404EE117E201B059C0E396140000000000186A068400000000000000A7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F174473045022100F9D55E27D707C1E582F63AEE1D7FD1877C1BA65C1F9D3EA69A2BD7A73BCC3172022059AE14C16A94B32204B9B3B47225107BD3C7DBDD1AEC17306D1F48A8B696AD9F8114819863812B0B9EA1F48EF5297D2F4EE1119BD87283146ABD3AD2BD443171175B7E7FD6C0BF547A6C5A78"`
+      );
+    });
+
+    it('transfer with memo', async () => {
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        payment: {
+          TransactionType: 'Payment',
+          Sequence: 82710910,
+          LastLedgerSequence: 94113337,
+          Amount: '100000',
+          Fee: '10',
+          Destination: 'rwjPKE7LqyYYcccwRoJLuGn7TA1Jyw5c6v',
+          Memos: [
+            {
+              Memo: {
+                MemoData: '31303030303030', // withdraw 金額(1000000)的 hex code
+              },
+            },
+          ],
+        },
+        confirmCB: () => {},
+        authorizedCB: () => {},
+      };
+
+      expect(await xrpSDK.signTransaction(signData)).toMatchInlineSnapshot(
+        `"1200002404EE117E201B059C0E396140000000000186A068400000000000000A7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F17446304402206E2E146CEA0CC9EE86D914136F8C4C1854A0D11F5C7818ED1E612B77C0ED7EF002207EC0106D0A195E338656810D3AF1DDC0B966EFC26457EA0C8178601BD48B50948114819863812B0B9EA1F48EF5297D2F4EE1119BD87283146ABD3AD2BD443171175B7E7FD6C0BF547A6C5A78F9EA7D0731303030303030E1F1"`
+      );
+    });
+  });
+
+  describe('Test sign message', () => {
+    it('sign Hello XRP', async () => {
+      const message = 'Hello XRP';
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        message,
+        addressIndex: 0,
+        confirmCB: () => {},
+        authorizedCB: () => {},
+      };
+
+      expect(await xrpSDK.signMessage(signData)).toMatchInlineSnapshot(
+        `"3045022100DF27FE3AFC364CC1E65759BA92BFD23AC418EFDB18C2DC2DC0D10FE635FDEB530220033A86D5ED77CA5E476008F4C8087A14380D765AF3F9479AAA133B135C32B267"`
+      );
+    });
+  });
 });
