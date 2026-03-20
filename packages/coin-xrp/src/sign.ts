@@ -32,3 +32,32 @@ export const signPayment = async (signTxData: types.signTxType, payment: types.P
   );
   return txUtil.generateRawTx(signature.toString('hex'), payment);
 };
+
+export const signMessage = async (signMsgData: types.signMsgType): Promise<string> => {
+  const { transport, appPrivateKey, appId, addressIndex, message, confirmCB, authorizedCB } = signMsgData;
+  // Use the new script when memo exists, or flags/destination tag is missing.
+
+  const script = params.MESSAGE.script + params.MESSAGE.signature;
+  const argument = await scriptUtil.getMessageArgument(addressIndex, message);
+
+  const preActions = [];
+  const sendScript = async () => {
+    await tx.command.sendScript(transport, script);
+  };
+  preActions.push(sendScript);
+
+  const sendArgument = async () => {
+    return tx.command.executeScript(transport, appId, appPrivateKey, argument);
+  };
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
+    transport,
+    preActions,
+    sendArgument,
+    SignatureType.DER,
+    confirmCB,
+    authorizedCB
+  );
+
+  return signature.toString('hex');
+};

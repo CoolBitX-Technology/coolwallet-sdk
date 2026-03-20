@@ -90,3 +90,9 @@ export const getPaymentArgument = async (
   }
   return SEPath + argument;
 };
+
+export const getMessageArgument = async (addressIndex: number, message: string): Promise<string> => {
+  const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
+  const argument = Buffer.from(message, 'utf8').toString('hex');
+  return SEPath + argument;
+};

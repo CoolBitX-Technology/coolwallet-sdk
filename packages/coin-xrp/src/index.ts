@@ -50,4 +50,8 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
 
     return xrpSign.signPayment(signTxData, payment);
   }
+
+  async signMessage(signMsgData: types.signMsgType): Promise<string> {
+    return xrpSign.signMessage(signMsgData);
+  }
 }

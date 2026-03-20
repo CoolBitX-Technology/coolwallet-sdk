@@ -37,3 +37,13 @@ export type Transaction = {
   to: string;
   value: string;
 };
+
+export type signMsgType = {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  message: string;
+  addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+};
