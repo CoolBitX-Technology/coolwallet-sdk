@@ -77,6 +77,9 @@ export const getPaymentArgument = async (
     transaction.push(toRlpBytes(txUtil.getAccount(payment.Destination), 20));
     const memos: Uint8Array[] = [];
     if (payment.Memos) {
+      if (payment.Memos.length > 1) {
+        throw new Error('Only one memo is supported at this time.');
+      }
       const memo = payment.Memos[0]?.Memo;
       if (memo) {
         memos.push(encodeMemoField(memo.MemoType));
