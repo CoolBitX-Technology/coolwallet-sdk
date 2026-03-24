@@ -110,6 +110,7 @@ jobs:
           echo "has_test_failures=true" >> $GITHUB_OUTPUT
           echo "failed_coins=$FAILED_COINS" >> $GITHUB_OUTPUT
           echo "::error::Some tests failed: $FAILED_COINS"
+          exit 1
         else
           echo "has_test_failures=false" >> $GITHUB_OUTPUT
           echo "::notice::All tests passed successfully"
