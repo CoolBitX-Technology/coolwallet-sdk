@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+- feat(XRP): CW-27284 add memo sign (#1114)
+
 
 ## 2.0.0
 - chore: upgrade coins versions to 2.0.0 (#992)
