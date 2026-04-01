@@ -15,6 +15,8 @@ TEST_SCOPES=(
   --scope @coolwallet/cosmos
   --scope @coolwallet/xtz
   --scope @coolwallet/atom
+  --scope @coolwallet/zec
+  --scope @coolwallet/xrp
 )
 LERNA="npx lerna"
 
