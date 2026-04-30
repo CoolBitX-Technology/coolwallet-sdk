@@ -25,6 +25,7 @@ console.log('OKX USDT: ', buildTokenHex(OKX.tokens.USDT));
 console.log('OKX USDC: ', buildTokenHex(OKX.tokens.USDC));
 
 console.log('ZKS USDC: ', buildTokenHex(ZKSYNC.tokens.USDC));
+console.log('ZKS USDC.e: ', buildTokenHex(ZKSYNC.tokens['USDC.e']));
 console.log('ZKS WETH: ', buildTokenHex(ZKSYNC.tokens.WETH));
 
 console.log('POL ORDER: ', buildTokenHex(POLYGON.tokens.ORDER));
