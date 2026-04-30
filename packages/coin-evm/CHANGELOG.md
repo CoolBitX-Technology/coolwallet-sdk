@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.6
+- fix(evm): update zkSync USDC token — add native USDC and rename bridged USDC to USDC.e
+
 ## 2.0.3
 - feat(evm): support large amount smart tx (@coolwallet/evm: 2.0.3-beta.0) (#1039)
 
