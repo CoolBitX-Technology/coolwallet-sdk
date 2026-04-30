@@ -2,6 +2,7 @@
 
 ## 2.0.1
 - feat(XRP): update XRP sign message script (#1122)
+- feat(XRP): CW-27284 add memo sign (#1114)
 
 
 ## 2.0.0
