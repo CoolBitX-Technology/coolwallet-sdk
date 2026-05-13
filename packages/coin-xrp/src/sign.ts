@@ -5,7 +5,7 @@ import * as types from './config/types';
 import * as params from './config/params';
 import { SignatureType } from '@coolwallet/core/lib/transaction/type';
 
-export const signPayment = async (signTxData: types.signTxType, payment: types.Payment): Promise<string> => {
+export const signPayment = async (signTxData: types.SignTxType, payment: types.Payment): Promise<string> => {
   const { transport, addressIndex, appId, appPrivateKey, confirmCB, authorizedCB } = signTxData;
   // Use the new script when memo exists, or flags/destination tag is missing.
   const useNewScript = Boolean(payment.Memos) || payment.Flags === undefined || payment.DestinationTag === undefined;
@@ -33,7 +33,7 @@ export const signPayment = async (signTxData: types.signTxType, payment: types.P
   return txUtil.generateRawTx(signature.toString('hex'), payment);
 };
 
-export const signMessage = async (signMsgData: types.signMsgType): Promise<string> => {
+export const signMessage = async (signMsgData: types.SignMsgType): Promise<string> => {
   const { transport, appPrivateKey, appId, addressIndex, message, confirmCB, authorizedCB } = signMsgData;
   // Use the new script when memo exists, or flags/destination tag is missing.
 

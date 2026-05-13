@@ -2,7 +2,7 @@ import { Transport } from '@coolwallet/core';
 
 export { Transport };
 
-export type signTxType = {
+export type SignTxType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
@@ -38,12 +38,29 @@ export type Transaction = {
   value: string;
 };
 
-export type signMsgType = {
+export type SignMsgType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
   message: string;
   addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+};
+
+export type IouToken = {
+  name: string;
+  code: string;
+  issuer: string;
+};
+
+export type SignTrustSetType = {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  payment: Payment;
+  addressIndex: number;
+  token: IouToken;
   confirmCB?(): void;
   authorizedCB?(): void;
 };
