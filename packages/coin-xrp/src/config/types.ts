@@ -2,29 +2,26 @@ import { Transport } from '@coolwallet/core';
 
 export { Transport };
 
-export type SignTxType = {
-  transport: Transport;
-  appPrivateKey: string;
-  appId: string;
-  payment: Payment;
-  addressIndex: number;
-  confirmCB?(): void;
-  authorizedCB?(): void;
-};
-
-export type Payment = {
+export type BasePayment = {
   TransactionType: string;
   Flags?: number;
   Sequence: number;
   DestinationTag?: number;
   LastLedgerSequence: number;
-  Amount: string;
   Fee: string;
   SigningPubKey?: string;
   Account?: string;
-  Destination: string;
   TxnSignature?: string;
   Memos?: Array<{ Memo: Memo }>;
+};
+
+export type Payment = BasePayment & {
+  Amount: string;
+  Destination: string;
+};
+
+export type TokenPayment = BasePayment & {
+  Token: IouToken & { value: string };
 };
 
 export type Memo = {
@@ -33,9 +30,25 @@ export type Memo = {
   MemoFormat?: string;
 };
 
+export type IouToken = {
+  name: string;
+  code: string;
+  issuer: string;
+};
+
 export type Transaction = {
   to: string;
   value: string;
+};
+
+export type SignTxType = {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  payment: Payment;
+  addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
 };
 
 export type SignMsgType = {
@@ -48,19 +61,12 @@ export type SignMsgType = {
   authorizedCB?(): void;
 };
 
-export type IouToken = {
-  name: string;
-  code: string;
-  issuer: string;
-};
-
 export type SignTrustSetType = {
   transport: Transport;
   appPrivateKey: string;
   appId: string;
-  payment: Payment;
+  tokenPayment: TokenPayment;
   addressIndex: number;
-  token: IouToken;
   confirmCB?(): void;
   authorizedCB?(): void;
 };

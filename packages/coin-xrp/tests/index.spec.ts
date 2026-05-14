@@ -134,4 +134,34 @@ describe('Test XRP SDK', () => {
       );
     });
   });
+
+  describe('Test Trust Set RLUSD', () => {
+    it('trust set with RLUSD token', async () => {
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        tokenPayment: {
+          TransactionType: 'TrustSet',
+          Flags: 2147483648,
+          Sequence: 82710910,
+          LastLedgerSequence: 94113337,
+          Fee: '10',
+          Token: {
+            name: 'RLUSD',
+            code: '524C555344000000000000000000000000000000',
+            issuer: 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De',
+            value: '1000000000',
+          },
+        },
+        confirmCB: () => {},
+        authorizedCB: () => {},
+      };
+
+      expect(await xrpSDK.signTrustSet(signData)).toMatchInlineSnapshot(
+        `"12001422800000002404EE117E201B059C0E3963D6C38D7EA4C68000524C555344000000000000000000000000000000E5E961C6A025C9404AA7B662DD1DF975BE75D13E68400000000000000A7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F17446304402201DE7855C2222B3C499889457917332AA6BA85AFDCC46FF4208789B4BA7ABDC0002207C24050D0BFF666830DE535EF0D54A13E0E065F25BC4D79BB43CCE65C5D326538114819863812B0B9EA1F48EF5297D2F4EE1119BD872"`
+      );
+    });
+  });
 });

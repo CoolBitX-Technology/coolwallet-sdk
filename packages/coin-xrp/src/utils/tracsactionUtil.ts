@@ -5,7 +5,7 @@ import * as params from '../config/params';
 const base58 = require('base-x')(params.R_B58_DICT);
 const codec = require('ripple-binary-codec');
 
-export const generateRawTx = (signature: string, payment: types.Payment): string => {
+export const generateRawTx = (signature: string, payment: types.BasePayment): string => {
   /* eslint-disable-next-line no-param-reassign */
   payment.TxnSignature = signature.toUpperCase();
   return codec.encode(payment);
@@ -28,4 +28,18 @@ export const getAccount = (address: string): string => {
   const addressBuf = base58.decode(address);
   const accountBuf = addressBuf.slice(1, 21);
   return accountBuf.toString('hex');
+};
+
+export const generateTrustSetRawTx = (signature: string, tokenPayment: types.TokenPayment): string => {
+  const { Token, ...rest } = tokenPayment;
+  const payload = {
+    ...rest,
+    TxnSignature: signature.toUpperCase(),
+    LimitAmount: {
+      currency: Token.code,
+      issuer: Token.issuer,
+      value: Token.value,
+    },
+  };
+  return codec.encode(payload);
 };

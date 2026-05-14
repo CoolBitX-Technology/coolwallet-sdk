@@ -54,4 +54,24 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
   async signMessage(signMsgData: types.SignMsgType): Promise<string> {
     return xrpSign.signMessage(signMsgData);
   }
+
+  async signTrustSet(signTxData: types.SignTrustSetType) {
+    const payment = signTxData.tokenPayment;
+
+    payment.TransactionType = 'TrustSet';
+    if (!payment.SigningPubKey) {
+      payment.SigningPubKey = await this.getPublicKey(
+        signTxData.transport,
+        signTxData.appPrivateKey,
+        signTxData.appId,
+        signTxData.addressIndex
+      );
+      payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
+    }
+    if (!payment.Account) {
+      payment.Account = txUtil.pubKeyToAddress(payment.SigningPubKey);
+    }
+
+    return xrpSign.signTrustSet(signTxData, payment);
+  }
 }
