@@ -80,7 +80,7 @@ export const signTrustSet = async (
       break;
     }
   }
-  let script;
+  let script: string;
   if (isRLUSD) {
     script = params.TRUST_SET_RLUSD.script + params.TRUST_SET_RLUSD.signature;
   } else {
