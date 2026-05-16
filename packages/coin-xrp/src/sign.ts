@@ -75,7 +75,7 @@ export const signTrustSet = async (
     const { code, issuer } = parseIouToken(tokenInfo.contractAddress);
     if (
       code.toLowerCase() === token.code.toLowerCase() &&
-      tokenInfo.name === token.name &&
+      tokenInfo.symbol === token.name &&
       issuer === token.issuer
     ) {
       isRLUSD = true;
