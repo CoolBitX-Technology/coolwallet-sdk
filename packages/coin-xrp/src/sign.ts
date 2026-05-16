@@ -72,9 +72,9 @@ export const signTrustSet = async (
   const { Token: token } = tokenPayment;
   let isRLUSD = false;
   for (const tokenInfo of TOKENTYPE) {
-    const { currency, issuer } = parseIouToken(tokenInfo.contractAddress);
+    const { code, issuer } = parseIouToken(tokenInfo.contractAddress);
     if (
-      currency.toLowerCase() === token.code.toLowerCase() &&
+      code.toLowerCase() === token.code.toLowerCase() &&
       tokenInfo.name === token.name &&
       issuer === token.issuer
     ) {
