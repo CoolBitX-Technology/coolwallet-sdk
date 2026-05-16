@@ -5,6 +5,7 @@ import * as types from './config/types';
 import * as params from './config/params';
 import { SignatureType } from '@coolwallet/core/lib/transaction/type';
 import { TOKENTYPE } from './config/tokenType';
+import { parseIouToken } from './utils/stringUtil';
 
 export const signPayment = async (signTxData: types.SignTxType, payment: types.Payment): Promise<string> => {
   const { transport, addressIndex, appId, appPrivateKey, confirmCB, authorizedCB } = signTxData;
@@ -71,10 +72,11 @@ export const signTrustSet = async (
   const { Token: token } = tokenPayment;
   let isRLUSD = false;
   for (const tokenInfo of TOKENTYPE) {
+    const { currency, issuer } = parseIouToken(tokenInfo.contractAddress);
     if (
-      tokenInfo.code.toLowerCase() === token.code.toLowerCase() &&
+      currency.toLowerCase() === token.code.toLowerCase() &&
       tokenInfo.name === token.name &&
-      tokenInfo.issuer === token.issuer
+      issuer === token.issuer
     ) {
       isRLUSD = true;
       break;
