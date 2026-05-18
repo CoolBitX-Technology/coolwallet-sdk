@@ -24,6 +24,11 @@ export type TokenPayment = BasePayment & {
   Token: IouToken & { value: string };
 };
 
+export type IouTransferPayment = BasePayment & {
+  Token: IouToken & { value: string };
+  Destination: string;
+};
+
 export type Memo = {
   MemoType?: string;
   MemoData: string;
@@ -66,6 +71,16 @@ export type SignTrustSetType = {
   appPrivateKey: string;
   appId: string;
   tokenPayment: TokenPayment;
+  addressIndex: number;
+  confirmCB?(): void;
+  authorizedCB?(): void;
+};
+
+export type SignIouTransferType = {
+  transport: Transport;
+  appPrivateKey: string;
+  appId: string;
+  iouPayment: IouTransferPayment;
   addressIndex: number;
   confirmCB?(): void;
   authorizedCB?(): void;

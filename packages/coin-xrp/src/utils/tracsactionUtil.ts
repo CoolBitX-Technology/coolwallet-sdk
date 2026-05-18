@@ -43,3 +43,17 @@ export const generateTrustSetRawTx = (signature: string, tokenPayment: types.Tok
   };
   return codec.encode(payload);
 };
+
+export const generateIouTransferRawTx = (signature: string, iouPayment: types.IouTransferPayment): string => {
+  const { Token, ...rest } = iouPayment;
+  const payload = {
+    ...rest,
+    TxnSignature: signature.toUpperCase(),
+    Amount: {
+      currency: Token.code,
+      issuer: Token.issuer,
+      value: Token.value,
+    },
+  };
+  return codec.encode(payload);
+};

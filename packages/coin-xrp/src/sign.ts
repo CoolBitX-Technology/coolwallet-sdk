@@ -73,11 +73,7 @@ export const signTrustSet = async (
   let isRLUSD = false;
   for (const tokenInfo of TOKENTYPE) {
     const { code, issuer } = parseIouToken(tokenInfo.contractAddress);
-    if (
-      code.toLowerCase() === token.code.toLowerCase() &&
-      tokenInfo.symbol === token.name &&
-      issuer === token.issuer
-    ) {
+    if (code.toLowerCase() === token.code.toLowerCase() && tokenInfo.symbol === token.name && issuer === token.issuer) {
       isRLUSD = true;
       break;
     }
@@ -110,4 +106,40 @@ export const signTrustSet = async (
   );
 
   return txUtil.generateTrustSetRawTx(signature.toString('hex'), tokenPayment);
+};
+
+export const signIouTransfer = async (signTxData: types.SignIouTransferType): Promise<string> => {
+  const { transport, appPrivateKey, appId, iouPayment, addressIndex, confirmCB, authorizedCB } = signTxData;
+  const { Token: token } = iouPayment;
+  let isRLUSD = false;
+  for (const tokenInfo of TOKENTYPE) {
+    const { code, issuer } = parseIouToken(tokenInfo.contractAddress);
+    if (code.toLowerCase() === token.code.toLowerCase() && tokenInfo.symbol === token.name && issuer === token.issuer) {
+      isRLUSD = true;
+      break;
+    }
+  }
+  const script = params.getIouTransferScript(isRLUSD);
+  const argument = await scriptUtil.getIouTransferArgument(addressIndex, iouPayment, isRLUSD);
+
+  const preActions = [];
+  const sendScript = async () => {
+    await tx.command.sendScript(transport, script);
+  };
+  preActions.push(sendScript);
+
+  const sendArgument = async () => {
+    return tx.command.executeScript(transport, appId, appPrivateKey, argument);
+  };
+
+  const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
+    transport,
+    preActions,
+    sendArgument,
+    SignatureType.DER,
+    confirmCB,
+    authorizedCB
+  );
+
+  return txUtil.generateIouTransferRawTx(signature.toString('hex'), iouPayment);
 };
