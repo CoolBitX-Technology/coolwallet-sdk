@@ -98,3 +98,164 @@ export const getMessageArgument = async (addressIndex: number, message: string):
   const argument = Buffer.from(message, 'utf8').toString('hex');
   return SEPath + argument;
 };
+
+/**
+ * Convert mantissa (bigint) into a 54-byte buffer where each byte represents
+ * one bit of the 54-bit mantissa value.
+ *
+ * Example flow:
+ *   mantissa = 1_000_000_000_000_000n
+ *   hex      = 0x038D7EA4C68000
+ *   54-bit binary = 000011100011010111111010100100110001101000000000000000
+ *   each bit -> 1 byte (0 -> 0x00, 1 -> 0x01)
+ *   result   = "000000000000010100000101000001010001010101000001010100010100..."
+ *              (108 hex chars / 54 bytes)
+ */
+export const MANTISSA_BIT_LENGTH = 54;
+
+export const mantissaToBitBytes = (mantissa: bigint): string => {
+  const absMantissa = mantissa < 0n ? -mantissa : mantissa;
+  const binaryStr = absMantissa.toString(2);
+
+  if (binaryStr.length > MANTISSA_BIT_LENGTH) {
+    throw new Error(`Mantissa exceeds ${MANTISSA_BIT_LENGTH} bits: ${mantissa}`);
+  }
+
+  const paddedBinary = binaryStr.padStart(MANTISSA_BIT_LENGTH, '0');
+  return paddedBinary
+    .split('')
+    .map((bit) => (bit === '1' ? '01' : '00'))
+    .join('');
+};
+
+export const encodeIouAmount = (amount: string): { mantissa: bigint; exponent: number; encoded: string } => {
+  const isNegative = amount.startsWith('-');
+  const absStr = isNegative ? amount.slice(1) : amount;
+
+  const [intStr, fracStr = ''] = absStr.split('.');
+  const cleanFrac = fracStr.replace(/0+$/, '');
+
+  let mantissa = BigInt(intStr + cleanFrac);
+  let exponent = -cleanFrac.length;
+
+  if (mantissa === 0n) {
+    return { mantissa: 0n, exponent: 0, encoded: '8000000000000000' };
+  }
+
+  while (mantissa % 10n === 0n) {
+    mantissa /= 10n;
+    exponent += 1;
+  }
+
+  const minMantissa = 1000000000000000n; // 10^15
+  const maxMantissa = 9999999999999999n; // 10^16 - 1
+
+  while (mantissa < minMantissa) {
+    mantissa *= 10n;
+    exponent -= 1;
+  }
+  while (mantissa > maxMantissa) {
+    mantissa /= 10n;
+    exponent += 1;
+  }
+
+  // Bit 63 = IOU marker, Bit 62 = sign, Bits 54-61 = exponent+97, Bits 0-53 = mantissa
+  let encoded = 1n << 63n;
+  if (!isNegative) encoded |= 1n << 62n;
+  encoded |= BigInt(exponent + 97) << 54n;
+  encoded |= mantissa;
+
+  return {
+    mantissa: isNegative ? -mantissa : mantissa,
+    exponent,
+    encoded: encoded.toString(16).padStart(16, '0').toUpperCase(),
+  };
+};
+
+export const getTrustSetArgument = async (
+  addressIndex: number,
+  payment: types.TokenPayment,
+  isRLUSD: boolean
+): Promise<string> => {
+  const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
+  if (!payment.Account || !payment.SigningPubKey) {
+    throw new Error('Account or SigningPubKey is not set');
+  }
+  const { encoded } = encodeIouAmount(payment.Token.value);
+
+  const transaction: Array<Uint8Array | Uint8Array[]> = [];
+  transaction.push(toRlpBytes(payment.Flags, 4));
+  transaction.push(toRlpBytes(payment.Sequence, 4));
+  transaction.push(toRlpBytes(payment.DestinationTag, 4));
+  transaction.push(toRlpBytes(payment.LastLedgerSequence, 4));
+  transaction.push(toRlpBytes(encoded, 8));
+  transaction.push(toRlpBytes(parseInt(payment.Fee), 7));
+  transaction.push(toRlpBytes(payment.SigningPubKey, 33));
+  transaction.push(toRlpBytes(txUtil.getAccount(payment.Account), 20));
+
+  if (!isRLUSD) {
+    const { Token: token } = payment;
+    const tokenNameLength = toHexValue(token.name.length, 1);
+    const tokenNameHex = Buffer.from(token.name, 'ascii').toString('hex').padEnd(14, '0').toUpperCase();
+    const issuerHex = txUtil.getAccount(token.issuer);
+    const tokenInfo = tokenNameLength + tokenNameHex + token.code + issuerHex;
+    transaction.push(toRlpBytes(tokenInfo, 48));
+  }
+  const argument = Buffer.from(rlp.encode(transaction)).toString('hex');
+
+  return SEPath + argument;
+};
+
+export const getIouTransferArgument = async (
+  addressIndex: number,
+  payment: types.IouTransferPayment,
+  isRLUSD: boolean
+): Promise<string> => {
+  const SEPath = `15${await utils.getPath(params.COIN_TYPE, addressIndex)}`;
+  if (!payment.Account || !payment.SigningPubKey) {
+    throw new Error('Account or SigningPubKey is not set');
+  }
+
+  const { mantissa, exponent } = encodeIouAmount(payment.Token.value);
+  console.log('mantissa', mantissa);
+  console.log('exponent', exponent);
+
+  const mantissaHex = mantissaToBitBytes(mantissa);
+  const mantissaBytes = Uint8Array.from(Buffer.from(mantissaHex, 'hex'));
+
+  const transaction: Array<Uint8Array | Uint8Array[]> = [];
+  transaction.push(toRlpBytes(payment.Flags, 4));
+  transaction.push(toRlpBytes(payment.Sequence, 4));
+  transaction.push(toRlpBytes(payment.DestinationTag, 4));
+  transaction.push(toRlpBytes(payment.LastLedgerSequence, 4));
+  transaction.push(mantissaBytes);
+  transaction.push(toRlpBytes(exponent * -1, 1));
+  transaction.push(toRlpBytes(parseInt(payment.Fee), 7));
+  transaction.push(toRlpBytes(payment.SigningPubKey, 33));
+  transaction.push(toRlpBytes(txUtil.getAccount(payment.Account), 20));
+  transaction.push(toRlpBytes(txUtil.getAccount(payment.Destination), 20));
+  const memos: Uint8Array[] = [];
+  if (payment.Memos) {
+    if (payment.Memos.length > 1) {
+      throw new Error('Only one memo is supported at this time.');
+    }
+    const memo = payment.Memos[0]?.Memo;
+    if (memo) {
+      memos.push(encodeMemoField(memo.MemoType));
+      memos.push(encodeMemoField(memo.MemoData));
+      memos.push(encodeMemoField(memo.MemoFormat));
+    }
+  }
+  transaction.push(memos);
+  if (!isRLUSD) {
+    const { Token: token } = payment;
+    const tokenNameLength = toHexValue(token.name.length, 1);
+    const tokenNameHex = Buffer.from(token.name, 'ascii').toString('hex').padEnd(14, '0').toUpperCase();
+    const issuerHex = txUtil.getAccount(token.issuer);
+    const tokenInfo = tokenNameLength + tokenNameHex + token.code + issuerHex;
+    transaction.push(toRlpBytes(tokenInfo, 48));
+  }
+
+  const argument = Buffer.from(rlp.encode(transaction)).toString('hex');
+  return SEPath + argument;
+};

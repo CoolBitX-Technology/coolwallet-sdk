@@ -6,3 +6,12 @@ export const removeHex0x = (hex: string): string => {
 };
 
 export const handleHex = (hex: string) => evenHexDigit(removeHex0x(hex));
+
+
+export const parseIouToken = (contractAddress: string): { code: string; issuer: string } => {
+  if (!contractAddress.includes('.')) {
+    throw new Error(`Invalid IOU token format: "${contractAddress}". Expected: "code.issuer"`);
+  }
+  const [code, issuer] = contractAddress.split('.');
+  return { code, issuer }
+}

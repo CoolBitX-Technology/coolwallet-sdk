@@ -134,4 +134,65 @@ describe('Test XRP SDK', () => {
       );
     });
   });
+
+  describe('Test Trust Set RLUSD', () => {
+    it('trust set with RLUSD token', async () => {
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        tokenPayment: {
+          TransactionType: 'TrustSet',
+          Flags: 2147483648,
+          Sequence: 82710910,
+          LastLedgerSequence: 94113337,
+          Fee: '10',
+          Token: {
+            name: 'RLUSD',
+            code: '524C555344000000000000000000000000000000',
+            issuer: 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De',
+            value: '1000000000',
+          },
+        },
+        confirmCB: () => {},
+        authorizedCB: () => {},
+      };
+
+      expect(await xrpSDK.signTrustSet(signData)).toMatchInlineSnapshot(
+        `"12001422800000002404EE117E201B059C0E3963D6C38D7EA4C68000524C555344000000000000000000000000000000E5E961C6A025C9404AA7B662DD1DF975BE75D13E68400000000000000A7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F17446304402201DE7855C2222B3C499889457917332AA6BA85AFDCC46FF4208789B4BA7ABDC0002207C24050D0BFF666830DE535EF0D54A13E0E065F25BC4D79BB43CCE65C5D326538114819863812B0B9EA1F48EF5297D2F4EE1119BD872"`
+      );
+    });
+  });
+
+  describe('Test IOU Transfer RLUSD', () => {
+    it('iou transfer with RLUSD token', async () => {
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        iouPayment: {
+          TransactionType: 'Payment',
+          Flags: 2147483648,
+          Sequence: 82710910,
+          LastLedgerSequence: 94113337,
+          Fee: '10',
+          Destination: 'rwjPKE7LqyYYcccwRoJLuGn7TA1Jyw5c6v',
+          Token: {
+            name: 'RLUSD',
+            code: '524C555344000000000000000000000000000000',
+            issuer: 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De',
+            value: '100',
+          },
+        },
+        confirmCB: () => {},
+        authorizedCB: () => {},
+      };
+
+      expect(await xrpSDK.signIouTransfer(signData)).toMatchInlineSnapshot(
+        `"12000022800000002404EE117E201B059C0E3961D5038D7EA4C68000524C555344000000000000000000000000000000E5E961C6A025C9404AA7B662DD1DF975BE75D13E68400000000000000A7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F174473045022100EFA90B162D936A2E6145F39AF28F8ADFACEB95FCE4D72F9760C56B0DFC6EFA5B0220393D506879C5D7398B0F19FDB6A44676700E00B68ACF8CBCB33DE1462F6A27668114819863812B0B9EA1F48EF5297D2F4EE1119BD87283146ABD3AD2BD443171175B7E7FD6C0BF547A6C5A78"`
+      );
+    });
+  });
 });

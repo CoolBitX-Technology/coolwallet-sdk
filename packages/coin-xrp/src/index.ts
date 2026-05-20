@@ -31,7 +31,7 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
    * Sign XRP Payment.
    * @description TransactionType must be 'Payment', Flags must be 2147483648;
    */
-  async signTransaction(signTxData: types.signTxType) {
+  async signTransaction(signTxData: types.SignTxType) {
     const payment = signTxData.payment;
 
     payment.TransactionType = 'Payment';
@@ -51,7 +51,47 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
     return xrpSign.signPayment(signTxData, payment);
   }
 
-  async signMessage(signMsgData: types.signMsgType): Promise<string> {
+  async signMessage(signMsgData: types.SignMsgType): Promise<string> {
     return xrpSign.signMessage(signMsgData);
+  }
+
+  async signTrustSet(signTxData: types.SignTrustSetType) {
+    const payment = signTxData.tokenPayment;
+
+    payment.TransactionType = 'TrustSet';
+    if (!payment.SigningPubKey) {
+      payment.SigningPubKey = await this.getPublicKey(
+        signTxData.transport,
+        signTxData.appPrivateKey,
+        signTxData.appId,
+        signTxData.addressIndex
+      );
+      payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
+    }
+    if (!payment.Account) {
+      payment.Account = txUtil.pubKeyToAddress(payment.SigningPubKey);
+    }
+
+    return xrpSign.signTrustSet(signTxData, payment);
+  }
+
+  async signIouTransfer(signTxData: types.SignIouTransferType) {
+    const payment = signTxData.iouPayment;
+
+    payment.TransactionType = 'Payment';
+    if (!payment.SigningPubKey) {
+      payment.SigningPubKey = await this.getPublicKey(
+        signTxData.transport,
+        signTxData.appPrivateKey,
+        signTxData.appId,
+        signTxData.addressIndex
+      );
+      payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
+    }
+    if (!payment.Account) {
+      payment.Account = txUtil.pubKeyToAddress(payment.SigningPubKey);
+    }
+
+    return xrpSign.signIouTransfer(signTxData);
   }
 }
