@@ -31,3 +31,4 @@ console.log('ETH ORDER: ', buildTokenHex('ORDER'));
 console.log('ETH AAVE: ', buildTokenHex('AAVE'));
 console.log('ETH LBTC: ', buildTokenHex('LBTC'));
 console.log('ETH XAUt: ', buildTokenHex('XAUt'));
+console.log('ETH RLUSD: ', buildTokenHex('RLUSD'));
