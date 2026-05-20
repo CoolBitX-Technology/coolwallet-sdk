@@ -132,6 +132,9 @@ export const signIouTransfer = async (signTxData: types.SignIouTransferType): Pr
     return tx.command.executeScript(transport, appId, appPrivateKey, argument);
   };
 
+  const { signedTx } = await tx.command.getSignedHex(transport);
+  console.log('signedTx: ', signedTx);
+
   const signature = await tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
     preActions,
