@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.3
+- [CW-28223] feat(eth): add RLUSD to eth (#1130)
+
 ## 2.0.2
 - [CW-27901] support rlusd scripts (#1128)
 
