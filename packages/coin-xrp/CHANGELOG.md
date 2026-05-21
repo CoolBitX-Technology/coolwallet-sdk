@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+- [CW-27901] support rlusd scripts (#1128)
+
 ## 2.0.1
 - feat(XRP): update XRP sign message script (#1122)
 - feat(XRP): CW-27284 add memo sign (#1114)
