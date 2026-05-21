@@ -4,6 +4,8 @@ import * as txUtil from './utils/tracsactionUtil';
 import * as types from './config/types';
 import * as params from './config/params';
 
+export { TOKENTYPE } from './config/tokenType';
+
 export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
   constructor() {
     super(params.COIN_TYPE);
@@ -16,7 +18,7 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
     transport: types.Transport,
     appPrivateKey: string,
     appId: string,
-    addressIndex: number
+    addressIndex: number,
   ): Promise<string> {
     const publicKey = await this.getPublicKey(transport, appPrivateKey, appId, addressIndex);
     return txUtil.pubKeyToAddress(publicKey);
@@ -40,7 +42,7 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
         signTxData.transport,
         signTxData.appPrivateKey,
         signTxData.appId,
-        signTxData.addressIndex
+        signTxData.addressIndex,
       );
       payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
     }
@@ -64,7 +66,7 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
         signTxData.transport,
         signTxData.appPrivateKey,
         signTxData.appId,
-        signTxData.addressIndex
+        signTxData.addressIndex,
       );
       payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
     }
@@ -84,7 +86,7 @@ export default class XRP extends COIN.ECDSACoin implements COIN.Coin {
         signTxData.transport,
         signTxData.appPrivateKey,
         signTxData.appId,
-        signTxData.addressIndex
+        signTxData.addressIndex,
       );
       payment.SigningPubKey = payment.SigningPubKey.toUpperCase();
     }
