@@ -68,6 +68,21 @@ jobs:
     - name: Run Docker container
       run: docker run -d --name coolwallet-jcvm-jre-http -p 9527:9527 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
 
+    - name: Wait for JCVM to be ready
+      run: |
+        echo "Waiting for JCVM on port 9527..."
+        for i in $(seq 1 30); do
+          if nc -z -w2 localhost 9527 2>/dev/null; then
+            echo "JCVM is ready (attempt $i)"
+            exit 0
+          fi
+          echo "Attempt $i/30 - not ready yet, waiting 2s..."
+          sleep 2
+        done
+        echo "JCVM failed to start after 60 seconds"
+        docker logs coolwallet-jcvm-jre-http
+        exit 1
+
     - name: Dump node environment
       working-directory: sdk
       run: 'echo "node: $(node -v) npm: $(npm -v)"'

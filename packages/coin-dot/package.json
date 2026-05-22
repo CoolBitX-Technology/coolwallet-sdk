@@ -17,7 +17,7 @@
     "publish-single": "rm -rf node_modules && npm install && npm run build && npm publish"
   },
   "dependencies": {
-    "@coolwallet/core": "^2.0.0",
+    "@coolwallet/core": "^2.0.8-beta.0",
     "@polkadot/keyring": "^6.0.5",
     "@types/node": "^14.0.13",
     "blake2b": "^2.1.3",

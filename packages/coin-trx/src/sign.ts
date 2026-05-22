@@ -62,12 +62,12 @@ export const signTransaction = async (
   );
 
   if (Buffer.isBuffer(canonicalSignature)) return '';
-  const { r, s } = canonicalSignature;
+  const { r, s32 } = canonicalSignature;
   const { signedTx } = await tx.command.getSignedHex(transport);
   const keyPair = ec.keyFromPublic(publicKey, 'hex');
   const v = ec.getKeyRecoveryParam(sha256(Buffer.from(signedTx, 'hex')), canonicalSignature, keyPair.pub);
 
-  const sig = r + s + v.toString().padStart(2, '0');
+  const sig = r + s32 + v.toString().padStart(2, '0');
 
   return '0a' + toVarint(signedTx.length / 2) + signedTx + '12' + toVarint(sig.length / 2) + sig;
 };
