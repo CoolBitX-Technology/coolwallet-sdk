@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.8
+- [CW-28266] fix: return s32 to support TRX, DOT (#1133)
+
 ## 2.0.7
 - feat(core): upgrade core version (#1119)
 
