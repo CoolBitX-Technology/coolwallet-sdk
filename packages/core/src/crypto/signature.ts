@@ -39,7 +39,7 @@ export const convertToDER = (sig: { r: string; s: string }): Buffer => {
   return derSignature;
 };
 
-export const getCanonicalSignature = (signature: { s?: any; r?: any, s32?: any }) => {
+export const getCanonicalSignature = (signature: { s: string; r: string}) => {
   const modulusString = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141';
   const modulus = new BN(modulusString, 16);
   const s = new BN(signature.s, 16);

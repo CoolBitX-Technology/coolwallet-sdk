@@ -7,9 +7,9 @@ import { SignatureType } from './type';
  *
  * @param {String} signature
  * @param {String} signatureType
- * @returns {{r:string, s:string} | Buffer } Buffer or DER signature
+ * @returns {{r:string, s:string, s32: string} | Buffer } Buffer or DER signature
  */
-export const formatSignature = (signature: string, signatureType: SignatureType): { r: string; s: string } | Buffer => {
+export const formatSignature = (signature: string, signatureType: SignatureType): { r: string; s: string; s32: string } | Buffer => {
   const iv = Buffer.alloc(16);
   iv.fill(0);
   const sigBuff = Buffer.from(signature, 'hex');
@@ -37,13 +37,13 @@ export const formatSignature = (signature: string, signatureType: SignatureType)
  * @param {String} encryptedSignature
  * @param {String} signatureKey
  * @param {SignatureType} signatureType
- * @return {{r:string, s:string} | Buffer } Buffer or DER signature
+ * @return {{r:string, s:string, s32: string} | Buffer } Buffer or DER signature
  */
 export const decryptSignatureFromSE = (
   encryptedSignature: string,
   signatureKey: string,
   signatureType: SignatureType
-): { r: string; s: string; s32?: string } | Buffer => {
+): { r: string; s: string; s32: string } | Buffer => {
   const iv = Buffer.alloc(16);
   iv.fill(0);
   const sigBuff = aes256CbcDecrypt(iv, Buffer.from(signatureKey, 'hex'), encryptedSignature);
