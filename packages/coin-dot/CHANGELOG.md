@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.1
+- fix: CW-28266 use s32 for signature in coin-dot and coin-trx (#1136)
+
 ## 2.1.0
 
 - feat(dot): add test cases & fix nominate decode address error [CW-25986] (#1063)
