@@ -70,9 +70,9 @@ jobs:
 
     - name: Wait for JCVM to be ready
       run: |
-        echo "Waiting for JCVM on port 9527..."
+        echo "Waiting for JCVM HTTP service on port 9527..."
         for i in $(seq 1 30); do
-          if nc -z -w2 localhost 9527 2>/dev/null; then
+          if curl -s -o /dev/null --max-time 2 http://localhost:9527/ 2>/dev/null; then
             echo "JCVM is ready (attempt $i)"
             exit 0
           fi

@@ -51,8 +51,12 @@ describe('Test XRP SDK', () => {
           Fee: '10',
           Destination: 'rwjPKE7LqyYYcccwRoJLuGn7TA1Jyw5c6v',
         },
-        confirmCB: () => {},
-        authorizedCB: () => {},
+        confirmCB: () => {
+          /* noop */
+        },
+        authorizedCB: () => {
+          /* noop */
+        },
       };
 
       expect(await xrpSDK.signTransaction(signData)).toMatchInlineSnapshot(
@@ -76,8 +80,12 @@ describe('Test XRP SDK', () => {
           Fee: '10',
           Destination: 'rwjPKE7LqyYYcccwRoJLuGn7TA1Jyw5c6v',
         },
-        confirmCB: () => {},
-        authorizedCB: () => {},
+        confirmCB: () => {
+          /* noop */
+        },
+        authorizedCB: () => {
+          /* noop */
+        },
       };
 
       expect(await xrpSDK.signTransaction(signData)).toMatchInlineSnapshot(
@@ -106,8 +114,12 @@ describe('Test XRP SDK', () => {
             },
           ],
         },
-        confirmCB: () => {},
-        authorizedCB: () => {},
+        confirmCB: () => {
+          /* noop */
+        },
+        authorizedCB: () => {
+          /* noop */
+        },
       };
 
       expect(await xrpSDK.signTransaction(signData)).toMatchInlineSnapshot(
@@ -125,8 +137,12 @@ describe('Test XRP SDK', () => {
         appId: props.appId,
         message,
         addressIndex: 0,
-        confirmCB: () => {},
-        authorizedCB: () => {},
+        confirmCB: () => {
+          /* noop */
+        },
+        authorizedCB: () => {
+          /* noop */
+        },
       };
 
       expect(await xrpSDK.signMessage(signData)).toMatchInlineSnapshot(
@@ -155,8 +171,12 @@ describe('Test XRP SDK', () => {
             value: '1000000000',
           },
         },
-        confirmCB: () => {},
-        authorizedCB: () => {},
+        confirmCB: () => {
+          /* noop */
+        },
+        authorizedCB: () => {
+          /* noop */
+        },
       };
 
       expect(await xrpSDK.signTrustSet(signData)).toMatchInlineSnapshot(
@@ -186,12 +206,48 @@ describe('Test XRP SDK', () => {
             value: '100',
           },
         },
-        confirmCB: () => {},
-        authorizedCB: () => {},
+        confirmCB: () => {
+          /* noop */
+        },
+        authorizedCB: () => {
+          /* noop */
+        },
       };
 
       expect(await xrpSDK.signIouTransfer(signData)).toMatchInlineSnapshot(
         `"12000022800000002404EE117E201B059C0E3961D5038D7EA4C68000524C555344000000000000000000000000000000E5E961C6A025C9404AA7B662DD1DF975BE75D13E68400000000000000A7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F174473045022100EFA90B162D936A2E6145F39AF28F8ADFACEB95FCE4D72F9760C56B0DFC6EFA5B0220393D506879C5D7398B0F19FDB6A44676700E00B68ACF8CBCB33DE1462F6A27668114819863812B0B9EA1F48EF5297D2F4EE1119BD87283146ABD3AD2BD443171175B7E7FD6C0BF547A6C5A78"`
+      );
+    });
+
+    it('iou transfer with RLUSD token and amount 0', async () => {
+      const signData = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex: 0,
+        iouPayment: {
+          TransactionType: 'Payment',
+          Sequence: 93998821,
+          LastLedgerSequence: 104796596,
+          Fee: '12',
+          Destination: 'rwjPKE7LqyYYcccwRoJLuGn7TA1Jyw5c6v',
+          Token: {
+            name: 'RLUSD',
+            code: '524C555344000000000000000000000000000000',
+            issuer: 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De',
+            value: '0',
+          },
+        },
+        confirmCB: () => {
+          /* noop */
+        },
+        authorizedCB: () => {
+          /* noop */
+        },
+      };
+
+      expect(await xrpSDK.signIouTransfer(signData)).toMatchInlineSnapshot(
+        `"12000024059A4EE5201B063F11B4618000000000000000524C555344000000000000000000000000000000E5E961C6A025C9404AA7B662DD1DF975BE75D13E68400000000000000C7321035659B8E4B0D46DC5B22F62EF6211206C2F9AA4C28689217BE99FDD5C706516F174463044022056467E0C5AE1F3C3F4E1CE6896861935463A65980CD37815B7C861048B8B71F60220603A5183F35D9816AA01CA7B923E46E0BBD7FD9AB28B03336C9A3D5849BC0E238114819863812B0B9EA1F48EF5297D2F4EE1119BD87283146ABD3AD2BD443171175B7E7FD6C0BF547A6C5A78"`
       );
     });
   });
