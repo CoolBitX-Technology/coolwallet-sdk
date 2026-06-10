@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.4
+- [CW-28501] fix(xrp): 修正 IOU transfer amount 為 0 時卡片報錯的問題 (#1139)
+
 ## 2.0.3
 - [CW-28223] feat(eth): add RLUSD to eth (#1130)
 
