@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+- [CW-28610] feat(ton): update symbol TON -> GRAM on Pro Card display (#1145)
+
 
 ## 2.0.0
 - chore: upgrade coins versions to 2.0.0 (#992)
