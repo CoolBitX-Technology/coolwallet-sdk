@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+- chore(zec/bch/ltc): remove local jest 26 and fix jest config (#1143)
+
 ## 2.0.1
 - fix(zec): update branch id to fix zec tx failed (#1141)
 - fix(ZEC): update zec latest support script version (#1116)
