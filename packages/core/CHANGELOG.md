@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.9
+- feat(core): add optional loadScript param to updateSE / updateSEPart1 (#1150)
+
 ## 2.0.8
 - [CW-28266] fix: return s32 to support TRX, DOT (#1133)
 
