@@ -135,6 +135,7 @@ interface UpdateSeParams {
   callAPI: (url: string, options: APIOptions) => Promise<any>;
   updateMCU?: boolean;
   apiSecret: string;
+  loadScript?: string;
 }
 
 /**
@@ -146,6 +147,7 @@ interface UpdateSeParams {
  * @param progressCallback progressCallback(progressNum): return update progress percentage
  * @param callAPI callAPI(url, options): Function of calling api
  * @param updateMCU
+ * @param loadScript override the default loadScript; used for testing specific firmware versions
  */
 export const updateSE = async ({
   transport,
@@ -156,6 +158,7 @@ export const updateSE = async ({
   callAPI,
   updateMCU = false,
   apiSecret,
+  loadScript,
 }: UpdateSeParams): Promise<number> => {
   const SCRIPT = getScripts(transport.cardType);
   const progress = new Progress(getProgressNums(updateMCU));
@@ -178,7 +181,13 @@ export const updateSE = async ({
     console.debug('Delete Card Manager Done');
 
     progressCallback(progress.next()); // progress 50
-    await insertLoadScript(transport, SCRIPT.loadScript, progressCallback, progress.current(), progress.next()); // From progress 50 to progress 88
+    await insertLoadScript(
+      transport,
+      loadScript ?? SCRIPT.loadScript,
+      progressCallback,
+      progress.current(),
+      progress.next()
+    ); // From progress 50 to progress 88
     console.debug('Load OTA Script Done');
 
     await insertScript(transport, SCRIPT.installScript);
@@ -210,6 +219,7 @@ export const updateSEPart1 = async ({
   callAPI,
   updateMCU = false,
   apiSecret,
+  loadScript,
 }: UpdateSeParams): Promise<void> => {
   const SCRIPT = getScripts(transport.cardType);
   const progress = new Progress(getProgressNums(updateMCU));
@@ -239,7 +249,13 @@ export const updateSEPart1 = async ({
 
     progressCallback(progress.next()); // progress 50
     console.log('updateSEPart1 >> insertLoadScript');
-    await insertLoadScript(transport, SCRIPT.loadScript, progressCallback, progress.current(), progress.next()); // From progress 50 to progress 88
+    await insertLoadScript(
+      transport,
+      loadScript ?? SCRIPT.loadScript,
+      progressCallback,
+      progress.current(),
+      progress.next()
+    ); // From progress 50 to progress 88
     console.debug('Load OTA Script Done');
 
     console.log('updateSEPart1 >> insertScript');
