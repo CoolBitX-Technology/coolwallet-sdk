@@ -16,9 +16,9 @@ import {
 import { MajorType, TxTypes } from './config/types';
 export { TxTypes };
 
-import type { MessageTransaction, Options, RawTransaction, Transaction } from './config/types';
+import type { MessageTransaction, Options, RawTransaction, Transaction, TokenAsset, ChangeOutput } from './config/types';
 
-export type { Options, RawTransaction, Transaction };
+export type { Options, RawTransaction, Transaction, TokenAsset, ChangeOutput };
 
 export default class ADA implements COIN.Coin {
   isTestNet = false;

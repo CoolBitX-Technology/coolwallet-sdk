@@ -1,5 +1,5 @@
 import { utils, config } from '@coolwallet/core';
-import { MajorType, Integer, Output, Witness, TxTypes, Transaction, MessageTransaction } from '../config/types';
+import { MajorType, Integer, Output, ChangeOutput, Witness, TxTypes, Transaction, MessageTransaction } from '../config/types';
 import {
   TRANSFER,
   REGISTER,
@@ -11,6 +11,7 @@ import {
   MESSAGE,
 } from '../config/params';
 import { derivePubKeyFromAccountToIndex, decodeAddress, cborEncode, genInputs, blake2b224 } from './index';
+import { encodeOutputValue } from './transactionUtil';
 
 const getFullPath = (rolePath: number, indexPath: number) => {
   const fullPath = utils.getFullPath({
@@ -35,13 +36,29 @@ const getOutputArgument = (output: Output, isTestNet = false) => {
   return encodeType + addressLength + address + amount;
 };
 
-const getChangeArgument = (output?: Output, isTestNet = false) => {
-  if (!output) return '0'.repeat(202);
+const MAX_CHANGE_VALUE_BYTES = 200;
+
+// Unified change-output argument shared by every tx type: addressLength(1) + address(90) +
+// valueLength(1) + value(200). The value is a pre-encoded CBOR blob — a bare uint for an
+// ADA-only change, or `82 <lovelace> <multiasset>` when the change carries native tokens.
+// addressLength == 00 signals no change (the card keys output presence on it).
+const getChangeArgument = (output?: ChangeOutput, isTestNet = false) => {
+  if (!output) return '00' + '0'.repeat(180) + '00' + '0'.repeat(MAX_CHANGE_VALUE_BYTES * 2);
+
   const { addressBuff } = decodeAddress(output.address, isTestNet);
   const addressLength = addressBuff.length.toString(16).padStart(2, '0');
   const address = addressBuff.toString('hex').padEnd(180, '0');
-  const amount = getUintArgument(output.amount);
-  return addressLength + address + amount;
+
+  const valueHex = encodeOutputValue(output.amount, output.assets);
+  const valueLengthBytes = valueHex.length / 2;
+  if (valueLengthBytes > MAX_CHANGE_VALUE_BYTES) {
+    throw new Error(`change value exceeds ${MAX_CHANGE_VALUE_BYTES} bytes (got ${valueLengthBytes})`);
+  }
+
+  const valueLength = valueLengthBytes.toString(16).padStart(2, '0');
+  const valuePadded = valueHex.padEnd(MAX_CHANGE_VALUE_BYTES * 2, '0');
+
+  return addressLength + address + valueLength + valuePadded;
 };
 
 const getKeyHash = (keyHash?: string) => {

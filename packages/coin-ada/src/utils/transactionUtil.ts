@@ -1,5 +1,16 @@
 import { derivePubKeyFromAccountToIndex, blake2b224, decodeAddress, cborEncode } from './index';
-import { MajorType, Integer, Input, Output, Witness, TxTypes, Transaction } from '../config/types';
+import {
+  MajorType,
+  Integer,
+  Input,
+  Output,
+  ChangeOutput,
+  TokenAsset,
+  Witness,
+  TxTypes,
+  Transaction,
+} from '../config/types';
+import { assert } from './assert';
 
 export const genInputs = (inputs: Input[]): string => {
   let result = '00' + cborEncode(MajorType.Array, inputs.length);
@@ -11,21 +22,65 @@ export const genInputs = (inputs: Input[]): string => {
   return result;
 };
 
-const genOutputsPrefix = (output?: Output, change?: Output) => {
+const genOutputsPrefix = (output?: Output, change?: ChangeOutput) => {
   let outputCount = 0;
   if (output) outputCount += 1;
   if (change) outputCount += 1;
   return '01' + cborEncode(MajorType.Array, outputCount);
 };
 
-export const genOutput = (output?: Output, isTestNet = false): string => {
-  if (!output) return '';
-  let result = '82';
-  const addressBuff = decodeAddress(output.address, isTestNet).addressBuff;
-  result += cborEncode(MajorType.Byte, addressBuff.length);
-  result += addressBuff.toString('hex');
-  result += cborEncode(MajorType.Uint, output.amount)
+export const buildMultiAssetCbor = (assets: TokenAsset[]): string => {
+  const policyMap = new Map<string, TokenAsset[]>();
+  for (const asset of assets) {
+    if (asset.policyId.length !== 56) throw new Error(`policyId must be 28 bytes hex: ${asset.policyId}`);
+    if (!policyMap.has(asset.policyId)) policyMap.set(asset.policyId, []);
+    const group = policyMap.get(asset.policyId);
+    assert(group, `buildMultiAssetCbor: group must be in policyMap by policyId=${asset.policyId}`);
+    group.push(asset);
+  }
+
+  // Cardano requires canonical CBOR: map keys sorted by encoded length, then bytewise.
+  // The node rejects a non-canonical value, and the signature is over these exact bytes.
+  // Compare by decoded bytes (not the hex string) so the order is independent of hex
+  // casing: policy ids are all 28 bytes (bytewise); asset names vary, so byte length
+  // first, then bytewise.
+  const sortedPolicies = [...policyMap.keys()].sort((a, b) => Buffer.from(a, 'hex').compare(Buffer.from(b, 'hex')));
+
+  let result = cborEncode(MajorType.Map, sortedPolicies.length);
+  for (const policyId of sortedPolicies) {
+    const group = policyMap.get(policyId);
+    assert(group, `buildMultiAssetCbor: group must be in policyMap by policyId=${policyId}`);
+    const policyAssets = [...group].sort((a, b) => {
+      const nameA = Buffer.from(a.assetName, 'hex');
+      const nameB = Buffer.from(b.assetName, 'hex');
+      return nameA.length - nameB.length || nameA.compare(nameB);
+    });
+    result += cborEncode(MajorType.Byte, 28) + policyId;
+    result += cborEncode(MajorType.Map, policyAssets.length);
+    for (const asset of policyAssets) {
+      const nameBuff = Buffer.from(asset.assetName, 'hex');
+      result += cborEncode(MajorType.Byte, nameBuff.length) + asset.assetName;
+      result += cborEncode(MajorType.Uint, asset.amount);
+    }
+  }
   return result;
+};
+
+export const encodeOutputValue = (amount: Integer, assets?: TokenAsset[]): string => {
+  if (!assets || assets.length === 0) return cborEncode(MajorType.Uint, amount);
+  return '82' + cborEncode(MajorType.Uint, amount) + buildMultiAssetCbor(assets);
+};
+
+export const genOutput = (output?: Output | ChangeOutput, isTestNet = false): string => {
+  if (!output) return '';
+  const addressBuff = decodeAddress(output.address, isTestNet).addressBuff;
+  const assets = 'assets' in output ? output.assets : undefined;
+  return (
+    '82' +
+    cborEncode(MajorType.Byte, addressBuff.length) +
+    addressBuff.toString('hex') +
+    encodeOutputValue(output.amount, assets)
+  );
 };
 
 export const genFee = (value: Integer): string => {
@@ -47,7 +102,7 @@ export const genFakeWitness = (addressIndexes: number[], txType: TxTypes): strin
   //   result += '825820' + '0'.repeat(64);
   //   result += '5840' + '0'.repeat(128);
   // }
-  result += '0'.repeat(202*count);
+  result += '0'.repeat(202 * count);
   return result;
 };
 
