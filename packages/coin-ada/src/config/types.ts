@@ -51,6 +51,18 @@ export interface Output {
   amount: Integer;
 }
 
+export interface TokenAsset {
+  policyId: string;  // 28 bytes hex (56 chars)
+  assetName: string; // 0-32 bytes hex, empty string means no asset name
+  amount: Integer;
+}
+
+export interface ChangeOutput {
+  address: string;
+  amount: Integer;
+  assets?: TokenAsset[];
+}
+
 export interface Witness {
   arg: string;
   vkey: string;
@@ -60,7 +72,7 @@ export interface Witness {
 export interface RawTransaction {
   addrIndexes: number[];
   inputs: Input[];
-  change?: Output;
+  change?: ChangeOutput;
   ttl: Integer;
   output?: Output;
   poolKeyHash?: string;
