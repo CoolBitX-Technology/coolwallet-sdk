@@ -1,0 +1,1 @@
+{"total":2,"items":[{"uid":"3b33019a79271a82980087132f5f52fc","name":"Test ADA SDK","statistic":{"failed":0,"broken":0,"skipped":0,"passed":17,"unknown":0,"total":17}},{"uid":"41d90e10e649bb3a2af76dce2a0cfbc4","name":"buildMultiAssetCbor canonical ordering","statistic":{"failed":0,"broken":0,"skipped":0,"passed":6,"unknown":0,"total":6}}]}
