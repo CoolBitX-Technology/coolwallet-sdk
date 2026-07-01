@@ -97,7 +97,8 @@ export async function getScriptSigningActions(
   appPrivateKey: string,
   preparedData: types.PreparedData,
   output: types.Output,
-  change: types.Change | undefined
+  change: types.Change | undefined,
+  branchId: number
 ): Promise<{
   preActions: Array<Function>;
   actions: Array<Function>;
@@ -133,7 +134,7 @@ export async function getScriptSigningActions(
   });
 
   const branchIdBuf = Buffer.allocUnsafe(4);
-  branchIdBuf.writeUInt32LE(params.BranchId, 0);
+  branchIdBuf.writeUInt32LE(branchId, 0);
   const transactionSigningHashContext = Buffer.concat([Buffer.from('ZcashSigHash'), branchIdBuf]);
 
   const actions = utxoArguments.map((utxoArgument) => async () => {

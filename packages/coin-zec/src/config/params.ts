@@ -14,8 +14,6 @@ export const TRANSFER = {
 
 export const COIN_TYPE = '80000085';
 
-export const BranchId = 0x5437f330; // NU6.2 (activated at block 3364600)
-
 export const ZCASH_NETWORK: Network = {
   messagePrefix: '\x18Zcash Signed Message:\n',
   pubKeyHash: 0x1cb8,
