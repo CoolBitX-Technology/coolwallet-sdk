@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0
+- ✨ [CW-28565] feat(zec): make branchId configurable in signTransaction (#1154)
+
 ## 2.0.2
 - chore(zec/bch/ltc): remove local jest 26 and fix jest config (#1143)
 
