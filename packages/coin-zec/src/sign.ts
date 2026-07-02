@@ -22,7 +22,8 @@ export async function signTransaction(signTxData: types.signTxType): Promise<str
     appPrivateKey,
     preparedData,
     output,
-    change
+    change,
+    signTxData.branchId
   );
 
   const signatures = await tx.flow.getSignaturesFromCoolWalletV2(

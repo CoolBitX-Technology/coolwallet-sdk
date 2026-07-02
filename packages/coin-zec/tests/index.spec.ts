@@ -67,6 +67,7 @@ describe('Test ZEC SDK', () => {
         ],
         output: { address: 't1Vbw17X8y1PBqYw2TxB9dTWTRrginFA9kX', value: '100000' },
         change: { addressIndex: 0, value: '629147' },
+        branchId: 0x5437f330,
       };
 
       const signedTx = await zecSDK.signTransaction(options);

@@ -12,6 +12,7 @@ export type signTxType = {
   change?: Change;
   confirmCB?(): void;
   authorizedCB?(): void;
+  branchId: number;
 };
 
 export enum ScriptType {
