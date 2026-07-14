@@ -173,6 +173,7 @@ export const TOKENTYPE = [
     symbol: 'USDD',
     unit: '18',
     contractAddress: '0x45e51bc23d592eb2dba86da3985299f7895d66ba',
-    signature: '',
+    signature:
+      '12045553444400000045e51bc23d592eb2dba86da3985299f7895d66ba3045022030b26fa3a6d531c2d65a8a1694941ec2bb00db2ff06cbf789fc45e2f293a44a30221008f01002b480a9e11a1d2247c98c5d5f81619441af2cab1e228af955a8e97e3fd',
   },
 ];

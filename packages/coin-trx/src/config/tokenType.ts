@@ -57,6 +57,8 @@ export const TOKENTYPE = [
     symbol: 'USDD',
     decimals: '18',
     contractAddress: 'e91a7411e56ce79e83570570f49b9fc35b7727c5',
-    signature: '',
+    paylaod: '120455534444000000e91a7411e56ce79e83570570f49b9fc35b7727c5',
+    signature:
+      '3046022100b74eb78a2f7f7acc1887089643ca0cac32f72b9a7c22d845136159efe34a5e8b022100e38408b427305afcae299515ef2504b0e48dd3f25a60e63028458f98815d9e0e',
   },
 ];
