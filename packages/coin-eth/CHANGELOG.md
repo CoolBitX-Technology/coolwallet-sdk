@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.4
+- ✨ [CW-28769] feat: add USDD token support for ETH, BSC, and TRX (#1157)
+
 ## 2.0.3
 - [CW-28223] feat(eth): add RLUSD to eth (#1130)
 
