@@ -1108,5 +1108,12 @@ export const TOKENTYPE = [
     contractAddress: '0x8292Bb45bf1Ee4d140127049757C2E0fF06317eD',
     signature: `1205524C55534400008292BB45BF1EE4D140127049757C2E0FF06317ED304402206BC56C188EA50F4F1501C6C4DC2CB9F1DBDA4C09F2FB1FECC03A8AF6162BA62D022061C4AC1488D7992B33A1E916378709C8D00FA3E7BB028805879A8B1C6AE3FACB`,
   },
+  {
+    name: 'Usdd Stablecoin',
+    symbol: 'USDD',
+    unit: '18',
+    contractAddress: '0x4f8e5de400de08b164e7421b3ee387f461becd1a',
+    signature: '',
+  },
 ];
 // signature : [unit-1B][symbol_length-1B][symbol-7B][contractAddress-20B][signature]

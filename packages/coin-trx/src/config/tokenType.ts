@@ -49,8 +49,14 @@ export const TOKENTYPE = [
     decimals: '6',
     contractAddress: '3dfe637b2b9ae4190a458b5f3efc1969afe27819',
     paylaod: '06034e4654000000003dfe637b2b9ae4190a458b5f3efc1969afe27819',
-    signature: 
+    signature:
       '304402201BF0245B481AE36252B39721A990AE597556F5F1AFCA9AE8E1A52D4F2773411802204D3F55ECE872C7C72A6F4BECDD55DBED00417C6242F2A08692AF1043D241FFA0',
-  }
-
+  },
+  {
+    name: 'Decentralized USD',
+    symbol: 'USDD',
+    decimals: '18',
+    contractAddress: 'e91a7411e56ce79e83570570f49b9fc35b7727c5',
+    signature: '',
+  },
 ];
