@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+- ✨ [CW-28769] feat: add USDD token support for ETH, BSC, and TRX (#1157)
+
 ## 2.0.1
 - fix: CW-28266 use s32 for signature in coin-dot and coin-trx (#1136)
 
