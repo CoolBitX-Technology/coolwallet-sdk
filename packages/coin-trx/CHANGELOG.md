@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.3
+- [CW-28771] fix(trx): 更新 USDD Pro token 簽名，修復簽交易顯示三條線問題 (#1163)
+
 ## 2.0.2
 - ✨ [CW-28769] feat: add USDD token support for ETH, BSC, and TRX (#1157)
 
