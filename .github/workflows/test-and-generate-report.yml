@@ -3,7 +3,7 @@ name: Test and Generate Report
 on:
   pull_request:
     branches:
-        - master
+      - master
 
 env:
   REGISTRY: asia-northeast1-docker.pkg.dev
@@ -13,227 +13,227 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       upload_status: ${{ steps.set_status.outputs.upload_status }}
-      has_test_failures: ${{ steps.test_execution.outputs.has_test_failures }} 
+      has_test_failures: ${{ steps.test_execution.outputs.has_test_failures }}
       failed_coins: ${{ steps.test_execution.outputs.failed_coins }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        repository: CoolBitX-Technology/coolwallet-sdk
-        path: sdk
-        ref: ${{ github.event.pull_request.head.ref }}
-        submodules: recursive
-        token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: CoolBitX-Technology/coolwallet-sdk
+          path: sdk
+          ref: ${{ github.event.pull_request.head.ref }}
+          submodules: recursive
+          token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
 
-    - name: Authenticate gcloud
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.DEV_CP_GCP_SVC_GITHUB_RUNNER_KEY_FILE }}
+      - name: Authenticate gcloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.DEV_CP_GCP_SVC_GITHUB_RUNNER_KEY_FILE }}
 
-    - name: Fetch master branch from upstream repository
-      run: |
-        cd ${{ github.workspace }}/sdk
-        git remote add upstream https://github.com/CoolBitX-Technology/coolwallet-sdk.git
-        git fetch upstream master
+      - name: Fetch master branch from upstream repository
+        run: |
+          cd ${{ github.workspace }}/sdk
+          git remote add upstream https://github.com/CoolBitX-Technology/coolwallet-sdk.git
+          git fetch upstream master
 
-    - name: Get list of modified files and check for modified package.json in coin directories
-      id: modified_files
-      working-directory: sdk
-      run: |
-        # cd ${{ github.workspace }}/sdk
-        MODIFIED_FILES=$(git diff --name-only upstream/master)
-        echo "$MODIFIED_FILES"
+      - name: Get list of modified files and check for modified package.json in coin directories
+        id: modified_files
+        working-directory: sdk
+        run: |
+          # cd ${{ github.workspace }}/sdk
+          MODIFIED_FILES=$(git diff --name-only upstream/master)
+          echo "$MODIFIED_FILES"
 
-        MODIFIED_COINS=""
-        for file in $MODIFIED_FILES; do
-          echo "file = $file"
-          if [[ $file == packages/coin-*/package.json || $file == packages/core/package.json ]]; then
-            COIN_DIR=$(dirname "$file")
-            MODIFIED_COINS="$MODIFIED_COINS $COIN_DIR"
-          fi
-        done
+          MODIFIED_COINS=""
+          for file in $MODIFIED_FILES; do
+            echo "file = $file"
+            if [[ $file == packages/coin-*/package.json || $file == packages/core/package.json ]]; then
+              COIN_DIR=$(dirname "$file")
+              MODIFIED_COINS="$MODIFIED_COINS $COIN_DIR"
+            fi
+          done
 
-        MODIFIED_COINS=$(echo $MODIFIED_COINS | xargs)  # Trim leading/trailing whitespace
-        echo "modified_coins=$MODIFIED_COINS" >> $GITHUB_OUTPUT
+          MODIFIED_COINS=$(echo $MODIFIED_COINS | xargs)  # Trim leading/trailing whitespace
+          echo "modified_coins=$MODIFIED_COINS" >> $GITHUB_OUTPUT
 
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
-      
-    - name: Docker auth
-      run: gcloud auth configure-docker ${{ env.REGISTRY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
-    - name: Pull Docker image
-      run: docker pull ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+      - name: Docker auth
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
-    - name: Run Docker container
-      run: docker run -d --name coolwallet-jcvm-jre-http -p 9527:9527 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
+      - name: Pull Docker image
+        run: docker pull ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
 
-    - name: Wait for JCVM to be ready
-      run: |
-        echo "Waiting for JCVM HTTP service on port 9527..."
-        for i in $(seq 1 30); do
-          if curl -s -o /dev/null --max-time 2 http://localhost:9527/ 2>/dev/null; then
-            echo "JCVM is ready (attempt $i)"
-            exit 0
-          fi
-          echo "Attempt $i/30 - not ready yet, waiting 2s..."
-          sleep 2
-        done
-        echo "JCVM failed to start after 60 seconds"
-        docker logs coolwallet-jcvm-jre-http
-        exit 1
+      - name: Run Docker container
+        run: docker run -d --name coolwallet-jcvm-jre-http -p 9527:9527 ${{ env.REGISTRY }}/${{ secrets.DEV_CP_GCP_PROJECT_ID }}/coolwallet/jcvm
 
-    - name: Dump node environment
-      working-directory: sdk
-      run: 'echo "node: $(node -v) npm: $(npm -v)"'
-
-    - name: Install node modules
-      working-directory: sdk
-      run: npm install
-
-    - name: Set up test fixture
-      working-directory: sdk
-      run: ./scripts/install-test-fixture.sh
-
-    - name: Run tests for all modified coin project
-      id: test_execution
-      run: |
-        ALL_TESTS_PASSED=true
-        FAILED_COINS=""
-
-        for modified_coin in ${{ steps.modified_files.outputs.modified_coins }}; do
-          if [ -f "${{ github.workspace }}/sdk/$modified_coin/tests/index.spec.ts" ]; then
-            echo "Test file found for = $modified_coin"
-            cd ${{ github.workspace }}/sdk/$modified_coin
-            npm install
-            npm run ci-test-report || {
-                ALL_TESTS_PASSED=false
-                COIN_NAME=$(basename "$modified_coin")
-                if [ -z "$FAILED_COINS" ]; then
-                  FAILED_COINS="$COIN_NAME"
-                else
-                  FAILED_COINS="$FAILED_COINS, $COIN_NAME"
-                fi
-                echo "::warning::Tests for $COIN_NAME failed"
-              }
-          else
-            echo "Test file not found for $modified_coin"
-          fi
-        done
-
-        if [ "$ALL_TESTS_PASSED" = "false" ]; then
-          echo "has_test_failures=true" >> $GITHUB_OUTPUT
-          echo "failed_coins=$FAILED_COINS" >> $GITHUB_OUTPUT
-          echo "::error::Some tests failed: $FAILED_COINS"
+      - name: Wait for JCVM to be ready
+        run: |
+          echo "Waiting for JCVM HTTP service on port 9527..."
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null --max-time 2 http://localhost:9527/ 2>/dev/null; then
+              echo "JCVM is ready (attempt $i)"
+              exit 0
+            fi
+            echo "Attempt $i/30 - not ready yet, waiting 2s..."
+            sleep 2
+          done
+          echo "JCVM failed to start after 60 seconds"
+          docker logs coolwallet-jcvm-jre-http
           exit 1
-        else
-          echo "has_test_failures=false" >> $GITHUB_OUTPUT
-          echo "::notice::All tests passed successfully"
-        fi
 
-    - name: Handing junit report
-      working-directory: sdk
-      run: sh scripts/handing-report.sh
+      - name: Dump node environment
+        working-directory: sdk
+        run: 'echo "node: $(node -v) npm: $(npm -v)"'
 
-    - name: Upload test result
-      id: upload_result
-      uses: actions/upload-artifact@v4.3.6
-      with:
-        name: result
-        path: |
-          ${{ github.workspace }}/sdk/scripts/reports/junit/
+      - name: Install node modules
+        working-directory: sdk
+        run: npm install
 
-    - name: Set upload status
-      id: set_status
-      run: |
-        if [ "${{ steps.upload_result.outputs.artifact-id }}" == "" ]; then
-          echo "upload_status=false" >> $GITHUB_OUTPUT
-        else
-          echo "upload_status=true" >> $GITHUB_OUTPUT
-        fi       
+      - name: Set up test fixture
+        working-directory: sdk
+        run: ./scripts/install-test-fixture.sh
 
-    - name: Print upload status
-      run: |
-        echo "The upload status is ${{ steps.set_status.outputs.upload_status }}"
-  
-  report:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
-    steps:            
-    - name: Get Allure history
-      uses: actions/checkout@v4
-      if: always()
-      continue-on-error: true
-      with:
-        repository: CoolBitX-Technology/coolwallet-sdk
-        path: gh-pages
-        ref: gh-pages
-        
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-        
-    - name: Move test result
-      run: |
-        mkdir allure-results
-        mv -v ./result/* ./allure-results/
-        
-    - name: Build Test Report
-      uses: simple-elf/allure-report-action@v1.13
-      if: always()
-      with:
-        gh_pages: gh-pages
-        allure_history: allure-history
-        allure_results: allure-results
-        subfolder: all-services
-        keep_reports: 30
-      
-    - name: Publish test report
-      uses: peaceiris/actions-gh-pages@v3
-      if: always()
-      with:
-        github_token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
-        publish_branch: gh-pages
-        publish_dir: allure-history
+      - name: Run tests for all modified coin project
+        id: test_execution
+        run: |
+          ALL_TESTS_PASSED=true
+          FAILED_COINS=""
 
-    - name: Set report URL
-      run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}" >> $GITHUB_ENV
-
-    - name: Report to Slack
-      if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
-      uses: 8398a7/action-slack@v3
-      with:
-          status: custom
-          fields: repo,commit,author,took
-          custom_payload: |
-            {
-              "attachments": [
-                {
-                  "color": "danger",
-                  "title": "Test Failure Notification",
-                  "text": "Failed coins: ${{ needs.build-and-push.outputs.failed_coins }}",
-                  "actions": [
-                    {
-                      "type": "button",
-                      "text": "Test Report",
-                      "url": "${{ env.REPORT_URL }}"
-                    },
-                    {
-                      "type": "button",
-                      "text": "PR",
-                      "url": "${{ github.event.pull_request.html_url }}"
-                    }
-                  ],
-                  "footer": "CoolWallet SDK Test",
-                  "ts": "${{ github.event.pull_request.updated_at }}"
+          for modified_coin in ${{ steps.modified_files.outputs.modified_coins }}; do
+            if [ -f "${{ github.workspace }}/sdk/$modified_coin/tests/index.spec.ts" ]; then
+              echo "Test file found for = $modified_coin"
+              cd ${{ github.workspace }}/sdk/$modified_coin
+              npm install
+              npm run ci-test-report || {
+                  ALL_TESTS_PASSED=false
+                  COIN_NAME=$(basename "$modified_coin")
+                  if [ -z "$FAILED_COINS" ]; then
+                    FAILED_COINS="$COIN_NAME"
+                  else
+                    FAILED_COINS="$FAILED_COINS, $COIN_NAME"
+                  fi
+                  echo "::warning::Tests for $COIN_NAME failed"
                 }
-              ]
-            }
-      env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COOLBITX_BOT }}
+            else
+              echo "Test file not found for $modified_coin"
+            fi
+          done
 
-    - name: Mark workflow as failed
-      if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
-      run: |
-        echo "::error::Test execution failed, please check the test report"
-        exit 1
+          if [ "$ALL_TESTS_PASSED" = "false" ]; then
+            echo "has_test_failures=true" >> $GITHUB_OUTPUT
+            echo "failed_coins=$FAILED_COINS" >> $GITHUB_OUTPUT
+            echo "::error::Some tests failed: $FAILED_COINS"
+            exit 1
+          else
+            echo "has_test_failures=false" >> $GITHUB_OUTPUT
+            echo "::notice::All tests passed successfully"
+          fi
+
+      - name: Handing junit report
+        working-directory: sdk
+        run: sh scripts/handing-report.sh
+
+      - name: Upload test result
+        id: upload_result
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: result
+          path: |
+            ${{ github.workspace }}/sdk/scripts/reports/junit/
+
+      - name: Set upload status
+        id: set_status
+        run: |
+          if [ "${{ steps.upload_result.outputs.artifact-id }}" == "" ]; then
+            echo "upload_status=false" >> $GITHUB_OUTPUT
+          else
+            echo "upload_status=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Print upload status
+        run: |
+          echo "The upload status is ${{ steps.set_status.outputs.upload_status }}"
+
+  # report:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+  #   if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }}
+  #   steps:
+  #   - name: Get Allure history
+  #     uses: actions/checkout@v4
+  #     if: always()
+  #     continue-on-error: true
+  #     with:
+  #       repository: CoolBitX-Technology/coolwallet-sdk
+  #       path: gh-pages
+  #       ref: gh-pages
+
+  #   - name: Download all artifacts
+  #     uses: actions/download-artifact@v4
+
+  #   - name: Move test result
+  #     run: |
+  #       mkdir allure-results
+  #       mv -v ./result/* ./allure-results/
+
+  #   - name: Build Test Report
+  #     uses: simple-elf/allure-report-action@v1.13
+  #     if: always()
+  #     with:
+  #       gh_pages: gh-pages
+  #       allure_history: allure-history
+  #       allure_results: allure-results
+  #       subfolder: all-services
+  #       keep_reports: 30
+
+  #   - name: Publish test report
+  #     uses: peaceiris/actions-gh-pages@v3
+  #     if: always()
+  #     with:
+  #       github_token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
+  #       publish_branch: gh-pages
+  #       publish_dir: allure-history
+
+  #   - name: Set report URL
+  #     run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}" >> $GITHUB_ENV
+
+  #   - name: Report to Slack
+  #     if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
+  #     uses: 8398a7/action-slack@v3
+  #     with:
+  #         status: custom
+  #         fields: repo,commit,author,took
+  #         custom_payload: |
+  #           {
+  #             "attachments": [
+  #               {
+  #                 "color": "danger",
+  #                 "title": "Test Failure Notification",
+  #                 "text": "Failed coins: ${{ needs.build-and-push.outputs.failed_coins }}",
+  #                 "actions": [
+  #                   {
+  #                     "type": "button",
+  #                     "text": "Test Report",
+  #                     "url": "${{ env.REPORT_URL }}"
+  #                   },
+  #                   {
+  #                     "type": "button",
+  #                     "text": "PR",
+  #                     "url": "${{ github.event.pull_request.html_url }}"
+  #                   }
+  #                 ],
+  #                 "footer": "CoolWallet SDK Test",
+  #                 "ts": "${{ github.event.pull_request.updated_at }}"
+  #               }
+  #             ]
+  #           }
+  #     env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_COOLBITX_BOT }}
+
+  #   - name: Mark workflow as failed
+  #     if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
+  #     run: |
+  #       echo "::error::Test execution failed, please check the test report"
+  #       exit 1
