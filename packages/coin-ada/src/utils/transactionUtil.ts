@@ -71,16 +71,32 @@ export const encodeOutputValue = (amount: Integer, assets?: TokenAsset[]): strin
   return '82' + cborEncode(MajorType.Uint, amount) + buildMultiAssetCbor(assets);
 };
 
-export const genOutput = (output?: Output | ChangeOutput, isTestNet = false): string => {
-  if (!output) return '';
-  const addressBuff = decodeAddress(output.address, isTestNet).addressBuff;
-  const assets = 'assets' in output ? output.assets : undefined;
+// One output entry: 82 <addrHeader> <addr> <value>. `assets` folds into the value when present.
+const genOutputEntry = (
+  address: string,
+  amount: Integer,
+  assets: TokenAsset[] | undefined,
+  isTestNet: boolean
+): string => {
+  const addressBuff = decodeAddress(address, isTestNet).addressBuff;
   return (
     '82' +
     cborEncode(MajorType.Byte, addressBuff.length) +
     addressBuff.toString('hex') +
-    encodeOutputValue(output.amount, assets)
+    encodeOutputValue(amount, assets)
   );
+};
+
+// Receiver output. Carries a single native token when this is a token transfer, otherwise plain ADA.
+export const genOutput = (output?: Output, isTestNet = false): string => {
+  if (!output) return '';
+  return genOutputEntry(output.address, output.amount, output.token ? [output.token] : undefined, isTestNet);
+};
+
+// Change output. Carries the leftover native tokens (if any) as `assets`.
+export const genChange = (change?: ChangeOutput, isTestNet = false): string => {
+  if (!change) return '';
+  return genOutputEntry(change.address, change.amount, change.assets, isTestNet);
 };
 
 export const genFee = (value: Integer): string => {
@@ -96,7 +112,8 @@ export const genTtl = (value: Integer): string => {
 };
 
 export const genFakeWitness = (addressIndexes: number[], txType: TxTypes): string => {
-  const count = addressIndexes.length + (txType === TxTypes.Transfer ? 0 : 1);
+  const isPaymentOnly = txType === TxTypes.Transfer || txType === TxTypes.TokenTransfer;
+  const count = addressIndexes.length + (isPaymentOnly ? 0 : 1);
   let result = 'a100' + cborEncode(MajorType.Array, count);
   // for (const index of addressIndexes) {
   //   result += '825820' + '0'.repeat(64);
@@ -119,7 +136,9 @@ export const genWitness = (witnesses: Witness[]): string => {
 };
 
 const genTxBodyPrefix = (txType: TxTypes) => {
-  if (txType === TxTypes.Transfer) return 'a4';
+  // Transfer and token transfer bodies are 4-entry maps (inputs, outputs, fee, ttl);
+  // the staking/governance types add a 5th entry (certs / withdrawals).
+  if (txType === TxTypes.Transfer || txType === TxTypes.TokenTransfer) return 'a4';
   return 'a5';
 };
 
@@ -128,7 +147,7 @@ export const genFakeTxBody = (tx: Transaction, txType: TxTypes, isTestNet = fals
   result += genInputs(tx.inputs);
   result += genOutputsPrefix(tx.output, tx.change);
   result += genOutput(tx.output, isTestNet);
-  result += genOutput(tx.change, isTestNet);
+  result += genChange(tx.change, isTestNet);
   result += genFee(tx.fee);
   result += genTtl(tx.ttl);
 
@@ -150,11 +169,11 @@ export const genTxBody = (tx: Transaction, accPubKey: string, txType: TxTypes, i
   result += genInputs(tx.inputs);
   result += genOutputsPrefix(tx.output, tx.change);
   result += genOutput(tx.output, isTestNet);
-  result += genOutput(tx.change, isTestNet);
+  result += genChange(tx.change, isTestNet);
   result += genFee(tx.fee);
   result += genTtl(tx.ttl);
 
-  if (txType === TxTypes.Transfer) return result;
+  if (txType === TxTypes.Transfer || txType === TxTypes.TokenTransfer) return result;
 
   const accPubKeyBuff = Buffer.from(accPubKey, 'hex');
   const stakeKeyBuff = derivePubKeyFromAccountToIndex(accPubKeyBuff, 2, 0);

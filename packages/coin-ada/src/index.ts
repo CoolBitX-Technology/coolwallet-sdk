@@ -9,6 +9,7 @@ import {
   getScript,
   getArguments,
   getMessageArgument,
+  assertTokenTransferSupported,
   decodeAddress,
   cborEncode,
 } from './utils';
@@ -64,8 +65,14 @@ export default class ADA implements COIN.Coin {
     const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = options;
     const internalTx = { ...transaction };
 
+    // reject unsupported token transfers up front, before touching the card
+    if (txType === TxTypes.TokenTransfer) {
+      if (!internalTx.output) throw new error.SDKError(ADA.prototype.signTransaction.name, 'output is required');
+      assertTokenTransferSupported(internalTx.output, this.isTestNet);
+    }
+
     // prepare data
-    const script = getScript(txType);
+    const script = getScript(txType, internalTx);
     const accPubKey = await this.getAccountPubKey(transport, appPrivateKey, appId);
     const witnesses = getArguments(internalTx, accPubKey, txType, this.isTestNet);
 
