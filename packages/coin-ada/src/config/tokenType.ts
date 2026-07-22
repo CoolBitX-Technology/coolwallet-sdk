@@ -1,0 +1,116 @@
+/* eslint-disable max-len */
+
+// `payload` is the exact 72-byte token-info blob the card hashes for verification:
+//   decimals(1) | symbolLength(1) | symbol(7, right-0-padded) |
+//   policyId(28) | assetNameCborLength(1) | assetNameCbor(34, right-0-padded)
+// (assetNameCbor = CBOR byte-string of the asset name, i.e. its bstr header + name bytes.)
+export interface OfficialToken {
+  symbol: string;
+  name: string;
+  decimals: number;
+  policyId: string; // 28-byte hex (56 chars)
+  assetName: string; // hex, '' for no asset name
+  payload: string;
+  signature: string;
+}
+
+export const TOKEN_TYPE: OfficialToken[] = [
+  {
+    symbol: 'SNEK',
+    name: 'Snek',
+    decimals: 0,
+    policyId: '279c909f348e533da5808898f87f9a14bb2c3dfbbacccd631d927a3f',
+    assetName: '534e454b',
+    payload:
+      '0004534e454b000000279c909f348e533da5808898f87f9a14bb2c3dfbbacccd631d927a3f0544534e454b0000000000000000000000000000000000000000000000000000000000',
+    signature:
+      '3045022100E3F94585AA1DC6890A72EF03965757ACF247C8B3CA89CDC537FD30885754833102201C74FAE200A9093B02D290E832D5D3774B624A0EE1BC901CB7AF4BAC2285AB13'.padStart(
+        144,
+        '0'
+      ),
+  },
+  {
+    symbol: 'NIGHT',
+    name: 'Midnight',
+    decimals: 6,
+    policyId: '0691b2fecca1ac4f53cb6dfb00b7013e561d1f34403b957cbb5af1fa',
+    assetName: '4e49474854',
+    payload:
+      '06054e4947485400000691b2fecca1ac4f53cb6dfb00b7013e561d1f34403b957cbb5af1fa06454e4947485400000000000000000000000000000000000000000000000000000000',
+    signature:
+      '304402202B2CCB856D57F40E6988D8E612309A0B369FF90B430202D90FA949856421D87902203A2680E42D44C4B0214FAE21AEEC5AA03BF146024C59CE452F04550B89C5E4EE'.padStart(
+        144,
+        '0'
+      ),
+  },
+  {
+    symbol: 'USDM',
+    name: 'USDM',
+    decimals: 6,
+    policyId: 'c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad',
+    assetName: '0014df105553444d',
+    payload:
+      '06045553444d000000c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad09480014df105553444d00000000000000000000000000000000000000000000000000',
+    signature:
+      '3046022100AFAC841643CBE7366BA85466CB0ED34C5792300A96256FFCE346F1026C13274F022100DC03DEC08C2D9AC12981D9B97CBE74EA57F18A62633714357A72AF2416F83EE9'.padStart(
+        144,
+        '0'
+      ),
+  },
+  {
+    symbol: 'USDA',
+    name: 'Anzens USDA',
+    decimals: 6,
+    policyId: 'fe7c786ab321f41c654ef6c1af7b3250a613c24e4213e0425a7ae456',
+    assetName: '55534441',
+    payload:
+      '060455534441000000fe7c786ab321f41c654ef6c1af7b3250a613c24e4213e0425a7ae4560544555344410000000000000000000000000000000000000000000000000000000000',
+    signature:
+      '304402206670A1190F03DC2C004EEB34DABC94705640E41634B677A77995EE01C1017D2F02207C56223FADDB449CAD3BE7F12E1F2E0544F0A7D5FA742D11CD8F7E9F17DB7E04'.padStart(
+        144,
+        '0'
+      ),
+  },
+  {
+    symbol: 'MIN',
+    name: 'Minswap',
+    decimals: 6,
+    policyId: '29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6',
+    assetName: '4d494e',
+    payload:
+      '06034d494e0000000029d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c604434d494e000000000000000000000000000000000000000000000000000000000000',
+    signature:
+      '3044022044F494F1A385D50C4FEA662E14E8DEFA7EA9C1ECA81955A07923C559D9E5DA8002202E2BD036B67A53415D135B8967D09153D6C3BDBEC77C092CBBCFA92C7891C8D9'.padStart(
+        144,
+        '0'
+      ),
+  },
+  {
+    symbol: 'STRIKE',
+    name: 'Strike Finance',
+    decimals: 6,
+    policyId: 'f13ac4d66b3ee19a6aa0f2a22298737bd907cc95121662fc971b5275',
+    assetName: '535452494b45',
+    payload:
+      '0606535452494b4500f13ac4d66b3ee19a6aa0f2a22298737bd907cc95121662fc971b52750746535452494b45000000000000000000000000000000000000000000000000000000',
+    signature:
+      '3046022100D11D3CFBDABA02A36A9D5BCAF41F1A3FC0977F8A665E21C3FADE108DD81999F50221009BF90C3A31F715C536526B073E9FF40D4C0CB8CCCE0B6A8B32747E8BBACAF72F'.padStart(
+        144,
+        '0'
+      ),
+  },
+  {
+    symbol: 'HOSKY',
+    name: 'Hosky Token',
+    decimals: 0,
+    policyId: 'a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235',
+    assetName: '484f534b59',
+    payload:
+      '0005484f534b590000a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c2350645484f534b5900000000000000000000000000000000000000000000000000000000',
+    signature:
+      '3046022100ADC9A0B2E3CC44F8AE457C674E79291E0277C3803A3225C7E7ABE40C963C77D0022100F2EAF5DD8527916AB7D09A8AB74D7B199B4BDF742135E3875D64805CF777CCF0'.padStart(
+        144,
+        '0'
+      ),
+  },
+];

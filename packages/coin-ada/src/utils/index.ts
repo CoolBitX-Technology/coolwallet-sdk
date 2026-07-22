@@ -95,4 +95,4 @@ export const cborEncode = (majorType: MajorType, value: Integer): string => {
 
 export { genFakeTxBody, genTxBody, genFakeWitness, genWitness, genInputs } from './transactionUtil';
 
-export { getScript, getArguments, getMessageArgument } from './scriptUtil';
+export { getScript, getArguments, getMessageArgument, assertTokenTransferSupported } from './scriptUtil';

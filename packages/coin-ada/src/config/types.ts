@@ -31,6 +31,7 @@ export enum TxTypes {
   StakeRegisterAndDelegate,
   Abstain,
   Message,
+  TokenTransfer,
 }
 
 export interface Options {
@@ -48,13 +49,18 @@ export interface Input {
 
 export interface Output {
   address: string;
-  amount: Integer;
+  amount: Integer; // lovelace. For TxTypes.TokenTransfer: the single native token sent alongside the min-ADA `amount`.
+  token?: TokenAsset;
 }
 
 export interface TokenAsset {
-  policyId: string;  // 28 bytes hex (56 chars)
+  policyId: string; // 28 bytes hex (56 chars)
   assetName: string; // 0-32 bytes hex, empty string means no asset name
   amount: Integer;
+  // Display metadata. When omitted, the SDK fills them from the official token list (TOKEN_TYPE).
+  // Required (must be supplied by the caller) for an unofficial token, which the card shows as "@symbol".
+  symbol?: string;
+  decimals?: number;
 }
 
 export interface ChangeOutput {

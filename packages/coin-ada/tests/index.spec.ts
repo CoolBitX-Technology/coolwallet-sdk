@@ -2,8 +2,26 @@
 import { CardType, Transport } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { DisplayBuilder, getTxDetail, initialize } from '@coolwallet/testing-library';
+import crypto from 'crypto';
 import ADA, { Transaction, Options, TxTypes, TokenAsset } from '../src';
-import { MessageTransaction } from '../src/config/types';
+import { MessageTransaction, MajorType } from '../src/config/types';
+import { cborEncode } from '../src/utils';
+import { genTxBody } from '../src/utils/transactionUtil';
+import { TOKEN_TYPE } from '../src/config/tokenType';
+
+const blake2b = require('blake2b');
+
+// Standard SPKI DER prefix for a raw 32-byte Ed25519 public key, so Node's crypto can verify it.
+const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
+const blake2b256 = (buf: Buffer): Buffer => Buffer.from(blake2b(32).update(buf).digest());
+const ed25519Verify = (message: Buffer, publicKey: Buffer, signature: Buffer): boolean => {
+  const key = crypto.createPublicKey({
+    key: Buffer.concat([ED25519_SPKI_PREFIX, publicKey]),
+    format: 'der',
+    type: 'spki',
+  });
+  return crypto.verify(null, message, key, signature);
+};
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
@@ -77,7 +95,36 @@ describe('Test ADA SDK', () => {
         confirmCB: () => {},
         authorizedCB: () => {},
       };
-      return await adaSDK.signTransaction(transaction, option, txType);
+      const signed = await adaSDK.signTransaction(transaction, option, txType);
+      await expectCardSignedOurBody(signed, transaction, txType);
+      return signed;
+    }
+
+    // Verify the card signed the body we expect: it signs blake2b256 of the body it built from the
+    // arguments, so re-derive that body with genTxBody and check the Ed25519 signature under each
+    // witness vkey. Checks the signed bytes only, not what the card displayed.
+    async function expectCardSignedOurBody(signedHex: string, transaction: Transaction, txType: TxTypes) {
+      const accPubKey = await adaSDK.getAccountPubKey(transport, props.appPrivateKey, props.appId);
+      const body = genTxBody(transaction, accPubKey, txType, false);
+      const isAbstain = txType === TxTypes.Abstain;
+      const prefix = isAbstain ? '84' : '83';
+      const suffix = isAbstain ? 'f5f6' : 'f6';
+      expect(signedHex.startsWith(prefix + body)).toBe(true);
+
+      const witnessSet = signedHex.slice(prefix.length + body.length, signedHex.length - suffix.length);
+      expect(witnessSet.slice(0, 4)).toBe('a100'); // map{0: [vkey witnesses]}
+      const count = parseInt(witnessSet.slice(4, 6), 16) - 0x80; // array header 0x8N
+      const hash = blake2b256(Buffer.from(body, 'hex'));
+      let rest = witnessSet.slice(6);
+      for (let i = 0; i < count; i += 1) {
+        expect(rest.slice(0, 6)).toBe('825820'); // [ bytes(32) vkey ...
+        const vkey = rest.slice(6, 70);
+        expect(rest.slice(70, 74)).toBe('5840'); // bytes(64) signature
+        const sig = rest.slice(74, 202);
+        expect(ed25519Verify(hash, Buffer.from(vkey, 'hex'), Buffer.from(sig, 'hex'))).toBe(true);
+        rest = rest.slice(202);
+      }
+      expect(rest).toBe(''); // no trailing bytes: every witness accounted for
     }
 
     describe('Transfer', () => {
@@ -98,6 +145,286 @@ describe('Test ADA SDK', () => {
         expect(await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.Transfer)).toMatchInlineSnapshot(
           `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e0981a000f4240825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be42821a02f50055a2581c29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6a1434d494e1a0001e240581c6ac8ef33b510ec004fe11585f7c5a9f0c07f0c23428ab4f29c1d7d10a1444d454c4418fb021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd5840b03cb6ee57ffbb0ca63c0e012bb22ed219457281acc2bb831e460d145bc47198d2fc3b614735c4bade8e64dca79a713c407f25ba30303c4689e16ad9193b7406f6"`
         );
+      });
+    });
+
+    describe('TokenTransfer', () => {
+      const RECEIVE_LOVELACE = 1200000; // min-ADA that accompanies the token
+      const TOKEN: TokenAsset = {
+        policyId: '29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6',
+        assetName: '4d494e',
+        amount: 123456,
+      };
+
+      it('with ADA-only change', async () => {
+        const transaction = buildTx(
+          { output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token: TOKEN } },
+          false
+        );
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`331`);
+        expect(await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581c29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6a1434d494e1a0001e240825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd584006ce374e5784e6615fee49587fbb634435e157881fd8f099770902c33f8ef6618aae904ff398810ed03d50e87ecbff2f6dba2d98c8a9700648d64f7bfad66303f6"`
+        );
+      });
+
+      it('with token change (leftover tokens ride back in change)', async () => {
+        const transaction = buildTx(
+          { output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token: TOKEN } },
+          true
+        );
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`411`);
+        expect(await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581c29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6a1434d494e1a0001e240825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be42821a02f50055a2581c29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6a1434d494e1a0001e240581c6ac8ef33b510ec004fe11585f7c5a9f0c07f0c23428ab4f29c1d7d10a1444d454c4418fb021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd58406e54cd82b924e707d704cabdc2f9bb9f7164a032fb1acfba254ead61ba9fbcc2c5e62c477b4ee573a56b0c5ed6c4eabe78f40bb8619ebeee532b547522eeb606f6"`
+        );
+
+        if (cardType !== CardType.Pro) return;
+        // "@MIN" while MIN's signature is empty; bare "MIN" once it's signed.
+        const minEntry = TOKEN_TYPE.find((t) => t.policyId === TOKEN.policyId && t.assetName === TOKEN.assetName);
+        const minSymbolPage = minEntry?.signature ? 'MIN' : '@MIN';
+        const txDetail = await getTxDetail(transport, props.appId);
+        const expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('ADA')
+          .messagePage(minSymbolPage)
+          .addressPage(RECEIVE_ADDRESS.toLowerCase())
+          .amountPage(Number(TOKEN.amount) / 1e6) // MIN decimals = 6
+          .messagePage('ADA') // label so the next amount reads as the min-ADA, not a second token amount
+          .amountPage(RECEIVE_LOVELACE / 1e6) // ADA decimals = 6
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      });
+
+      // Every official token, end to end: the token identity must land in the receiver output and
+      // the card must show it (as "@symbol" until its signature is filled in) with the right decimals.
+      // No inline snapshot here — jest can't rewrite one line per it.each row — so we assert structure
+      // and display directly; the MIN cases above pin the exact bytes.
+      const TOKEN_AMOUNT = 123456;
+      it.each(TOKEN_TYPE)(
+        'sends official token $symbol (verified symbol once signed, otherwise @$symbol)',
+        async ({ symbol, policyId, assetName, decimals, signature }) => {
+          const token: TokenAsset = { policyId, assetName, amount: TOKEN_AMOUNT };
+          const transaction = buildTx({ output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token } }, false);
+          const signed = await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer);
+
+          // token identity is in the (card-built) receiver output
+          const assetNameCbor = cborEncode(MajorType.Byte, Buffer.from(assetName, 'hex').length) + assetName;
+          expect(signed).toContain('581c' + policyId);
+          expect(signed).toContain(assetNameCbor + cborEncode(MajorType.Uint, TOKEN_AMOUNT));
+
+          if (cardType !== CardType.Pro) return;
+          // signed -> verified, shows the bare symbol; unsigned -> shown as "@symbol"
+          const symbolPage = signature ? symbol : '@' + symbol;
+          const txDetail = await getTxDetail(transport, props.appId);
+          const expectedTxDetail = new DisplayBuilder()
+            .messagePage('TEST')
+            .messagePage('ADA')
+            .messagePage(symbolPage)
+            .addressPage(RECEIVE_ADDRESS.toLowerCase())
+            .amountPage(TOKEN_AMOUNT / 10 ** decimals)
+            .messagePage('ADA') // label so the next amount reads as the min-ADA, not a second token amount
+            .amountPage(RECEIVE_LOVELACE / 1e6)
+            .wrapPage('PRESS', 'BUTToN')
+            .finalize();
+          expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+        }
+      );
+
+      // Custom / unofficial token: not in TOKEN_TYPE, so the caller supplies symbol + decimals and the
+      // signature slot is all zeros -> ifSigned fails -> the card shows "@FOO" (unverified). This pins
+      // the unverified path that the official tokens no longer exercise now that they are signed.
+      it('sends a custom (unofficial) token, shown unverified with @', async () => {
+        const custom: TokenAsset = {
+          policyId: '00112233445566778899aabbccddeeff00112233445566778899aabb',
+          assetName: '54455354', // "TEST"
+          amount: 123456,
+          symbol: 'FOO',
+          decimals: 4,
+        };
+        const transaction = buildTx(
+          { output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token: custom } },
+          false
+        );
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`332`);
+        expect(await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581c00112233445566778899aabbccddeeff00112233445566778899aabba144544553541a0001e240825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd58408015db425fa23d63ea8c04ad359c074ac36dbcef562272b0ce6f900ea56f8af6d0a66c9b1812b396cec34d5e5de92bcba898f141099be962774b2592ff9e7e0df6"`
+        );
+
+        if (cardType !== CardType.Pro) return;
+        const txDetail = await getTxDetail(transport, props.appId);
+        const expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('ADA')
+          .messagePage('@FOO')
+          .addressPage(RECEIVE_ADDRESS.toLowerCase())
+          .amountPage(Number(custom.amount) / 1e4) // custom decimals = 4
+          .messagePage('ADA') // label so the next amount reads as the min-ADA, not a second token amount
+          .amountPage(RECEIVE_LOVELACE / 1e6)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      });
+
+      // A displayed integer >= 1e8 can't be rendered by the SE, so the transfer is blind-signed with
+      // the TOKEN_TRANSFER_BLIND script: the card shows "ADA -> SMART -> PRESS" instead of amounts.
+      // HOSKY has 0 decimals, so 5,000,000,000 tokens displays as 5e9 (>= 1e8) -> blind. That amount
+      // also exercises the 8-byte CBOR uint path (> 0xffffffff) in the body.
+      it('blind-signs when the displayed amount reaches 1e8 (shows SMART)', async () => {
+        const hosky = TOKEN_TYPE.find((t) => t.symbol === 'HOSKY')!;
+        const token: TokenAsset = { policyId: hosky.policyId, assetName: hosky.assetName, amount: 5_000_000_000 };
+        const transaction = buildTx({ output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token } }, false);
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`337`);
+        const signed = await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer);
+        expect(signed).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581ca0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235a145484f534b591b000000012a05f200825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd5840bc8a6eb24215b2e42b6e2f8a8eec401d5d156f771853b905a121df4c8d904ee65cc073077459235400240c8bb50e3cc845a62c4648e8f3bf4b0ecf642dc7780ff6"`
+        );
+
+        // token still lands in the body even though the amount is blind on screen
+        const assetNameCbor = cborEncode(MajorType.Byte, Buffer.from(hosky.assetName, 'hex').length) + hosky.assetName;
+        expect(signed).toContain('581c' + hosky.policyId);
+        expect(signed).toContain(assetNameCbor + cborEncode(MajorType.Uint, 5_000_000_000));
+
+        if (cardType !== CardType.Pro) return;
+        const txDetail = await getTxDetail(transport, props.appId);
+        // Full blind, aligned with every other chain's token blind sign (TON/TRC20/ERC20/...):
+        // symbol, address and amounts are all replaced by a single SMART page.
+        const expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('ADA')
+          .wrapPage('SMART', '')
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      });
+
+      // Small amount (<= 0x17) lives inside the CBOR prefix byte, exercising the "value in prefix"
+      // branch of both the body encoding and the on-card amount display.
+      it('small token amount embedded in the CBOR prefix', async () => {
+        const token: TokenAsset = { ...TOKEN, amount: 5 };
+        const transaction = buildTx({ output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token } }, false);
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`327`);
+        const signed = await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer);
+        expect(signed).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581c29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6a1434d494e05825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd5840073a531af2df2addbb87a84e6f9870adea07c16eafa9af7f97a4ca43f2f37c864f84d332e1ed743bb6a9c93482c83a31f6d057e87380103056a1bc01ab324907f6"`
+        );
+        expect(signed).toContain('434d494e05'); // "MIN" name + amount 5 (cbor "05")
+
+        if (cardType !== CardType.Pro) return;
+        const min = TOKEN_TYPE.find((t) => t.symbol === 'MIN')!;
+        const txDetail = await getTxDetail(transport, props.appId);
+        const expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('ADA')
+          .messagePage(min.signature ? 'MIN' : '@MIN')
+          .addressPage(RECEIVE_ADDRESS.toLowerCase())
+          .amountPage(5 / 1e6) // MIN decimals = 6
+          .messagePage('ADA')
+          .amountPage(RECEIVE_LOVELACE / 1e6)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      });
+
+      // Asset name >= 24 bytes uses the 2-byte CBOR byte-string header (0x58 <len>); official tokens
+      // (<= 8 bytes) never reach it. Unofficial token, so it shows unverified.
+      it('long asset name (2-byte CBOR header)', async () => {
+        const assetName = 'ab'.repeat(28); // 28 bytes -> header 0x58 0x1c = "581c"
+        const token: TokenAsset = { policyId: '11'.repeat(28), assetName, amount: 123456, symbol: 'LONG', decimals: 0 };
+        const transaction = buildTx({ output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token } }, false);
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`357`);
+        const signed = await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer);
+        expect(signed).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581c11111111111111111111111111111111111111111111111111111111a1581cabababababababababababababababababababababababababababab1a0001e240825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd5840b051ecabe4d499faa25b12be8f72c92564bed91f8390c81bd015788a7f6e566080d9bef87cee323264c6cf9656c116fda335589d72e0756aac4bb2ee95efe704f6"`
+        );
+        expect(signed).toContain('581c' + assetName + '1a0001e240'); // 28-byte name (581c header) + amount
+      });
+
+      // Empty asset name -> the shortest byte-string header (0x40), the lower length bound.
+      it('empty asset name', async () => {
+        const token: TokenAsset = {
+          policyId: '22'.repeat(28),
+          assetName: '',
+          amount: 123456,
+          symbol: 'NONE',
+          decimals: 0,
+        };
+        const transaction = buildTx({ output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token } }, false);
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`328`);
+        const signed = await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer);
+        expect(signed).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581c22222222222222222222222222222222222222222222222222222222a1401a0001e240825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd58409ba10ff0e9fbb15e0fd6ba1ef4b0630519241058f6ca09df17434507986b164952c4f22d58332760d558b005946a28bb11df83d29405fb86a9cf298c0a05360df6"`
+        );
+        expect(signed).toContain('581c' + '22'.repeat(28) + 'a1401a0001e240'); // policy -> a1 -> "40" (empty name) -> amount
+      });
+
+      // No change output: the outputs array is 1 (receiver only) instead of 2.
+      it('no change output', async () => {
+        const transaction = buildTx(
+          { output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token: TOKEN }, change: undefined },
+          false
+        );
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`266`);
+        const signed = await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer);
+        expect(signed).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101818258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581c29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6a1434d494e1a0001e240021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd5840c70bb5691dd348e3b493b1014d9a90de2a05898a3d430071b30c7a319816643ee56cf4a718949579019fce6df5b4ac929f824841904ef04b68ac9b99dec1ab01f6"`
+        );
+        expect(signed).toContain('0181825839'); // outputs key 01 + array(1) + first (receiver) output, no change
+      });
+
+      // Receiver is an enterprise address (encode type 2, 29 bytes) -> the type-2 address display path.
+      it('receiver is an enterprise address', async () => {
+        const ENTERPRISE_ADDRESS = 'addr1vyulu6ra4ennas49mn77n4cpxcy7862sdx25f4sw8ea5yhsysacsn';
+        const transaction = buildTx(
+          { output: { address: ENTERPRISE_ADDRESS, amount: RECEIVE_LOVELACE, token: TOKEN } },
+          false
+        );
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`303`);
+        const signed = await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer);
+        expect(signed).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a3101018282581d6139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e821a00124f80a1581c29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6a1434d494e1a0001e240825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be421a02f50055021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd5840a8eabbfa8e55d204261a7c479c9b58efbc1d4152b67584e7c34405701326e80023f0d25c8c9d0a3244151b16a8f336b92ce06bad9bff008fc5b428b32dfbf606f6"`
+        );
+        // 29-byte enterprise address (581d header, 0x61 = mainnet enterprise) in the receiver output
+        expect(signed).toContain('82581d6139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e');
+
+        if (cardType !== CardType.Pro) return;
+        const min = TOKEN_TYPE.find((t) => t.symbol === 'MIN')!;
+        const txDetail = await getTxDetail(transport, props.appId);
+        const expectedTxDetail = new DisplayBuilder()
+          .messagePage('TEST')
+          .messagePage('ADA')
+          .messagePage(min.signature ? 'MIN' : '@MIN')
+          .addressPage(ENTERPRISE_ADDRESS.toLowerCase())
+          .amountPage(Number(TOKEN.amount) / 1e6)
+          .messagePage('ADA')
+          .amountPage(RECEIVE_LOVELACE / 1e6)
+          .wrapPage('PRESS', 'BUTToN')
+          .finalize();
+        expect(txDetail).toEqual(expectedTxDetail.toLowerCase());
+      });
+
+      // Change carrying many leftover tokens: exercises the enlarged (2048-byte) change slot and its
+      // 2-byte length prefix end-to-end. 10 distinct-policy tokens -> change value ~400 bytes (> 255),
+      // so the 2-byte length path is used; well within the 2048 cap.
+      it('change carrying many leftover tokens (enlarged change slot)', async () => {
+        const manyAssets: TokenAsset[] = Array.from({ length: 10 }, (_, i) => ({
+          policyId: (i + 16).toString(16).padStart(2, '0').repeat(28),
+          assetName: '4d494e',
+          amount: 100000 + i,
+        }));
+        const transaction = buildTx(
+          {
+            output: { address: RECEIVE_ADDRESS, amount: RECEIVE_LOVELACE, token: TOKEN },
+            change: { address: CHANGE_ADDRESS, amount: CHANGE_AMOUNT, assets: manyAssets },
+          },
+          false
+        );
+        expect(adaSDK.getTransactionSize(transaction, TxTypes.TokenTransfer)).toMatchInlineSnapshot(`733`);
+        const signed = await get_signed_tx_by_coolwallet_sdk(transaction, TxTypes.TokenTransfer);
+        expect(signed).toMatchInlineSnapshot(
+          `"83a4008182582032f4fd7d5b365f5d14995df23b9737f16f24ef55b95ac33043bf79895b1a5a310101828258390139fe687dae673ec2a5dcfde9d7013609e3e950699544d60e3e7b425e24e55b53595db72be3b51be037cb7a0fcdcbabea306356ca02e0e098821a00124f80a1581c29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c6a1434d494e1a0001e240825839011b01caf7cb598ea512c2a92ab1c30964b2435c8a6ca866d2bddf69946d3bad769f0ef7006e53f77bd40edf8414e6aaa74d2b4d752736be42821a02f50055aa581c10101010101010101010101010101010101010101010101010101010a1434d494e1a000186a0581c11111111111111111111111111111111111111111111111111111111a1434d494e1a000186a1581c12121212121212121212121212121212121212121212121212121212a1434d494e1a000186a2581c13131313131313131313131313131313131313131313131313131313a1434d494e1a000186a3581c14141414141414141414141414141414141414141414141414141414a1434d494e1a000186a4581c15151515151515151515151515151515151515151515151515151515a1434d494e1a000186a5581c16161616161616161616161616161616161616161616161616161616a1434d494e1a000186a6581c17171717171717171717171717171717171717171717171717171717a1434d494e1a000186a7581c18181818181818181818181818181818181818181818181818181818a1434d494e1a000186a8581c19191919191919191919191919191919191919191919191919191919a1434d494e1a000186a9021a0002a801031a07c33a67a10081825820f7d409a67ce45b502f42a49ce8bf8ef19636428c515ae9d961894bfa6341fbfd5840012942aa709fa70cbe98946b0728eea5b463da7b41aae977b7cfa247a9a40f9c0fc637a682177feab824d26f51f14c866121d0d3d46edb79fab7ecfab92e540ff6"`
+        );
+        // all 10 change policies land in the body
+        manyAssets.forEach((a) => expect(signed).toContain('581c' + a.policyId));
       });
     });
 

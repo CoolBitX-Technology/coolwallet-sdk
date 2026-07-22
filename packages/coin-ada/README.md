@@ -4,6 +4,10 @@ Typescript library with support for the integration of Cardano for third party a
 ## Updates
 1. Support combined register and delegate in single transaction.
 2. Support testnet address.
+3. Support native token transfer (`TxTypes.TokenTransfer`): send one native token in the receiver
+   output, with the rest of the UTXO's tokens riding back in change. Official tokens (see the
+   built-in token list) display their verified symbol on the Pro card; an unofficial token is shown
+   as `@symbol`. Large amounts the screen can't render are blind-signed.
 
 
 ## Install
@@ -94,6 +98,9 @@ export enum TxTypes {
   StakeDeregister,
   StakeWithdraw,
   StakeRegisterAndDelegate,
+  Abstain,
+  Message,
+  TokenTransfer,
 }
 
 export interface Input {
@@ -101,15 +108,32 @@ export interface Input {
   index: Integer;
 }
 
+export interface TokenAsset {
+  policyId: string; // 28 bytes hex (56 chars)
+  assetName: string; // 0-32 bytes hex, empty string means no asset name
+  amount: Integer;
+  // Display metadata. Omit for an official token (filled from the built-in list); required for an
+  // unofficial one, which the card shows as "@symbol".
+  symbol?: string; // 1-7 bytes ascii
+  decimals?: number; // 0-20
+}
+
 export interface Output {
   address: string;
+  amount: Integer; // lovelace. For a token transfer this is the min-ADA sent alongside the token.
+  token?: TokenAsset; // the single native token to send (TxTypes.TokenTransfer only)
+}
+
+export interface ChangeOutput {
+  address: string;
   amount: Integer;
+  assets?: TokenAsset[]; // leftover tokens riding back in change
 }
 
 export interface RawTransaction {
   addrIndexes: number[];
   inputs: Input[];
-  change?: Output;
+  change?: ChangeOutput;
   ttl: Integer;
   output?: Output;
   poolKeyHash?: string;
@@ -213,9 +237,22 @@ stateDiagram-v2
 interface RawTransaction {
   addrIndexes: number[];
   inputs: Input[];
-  change?: Output;
+  change?: ChangeOutput;
   ttl: Integer;
   output: Output;
+}
+```
+
+### Token Transfer
+One native token goes in the receiver `output.token`; any leftover tokens of the spent UTXO ride
+back in `change.assets`. Signed with `TxTypes.TokenTransfer`.
+```typescript
+interface RawTransaction {
+  addrIndexes: number[];
+  inputs: Input[];
+  ttl: Integer;
+  output: Output; // { address, amount: minAda, token: { policyId, assetName, amount, symbol?, decimals? } }
+  change?: ChangeOutput; // { address, amount, assets?: TokenAsset[] }
 }
 ```
 
@@ -224,7 +261,7 @@ interface RawTransaction {
 interface RawTransaction {
   addrIndexes: number[];
   inputs: Input[];
-  change?: Output;
+  change?: ChangeOutput;
   ttl: Integer;
 }
 ```
@@ -234,7 +271,7 @@ interface RawTransaction {
 interface RawTransaction {
   addrIndexes: number[];
   inputs: Input[];
-  change?: Output;
+  change?: ChangeOutput;
   ttl: Integer;
   poolKeyHash: string;
 }
@@ -245,7 +282,7 @@ interface RawTransaction {
 interface RawTransaction {
   addrIndexes: number[];
   inputs: Input[];
-  change?: Output;
+  change?: ChangeOutput;
   ttl: Integer;
 }
 ```
@@ -255,7 +292,7 @@ interface RawTransaction {
 interface RawTransaction {
   addrIndexes: number[];
   inputs: Input[];
-  change: Output;
+  change: ChangeOutput;
   ttl: Integer;
   withdrawAmount: Integer;
 }
