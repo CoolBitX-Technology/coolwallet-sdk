@@ -48,4 +48,11 @@ export const TOKENS = {
     contractAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     signature: `060455534443000000833589fCD6eDb6E08f4c7C32D4f71b54bdA02913304502205e83b7e4ebc3f6c13ca930ef30ab29b0a29a9a3e546850135627b92c8b034c85022100e7ee55e5b90f539243d0a81b155a2d70cff00aec60bc8ff4b82503462c039488`,
   },
+  USDS: {
+    name: 'USDS Stablecoin',
+    symbol: 'USDS',
+    unit: '18',
+    contractAddress: '0x820c137fa70c8691f0e44dc420a5e53c168921dc',
+    signature: '',
+  },
 };
