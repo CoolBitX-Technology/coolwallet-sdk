@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.8
+- ✨ [CW-28804] feat(token): Support USDS as an official token on Ethereum, Base, Arbitrum, and Solana (#1176)
+
 ## 2.0.6
 - fix(evm): update zkSync USDC token — add native USDC and rename bridged USDC to USDC.e
 
