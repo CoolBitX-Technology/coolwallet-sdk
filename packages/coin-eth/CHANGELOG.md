@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.5
+- ✨ [CW-28804] feat(token): Support USDS as an official token on Ethereum, Base, Arbitrum, and Solana (#1176)
+
 ## 2.0.4
 - ✨ [CW-28769] feat: add USDD token support for ETH, BSC, and TRX (#1157)
 
