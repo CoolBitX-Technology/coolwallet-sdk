@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.3
+- ✨ [CW-23693] feat(ada): native token transfer (#1166)
+
 ## 2.0.2
 - ✨ [CW-28621] feat(ada): support putting token assets into change utxo for all tx types (#1152)
 
