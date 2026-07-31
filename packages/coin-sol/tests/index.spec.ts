@@ -41,7 +41,6 @@ function omit<T extends Record<string, any>>(obj: T, key: keyof T) {
 describe('Test Solana SDK', () => {
   const tokens = Object.values(TOKEN_INFO);
   const getRandInt = (max: number) => Math.floor(Math.random() * max);
-  const getRandToken = () => omit(tokens[getRandInt(tokens.length)], 'signature');
   const getRandWallet = () => stringUtil.pubKeyToAddress(crypto.randomBytes(32).toString('hex'));
 
   let props: PromiseValue<ReturnType<typeof initialize>>;
@@ -159,7 +158,7 @@ describe('Test Solana SDK', () => {
     expect(display).toEqual(expectedTxDetail.toLowerCase());
   });
 
-  it('Test SPL Token Transaction', async () => {
+  it.each(tokens)('Test SPL Token Transaction $symbol', async (officialToken) => {
     const addressIndex = 0;
     const node = wallet.derivePath(bip32Path(addressIndex));
     const expectedWallet = Keypair.fromSeed(node.privateKey);
@@ -167,7 +166,9 @@ describe('Test Solana SDK', () => {
     const fromTokenAccount = getRandWallet();
     const toTokenAccount = getRandWallet();
     const recentBlockhash = getRandWallet();
-    const tokenInfo = getRandToken();
+    // 不帶 signature，讓 SDK 依 token address 自行從官方清單取回官方簽名。
+    // 官方簽名有效時 Pro 卡顯示純 symbol；簽名錯誤或缺漏才會退化成三條線。
+    const tokenInfo = omit(officialToken, 'signature');
     const amount = getRandInt(10 * 10 ** tokenInfo.decimals) + 1;
 
     const signTxData = {
