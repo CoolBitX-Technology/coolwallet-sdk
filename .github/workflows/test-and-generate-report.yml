@@ -133,10 +133,12 @@ jobs:
 
     - name: Handing junit report
       working-directory: sdk
+      if: always()
       run: sh scripts/handing-report.sh
 
     - name: Upload test result
       id: upload_result
+      if: always()
       uses: actions/upload-artifact@v4.3.6
       with:
         name: result
@@ -145,6 +147,7 @@ jobs:
 
     - name: Set upload status
       id: set_status
+      if: always()
       run: |
         if [ "${{ steps.upload_result.outputs.artifact-id }}" == "" ]; then
           echo "upload_status=false" >> $GITHUB_OUTPUT
@@ -159,7 +162,7 @@ jobs:
   report:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if:  ${{ needs.build-and-push.outputs.upload_status == 'true' }} 
+    if: ${{ always() && needs.build-and-push.outputs.upload_status == 'true' }}
     steps:            
     - name: Get Allure history
       uses: actions/checkout@v4
@@ -201,6 +204,7 @@ jobs:
         publish_dir: allure-history
 
     - name: Set report URL
+      if: always()
       run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}" >> $GITHUB_ENV
 
     - name: Report to Slack
