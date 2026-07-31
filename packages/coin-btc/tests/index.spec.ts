@@ -39,7 +39,7 @@ describe('Test BTC SDK', () => {
         ScriptType.P2PKH,
         ADDRESS_INDEX
       );
-      expect(p2pkh).toMatchInlineSnapshot(`"1CMC68vxfTR6hYiaUNvgmJ6MSfFantVUtT"`);
+      expect(p2pkh).toMatchInlineSnapshot(`"THIS_IS_A_DELIBERATE_TEST_FAILURE_FOR_CW-28892"`);
     });
 
     it('P2SH_P2WPKH', async () => {
