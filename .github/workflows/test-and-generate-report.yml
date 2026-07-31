@@ -207,6 +207,11 @@ jobs:
       if: always()
       run: echo "REPORT_URL=https://coolbitx-technology.github.io/coolwallet-sdk/all-services/${{ github.run_number }}" >> $GITHUB_ENV
 
+    - name: Compute Slack timestamp
+      id: slack_ts
+      if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
+      run: echo "ts=$(date -d '${{ github.event.pull_request.updated_at }}' +%s)" >> $GITHUB_OUTPUT
+
     - name: Report to Slack
       if: ${{ needs.build-and-push.outputs.has_test_failures == 'true' }}
       uses: 8398a7/action-slack@v3
@@ -233,7 +238,7 @@ jobs:
                     }
                   ],
                   "footer": "CoolWallet SDK Test",
-                  "ts": "${{ github.event.pull_request.updated_at }}"
+                  "ts": "${{ steps.slack_ts.outputs.ts }}"
                 }
               ]
             }
