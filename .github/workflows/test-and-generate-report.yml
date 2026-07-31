@@ -187,7 +187,11 @@ jobs:
         allure_results: allure-results
         subfolder: all-services
         keep_reports: 30
-      
+
+    - name: Remove root-owned .git from allure-history
+      if: always()
+      run: sudo rm -rf allure-history/.git
+
     - name: Publish test report
       uses: peaceiris/actions-gh-pages@v3
       if: always()
