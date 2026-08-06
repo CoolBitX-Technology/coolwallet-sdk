@@ -21,7 +21,7 @@ jobs:
       with:
         repository: CoolBitX-Technology/coolwallet-sdk
         path: sdk
-        ref: ${{ github.event.pull_request.head.ref }}
+        ref: ${{ github.event.pull_request.head.sha }}
         submodules: recursive
         token: ${{ secrets.DEVOPS_READ_PACKAGE_TOKEN }}
 
@@ -71,15 +71,16 @@ jobs:
     - name: Wait for JCVM to be ready
       run: |
         echo "Waiting for JCVM HTTP service on port 9527..."
-        for i in $(seq 1 30); do
+        for i in $(seq 1 90); do
           if curl -s -o /dev/null --max-time 2 http://localhost:9527/ 2>/dev/null; then
             echo "JCVM is ready (attempt $i)"
             exit 0
           fi
-          echo "Attempt $i/30 - not ready yet, waiting 2s..."
+          echo "Attempt $i/90 - not ready yet, waiting 2s..."
           sleep 2
         done
-        echo "JCVM failed to start after 60 seconds"
+        echo "JCVM failed to start after 180 seconds"
+        docker ps -a --filter name=coolwallet-jcvm-jre-http
         docker logs coolwallet-jcvm-jre-http
         exit 1
 
