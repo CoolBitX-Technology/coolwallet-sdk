@@ -1,4 +1,6 @@
-import { getCanonicalSignature } from '../../src/crypto/signature';
+import { getCanonicalSignature, convertToDER } from '../../src/crypto/signature';
+import { formatSignature } from '../../src/transaction/util';
+import { SignatureType } from '../../src/transaction/type';
 
 describe('getCanonicalSignature', () => {
   it('r32 is always 64 hex chars when r has a leading-zero byte', () => {
@@ -46,5 +48,23 @@ describe('getCanonicalSignature', () => {
 
     expect(result.r32).toHaveLength(64);
     expect(result.s32).toHaveLength(64);
+  });
+});
+
+describe('formatSignature — Canonical end-to-end', () => {
+  it('r32 survives the DER parse → canonicalize pipeline when r has a leading-zero byte', () => {
+    // r is 31 significant bytes (< 2^248). convertToDER adds the DER 0x00 high-bit prefix,
+    // so parseDERsignature gives back 31 bytes; without the r32 fix this produced a 62-char r.
+    const r = 'ab'.repeat(31); // 31 bytes, first byte 0xab (high bit set → DER prepends 0x00)
+    const s = '12'.repeat(32);
+
+    const derHex = convertToDER({ r, s }).toString('hex');
+    const result = formatSignature(derHex, SignatureType.Canonical);
+
+    expect(Buffer.isBuffer(result)).toBe(false);
+    if (!Buffer.isBuffer(result)) {
+      expect(result.r32).toHaveLength(64);
+      expect(result.r32.startsWith('00')).toBe(true);
+    }
   });
 });
