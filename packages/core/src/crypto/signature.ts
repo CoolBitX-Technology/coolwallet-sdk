@@ -61,13 +61,15 @@ export const getCanonicalSignature = (signature: { s: string; r: string}) => {
   
   // handing r
   const rBigNumber = r.toString(16);
+  const r32 = rBigNumber.padStart(64, '0');
   const rlength = rBigNumber.length % 2 === 0 ? rBigNumber.length : rBigNumber.length + 1;
   const canonicalR = rBigNumber.padStart(rlength, '0');
 
   const canonicalSignature = {
     r: canonicalR,
     s: canonicalS,
-    s32: s32,
+    r32,
+    s32,
   };
 
   return canonicalSignature;
