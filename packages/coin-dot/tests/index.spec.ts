@@ -303,7 +303,7 @@ describe('Test KSM SDK', () => {
       });
 
       expect(await ksmSDK.signBondTransaction(signData)).toMatchInlineSnapshot(
-        `"0xc1018400a85cb7912f332232f986d85fa0946ea3fb34dec6dfe3505de03fc417ca8ecac402fb2eb8c0c748b73f38ac7d9e5e929aa06bd755aa961f2f1e678553e9f9a8ef732dbdaa5f7a3af344ffd3427e202bdccb73b2ce7fc496a037da1f05bd8edbe60036000800000059000284d71701"`
+        `"0xc5018400a85cb7912f332232f986d85fa0946ea3fb34dec6dfe3505de03fc417ca8ecac40200fb2eb8c0c748b73f38ac7d9e5e929aa06bd755aa961f2f1e678553e9f9a8ef732dbdaa5f7a3af344ffd3427e202bdccb73b2ce7fc496a037da1f05bd8edbe60036000800000059000284d71701"`
       );
     });
   });

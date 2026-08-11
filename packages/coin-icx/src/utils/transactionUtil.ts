@@ -142,8 +142,7 @@ const generateFullCanonicalSig = (canonicalSignature: any, phraseToSign: string,
   } else {
     throw `generateCanonicalSig failed unexpected value of recoveryParam: ${recoveryParam}`;
   }
-  const { r } = canonicalSignature; // string
-  const { s } = canonicalSignature; // string
+  const { r32, s32 } = canonicalSignature;
 
-  return r + s + v;
+  return r32 + s32 + v;
 };
