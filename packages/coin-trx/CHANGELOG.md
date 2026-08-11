@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.4
+- fix(cro,trx): 修正 npm publish 失敗問題 (#1191)
+
 ## 2.0.2
 - ✨ [CW-28769] feat: add USDD token support for ETH, BSC, and TRX (#1157)
 
