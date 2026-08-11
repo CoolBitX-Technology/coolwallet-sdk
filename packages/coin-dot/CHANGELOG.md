@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.2
+- 🐛 [CW-28884] fix: 修正 r32 簽名長度不一致問題 (#1186)
+
 ## 2.1.1
 - fix: CW-28266 use s32 for signature in coin-dot and coin-trx (#1136)
 
