@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+- fix(cro,trx): 修正 npm publish 失敗問題 (#1191)
+
 
 ## 2.0.0
 - chore: upgrade coins versions to 2.0.0 (#992)
