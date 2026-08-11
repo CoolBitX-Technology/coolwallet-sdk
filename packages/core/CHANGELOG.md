@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.10
+- 🐛 [CW-28884] fix(core): getCanonicalSignature 補上 r32 padding (#1184)
+
 ## 2.0.9
 - feat(core): add optional loadScript param to updateSE / updateSEPart1 (#1150)
 
