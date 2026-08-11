@@ -12,11 +12,10 @@ export function publicKeyToAddress(publicKey: string, prefix = 'cro') {
   return bech32.encode(prefix, words);
 }
 
-export const genCROSigFromSESig = async (canonicalSignature: { r: string; s: string }): Promise<string> => {
-  const { r } = canonicalSignature;
-  const { s } = canonicalSignature;
+export const genCROSigFromSESig = async (canonicalSignature: { r32: string; s32: string }): Promise<string> => {
+  const { r32, s32 } = canonicalSignature;
 
-  return Buffer.from(r + s, 'hex').toString('base64');
+  return Buffer.from(r32 + s32, 'hex').toString('base64');
 };
 
 export const getTxProtobuf = (

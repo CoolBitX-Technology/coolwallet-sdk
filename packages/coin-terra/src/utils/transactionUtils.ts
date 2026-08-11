@@ -1,11 +1,10 @@
 import { SignDataType } from '../config/types';
 import { AuthInfo, SignerInfo, SimplePublicKey, ModeInfo, Coin, Fee, Msg, TxBody, Tx } from '../terra/@terra-core';
 
-export async function genTERRASigFromSESig(canonicalSignature: { r: string; s: string }): Promise<string> {
-  const { r } = canonicalSignature;
-  const { s } = canonicalSignature;
+export async function genTERRASigFromSESig(canonicalSignature: { r32: string; s32: string }): Promise<string> {
+  const { r32, s32 } = canonicalSignature;
 
-  return Buffer.from(r + s, 'hex').toString('base64');
+  return Buffer.from(r32 + s32, 'hex').toString('base64');
 }
 
 export function publicKeyToAddress(publicKeyHex: string) {
