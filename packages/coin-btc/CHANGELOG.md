@@ -1,7 +1,7 @@
 # Changelog
 
 ## 2.0.2
-- fix: WITNESS_0 argument 的 nSequence 改為取自 input，修正非 RBF 交易簽出無效簽章的問題 [CW-28987]
+- fix: WITNESS_0 argument 的 nSequence 改為取自 input，修正非 RBF 交易簽出無效簽章的問題 [CW-28987] (#1194)
 
 
 ## 2.0.1
