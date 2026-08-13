@@ -25,6 +25,19 @@ const getPath = async (addressIndex: number, purpose?: number, pathType?: PathTy
   return path;
 };
 
+const DEFAULT_SEQUENCE = 0xffffffff;
+
+function assertSequencesAreAllSame(inputs: Array<Input>): void {
+  const sequences = inputs.map((input) => (input.sequence ? input.sequence : DEFAULT_SEQUENCE));
+  const [sequence] = sequences;
+  if (sequences.some((each) => each !== sequence)) {
+    throw new error.SDKError(
+      assertSequencesAreAllSame.name,
+      `All inputs must share the same sequence, got [${sequences.join(', ')}]`
+    );
+  }
+}
+
 export async function getScriptSigningActions(
   transport: Transport,
   redeemScriptType: ScriptType,
@@ -214,6 +227,14 @@ export async function getWitness0Argument(
   if (!scriptPubKey) {
     throw new error.SDKError(getWitness0Argument.name, `OutputHash Undefined`);
   }
+  if (inputs.length === 0) {
+    throw new error.SDKError(getWitness0Argument.name, `Inputs must not be empty`);
+  }
+
+  assertSequencesAreAllSame(inputs);
+
+  const sequence = inputs[0].sequence ? inputs[0].sequence : DEFAULT_SEQUENCE;
+
   const reverseVersion = Buffer.from('02000000', 'hex');
 
   const prevouts = inputs.map((input) => {
@@ -225,9 +246,7 @@ export async function getWitness0Argument(
 
   const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
   const sequences = inputs.map((input) => {
-    return Buffer.concat([
-      input.sequence ? bufferUtil.toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
-    ]);
+    return Buffer.concat([bufferUtil.toReverseUintBuffer(sequence, 4)]);
   });
   const hashSequences = cryptoUtil.doubleSha256(Buffer.concat(sequences));
 
@@ -266,7 +285,7 @@ export async function getWitness0Argument(
     changePath = bufferUtil.toUintBuffer(0, 21); //Buffer.from('000000000000000000000000000000000000000000', 'hex');
   }
 
-  const reverseSequence = Buffer.from('fdffffff', 'hex');
+  const reverseSequence = bufferUtil.toReverseUintBuffer(sequence, 4);
 
   const reverseLockTime = Buffer.from('00000000', 'hex');
 
