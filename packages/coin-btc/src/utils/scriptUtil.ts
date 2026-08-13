@@ -25,6 +25,11 @@ const getPath = async (addressIndex: number, purpose?: number, pathType?: PathTy
   return path;
 };
 
+// 卡片是拿 script argument 裡的 nSequence 組 sighash preimage，而最終交易的同一個值是
+// transactionUtil.createUnsignedTransactions 序列化出來的 —— 兩邊不一致就會簽出無效簽章。
+// 因此這個預設值必須與 createUnsignedTransactions 相同，連 falsy 判斷都要一致：那裡同樣寫
+// `sequence ? ... : ffffffff`，所以 sequence 0 也會被正規化成 0xffffffff。只改單邊
+// （例如這裡改用 ??）會重新製造出這個修正要消滅的那種 mismatch。
 const DEFAULT_SEQUENCE = 0xffffffff;
 
 function assertSequencesAreAllSame(inputs: Array<Input>): void {
@@ -234,6 +239,7 @@ export async function getWitness0Argument(
   assertSequencesAreAllSame(inputs);
 
   const sequence = inputs[0].sequence ? inputs[0].sequence : DEFAULT_SEQUENCE;
+  const reverseSequence = bufferUtil.toReverseUintBuffer(sequence, 4);
 
   const reverseVersion = Buffer.from('02000000', 'hex');
 
@@ -245,10 +251,7 @@ export async function getWitness0Argument(
   });
 
   const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
-  const sequences = inputs.map((input) => {
-    return Buffer.concat([bufferUtil.toReverseUintBuffer(sequence, 4)]);
-  });
-  const hashSequences = cryptoUtil.doubleSha256(Buffer.concat(sequences));
+  const hashSequences = cryptoUtil.doubleSha256(Buffer.concat(inputs.map(() => reverseSequence)));
 
   const zeroPadding = Buffer.from('00000000', 'hex');
 
@@ -284,8 +287,6 @@ export async function getWitness0Argument(
     changeAmount = bufferUtil.toUintBuffer(0, 8); //)Buffer.from('0000000000000000', 'hex');
     changePath = bufferUtil.toUintBuffer(0, 21); //Buffer.from('000000000000000000000000000000000000000000', 'hex');
   }
-
-  const reverseSequence = bufferUtil.toReverseUintBuffer(sequence, 4);
 
   const reverseLockTime = Buffer.from('00000000', 'hex');
 

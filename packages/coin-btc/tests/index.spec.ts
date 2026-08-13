@@ -126,7 +126,7 @@ describe('Test BTC SDK', () => {
   // 卡片是用 script argument 裡的 nSequence 自行組 BIP143 preimage 的，而最終交易的該值是 JS 端
   // 序列化出來的。兩邊不一致時交易看起來完全正常、snapshot 也會過，只有廣播時才會被節點以
   // script verify 失敗拒收 —— 所以這裡一律驗簽章而不只比對 snapshot。
-  describe('Sign Transfer Tx with RBF disabled (sequence=0xffffffff)', () => {
+  describe('Sign Transfer Tx with explicit nSequence', () => {
     const PRE_VALUE = 34883;
 
     const buildOptions = (sequence: number): signTxType => ({
