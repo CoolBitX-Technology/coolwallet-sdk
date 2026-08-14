@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+- 🐛 [CW-28987] fix(btc): WITNESS_0 argument 的 nSequence 改為取自 input (#1194)
+
 ## 2.0.1
 - feat: sunset omni usdt [CW-24950] (#1026)
 
