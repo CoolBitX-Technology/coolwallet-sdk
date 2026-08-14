@@ -3,6 +3,7 @@ import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 import BTC from '../src';
 import { ScriptType, signTxType } from '../src/config/types';
+import { getSequences, getVersion, verifySegwitV0Signatures } from './utils/verifySignature';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
@@ -119,6 +120,63 @@ describe('Test BTC SDK', () => {
       expect(await btcSDK.signTransaction(options)).toMatchInlineSnapshot(
         `"020000000001011ea37510dcd8d6b264556c376f335fd0e80afbad51c4e034bfb785c9a62c5cf501000000171600147c7af58931fa8a36f4c3d974e14108a60c6577fcfdffffff022b0200000000000017a9143ca1b20af95028ac60b644f6e26ca4d269dfa83c87808300000000000017a914a4df3c0070acd2e1ecf20c7457a8a5c939f98f0687024730440220750d6e6bb54733e90614571f2defbb3525256272a6c961555613ed4ec13010b302206f5c0bd56bccece37bcc1f030cf0fe3ff36dddccfeeecaddc16271fa63a88da7012103eb551a9d4044ca0aba80c03bd931456f718d5981eaf89a70e63be227fa3d044b00000000"`
       );
+    });
+  });
+
+  // 卡片是用 script argument 裡的 nSequence 自行組 BIP143 preimage 的，而最終交易的該值是 JS 端
+  // 序列化出來的。兩邊不一致時交易看起來完全正常、snapshot 也會過，只有廣播時才會被節點以
+  // script verify 失敗拒收 —— 所以這裡一律驗簽章而不只比對 snapshot。
+  describe('Sign Transfer Tx with explicit nSequence', () => {
+    const PRE_VALUE = 34883;
+
+    const buildOptions = (sequence: number): signTxType => ({
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      scriptType: ScriptType.P2SH_P2WPKH,
+      inputs: [
+        {
+          preTxHash: 'f55c2ca6c985b7bf34e0c451adfb0ae8d05f336f376c5564b2d6d8dc1075a31e',
+          preIndex: 1,
+          preValue: String(PRE_VALUE),
+          sequence,
+          addressIndex: 0,
+        },
+      ],
+      output: { address: '37DcArQ1icSZKf7oFTosUid28kWBgsLLEz', value: '555' },
+      change: { addressIndex: 0, value: '33664' },
+      version: 2,
+    });
+
+    // 這是核心 case：訂單交易（Swap / Lombard BTC 質押）要求 version 維持韌體支援的 2，
+    // 但 sequence 用 0xffffffff 以停用 RBF。修正前 SDK 把 preimage 的 nSequence 寫死成
+    // 0xfffffffd，導致卡片簽的是另一筆交易，這個 verify 會失敗。
+    it('P2SH_P2WPKH: version=2 + sequence=0xffffffff 的簽章驗得過', async () => {
+      const signedTx = await btcSDK.signTransaction(buildOptions(0xffffffff));
+
+      expect(getVersion(signedTx)).toBe(2);
+      expect(getSequences(signedTx)).toEqual([0xffffffff]);
+      expect(verifySegwitV0Signatures(signedTx, [PRE_VALUE])).toBe(true);
+    });
+
+    it('P2SH_P2WPKH: version=2 + sequence=0xfffffffd（signal RBF）的簽章驗得過', async () => {
+      const signedTx = await btcSDK.signTransaction(buildOptions(0xfffffffd));
+
+      expect(getVersion(signedTx)).toBe(2);
+      expect(getSequences(signedTx)).toEqual([0xfffffffd]);
+      expect(verifySegwitV0Signatures(signedTx, [PRE_VALUE])).toBe(true);
+    });
+
+    // script argument 只有一格 nSequence，卡片會拿它去簽每一筆 input，
+    // 所以 sequence 不一致時必須報錯，不能簽出一筆簽章驗不過的交易。
+    it('P2SH_P2WPKH: 各 input 的 sequence 不一致時應拋錯', async () => {
+      const options = buildOptions(0xffffffff);
+      options.inputs = [
+        { ...options.inputs[0], sequence: 0xffffffff },
+        { ...options.inputs[0], preIndex: 0, sequence: 0xfffffffd },
+      ];
+
+      await expect(btcSDK.signTransaction(options)).rejects.toThrow(/same sequence/);
     });
   });
 });
