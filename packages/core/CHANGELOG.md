@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.11
+- 🐛 [CW-29062] fix(core): 備份 register data 失敗時可依 ignoreBackupError 續行韌體更新 (#1196)
+
 ## 2.0.10
 - 🐛 [CW-28884] fix(core): getCanonicalSignature 補上 r32 padding (#1184)
 
