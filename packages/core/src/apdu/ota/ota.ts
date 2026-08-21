@@ -79,7 +79,29 @@ const getProgressNums = (updateMCU: boolean): Array<number> => {
   return updateMCU ? progressNum.map((num) => Math.floor(num / 2)) : progressNum;
 };
 
-const performBackupRegisterData = async (transport: Transport, appId: string, appPrivateKey: string): Promise<void> => {
+/**
+ * The ignoreXxxError flags are the rescue path for cards stuck in an abnormal state (CW-29062):
+ * every command going through the store interface returns 6F00, so the backup step blocks the
+ * only way to repair the card. Each flag tolerates exactly one step, and any tolerated failure
+ * skips the remaining backup steps and continues the firmware update without backup.
+ */
+interface PerformBackupRegisterDataOptions {
+  transport: Transport;
+  appId: string;
+  appPrivateKey: string;
+  ignoreCheckBackupStatusError?: boolean;
+  ignoreGetCardInfoError?: boolean;
+  ignoreBackupRegisterDataError?: boolean;
+}
+
+const performBackupRegisterData = async ({
+  transport,
+  appId,
+  appPrivateKey,
+  ignoreCheckBackupStatusError = false,
+  ignoreGetCardInfoError = false,
+  ignoreBackupRegisterDataError = false,
+}: PerformBackupRegisterDataOptions): Promise<void> => {
   const cardSEVersion = await safeGetSEVersion(transport);
   const hasBackupScriptSEVersion = 76;
   if (transport.cardType === CardType.Pro && cardSEVersion < hasBackupScriptSEVersion) return; // SEVersion lower than 76 cannot do backup.
@@ -87,15 +109,34 @@ const performBackupRegisterData = async (transport: Transport, appId: string, ap
   const isAppletExist = await safeCheckMainAppletExists(transport);
   if (!isAppletExist) return; // no need to do backup because no main applet.
 
-  const hasBackup = await setting.backup.checkBackupStatus(transport);
+  let hasBackup: boolean;
+  try {
+    hasBackup = await setting.backup.checkBackupStatus(transport);
+  } catch (e) {
+    if (!ignoreCheckBackupStatusError) throw e;
+    console.warn(`checkBackupStatus failed, continue firmware update without backup. error: ${e}`);
+    return;
+  }
   if (hasBackup) return; // no need to do backup because backup already exists.
 
-  const { walletCreated } = await info.getCardInfo(transport);
+  let walletCreated: boolean;
+  try {
+    ({ walletCreated } = await info.getCardInfo(transport));
+  } catch (e) {
+    if (!ignoreGetCardInfoError) throw e;
+    console.warn(`getCardInfo failed, continue firmware update without backup. error: ${e}`);
+    return;
+  }
   if (!walletCreated) return; // no need to do backup because wallet not created.
 
-  console.debug('performBackupRegisterData >> backupRegisterData try');
-  await backupRegisterData(transport, appId, appPrivateKey);
-  console.debug('performBackupRegisterData >> backupRegisterData success');
+  try {
+    console.debug('performBackupRegisterData >> backupRegisterData try');
+    await backupRegisterData(transport, appId, appPrivateKey);
+    console.debug('performBackupRegisterData >> backupRegisterData success');
+  } catch (e) {
+    if (!ignoreBackupRegisterDataError) throw e;
+    console.warn(`backupRegisterData failed, continue firmware update without backup. error: ${e}`);
+  }
 };
 
 const performRecoverBackupData = async (transport: Transport): Promise<void> => {
@@ -136,6 +177,9 @@ interface UpdateSeParams {
   updateMCU?: boolean;
   apiSecret: string;
   loadScript?: string;
+  ignoreCheckBackupStatusError?: boolean;
+  ignoreGetCardInfoError?: boolean;
+  ignoreBackupRegisterDataError?: boolean;
 }
 
 /**
@@ -159,6 +203,9 @@ export const updateSE = async ({
   updateMCU = false,
   apiSecret,
   loadScript,
+  ignoreCheckBackupStatusError,
+  ignoreGetCardInfoError,
+  ignoreBackupRegisterDataError,
 }: UpdateSeParams): Promise<number> => {
   const SCRIPT = getScripts(transport.cardType);
   const progress = new Progress(getProgressNums(updateMCU));
@@ -167,7 +214,14 @@ export const updateSE = async ({
     if (transport.cardType === CardType.Pro) await mcu.display.showUpdate(transport);
 
     progressCallback(progress.current()); // progress 14
-    await performBackupRegisterData(transport, appId, appPrivateKey);
+    await performBackupRegisterData({
+      transport,
+      appId,
+      appPrivateKey,
+      ignoreCheckBackupStatusError,
+      ignoreGetCardInfoError,
+      ignoreBackupRegisterDataError,
+    });
 
     // get ssd applet and authorize
     progressCallback(progress.next()); // progress 28
@@ -220,6 +274,9 @@ export const updateSEPart1 = async ({
   updateMCU = false,
   apiSecret,
   loadScript,
+  ignoreCheckBackupStatusError,
+  ignoreGetCardInfoError,
+  ignoreBackupRegisterDataError,
 }: UpdateSeParams): Promise<void> => {
   const SCRIPT = getScripts(transport.cardType);
   const progress = new Progress(getProgressNums(updateMCU));
@@ -231,7 +288,14 @@ export const updateSEPart1 = async ({
 
     progressCallback(progress.current()); // progress 14
     console.log('updateSEPart1 >> performBackupRegisterData');
-    await performBackupRegisterData(transport, appId, appPrivateKey);
+    await performBackupRegisterData({
+      transport,
+      appId,
+      appPrivateKey,
+      ignoreCheckBackupStatusError,
+      ignoreGetCardInfoError,
+      ignoreBackupRegisterDataError,
+    });
 
     // get ssd applet and authorize
     progressCallback(progress.next()); // progress 28
