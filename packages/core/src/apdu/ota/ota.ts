@@ -82,8 +82,11 @@ const getProgressNums = (updateMCU: boolean): Array<number> => {
 /**
  * The ignoreXxxError flags are the rescue path for cards stuck in an abnormal state (CW-29062):
  * every command going through the store interface returns 6F00, so the backup step blocks the
- * only way to repair the card. Each flag tolerates exactly one step, and any tolerated failure
- * skips the remaining backup steps and continues the firmware update without backup.
+ * only way to repair the card. Each flag tolerates exactly one step. A tolerated pre-check
+ * failure (checkBackupStatus / getCardInfo) falls back to the assumption that keeps trying to
+ * back up (no backup yet / wallet created) and moves on to the next step, so a feasible backup
+ * is never skipped. Only a tolerated backupRegisterData failure continues the update without
+ * backup — which wipes the wallet on the card at the delete/install step.
  */
 interface PerformBackupRegisterDataOptions {
   transport: Transport;
@@ -114,8 +117,8 @@ const performBackupRegisterData = async ({
     hasBackup = await setting.backup.checkBackupStatus(transport);
   } catch (e) {
     if (!ignoreCheckBackupStatusError) throw e;
-    console.warn(`checkBackupStatus failed, continue firmware update without backup. error: ${e}`);
-    return;
+    console.warn(`checkBackupStatus failed, assume no backup and continue. error: ${e}`);
+    hasBackup = false; // 查不到就當作沒有備份，繼續往下嘗試做備份；就算其實已有備份，重寫的也是同一份資料
   }
   if (hasBackup) return; // no need to do backup because backup already exists.
 
@@ -124,8 +127,8 @@ const performBackupRegisterData = async ({
     ({ walletCreated } = await info.getCardInfo(transport));
   } catch (e) {
     if (!ignoreGetCardInfoError) throw e;
-    console.warn(`getCardInfo failed, continue firmware update without backup. error: ${e}`);
-    return;
+    console.warn(`getCardInfo failed, assume wallet created and continue. error: ${e}`);
+    walletCreated = true; // 查不到就當作有錢包，寧可多做一次備份嘗試，避免漏備份就往下更新
   }
   if (!walletCreated) return; // no need to do backup because wallet not created.
 
