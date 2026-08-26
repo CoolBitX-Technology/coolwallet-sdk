@@ -11,6 +11,22 @@ const buildTokenHex = (token: BuildTokenHexInput) => {
   return `${unitHex}${symbolLengthHex}${symbolHex}${address}`;
 };
 
+// Batch mode: `npm run list:token -- BSC:TWT:18:0x4B0F...` prints only the requested tokens, so a
+// token that isn't in this package's chain modules yet (a brand new one being signed for the first
+// time) can still get its hex from this script instead of a second copy of buildTokenHex elsewhere.
+// With no arguments the hardcoded list below runs unchanged.
+const specs = process.argv.slice(2);
+if (specs.length > 0) {
+  for (const spec of specs) {
+    const [chain, symbol, unit, contractAddress] = spec.split(':');
+    if (!chain || !symbol || !unit || !contractAddress) {
+      throw new Error(`Expected a "<chain>:<symbol>:<unit>:<contractAddress>" spec, got "${spec}"`);
+    }
+    console.log(`${chain} ${symbol}: `, buildTokenHex({ symbol, unit, contractAddress }));
+  }
+  process.exit(0);
+}
+
 console.log('ARB USD₮0: ', buildTokenHex(ARBITRUM.tokens['USDT0']));
 console.log('ARB USDC.e: ', buildTokenHex(ARBITRUM.tokens['USDC.e']));
 console.log('ARB DAI: ', buildTokenHex(ARBITRUM.tokens.DAI));
