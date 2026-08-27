@@ -30,8 +30,9 @@ const buildTokenHex = (token: BuildTokenHexInput) => {
 const specs = process.argv.slice(2);
 if (specs.length > 0) {
   for (const spec of specs) {
-    const [chain, symbol, unit, contractAddress] = spec.split(':');
-    if (!chain || !symbol || !unit || !contractAddress) {
+    const parts = spec.split(':');
+    const [chain, symbol, unit, contractAddress] = parts;
+    if (parts.length !== 4 || !chain || !symbol || !unit || !contractAddress) {
       throw new Error(`Expected a "<chain>:<symbol>:<unit>:<contractAddress>" spec, got "${spec}"`);
     }
     // Every field below is fixed-width, and an out-of-range value silently shifts the fields after it
