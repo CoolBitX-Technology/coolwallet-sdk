@@ -24,7 +24,10 @@ function getTransferArguments(rawTx: Transaction, addressIndex: number): string 
 }
 
 function getTokenInfoArgs(tokenInfo: types.TokenInfo): string {
-  const scriptTokenSymbol = tokenInfo.symbol.slice(0, 7).toUpperCase();
+  // Signing Card signs the symbol's original case (tools/token.ts's buildTokenHex does too) —
+  // uppercasing here would rebuild a different byte sequence than what the stored signature covers,
+  // so the card's verification fails for any symbol that isn't already all-caps.
+  const scriptTokenSymbol = tokenInfo.symbol.slice(0, 7);
 
   const tokenSignature = tokenInfo.signature ?? '';
   const signature = tokenSignature.slice(82).padStart(144, '0');
