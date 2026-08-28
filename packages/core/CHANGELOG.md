@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.12
+- 🐛 [CW-29062] fix(core): 備份 pre-check 容錯改為以安全假設值續行，不再跳過整段備份 (#1198)
+
 ## 2.0.11
 - 🐛 [CW-29062] fix(core): 備份 register data 失敗時可依 ignoreBackupError 續行韌體更新 (#1196)
 
