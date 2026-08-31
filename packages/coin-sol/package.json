@@ -46,7 +46,8 @@
     "@types/bs58": "^4.0.1",
     "@types/node": "^18.19.76",
     "bip39": "^3.0.4",
-    "regenerator-runtime": "^0.14.1"
+    "regenerator-runtime": "^0.14.1",
+    "typescript": "^5.9.3"
   },
   "repository": {
     "type": "git",
