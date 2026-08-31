@@ -7,6 +7,7 @@ const HEX_REGEX = /[0-9A-Fa-f]{6}/g;
 
 export const isBase58Format = (value?: string): boolean => {
   if (!value) return false;
+  if (value.length !== 43 && value.length !== 44) return false;
   return /^[A-HJ-NP-Za-km-z1-9]*$/.test(value);
 };
 
