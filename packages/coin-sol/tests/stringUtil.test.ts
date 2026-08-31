@@ -1,3 +1,4 @@
+import base58 from 'bs58';
 import { isBase58Format } from '../src/utils/stringUtil';
 
 describe('isBase58Format', () => {
@@ -15,8 +16,16 @@ describe('isBase58Format', () => {
     expect(isBase58Format('So11111111111111111111111111111111111111112')).toBe(true);
   });
 
-  it('rejects a base58-charset string that is shorter than a 32-byte pubkey', () => {
-    expect(isBase58Format('11111111111111111111111111111111')).toBe(false);
+  it('accepts the System Program ID, whose leading zero bytes shrink it to 32 chars', () => {
+    const systemProgramId = '1'.repeat(32);
+    expect(base58.decode(systemProgramId)).toHaveLength(32);
+    expect(isBase58Format(systemProgramId)).toBe(true);
+  });
+
+  it('rejects a base58-charset string that decodes to more than 32 bytes', () => {
+    const tooLong = '1'.repeat(34);
+    expect(base58.decode(tooLong)).toHaveLength(34);
+    expect(isBase58Format(tooLong)).toBe(false);
   });
 
   it('rejects empty or undefined input', () => {
