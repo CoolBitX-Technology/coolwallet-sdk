@@ -106,7 +106,7 @@ describe('Test Solana SDK', () => {
     const expectedWallet = Keypair.fromSeed(node.privateKey);
     const toPubkey = getRandWallet();
     const recentBlockhash = getRandWallet();
-    const lamports = ((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL;
+    const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
 
     const signTxData = {
       transport,
@@ -489,7 +489,7 @@ describe('Test Solana SDK', () => {
     const SEED = 'stake:0';
     const STAKE_ACCOUNT = await sol.createWithSeed(FROM_PUBKEY.toString(), SEED, StakeProgram.programId.toString());
     const VALIDATOR = new PublicKey(getRandWallet());
-    const lamports = ((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL;
+    const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
     const signTxData = {
       transport,
       appPrivateKey: props.appPrivateKey,
@@ -559,7 +559,7 @@ describe('Test Solana SDK', () => {
     const FROM_PUBKEY = expectedWallet.publicKey;
     const toPubkey = getRandWallet();
     const recentBlockhash = getRandWallet();
-    const lamports = ((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL;
+    const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
 
     const signTxData = {
       transport,
@@ -614,7 +614,7 @@ describe('Test Solana SDK', () => {
     const addressIndex = 0;
     const node = wallet.derivePath(bip32Path(addressIndex));
     const expectedWallet = Keypair.fromSeed(node.privateKey);
-    const lamports = ((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL;
+    const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
     const recentBlockhash = getRandWallet();
     const stakePubkey = getRandWallet();
     const withdrawToPubKey = getRandWallet();
@@ -673,7 +673,7 @@ describe('Test Solana SDK', () => {
     const addressIndex = 0;
     const node = wallet.derivePath(bip32Path(addressIndex));
     const expectedWallet = Keypair.fromSeed(node.privateKey);
-    const lamports = ((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL;
+    const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
     const recentBlockhash = getRandWallet();
     const stakePubkey = getRandWallet();
     const withdrawToPubKey = expectedWallet.publicKey;
