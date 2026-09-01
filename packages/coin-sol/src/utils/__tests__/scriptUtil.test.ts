@@ -80,6 +80,36 @@ describe('Test scriptUtil.getXXXArguments function', () => {
     );
   });
 
+  /** CW-29104: symbol 曾在這裡被強制轉大寫，跟簽章當初簽的原始大小寫對不上，
+   * 導致卡片驗證合法地失敗（混合大小寫的官方 token，例如 Ondo 的 `<TICKER>on` 系列）。
+   **/
+  it('getSplTokenTransferArguments preserves the token symbol case', () => {
+    const mixedCaseTokenInfo = {
+      symbol: 'AALon',
+      decimals: 9,
+      address: 'DmxNoS1Ta55UprucC4mmCLaDhSjjnzhcP2cRUpAo4zat',
+    };
+    const tx = {
+      signer,
+      fromTokenAccount: 'FXLxFVPWB8FuRZnb621YbWw2tmY7fmEAJAC6dMkZWWzx',
+      toTokenAccount: 'ASMnRWAZpArzDDWyqUDzd8TF9AdikwfD9gnYNAu6P7oP',
+      recentBlockhash,
+      programId: tokenProgramId,
+      tokenInfo: mixedCaseTokenInfo,
+      amount: 100,
+      computeUnitPrice,
+      computeUnitLimit,
+    };
+
+    const compiledTx = compileSplTokenTransaction(tx);
+    const rawTx = new Transaction(compiledTx);
+    const args = getSplTokenTransferArguments(rawTx, 0, mixedCaseTokenInfo);
+
+    const symbolHex = Buffer.from('AALon').toString('hex');
+    expect(args).toContain(symbolHex);
+    expect(args).not.toContain(Buffer.from('AALON').toString('hex'));
+  });
+
   it('getCreateAndTransferSplTokenArguments', () => {
     const tx = {
       signer,
