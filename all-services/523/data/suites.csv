@@ -1,0 +1,8 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","1","addressToOutScript P2WPKH: ltc1q address (43 chars) → scriptType P2WPKH with 20-byte hash","","2026-09-08","passed","2026-09-08","","addressToOutScript","addressToOutScript P2WPKH: ltc1q address (43 chars) → scriptType P2WPKH with 20-byte hash",""
+"","271","Test LTC SDK Test Get index 0 address","","2026-09-08","passed","2026-09-08","","Test LTC SDK","Test LTC SDK Test Get index 0 address",""
+"","5","addressToOutScript P2WSH: ltc1q address (63 chars) → scriptType P2WSH with 32-byte hash","","2026-09-08","passed","2026-09-08","","addressToOutScript","addressToOutScript P2WSH: ltc1q address (63 chars) → scriptType P2WSH with 32-byte hash",""
+"","347","Test LTC SDK Test Sign Transfer LTC Transaction","","2026-09-08","passed","2026-09-08","","Test LTC SDK","Test LTC SDK Test Sign Transfer LTC Transaction",""
+"","2","addressToOutScript P2PKH: L-prefix address → scriptType P2PKH with 20-byte hash","","2026-09-08","passed","2026-09-08","","addressToOutScript","addressToOutScript P2PKH: L-prefix address → scriptType P2PKH with 20-byte hash",""
+"","8","addressToOutScript unsupported address → throws","","2026-09-08","passed","2026-09-08","","addressToOutScript","addressToOutScript unsupported address → throws",""
+"","1","addressToOutScript P2SH_P2WPKH: M-prefix address → scriptType P2SH_P2WPKH with 20-byte hash","","2026-09-08","passed","2026-09-08","","addressToOutScript","addressToOutScript P2SH_P2WPKH: M-prefix address → scriptType P2SH_P2WPKH with 20-byte hash",""
