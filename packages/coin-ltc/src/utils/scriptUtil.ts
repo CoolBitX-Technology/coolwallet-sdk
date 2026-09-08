@@ -35,7 +35,7 @@ export async function getArgument(
     outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
   } else if (outputType == types.ScriptType.P2WSH) {
     outputScriptType = bufferUtil.toUintBuffer(3, 1);
-    outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
+    outputHashBuf = outputHash;
   } else {
     throw new error.SDKError(getArgument.name, `Unsupport ScriptType : ${outputType}`);
   }
