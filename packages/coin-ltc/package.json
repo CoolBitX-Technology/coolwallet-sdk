@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/ltc",
-  "version": "2.0.1-beta.0",
+  "version": "2.0.2-beta.0",
   "description": "Coolwallet LiteCoin sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -51,7 +51,9 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
   },
   "jest": {
-    "setupFilesAfterEnv": ["../../jest.setup.js"],
+    "setupFilesAfterEnv": [
+      "../../jest.setup.js"
+    ],
     "testTimeout": 60000
   }
 }
