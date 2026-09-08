@@ -1,0 +1,1 @@
+{"total":2,"items":[{"uid":"f4b6a77e1e5f94c1c1ad63b3066bb49e","name":"addressToOutScript","statistic":{"failed":0,"broken":0,"skipped":0,"passed":5,"unknown":0,"total":5}},{"uid":"cabc83ac70a430cf85ceef0fc797f587","name":"Test LTC SDK","statistic":{"failed":0,"broken":0,"skipped":0,"passed":2,"unknown":0,"total":2}}]}
