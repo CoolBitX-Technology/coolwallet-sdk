@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.4
+- chore(coin-eth,coin-evm,coin-sol): bump patch version after #1201 (#1202)
+
 ## 2.0.3
 - ✨ [CW-28804] feat(token): Support USDS as an official token on Ethereum, Base, Arbitrum, and Solana (#1176)
 
