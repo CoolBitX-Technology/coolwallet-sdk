@@ -12514,12 +12514,104 @@ function run() {
                 case 0:
                     context = github.context;
                     console.log('context :', context);
-                    // TEMP(CW-29077 OIDC test): restricted to coin-bch only for OIDC verification.
-                    // Revert to the full package list below once verification is done.
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bch')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/core')];
                 case 1:
-                    // TEMP(CW-29077 OIDC test): restricted to coin-bch only for OIDC verification.
-                    // Revert to the full package list below once verification is done.
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ada')];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-aptos')];
+                case 3:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-atom')];
+                case 4:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bch')];
+                case 5:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bnb')];
+                case 6:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bsc')];
+                case 7:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-btc')];
+                case 8:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-cro')];
+                case 9:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-cronos')];
+                case 10:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-doge')];
+                case 11:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-dot')];
+                case 12:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-etc')];
+                case 13:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-eth')];
+                case 14:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-evm')];
+                case 15:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-icx')];
+                case 16:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-iotx')];
+                case 17:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-kas')];
+                case 18:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ltc')];
+                case 19:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sol')];
+                case 20:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-terra')];
+                case 21:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-theta')];
+                case 22:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ton')];
+                case 23:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-trx')];
+                case 24:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
+                case 25:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
+                case 26:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xtz')];
+                case 27:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sui')];
+                case 28:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zec')];
+                case 29:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
+                case 30:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
+                case 31:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
+                case 32:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-react-native-nfc')];
+                case 33:
                     _a.sent();
                     return [2 /*return*/];
             }
