@@ -24,7 +24,14 @@ export async function isLocalUpgraded(path: string) {
     const remoteVersion = semver.clean(await command('npm', ['view', name, 'version'])) ?? '';
     console.log(`remote version: ${remoteVersion}`);
     console.log(`local version: ${version}`);
-    return semver.gt(version, remoteVersion);
+
+    if (!semver.gt(version, remoteVersion)) return false;
+
+    if (await isVersionPublished(name, version)) {
+      console.log(`Version ${version} is already published to the registry (under a non-latest tag), skipping.`);
+      return false;
+    }
+    return true;
   } catch (e) {
     const error = e as Error;
     if (error.message.includes(NPM_404_ERR_CODE)) {
@@ -34,6 +41,24 @@ export async function isLocalUpgraded(path: string) {
     console.log('Error:', error.message);
   }
   return false;
+}
+
+/**
+ * Check whether a specific version has already been published, under any dist-tag.
+ * `npm view <name> version` only reflects the `latest` tag, so a version already
+ * published under e.g. `beta` would otherwise look "unpublished" and get retried
+ * on every push, failing with E403.
+ */
+async function isVersionPublished(name: string, version: string): Promise<boolean> {
+  try {
+    const raw = await command('npm', ['view', name, 'versions', '--json']);
+    const parsed = JSON.parse(raw);
+    const versions: string[] = Array.isArray(parsed) ? parsed : [parsed];
+    return versions.includes(version);
+  } catch (e) {
+    console.log(`Could not fetch published versions for ${name}, will attempt to publish:`, e);
+    return false;
+  }
 }
 
 export async function buildAndPublish(path: string) {

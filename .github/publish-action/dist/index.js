@@ -12730,15 +12730,23 @@ function isLocalUpgraded(path) {
                     console.log("package name: ".concat(name));
                     _e.label = 1;
                 case 1:
-                    _e.trys.push([1, 3, , 4]);
+                    _e.trys.push([1, 4, , 5]);
                     _d = (_c = semver_1.default).clean;
                     return [4 /*yield*/, command('npm', ['view', name, 'version'])];
                 case 2:
                     remoteVersion = (_a = _d.apply(_c, [_e.sent()])) !== null && _a !== void 0 ? _a : '';
                     console.log("remote version: ".concat(remoteVersion));
                     console.log("local version: ".concat(version));
-                    return [2 /*return*/, semver_1.default.gt(version, remoteVersion)];
+                    if (!semver_1.default.gt(version, remoteVersion))
+                        return [2 /*return*/, false];
+                    return [4 /*yield*/, isVersionPublished(name, version)];
                 case 3:
+                    if (_e.sent()) {
+                        console.log("Version ".concat(version, " is already published to the registry (under a non-latest tag), skipping."));
+                        return [2 /*return*/, false];
+                    }
+                    return [2 /*return*/, true];
+                case 4:
                     e_1 = _e.sent();
                     error = e_1;
                     if (error.message.includes(NPM_404_ERR_CODE)) {
@@ -12746,16 +12754,44 @@ function isLocalUpgraded(path) {
                         return [2 /*return*/, true];
                     }
                     console.log('Error:', error.message);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/, false];
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/, false];
             }
         });
     });
 }
 exports.isLocalUpgraded = isLocalUpgraded;
+/**
+ * Check whether a specific version has already been published, under any dist-tag.
+ * `npm view <name> version` only reflects the `latest` tag, so a version already
+ * published under e.g. `beta` would otherwise look "unpublished" and get retried
+ * on every push, failing with E403.
+ */
+function isVersionPublished(name, version) {
+    return __awaiter(this, void 0, void 0, function () {
+        var raw, parsed, versions, e_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, command('npm', ['view', name, 'versions', '--json'])];
+                case 1:
+                    raw = _a.sent();
+                    parsed = JSON.parse(raw);
+                    versions = Array.isArray(parsed) ? parsed : [parsed];
+                    return [2 /*return*/, versions.includes(version)];
+                case 2:
+                    e_2 = _a.sent();
+                    console.log("Could not fetch published versions for ".concat(name, ", will attempt to publish:"), e_2);
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
 function buildAndPublish(path) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, name, version, preRelease, isBeta, installLogs, buildLogs, publishArgs, result, e_2, error;
+        var _a, name, version, preRelease, isBeta, installLogs, buildLogs, publishArgs, result, e_3, error;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -12785,8 +12821,8 @@ function buildAndPublish(path) {
                     _b.sent();
                     return [3 /*break*/, 7];
                 case 6:
-                    e_2 = _b.sent();
-                    error = e_2;
+                    e_3 = _b.sent();
+                    error = e_3;
                     console.log("Cannot publish package ".concat(name, ", reason:"));
                     console.log(error);
                     core.setFailed("Cannot publish package ".concat(name, ": ").concat(error.message));
