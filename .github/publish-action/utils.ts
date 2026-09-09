@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import semver from 'semver';
 import { spawn } from 'child_process';
 
@@ -53,6 +54,7 @@ export async function buildAndPublish(path: string) {
     const error = e as Error;
     console.log(`Cannot publish package ${name}, reason:`);
     console.log(error);
+    core.setFailed(`Cannot publish package ${name}: ${error.message}`);
   }
 }
 
