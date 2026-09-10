@@ -35,5 +35,3 @@ jobs:
 
     - name: Publish action
       uses: ./.github/publish-action
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
