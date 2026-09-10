@@ -57,7 +57,7 @@ Used to sign transactions of different cryptocurrencies.
 | [`@coolwallet/atom`](/packages/coin-atom) | ![version](https://img.shields.io/npm/v/@coolwallet/atom) | Cosmos |
 | [`@coolwallet/bch`](/packages/coin-bch)   | ![version](https://img.shields.io/npm/v/@coolwallet/bch) | Bitcoin Cash |
 | [`@coolwallet/bsc`](/packages/coin-bsc)   | ![version](https://img.shields.io/npm/v/@coolwallet/bsc) | Binance Smart Chain |
-| [`@coolwallet/btc`](/packages/coin-btc)   | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin/USDT |
+| [`@coolwallet/btc`](/packages/coin-btc)   | ![version](https://img.shields.io/npm/v/@coolwallet/btc) | Bitcoin |
 | [`@coolwallet/cro`](/packages/coin-cro)   | ![version](https://img.shields.io/npm/v/@coolwallet/cro) | Crypto.org |
 | [`@coolwallet/cronos`](/packages/coin-cronos)   | ![version](https://img.shields.io/npm/v/@coolwallet/cronos) | Cronos |
 | [`@coolwallet/doge`](/packages/coin-doge) | ![version](https://img.shields.io/npm/v/@coolwallet/doge) | Doge |
