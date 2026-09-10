@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.3
+- 🔧 [CW-29007] chore(coin-btc): 修正 argument 寫死的 latent bug、清除 USDT 殘留、更新 README (#1215)
+
 ## 2.0.2
 - 🐛 [CW-28987] fix(btc): WITNESS_0 argument 的 nSequence 改為取自 input (#1194)
 
