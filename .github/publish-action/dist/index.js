@@ -12695,7 +12695,10 @@ var core = __importStar(__nccwpck_require__(2186));
 var semver_1 = __importDefault(__nccwpck_require__(1383));
 var child_process_1 = __nccwpck_require__(2081);
 var betaList = ['beta', 'hotfix', 'stg'];
-var NPM_404_ERR_CODE = 'npm ERR! code E404';
+// Matches the "code E404" token only — npm has changed the surrounding log
+// prefix across versions (e.g. "npm ERR!" on npm 8/10 vs "npm error" on
+// npm 11+), so matching a full line is fragile.
+var NPM_404_ERR_CODE = 'code E404';
 function installCore(isBeta) {
     if (isBeta === void 0) { isBeta = false; }
     return __awaiter(this, void 0, void 0, function () {

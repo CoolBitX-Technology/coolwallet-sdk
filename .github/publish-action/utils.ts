@@ -4,7 +4,10 @@ import { spawn } from 'child_process';
 
 const betaList = ['beta', 'hotfix', 'stg'];
 
-const NPM_404_ERR_CODE = 'npm ERR! code E404';
+// Matches the "code E404" token only — npm has changed the surrounding log
+// prefix across versions (e.g. "npm ERR!" on npm 8/10 vs "npm error" on
+// npm 11+), so matching a full line is fragile.
+const NPM_404_ERR_CODE = 'code E404';
 
 export async function installCore(isBeta: boolean = false) {
   const packageName = isBeta ? '@coolwallet/core@beta' : '@coolwallet/core';
