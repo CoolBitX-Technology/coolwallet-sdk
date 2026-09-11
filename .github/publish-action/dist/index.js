@@ -12757,6 +12757,7 @@ function isLocalUpgraded(path) {
                         return [2 /*return*/, true];
                     }
                     console.log('Error:', error.message);
+                    core.setFailed("Cannot determine whether ".concat(name, " needs to be published: ").concat(error.message));
                     return [3 /*break*/, 5];
                 case 5: return [2 /*return*/, false];
             }
@@ -12794,14 +12795,14 @@ function isVersionPublished(name, version) {
 }
 function buildAndPublish(path) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, name, version, preRelease, isBeta, installLogs, buildLogs, publishArgs, result, e_3, error;
+        var _a, name, version, preRelease, isBeta, installLogs, buildLogs, publishArgs, result, e_3, error, e_4, error;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = getPackageInfo(path), name = _a.name, version = _a.version;
                     _b.label = 1;
                 case 1:
-                    _b.trys.push([1, 6, , 7]);
+                    _b.trys.push([1, 5, , 6]);
                     preRelease = semver_1.default.prerelease(version);
                     isBeta = betaList.includes('' + (preRelease === null || preRelease === void 0 ? void 0 : preRelease[0]));
                     return [4 /*yield*/, command('npm', ['ci'], path)];
@@ -12819,18 +12820,28 @@ function buildAndPublish(path) {
                 case 4:
                     result = _b.sent();
                     console.log('npm publish :', result);
-                    return [4 /*yield*/, pushTag("".concat(name, "@").concat(version))];
+                    return [3 /*break*/, 6];
                 case 5:
-                    _b.sent();
-                    return [3 /*break*/, 7];
-                case 6:
                     e_3 = _b.sent();
                     error = e_3;
                     console.log("Cannot publish package ".concat(name, ", reason:"));
                     console.log(error);
                     core.setFailed("Cannot publish package ".concat(name, ": ").concat(error.message));
-                    return [3 /*break*/, 7];
-                case 7: return [2 /*return*/];
+                    return [2 /*return*/];
+                case 6:
+                    _b.trys.push([6, 8, , 9]);
+                    return [4 /*yield*/, pushTag("".concat(name, "@").concat(version))];
+                case 7:
+                    _b.sent();
+                    return [3 /*break*/, 9];
+                case 8:
+                    e_4 = _b.sent();
+                    error = e_4;
+                    console.log("Published ".concat(name, "@").concat(version, " to npm, but failed to push the git tag, reason:"));
+                    console.log(error);
+                    core.setFailed("Published ".concat(name, "@").concat(version, " to npm, but failed to push the git tag: ").concat(error.message));
+                    return [3 /*break*/, 9];
+                case 9: return [2 /*return*/];
             }
         });
     });

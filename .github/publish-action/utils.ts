@@ -42,6 +42,7 @@ export async function isLocalUpgraded(path: string) {
       return true;
     }
     console.log('Error:', error.message);
+    core.setFailed(`Cannot determine whether ${name} needs to be published: ${error.message}`);
   }
   return false;
 }
@@ -77,12 +78,23 @@ export async function buildAndPublish(path: string) {
     if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
     const result = await command('npm', publishArgs, path);
     console.log('npm publish :', result);
-    await pushTag(`${name}@${version}`);
   } catch (e) {
     const error = e as Error;
     console.log(`Cannot publish package ${name}, reason:`);
     console.log(error);
     core.setFailed(`Cannot publish package ${name}: ${error.message}`);
+    return;
+  }
+
+  // npm publish already succeeded at this point — a failure here must not be
+  // reported as a publish failure, since the version is already live on npm.
+  try {
+    await pushTag(`${name}@${version}`);
+  } catch (e) {
+    const error = e as Error;
+    console.log(`Published ${name}@${version} to npm, but failed to push the git tag, reason:`);
+    console.log(error);
+    core.setFailed(`Published ${name}@${version} to npm, but failed to push the git tag: ${error.message}`);
   }
 }
 
