@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.0.1
+
 - chore(zec/bch/ltc): remove local jest 26 and fix jest config (#1143)
 
 
