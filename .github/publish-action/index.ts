@@ -70,9 +70,7 @@ async function run() {
   await checkAndPublish(context, 'packages/transport-react-native-nfc');
 }
 
-try {
-  run();
-} catch (e) {
+run().catch((e) => {
   const error = e as Error;
   core.setFailed(error.message);
-}
+});
