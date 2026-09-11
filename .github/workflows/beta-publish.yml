@@ -8,6 +8,14 @@ permissions:
   contents: read
   id-token: write
 
+# This job always iterates the same full package list regardless of which
+# branch triggered it, so any overlapping run (same branch or different) can
+# race on the same npm package/git tag. Queue runs instead of letting them
+# race; don't cancel one mid-publish since that could leave things half-done.
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
 jobs:
   check_and_publish_npm_packages:
 
