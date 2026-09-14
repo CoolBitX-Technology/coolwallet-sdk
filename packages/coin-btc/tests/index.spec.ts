@@ -3,7 +3,7 @@ import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 import BTC from '../src';
 import { ScriptType, signTxType } from '../src/config/types';
-import { getSequences, getVersion, verifySegwitV0Signatures } from './utils/verifySignature';
+import { getSequences, getVersion, verifySegwitV0Signatures, verifyTaprootSignatures } from './utils/verifySignature';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 type Mandatory = PromiseValue<ReturnType<typeof initialize>>;
@@ -177,6 +177,115 @@ describe('Test BTC SDK', () => {
       ];
 
       await expect(btcSDK.signTransaction(options)).rejects.toThrow(/same sequence/);
+    });
+  });
+
+  // 上面那組固定 version: 2 —— 剛好對上 argument builder 原本寫死的 02000000，所以驗得過。
+  // 這一組專打「呼叫端沒把 version / sequence 講滿」的路徑：argument 的預設值必須與
+  // createUnsignedTransactions 相同，否則卡片組出來的 preimage 對到的是另一筆交易。
+  describe('Sign Transfer Tx with non-default nVersion / omitted nSequence', () => {
+    const SEGWIT_PRE_VALUE = 34883;
+    const TAPROOT_PRE_VALUE = 37440;
+
+    const buildSegwitOptions = (version?: number, sequence?: number): signTxType => ({
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      scriptType: ScriptType.P2SH_P2WPKH,
+      inputs: [
+        {
+          preTxHash: 'f55c2ca6c985b7bf34e0c451adfb0ae8d05f336f376c5564b2d6d8dc1075a31e',
+          preIndex: 1,
+          preValue: String(SEGWIT_PRE_VALUE),
+          sequence,
+          addressIndex: 0,
+        },
+      ],
+      output: { address: '37DcArQ1icSZKf7oFTosUid28kWBgsLLEz', value: '555' },
+      change: { addressIndex: 0, value: '33664' },
+      version,
+    });
+
+    const buildTaprootOptions = (version?: number, sequence?: number): signTxType => ({
+      transport,
+      appPrivateKey: props.appPrivateKey,
+      appId: props.appId,
+      scriptType: ScriptType.P2TR,
+      inputs: [
+        {
+          preTxHash: '2479b5de0357df633a4c87644a0e472eda4885e95287214f7db218c9c13c4d02',
+          preIndex: 0,
+          preValue: String(TAPROOT_PRE_VALUE),
+          sequence,
+          addressIndex: 0,
+        },
+      ],
+      output: { address: 'bc1p6vmwjc4l8dhs7cfglzjg4am3sjnnpywz7syk8826crahy39d6vaq2duk4m', value: '345' },
+      change: { addressIndex: 0, value: '36479' },
+      version,
+    });
+
+    // BIP341 的 preimage 承諾所有 input 的 scriptPubKey，而 P2TR 的公鑰只存在於那裡（witness
+    // 只有 64-byte 簽章）—— 驗簽時得自己把被花掉 UTXO 的 scriptPubKey 找回來。
+    const getTaprootPrevOutScript = async (): Promise<Buffer> => {
+      const { outScript } = await btcSDK.getAddressAndOutScript(
+        transport,
+        props.appPrivateKey,
+        props.appId,
+        ScriptType.P2TR,
+        0
+      );
+      return outScript;
+    };
+
+    it('P2SH_P2WPKH: version=1 的簽章驗得過', async () => {
+      const signedTx = await btcSDK.signTransaction(buildSegwitOptions(1, 0xffffffff));
+
+      expect(getVersion(signedTx)).toBe(1);
+      expect(verifySegwitV0Signatures(signedTx, [SEGWIT_PRE_VALUE])).toBe(true);
+    });
+
+    // 變因隔離：sequence 固定用顯式值，單獨釘住 WITNESS_0 的 version fallback。
+    it('P2SH_P2WPKH: 省略 version 時兩邊都落在預設值 1', async () => {
+      const signedTx = await btcSDK.signTransaction(buildSegwitOptions(undefined, 0xffffffff));
+
+      expect(getVersion(signedTx)).toBe(1);
+      expect(verifySegwitV0Signatures(signedTx, [SEGWIT_PRE_VALUE])).toBe(true);
+    });
+
+    // 反過來：version 固定用修正前剛好會過的 2，單獨釘住 WITNESS_0 的 sequence fallback。
+    // 這條在本票的修正前就會過（W0 的 sequence 預設值是 CW-28987 修好的）—— 它的作用是
+    // 防止那個修正在未來被改回 hardcode，不是證明本票的修正。
+    it('P2SH_P2WPKH: 省略 sequence 時兩邊都落在預設值 0xffffffff', async () => {
+      const signedTx = await btcSDK.signTransaction(buildSegwitOptions(2, undefined));
+
+      expect(getSequences(signedTx)).toEqual([0xffffffff]);
+      expect(verifySegwitV0Signatures(signedTx, [SEGWIT_PRE_VALUE])).toBe(true);
+    });
+
+    it('P2TR: version=1 的簽章驗得過', async () => {
+      const signedTx = await btcSDK.signTransaction(buildTaprootOptions(1, 0xffffffff));
+
+      expect(getVersion(signedTx)).toBe(1);
+      expect(verifyTaprootSignatures(signedTx, [await getTaprootPrevOutScript()], [TAPROOT_PRE_VALUE])).toBe(true);
+    });
+
+    // version 省略時 createUnsignedTransactions 落在 1，argument 也必須落在 1。
+    it('P2TR: 省略 version 時兩邊都落在預設值 1', async () => {
+      const signedTx = await btcSDK.signTransaction(buildTaprootOptions(undefined, 0xffffffff));
+
+      expect(getVersion(signedTx)).toBe(1);
+      expect(verifyTaprootSignatures(signedTx, [await getTaprootPrevOutScript()], [TAPROOT_PRE_VALUE])).toBe(true);
+    });
+
+    // sequence 省略時 createUnsignedTransactions 正規化成 0xffffffff，argument 原本卻用
+    // 0xfdffffff 算 sha_sequences。注意 Taproot 不需要比照 WITNESS_0 檢查「所有 input 的
+    // sequence 相同」：BIP341 的 preimage 只有聚合的 sha_sequences、沒有單筆 nSequence 欄位。
+    it('P2TR: 省略 sequence 時兩邊都落在預設值 0xffffffff', async () => {
+      const signedTx = await btcSDK.signTransaction(buildTaprootOptions(2, undefined));
+
+      expect(getSequences(signedTx)).toEqual([0xffffffff]);
+      expect(verifyTaprootSignatures(signedTx, [await getTaprootPrevOutScript()], [TAPROOT_PRE_VALUE])).toBe(true);
     });
   });
 });

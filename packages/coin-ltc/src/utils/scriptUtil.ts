@@ -33,6 +33,9 @@ export async function getArgument(
   } else if (outputType == types.ScriptType.P2WPKH) {
     outputScriptType = bufferUtil.toUintBuffer(2, 1);
     outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
+  } else if (outputType == types.ScriptType.P2WSH) {
+    outputScriptType = bufferUtil.toUintBuffer(3, 1);
+    outputHashBuf = outputHash;
   } else {
     throw new error.SDKError(getArgument.name, `Unsupport ScriptType : ${outputType}`);
   }

@@ -81,13 +81,7 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
 
   checkRedeemScriptType(redeemScriptType);
 
-  const { preparedData } = txUtil.createUnsignedTransactions(
-    redeemScriptType,
-    inputs,
-    output,
-    change,
-    version
-  );
+  const { preparedData } = txUtil.createUnsignedTransactions(redeemScriptType, inputs, output, change, version);
   const seVersion = await info.getSEVersion(transport);
 
   let script;
@@ -98,10 +92,10 @@ export async function signBTCTransaction(signTxData: signTxType): Promise<string
     argument = await scriptUtil.getBTCArgument(redeemScriptType, inputs, output, change);
   } else if (redeemScriptType === ScriptType.P2TR) {
     script = param.WITNESS_1.script + param.WITNESS_1.signature;
-    argument = await scriptUtil.getWitness1Argument(redeemScriptType, inputs, output, change);
+    argument = await scriptUtil.getWitness1Argument(redeemScriptType, inputs, output, change, version);
   } else {
     script = param.WITNESS_0.script + param.WITNESS_0.signature;
-    argument = await scriptUtil.getWitness0Argument(redeemScriptType, inputs, output, change);
+    argument = await scriptUtil.getWitness0Argument(redeemScriptType, inputs, output, change, version);
   }
 
   const { preActions } = scriptUtil.getScriptSigningPreActions(transport, appId, appPrivateKey, script, argument);
