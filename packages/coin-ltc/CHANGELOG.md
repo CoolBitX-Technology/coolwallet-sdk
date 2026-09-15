@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+- ✨ [CW-29086] feat(coin-ltc): 支援發送到 ltc1 P2WSH 地址 (#1210)
+
 ## 2.0.1
 - chore(zec/bch/ltc): remove local jest 26 and fix jest config (#1143)
 
