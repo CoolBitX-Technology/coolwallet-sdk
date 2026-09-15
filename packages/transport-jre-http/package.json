@@ -11,6 +11,10 @@
   },
   "author": "coolwallet-team",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-sdk.git"
+  },
   "dependencies": {
     "@coolwallet/core": "^2.0.0",
     "axios": "^0.25.0",

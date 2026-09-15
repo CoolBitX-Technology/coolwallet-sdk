@@ -11,6 +11,10 @@
   },
   "author": "coolwallet-team",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoolBitX-Technology/coolwallet-sdk.git"
+  },
   "peerDependencies": {
     "react-native-nfc-manager": "^3.17.0"
   },
