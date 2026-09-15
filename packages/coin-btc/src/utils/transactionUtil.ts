@@ -1,18 +1,12 @@
-import BN from 'bn.js';
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { error } from '@coolwallet/core';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as varuint from './varuintUtil';
 import * as cryptoUtil from './cryptoUtil';
+import * as bufferUtil from './bufferUtil';
 import { ScriptType, Input, Output, Change, PreparedData } from '../config/types';
 
 bitcoin.initEccLib(ecc);
-
-export function toReverseUintBuffer(numberOrString: number | string, byteSize: number): Buffer {
-  const bn = new BN(numberOrString);
-  const buf = Buffer.from(bn.toArray()).reverse();
-  return Buffer.alloc(byteSize).fill(buf, 0, buf.length);
-}
 
 function toXOnly(pubKey: Buffer): Buffer {
   return pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
@@ -97,18 +91,21 @@ export function createUnsignedTransactions(
   preparedData: PreparedData;
   unsignedTransactions: Array<Buffer>;
 } {
-  const versionBuf = toReverseUintBuffer(version, 4);
-  const lockTimeBuf = toReverseUintBuffer(lockTime, 4);
+  const versionBuf = bufferUtil.toReverseUintBuffer(version, 4);
+  const lockTimeBuf = bufferUtil.toReverseUintBuffer(lockTime, 4);
   const inputsCount = varuint.encode(inputs.length);
   const preparedInputs = inputs.map(
     ({ preTxHash, preIndex, preValue, sequence, addressIndex, pubkeyBuf, purposeIndex }) => {
       if (!pubkeyBuf) {
         throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
       }
-      const preOutPointBuf = Buffer.concat([Buffer.from(preTxHash, 'hex').reverse(), toReverseUintBuffer(preIndex, 4)]);
+      const preOutPointBuf = Buffer.concat([
+        Buffer.from(preTxHash, 'hex').reverse(),
+        bufferUtil.toReverseUintBuffer(preIndex, 4),
+      ]);
 
-      const preValueBuf = toReverseUintBuffer(preValue, 8);
-      const sequenceBuf = sequence ? toReverseUintBuffer(sequence, 4) : Buffer.from('ffffffff', 'hex');
+      const preValueBuf = bufferUtil.toReverseUintBuffer(preValue, 8);
+      const sequenceBuf = sequence ? bufferUtil.toReverseUintBuffer(sequence, 4) : Buffer.from('ffffffff', 'hex');
 
       return {
         addressIndex,
@@ -124,10 +121,10 @@ export function createUnsignedTransactions(
   const { scriptType: outputType, outScript: outputScript } = addressToOutScript(output.address);
   const outputScriptLen = varuint.encode(outputScript.length);
 
-  const outputArray = [Buffer.concat([toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])];
+  const outputArray = [Buffer.concat([bufferUtil.toReverseUintBuffer(output.value, 8), outputScriptLen, outputScript])];
   if (change) {
     if (!change.pubkeyBuf) throw new error.SDKError(createUnsignedTransactions.name, 'Public Key not exists !!');
-    const changeValue = toReverseUintBuffer(change.value, 8);
+    const changeValue = bufferUtil.toReverseUintBuffer(change.value, 8);
     const { outScript } = pubkeyToAddressAndOutScript(change.pubkeyBuf, redeemScriptType);
     const outScriptLen = varuint.encode(outScript.length);
     outputArray.push(Buffer.concat([changeValue, outScriptLen, outScript]));
