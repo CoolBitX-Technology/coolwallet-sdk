@@ -19,6 +19,7 @@ import {
   createTransferCheckedInstruction,
 } from '@solana/spl-token';
 import SOL, { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../src';
+import { VersionedMessage } from '../src/message';
 import * as stringUtil from '../src/utils/stringUtil';
 import { TOKEN_INFO } from '../src/config/tokenInfos';
 
@@ -726,5 +727,141 @@ describe('Test Solana SDK', () => {
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+  describe('Late-bound blockhash', () => {
+    const addressIndex = 0;
+
+    /** Builds the transaction the card is expected to have signed, given the blockhash it used. */
+    const expectedTransferTx = async (toPubkey: string, lamports: number, recentBlockhash: string) => {
+      const node = wallet.derivePath(bip32Path(addressIndex));
+      const expectedWallet = Keypair.fromSeed(node.privateKey);
+      const transaction = new Transaction({ feePayer: expectedWallet.publicKey, recentBlockhash }).add(
+        SystemProgram.transfer({
+          fromPubkey: expectedWallet.publicKey,
+          toPubkey: new PublicKey(toPubkey),
+          lamports,
+        })
+      );
+      const signature = (await node.sign(transaction.compileMessage().serialize().toString('hex'))) ?? new Uint8Array();
+      transaction.addSignature(expectedWallet.publicKey, Buffer.from(signature));
+      return transaction;
+    };
+
+    it('signs with the fetched blockhash, not the one carried by the transaction', async () => {
+      const toPubkey = getRandWallet();
+      const staleBlockhash = getRandWallet();
+      const freshBlockhash = getRandWallet();
+      const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
+
+      const signedTx = await sol.signTransferTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: { toPubkey, recentBlockhash: staleBlockhash, lamports },
+        addressIndex,
+        fetchBlockhash: async () => freshBlockhash,
+      });
+
+      const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+      expect(recoveredTx.recentBlockhash).toEqual(freshBlockhash);
+      expect(recoveredTx.recentBlockhash).not.toEqual(staleBlockhash);
+      expect(recoveredTx.verifySignatures()).toEqual(true);
+
+      // The signature has to cover the fresh blockhash too, not just the serialized bytes
+      const expected = await expectedTransferTx(toPubkey, lamports, freshBlockhash);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(expected.serialize().toString('hex'));
+    });
+
+    it('keeps the transaction blockhash when no hook is given', async () => {
+      const toPubkey = getRandWallet();
+      const recentBlockhash = getRandWallet();
+      const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
+
+      const signedTx = await sol.signTransferTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: { toPubkey, recentBlockhash, lamports },
+        addressIndex,
+      });
+
+      const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+      expect(recoveredTx.recentBlockhash).toEqual(recentBlockhash);
+      const expected = await expectedTransferTx(toPubkey, lamports, recentBlockhash);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(expected.serialize().toString('hex'));
+    });
+
+    it('fetches the blockhash once, after the script has been sent', async () => {
+      const toPubkey = getRandWallet();
+      const freshBlockhash = getRandWallet();
+      const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
+      const fetchBlockhash = jest.fn(async () => freshBlockhash);
+
+      await sol.signTransferTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: { toPubkey, recentBlockhash: getRandWallet(), lamports },
+        addressIndex,
+        fetchBlockhash,
+      });
+
+      expect(fetchBlockhash).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects the whole signing attempt when the hook fails', async () => {
+      const signing = sol.signTransferTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: { toPubkey: getRandWallet(), recentBlockhash: getRandWallet(), lamports: 1000 },
+        addressIndex,
+        fetchBlockhash: async () => {
+          throw new Error('rpc is down');
+        },
+      });
+
+      await expect(signing).rejects.toThrow('rpc is down');
+    });
+
+    it('applies the fetched blockhash to a versioned message, hex-encoded for legacy', async () => {
+      const node = wallet.derivePath(bip32Path(addressIndex));
+      const expectedWallet = Keypair.fromSeed(node.privateKey);
+      const toPubkey = getRandWallet();
+      const staleBlockhash = getRandWallet();
+      const freshBlockhash = getRandWallet();
+      const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
+
+      const legacyMessage = new Transaction({
+        feePayer: expectedWallet.publicKey,
+        recentBlockhash: staleBlockhash,
+      })
+        .add(
+          SystemProgram.transfer({
+            fromPubkey: expectedWallet.publicKey,
+            toPubkey: new PublicKey(toPubkey),
+            lamports,
+          })
+        )
+        .compileMessage();
+
+      const signedTx = await sol.signTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: {
+          signatures: [new Uint8Array(64)],
+          message: VersionedMessage.deserialize(Uint8Array.from(legacyMessage.serialize())),
+        },
+        addressIndex,
+        fetchBlockhash: async () => freshBlockhash,
+      });
+
+      const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+      expect(recoveredTx.recentBlockhash).toEqual(freshBlockhash);
+      expect(recoveredTx.verifySignatures()).toEqual(true);
+      const expected = await expectedTransferTx(toPubkey, lamports, freshBlockhash);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(expected.serialize().toString('hex'));
+    });
   });
 });

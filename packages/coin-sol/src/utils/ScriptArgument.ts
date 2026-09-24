@@ -111,6 +111,25 @@ export class ScriptArgument {
 
   constructor(private readonly params: ScriptArgumentParams) {}
 
+  setRecentBlockhash(recentBlockhash: types.Blockhash): void {
+    // The caller is expected to call `getRecentBlockhash` first and then build the arguments when `getRecentBlockhash` needs to be executed.
+    if (this.result) {
+      throw new SDKError(this.setRecentBlockhash.name, 'script argument is already built');
+    }
+
+    // Signing a message or a sign-in has no blockhash.
+    if (!('transaction' in this.params)) {
+      return;
+    }
+
+    if (this.params.txType === ScriptArgumentType.Versioned) {
+      VersionedMessage.setRecentBlockhash(this.params.transaction, recentBlockhash);
+      return;
+    }
+
+    this.params.transaction.recentBlockhash = recentBlockhash;
+  }
+
   toArgument(): string {
     return this.buildArgumentOnce().argument;
   }
