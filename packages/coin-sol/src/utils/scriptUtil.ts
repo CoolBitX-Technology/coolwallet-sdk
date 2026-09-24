@@ -6,6 +6,7 @@ import { createSignInMessage } from './signIn';
 import { Transaction } from './Transaction';
 import { VersionedMessage } from '../message';
 import { tx } from '@coolwallet/core';
+import type { ScriptArgument } from './ScriptArgument';
 
 /**
  * getTransferArguments
@@ -144,14 +145,15 @@ export function getScriptSigningPreActions(
   return { preActions };
 }
 
-function getScriptSigningActions(signData: types.signVersionedTransactions): {
+function getScriptSigningActions(
+  signData: types.signVersionedTransactions,
+  scriptArguments: Array<ScriptArgument>
+): {
   actions: Array<() => Promise<string | undefined>>;
 } {
-  const { transport, appPrivateKey, appId, addressIndex } = signData;
-  const versionedTxs = signData.transaction;
-  const actions = versionedTxs.map((versionedTx) => async () => {
-    const argument = getSignVersionedArguments(versionedTx.message, addressIndex);
-    return tx.command.executeScript(transport, appId, appPrivateKey, argument);
+  const { transport, appPrivateKey, appId } = signData;
+  const actions = scriptArguments.map((scriptArgument) => async () => {
+    return tx.command.executeScript(transport, appId, appPrivateKey, scriptArgument.toArgument());
   });
   return { actions };
 }
