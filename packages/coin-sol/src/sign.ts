@@ -1,22 +1,23 @@
 import { tx } from '@coolwallet/core';
 import * as types from './config/types';
-import { Message, MessageV0, VersionedMessage } from './message';
+import { Message, MessageV0 } from './message';
 
 import { Transaction } from './utils/Transaction';
 import { VersionedTransaction } from './utils/versionedTransaction';
 import { getScriptSigningActions } from './utils/scriptUtil';
 import { SignatureType } from '@coolwallet/core/lib/transaction';
 import { signVersionedTransactionType } from './config/types';
+import { ScriptArgument } from './utils/ScriptArgument';
 
 async function executeScriptWithPreActions(
   signData: types.SignDataType,
   script: string,
-  argument: string
+  scriptArgument: ScriptArgument
 ): Promise<Buffer | { r: string; s: string }> {
   const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = signData;
 
   const preActions = [() => tx.command.sendScript(transport, script)];
-  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, argument);
+  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, scriptArgument.toArgument());
 
   return tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
@@ -24,23 +25,24 @@ async function executeScriptWithPreActions(
     action,
     SignatureType.EDDSA,
     confirmCB,
-    authorizedCB,
+    authorizedCB
   );
 }
 
 async function signAllTransactions(
   signTxData: types.signVersionedTransactions,
-  preActions: Array<() => Promise<void>>
+  preActions: Array<() => Promise<void>>,
+  scriptArguments: Array<ScriptArgument>
 ): Promise<Array<Uint8Array>> {
   const { transport, confirmCB, authorizedCB } = signTxData;
-  const { actions } = await getScriptSigningActions(signTxData);
+  const { actions } = getScriptSigningActions(signTxData, scriptArguments);
   const signatures = (await tx.flow.getSignaturesFromCoolWalletV2(
     transport,
     preActions,
     actions,
     SignatureType.EDDSA,
     confirmCB,
-    authorizedCB,
+    authorizedCB
   )) as Array<Buffer>;
 
   return signatures.map((signature) => {
@@ -50,11 +52,11 @@ async function signAllTransactions(
 
 async function signTransaction(
   signTxData: types.signTxType,
-  rawTx: Transaction | VersionedMessage,
   script: string,
-  argument: string
+  scriptArgument: ScriptArgument
 ): Promise<string> {
-  const signature = (await executeScriptWithPreActions(signTxData, script, argument)) as Buffer;
+  const signature = (await executeScriptWithPreActions(signTxData, script, scriptArgument)) as Buffer;
+  const rawTx = scriptArgument.toTransaction();
   if (rawTx instanceof Message || rawTx instanceof MessageV0) {
     const signatureUint8Arrays = (signTxData as signVersionedTransactionType).transaction.signatures;
     signatureUint8Arrays[0] = new Uint8Array(signature);
@@ -67,8 +69,12 @@ async function signTransaction(
   }
 }
 
-async function signMessage(signMsgData: types.signMsgType, script: string, argument: string): Promise<string> {
-  const signature = await executeScriptWithPreActions(signMsgData, script, argument);
+async function signMessage(
+  signMsgData: types.signMsgType,
+  script: string,
+  scriptArgument: ScriptArgument
+): Promise<string> {
+  const signature = await executeScriptWithPreActions(signMsgData, script, scriptArgument);
   return signature.toString('hex');
 }
 export { signTransaction, signMessage, signAllTransactions };

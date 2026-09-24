@@ -10,18 +10,10 @@ import * as stringUtil from './utils/stringUtil';
 import * as scriptUtil from './utils/scriptUtil';
 import * as sign from './sign';
 import { TOKEN_INFO } from './config/tokenInfos';
-import {
-  compileAssociateTokenAccount,
-  compileDelegateAndCreateAccountWithSeed,
-  compileSplTokenTransaction,
-  compileTransferTransaction,
-  compileUndelegate,
-  compileStakingWithdraw,
-} from './utils/rawTransaction';
 import { createProgramAddressSync } from './utils/account';
 import { is_on_curve } from './utils/ed25519';
-import { Transaction } from './utils/Transaction';
 import { VersionedTransaction } from './utils/versionedTransaction';
+import { ScriptArgument, ScriptArgumentType } from './utils/ScriptArgument';
 
 class Solana extends COIN.EDDSACoin implements COIN.Coin {
   constructor() {
@@ -91,16 +83,19 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
         ? params.SCRIPT.TRANSFER_WITH_COMPUTE_BUDGET.scriptWithSignature
         : params.SCRIPT.TRANSFER.scriptWithSignature;
 
-    const rawTransaction = compileTransferTransaction({ ...signTxData.transaction, fromPubkey });
-    const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getTransferArguments(transactionInstruction, addressIndex);
+    const scriptArgument = new ScriptArgument({
+      txType: ScriptArgumentType.Transfer,
+      transaction,
+      fromPubkey,
+      addressIndex,
+    });
 
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+    return sign.signTransaction(signTxData, script, scriptArgument);
   }
 
   async signTransferSplTokenTransaction(signTxData: types.signTransferSplTokenTransactionType): Promise<string> {
     const { transport, transaction, appPrivateKey, appId, addressIndex } = signTxData;
-    const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
+    const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script =
       transaction.computeUnitLimit && transaction.computeUnitPrice
         ? params.SCRIPT.SPL_TOKEN_WITH_COMPUTE_BUDGET.scriptWithSignature
@@ -108,16 +103,20 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     // If given token address can be found in official token list, use it instead of the user given one.
     const tokenInfo: types.TokenInfo =
       TOKEN_INFO.find((tok) => tok.address === transaction.tokenInfo.address) ?? transaction.tokenInfo;
-    const rawTransaction = compileSplTokenTransaction({ ...transaction, signer });
-    const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getSplTokenTransferArguments(transactionInstruction, addressIndex, tokenInfo);
+    const scriptArgument = new ScriptArgument({
+      txType: ScriptArgumentType.SplTokenTransfer,
+      transaction,
+      fromPubkey,
+      addressIndex,
+      tokenInfo,
+    });
 
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+    return sign.signTransaction(signTxData, script, scriptArgument);
   }
 
   async signCreateAndTransferSPLToken(signTxData: types.signCreateAndTransferSplTokenTransaction): Promise<string> {
     const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
-    const signer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
+    const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script =
       transaction.computeUnitLimit && transaction.computeUnitPrice
         ? params.SCRIPT.CREATE_AND_SPL_TOKEN_WITH_COMPUTE_BUDGET.scriptWithSignature
@@ -125,30 +124,29 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     // If given token address can be found in official token list, use it instead of the user given one.
     const tokenInfo: types.TokenInfo =
       TOKEN_INFO.find((tok) => tok.address === transaction.tokenInfo.address) ?? transaction.tokenInfo;
-    const associateAccountInstruction = compileAssociateTokenAccount({
-      ...transaction,
-      signer,
-      owner: transaction.toPubkey,
-      associateAccount: transaction.toTokenAccount,
-      token: tokenInfo.address,
+    const scriptArgument = new ScriptArgument({
+      txType: ScriptArgumentType.CreateAndTransferSplToken,
+      transaction,
+      fromPubkey,
+      addressIndex,
+      tokenInfo,
     });
-    const transferInstructions = compileSplTokenTransaction({ ...transaction, signer }).instructions;
-    associateAccountInstruction.instructions.push(...transferInstructions);
-    const transactionInstruction = new Transaction(associateAccountInstruction);
-    const argument = scriptUtil.getCreateAndTransferSPLToken(transactionInstruction, addressIndex, tokenInfo);
 
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+    return sign.signTransaction(signTxData, script, scriptArgument);
   }
 
   async signUndelegate(signTxData: types.signUndelegateType): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
-    const feePayer = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script = params.SCRIPT.UNDELEGATE.scriptWithSignature;
-    const rawTransaction = compileUndelegate({ ...signTxData.transaction, feePayer });
-    const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getUndelegateArguments(transactionInstruction, addressIndex);
+    const scriptArgument = new ScriptArgument({
+      txType: ScriptArgumentType.Undelegate,
+      transaction,
+      fromPubkey,
+      addressIndex,
+    });
 
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+    return sign.signTransaction(signTxData, script, scriptArgument);
   }
 
   async signDelegateAndCreateAccountWithSeed(
@@ -157,67 +155,81 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
     if (signTxData.transaction.seed.length > 64) {
       throw new SDKError(this.signDelegateAndCreateAccountWithSeed.name, 'seed length cannot be greater than 32 bytes');
     }
-    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
     const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script = params.SCRIPT.DELEGATE_AND_CREATE_ACCOUNT_WITH_SEED.scriptWithSignature;
     let newAccountPubkey = signTxData.transaction.newAccountPubkey;
     if (!newAccountPubkey) {
       newAccountPubkey = await this.createWithSeed(fromPubkey, signTxData.transaction.seed, params.STAKE_PROGRAM_ID);
     }
-    const transaction = {
-      ...signTxData.transaction,
-      newAccountPubkey,
+    const scriptArgument = new ScriptArgument({
+      txType: ScriptArgumentType.DelegateAndCreateAccountWithSeed,
+      transaction,
       fromPubkey,
-      basePubkey: fromPubkey,
-    };
-    const rawTransaction = compileDelegateAndCreateAccountWithSeed(transaction);
-    const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getDelegateAndCreateAccountArguments(transactionInstruction, addressIndex);
+      newAccountPubkey,
+      addressIndex,
+    });
 
-    return sign.signTransaction({ ...signTxData, transaction }, transactionInstruction, script, argument);
+    return sign.signTransaction({ ...signTxData, transaction }, script, scriptArgument);
   }
 
   async signStackingWithdrawTransaction(signTxData: types.signStakingWithdrawType): Promise<string> {
-    const { transport, appPrivateKey, appId, addressIndex } = signTxData;
-    const authorizedPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
+    const { transport, appPrivateKey, appId, addressIndex, transaction } = signTxData;
+    const fromPubkey = await this.getAddress(transport, appPrivateKey, appId, addressIndex);
     const script = params.SCRIPT.STAKING_WITHDRAW.scriptWithSignature;
-    const rawTransaction = compileStakingWithdraw({ ...signTxData.transaction, authorizedPubkey });
-    const transactionInstruction = new Transaction(rawTransaction);
-    const argument = scriptUtil.getWithdrawArguments(transactionInstruction, addressIndex);
+    const scriptArgument = new ScriptArgument({
+      txType: ScriptArgumentType.StakingWithdraw,
+      transaction,
+      fromPubkey,
+      addressIndex,
+    });
 
-    return sign.signTransaction(signTxData, transactionInstruction, script, argument);
+    return sign.signTransaction(signTxData, script, scriptArgument);
   }
 
   async signSignInMessage(signMsgData: types.signSignInMessageType): Promise<string> {
     const { addressIndex } = signMsgData;
     const script = params.SCRIPT.SIGN_IN.scriptWithSignature;
     const message = signMsgData.message;
-    const argument = scriptUtil.getSignInArguments(message, addressIndex);
+    const scriptArgument = new ScriptArgument({ txType: ScriptArgumentType.SignIn, message, addressIndex });
 
-    return sign.signMessage(signMsgData, script, argument);
+    return sign.signMessage(signMsgData, script, scriptArgument);
   }
 
   async signMessage(signMsgData: types.signMessageType): Promise<string> {
     const { addressIndex } = signMsgData;
     const script = params.SCRIPT.SIGN_MESSAGE.scriptWithSignature;
     const message = signMsgData.message;
-    const argument = scriptUtil.getSignMessageArguments(message, addressIndex);
+    const scriptArgument = new ScriptArgument({ txType: ScriptArgumentType.SignMessage, message, addressIndex });
 
-    return sign.signMessage(signMsgData, script, argument);
+    return sign.signMessage(signMsgData, script, scriptArgument);
   }
 
   async signTransaction(signTxData: types.signVersionedTransactionType): Promise<string> {
     const { addressIndex } = signTxData;
     const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
-    const argument = scriptUtil.getSignVersionedArguments(signTxData.transaction.message, addressIndex);
-    return sign.signTransaction(signTxData, signTxData.transaction.message, script, argument);
+    const scriptArgument = new ScriptArgument({
+      txType: ScriptArgumentType.Versioned,
+      transaction: signTxData.transaction.message,
+      addressIndex,
+    });
+
+    return sign.signTransaction(signTxData, script, scriptArgument);
   }
 
   async signAllTransactions(signTxData: types.signVersionedTransactions): Promise<string[]> {
     const script = params.SCRIPT.SMART_CONTRACT.scriptWithSignature;
     const { preActions } = scriptUtil.getScriptSigningPreActions(signTxData, script);
+    const scriptArguments = signTxData.transaction.map(
+      ({ message }) =>
+        new ScriptArgument({
+          txType: ScriptArgumentType.Versioned,
+          transaction: message,
+          addressIndex: signTxData.addressIndex,
+        })
+    );
 
-    const signatures = await sign.signAllTransactions(signTxData, preActions);
+    const signatures = await sign.signAllTransactions(signTxData, preActions, scriptArguments);
 
     return signatures.map((signature, index) => {
       const _signatures = [];
