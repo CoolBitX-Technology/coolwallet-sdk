@@ -9,15 +9,28 @@ import { SignatureType } from '@coolwallet/core/lib/transaction';
 import { signVersionedTransactionType } from './config/types';
 import { ScriptArgument } from './utils/ScriptArgument';
 
+function once<T>(resolve: () => Promise<T>): () => Promise<T> {
+  let resolved: Promise<T> | undefined;
+  return () => {
+    if (!resolved) resolved = resolve();
+    return resolved;
+  };
+}
+
 async function executeScriptWithPreActions(
   signData: types.SignDataType,
   script: string,
-  scriptArgument: ScriptArgument
+  scriptArgument: ScriptArgument,
+  fetchBlockhash?: () => Promise<types.Blockhash>
 ): Promise<Buffer | { r: string; s: string }> {
   const { transport, appPrivateKey, appId, confirmCB, authorizedCB } = signData;
 
   const preActions = [() => tx.command.sendScript(transport, script)];
-  const action = () => tx.command.executeScript(transport, appId, appPrivateKey, scriptArgument.toArgument());
+  const action = async () => {
+    // CW-29319: Refresh the blockhash here to avoid transaction timeouts.
+    if (fetchBlockhash) scriptArgument.setRecentBlockhash(await fetchBlockhash());
+    return tx.command.executeScript(transport, appId, appPrivateKey, scriptArgument.toArgument());
+  };
 
   return tx.flow.getSingleSignatureFromCoolWalletV2(
     transport,
@@ -35,7 +48,9 @@ async function signAllTransactions(
   scriptArguments: Array<ScriptArgument>
 ): Promise<Array<Uint8Array>> {
   const { transport, confirmCB, authorizedCB } = signTxData;
-  const { actions } = getScriptSigningActions(signTxData, scriptArguments);
+  // The batch must share one blockhash, so it is fetched once
+  const fetchBlockhash = signTxData.fetchBlockhash ? once(signTxData.fetchBlockhash) : undefined;
+  const { actions } = getScriptSigningActions(signTxData, scriptArguments, fetchBlockhash);
   const signatures = (await tx.flow.getSignaturesFromCoolWalletV2(
     transport,
     preActions,
@@ -55,7 +70,12 @@ async function signTransaction(
   script: string,
   scriptArgument: ScriptArgument
 ): Promise<string> {
-  const signature = (await executeScriptWithPreActions(signTxData, script, scriptArgument)) as Buffer;
+  const signature = (await executeScriptWithPreActions(
+    signTxData,
+    script,
+    scriptArgument,
+    signTxData.fetchBlockhash
+  )) as Buffer;
   const rawTx = scriptArgument.toTransaction();
   if (rawTx instanceof Message || rawTx instanceof MessageV0) {
     const signatureUint8Arrays = (signTxData as signVersionedTransactionType).transaction.signatures;

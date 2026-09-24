@@ -229,6 +229,17 @@ type Mandatory<T> = T extends SignInMessage | string
     appId: string;
     transaction: T;
     addressIndex: number;
+    /**
+     * Optional late-binding hook returning a fresh base58 blockhash. When provided, the SDK calls
+     * it after `preActions` have run and just before the argument goes to the card, and builds the
+     * argument with that blockhash instead of the one carried by `transaction`. Without it the
+     * transaction's own blockhash is used and behaviour is unchanged.
+     *
+     * Timeouts and failures are the caller's responsibility. A rejection fails the whole signing
+     * attempt with the card already holding the script and waiting for the argument, so catch
+     * inside the hook and return a usable blockhash if a fallback is wanted.
+     */
+    fetchBlockhash?: () => Promise<Blockhash>;
     confirmCB?(): void;
     authorizedCB?(): void;
   };
