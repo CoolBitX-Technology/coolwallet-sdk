@@ -147,12 +147,14 @@ export function getScriptSigningPreActions(
 
 function getScriptSigningActions(
   signData: types.signVersionedTransactions,
-  scriptArguments: Array<ScriptArgument>
+  scriptArguments: Array<ScriptArgument>,
+  fetchBlockhash?: () => Promise<types.Blockhash>
 ): {
   actions: Array<() => Promise<string | undefined>>;
 } {
   const { transport, appPrivateKey, appId } = signData;
   const actions = scriptArguments.map((scriptArgument) => async () => {
+    if (fetchBlockhash) scriptArgument.setRecentBlockhash(await fetchBlockhash());
     return tx.command.executeScript(transport, appId, appPrivateKey, scriptArgument.toArgument());
   });
   return { actions };
