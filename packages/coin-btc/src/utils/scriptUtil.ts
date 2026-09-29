@@ -6,7 +6,7 @@ import * as varuint from './varuintUtil';
 import { COIN_TYPE } from '../config/param';
 import { utils, tx } from '@coolwallet/core';
 import { ScriptType, Input, Output, Change, PreparedData, Callback } from '../config/types';
-import { pubkeyToAddressAndOutScript, toReverseUintBuffer } from './transactionUtil';
+import { pubkeyToAddressAndOutScript } from './transactionUtil';
 import { PathType } from '@coolwallet/core/lib/config/param';
 import { shouldUseLegacyScript10Or11, shouldUseLegacyUtxoScript } from './versionUtil';
 
@@ -31,6 +31,11 @@ const getPath = async (addressIndex: number, purpose?: number, pathType?: PathTy
 // `sequence ? ... : ffffffff`，所以 sequence 0 也會被正規化成 0xffffffff。只改單邊
 // （例如這裡改用 ??）會重新製造出這個修正要消滅的那種 mismatch。
 const DEFAULT_SEQUENCE = 0xffffffff;
+
+// 卡片是拿 script argument 裡的 nVersion 組 sighash preimage 的，
+// 所以這個預設值必須與 createUnsignedTransactions 的 `version = 1` 相同 —— 呼叫端省略
+// version 時，兩邊都得落在 1，否則卡片又會對另一筆交易簽名。
+const DEFAULT_VERSION = 1;
 
 function assertSequencesAreAllSame(inputs: Array<Input>): void {
   const sequences = inputs.map((input) => (input.sequence ? input.sequence : DEFAULT_SEQUENCE));
@@ -226,7 +231,8 @@ export async function getWitness0Argument(
   scriptType: ScriptType,
   inputs: Array<Input>,
   output: Output,
-  change?: Change
+  change?: Change,
+  version = DEFAULT_VERSION
 ): Promise<string> {
   const { scriptType: outputType, scriptPubKey } = txUtil.addressToOutScript(output.address);
   if (!scriptPubKey) {
@@ -241,7 +247,7 @@ export async function getWitness0Argument(
   const sequence = inputs[0].sequence ? inputs[0].sequence : DEFAULT_SEQUENCE;
   const reverseSequence = bufferUtil.toReverseUintBuffer(sequence, 4);
 
-  const reverseVersion = Buffer.from('02000000', 'hex');
+  const reverseVersion = bufferUtil.toReverseUintBuffer(version, 4);
 
   const prevouts = inputs.map((input) => {
     return Buffer.concat([
@@ -314,13 +320,14 @@ export async function getWitness1Argument(
   scriptType: ScriptType,
   inputs: Array<Input>,
   output: Output,
-  change?: Change
+  change?: Change,
+  version = DEFAULT_VERSION
 ): Promise<string> {
   const { scriptType: outputType, scriptPubKey } = txUtil.addressToOutScript(output.address);
   if (!scriptPubKey) {
     throw new error.SDKError(getWitness1Argument.name, `OutputHash Undefined`);
   }
-  const reverseVersion = Buffer.from('02000000', 'hex');
+  const reverseVersion = bufferUtil.toReverseUintBuffer(version, 4);
   const reverseLockTime = Buffer.from('00000000', 'hex');
   const prevouts = inputs.map((input) => {
     return Buffer.concat([
@@ -330,9 +337,7 @@ export async function getWitness1Argument(
   });
 
   const hashPrevouts = cryptoUtil.sha256(Buffer.concat(prevouts));
-  const amounts = inputs.map((input) => {
-    return Buffer.concat([toReverseUintBuffer(input.preValue, 8)]);
-  });
+  const amounts = inputs.map((input) => bufferUtil.toReverseUintBuffer(input.preValue, 8));
   const hashAmounts = cryptoUtil.sha256(Buffer.concat(amounts));
 
   const scriptPubkeys = inputs.map((input) => {
@@ -358,11 +363,9 @@ export async function getWitness1Argument(
   });
   const hashScriptPubkeys = cryptoUtil.sha256(Buffer.concat(scriptPubkeys));
 
-  const sequences = inputs.map((input) => {
-    return Buffer.concat([
-      input.sequence ? bufferUtil.toReverseUintBuffer(input.sequence, 4) : Buffer.from('fdffffff', 'hex'),
-    ]);
-  });
+  const sequences = inputs.map((input) =>
+    bufferUtil.toReverseUintBuffer(input.sequence ? input.sequence : DEFAULT_SEQUENCE, 4)
+  );
   const hashSequences = cryptoUtil.sha256(Buffer.concat(sequences));
 
   const zeroPadding = Buffer.from('00000000', 'hex');
@@ -415,164 +418,5 @@ export async function getWitness1Argument(
     changeScriptType,
     changeAmount,
     changePath,
-  ]).toString('hex');
-}
-
-export async function getUSDTArgument(
-  scriptType: ScriptType,
-  inputs: Array<Input>,
-  output: Output,
-  value: string,
-  change?: Change
-) {
-  const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
-  if (!outputHash) {
-    throw new error.SDKError(getBTCArgument.name, `OutputHash Undefined`);
-  }
-  let outputScriptType;
-  let outputHashBuf;
-  if (outputType === ScriptType.P2PKH || outputType === ScriptType.P2SH_P2WPKH || outputType === ScriptType.P2WPKH) {
-    outputScriptType = varuint.encode(outputType);
-    outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-  } else if (outputType === ScriptType.P2WSH) {
-    outputScriptType = varuint.encode(outputType);
-    outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
-  } else {
-    throw new error.SDKError(getBTCArgument.name, `Unsupport ScriptType '${outputType}'`);
-  }
-  const outputAmount = bufferUtil.toUintBuffer(output.value, 8);
-  //[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
-  let haveChange;
-  let changeScriptType;
-  let changeAmount;
-  let changePath;
-  if (change) {
-    if (!change.pubkeyBuf) throw new error.SDKError(getBTCArgument.name, 'Public Key not exists !!');
-    haveChange = varuint.encode(1);
-    changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
-    changeAmount = bufferUtil.toUintBuffer(change.value, 8);
-    changePath = Buffer.from(await utils.getPath(COIN_TYPE, change.addressIndex), 'hex');
-  } else {
-    haveChange = Buffer.from('00', 'hex');
-    changeScriptType = Buffer.from('00', 'hex');
-    changeAmount = bufferUtil.toUintBuffer(0, 8); //)Buffer.from('0000000000000000', 'hex');
-    changePath = bufferUtil.toUintBuffer(0, 21); //Buffer.from('000000000000000000000000000000000000000000', 'hex');
-  }
-  const prevouts = inputs.map((input) => {
-    return Buffer.concat([
-      Buffer.from(input.preTxHash, 'hex').reverse(),
-      bufferUtil.toReverseUintBuffer(input.preIndex, 4),
-    ]);
-  });
-  const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
-  const sequences = inputs.map((input) => {
-    return Buffer.concat([
-      input.sequence ? bufferUtil.toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
-    ]);
-  });
-  const hashSequence = cryptoUtil.doubleSha256(Buffer.concat(sequences));
-
-  const usdtAmount = bufferUtil.toUintBuffer(value, 8);
-
-  return Buffer.concat([
-    outputScriptType,
-    outputAmount,
-    outputHashBuf,
-    haveChange,
-    changeScriptType,
-    changeAmount,
-    changePath,
-    hashPrevouts,
-    hashSequence,
-    usdtAmount,
-  ]).toString('hex');
-}
-
-export async function getUSDTNewArgument(
-  scriptType: ScriptType,
-  inputs: Array<Input>,
-  output: Output,
-  value: string,
-  change?: Change
-): Promise<string> {
-  const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
-  if (!outputHash) {
-    throw new error.SDKError(getBTCArgument.name, `OutputHash Undefined`);
-  }
-  const reverseVersion = Buffer.from('02000000', 'hex');
-
-  const prevouts = inputs.map((input) => {
-    return Buffer.concat([
-      Buffer.from(input.preTxHash, 'hex').reverse(),
-      bufferUtil.toReverseUintBuffer(input.preIndex, 4),
-    ]);
-  });
-
-  const hashPrevouts = cryptoUtil.doubleSha256(Buffer.concat(prevouts));
-  const sequences = inputs.map((input) => {
-    return Buffer.concat([
-      input.sequence ? bufferUtil.toReverseUintBuffer(input.sequence, 4) : Buffer.from('ffffffff', 'hex'),
-    ]);
-  });
-  const hashSequences = cryptoUtil.doubleSha256(Buffer.concat(sequences));
-
-  const zeroPadding = Buffer.from('00000000', 'hex');
-  const usdtDust = bufferUtil.toUintBuffer(output.value, 8);
-
-  let outputScriptType;
-  let outputHashBuf;
-  if (outputType === ScriptType.P2PKH || outputType === ScriptType.P2SH_P2WPKH || outputType === ScriptType.P2WPKH) {
-    outputScriptType = varuint.encode(outputType);
-    outputHashBuf = Buffer.from(`000000000000000000000000${outputHash.toString('hex')}`, 'hex');
-  } else if (outputType === ScriptType.P2WSH) {
-    outputScriptType = varuint.encode(outputType);
-    outputHashBuf = Buffer.from(outputHash.toString('hex'), 'hex');
-  } else {
-    throw new error.SDKError(getBTCArgument.name, `Unsupport ScriptType '${outputType}'`);
-  }
-  const usdtAmount = bufferUtil.toUintBuffer(value, 8);
-  //[haveChange(1B)] [changeScriptType(1B)] [changeAmount(8B)] [changePath(21B)]
-  let haveChange;
-  let changeScriptType;
-  let changeAmount;
-  let changePath;
-  if (change) {
-    if (!change.pubkeyBuf) throw new error.SDKError(getWitness1Argument.name, 'Public Key not exists !!');
-    haveChange = varuint.encode(1);
-    changeScriptType = bufferUtil.toUintBuffer(scriptType, 1);
-    changeAmount = bufferUtil.toUintBuffer(change.value, 8);
-    changePath = Buffer.from(
-      await utils.getPath(COIN_TYPE, change.addressIndex, 5, PathType.BIP32, change.purposeIndex),
-      'hex'
-    );
-  } else {
-    haveChange = Buffer.from('00', 'hex');
-    changeScriptType = Buffer.from('00', 'hex');
-    changeAmount = bufferUtil.toUintBuffer(0, 8); //)Buffer.from('0000000000000000', 'hex');
-    changePath = bufferUtil.toUintBuffer(0, 21); //Buffer.from('000000000000000000000000000000000000000000', 'hex');
-  }
-
-  const reverseSequence = Buffer.from('fdffffff', 'hex');
-
-  const reverseLockTime = Buffer.from('00000000', 'hex');
-
-  const reverseHashType = Buffer.from('01000000', 'hex');
-
-  return Buffer.concat([
-    reverseVersion,
-    hashPrevouts,
-    hashSequences,
-    zeroPadding,
-    outputScriptType,
-    usdtDust,
-    usdtAmount,
-    outputHashBuf,
-    haveChange,
-    changeScriptType,
-    changeAmount,
-    changePath,
-    reverseSequence,
-    reverseLockTime,
-    reverseHashType,
   ]).toString('hex');
 }
