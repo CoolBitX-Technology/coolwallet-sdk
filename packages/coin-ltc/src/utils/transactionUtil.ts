@@ -22,9 +22,12 @@ export function addressToOutScript(address: string): {
   } else if (address.startsWith('M')) {
     scriptType = types.ScriptType.P2SH_P2WPKH;
     payment = bitcoin.payments.p2sh(input);
-  } else if (address.startsWith('ltc')) {
+  } else if (address.startsWith('ltc1q') && address.length === 43) {
     scriptType = types.ScriptType.P2WPKH;
     payment = bitcoin.payments.p2wpkh(input);
+  } else if (address.startsWith('ltc1q') && address.length === 63) {
+    scriptType = types.ScriptType.P2WSH;
+    payment = bitcoin.payments.p2wsh(input);
   } else {
     throw new error.SDKError(addressToOutScript.name, `Unsupport Address '${address}'`);
   }
