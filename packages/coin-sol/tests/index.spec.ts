@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import * as bip39 from 'bip39';
 import base58 from 'bs58';
-import { CardType, Transport } from '@coolwallet/core';
+import { CardType, Transport, tx } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize, getTxDetail, DisplayBuilder, CURVE, HDWallet } from '@coolwallet/testing-library';
 import {
@@ -12,6 +12,8 @@ import {
   StakeProgram,
   LAMPORTS_PER_SOL,
   ComputeBudgetProgram,
+  TransactionMessage,
+  VersionedTransaction,
 } from '@solana/web3.js';
 import {
   createAssociatedTokenAccountInstruction,
@@ -19,6 +21,7 @@ import {
   createTransferCheckedInstruction,
 } from '@solana/spl-token';
 import SOL, { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../src';
+import { VersionedMessage } from '../src/message';
 import * as stringUtil from '../src/utils/stringUtil';
 import { TOKEN_INFO } from '../src/config/tokenInfos';
 
@@ -726,5 +729,371 @@ describe('Test Solana SDK', () => {
       .wrapPage('PRESS', 'BUTToN')
       .finalize();
     expect(display).toEqual(expectedTxDetail.toLowerCase());
+  });
+  describe('Late-bound blockhash', () => {
+    const addressIndex = 0;
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    /** Builds the transaction the card is expected to have signed, given the blockhash it used. */
+    const expectedTransferTx = async (toPubkey: string, lamports: number, recentBlockhash: string) => {
+      const node = wallet.derivePath(bip32Path(addressIndex));
+      const expectedWallet = Keypair.fromSeed(node.privateKey);
+      const transaction = new Transaction({ feePayer: expectedWallet.publicKey, recentBlockhash }).add(
+        SystemProgram.transfer({
+          fromPubkey: expectedWallet.publicKey,
+          toPubkey: new PublicKey(toPubkey),
+          lamports,
+        })
+      );
+      const signature = (await node.sign(transaction.compileMessage().serialize().toString('hex'))) ?? new Uint8Array();
+      transaction.addSignature(expectedWallet.publicKey, Buffer.from(signature));
+      return transaction;
+    };
+
+    it('signs with the fetched blockhash, not the one carried by the transaction', async () => {
+      const toPubkey = getRandWallet();
+      const staleBlockhash = getRandWallet();
+      const freshBlockhash = getRandWallet();
+      const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
+
+      const signedTx = await sol.signTransferTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: { toPubkey, recentBlockhash: staleBlockhash, lamports },
+        addressIndex,
+        fetchBlockhash: async () => freshBlockhash,
+      });
+
+      const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+      expect(recoveredTx.recentBlockhash).toEqual(freshBlockhash);
+      expect(recoveredTx.recentBlockhash).not.toEqual(staleBlockhash);
+      expect(recoveredTx.verifySignatures()).toEqual(true);
+
+      // The signature has to cover the fresh blockhash too, not just the serialized bytes
+      const expected = await expectedTransferTx(toPubkey, lamports, freshBlockhash);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(expected.serialize().toString('hex'));
+    });
+
+    it('keeps the transaction blockhash when no hook is given', async () => {
+      const toPubkey = getRandWallet();
+      const recentBlockhash = getRandWallet();
+      const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
+
+      const signedTx = await sol.signTransferTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: { toPubkey, recentBlockhash, lamports },
+        addressIndex,
+      });
+
+      const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+      expect(recoveredTx.recentBlockhash).toEqual(recentBlockhash);
+      const expected = await expectedTransferTx(toPubkey, lamports, recentBlockhash);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(expected.serialize().toString('hex'));
+    });
+
+    it('fetches the blockhash once, after the script is sent and before the argument is', async () => {
+      const sendScript = jest.spyOn(tx.command, 'sendScript');
+      const executeScript = jest.spyOn(tx.command, 'executeScript');
+      const fetchBlockhash = jest.fn(async () => getRandWallet());
+
+      await sol.signTransferTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: { toPubkey: getRandWallet(), recentBlockhash: getRandWallet(), lamports: 1000 },
+        addressIndex,
+        fetchBlockhash,
+      });
+
+      const [sendScriptOrder] = sendScript.mock.invocationCallOrder;
+      const [fetchBlockhashOrder] = fetchBlockhash.mock.invocationCallOrder;
+      const [executeScriptOrder] = executeScript.mock.invocationCallOrder;
+      expect(fetchBlockhash).toHaveBeenCalledTimes(1);
+      expect(sendScriptOrder).toBeLessThan(fetchBlockhashOrder);
+      expect(fetchBlockhashOrder).toBeLessThan(executeScriptOrder);
+    });
+
+    it('rejects the whole signing attempt without sending the argument when the hook fails', async () => {
+      const executeScript = jest.spyOn(tx.command, 'executeScript');
+
+      const signing = sol.signTransferTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: { toPubkey: getRandWallet(), recentBlockhash: getRandWallet(), lamports: 1000 },
+        addressIndex,
+        fetchBlockhash: async () => {
+          throw new Error('rpc is down');
+        },
+      });
+
+      await expect(signing).rejects.toThrow('rpc is down');
+      expect(executeScript).not.toHaveBeenCalled();
+    });
+
+    describe('every compiled entry point', () => {
+      type FetchBlockhash = () => Promise<string>;
+      const signingProps = (fetchBlockhash: FetchBlockhash) => ({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        addressIndex,
+        fetchBlockhash,
+      });
+
+      const compiledEntryPoints = [
+        {
+          name: 'signTransferTransaction',
+          sign: (recentBlockhash: string, fetchBlockhash: FetchBlockhash) => {
+            const transaction = { toPubkey: getRandWallet(), recentBlockhash, lamports: 1000 };
+            return {
+              transaction,
+              signing: sol.signTransferTransaction({ ...signingProps(fetchBlockhash), transaction }),
+            };
+          },
+        },
+        {
+          name: 'signTransferTransaction with compute budget',
+          sign: (recentBlockhash: string, fetchBlockhash: FetchBlockhash) => {
+            const transaction = {
+              toPubkey: getRandWallet(),
+              recentBlockhash,
+              lamports: 1000,
+              computeUnitPrice: '1000',
+              computeUnitLimit: '200000',
+            };
+            return {
+              transaction,
+              signing: sol.signTransferTransaction({ ...signingProps(fetchBlockhash), transaction }),
+            };
+          },
+        },
+        {
+          name: 'signTransferSplTokenTransaction',
+          sign: (recentBlockhash: string, fetchBlockhash: FetchBlockhash) => {
+            const transaction = {
+              fromTokenAccount: getRandWallet(),
+              toTokenAccount: getRandWallet(),
+              recentBlockhash,
+              amount: 1000,
+              tokenInfo: tokens[0],
+              programId: TOKEN_PROGRAM_ID,
+            };
+            return {
+              transaction,
+              signing: sol.signTransferSplTokenTransaction({ ...signingProps(fetchBlockhash), transaction }),
+            };
+          },
+        },
+        {
+          name: 'signCreateAndTransferSPLToken',
+          sign: (recentBlockhash: string, fetchBlockhash: FetchBlockhash) => {
+            const transaction = {
+              fromTokenAccount: getRandWallet(),
+              toPubkey: getRandWallet(),
+              toTokenAccount: getRandWallet(),
+              recentBlockhash,
+              amount: 1000,
+              tokenInfo: tokens[0],
+              programId: TOKEN_PROGRAM_ID,
+            };
+            return {
+              transaction,
+              signing: sol.signCreateAndTransferSPLToken({ ...signingProps(fetchBlockhash), transaction }),
+            };
+          },
+        },
+        {
+          name: 'signUndelegate',
+          sign: (recentBlockhash: string, fetchBlockhash: FetchBlockhash) => {
+            const transaction = { stakePubkey: getRandWallet(), authorizedPubkey: walletAddress, recentBlockhash };
+            return { transaction, signing: sol.signUndelegate({ ...signingProps(fetchBlockhash), transaction }) };
+          },
+        },
+        {
+          name: 'signDelegateAndCreateAccountWithSeed',
+          sign: (recentBlockhash: string, fetchBlockhash: FetchBlockhash) => {
+            const transaction = { votePubkey: getRandWallet(), seed: 'stake:0', lamports: 1000, recentBlockhash };
+            return {
+              transaction,
+              signing: sol.signDelegateAndCreateAccountWithSeed({ ...signingProps(fetchBlockhash), transaction }),
+            };
+          },
+        },
+        {
+          name: 'signStackingWithdrawTransaction',
+          sign: (recentBlockhash: string, fetchBlockhash: FetchBlockhash) => {
+            const transaction = {
+              stakePubkey: getRandWallet(),
+              withdrawToPubKey: getRandWallet(),
+              recentBlockhash,
+              lamports: 1000,
+            };
+            return {
+              transaction,
+              signing: sol.signStackingWithdrawTransaction({ ...signingProps(fetchBlockhash), transaction }),
+            };
+          },
+        },
+      ];
+
+      it.each(compiledEntryPoints)(
+        "$name signs with the fetched blockhash and leaves the caller's transaction untouched",
+        async ({ sign }) => {
+          const staleBlockhash = getRandWallet();
+          const freshBlockhash = getRandWallet();
+
+          const { transaction, signing } = sign(staleBlockhash, async () => freshBlockhash);
+          const recoveredTx = Transaction.from(Buffer.from(await signing, 'hex'));
+
+          expect(recoveredTx.recentBlockhash).toEqual(freshBlockhash);
+          expect(recoveredTx.verifySignatures()).toEqual(true);
+          expect(transaction.recentBlockhash).toEqual(staleBlockhash);
+        }
+      );
+    });
+
+    it('applies the fetched blockhash to a versioned message, hex-encoded for legacy', async () => {
+      const node = wallet.derivePath(bip32Path(addressIndex));
+      const expectedWallet = Keypair.fromSeed(node.privateKey);
+      const toPubkey = getRandWallet();
+      const staleBlockhash = getRandWallet();
+      const freshBlockhash = getRandWallet();
+      const lamports = Math.round(((getRandInt(10000000) + 1) / 10000000.0) * LAMPORTS_PER_SOL);
+
+      const legacyMessage = new Transaction({
+        feePayer: expectedWallet.publicKey,
+        recentBlockhash: staleBlockhash,
+      })
+        .add(
+          SystemProgram.transfer({
+            fromPubkey: expectedWallet.publicKey,
+            toPubkey: new PublicKey(toPubkey),
+            lamports,
+          })
+        )
+        .compileMessage();
+
+      const signedTx = await sol.signTransaction({
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        transaction: {
+          signatures: [new Uint8Array(64)],
+          message: VersionedMessage.deserialize(Uint8Array.from(legacyMessage.serialize())),
+        },
+        addressIndex,
+        fetchBlockhash: async () => freshBlockhash,
+      });
+
+      const recoveredTx = Transaction.from(Buffer.from(signedTx, 'hex'));
+      expect(recoveredTx.recentBlockhash).toEqual(freshBlockhash);
+      expect(recoveredTx.verifySignatures()).toEqual(true);
+      const expected = await expectedTransferTx(toPubkey, lamports, freshBlockhash);
+      expect(recoveredTx.serialize().toString('hex')).toEqual(expected.serialize().toString('hex'));
+    });
+
+    describe('versioned messages', () => {
+      const payerKey = () => Keypair.fromSeed(wallet.derivePath(bip32Path(addressIndex)).privateKey).publicKey;
+      const transferInstructions = () => [
+        SystemProgram.transfer({ fromPubkey: payerKey(), toPubkey: new PublicKey(getRandWallet()), lamports: 1000 }),
+      ];
+
+      const legacyMessageWith = (recentBlockhash: string) => {
+        const legacyMessage = new Transaction({ feePayer: payerKey(), recentBlockhash })
+          .add(...transferInstructions())
+          .compileMessage();
+        return VersionedMessage.deserialize(Uint8Array.from(legacyMessage.serialize()));
+      };
+
+      const v0MessageWith = (recentBlockhash: string) => {
+        const v0Message = new TransactionMessage({
+          payerKey: payerKey(),
+          recentBlockhash,
+          instructions: transferInstructions(),
+        }).compileToV0Message();
+        return VersionedMessage.deserialize(v0Message.serialize());
+      };
+
+      /** The card's signature has to cover exactly the message bytes that go out for broadcast. */
+      const recoverSignedByCard = async (signedTx: string) => {
+        const recoveredTx = VersionedTransaction.deserialize(Buffer.from(signedTx, 'hex'));
+        const node = wallet.derivePath(bip32Path(addressIndex));
+        const messageHex = Buffer.from(recoveredTx.message.serialize()).toString('hex');
+        const expectedSignature = (await node.sign(messageHex)) ?? new Uint8Array();
+        expect(Buffer.from(recoveredTx.signatures[0])).toEqual(Buffer.from(expectedSignature));
+        return recoveredTx;
+      };
+
+      it("signTransaction applies the fetched blockhash to a v0 message, leaving the caller's untouched", async () => {
+        const staleBlockhash = getRandWallet();
+        const freshBlockhash = getRandWallet();
+        const message = v0MessageWith(staleBlockhash);
+
+        const signedTx = await sol.signTransaction({
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          transaction: { signatures: [new Uint8Array(64)], message },
+          addressIndex,
+          fetchBlockhash: async () => freshBlockhash,
+        });
+
+        const recoveredTx = await recoverSignedByCard(signedTx);
+        expect(recoveredTx.version).toEqual(0);
+        expect(recoveredTx.message.recentBlockhash).toEqual(freshBlockhash);
+        expect(message.recentBlockhash).toEqual(staleBlockhash);
+      });
+
+      it('signAllTransactions fetches once and signs the whole batch with that blockhash', async () => {
+        const staleBlockhash = getRandWallet();
+        const freshBlockhash = getRandWallet();
+        const messages = [legacyMessageWith(staleBlockhash), v0MessageWith(staleBlockhash)];
+        const originalMessageBytes = messages.map((message) => Buffer.from(message.serialize()).toString('hex'));
+        const fetchBlockhash = jest.fn(async () => freshBlockhash);
+
+        const signedTxs = await sol.signAllTransactions({
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          transaction: messages.map((message) => ({ signatures: [new Uint8Array(64)], message })),
+          addressIndex,
+          fetchBlockhash,
+        });
+
+        const recoveredTxs = await Promise.all(signedTxs.map(recoverSignedByCard));
+        expect(fetchBlockhash).toHaveBeenCalledTimes(1);
+        expect(recoveredTxs.map((recoveredTx) => recoveredTx.version)).toEqual(['legacy', 0]);
+        expect(recoveredTxs.map((recoveredTx) => recoveredTx.message.recentBlockhash)).toEqual([
+          freshBlockhash,
+          freshBlockhash,
+        ]);
+        expect(messages.map((message) => Buffer.from(message.serialize()).toString('hex'))).toEqual(
+          originalMessageBytes
+        );
+      });
+
+      it("signAllTransactions keeps each message's own blockhash when no hook is given", async () => {
+        const blockhashes = [getRandWallet(), getRandWallet()];
+        const messages = [legacyMessageWith(blockhashes[0]), v0MessageWith(blockhashes[1])];
+
+        const signedTxs = await sol.signAllTransactions({
+          transport,
+          appPrivateKey: props.appPrivateKey,
+          appId: props.appId,
+          transaction: messages.map((message) => ({ signatures: [new Uint8Array(64)], message })),
+          addressIndex,
+        });
+
+        const recoveredTxs = await Promise.all(signedTxs.map(recoverSignedByCard));
+        expect(recoveredTxs.map((recoveredTx) => recoveredTx.message.recentBlockhash)).toEqual(blockhashes);
+      });
+    });
   });
 });
