@@ -2,11 +2,19 @@ name: Check and publish npm packages
 
 on:
   push:
-    branches: [ master, stg*, hotfix*, beta, feat/CW-29077-use-oidc ]
+    branches: [ master, stg*, hotfix*, beta ]
 
 permissions:
   contents: read
   id-token: write
+
+# This job always iterates the same full package list regardless of which
+# branch triggered it, so any overlapping run (same branch or different) can
+# race on the same npm package/git tag. Queue runs instead of letting them
+# race; don't cancel one mid-publish since that could leave things half-done.
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
 
 jobs:
   check_and_publish_npm_packages:
@@ -35,5 +43,3 @@ jobs:
 
     - name: Publish action
       uses: ./.github/publish-action
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

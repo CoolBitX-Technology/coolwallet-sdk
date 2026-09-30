@@ -12514,25 +12514,114 @@ function run() {
                 case 0:
                     context = github.context;
                     console.log('context :', context);
-                    // TEMP(CW-29077 OIDC test): restricted to coin-bch only for OIDC verification.
-                    // Revert to the full package list below once verification is done.
-                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bch')];
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/core')];
                 case 1:
-                    // TEMP(CW-29077 OIDC test): restricted to coin-bch only for OIDC verification.
-                    // Revert to the full package list below once verification is done.
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ada')];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-aptos')];
+                case 3:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-atom')];
+                case 4:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bch')];
+                case 5:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bnb')];
+                case 6:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-bsc')];
+                case 7:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-btc')];
+                case 8:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-cro')];
+                case 9:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-cronos')];
+                case 10:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-doge')];
+                case 11:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-dot')];
+                case 12:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-etc')];
+                case 13:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-eth')];
+                case 14:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-evm')];
+                case 15:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-icx')];
+                case 16:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-iotx')];
+                case 17:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-kas')];
+                case 18:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ltc')];
+                case 19:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sol')];
+                case 20:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-terra')];
+                case 21:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-theta')];
+                case 22:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-ton')];
+                case 23:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-trx')];
+                case 24:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xlm')];
+                case 25:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xrp')];
+                case 26:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-xtz')];
+                case 27:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-sui')];
+                case 28:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/coin-zec')];
+                case 29:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-web-ble')];
+                case 30:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-jre-http')];
+                case 31:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/testing-library')];
+                case 32:
+                    _a.sent();
+                    return [4 /*yield*/, checkAndPublish(context, 'packages/transport-react-native-nfc')];
+                case 33:
                     _a.sent();
                     return [2 /*return*/];
             }
         });
     });
 }
-try {
-    run();
-}
-catch (e) {
+run().catch(function (e) {
     var error = e;
     core.setFailed(error.message);
-}
+});
 
 
 /***/ }),
@@ -12542,6 +12631,25 @@ catch (e) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12583,10 +12691,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.buildAndPublish = exports.isLocalUpgraded = exports.installCore = void 0;
+var core = __importStar(__nccwpck_require__(2186));
 var semver_1 = __importDefault(__nccwpck_require__(1383));
 var child_process_1 = __nccwpck_require__(2081);
 var betaList = ['beta', 'hotfix', 'stg'];
-var NPM_404_ERR_CODE = 'npm ERR! code E404';
+// Matches the "code E404" token only — npm has changed the surrounding log
+// prefix across versions (e.g. "npm ERR!" on npm 8/10 vs "npm error" on
+// npm 11+), so matching a full line is fragile.
+var NPM_404_ERR_CODE = 'code E404';
 function installCore(isBeta) {
     if (isBeta === void 0) { isBeta = false; }
     return __awaiter(this, void 0, void 0, function () {
@@ -12621,15 +12733,23 @@ function isLocalUpgraded(path) {
                     console.log("package name: ".concat(name));
                     _e.label = 1;
                 case 1:
-                    _e.trys.push([1, 3, , 4]);
+                    _e.trys.push([1, 4, , 5]);
                     _d = (_c = semver_1.default).clean;
                     return [4 /*yield*/, command('npm', ['view', name, 'version'])];
                 case 2:
                     remoteVersion = (_a = _d.apply(_c, [_e.sent()])) !== null && _a !== void 0 ? _a : '';
                     console.log("remote version: ".concat(remoteVersion));
                     console.log("local version: ".concat(version));
-                    return [2 /*return*/, semver_1.default.gt(version, remoteVersion)];
+                    if (!semver_1.default.gt(version, remoteVersion))
+                        return [2 /*return*/, false];
+                    return [4 /*yield*/, isVersionPublished(name, version)];
                 case 3:
+                    if (_e.sent()) {
+                        console.log("Version ".concat(version, " is already published to the registry (under a non-latest tag), skipping."));
+                        return [2 /*return*/, false];
+                    }
+                    return [2 /*return*/, true];
+                case 4:
                     e_1 = _e.sent();
                     error = e_1;
                     if (error.message.includes(NPM_404_ERR_CODE)) {
@@ -12637,23 +12757,52 @@ function isLocalUpgraded(path) {
                         return [2 /*return*/, true];
                     }
                     console.log('Error:', error.message);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/, false];
+                    core.setFailed("Cannot determine whether ".concat(name, " needs to be published: ").concat(error.message));
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/, false];
             }
         });
     });
 }
 exports.isLocalUpgraded = isLocalUpgraded;
+/**
+ * Check whether a specific version has already been published, under any dist-tag.
+ * `npm view <name> version` only reflects the `latest` tag, so a version already
+ * published under e.g. `beta` would otherwise look "unpublished" and get retried
+ * on every push, failing with E403.
+ */
+function isVersionPublished(name, version) {
+    return __awaiter(this, void 0, void 0, function () {
+        var raw, parsed, versions, e_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, command('npm', ['view', name, 'versions', '--json'])];
+                case 1:
+                    raw = _a.sent();
+                    parsed = JSON.parse(raw);
+                    versions = Array.isArray(parsed) ? parsed : [parsed];
+                    return [2 /*return*/, versions.includes(version)];
+                case 2:
+                    e_2 = _a.sent();
+                    console.log("Could not fetch published versions for ".concat(name, ", will attempt to publish:"), e_2);
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
 function buildAndPublish(path) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, name, version, preRelease, isBeta, installLogs, buildLogs, publishArgs, result, e_2, error;
+        var _a, name, version, preRelease, isBeta, installLogs, buildLogs, publishArgs, result, e_3, error, e_4, error;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = getPackageInfo(path), name = _a.name, version = _a.version;
                     _b.label = 1;
                 case 1:
-                    _b.trys.push([1, 6, , 7]);
+                    _b.trys.push([1, 5, , 6]);
                     preRelease = semver_1.default.prerelease(version);
                     isBeta = betaList.includes('' + (preRelease === null || preRelease === void 0 ? void 0 : preRelease[0]));
                     return [4 /*yield*/, command('npm', ['ci'], path)];
@@ -12671,17 +12820,28 @@ function buildAndPublish(path) {
                 case 4:
                     result = _b.sent();
                     console.log('npm publish :', result);
-                    return [4 /*yield*/, pushTag("".concat(name, "@").concat(version))];
+                    return [3 /*break*/, 6];
                 case 5:
-                    _b.sent();
-                    return [3 /*break*/, 7];
-                case 6:
-                    e_2 = _b.sent();
-                    error = e_2;
+                    e_3 = _b.sent();
+                    error = e_3;
                     console.log("Cannot publish package ".concat(name, ", reason:"));
                     console.log(error);
-                    return [3 /*break*/, 7];
-                case 7: return [2 /*return*/];
+                    core.setFailed("Cannot publish package ".concat(name, ": ").concat(error.message));
+                    return [2 /*return*/];
+                case 6:
+                    _b.trys.push([6, 8, , 9]);
+                    return [4 /*yield*/, pushTag("".concat(name, "@").concat(version))];
+                case 7:
+                    _b.sent();
+                    return [3 /*break*/, 9];
+                case 8:
+                    e_4 = _b.sent();
+                    error = e_4;
+                    console.log("Published ".concat(name, "@").concat(version, " to npm, but failed to push the git tag, reason:"));
+                    console.log(error);
+                    core.setFailed("Published ".concat(name, "@").concat(version, " to npm, but failed to push the git tag: ").concat(error.message));
+                    return [3 /*break*/, 9];
+                case 9: return [2 /*return*/];
             }
         });
     });

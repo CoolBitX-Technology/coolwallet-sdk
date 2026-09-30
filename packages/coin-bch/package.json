@@ -1,6 +1,6 @@
 {
   "name": "@coolwallet/bch",
-  "version": "2.0.1-beta.1",
+  "version": "2.0.1-beta.0",
   "description": "Coolwallet Bitcoin Cash sdk",
   "main": "lib/index.js",
   "scripts": {
@@ -50,7 +50,7 @@
     "url": "git+https://github.com/CoolBitX-Technology/coolwallet-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/CoolBitX-Technology/coolwallet3-sdk/issues"
+    "url": "https://github.com/CoolBitX-Technology/coolwallet-sdk/issues"
   },
   "jest": {
     "setupFilesAfterEnv": [

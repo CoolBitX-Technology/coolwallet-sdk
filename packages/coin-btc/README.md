@@ -48,36 +48,11 @@ const signTxData = {
         value: "77301.99983500001",
         addressIndex: 0,
         pubkeyBuf: Uint8Array(33)
-    }
+    },
+    version: 2
 }
 
 const normalTx = await btc.signTransaction(signTxData)
-
-const usdtSignTxData = {
-    transport,
-    appPrivateKey,
-    appId,
-    scriptType: 1,
-    inputs: [{
-        preTxHash: "735153f57da91462a01c17937a397aa67f7b5faf9ab74ebcdd4c8f485aba26f5",
-        preIndex: 1,
-        preValue: 87302,
-        sequence: 0xFFFFFFFF,
-        addressIndex: 0,
-        pubkeyBuf: Uint8Array(33)
-    }],
-    output: {
-        value: "546",
-        address: "3442qW39131y5Q8qR963ehjmxXPAXUWn7Q",
-    },
-    change: {
-        value: "69926",
-        addressIndex: 0,
-        pubkeyBuf: Uint8Array(33)
-    }
-}
-
-const usdtTx = await btc.signUSDTTransaction(usdtSignTxData)
 ```
 
 ## Methods
@@ -137,30 +112,6 @@ async signTransaction(signTxData: signTxType):Promise<string>
 |     inputs    |            Array of inputs of previous transactions (UTXO)           |  [Inputs]  |    True   |
 |     output    |                       Output of the transaction                      |   Output   |    True   |
 |     change    |                      Address to receive changes                      |   Change   |    True   |
-|   confirmCB   |      Callback of confirmation data to the connected application      |  Function  |   False   |
-|  authorizedCB | Callback of authorized transaction data to the connected application |  Function  |   False   |
-
-### signUSDTTransaction
-
-#### Description
-
-Sign USDT Transaction
-
-```javascript
-async signUSDTTransaction(signUSDTTxData: signUSDTTxType): Promise<string>
-```
-
-#### signUSDTTxType Arguments
-
-|      Arg      |                              Description                             |    Type    |  Required |
-|:-------------:|:--------------------------------------------------------------------:|:----------:|:---------:|
-|   transport   |             Object to communicate with CoolWallet device             |  Transport |    True   |
-| appPrivateKey |               Private key for the connected application              |   string   |    True   |
-|     appId     |                   ID for the connected application                   |   string   |    True   |
-|   scriptType  |               Define the type of script of the address               | ScriptType |    True   |
-|     inputs    |            Array of inputs of previous transactions (UTXO)           |  [Inputs]  |    True   |
-|     output    |                       Output of the transaction                      |   Output   |    True   |
-|     value     |                      Amount of USDT to transfer                      |   string   |    True   |
-|     change    |                      Address to receive changes                      |   Change   |    True   |
+|    version    |            Transaction version (`nVersion`). Defaults to 1           |   number   |   False   |
 |   confirmCB   |      Callback of confirmation data to the connected application      |  Function  |   False   |
 |  authorizedCB | Callback of authorized transaction data to the connected application |  Function  |   False   |
