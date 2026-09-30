@@ -108,26 +108,20 @@ type Result = {
 
 export class ScriptArgument {
   private result?: Result;
+  private recentBlockhash?: types.Blockhash;
 
   constructor(private readonly params: ScriptArgumentParams) {}
 
+  /**
+   * Late-binds the blockhash the argument is built with. Must be called before the first
+   * `toArgument()` / `toTransaction()`; the caller's transaction is never rewritten.
+   * Messages and sign-ins have no blockhash and ignore it.
+   */
   setRecentBlockhash(recentBlockhash: types.Blockhash): void {
-    // The caller is expected to call `getRecentBlockhash` first and then build the arguments when `getRecentBlockhash` needs to be executed.
     if (this.result) {
       throw new SDKError(this.setRecentBlockhash.name, 'script argument is already built');
     }
-
-    // Signing a message or a sign-in has no blockhash.
-    if (!('transaction' in this.params)) {
-      return;
-    }
-
-    if (this.params.txType === ScriptArgumentType.Versioned) {
-      VersionedMessage.setRecentBlockhash(this.params.transaction, recentBlockhash);
-      return;
-    }
-
-    this.params.transaction.recentBlockhash = recentBlockhash;
+    this.recentBlockhash = recentBlockhash;
   }
 
   toArgument(): string {
@@ -175,7 +169,13 @@ export class ScriptArgument {
     }
   }
 
-  private buildTransfer({ transaction, fromPubkey, addressIndex }: TransferParams) {
+  /** The late-bound blockhash wins over the transaction's own, applied to a copy. */
+  private withLateBoundBlockhash<T extends { recentBlockhash: types.Blockhash }>(transaction: T): T {
+    return this.recentBlockhash ? { ...transaction, recentBlockhash: this.recentBlockhash } : transaction;
+  }
+
+  private buildTransfer({ transaction: inputTransaction, fromPubkey, addressIndex }: TransferParams) {
+    const transaction = this.withLateBoundBlockhash(inputTransaction);
     const rawTransaction = compileTransferTransaction({ ...transaction, fromPubkey });
     const transactionInstruction = new Transaction(rawTransaction);
     return {
@@ -184,7 +184,13 @@ export class ScriptArgument {
     };
   }
 
-  private buildSplTokenTransfer({ transaction, fromPubkey, addressIndex, tokenInfo }: SplTokenTransferParams) {
+  private buildSplTokenTransfer({
+    transaction: inputTransaction,
+    fromPubkey,
+    addressIndex,
+    tokenInfo,
+  }: SplTokenTransferParams) {
+    const transaction = this.withLateBoundBlockhash(inputTransaction);
     const rawTransaction = compileSplTokenTransaction({ ...transaction, signer: fromPubkey });
     const transactionInstruction = new Transaction(rawTransaction);
     return {
@@ -194,11 +200,12 @@ export class ScriptArgument {
   }
 
   private buildCreateAndTransferSplToken({
-    transaction,
+    transaction: inputTransaction,
     fromPubkey,
     addressIndex,
     tokenInfo,
   }: CreateAndTransferSplTokenParams) {
+    const transaction = this.withLateBoundBlockhash(inputTransaction);
     const associateAccountInstruction = compileAssociateTokenAccount({
       ...transaction,
       signer: fromPubkey,
@@ -215,7 +222,8 @@ export class ScriptArgument {
     };
   }
 
-  private buildUndelegate({ transaction, fromPubkey, addressIndex }: UndelegateParams) {
+  private buildUndelegate({ transaction: inputTransaction, fromPubkey, addressIndex }: UndelegateParams) {
+    const transaction = this.withLateBoundBlockhash(inputTransaction);
     const rawTransaction = compileUndelegate({ ...transaction, feePayer: fromPubkey });
     const transactionInstruction = new Transaction(rawTransaction);
     return {
@@ -225,11 +233,12 @@ export class ScriptArgument {
   }
 
   private buildDelegateAndCreateAccountWithSeed({
-    transaction,
+    transaction: inputTransaction,
     fromPubkey,
     newAccountPubkey,
     addressIndex,
   }: DelegateAndCreateAccountParams) {
+    const transaction = this.withLateBoundBlockhash(inputTransaction);
     const rawTransaction = compileDelegateAndCreateAccountWithSeed({
       ...transaction,
       fromPubkey,
@@ -243,7 +252,8 @@ export class ScriptArgument {
     };
   }
 
-  private buildStakingWithdraw({ transaction, fromPubkey, addressIndex }: StakingWithdrawParams) {
+  private buildStakingWithdraw({ transaction: inputTransaction, fromPubkey, addressIndex }: StakingWithdrawParams) {
+    const transaction = this.withLateBoundBlockhash(inputTransaction);
     const rawTransaction = compileStakingWithdraw({ ...transaction, authorizedPubkey: fromPubkey });
     const transactionInstruction = new Transaction(rawTransaction);
     return {
@@ -252,7 +262,10 @@ export class ScriptArgument {
     };
   }
 
-  private buildVersioned({ transaction, addressIndex }: VersionedParams) {
+  private buildVersioned({ transaction: inputTransaction, addressIndex }: VersionedParams) {
+    const transaction = this.recentBlockhash
+      ? VersionedMessage.withRecentBlockhash(inputTransaction, this.recentBlockhash)
+      : inputTransaction;
     return {
       transaction,
       argument: scriptUtil.getSignVersionedArguments(transaction, addressIndex),

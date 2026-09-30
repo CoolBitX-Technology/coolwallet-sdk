@@ -35,19 +35,18 @@ export const VersionedMessage = {
   },
 
   /**
-   * Replaces the message's `recentBlockhash` in place, leaving everything else untouched.
+   * Returns a copy of the message with `recentBlockhash` replaced, leaving the original untouched.
    */
-  setRecentBlockhash: (message: VersionedMessage, blockhash: Blockhash): void => {
+  withRecentBlockhash: (message: VersionedMessage, blockhash: Blockhash): VersionedMessage => {
     if (message instanceof MessageV0) {
-      message.recentBlockhash = blockhash;
-      return;
+      return new MessageV0({ ...message, recentBlockhash: blockhash });
     }
     if (message instanceof Message) {
-      message.recentBlockhash = Buffer.from(base58.decode(blockhash)).toString('hex');
-      return;
+      // legacy Message stores the blockhash hex-encoded
+      return new Message({ ...message, recentBlockhash: Buffer.from(base58.decode(blockhash)).toString('hex') });
     }
     throw new SDKError(
-      'VersionedMessage.setRecentBlockhash',
+      'VersionedMessage.withRecentBlockhash',
       'unsupported message version, cannot set its recent blockhash'
     );
   },
