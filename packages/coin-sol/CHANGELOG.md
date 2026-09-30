@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.5
+- feat(coin-sol): fetch the blockhash just before the argument is sent (CW-29319) (#1221)
+
 ## 2.0.4
 - chore(coin-eth,coin-evm,coin-sol): bump patch version after #1201 (#1202)
 
