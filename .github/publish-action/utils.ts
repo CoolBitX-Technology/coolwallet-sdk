@@ -1,9 +1,13 @@
+import * as core from '@actions/core';
 import semver from 'semver';
 import { spawn } from 'child_process';
 
 const betaList = ['beta', 'hotfix', 'stg'];
 
-const NPM_404_ERR_CODE = 'npm ERR! code E404';
+// Matches the "code E404" token only — npm has changed the surrounding log
+// prefix across versions (e.g. "npm ERR!" on npm 8/10 vs "npm error" on
+// npm 11+), so matching a full line is fragile.
+const NPM_404_ERR_CODE = 'code E404';
 
 export async function installCore(isBeta: boolean = false) {
   const packageName = isBeta ? '@coolwallet/core@beta' : '@coolwallet/core';
@@ -23,7 +27,14 @@ export async function isLocalUpgraded(path: string) {
     const remoteVersion = semver.clean(await command('npm', ['view', name, 'version'])) ?? '';
     console.log(`remote version: ${remoteVersion}`);
     console.log(`local version: ${version}`);
-    return semver.gt(version, remoteVersion);
+
+    if (!semver.gt(version, remoteVersion)) return false;
+
+    if (await isVersionPublished(name, version)) {
+      console.log(`Version ${version} is already published to the registry (under a non-latest tag), skipping.`);
+      return false;
+    }
+    return true;
   } catch (e) {
     const error = e as Error;
     if (error.message.includes(NPM_404_ERR_CODE)) {
@@ -31,8 +42,27 @@ export async function isLocalUpgraded(path: string) {
       return true;
     }
     console.log('Error:', error.message);
+    core.setFailed(`Cannot determine whether ${name} needs to be published: ${error.message}`);
   }
   return false;
+}
+
+/**
+ * Check whether a specific version has already been published, under any dist-tag.
+ * `npm view <name> version` only reflects the `latest` tag, so a version already
+ * published under e.g. `beta` would otherwise look "unpublished" and get retried
+ * on every push, failing with E403.
+ */
+async function isVersionPublished(name: string, version: string): Promise<boolean> {
+  try {
+    const raw = await command('npm', ['view', name, 'versions', '--json']);
+    const parsed = JSON.parse(raw);
+    const versions: string[] = Array.isArray(parsed) ? parsed : [parsed];
+    return versions.includes(version);
+  } catch (e) {
+    console.log(`Could not fetch published versions for ${name}, will attempt to publish:`, e);
+    return false;
+  }
 }
 
 export async function buildAndPublish(path: string) {
@@ -48,11 +78,23 @@ export async function buildAndPublish(path: string) {
     if (isBeta) publishArgs = publishArgs.concat(['--tag', 'beta']);
     const result = await command('npm', publishArgs, path);
     console.log('npm publish :', result);
-    await pushTag(`${name}@${version}`);
   } catch (e) {
     const error = e as Error;
     console.log(`Cannot publish package ${name}, reason:`);
     console.log(error);
+    core.setFailed(`Cannot publish package ${name}: ${error.message}`);
+    return;
+  }
+
+  // npm publish already succeeded at this point — a failure here must not be
+  // reported as a publish failure, since the version is already live on npm.
+  try {
+    await pushTag(`${name}@${version}`);
+  } catch (e) {
+    const error = e as Error;
+    console.log(`Published ${name}@${version} to npm, but failed to push the git tag, reason:`);
+    console.log(error);
+    core.setFailed(`Published ${name}@${version} to npm, but failed to push the git tag: ${error.message}`);
   }
 }
 
