@@ -13,6 +13,7 @@ import { TOKEN_INFO } from './config/tokenInfos';
 import { createProgramAddressSync } from './utils/account';
 import { is_on_curve } from './utils/ed25519';
 import { VersionedTransaction } from './utils/versionedTransaction';
+import type { VersionedMessage } from './message';
 import { ScriptArgument, ScriptArgumentType } from './utils/ScriptArgument';
 
 class Solana extends COIN.EDDSACoin implements COIN.Coin {
@@ -170,7 +171,7 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       addressIndex,
     });
 
-    return sign.signTransaction({ ...signTxData, transaction }, script, scriptArgument);
+    return sign.signTransaction(signTxData, script, scriptArgument);
   }
 
   async signStackingWithdrawTransaction(signTxData: types.signStakingWithdrawType): Promise<string> {
@@ -238,7 +239,8 @@ class Solana extends COIN.EDDSACoin implements COIN.Coin {
       for (let i = 1; i < messageSignatures.length; i++) {
         _signatures.push(messageSignatures[i]);
       }
-      const versionedTransaction = new VersionedTransaction(signTxData.transaction[index].message, _signatures);
+      const message = scriptArguments[index].toTransaction() as VersionedMessage;
+      const versionedTransaction = new VersionedTransaction(message, _signatures);
       return Buffer.from(versionedTransaction.serialize()).toString('hex');
     });
   }
