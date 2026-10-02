@@ -80,6 +80,22 @@ const erc20SignTxData = {
 const erc20Tx = await evm.signERC20Transaction(erc20SignTxData);
 ```
 
+### Chain 138 / DeFi Oracle Meta Mainnet
+
+The EVM package can also be used with Chain 138 by passing its EIP-155 chain ID:
+
+```javascript
+import EVM from '@coolwallet/evm';
+
+const chainId = 138; // DeFi Oracle Meta Mainnet
+const evm = new EVM(chainId);
+```
+
+Chain 138 uses the standard Ethereum derivation path shown below and the native
+asset symbol `ETH`. Configure RPC, explorer, gas, nonce and transaction data in
+the host application before calling `signTransaction`, `signEIP1559Transaction`
+or smart-contract signing helpers.
+
 ## Methods
 
 ### getAddress
