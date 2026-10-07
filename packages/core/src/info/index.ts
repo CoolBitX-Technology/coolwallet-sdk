@@ -33,13 +33,18 @@ export const GO_SIGNING_ONLY_SE_VERSION = 100;
 /**
  * Whether the card is a CoolWallet Go running the signing-only firmware.
  * Pro SE versions are above 100 as well, so the card type must be checked first.
+ * Unlike getSEVersion, a failed version query throws instead of reading as version 0,
+ * so a transport error is never mistaken for old firmware (which would prompt a needless OTA).
  * @param {Transport} transport
  * @returns {Promise<boolean>}
  */
 export const isSigningOnlyFirmware = async (transport: Transport): Promise<boolean> => {
   if (transport.cardType !== CardType.Go) return false;
-  const seVersion = await getSEVersion(transport);
-  return seVersion >= GO_SIGNING_ONLY_SE_VERSION;
+  const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
+  if (statusCode !== CODE._9000 || !outputData) {
+    throw new APDUError(commands.GET_SE_VERSION, statusCode, msg);
+  }
+  return parseInt(outputData, 16) >= GO_SIGNING_ONLY_SE_VERSION;
 };
 
 /**

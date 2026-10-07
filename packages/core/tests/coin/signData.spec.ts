@@ -27,7 +27,16 @@ const mockTransport = ({
   seVersion = 100,
   signResponse = '',
   signStatus = '9000',
-}: { cardType?: CardType; seVersion?: number; signResponse?: string; signStatus?: string } = {}) => {
+  versionResponse,
+  versionError,
+}: {
+  cardType?: CardType;
+  seVersion?: number;
+  signResponse?: string;
+  signStatus?: string;
+  versionResponse?: string;
+  versionError?: Error;
+} = {}) => {
   const sent: SentApdu[] = [];
   const transport = {
     cardType,
@@ -36,7 +45,8 @@ const mockTransport = ({
       // command = pid(00) cmdLen(09) CLA INS P1 P2 ...
       switch (command.slice(6, 8).toUpperCase()) {
         case '52':
-          return seVersion.toString(16).padStart(4, '0') + '9000';
+          if (versionError) throw versionError;
+          return versionResponse ?? seVersion.toString(16).padStart(4, '0') + '9000';
         case '54':
           return nonce + '9000';
         case 'A0':
@@ -62,6 +72,25 @@ describe('isSigningOnlyFirmware', () => {
   ])('%s card with SE version %d -> %s', async (cardType, seVersion, expected) => {
     const { transport } = mockTransport({ cardType, seVersion });
     await expect(isSigningOnlyFirmware(transport)).resolves.toBe(expected);
+  });
+
+  it('throws instead of reporting old firmware when the transport fails', async () => {
+    const { transport } = mockTransport({ versionError: new Error('BLE disconnected') });
+    await expect(isSigningOnlyFirmware(transport)).rejects.toThrow('BLE disconnected');
+  });
+
+  it.each([
+    ['non-9000 status', '6D00'],
+    ['empty version with 9000', '9000'],
+  ])('throws APDUError on %s', async (_, versionResponse) => {
+    const { transport } = mockTransport({ versionResponse });
+    await expect(isSigningOnlyFirmware(transport)).rejects.toThrow(APDUError);
+  });
+
+  it('does not query the card for non-Go cards', async () => {
+    const { transport, sent } = mockTransport({ cardType: CardType.Pro, versionError: new Error('unreachable') });
+    await expect(isSigningOnlyFirmware(transport)).resolves.toBe(false);
+    expect(sent).toHaveLength(0);
   });
 });
 
@@ -190,6 +219,21 @@ describe('signData', () => {
       await expect(
         signData({ transport, appId, appPrivateKey, path: BIP32_PATH, curve: SignCurve.SECP256K1, data: digest })
       ).rejects.toThrow('requires CoolWallet Go signing-only firmware');
+      expect(signDataApdus()).toHaveLength(0);
+    });
+
+    it('surfaces a failed version query instead of reporting old firmware', async () => {
+      const { transport, signDataApdus } = mockTransport({ versionError: new Error('BLE disconnected') });
+      const result = signData({
+        transport,
+        appId,
+        appPrivateKey,
+        path: BIP32_PATH,
+        curve: SignCurve.SECP256K1,
+        data: digest,
+      });
+      await expect(result).rejects.toThrow('BLE disconnected');
+      await expect(result).rejects.not.toThrow('requires CoolWallet Go signing-only firmware');
       expect(signDataApdus()).toHaveLength(0);
     });
   });
