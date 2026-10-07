@@ -1,6 +1,6 @@
 import { executeCommand } from '../apdu/execute/execute';
 import { commands } from '../apdu/execute/command';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import { target } from '../config/param';
 import { SE_MODE } from '../config/mode';
 import { CODE } from '../config/status/code';
@@ -25,6 +25,21 @@ export const getSEVersion = async (transport: Transport): Promise<number> => {
   } catch (e) {
     return 0;
   }
+};
+
+// Go SE versions are decimal: below 100 = script card, 100 and up = signing-only card (INS 0xA0 signData).
+export const GO_SIGNING_ONLY_SE_VERSION = 100;
+
+/**
+ * Whether the card is a CoolWallet Go running the signing-only firmware.
+ * Pro SE versions are above 100 as well, so the card type must be checked first.
+ * @param {Transport} transport
+ * @returns {Promise<boolean>}
+ */
+export const isSigningOnlyFirmware = async (transport: Transport): Promise<boolean> => {
+  if (transport.cardType !== CardType.Go) return false;
+  const seVersion = await getSEVersion(transport);
+  return seVersion >= GO_SIGNING_ONLY_SE_VERSION;
 };
 
 /**
