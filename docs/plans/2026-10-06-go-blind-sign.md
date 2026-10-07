@@ -35,9 +35,9 @@ Go 卡改為盲簽：SE（coolwallet-lite-se `a9ccb8d`、`89154b4`、`76c71d4`�
 
 ### In scope
 
-- [ ] core：`SIGN_DATA` command 定義與 `coin.signData`（0xA0 路徑）
-- [ ] core：韌體版本判斷（`seVersion >= 100` 視為簽章專用韌體），非簽章專用韌體呼叫 `signData` 明確丟錯
-- [ ] core：統一回傳格式（ECDSA 同時回 `der` 與 canonical `{ r, s }`；EdDSA / Schnorr 回 64B）
+- [x] core：`SIGN_DATA` command 定義與 `coin.signData`（0xA0 路徑）
+- [x] core：韌體版本判斷（`seVersion >= 100` 視為簽章專用韌體），非簽章專用韌體呼叫 `signData` 明確丟錯
+- [x] core：統一回傳格式（ECDSA 同時回 `der` 與 canonical `{ r, s }`；EdDSA / Schnorr 回 64B）
 - [ ] go-signer：新 package，包 core `signData` 為各曲線方法，結果原樣透傳
 - [ ] core：`insertLoadScript` / `insertScript` 檢查回應碼，非 `9000` 丟錯
 - [x] core：Go OTA 切換為新韌體 loadScript 與版本號
@@ -193,7 +193,7 @@ flowchart LR
 - **Merge order**: 1st
 - **Commits**:
   - [x] `feat(core): add SIGN_DATA command and signing-only firmware check`
-  - [ ] `feat(core): add coin.signData for Go signing-only firmware`
+  - [x] `feat(core): add coin.signData for Go signing-only firmware`
   - [ ] `test(core): cover signData validation and result formatting`
 
 ---
