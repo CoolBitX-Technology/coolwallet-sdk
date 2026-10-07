@@ -219,7 +219,7 @@ flowchart LR
 - **Merge order**: 與 PR 1 一起（#1225），必須在新韌體 OTA 發版前上線
 - **Commits**:
   - [x] `fix(core): fail OTA when load or install returns non-9000`
-  - [ ] `test(core): cover OTA status check`
+  - [x] `test(core): cover OTA status check`
 
 ---
 
@@ -257,7 +257,7 @@ flowchart LR
 - [ ] 四種曲線在 host-sim 與新韌體實卡上簽章可驗證
 - [ ] ECDSA / Ed25519 與參考實作逐 byte 一致
 - [ ] BTC 多輸入可連續呼叫 `signData` 簽完
-- [ ] OTA LOAD / INSTALL 非 `9000` 時明確失敗
+- [x] OTA LOAD / INSTALL 非 `9000` 時明確失敗
 - [ ] Go OTA 可更新到 `100`
 - [ ] core CHANGELOG 與 go-signer README 更新
 
