@@ -194,7 +194,7 @@ flowchart LR
 - **Commits**:
   - [x] `feat(core): add SIGN_DATA command and signing-only firmware check`
   - [x] `feat(core): add coin.signData for Go signing-only firmware`
-  - [ ] `test(core): cover signData validation and result formatting`
+  - [x] `test(core): cover signData validation and result formatting`
 
 ---
 
