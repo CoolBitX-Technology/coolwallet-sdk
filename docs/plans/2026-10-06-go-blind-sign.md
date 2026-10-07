@@ -7,7 +7,7 @@ ticket: CW-29371
 
 # Plan: Go 卡盲簽 — core 通用簽章函數 + `@coolwallet/go-signer`
 
-> 🔨 In progress — PR 1 + PR 4 在 `feat/CW-29371-go-blind-sign`；PR 2、PR 3 各自開分支（見 decisions log）
+> 🔨 In progress — PR 1 + PR 3 + PR 4 在 `feat/CW-29371-go-blind-sign`（#1225）；PR 2 在 `feat/CW-29371-go-signer`（見 decisions log）
 
 ## 1. Goal
 
@@ -39,7 +39,7 @@ Go 卡改為盲簽：SE（coolwallet-lite-se `a9ccb8d`、`89154b4`、`76c71d4`�
 - [x] core：韌體版本判斷（`seVersion >= 100` 視為簽章專用韌體），非簽章專用韌體呼叫 `signData` 明確丟錯
 - [x] core：統一回傳格式（ECDSA 同時回 `der` 與 canonical `{ r, s }`；EdDSA / Schnorr 回 64B）
 - [ ] go-signer：新 package，包 core `signData` 為各曲線方法，結果原樣透傳
-- [ ] core：`insertLoadScript` / `insertScript` 檢查回應碼，非 `9000` 丟錯
+- [x] core：`insertLoadScript` / `insertScript` 檢查回應碼，非 `9000` 丟錯
 - [x] core：Go OTA 切換為新韌體 loadScript 與版本號
 
 ### Out of scope (explicit)
@@ -213,12 +213,12 @@ flowchart LR
 
 ### PR 3: OTA 檢查 LOAD / INSTALL 回應碼 — ~40 lines
 - **Category**: Bugs
-- **Branch**: `fix/CW-29371-ota-check-status`
+- **Branch**: `feat/CW-29371-go-blind-sign`（併入 #1225）
 - **Goal**: `insertScript` / `insertLoadScript` 遇到非 `9000` 時明確失敗。
-- **Depends on**: none（票上排在 SE 交付後，技術上可獨立先做）
-- **Merge order**: 3rd（可與 PR 1 / 2 平行）
+- **Depends on**: none
+- **Merge order**: 與 PR 1 一起（#1225），必須在新韌體 OTA 發版前上線
 - **Commits**:
-  - [ ] `fix(core): fail OTA when load or install returns non-9000`
+  - [x] `fix(core): fail OTA when load or install returns non-9000`
   - [ ] `test(core): cover OTA status check`
 
 ---
@@ -252,7 +252,7 @@ flowchart LR
 
 ## 10. Done criteria
 
-- [ ] PR 1 → PR 2 依序 merge；PR 3 merge；PR 4 在 CW-29370 交付後 merge
+- [ ] #1225（PR 1 + PR 3 + PR 4）merge → PR 2 merge
 - [ ] CI 綠燈
 - [ ] 四種曲線在 host-sim 與新韌體實卡上簽章可驗證
 - [ ] ECDSA / Ed25519 與參考實作逐 byte 一致
@@ -273,3 +273,5 @@ flowchart LR
 - 2026-10-07 — 簽章專用韌體版本為十進位 `100`（非 `0x0100`），判斷改為 `seVersion >= 100` 且 `cardType === Go`（Pro 版本號 > 100，必須一併判斷卡別）— SE 已改版（lite-se `ea894b3`）。
 - 2026-10-07 — 新韌體 OTA script（PR 4）與 PR 1 同在 `feat/CW-29371-go-blind-sign` — 使用者決定。
 - 2026-10-07 — PR 2 另開 `feat/CW-29371-go-signer`，疊在 PR 1 分支上 — go-signer 為新 package，需等含 `signData` 的 core 發版；使用者同意。
+- 2026-10-07 — PR 3（OTA 回應碼檢查）併入 #1225 — 新韌體整版替換，LOAD / INSTALL 失敗不可被當成成功；使用者決定。
+- 2026-10-07 — OTA 推到 100 後舊 coin-* script 路徑在 Go 卡失效（`6D00`），由 App 端配合改走 `signData` / go-signer 後再發版 — 使用者確認。
