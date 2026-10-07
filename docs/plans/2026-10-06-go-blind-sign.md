@@ -207,7 +207,7 @@ flowchart LR
 - **Commits**:
   - [x] `chore(go-signer): scaffold package`
   - [x] `feat(go-signer): add GoSigner with per-curve sign methods`
-  - [ ] `test(go-signer): add unit tests with mocked core`
+  - [x] `test(go-signer): add unit tests with mocked core`
 
 ---
 
