@@ -7,7 +7,7 @@ ticket: CW-29371
 
 # Plan: Go 卡盲簽 — core 通用簽章函數 + `@coolwallet/go-signer`
 
-> 🔨 In progress — 所有 PR 皆在 `feat/CW-29371-go-blind-sign` 上進行（使用者決定，見 decisions log）
+> 🔨 In progress — PR 1 + PR 4 在 `feat/CW-29371-go-blind-sign`；PR 2、PR 3 各自開分支（見 decisions log）
 
 ## 1. Goal
 
@@ -200,7 +200,7 @@ flowchart LR
 
 ### PR 2: 新增 `@coolwallet/go-signer` — ~180 lines
 - **Category**: Feature
-- **Branch**: `feat/CW-29371-go-blind-sign`
+- **Branch**: `feat/CW-29371-go-signer`（從 `feat/CW-29371-go-blind-sign` 開出；PR base 先指向它，PR 1 merge 後改為 `master`）
 - **Goal**: 新 package 以 `GoSigner` 包裝 core `signData`，提供給 App 的各曲線簽章 API。
 - **Depends on**: PR 1（需要 core 發版含 `signData`）
 - **Merge order**: 2nd
@@ -213,7 +213,7 @@ flowchart LR
 
 ### PR 3: OTA 檢查 LOAD / INSTALL 回應碼 — ~40 lines
 - **Category**: Bugs
-- **Branch**: `feat/CW-29371-go-blind-sign`
+- **Branch**: `fix/CW-29371-ota-check-status`
 - **Goal**: `insertScript` / `insertLoadScript` 遇到非 `9000` 時明確失敗。
 - **Depends on**: none（票上排在 SE 交付後，技術上可獨立先做）
 - **Merge order**: 3rd（可與 PR 1 / 2 平行）
@@ -271,4 +271,5 @@ flowchart LR
 - 2026-10-06 — 舊韌體（SE 13 / 16）script 路徑延後 — 使用者指示先不處理。
 - 2026-10-06 — package 命名 `@coolwallet/go-signer` — 對齊產品名 CoolWallet Go。
 - 2026-10-07 — 簽章專用韌體版本為十進位 `100`（非 `0x0100`），判斷改為 `seVersion >= 100` 且 `cardType === Go`（Pro 版本號 > 100，必須一併判斷卡別）— SE 已改版（lite-se `ea894b3`）。
-- 2026-10-07 — 所有 PR 皆在 `feat/CW-29371-go-blind-sign` 上進行；新韌體 OTA script（原 PR 4）已先 commit — 使用者決定。
+- 2026-10-07 — 新韌體 OTA script（PR 4）與 PR 1 同在 `feat/CW-29371-go-blind-sign` — 使用者決定。
+- 2026-10-07 — PR 2 另開 `feat/CW-29371-go-signer`，疊在 PR 1 分支上 — go-signer 為新 package，需等含 `signData` 的 core 發版；使用者同意。
