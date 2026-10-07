@@ -13,6 +13,8 @@ import { SignCurve, SignDataParams, SignDataResult } from './config/types';
 const MAX_APDU_DATA_LENGTH = 2047;
 // appId (20B) + right-justified command signature (72B)
 const COMMAND_SIGNATURE_LENGTH = 92;
+// pathType (1B) + up to 5 indices (4B each), same limit as the SE's Bip32 / Bip32Ed25519
+const MAX_PATH_LENGTH = 21;
 const DIGEST_LENGTH = 32;
 const SIGNATURE_LENGTH = 64;
 
@@ -31,7 +33,7 @@ const checkParameters = (path: string, curve: SignCurve, data: string) => {
     throw new SDKError(signData.name, `unsupported curve: ${curve}`);
   }
   const pathLength = path.length / 2;
-  if (!isHex(path) || pathLength < 1 || (pathLength - 1) % 4 !== 0) {
+  if (!isHex(path) || pathLength < 1 || pathLength > MAX_PATH_LENGTH || (pathLength - 1) % 4 !== 0) {
     throw new SDKError(signData.name, `invalid path: ${path}`);
   }
   const pathType = path.slice(0, 2);

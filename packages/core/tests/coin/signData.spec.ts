@@ -200,6 +200,8 @@ describe('signData', () => {
       ['path not hex', SignCurve.SECP256K1, 'zz', digest],
       ['empty path', SignCurve.SECP256K1, '', digest],
       ['path with a partial index', SignCurve.SECP256K1, BIP32_PATH + '00', digest],
+      ['path deeper than 5 indices', SignCurve.SECP256K1, BIP32_PATH + '00000000', digest],
+      ['path longer than the 1-byte length field', SignCurve.ED25519, '10' + '80000000'.repeat(64), 'aa'],
       ['SECP256K1 with SLIP0010 path', SignCurve.SECP256K1, SLIP0010_PATH, digest],
       ['SCHNORR with SLIP0010 path', SignCurve.SCHNORR, SLIP0010_PATH, digest],
       ['ED25519 with BIP32 path', SignCurve.ED25519, BIP32_PATH, 'aa'],
