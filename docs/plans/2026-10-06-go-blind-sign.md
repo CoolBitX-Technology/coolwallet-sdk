@@ -205,7 +205,7 @@ flowchart LR
 - **Depends on**: PR 1（需要 core 發版含 `signData`）
 - **Merge order**: 2nd
 - **Commits**:
-  - [ ] `chore(go-signer): scaffold package`
+  - [x] `chore(go-signer): scaffold package`
   - [ ] `feat(go-signer): add GoSigner with per-curve sign methods`
   - [ ] `test(go-signer): add unit tests with mocked core`
 
