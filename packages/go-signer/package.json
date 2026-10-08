@@ -18,8 +18,8 @@
   "bugs": {
     "url": "https://github.com/CoolBitX-Technology/coolwallet-sdk/issues"
   },
-  "peerDependencies": {
-    "@coolwallet/core": "^2.0.12"
+  "dependencies": {
+    "@coolwallet/core": "^2.1.0-beta.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",
@@ -27,7 +27,6 @@
     "@babel/plugin-proposal-class-properties": "^7.16.7",
     "@babel/preset-env": "^7.16.10",
     "@babel/preset-typescript": "^7.16.7",
-    "@coolwallet/core": "file:../core",
     "@types/jest": "^27.4.0",
     "@types/node": "^14.0.13",
     "babel-jest": "^27.4.6",
