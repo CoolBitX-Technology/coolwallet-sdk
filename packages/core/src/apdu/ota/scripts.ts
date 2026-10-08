@@ -26,12 +26,21 @@ const parseOTAScript = (OTAScript: string): Command[] => {
   });
 };
 
+// LOAD / INSTALL must succeed on every line; otherwise the old applet is already deleted
+// and continuing would report a successful update on a card without the new applet.
+const checkScriptStatus = (name: string, script: Command, line: number, statusCode: string) => {
+  if (statusCode !== CODE._9000) {
+    throw new SDKError(name, `INS ${script.INS} failed at line ${line}, status code: ${statusCode}`);
+  }
+};
+
 const insertScript = async (transport: Transport, scriptHex: string): Promise<void> => {
   try {
     const scripts = parseOTAScript(scriptHex);
-    for (const script of scripts) {
+    for (const [i, script] of scripts.entries()) {
       const { packets } = script;
-      await executeCommand(transport, script, target.SE, packets);
+      const { statusCode } = await executeCommand(transport, script, target.SE, packets);
+      checkScriptStatus(insertScript.name, script, i, statusCode);
     }
   } catch (e) {
     throw new SDKError(insertScript.name, `insert Script Failed! ${e}`);
@@ -51,7 +60,8 @@ const insertLoadScript = async (
     let idx = 0;
     for (const script of scripts) {
       const { packets } = script;
-      await executeCommand(transport, script, target.SE, packets);
+      const { statusCode } = await executeCommand(transport, script, target.SE, packets);
+      checkScriptStatus(insertLoadScript.name, script, idx, statusCode);
       progressCallback(Math.round(floor + idx * step));
       idx += 1;
     }
