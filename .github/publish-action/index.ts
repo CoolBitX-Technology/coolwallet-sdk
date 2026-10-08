@@ -68,6 +68,7 @@ async function run() {
   await checkAndPublish(context, 'packages/transport-jre-http');
   await checkAndPublish(context, 'packages/testing-library');
   await checkAndPublish(context, 'packages/transport-react-native-nfc');
+  await checkAndPublish(context, 'packages/go-signer');
 }
 
 run().catch((e) => {
