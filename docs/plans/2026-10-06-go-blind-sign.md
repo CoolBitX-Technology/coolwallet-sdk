@@ -38,7 +38,7 @@ Go 卡改為盲簽：SE（coolwallet-lite-se `a9ccb8d`、`89154b4`、`76c71d4`�
 - [x] core：`SIGN_DATA` command 定義與 `coin.signData`（0xA0 路徑）
 - [x] core：韌體版本判斷（`seVersion >= 100` 視為簽章專用韌體），非簽章專用韌體呼叫 `signData` 明確丟錯
 - [x] core：統一回傳格式（ECDSA 同時回 `der` 與 canonical `{ r, s }`；EdDSA / Schnorr 回 64B）
-- [ ] go-signer：新 package，包 core `signData` 為各曲線方法，結果原樣透傳
+- [x] go-signer：新 package，包 core `signData` 為各曲線方法，結果原樣透傳
 - [x] core：`insertLoadScript` / `insertScript` 檢查回應碼，非 `9000` 丟錯
 - [x] core：Go OTA 切換為新韌體 loadScript 與版本號
 
@@ -205,9 +205,11 @@ flowchart LR
 - **Depends on**: PR 1（需要 core 發版含 `signData`）
 - **Merge order**: 2nd
 - **Commits**:
-  - [ ] `chore(go-signer): scaffold package`
-  - [ ] `feat(go-signer): add GoSigner with per-curve sign methods`
-  - [ ] `test(go-signer): add unit tests with mocked core`
+  - [x] `chore(go-signer): scaffold package`
+  - [x] `feat(go-signer): add GoSigner with per-curve sign methods`
+  - [x] `test(go-signer): add unit tests with mocked core`
+  - [x] `chore(go-signer): depend on @coolwallet/core ^2.1.0-beta.0 like the other packages`
+  - [ ] `chore(go-signer): resolve core from the registry in package-lock.json`（core `2.1.0-beta.0` 發佈後：在 go-signer 執行 `npm install`，確認 lockfile 中 core 的 `resolved` 為 `https://registry.npmjs.org/...` 而非 `../core`）
 
 ---
 
@@ -248,7 +250,7 @@ flowchart LR
 - **Assumption**：結果欄位一律為 hex string（不用 Buffer）。
 - **Risk**：`executeAPDU` 限制 data（含 1B checksum）≤ 4096 hex，即 APDU data 最多 2047B；扣掉 appId + sig 92B 後 `[pathLength][path][signData]` 最多 1955B；需與 SE `largestMessage` 對齊，大型 SOL 交易可能超出 — mitigation：前置檢查給明確錯誤，必要時另開票支援分段。
 - **Risk**：卡片無確認畫面，任何送進來的 digest 都會被簽 — mitigation：README 明確標示盲簽語意。
-- **Risk**：go-signer 依賴的 core 版本需先發佈 — mitigation：PR 2 開發期用 `file:../core`，發佈前改為 `^<new core version>`。
+- **Risk**：go-signer 依賴的 core 版本需先發佈 — mitigation：`package.json` 已寫 `dependencies: ^2.1.0-beta.0`（同 core 2.x coin-* 慣例）；本地開發暫時改為 `file:../core` 且不 commit；core beta 發佈後重新產生 lockfile 再開 PR 2，避免 CI `npm ci` 連到未 build 的 `../core`。
 
 ## 10. Done criteria
 
