@@ -10,6 +10,9 @@ env:
 
 jobs:
   build-and-push:
+    # Runs triggered by Dependabot (including re-runs of them) cannot read Actions secrets (checkout token, GCP key),
+    # so this job can never pass for them. Commits someone else pushes to a Dependabot PR still run the tests.
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     outputs:
       upload_status: ${{ steps.set_status.outputs.upload_status }}
