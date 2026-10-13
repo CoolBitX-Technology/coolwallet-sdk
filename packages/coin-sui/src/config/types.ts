@@ -1,18 +1,13 @@
 import { Transport } from '@coolwallet/core';
-import { ObjectRef, Transaction } from '@mysten/sui/transactions';
-
+import { Transaction } from '@mysten/sui/transactions';
 
 export interface CoinTransactionInfo {
+  transaction: string; // tx bytes in base64
   amount: string; // unit amount
   toAddress: string;
-  gasPayment: Array<ObjectRef>;
-  gasPrice: string;
-  gasBudget: string;
 }
 
-export interface TokenTransactionInfo extends CoinTransactionInfo {
-  coinObjects: Array<ObjectRef>;
-}
+export type TokenTransactionInfo = CoinTransactionInfo;
 
 type BaseTransactionArgs = {
   transport: Transport;
