@@ -12,10 +12,16 @@ npm i @coolwallet/sui
 
 ## Usage - Get Address And Coin Transfer
 
+The transfer APIs sign transaction bytes built by the caller. The card displays the recipient and amount
+read from fixed input positions, so the transaction must follow this layout:
+
+- `inputs[0]`: the send amount as a pure `u64` (unit amount), equal to `transactionInfo.amount`
+- `inputs[1]`: the recipient as a pure `address`, equal to `transactionInfo.toAddress`
+
+Create these two pure inputs before any other input (gas coin, coin objects, etc.), otherwise signing throws
+`checkParams: amount is not at the expected input`.
+
 ```javascript
-import Sui from '@coolwallet/sui';
-import { crypto } from '@coolwallet/core';
-import { createTransport } from '@coolwallet/transport-web-ble';
 import Sui from '@coolwallet/sui';
 import { crypto } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-web-ble';
@@ -24,6 +30,8 @@ import {
   CoinTransactionInfo,
 } from '@coolwallet/sui/config/types';
 import { convertToUnitAmount } from '@coolwallet/sui/utils/transactionUtil';
+import { Transaction } from '@mysten/sui/transactions';
+import { SUI_DECIMALS } from '@mysten/sui/utils';
 
 const sui = new Sui();
 
@@ -41,24 +49,28 @@ const address = await sui.getAddress(transport, appPrivateKey, appId, 0);
 // signCoinTransaction
 const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
 const amount = convertToUnitAmount('0.1', SUI_DECIMALS);
-const addressIndex = 0;
+
+const tx = new Transaction();
+tx.setSender(address);
+tx.setGasPayment([
+  {
+    objectId: '0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd26',
+    version: 428891992,
+    digest: 'GsuLrrruMfrn6tNpPqGMvXDujTG9QcxRpF1332MCThF4',
+  },
+]);
+tx.setGasPrice(750);
+tx.setGasBudget(3476000);
+// inputs[0] = amount, inputs[1] = toAddress
+const amountArg = tx.pure.u64(amount);
+const toAddressArg = tx.pure.address(toAddress);
+const [coin] = tx.splitCoins(tx.gas, [amountArg]);
+tx.transferObjects([coin], toAddressArg);
+
 const transactionInfo: CoinTransactionInfo = {
+  transaction: Buffer.from(await tx.build()).toString('base64'),
   amount,
   toAddress,
-  payment: [
-    {
-      objectId: '0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd26',
-      version: 428891992,
-      digest: 'GsuLrrruMfrn6tNpPqGMvXDujTG9QcxRpF1332MCThF4',
-    },
-    {
-      objectId: '0xa8d3438b75c713a9d2ad4b7bc5009ed0a0fffb909ef42a050cba2f823f939387',
-      version: 419878795,
-      digest: '3MoCJHgS8kDb2fLLUBQaeY4Z4b4GqLN7zxkkd9hknTmL',
-    },
-  ],
-  gasPrice: '750',
-  gasBudget: '3476000',
 };
 
 const signData: CoinTransactionArgs = {
@@ -84,6 +96,7 @@ import {
   TokenTransactionInfo,
 } from '@coolwallet/sui/config/types';
 import { convertToUnitAmount } from '@coolwallet/sui/utils/transactionUtil';
+import { Transaction } from '@mysten/sui/transactions';
 
 const addressIndex = 0;
 const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';
@@ -96,30 +109,32 @@ const tokenInfo: TokenInfo = {
 
 const amount = convertToUnitAmount('0.001', tokenInfo.decimals);
 
+const tx = new Transaction();
+tx.setSender(address);
+tx.setGasPayment([
+  {
+    objectId: '0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd26',
+    version: 428891992,
+    digest: 'GsuLrrruMfrn6tNpPqGMvXDujTG9QcxRpF1332MCThF4',
+  },
+]);
+tx.setGasPrice(750);
+tx.setGasBudget(3823624);
+// inputs[0] = amount, inputs[1] = toAddress; create them before the coin object input
+const amountArg = tx.pure.u64(amount);
+const toAddressArg = tx.pure.address(toAddress);
+const tokenCoin = tx.objectRef({
+  objectId: '0xc7af6c6bcdebc855af9867b8048f9f12fccaf9796787fe58cff9c9214dde4bae',
+  version: 428892013,
+  digest: 'GUFd3NxnDsWZmDayuFYt85T1jjXjXHtC1iqFxHxt3U66',
+});
+const [coin] = tx.splitCoins(tokenCoin, [amountArg]);
+tx.transferObjects([coin], toAddressArg);
+
 const transactionInfo: TokenTransactionInfo = {
+  transaction: Buffer.from(await tx.build()).toString('base64'),
   amount,
   toAddress,
-  payment: [
-    {
-      objectId: '0x159b6593e1bcfe4f784fcffdd483de003317a401308b7ed79bb22ecfb167cd26',
-      version: 428891992,
-      digest: 'GsuLrrruMfrn6tNpPqGMvXDujTG9QcxRpF1332MCThF4',
-    },
-    {
-      objectId: '0xa8d3438b75c713a9d2ad4b7bc5009ed0a0fffb909ef42a050cba2f823f939387',
-      version: 419878795,
-      digest: '3MoCJHgS8kDb2fLLUBQaeY4Z4b4GqLN7zxkkd9hknTmL',
-    },
-  ],
-  gasPrice: '750',
-  gasBudget: '3823624',
-  coinObjects: [
-    {
-      objectId: '0xc7af6c6bcdebc855af9867b8048f9f12fccaf9796787fe58cff9c9214dde4bae',
-      version: 428892013,
-      digest: 'GUFd3NxnDsWZmDayuFYt85T1jjXjXHtC1iqFxHxt3U66',
-    },
-  ],
 };
 
 const signData: TokenTransactionArgs = {
