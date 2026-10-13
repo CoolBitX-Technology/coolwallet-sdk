@@ -58,19 +58,29 @@ const checkParameters = (path: string, curve: SignCurve, data: string) => {
 };
 
 const formatSignature = (curve: SignCurve, signature: string): SignDataResult => {
-  if (curve === SignCurve.SECP256K1) {
-    const canonicalSignature = getCanonicalSignature(parseDERsignature(signature));
-    return {
-      curve,
-      der: convertToDER(canonicalSignature).toString('hex'),
-      r: canonicalSignature.r32,
-      s: canonicalSignature.s32,
-    };
+  switch (curve) {
+    case SignCurve.SECP256K1: {
+      const canonicalSignature = getCanonicalSignature(parseDERsignature(signature));
+      return {
+        curve,
+        der: convertToDER(canonicalSignature).toString('hex'),
+        r: canonicalSignature.r32,
+        s: canonicalSignature.s32,
+      };
+    }
+    case SignCurve.SCHNORR:
+    case SignCurve.ED25519:
+    case SignCurve.BIP32ED25519:
+      if (signature.length !== SIGNATURE_LENGTH * 2) {
+        throw new SDKError(signData.name, `unexpected signature length: ${signature.length / 2} bytes`);
+      }
+      return { curve, signature };
+    default: {
+      // A curve added to SignCurve without a case here fails to compile.
+      const unhandled: never = curve;
+      throw new SDKError(signData.name, `unsupported curve: ${unhandled}`);
+    }
   }
-  if (signature.length !== SIGNATURE_LENGTH * 2) {
-    throw new SDKError(signData.name, `unexpected signature length: ${signature.length / 2} bytes`);
-  }
-  return { curve, signature } as SignDataResult;
 };
 
 /**
