@@ -213,7 +213,7 @@ flowchart LR
   - [x] `feat(go-signer): add GoSigner with per-curve sign methods`
   - [x] `test(go-signer): add unit tests with mocked core`
   - [x] `chore(go-signer): depend on @coolwallet/core ^2.1.0-beta.0 like the other packages`
-  - [ ] `chore(go-signer): resolve core from the registry in package-lock.json`（core `2.1.0-beta.0` 發佈後：在 go-signer 執行 `npm install`，確認 lockfile 中 core 的 `resolved` 為 `https://registry.npmjs.org/...` 而非 `../core`）
+  - [x] `chore(go-signer): resolve core from the registry in package-lock.json`（core `2.1.0-beta.0` 發佈後：在 go-signer 執行 `npm install`，確認 lockfile 中 core 的 `resolved` 為 `https://registry.npmjs.org/...` 而非 `../core`；因本地 core 版本相同，需先移除 lockfile 中 `../core` 的紀錄 npm 才會改由 registry 解析）
   - [x] `chore(go-signer): release as 0.1.0-beta.0`（依賴 core prerelease 期間以 `beta` tag 發佈，避免 `0.1.0` 進 `latest`）
 
 ---
