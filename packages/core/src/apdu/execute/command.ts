@@ -102,6 +102,13 @@ export const commands = {
     P1: '00',
     P2: '00',
   },
+  SIGN_DATA: {
+    // Go signing-only firmware, P1: signType
+    CLA: '80',
+    INS: 'A0',
+    P1: undefined,
+    P2: '00',
+  },
   EXECUTE_SEGMENT_SCRIPT: {
     CLA: '80',
     INS: 'A8',
