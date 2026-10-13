@@ -36,4 +36,11 @@ const SCRIPT = {
 
 // reference: https://github.com/satoshilabs/slips/blob/master/slip-0044.md
 const COIN_TYPE = '80000310'; // 784
-export { SCRIPT, COIN_TYPE };
+
+// [header(3 bytes)] [inputs[0] amount(10 bytes)] [inputs[1] toAddress(34 bytes)] [inputs[2] ...]
+const TRANSACTION_LAYOUT = {
+  amountInputOffset: 3,
+  toAddressInputOffset: 13,
+};
+
+export { SCRIPT, COIN_TYPE, TRANSACTION_LAYOUT };
