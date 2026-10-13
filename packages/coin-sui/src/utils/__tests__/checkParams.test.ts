@@ -1,5 +1,5 @@
 import { checkTransferTokenTransaction, checkTransferTransaction } from '../checkParams';
-import { addressBalanceToAddress, addressBalanceTransactions } from '../../../tests/addressBalanceTestData';
+import { addressBalanceToAddress, addressBalanceTransactions } from './addressBalanceTestData';
 
 describe('Test checkParams transfer inputs layout', () => {
   const toAddress = '0x72fd5d47879c6fc39af5323b0fbda83425ca8a5172fb048aaa78c1211a98af09';

@@ -3,7 +3,7 @@ import { Inputs, Transaction } from '@mysten/sui/transactions';
 import { getCoinTransferArguments, getSmartContractArguments, getTokenTransferArguments } from '../scriptUtil';
 import { coinFeeInfo, tokenFeeInfo, tokenFeeInfoWith10CoinObjects } from './testData';
 import { messageWithIntent } from '@mysten/sui/cryptography';
-import { addressBalanceToAddress, addressBalanceTransactions } from '../../../tests/addressBalanceTestData';
+import { addressBalanceToAddress, addressBalanceTransactions } from './addressBalanceTestData';
 
 jest.mock('@coolwallet/core', () => {
   return {

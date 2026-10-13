@@ -88,7 +88,8 @@ export async function signTokenTransferTransaction(transactionArgs: TokenTransac
   let script = param.SCRIPT.TOKEN_TRANSFER.scriptWithSignature;
   let argumentWithBytes = getTokenTransferArguments(transaction, addressIndex, tokenInfo);
   const humanAmountLimit = new BigNumber(1).shiftedBy(8);
-  if (new BigNumber(amount).isGreaterThanOrEqualTo(humanAmountLimit)) {
+  const humanAmount = new BigNumber(amount).shiftedBy(-tokenInfo.decimals);
+  if (humanAmount.isGreaterThanOrEqualTo(humanAmountLimit)) {
     script = param.SCRIPT.SMART_CONTRACT.scriptWithSignature;
     argumentWithBytes = getSmartContractArguments(transaction, addressIndex);
   }

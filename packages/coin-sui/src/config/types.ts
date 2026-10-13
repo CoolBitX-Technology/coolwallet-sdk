@@ -2,8 +2,11 @@ import { Transport } from '@coolwallet/core';
 import { Transaction } from '@mysten/sui/transactions';
 
 export interface CoinTransactionInfo {
-  transaction: string; // tx bytes in base64
-  amount: string; // unit amount
+  /** 呼叫端組好、尚未簽章的 TransactionData BCS bytes（base64） */
+  transaction: string;
+  /** unit amount，必須等於 inputs[0] 的 u64 */
+  amount: string;
+  /** 必須等於 inputs[1] 的 address */
   toAddress: string;
 }
 

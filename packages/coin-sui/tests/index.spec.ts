@@ -4,7 +4,7 @@ import { initialize } from '@coolwallet/testing-library';
 import Sui from '../src';
 import { Transaction } from '@mysten/sui/transactions';
 import { testTokenInfo, testCoinTransactionInfo, testTokenTransactionInfo } from './testData';
-import { addressBalanceToAddress, addressBalanceTransactions } from './addressBalanceTestData';
+import { addressBalanceToAddress, addressBalanceTransactions } from '../src/utils/__tests__/addressBalanceTestData';
 import {
   CoinTransactionArgs,
   CoinTransactionInfo,
