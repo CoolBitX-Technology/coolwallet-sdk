@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.0
+- ✨ [CW-29371] feat(core): add signData for Go signing-only firmware (#1225)
+
 ## 2.0.12
 - 🐛 [CW-29062] fix(core): 備份 pre-check 容錯改為以安全假設值續行，不再跳過整段備份 (#1198)
 
