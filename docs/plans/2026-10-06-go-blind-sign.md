@@ -82,8 +82,12 @@ Go 卡改為盲簽：SE（coolwallet-lite-se `a9ccb8d`、`89154b4`、`76c71d4`�
   ```
 
   流程：
-  1. 前置檢查（host 端先擋，錯誤訊息比 SW 好懂）：`transport.cardType === Go`；path hex 合法且 ≤ 255B；pathType 與 curve 相容（同 SE 對照表）；data 長度規則。
-  2. `info.getSEVersion` ≥ `100`，否則丟 `SDKError('signData', 'requires Go signing-only firmware')`。
+  1. 前置檢查（host 端先擋，錯誤訊息比 SW 好懂，不送任何 APDU）：
+     - curve 為 `SignCurve` 之一。
+     - path：hex 字串，`[pathType 1B][index 4B]...`，即 `(pathLength - 1) % 4 === 0`，且 `1 ≤ pathLength ≤ 21`（pathType + 最多 5 層 index，同 SE `Bip32` / `Bip32Ed25519` 的上限；也保證 1 byte 的 pathLength 欄位不會溢位）。
+     - pathType 與 curve 相容（同 SE `KeyManager.checkSignParameter` 對照表）。
+     - data：hex 字串；ECDSA / Schnorr 必須 32B，EdDSA 非空；`1 + pathLength + data + 92` 不超過單一 APDU 的 2047B。
+  2. `info.isSigningOnlyFirmware(transport)`：非 Go 卡回 false；Go 卡自行送 `GET_SE_VERSION`，版本 ≥ `100` 回 true；通訊失敗或回應異常直接拋錯（不沿用 `getSEVersion` 吞錯回 0 的行為）。回 false 時丟 `SDKError('signData', 'requires CoolWallet Go signing-only firmware')`。
   3. `body = pathLength + path + data`；`sig = getCommandSignature(transport, appId, appPrivateKey, SIGN_DATA, body, curve, '00')`。
   4. `executeCommand(transport, SIGN_DATA, target.SE, body + sig, curve, '00')`；非 `9000` 丟 `APDUError`。
   5. 依 curve 組裝結果：ECDSA 解析 DER 得 `r`、`s`（64 hex 補零）並保留原始 `der`；其他直接回 64B hex。
@@ -275,3 +279,6 @@ flowchart LR
 - 2026-10-07 — PR 2 另開 `feat/CW-29371-go-signer`，疊在 PR 1 分支上 — go-signer 為新 package，需等含 `signData` 的 core 發版；使用者同意。
 - 2026-10-07 — PR 3（OTA 回應碼檢查）併入 #1225 — 新韌體整版替換，LOAD / INSTALL 失敗不可被當成成功；使用者決定。
 - 2026-10-07 — OTA 推到 100 後舊 coin-* script 路徑在 Go 卡失效（`6D00`），由 App 端配合改走 `signData` / go-signer 後再發版 — 使用者確認。
+- 2026-10-07 — path 上限由原本設想的 255B（pathLength 欄位上限）改為 21B — SE `Bip32` / `Bip32Ed25519` 只接受 `pathLength ≤ 21`，對齊後超出的 path 在 host 端就被擋下（code review 發現 255B 會讓長度欄位溢位）。
+- 2026-10-07 — 版本判斷改由 `isSigningOnlyFirmware` 自行送 `GET_SE_VERSION` 並在失敗時拋錯 — `getSEVersion` 失敗回 0 會讓斷線被誤判為舊韌體、誘導不必要的 OTA（code review 發現）。
+- 2026-10-13 — §4.1 補上 path 規則與版本判斷的實際做法 — PR #1225 review（Dorac）指出計畫與實作不一致。
