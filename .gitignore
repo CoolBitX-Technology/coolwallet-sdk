@@ -3,6 +3,8 @@ packages/**/lib/
 **/.DS_Store
 packages/**/coverage/
 packages/**/.nyc_output/
+# built by the "Build publish action" step in beta-publish.yml
+.github/publish-action/dist/
 
 scripts/reports
 scripts/allure-report
