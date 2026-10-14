@@ -10,7 +10,7 @@ The card no longer parses transactions. The app builds and hashes the transactio
 npm install @coolwallet/core @coolwallet/go-signer
 ```
 
-`@coolwallet/go-signer` depends on `@coolwallet/core` `^2.1.0-beta.0`, the first version with `coin.signData`. Keep the app's own core in the same range so npm installs a single copy shared by both.
+`@coolwallet/go-signer` depends on `@coolwallet/core` `^2.1.0-beta.1`. `2.1.0-beta.0` added `coin.signData` but fails to load when `coin/config/types` is required before the package entry, which some bundlers do; `2.1.0-beta.1` fixes that. Keep the app's own core in the same range so npm installs a single copy shared by both.
 
 ## Usage
 

@@ -215,6 +215,7 @@ flowchart LR
   - [x] `chore(go-signer): depend on @coolwallet/core ^2.1.0-beta.0 like the other packages`
   - [x] `chore(go-signer): resolve core from the registry in package-lock.json`（core `2.1.0-beta.0` 發佈後：在 go-signer 執行 `npm install`，確認 lockfile 中 core 的 `resolved` 為 `https://registry.npmjs.org/...` 而非 `../core`；因本地 core 版本相同，需先移除 lockfile 中 `../core` 的紀錄 npm 才會改由 registry 解析）
   - [x] `chore(go-signer): release as 0.1.0-beta.0`（依賴 core prerelease 期間以 `beta` tag 發佈，避免 `0.1.0` 進 `latest`）
+  - [x] `chore(go-signer): depend on @coolwallet/core ^2.1.0-beta.1`（beta.0 在 `coin/config/types` 先於 package entry 載入時會失敗，beta.1 修正）
 
 ---
 
@@ -255,7 +256,7 @@ flowchart LR
 - **Assumption**：結果欄位一律為 hex string（不用 Buffer）。
 - **Risk**：`executeAPDU` 限制 data（含 1B checksum）≤ 4096 hex，即 APDU data 最多 2047B；扣掉 appId + sig 92B 後 `[pathLength][path][signData]` 最多 1955B；需與 SE `largestMessage` 對齊，大型 SOL 交易可能超出 — mitigation：前置檢查給明確錯誤，必要時另開票支援分段。
 - **Risk**：卡片無確認畫面，任何送進來的 digest 都會被簽 — mitigation：README 明確標示盲簽語意。
-- **Risk**：go-signer 依賴的 core 版本需先發佈 — mitigation：`package.json` 已寫 `dependencies: ^2.1.0-beta.0`（同 core 2.x coin-* 慣例）；本地開發暫時改為 `file:../core` 且不 commit；core beta 發佈後重新產生 lockfile 再開 PR 2，避免 CI `npm ci` 連到未 build 的 `../core`。
+- **Risk**：go-signer 依賴的 core 版本需先發佈 — mitigation：`package.json` 已寫 `dependencies: ^2.1.0-beta.1`（同 core 2.x coin-* 慣例；beta.0 有載入順序問題）；本地開發暫時改為 `file:../core` 且不 commit；core beta 發佈後重新產生 lockfile 再開 PR 2，避免 CI `npm ci` 連到未 build 的 `../core`。
 
 ## 10. Done criteria
 
