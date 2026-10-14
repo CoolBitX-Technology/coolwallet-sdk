@@ -19,6 +19,7 @@
     "url": "https://github.com/CoolBitX-Technology/coolwallet-sdk/issues"
   },
   "dependencies": {
+    "@babel/runtime": "^7.21.0",
     "@coolwallet/core": "^2.1.0-beta.1"
   },
   "devDependencies": {

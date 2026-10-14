@@ -216,6 +216,7 @@ flowchart LR
   - [x] `chore(go-signer): resolve core from the registry in package-lock.json`（core `2.1.0-beta.0` 發佈後：在 go-signer 執行 `npm install`，確認 lockfile 中 core 的 `resolved` 為 `https://registry.npmjs.org/...` 而非 `../core`；因本地 core 版本相同，需先移除 lockfile 中 `../core` 的紀錄 npm 才會改由 registry 解析）
   - [x] `chore(go-signer): release as 0.1.0-beta.0`（依賴 core prerelease 期間以 `beta` tag 發佈，避免 `0.1.0` 進 `latest`）
   - [x] `chore(go-signer): depend on @coolwallet/core ^2.1.0-beta.1`（beta.0 在 `coin/config/types` 先於 package entry 載入時會失敗，beta.1 修正）
+  - [x] `chore(go-signer): depend on @babel/runtime`（core 的 build 在執行期 require `@babel/runtime`，卻沒列為 dependency；新版 `@babel/preset-env` 不再經由 `regenerator-transform` 間接帶入，乾淨安裝時 core 無法載入）
 
 ---
 
