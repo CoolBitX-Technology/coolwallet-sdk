@@ -1,8 +1,10 @@
-import { Transport } from '../../index';
+// Type-only on purpose: a value import of the package entry would put this module in core's import cycle, and
+// coin/signData reads SignCurve at load time, so loading this file first (e.g. via a deep import) used to crash.
+import type Transport from '../../transport';
 import { PathType } from '../../config';
 import { SignatureType } from '../../transaction';
 
-export { Transport };
+export type { Transport };
 
 export type SignTxHashData = {
   transport: Transport;
