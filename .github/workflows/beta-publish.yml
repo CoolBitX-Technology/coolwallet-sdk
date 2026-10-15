@@ -41,5 +41,10 @@ jobs:
     - name: Ensure npm CLI supports trusted publishing
       run: npm install -g npm@11
 
+    # dist/ is not committed; build the action from index.ts / utils.ts on every run.
+    - name: Build publish action
+      working-directory: .github/publish-action
+      run: npm ci && npm run build
+
     - name: Publish action
       uses: ./.github/publish-action
