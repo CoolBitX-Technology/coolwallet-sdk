@@ -18,8 +18,10 @@ export const getSEVersion = async (transport: Transport): Promise<number> => {
   try {
     const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
     if (outputData) {
-      transport.seVersion = parseInt(outputData, 16);
-      return transport.seVersion;
+      const version = parseInt(outputData, 16);
+      // Only a successful response is cached, so a failed one cannot pick the wrong error table for the session.
+      if (statusCode === CODE._9000) transport.seVersion = version;
+      return version;
     } else {
       throw new APDUError(commands.GET_SE_VERSION, statusCode, msg);
     }

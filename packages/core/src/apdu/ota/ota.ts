@@ -249,7 +249,7 @@ export const updateSE = async ({
     console.debug('Load OTA Script Done');
 
     await insertScript(transport, SCRIPT.installScript);
-    transport.seVersion = getNewSeVersion(transport.cardType);
+    transport.seVersion = undefined; // loadScript may install another build, so read the version from the card again
     console.debug('Insert Install Script Done');
 
     if (transport.cardType === CardType.Pro) await mcu.display.hideUpdate(transport); // Hide update from the card
@@ -330,7 +330,7 @@ export const updateSEPart1 = async ({
 
     console.log('updateSEPart1 >> insertScript');
     await insertScript(transport, SCRIPT.installScript);
-    transport.seVersion = getNewSeVersion(transport.cardType);
+    transport.seVersion = undefined; // loadScript may install another build, so read the version from the card again
     console.debug('Insert Install Script Done');
 
     if (transport.cardType === CardType.Pro) {

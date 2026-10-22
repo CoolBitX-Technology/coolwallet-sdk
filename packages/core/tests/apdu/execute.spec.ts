@@ -80,6 +80,12 @@ describe('executeAPDU error message', () => {
     expect(msg).toBe('unsupported script command');
   });
 
+  it('does not cache the version from a non-9000 GET_SE_VERSION response', async () => {
+    const transport = mockTransport(CardType.Pro, ['015B6985']);
+    await expect(getSEVersion(transport)).resolves.toBe(347);
+    expect(transport.seVersion).toBeUndefined();
+  });
+
   it('does not overwrite the cached version when getSEVersion fails', async () => {
     const transport = mockTransport(CardType.Pro, ['6D00']);
     transport.seVersion = 347;
