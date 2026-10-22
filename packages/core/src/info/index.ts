@@ -18,7 +18,8 @@ export const getSEVersion = async (transport: Transport): Promise<number> => {
   try {
     const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
     if (outputData) {
-      return parseInt(outputData, 16);
+      transport.seVersion = parseInt(outputData, 16);
+      return transport.seVersion;
     } else {
       throw new APDUError(commands.GET_SE_VERSION, statusCode, msg);
     }
@@ -44,7 +45,8 @@ export const isSigningOnlyFirmware = async (transport: Transport): Promise<boole
   if (statusCode !== CODE._9000 || !outputData) {
     throw new APDUError(commands.GET_SE_VERSION, statusCode, msg);
   }
-  return parseInt(outputData, 16) >= GO_SIGNING_ONLY_SE_VERSION;
+  transport.seVersion = parseInt(outputData, 16);
+  return transport.seVersion >= GO_SIGNING_ONLY_SE_VERSION;
 };
 
 /**

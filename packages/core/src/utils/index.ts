@@ -2,7 +2,7 @@ import * as bip39 from 'bip39';
 import pbkdf2 from 'pbkdf2';
 import isEmpty from 'lodash/isEmpty';
 import Transport, { CardType } from '../transport';
-import { MSG } from '../config/status/msg';
+import { getMsg } from '../config/status/msg';
 import { CODE } from '../config/status/code';
 import { PathType } from '../config/param';
 import { SDKError } from '../error/errorHandle';
@@ -70,9 +70,12 @@ export const getPath = async (
   return fullPath;
 };
 
-export const getReturnMsg = (code: string): string => {
-  const message = MSG[`_${code}`] ? MSG[`_${code}`] : 'unknown command error';
-  return message;
+/**
+ * Without cardType and seVersion, the legacy (Pro SE <= 346) messages are used.
+ */
+export const getReturnMsg = (code: string, cardType?: CardType, seVersion?: number): string => {
+  const message = getMsg(code, cardType, seVersion);
+  return message ? message : 'unknown command error';
 };
 
 const getCheckSum = (data: any) => {
