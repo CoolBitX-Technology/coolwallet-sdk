@@ -1,4 +1,40 @@
-import { createSeedsHexByMnemonic } from '../../src/utils';
+import { createSeedsHexByMnemonic, getReturnMsg } from '../../src/utils';
+import { CardType } from '../../src/transport';
+
+describe('getReturnMsg', () => {
+  it('uses legacy messages when the card version is not given', () => {
+    expect(getReturnMsg('609D')).toBe('appid need registered');
+    expect(getReturnMsg('6A01')).toBe('unsupported script command');
+  });
+
+  it.each([
+    [CardType.Pro, 346],
+    [CardType.Pro, 0],
+    [CardType.Go, 100],
+    [CardType.Go, 0],
+  ])('uses legacy messages for %s SE %d', (cardType, seVersion) => {
+    expect(getReturnMsg('6A01', cardType, seVersion)).toBe('unsupported script command');
+    expect(getReturnMsg('6903', cardType, seVersion)).toBe('unknown command error');
+  });
+
+  it('uses renumbered messages for Pro SE >= 347', () => {
+    expect(getReturnMsg('6903', CardType.Pro, 347)).toBe('appid need registered');
+    expect(getReturnMsg('6A01', CardType.Pro, 347)).toBe('script signature verification failed');
+    expect(getReturnMsg('6915', CardType.Pro, 348)).toBe('old pair password is wrong');
+    expect(getReturnMsg('609D', CardType.Pro, 347)).toBe('unknown command error');
+  });
+
+  it('uses renumbered messages for Go SE >= 101', () => {
+    expect(getReturnMsg('6903', CardType.Go, 101)).toBe('appid need registered');
+    expect(getReturnMsg('6D12', CardType.Go, 101)).toBe('path length is incorrect in Bip32.java');
+    expect(getReturnMsg('609D', CardType.Go, 101)).toBe('unknown command error');
+  });
+
+  it('shares ISO status words across versions', () => {
+    expect(getReturnMsg('6A86')).toBe('incorrect p1 & p2');
+    expect(getReturnMsg('6A86', CardType.Pro, 347)).toBe('incorrect p1 & p2');
+  });
+});
 
 describe('utils', () => {
   test('createSeedsHexByMnemonic', async () => {

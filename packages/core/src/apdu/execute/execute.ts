@@ -1,15 +1,20 @@
 import isNil from 'lodash/isNil';
-import { CommandType } from './command';
+import { CommandType, commands } from './command';
 import * as util from '../../utils';
 import Transport, { CardType } from '../../transport/index';
 import { SDKError } from '../../error/errorHandle';
 import { target } from '../../config/param';
+import { CODE } from '../../config/status/code';
+import { isVersionIndependentCode } from '../../config/status/msg';
 import { error } from '../..';
 
 const commandCounter = {
   command: '',
   count: 0,
 };
+
+// Transports whose SE version is being queried, so the query's own response cannot trigger another query.
+const fetchingSEVersion = new WeakSet<Transport>();
 
 /**
  * @param {Transport} transport
@@ -63,7 +68,7 @@ export const executeAPDU = async (
     if (transport.requestAPDUV2) {
       const response = await transport.requestAPDUV2(apdu, executedTarget === target.SE ? 'BLE_CMD' : 'MCU_CMD');
       const statusCode = response.status.toUpperCase();
-      const msg = util.getReturnMsg(statusCode);
+      const msg = await getMsgByTarget(transport, statusCode, executedTarget);
       return { statusCode, msg, outputData: response.outputData };
     }
     const response = await transport.request(apdu.command, apdu.data);
@@ -83,13 +88,43 @@ export const executeAPDU = async (
       }
     }
 
-    const msg = util.getReturnMsg(statusCode.toUpperCase());
     statusCode = statusCode.toUpperCase();
+    const msg = await getMsgByTarget(transport, statusCode, executedTarget);
     return { statusCode, msg, outputData };
   } catch (err) {
     throw new SDKError(executeAPDU.name, `executeAPDU error: ${err}`);
   }
 };
+
+/**
+ * Query and cache the SE version the first time a version-dependent status word comes back,
+ * so apps do not have to call getSEVersion before the error messages are correct.
+ * Uses executeAPDU directly because info imports this module.
+ */
+async function ensureSEVersion(transport: Transport): Promise<void> {
+  if (!isNil(transport.seVersion) || fetchingSEVersion.has(transport)) return;
+  fetchingSEVersion.add(transport);
+  try {
+    const { CLA, INS, P1, P2 } = commands.GET_SE_VERSION;
+    const apdu = util.assemblyCommandAndData(CLA, INS, P1 as string, P2 as string, '');
+    const { statusCode, outputData } = await executeAPDU(transport, apdu, target.SE);
+    const version = parseInt(outputData, 16);
+    if (statusCode === CODE._9000 && !Number.isNaN(version)) {
+      transport.seVersion = version;
+    }
+  } catch (e) {
+    console.debug(`ensureSEVersion failed, use legacy error messages: ${e}`);
+  } finally {
+    fetchingSEVersion.delete(transport);
+  }
+}
+
+// Only SE status words depend on the SE version; MCU responses keep the legacy messages.
+async function getMsgByTarget(transport: Transport, statusCode: string, executedTarget: string): Promise<string> {
+  if (executedTarget !== target.SE) return util.getReturnMsg(statusCode);
+  if (!isVersionIndependentCode(statusCode)) await ensureSEVersion(transport);
+  return util.getReturnMsg(statusCode, transport.cardType, transport.seVersion);
+}
 
 /**
  *

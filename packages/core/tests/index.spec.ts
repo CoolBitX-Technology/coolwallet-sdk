@@ -359,7 +359,7 @@ describe('Seed backup and recovery in OTA (firmware update) flow', () => {
     it(`delete failed: the appId can't be recognized`, async () => {
       await expect(_resetCard()).resolves.toMatchInlineSnapshot(`true`);
       await expect(_deleteBackupRegisterData()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"error function: deleteBackupRegisterData, message: Delete backup register data failed Error: command info: {\\"CLA\\":\\"80\\",\\"INS\\":\\"84\\",\\"P1\\":\\"00\\",\\"P2\\":\\"00\\"}, returnCode: 609D, message: appid need registered"`
+        `"error function: deleteBackupRegisterData, message: Delete backup register data failed Error: command info: {\\"CLA\\":\\"80\\",\\"INS\\":\\"84\\",\\"P1\\":\\"00\\",\\"P2\\":\\"00\\"}, returnCode: 6903, message: appid need registered"`
       );
     });
 

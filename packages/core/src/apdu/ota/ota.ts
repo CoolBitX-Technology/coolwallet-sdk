@@ -234,6 +234,7 @@ export const updateSE = async ({
     await performApiChallenge(transport, cardId, callAPI, apiSecret);
 
     progressCallback(progress.next()); // progress 44
+    transport.seVersion = undefined; // the cached version no longer applies once the applet is deleted
     await insertDeleteScript(transport, SCRIPT.deleteScript);
     console.debug('Delete Card Manager Done');
 
@@ -248,6 +249,7 @@ export const updateSE = async ({
     console.debug('Load OTA Script Done');
 
     await insertScript(transport, SCRIPT.installScript);
+    transport.seVersion = undefined; // loadScript may install another build, so read the version from the card again
     console.debug('Insert Install Script Done');
 
     if (transport.cardType === CardType.Pro) await mcu.display.hideUpdate(transport); // Hide update from the card
@@ -311,6 +313,7 @@ export const updateSEPart1 = async ({
 
     progressCallback(progress.next()); // progress 44
     console.log('updateSEPart1 >> insertDeleteScript');
+    transport.seVersion = undefined; // the cached version no longer applies once the applet is deleted
     await insertDeleteScript(transport, SCRIPT.deleteScript);
     console.debug('Delete Card Manager Done');
 
@@ -327,6 +330,7 @@ export const updateSEPart1 = async ({
 
     console.log('updateSEPart1 >> insertScript');
     await insertScript(transport, SCRIPT.installScript);
+    transport.seVersion = undefined; // loadScript may install another build, so read the version from the card again
     console.debug('Insert Install Script Done');
 
     if (transport.cardType === CardType.Pro) {

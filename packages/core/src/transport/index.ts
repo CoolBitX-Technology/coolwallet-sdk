@@ -11,6 +11,8 @@ enum CardType {
 
 interface Transport {
   cardType: CardType;
+  // Cached by getSEVersion, so each APDU response can pick the error message table without querying the card again.
+  seVersion?: number;
   requestAPDUV2?: (apdu: { command: string; data: string }, target: string) => Promise<any>;
 
   request(command: string, packets: string): Promise<string>;
