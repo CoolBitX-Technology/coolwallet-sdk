@@ -19,8 +19,8 @@ export const getSEVersion = async (transport: Transport): Promise<number> => {
     const { outputData, statusCode, msg } = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
     if (outputData) {
       const version = parseInt(outputData, 16);
-      // Only a successful response is cached, so a failed one cannot pick the wrong error table for the session.
-      if (statusCode === CODE._9000) transport.seVersion = version;
+      // Only a successful, numeric response is cached, so a bad one cannot pick the wrong error table for the session.
+      if (statusCode === CODE._9000 && !Number.isNaN(version)) transport.seVersion = version;
       return version;
     } else {
       throw new APDUError(commands.GET_SE_VERSION, statusCode, msg);
@@ -47,8 +47,9 @@ export const isSigningOnlyFirmware = async (transport: Transport): Promise<boole
   if (statusCode !== CODE._9000 || !outputData) {
     throw new APDUError(commands.GET_SE_VERSION, statusCode, msg);
   }
-  transport.seVersion = parseInt(outputData, 16);
-  return transport.seVersion >= GO_SIGNING_ONLY_SE_VERSION;
+  const version = parseInt(outputData, 16);
+  if (!Number.isNaN(version)) transport.seVersion = version;
+  return version >= GO_SIGNING_ONLY_SE_VERSION;
 };
 
 /**

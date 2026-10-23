@@ -108,8 +108,9 @@ async function ensureSEVersion(transport: Transport): Promise<void> {
     const { CLA, INS, P1, P2 } = commands.GET_SE_VERSION;
     const apdu = util.assemblyCommandAndData(CLA, INS, P1 as string, P2 as string, '');
     const { statusCode, outputData } = await executeAPDU(transport, apdu, target.SE);
-    if (statusCode === CODE._9000 && outputData) {
-      transport.seVersion = parseInt(outputData, 16);
+    const version = parseInt(outputData, 16);
+    if (statusCode === CODE._9000 && !Number.isNaN(version)) {
+      transport.seVersion = version;
     }
   } catch (e) {
     console.debug(`ensureSEVersion failed, use legacy error messages: ${e}`);

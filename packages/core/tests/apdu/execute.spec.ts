@@ -86,6 +86,16 @@ describe('executeAPDU error message', () => {
     expect(transport.seVersion).toBeUndefined();
   });
 
+  it('does not cache a non-numeric SE version', async () => {
+    const transport = mockTransport(CardType.Pro, ['ZZZZ9000', '6A01', 'ZZZZ9000']);
+    await expect(getSEVersion(transport)).resolves.toBeNaN();
+    expect(transport.seVersion).toBeUndefined();
+
+    const { msg } = await executeAPDU(transport, nextApdu(), target.SE);
+    expect(msg).toBe('unsupported script command');
+    expect(transport.seVersion).toBeUndefined();
+  });
+
   it('does not overwrite the cached version when getSEVersion fails', async () => {
     const transport = mockTransport(CardType.Pro, ['6D00']);
     transport.seVersion = 347;
