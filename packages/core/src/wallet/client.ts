@@ -67,12 +67,13 @@ export const register = async (
 };
 
 /**
- * Change the pairing password. Only a wrong old password uses up one of the tries shared with register.
+ * Change the pairing password. Needs Pro SE 348 or Go SE 102.
+ * Only a wrong old password uses up one of the tries shared with register.
  * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivKey
- * @param {string} oldPassword
- * @param {string} newPassword 6-8 digits
+ * @param {string} oldPassword 6-8 digits on Pro, 8 digits on Go
+ * @param {string} newPassword 6-8 digits on Pro, 8 digits on Go
  * @param {string} SEPublicKey
  */
 export const changePairingPassword = async (
