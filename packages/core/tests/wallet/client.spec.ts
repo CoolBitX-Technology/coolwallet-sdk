@@ -1,8 +1,8 @@
 import { createECDH, createHash } from 'crypto';
 import { ec as EC } from 'elliptic';
 import { CardType, Transport } from '../../src';
-import { changePairingPassword } from '../../src/wallet/client';
-import { ECIESDec } from '../../src/crypto/encryptions';
+import { changePairingPassword, getPairingPassword } from '../../src/wallet/client';
+import { ECIESDec, ECIESenc } from '../../src/crypto/encryptions';
 
 const secp256k1 = new EC('secp256k1');
 const appKey = secp256k1.keyFromPrivate('11'.repeat(32));
@@ -44,14 +44,33 @@ const mockTransport = ({
           return nonce + '9000';
         case '12':
           return changeStatus;
+        case '1A':
+          // GET_PAIR_PWD returns the new password encrypted to the app public key
+          return ECIESenc(appKey.getPublic(false, 'hex'), 'FF123456') + '9000';
         default:
           return '9000';
       }
     }),
   } as unknown as Transport;
   const changeApdus = () => sent.filter(({ command }) => command.slice(6, 8).toUpperCase() === '12');
-  return { transport, changeApdus };
+  // command = pid(00) cmdLen(09) CLA INS ...; MCU commands use CLA 7F
+  const mcuApdus = () => sent.filter(({ command }) => command.slice(4, 6).toUpperCase() === '7F');
+  return { transport, changeApdus, mcuApdus };
 };
+
+describe('getPairingPassword', () => {
+  it('returns the new password on a Go card without sending an MCU command', async () => {
+    const { transport, mcuApdus } = mockTransport({ cardType: CardType.Go, seVersion: 102 });
+    await expect(getPairingPassword(transport, appId, appPrivateKey)).resolves.toBe('123456');
+    expect(mcuApdus()).toHaveLength(0);
+  });
+
+  it('powers off the MCU on a Pro card', async () => {
+    const { transport, mcuApdus } = mockTransport();
+    await expect(getPairingPassword(transport, appId, appPrivateKey)).resolves.toBe('123456');
+    expect(mcuApdus()).toHaveLength(1);
+  });
+});
 
 describe('changePairingPassword', () => {
   it.each([

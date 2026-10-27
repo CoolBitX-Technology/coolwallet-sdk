@@ -192,7 +192,8 @@ export const getPairingPassword = async (transport: Transport, appId: string, ap
   );
 
   // const encryptedPassword = await apdu.pairing.getPairingPassword(transport, signature, forceUseSC);
-  await mcu.control.powerOff(transport);
+  // Go has no MCU, and the card has already replaced the password, so a throwing powerOff would lose it.
+  if (transport.cardType === CardType.Pro) await mcu.control.powerOff(transport);
   let password = crypto.encryption.ECIESDec(appPrivKey, encryptedPassword);
   if (!password) throw new SDKError(getPairingPassword.name, `password error, your password: ${password}`);
   password = password.replace(/f/gi, '');
