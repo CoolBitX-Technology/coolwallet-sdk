@@ -86,8 +86,16 @@ export const changePairingPassword = async (
   if (!SEPublicKey) {
     throw new SDKError(changePairingPassword.name, 'SEPublicKey can not be undifined');
   }
-  if (!/^\d{6,8}$/.test(newPassword)) {
-    throw new SDKError(changePairingPassword.name, 'newPassword must be 6-8 digits');
+  // The card does not check the password length, so the SDK enforces it: Pro takes 6-8 digits and Go exactly 8.
+  // The old password was set under the same rule, so any other old password can never match.
+  const isGo = transport.cardType === CardType.Go;
+  const passwordPattern = isGo ? /^\d{8}$/ : /^\d{6,8}$/;
+  const passwordDigits = isGo ? '8' : '6-8';
+  if (!passwordPattern.test(oldPassword)) {
+    throw new SDKError(changePairingPassword.name, `oldPassword must be ${passwordDigits} digits`);
+  }
+  if (!passwordPattern.test(newPassword)) {
+    throw new SDKError(changePairingPassword.name, `newPassword must be ${passwordDigits} digits`);
   }
   const requiredSEVersion =
     transport.cardType === CardType.Go ? GO_CHANGE_PAIR_PWD_SE_VERSION : PRO_CHANGE_PAIR_PWD_SE_VERSION;
