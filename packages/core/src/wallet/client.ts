@@ -3,10 +3,14 @@ import { executeCommand } from '../apdu/execute/execute';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { APDUError, SDKError } from '../error/errorHandle';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import * as crypto from '../crypto/index';
-import { apdu, mcu } from '..';
-import { getCommandSignature } from '../setting/auth';
+import { mcu } from '..';
+import { getCommandSignature, versionCheck } from '../setting/auth';
+
+// changePairPwd (0x12) is supported from Pro SE 348 and Go SE 102.
+const PRO_CHANGE_PAIR_PWD_SE_VERSION = 348;
+const GO_CHANGE_PAIR_PWD_SE_VERSION = 102;
 
 /**
  * @param {Transport} transport
@@ -59,6 +63,56 @@ export const register = async (
     return appId;
   } else {
     throw new APDUError(commands.REGISTER, statusCode, msg);
+  }
+};
+
+/**
+ * Change the pairing password. Only a wrong old password uses up one of the tries shared with register.
+ * @param {Transport} transport
+ * @param {string} appId
+ * @param {string} appPrivKey
+ * @param {string} oldPassword
+ * @param {string} newPassword 6-8 digits
+ * @param {string} SEPublicKey
+ */
+export const changePairingPassword = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  oldPassword: string,
+  newPassword: string,
+  SEPublicKey: string
+): Promise<void> => {
+  if (!SEPublicKey) {
+    throw new SDKError(changePairingPassword.name, 'SEPublicKey can not be undifined');
+  }
+  if (!/^\d{6,8}$/.test(newPassword)) {
+    throw new SDKError(changePairingPassword.name, 'newPassword must be 6-8 digits');
+  }
+  const requiredSEVersion =
+    transport.cardType === CardType.Go ? GO_CHANGE_PAIR_PWD_SE_VERSION : PRO_CHANGE_PAIR_PWD_SE_VERSION;
+  await versionCheck(transport, requiredSEVersion);
+
+  // Passwords are BCD left-padded with F to 4 bytes, as in register.
+  const passwords = oldPassword.padStart(8, 'F') + newPassword.padStart(8, 'F');
+  const encryptedPasswords = crypto.encryption.ECIESenc(SEPublicKey, passwords);
+  const signature = await getCommandSignature(
+    transport,
+    appId,
+    appPrivKey,
+    commands.CHANGE_PAIR_PWD,
+    encryptedPasswords
+  );
+  const { statusCode, msg } = await executeCommand(
+    transport,
+    commands.CHANGE_PAIR_PWD,
+    target.SE,
+    encryptedPasswords + signature,
+    undefined,
+    undefined
+  );
+  if (statusCode !== CODE._9000) {
+    throw new APDUError(commands.CHANGE_PAIR_PWD, statusCode, msg);
   }
 };
 
