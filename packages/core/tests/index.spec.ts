@@ -444,3 +444,91 @@ describe('Seed backup and recovery in OTA (firmware update) flow', () => {
     });
   });
 });
+
+describe('Change pairing password', () => {
+  let props: PromiseValue<ReturnType<typeof initialize>>;
+  let transport: Transport;
+  let cardType: CardType;
+  let supported = false;
+
+  beforeAll(async () => {
+    if (process.env.CARD === 'go') {
+      cardType = CardType.Go;
+    } else {
+      cardType = CardType.Pro;
+    }
+    if (cardType === CardType.Go) {
+      transport = (await createTransport('http://localhost:9527', CardType.Go))!;
+    } else {
+      transport = (await createTransport())!;
+    }
+    // changePairPwd (0x12) needs Pro SE 348 / Go SE 102; skip on an older simulator.
+    const seVersion = await info.getSEVersion(transport);
+    supported = seVersion >= (cardType === CardType.Go ? 102 : 348);
+    if (supported) props = await initialize(transport, mnemonic);
+  });
+
+  const itIfSupported = (name: string, fn: () => Promise<void>) =>
+    it(name, async () => {
+      if (!supported) {
+        console.warn(`skip "${name}": the simulator does not support changePairPwd (0x12)`);
+        return;
+      }
+      await fn();
+    });
+
+  const change = (oldPassword: string, newPassword: string) =>
+    wallet.client.changePairingPassword(
+      transport,
+      props.appId,
+      props.appPrivateKey,
+      oldPassword,
+      newPassword,
+      props.SEPublicKey
+    );
+
+  // getPairingPassword (0x1A) generates a new random password, so it cannot be used to read the current one.
+  // Each change is verified by using the new password as the old one in the next change.
+  itIfSupported('changes the password, after which the previous one is rejected', async () => {
+    await expect(change('12345678', '87654321')).resolves.toBeUndefined();
+    await expect(change('12345678', '11112222')).rejects.toThrow('returnCode: 6915');
+  });
+
+  itIfSupported('accepts a 6-digit new password, including 000000, on a Pro card', async () => {
+    if (cardType !== CardType.Pro) return;
+    await expect(change('87654321', '000000')).resolves.toBeUndefined();
+    await expect(change('000000', '87654321')).resolves.toBeUndefined();
+  });
+
+  itIfSupported('returns 6915 for a wrong old password', async () => {
+    await expect(change('11112222', '22223333')).rejects.toThrow(
+      'returnCode: 6915, message: old pair password is wrong'
+    );
+  });
+
+  itIfSupported('returns 6917 when the new password equals the old one', async () => {
+    await expect(change('87654321', '87654321')).rejects.toThrow(
+      'returnCode: 6917, message: new pair password is the same as the old one'
+    );
+  });
+
+  itIfSupported('returns 6918 while register data is backed up', async () => {
+    await backupRegisterData(transport, props.appId, props.appPrivateKey);
+    try {
+      await expect(change('87654321', '12345678')).rejects.toThrow('returnCode: 6918');
+    } finally {
+      await deleteBackupRegisterData(transport, props.appId, props.appPrivateKey);
+    }
+  });
+
+  itIfSupported('changes the password back after the backup is removed', async () => {
+    await expect(change('87654321', '12345678')).resolves.toBeUndefined();
+    await expect(change('12345678', '87654321')).resolves.toBeUndefined();
+  });
+
+  itIfSupported('getPairingPassword replaces the password with a new random one', async () => {
+    const generated = await wallet.client.getPairingPassword(transport, props.appId, props.appPrivateKey);
+    await expect(change('87654321', '12345678')).rejects.toThrow('returnCode: 6915');
+    await expect(change(generated, '12345678')).resolves.toBeUndefined();
+  });
+});
