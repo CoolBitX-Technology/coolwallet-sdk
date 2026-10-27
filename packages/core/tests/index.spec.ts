@@ -463,7 +463,9 @@ describe('Change pairing password', () => {
       transport = (await createTransport())!;
     }
     // changePairPwd (0x12) needs Pro SE 348 / Go SE 102; skip on an older simulator.
+    // getSEVersion reads a failed query as 0, so fail instead of skipping when the version cannot be read.
     const seVersion = await info.getSEVersion(transport);
+    if (!seVersion) throw new Error('Failed to read the SE version from the simulator');
     supported = seVersion >= (cardType === CardType.Go ? 102 : 348);
     if (supported) props = await initialize(transport, mnemonic);
   });
