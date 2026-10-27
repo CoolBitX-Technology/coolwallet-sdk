@@ -6,7 +6,7 @@ import { APDUError, SDKError } from '../error/errorHandle';
 import Transport, { CardType } from '../transport';
 import * as crypto from '../crypto/index';
 import { mcu } from '..';
-import { getCommandSignature, versionCheck } from '../setting/auth';
+import { getCommandSignature } from '../setting/auth';
 
 // changePairPwd (0x12) is supported from Pro SE 348 and Go SE 102.
 const PRO_CHANGE_PAIR_PWD_SE_VERSION = 348;
@@ -97,9 +97,22 @@ export const changePairingPassword = async (
   if (!passwordPattern.test(newPassword)) {
     throw new SDKError(changePairingPassword.name, `newPassword must be ${passwordDigits} digits`);
   }
+  // Like isSigningOnlyFirmware, a failed version query throws instead of reading as version 0,
+  // so a transport error is never reported as old firmware.
   const requiredSEVersion =
     transport.cardType === CardType.Go ? GO_CHANGE_PAIR_PWD_SE_VERSION : PRO_CHANGE_PAIR_PWD_SE_VERSION;
-  await versionCheck(transport, requiredSEVersion);
+  const version = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
+  if (version.statusCode !== CODE._9000 || !version.outputData) {
+    throw new APDUError(commands.GET_SE_VERSION, version.statusCode, version.msg);
+  }
+  const seVersion = parseInt(version.outputData, 16);
+  if (!Number.isNaN(seVersion)) transport.seVersion = seVersion;
+  if (!(seVersion >= requiredSEVersion)) {
+    throw new SDKError(
+      changePairingPassword.name,
+      `Firmware version too low. Please update to ${requiredSEVersion}`
+    );
+  }
 
   // Passwords are BCD left-padded with F to 4 bytes, as in register.
   const passwords = oldPassword.padStart(8, 'F') + newPassword.padStart(8, 'F');

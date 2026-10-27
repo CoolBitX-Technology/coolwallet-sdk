@@ -21,7 +21,15 @@ const mockTransport = ({
   cardType = CardType.Pro,
   seVersion = 348,
   changeStatus = '9000',
-}: { cardType?: CardType; seVersion?: number; changeStatus?: string } = {}) => {
+  versionResponse,
+  versionError,
+}: {
+  cardType?: CardType;
+  seVersion?: number;
+  changeStatus?: string;
+  versionResponse?: string;
+  versionError?: Error;
+} = {}) => {
   const sent: SentApdu[] = [];
   const transport = {
     cardType,
@@ -30,7 +38,8 @@ const mockTransport = ({
       // command = pid(00) cmdLen(09) CLA INS P1 P2 ...
       switch (command.slice(6, 8).toUpperCase()) {
         case '52':
-          return seVersion.toString(16).padStart(4, '0') + '9000';
+          if (versionError) throw versionError;
+          return versionResponse ?? seVersion.toString(16).padStart(4, '0') + '9000';
         case '54':
           return nonce + '9000';
         case '12':
@@ -85,6 +94,22 @@ describe('changePairingPassword', () => {
     await expect(
       changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey)
     ).rejects.toThrow('Firmware version too low');
+    expect(changeApdus()).toHaveLength(0);
+  });
+
+  it('throws the version query error instead of reporting old firmware', async () => {
+    const { transport, changeApdus } = mockTransport({ versionResponse: '6D00' });
+    const result = changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey);
+    await expect(result).rejects.toThrow('returnCode: 6D00');
+    await expect(result).rejects.not.toThrow('Firmware version too low');
+    expect(changeApdus()).toHaveLength(0);
+  });
+
+  it('throws the transport error instead of reporting old firmware', async () => {
+    const { transport, changeApdus } = mockTransport({ versionError: new Error('BLE disconnected') });
+    const result = changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey);
+    await expect(result).rejects.toThrow('BLE disconnected');
+    await expect(result).rejects.not.toThrow('Firmware version too low');
     expect(changeApdus()).toHaveLength(0);
   });
 
