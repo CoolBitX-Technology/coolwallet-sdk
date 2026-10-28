@@ -92,7 +92,7 @@ export const changePairingPassword = async (
   if (!SEPublicKey) {
     throw new SDKError(changePairingPassword.name, 'SEPublicKey can not be undifined');
   }
-  // The card does not check the password length, so the SDK enforces exactly 8 digits.
+  // The card takes a new password of 6-8 digits; Go passwords are exactly 8, so the SDK enforces that.
   // The old password was set under the same rule, so any other old password can never match.
   if (!/^\d{8}$/.test(oldPassword)) {
     throw new SDKError(changePairingPassword.name, 'oldPassword must be 8 digits');
@@ -108,8 +108,11 @@ export const changePairingPassword = async (
     throw new APDUError(commands.GET_SE_VERSION, version.statusCode, version.msg);
   }
   const seVersion = parseInt(version.outputData, 16);
-  if (!Number.isNaN(seVersion)) transport.seVersion = seVersion;
-  if (!(seVersion >= requiredSEVersion)) {
+  if (Number.isNaN(seVersion)) {
+    throw new SDKError(changePairingPassword.name, `Invalid SE version: ${version.outputData}`);
+  }
+  transport.seVersion = seVersion;
+  if (seVersion < requiredSEVersion) {
     throw new SDKError(
       changePairingPassword.name,
       `Firmware version too low. Please update to ${requiredSEVersion}`

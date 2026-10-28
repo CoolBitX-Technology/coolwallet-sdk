@@ -157,6 +157,13 @@ describe('changePairingPassword', () => {
     expect(changeApdus()).toHaveLength(0);
   });
 
+  it('throws on an unreadable version instead of reporting old firmware', async () => {
+    const { transport, changeApdus } = mockTransport({ versionResponse: 'ZZZZ9000' });
+    const result = changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey);
+    await expect(result).rejects.toThrow('Invalid SE version: ZZZZ');
+    expect(changeApdus()).toHaveLength(0);
+  });
+
   it('throws the transport error instead of reporting old firmware', async () => {
     const { transport, changeApdus } = mockTransport({ versionError: new Error('BLE disconnected') });
     const result = changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey);
