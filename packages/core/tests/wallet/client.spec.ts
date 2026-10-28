@@ -1,7 +1,7 @@
 import { createECDH, createHash } from 'crypto';
 import { ec as EC } from 'elliptic';
 import { CardType, Transport } from '../../src';
-import { changePairingPassword } from '../../src/wallet/client';
+import { changePairingPassword, getPairingPassword } from '../../src/wallet/client';
 import { ECIESDec } from '../../src/crypto/encryptions';
 
 const secp256k1 = new EC('secp256k1');
@@ -52,6 +52,16 @@ const mockTransport = ({
   const changeApdus = () => sent.filter(({ command }) => command.slice(6, 8).toUpperCase() === '12');
   return { transport, changeApdus };
 };
+
+describe('getPairingPassword', () => {
+  it('rejects a Go card without sending any APDU', async () => {
+    const { transport } = mockTransport({ cardType: CardType.Go, seVersion: 102 });
+    await expect(getPairingPassword(transport, appId, appPrivateKey)).rejects.toThrow(
+      'CoolWallet Go does not support this command.'
+    );
+    expect(transport.request).not.toHaveBeenCalled();
+  });
+});
 
 describe('changePairingPassword', () => {
   it.each([

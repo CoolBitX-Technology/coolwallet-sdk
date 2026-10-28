@@ -182,6 +182,10 @@ export const getPairedApps = async (
  * @return {Promise<string>}
  */
 export const getPairingPassword = async (transport: Transport, appId: string, appPrivKey: string): Promise<string> => {
+  // Go firmware has no GET_PAIR_PWD (0x1A).
+  if (transport.cardType === CardType.Go) {
+    throw new SDKError(getPairingPassword.name, 'CoolWallet Go does not support this command.');
+  }
   const signature = await getCommandSignature(transport, appId, appPrivKey, commands.GET_PAIR_PWD);
   const { outputData: encryptedPassword } = await executeCommand(
     transport,
