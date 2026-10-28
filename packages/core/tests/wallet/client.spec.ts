@@ -195,7 +195,7 @@ describe('changePairingPassword', () => {
   );
 
   it.each([
-    ['6914', 'pin is frozen'],
+    ['6914', 'pairing is locked'],
     ['6915', 'old pair password is wrong'],
     ['6916', 'new pair password format is invalid'],
     ['6917', 'new pair password is the same as the old one'],

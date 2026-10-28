@@ -101,7 +101,7 @@ const RENUMBERED_MSG: MsgTable = {
   _6911: 'device index out of range',
   _6912: 'no current device',
   _6913: 'card is not paired with any device',
-  _6914: 'pin is frozen',
+  _6914: 'pairing is locked by changePairingStatus or after too many wrong passwords',
   _6915: 'old pair password is wrong',
   _6916: 'new pair password format is invalid',
   _6917: 'new pair password is the same as the old one',
