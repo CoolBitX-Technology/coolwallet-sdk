@@ -3,10 +3,13 @@ import { executeCommand } from '../apdu/execute/execute';
 import { target } from '../config/param';
 import { CODE } from '../config/status/code';
 import { APDUError, SDKError } from '../error/errorHandle';
-import Transport from '../transport';
+import Transport, { CardType } from '../transport';
 import * as crypto from '../crypto/index';
-import { apdu, mcu } from '..';
+import { mcu } from '..';
 import { getCommandSignature } from '../setting/auth';
+
+// changePairPwd (0x12) is supported from Go SE 102. Pro does not support it.
+const GO_CHANGE_PAIR_PWD_SE_VERSION = 102;
 
 /**
  * @param {Transport} transport
@@ -25,6 +28,11 @@ export const register = async (
   if (!SEPublicKey) {
     throw new SDKError(register.name, 'SEPublicKey can not be undifined');
   }
+  // The card does not check the password format, so the SDK enforces it: Pro takes 6-8 digits and Go exactly 8.
+  const isGo = transport.cardType === CardType.Go;
+  if (!(isGo ? /^\d{8}$/ : /^\d{6,8}$/).test(password)) {
+    throw new SDKError(register.name, `password must be ${isGo ? '8' : '6-8'} digits`);
+  }
   let nameToUTF = Buffer.from(deviceName, 'utf8');
   const maxLen = 30;
 
@@ -36,9 +44,7 @@ export const register = async (
   } else {
     nameToUTF = nameToUTF.slice(0, maxLen);
   }
-  if (password.length % 2 === 1 && password.length > 8) {
-    password = '0' + password;
-  }
+  // BCD left-padded with F to 4 bytes
   const addedPassword = password.padStart(8, 'F');
 
   const hexNameToUTF = nameToUTF.toString('hex');
@@ -59,6 +65,80 @@ export const register = async (
     return appId;
   } else {
     throw new APDUError(commands.REGISTER, statusCode, msg);
+  }
+};
+
+/**
+ * Change the pairing password. Only CoolWallet Go supports it, from SE 102.
+ * Only a wrong old password uses up one of the tries shared with register.
+ * @param {Transport} transport
+ * @param {string} appId
+ * @param {string} appPrivKey
+ * @param {string} oldPassword 8 digits
+ * @param {string} newPassword 8 digits
+ * @param {string} SEPublicKey
+ */
+export const changePairingPassword = async (
+  transport: Transport,
+  appId: string,
+  appPrivKey: string,
+  oldPassword: string,
+  newPassword: string,
+  SEPublicKey: string
+): Promise<void> => {
+  if (transport.cardType !== CardType.Go) {
+    throw new SDKError(changePairingPassword.name, 'Only CoolWallet Go supports this command.');
+  }
+  if (!SEPublicKey) {
+    throw new SDKError(changePairingPassword.name, 'SEPublicKey can not be undifined');
+  }
+  // The card takes a new password of 6-8 digits; Go passwords are exactly 8, so the SDK enforces that.
+  // The old password was set under the same rule, so any other old password can never match.
+  if (!/^\d{8}$/.test(oldPassword)) {
+    throw new SDKError(changePairingPassword.name, 'oldPassword must be 8 digits');
+  }
+  if (!/^\d{8}$/.test(newPassword)) {
+    throw new SDKError(changePairingPassword.name, 'newPassword must be 8 digits');
+  }
+  // Like isSigningOnlyFirmware, a failed version query throws instead of reading as version 0,
+  // so a transport error is never reported as old firmware.
+  const requiredSEVersion = GO_CHANGE_PAIR_PWD_SE_VERSION;
+  const version = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
+  if (version.statusCode !== CODE._9000 || !version.outputData) {
+    throw new APDUError(commands.GET_SE_VERSION, version.statusCode, version.msg);
+  }
+  const seVersion = parseInt(version.outputData, 16);
+  if (Number.isNaN(seVersion)) {
+    throw new SDKError(changePairingPassword.name, `Invalid SE version: ${version.outputData}`);
+  }
+  transport.seVersion = seVersion;
+  if (seVersion < requiredSEVersion) {
+    throw new SDKError(
+      changePairingPassword.name,
+      `Firmware version too low. Please update to ${requiredSEVersion}`
+    );
+  }
+
+  // Passwords are 4-byte BCD, as in register.
+  const passwords = oldPassword + newPassword;
+  const encryptedPasswords = crypto.encryption.ECIESenc(SEPublicKey, passwords);
+  const signature = await getCommandSignature(
+    transport,
+    appId,
+    appPrivKey,
+    commands.CHANGE_PAIR_PWD,
+    encryptedPasswords
+  );
+  const { statusCode, msg } = await executeCommand(
+    transport,
+    commands.CHANGE_PAIR_PWD,
+    target.SE,
+    encryptedPasswords + signature,
+    undefined,
+    undefined
+  );
+  if (statusCode !== CODE._9000) {
+    throw new APDUError(commands.CHANGE_PAIR_PWD, statusCode, msg);
   }
 };
 
@@ -106,6 +186,10 @@ export const getPairedApps = async (
  * @return {Promise<string>}
  */
 export const getPairingPassword = async (transport: Transport, appId: string, appPrivKey: string): Promise<string> => {
+  // Go firmware has no GET_PAIR_PWD (0x1A).
+  if (transport.cardType === CardType.Go) {
+    throw new SDKError(getPairingPassword.name, 'CoolWallet Go does not support this command.');
+  }
   const signature = await getCommandSignature(transport, appId, appPrivKey, commands.GET_PAIR_PWD);
   const { outputData: encryptedPassword } = await executeCommand(
     transport,
