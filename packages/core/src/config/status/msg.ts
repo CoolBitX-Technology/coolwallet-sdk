@@ -89,7 +89,7 @@ const LEGACY_MSG: MsgTable = {
 
 // Custom status words of Pro SE >= 347 and Go SE >= 101, from coolwallet-pro-se ErrorMessage.java and
 // CryptoError.java. Go SE uses a subset of them (no script, message pack or RLP codes; the pair password
-// codes need Pro SE >= 348 or Go SE >= 102).
+// codes need Go SE >= 102).
 const RENUMBERED_MSG: MsgTable = {
   // 690x command auth
   _6901: 'command data is shorter than appId and signature',
@@ -103,7 +103,7 @@ const RENUMBERED_MSG: MsgTable = {
   _6913: 'card is not paired with any device',
   _6914: 'pin is frozen',
   _6915: 'old pair password is wrong',
-  _6916: 'new pair password format is invalid (6-8 BCD digits left-padded with F)',
+  _6916: 'new pair password format is invalid',
   _6917: 'new pair password is the same as the old one',
   _6918: 'register data backup is pending; recover or reset it before changing the pair password',
   // 692x backup

@@ -18,8 +18,8 @@ const SEPrivateKey = seKey.getPrivateKey('hex');
 type SentApdu = { command: string; data: string };
 
 const mockTransport = ({
-  cardType = CardType.Pro,
-  seVersion = 348,
+  cardType = CardType.Go,
+  seVersion = 102,
   changeStatus = '9000',
   versionResponse,
   versionError,
@@ -64,18 +64,10 @@ describe('getPairingPassword', () => {
 });
 
 describe('changePairingPassword', () => {
-  it.each([
-    [CardType.Pro, 348, '123456', 'FF12345687654321'],
-    [CardType.Go, 102, '12345678', '1234567887654321'],
-  ])('sends the encrypted passwords with the command signature on %s SE %d', async (
-    cardType,
-    seVersion,
-    oldPassword,
-    plaintext
-  ) => {
-    const { transport, changeApdus } = mockTransport({ cardType, seVersion });
+  it('sends the encrypted passwords with the command signature', async () => {
+    const { transport, changeApdus } = mockTransport();
     await expect(
-      changePairingPassword(transport, appId, appPrivateKey, oldPassword, '87654321', SEPublicKey)
+      changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey)
     ).resolves.toBeUndefined();
 
     const apdus = changeApdus();
@@ -86,7 +78,7 @@ describe('changePairingPassword', () => {
     expect(data).toHaveLength((101 + 20 + 72) * 2);
 
     const encrypted = data.slice(0, 202);
-    expect(ECIESDec(SEPrivateKey, encrypted).toUpperCase()).toBe(plaintext);
+    expect(ECIESDec(SEPrivateKey, encrypted)).toBe('1234567887654321');
     expect(data.slice(202, 242)).toBe(appId);
 
     const signature = data.slice(242).replace(/^(00)+/, '');
@@ -96,14 +88,19 @@ describe('changePairingPassword', () => {
     expect(appKey.verify(signedData, signature)).toBe(true);
   });
 
-  it.each([
-    [CardType.Pro, 347],
-    [CardType.Go, 101],
-  ])('rejects %s SE %d before sending the command', async (cardType, seVersion) => {
-    const { transport, changeApdus } = mockTransport({ cardType, seVersion });
+  it('rejects a Pro card without sending any APDU', async () => {
+    const { transport } = mockTransport({ cardType: CardType.Pro, seVersion: 348 });
     await expect(
       changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey)
-    ).rejects.toThrow('Firmware version too low');
+    ).rejects.toThrow('Only CoolWallet Go supports this command.');
+    expect(transport.request).not.toHaveBeenCalled();
+  });
+
+  it('rejects Go SE 101 before sending the command', async () => {
+    const { transport, changeApdus } = mockTransport({ seVersion: 101 });
+    await expect(
+      changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey)
+    ).rejects.toThrow('Firmware version too low. Please update to 102');
     expect(changeApdus()).toHaveLength(0);
   });
 
@@ -123,18 +120,10 @@ describe('changePairingPassword', () => {
     expect(changeApdus()).toHaveLength(0);
   });
 
-  it.each(['12345', '123456789', '12a456', ''])('rejects new password %p without the card', async (newPassword) => {
-    const { transport } = mockTransport();
-    await expect(
-      changePairingPassword(transport, appId, appPrivateKey, '123456', newPassword, SEPublicKey)
-    ).rejects.toThrow('newPassword must be 6-8 digits');
-    expect(transport.request).not.toHaveBeenCalled();
-  });
-
-  it.each(['123456', '1234567', '123456789', '1234a678'])(
-    'rejects new password %p on a Go card without the card',
+  it.each(['123456', '1234567', '123456789', '1234a678', ''])(
+    'rejects new password %p without the card',
     async (newPassword) => {
-      const { transport } = mockTransport({ cardType: CardType.Go, seVersion: 102 });
+      const { transport } = mockTransport();
       await expect(
         changePairingPassword(transport, appId, appPrivateKey, '12345678', newPassword, SEPublicKey)
       ).rejects.toThrow('newPassword must be 8 digits');
@@ -142,27 +131,10 @@ describe('changePairingPassword', () => {
     }
   );
 
-  it.each(['123456', '1234567', '12345678'])('accepts new password %p on a Pro card', async (newPassword) => {
-    const { transport, changeApdus } = mockTransport();
-    await changePairingPassword(transport, appId, appPrivateKey, '12345678', newPassword, SEPublicKey);
-    expect(changeApdus()).toHaveLength(1);
-  });
-
-  it.each(['12345', '123456789', '12a456', '12g456', ''])(
-    'rejects old password %p on a Pro card without the card',
+  it.each(['123456', '1234567', '123456789', '1234a678', ''])(
+    'rejects old password %p without the card',
     async (oldPassword) => {
       const { transport } = mockTransport();
-      await expect(
-        changePairingPassword(transport, appId, appPrivateKey, oldPassword, '87654321', SEPublicKey)
-      ).rejects.toThrow('oldPassword must be 6-8 digits');
-      expect(transport.request).not.toHaveBeenCalled();
-    }
-  );
-
-  it.each(['123456', '1234567', '123456789', '1234a678'])(
-    'rejects old password %p on a Go card without the card',
-    async (oldPassword) => {
-      const { transport } = mockTransport({ cardType: CardType.Go, seVersion: 102 });
       await expect(
         changePairingPassword(transport, appId, appPrivateKey, oldPassword, '87654321', SEPublicKey)
       ).rejects.toThrow('oldPassword must be 8 digits');
@@ -178,7 +150,7 @@ describe('changePairingPassword', () => {
     ['6918', 'register data backup is pending'],
   ])('throws the card error %s', async (changeStatus, message) => {
     const { transport } = mockTransport({ changeStatus });
-    const result = changePairingPassword(transport, appId, appPrivateKey, '123456', '87654321', SEPublicKey);
+    const result = changePairingPassword(transport, appId, appPrivateKey, '12345678', '87654321', SEPublicKey);
     await expect(result).rejects.toThrow(`returnCode: ${changeStatus}`);
     await expect(result).rejects.toThrow(message);
   });

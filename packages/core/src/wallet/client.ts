@@ -8,8 +8,7 @@ import * as crypto from '../crypto/index';
 import { mcu } from '..';
 import { getCommandSignature } from '../setting/auth';
 
-// changePairPwd (0x12) is supported from Pro SE 348 and Go SE 102.
-const PRO_CHANGE_PAIR_PWD_SE_VERSION = 348;
+// changePairPwd (0x12) is supported from Go SE 102. Pro does not support it.
 const GO_CHANGE_PAIR_PWD_SE_VERSION = 102;
 
 /**
@@ -67,13 +66,13 @@ export const register = async (
 };
 
 /**
- * Change the pairing password. Needs Pro SE 348 or Go SE 102.
+ * Change the pairing password. Only CoolWallet Go supports it, from SE 102.
  * Only a wrong old password uses up one of the tries shared with register.
  * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivKey
- * @param {string} oldPassword 6-8 digits on Pro, 8 digits on Go
- * @param {string} newPassword 6-8 digits on Pro, 8 digits on Go
+ * @param {string} oldPassword 8 digits
+ * @param {string} newPassword 8 digits
  * @param {string} SEPublicKey
  */
 export const changePairingPassword = async (
@@ -84,24 +83,23 @@ export const changePairingPassword = async (
   newPassword: string,
   SEPublicKey: string
 ): Promise<void> => {
+  if (transport.cardType !== CardType.Go) {
+    throw new SDKError(changePairingPassword.name, 'Only CoolWallet Go supports this command.');
+  }
   if (!SEPublicKey) {
     throw new SDKError(changePairingPassword.name, 'SEPublicKey can not be undifined');
   }
-  // The card does not check the password length, so the SDK enforces it: Pro takes 6-8 digits and Go exactly 8.
+  // The card does not check the password length, so the SDK enforces exactly 8 digits.
   // The old password was set under the same rule, so any other old password can never match.
-  const isGo = transport.cardType === CardType.Go;
-  const passwordPattern = isGo ? /^\d{8}$/ : /^\d{6,8}$/;
-  const passwordDigits = isGo ? '8' : '6-8';
-  if (!passwordPattern.test(oldPassword)) {
-    throw new SDKError(changePairingPassword.name, `oldPassword must be ${passwordDigits} digits`);
+  if (!/^\d{8}$/.test(oldPassword)) {
+    throw new SDKError(changePairingPassword.name, 'oldPassword must be 8 digits');
   }
-  if (!passwordPattern.test(newPassword)) {
-    throw new SDKError(changePairingPassword.name, `newPassword must be ${passwordDigits} digits`);
+  if (!/^\d{8}$/.test(newPassword)) {
+    throw new SDKError(changePairingPassword.name, 'newPassword must be 8 digits');
   }
   // Like isSigningOnlyFirmware, a failed version query throws instead of reading as version 0,
   // so a transport error is never reported as old firmware.
-  const requiredSEVersion =
-    transport.cardType === CardType.Go ? GO_CHANGE_PAIR_PWD_SE_VERSION : PRO_CHANGE_PAIR_PWD_SE_VERSION;
+  const requiredSEVersion = GO_CHANGE_PAIR_PWD_SE_VERSION;
   const version = await executeCommand(transport, commands.GET_SE_VERSION, target.SE);
   if (version.statusCode !== CODE._9000 || !version.outputData) {
     throw new APDUError(commands.GET_SE_VERSION, version.statusCode, version.msg);
@@ -115,8 +113,8 @@ export const changePairingPassword = async (
     );
   }
 
-  // Passwords are BCD left-padded with F to 4 bytes, as in register.
-  const passwords = oldPassword.padStart(8, 'F') + newPassword.padStart(8, 'F');
+  // Passwords are 4-byte BCD, as in register.
+  const passwords = oldPassword + newPassword;
   const encryptedPasswords = crypto.encryption.ECIESenc(SEPublicKey, passwords);
   const signature = await getCommandSignature(
     transport,
