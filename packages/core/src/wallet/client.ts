@@ -28,6 +28,11 @@ export const register = async (
   if (!SEPublicKey) {
     throw new SDKError(register.name, 'SEPublicKey can not be undifined');
   }
+  // The card does not check the password format, so the SDK enforces it: Pro takes 6-8 digits and Go exactly 8.
+  const isGo = transport.cardType === CardType.Go;
+  if (!(isGo ? /^\d{8}$/ : /^\d{6,8}$/).test(password)) {
+    throw new SDKError(register.name, `password must be ${isGo ? '8' : '6-8'} digits`);
+  }
   let nameToUTF = Buffer.from(deviceName, 'utf8');
   const maxLen = 30;
 
@@ -39,9 +44,7 @@ export const register = async (
   } else {
     nameToUTF = nameToUTF.slice(0, maxLen);
   }
-  if (password.length % 2 === 1 && password.length > 8) {
-    password = '0' + password;
-  }
+  // BCD left-padded with F to 4 bytes
   const addedPassword = password.padStart(8, 'F');
 
   const hexNameToUTF = nameToUTF.toString('hex');

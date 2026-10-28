@@ -1,7 +1,7 @@
 import { createECDH, createHash } from 'crypto';
 import { ec as EC } from 'elliptic';
 import { CardType, Transport } from '../../src';
-import { changePairingPassword, getPairingPassword } from '../../src/wallet/client';
+import { changePairingPassword, getPairingPassword, register } from '../../src/wallet/client';
 import { ECIESDec } from '../../src/crypto/encryptions';
 
 const secp256k1 = new EC('secp256k1');
@@ -49,9 +49,54 @@ const mockTransport = ({
       }
     }),
   } as unknown as Transport;
-  const changeApdus = () => sent.filter(({ command }) => command.slice(6, 8).toUpperCase() === '12');
-  return { transport, changeApdus };
+  const apdusOf = (ins: string) => sent.filter(({ command }) => command.slice(6, 8).toUpperCase() === ins);
+  const changeApdus = () => apdusOf('12');
+  const registerApdus = () => apdusOf('10');
+  return { transport, changeApdus, registerApdus };
 };
+
+describe('register', () => {
+  const appPublicKey = appKey.getPublic(false, 'hex');
+
+  it.each(['123456', '1234567', '123456789', '1234a678', ''])(
+    'rejects password %p on a Go card without the card',
+    async (password) => {
+      const { transport } = mockTransport();
+      await expect(register(transport, appPublicKey, password, 'test', SEPublicKey)).rejects.toThrow(
+        'password must be 8 digits'
+      );
+      expect(transport.request).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['12345', '123456789', '12a456', '12g456', ''])(
+    'rejects password %p on a Pro card without the card',
+    async (password) => {
+      const { transport } = mockTransport({ cardType: CardType.Pro });
+      await expect(register(transport, appPublicKey, password, 'test', SEPublicKey)).rejects.toThrow(
+        'password must be 6-8 digits'
+      );
+      expect(transport.request).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    [CardType.Go, '12345678', '12345678'],
+    [CardType.Go, '01234567', '01234567'],
+    [CardType.Pro, '123456', 'FF123456'],
+    [CardType.Pro, '012345', 'FF012345'],
+    [CardType.Pro, '1234567', 'F1234567'],
+    [CardType.Pro, '12345678', '12345678'],
+  ])('sends password %p on %s as %p', async (cardType, password, padded) => {
+    const { transport, registerApdus } = mockTransport({ cardType });
+    await register(transport, appPublicKey, password, 'test', SEPublicKey);
+    const apdus = registerApdus();
+    expect(apdus).toHaveLength(1);
+    // Drop the 1-byte checksum; the plaintext starts with the 4-byte password.
+    const plaintext = ECIESDec(SEPrivateKey, apdus[0].data.slice(0, -2));
+    expect(plaintext.slice(0, 8).toUpperCase()).toBe(padded);
+  });
+});
 
 describe('getPairingPassword', () => {
   it('rejects a Go card without sending any APDU', async () => {
