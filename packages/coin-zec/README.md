@@ -96,7 +96,7 @@ Sign Litecoin Transaction.
 async signTransaction(signTxData: signTxType):Promise<string>
 ```
 
-A CoolWallet Pro with SE 348 or later signs a v5 transaction (ZIP-225, sighash ZIP-244), which stays valid after NU7. Older SE versions and other cards sign v4, which NU7 no longer accepts.
+A CoolWallet Pro with SE 348 or later signs a v5 transaction (ZIP-225, sighash ZIP-244), which stays valid after NU7. A Pro with an older SE, and a CoolWallet Go that runs scripts, sign v4, which NU7 no longer accepts. A CoolWallet Go on signing-only firmware signs with `@coolwallet/go-signer` instead.
 
 #### signTxType Arguments
 
