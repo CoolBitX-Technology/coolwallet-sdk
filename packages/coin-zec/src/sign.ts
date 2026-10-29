@@ -17,7 +17,7 @@ export async function signTransaction(signTxData: types.signTxType): Promise<str
   const { preparedData } = txUtil.createUnsignedTransactions(scriptType, inputs, output, change);
 
   const seVersion = await info.getSEVersion(transport);
-  versionUtil.assertRunsScripts(transport.cardType, seVersion);
+  versionUtil.assertGoSeVersionSupportsZecScript(transport.cardType, seVersion);
   if (versionUtil.shouldSignV5(transport.cardType, seVersion)) {
     return signV5Transaction(signTxData, preparedData);
   }
