@@ -146,6 +146,11 @@ const RENUMBERED_MSG: MsgTable = {
   _6A93: 'remaining data type does not match the utxo sign type',
   _6A94: 'unsupported utxo sign type',
   _6A95: 'unsupported utxo script type',
+  _6A96: 'utxo section starts inside another utxo section',
+  _6A97: 'utxo section does not accept a hash key',
+  _6A98: 'utxo section data is split across several commands',
+  _6A99: 'utxo section changes the confirmed content',
+  _6A9A: 'utxo section result to sign as is is not 32 bytes',
   // 6B0x number conversion
   _6B01: 'enter unexpected numbers when converting digital formats',
   _6B02: 'input too long when converting digital format',

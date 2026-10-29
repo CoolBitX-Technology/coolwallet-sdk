@@ -173,3 +173,48 @@ export function composeFinalTransaction(
     joinSplits,
   ]);
 }
+
+/**
+ * v5 transparent transaction (ZIP-225): the header now carries the consensus branch id, and the transparent bundle
+ * is followed by empty Sapling and Orchard bundles.
+ */
+export function composeFinalV5Transaction(
+  preparedData: types.PreparedData,
+  signatures: Array<Buffer>,
+  branchId: number,
+  expiryHeight = 0
+): Buffer {
+  const { preparedInputs, outputsCount, outputsBuf, lockTimeBuf } = preparedData;
+
+  // P2PKH scriptSig: <DER signature | hashType 0x81 (ALL|ANYONECANPAY)> <public key>
+  const inputsBuf = Buffer.concat(
+    preparedInputs.map((data, i) => {
+      const { pubkeyBuf, preOutPointBuf, sequenceBuf } = data;
+      const signature = signatures[i];
+      const inScript = Buffer.concat([
+        Buffer.from((signature.length + 1).toString(16), 'hex'),
+        signature,
+        Buffer.from('81', 'hex'),
+        Buffer.from(pubkeyBuf.length.toString(16), 'hex'),
+        pubkeyBuf,
+      ]);
+      return Buffer.concat([preOutPointBuf, bufferUtil.toVarUintBuffer(inScript.length), inScript, sequenceBuf]);
+    })
+  );
+
+  // nSpendsSapling | nOutputsSapling | nActionsOrchard, all 0
+  const emptyShieldedBundles = Buffer.alloc(3, 0);
+
+  return Buffer.concat([
+    bufferUtil.toUintBuffer(params.ZcashTxVersion[params.txVersion.V5], 4),
+    bufferUtil.toUintBuffer(params.ZcashGroupId[params.txVersion.V5], 4),
+    bufferUtil.toUintBuffer(branchId, 4),
+    lockTimeBuf,
+    bufferUtil.toUintBuffer(expiryHeight, 4),
+    bufferUtil.toVarUintBuffer(preparedInputs.length),
+    inputsBuf,
+    outputsCount,
+    outputsBuf,
+    emptyShieldedBundles,
+  ]);
+}
