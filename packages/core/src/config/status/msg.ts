@@ -151,6 +151,8 @@ const RENUMBERED_MSG: MsgTable = {
   _6A98: 'utxo section data is split across several commands',
   _6A99: 'utxo section changes the confirmed content',
   _6A9A: 'utxo section result to sign as is is not 32 bytes',
+  _6A9B: 'utxo section changes the transaction data or coin type the main part left',
+  _6A9C: 'script with a utxo section is signed by a command other than 80AA',
   // 6B0x number conversion
   _6B01: 'enter unexpected numbers when converting digital formats',
   _6B02: 'input too long when converting digital format',
