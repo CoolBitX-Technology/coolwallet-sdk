@@ -7,6 +7,10 @@ import * as types from '../config/types';
 import rlp from 'rlp';
 import BN from 'bn.js';
 
+/**
+ * @deprecated v4 transactions are no longer valid once NU7 activates (around 2026-11-05); remove after that. Use
+ * getV5Argument.
+ */
 export async function getArgument(
   txVersion: params.txVersion,
   scriptType: types.ScriptType,
@@ -89,6 +93,10 @@ export async function getArgument(
   return Buffer.from(rlp.encode(rlpInput)).toString('hex');
 }
 
+/**
+ * @deprecated v4 transactions are no longer valid once NU7 activates (around 2026-11-05); remove after that. Use
+ * getV5ScriptSigningActions.
+ */
 export async function getScriptSigningActions(
   txVersion: params.txVersion,
   transport: types.Transport,
@@ -157,8 +165,8 @@ export async function getV5Argument(
   output: types.Output,
   change: types.Change | undefined,
   branchId: number,
-  expiryHeight = 0,
-  lockTime = 0
+  lockTimeBuf: Buffer,
+  expiryHeight: number
 ): Promise<string> {
   const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
   if (!outputHash) {
@@ -187,7 +195,7 @@ export async function getV5Argument(
     ...outputArguments,
     ...changeArguments,
     bufferUtil.toUintBuffer(branchId, 4),
-    bufferUtil.toUintBuffer(lockTime, 4),
+    lockTimeBuf,
     bufferUtil.toUintBuffer(expiryHeight, 4),
   ];
   return Buffer.from(rlp.encode(rlpInput)).toString('hex');
@@ -207,7 +215,7 @@ export async function getV5ScriptSigningActions(
   output: types.Output,
   change: types.Change | undefined,
   branchId: number,
-  expiryHeight?: number
+  expiryHeight: number
 ): Promise<{
   preActions: Array<() => Promise<void>>;
   actions: Array<() => Promise<string | undefined>>;
@@ -216,7 +224,9 @@ export async function getV5ScriptSigningActions(
     throw new error.SDKError(getV5ScriptSigningActions.name, `Unsupport ScriptType '${scriptType}'`);
   }
   const script = params.TRANSFER_V5.script + params.TRANSFER_V5.signature;
-  const argument = '00' + (await getV5Argument(scriptType, output, change, branchId, expiryHeight)); // keylength zero
+  // path length 0: the script ends in a UTXO section, so 80A2 signs nothing; each input is signed by 80AA
+  const argument =
+    '00' + (await getV5Argument(scriptType, output, change, branchId, preparedData.lockTimeBuf, expiryHeight));
 
   const sendScript = async () => {
     await tx.command.sendScript(transport, script);

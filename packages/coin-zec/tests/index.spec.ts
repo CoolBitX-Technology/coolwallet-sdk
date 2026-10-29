@@ -1,4 +1,4 @@
-import { CardType, Transport, info } from '@coolwallet/core';
+import { CardType, Transport, info, tx as coreTx } from '@coolwallet/core';
 import { createTransport } from '@coolwallet/transport-jre-http';
 import { initialize } from '@coolwallet/testing-library';
 import ZEC from '../src';
@@ -29,6 +29,10 @@ describe('Test ZEC SDK', () => {
       transport = (await createTransport())!;
     }
     props = await initialize(transport, mnemonic);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('Test Get Address', () => {
@@ -130,6 +134,37 @@ describe('Test ZEC SDK', () => {
       );
     });
 
+    it('pays a P2SH recipient', async () => {
+      // Given one input of 739147 zatoshi at address index 0
+      // And the recipient is a t3 (P2SH) address and gets 100000, and the change (address index 1) gets 629147
+      // And the branch id is NU7's and there is no expiry height
+      const options: signTxType = {
+        transport,
+        appPrivateKey: props.appPrivateKey,
+        appId: props.appId,
+        scriptType: ScriptType.P2PKH,
+        inputs: [
+          {
+            preTxHash: '9452bdd51aea164d92db842616c9979c72fda81553d3b51d7bffa26858eaf437',
+            preIndex: 1,
+            preValue: '739147',
+            addressIndex: 0,
+          },
+        ],
+        output: { address: 't3Vz22vK5z2LcKEdg16Yv4FFneEL1zg9ojd', value: '100000' },
+        change: { addressIndex: 1, value: '629147' },
+        branchId: NU7_BRANCH_ID,
+      };
+
+      const signedTx = await zecSDK.signTransaction(options);
+
+      const tx = parseV5Transaction(signedTx);
+      expect(tx.outputs[0].toString('hex')).toBe(
+        'a086010000000000' + '17a914' + '7d46a730d31f97b1930d3368a967c309bd4d136a' + '87'
+      );
+      expect(verifyInputSignature(tx, 0, await getSpentOutput(0, '739147'))).toBe(true);
+    });
+
     it('signs every input under one confirmation', async () => {
       // Given two inputs of 50000 (address index 0) and 70000 (address index 2) zatoshi
       // And the recipient gets 100000 with no change
@@ -156,12 +191,16 @@ describe('Test ZEC SDK', () => {
         output: RECIPIENT,
         branchId: NU7_BRANCH_ID,
       };
-      const confirmCB = jest.fn();
+      const executeScript = jest.spyOn(coreTx.command, 'executeScript');
+      const executeUtxoSegmentScript = jest.spyOn(coreTx.command, 'executeUtxoSegmentScript');
 
-      const signedTx = await zecSDK.signTransaction({ ...options, confirmCB });
+      const signedTx = await zecSDK.signTransaction(options);
 
       const tx = parseV5Transaction(signedTx);
-      expect(confirmCB).toHaveBeenCalledTimes(1);
+      // one 80A2 for the confirmation, then one 80AA per input, none with a hash key
+      expect(executeScript).toHaveBeenCalledTimes(1);
+      expect(executeUtxoSegmentScript).toHaveBeenCalledTimes(2);
+      executeUtxoSegmentScript.mock.calls.forEach((call) => expect(call[4]).toBeUndefined());
       expect(tx.inputs).toHaveLength(2);
       expect(verifyInputSignature(tx, 0, await getSpentOutput(0, '50000'))).toBe(true);
       expect(verifyInputSignature(tx, 1, await getSpentOutput(2, '70000'))).toBe(true);

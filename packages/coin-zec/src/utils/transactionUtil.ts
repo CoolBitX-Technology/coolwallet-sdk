@@ -122,6 +122,10 @@ export function createUnsignedTransactions(
   };
 }
 
+/**
+ * @deprecated v4 transactions are no longer valid once NU7 activates (around 2026-11-05); remove after that. Use
+ * composeFinalV5Transaction.
+ */
 export function composeFinalTransaction(
   txVersion: params.txVersion,
   scriptType: types.ScriptType,
@@ -182,7 +186,7 @@ export function composeFinalV5Transaction(
   preparedData: types.PreparedData,
   signatures: Array<Buffer>,
   branchId: number,
-  expiryHeight = 0
+  expiryHeight: number
 ): Buffer {
   const { preparedInputs, outputsCount, outputsBuf, lockTimeBuf } = preparedData;
 
