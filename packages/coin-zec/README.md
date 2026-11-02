@@ -96,6 +96,8 @@ Sign Litecoin Transaction.
 async signTransaction(signTxData: signTxType):Promise<string>
 ```
 
+A CoolWallet Pro with SE 348 or later signs a v5 transaction (ZIP-225, sighash ZIP-244), which stays valid after NU7. A Pro with an older SE, and a CoolWallet Go that runs scripts, sign v4, which NU7 no longer accepts. A CoolWallet Go on signing-only firmware signs with `@coolwallet/go-signer` instead.
+
 #### signTxType Arguments
 
 |      Arg      |                              Description                             |    Type    |  Required |
@@ -109,3 +111,5 @@ async signTransaction(signTxData: signTxType):Promise<string>
 |     change    |                      Address to receive changes                      |   Change   | TRUE |
 |   confirmCB   |      Callback of confirmation data to the connected application      |  Function  | FALSE |
 |  authorizedCB | Callback of authorized transaction data to the connected application |  Function  | FALSE |
+|    branchId   |    Consensus branch id of the next block (`consensus.nextblock`)     |   number   | TRUE |
+|  expiryHeight |    v5 only: last block height that can mine it; 0 means no expiry    |   number   | FALSE |

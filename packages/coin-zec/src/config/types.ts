@@ -13,6 +13,7 @@ export type signTxType = {
   confirmCB?(): void;
   authorizedCB?(): void;
   branchId: number;
+  expiryHeight?: number; // v5 only: block height after which the transaction can no longer be mined; 0 means no expiry
 };
 
 export enum ScriptType {

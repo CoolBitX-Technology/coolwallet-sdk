@@ -7,6 +7,10 @@ import * as types from '../config/types';
 import rlp from 'rlp';
 import BN from 'bn.js';
 
+/**
+ * @deprecated v4 transactions are no longer valid once NU7 activates (around 2026-11-05); remove after that. Use
+ * getV5Argument.
+ */
 export async function getArgument(
   txVersion: params.txVersion,
   scriptType: types.ScriptType,
@@ -89,6 +93,10 @@ export async function getArgument(
   return Buffer.from(rlp.encode(rlpInput)).toString('hex');
 }
 
+/**
+ * @deprecated v4 transactions are no longer valid once NU7 activates (around 2026-11-05); remove after that. Use
+ * getV5ScriptSigningActions.
+ */
 export async function getScriptSigningActions(
   txVersion: params.txVersion,
   transport: types.Transport,
@@ -145,6 +153,99 @@ export async function getScriptSigningActions(
       await utxoArgument,
       transactionSigningHashContext.toString('hex')
     );
+  });
+
+  return { preActions, actions };
+}
+
+// Argument of TRANSFER_V5:
+// outputAmount | outputScriptType | outputDest | haveChange | changeAmount | changeScriptType | changePath | consensusBranchId | lockTime | expiryHeight
+export async function getV5Argument(
+  scriptType: types.ScriptType,
+  output: types.Output,
+  change: types.Change | undefined,
+  branchId: number,
+  lockTimeBuf: Buffer,
+  expiryHeight: number
+): Promise<string> {
+  const { scriptType: outputType, outHash: outputHash } = txUtil.addressToOutScript(output.address);
+  if (!outputHash) {
+    throw new error.SDKError(getV5Argument.name, `OutputHash Undefined`);
+  }
+  const outputArguments = [
+    Buffer.from(new BN(output.value).toArray()),
+    bufferUtil.toUintBuffer(outputType, 1),
+    outputHash,
+  ];
+
+  let changeArguments;
+  if (change) {
+    if (!change.pubkeyBuf) throw new error.SDKError(getV5Argument.name, 'Public Key not exists !!');
+    changeArguments = [
+      bufferUtil.toUintBuffer(1, 1),
+      Buffer.from(new BN(change.value).toArray()),
+      bufferUtil.toUintBuffer(scriptType, 1),
+      Buffer.from(await utils.getPath(params.COIN_TYPE, change.addressIndex), 'hex'),
+    ];
+  } else {
+    changeArguments = [bufferUtil.toUintBuffer(0, 1), Buffer.alloc(0), Buffer.alloc(0), Buffer.alloc(0)];
+  }
+
+  const rlpInput = [
+    ...outputArguments,
+    ...changeArguments,
+    bufferUtil.toUintBuffer(branchId, 4),
+    lockTimeBuf,
+    bufferUtil.toUintBuffer(expiryHeight, 4),
+  ];
+  return Buffer.from(rlp.encode(rlpInput)).toString('hex');
+}
+
+/**
+ * v5 signing: the script runs once and shows the outputs for a single confirmation; each input is then signed by the
+ * script's UTXO section, which computes that input's ZIP-244 digest on the card (SIGHASH_ALL|ANYONECANPAY). The
+ * section's personalizations are in the script, so no hash key is sent.
+ */
+export async function getV5ScriptSigningActions(
+  transport: types.Transport,
+  scriptType: types.ScriptType,
+  appId: string,
+  appPrivateKey: string,
+  preparedData: types.PreparedData,
+  output: types.Output,
+  change: types.Change | undefined,
+  branchId: number,
+  expiryHeight: number
+): Promise<{
+  preActions: Array<() => Promise<void>>;
+  actions: Array<() => Promise<string | undefined>>;
+}> {
+  if (scriptType !== types.ScriptType.P2PKH) {
+    throw new error.SDKError(getV5ScriptSigningActions.name, `Unsupport ScriptType '${scriptType}'`);
+  }
+  const script = params.TRANSFER_V5.script + params.TRANSFER_V5.signature;
+  // path length 0: the script ends in a UTXO section, so 80A2 signs nothing; each input is signed by 80AA
+  const argument =
+    '00' + (await getV5Argument(scriptType, output, change, branchId, preparedData.lockTimeBuf, expiryHeight));
+
+  const sendScript = async () => {
+    await tx.command.sendScript(transport, script);
+  };
+  const sendArgument = async () => {
+    await tx.command.executeScript(transport, appId, appPrivateKey, argument);
+  };
+  const preActions = [sendScript, sendArgument];
+
+  // outPoint(36) | value(8, LE) | pubKeyHash(20) | sequence(4)
+  const actions = preparedData.preparedInputs.map((preparedInput) => async () => {
+    const SEPath = `15${await utils.getPath(params.COIN_TYPE, preparedInput.addressIndex)}`;
+    const utxoArgument = Buffer.concat([
+      preparedInput.preOutPointBuf,
+      preparedInput.preValueBuf,
+      cryptoUtil.hash160(preparedInput.pubkeyBuf),
+      preparedInput.sequenceBuf,
+    ]).toString('hex');
+    return tx.command.executeUtxoSegmentScript(transport, appId, appPrivateKey, SEPath + utxoArgument);
   });
 
   return { preActions, actions };
