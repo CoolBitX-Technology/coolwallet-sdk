@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.1.0
+- ✨ [CW-29408] feat(zec): sign v5 transactions with the script's UTXO section (#1238)
+
 ## 3.0.0
 - ✨ [CW-28565] feat(zec): make branchId configurable in signTransaction (#1154)
 
