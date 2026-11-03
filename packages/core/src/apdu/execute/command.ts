@@ -18,6 +18,12 @@ export const commands = {
     P1: undefined,
     P2: '00',
   },
+  CHANGE_PAIR_PWD: {
+    CLA: '80',
+    INS: '12',
+    P1: '00',
+    P2: '00',
+  },
   SAY_HI: {
     CLA: '80',
     INS: '50',
