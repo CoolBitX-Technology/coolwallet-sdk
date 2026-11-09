@@ -8,8 +8,8 @@ import * as crypto from '../crypto/index';
 import { mcu } from '..';
 import { getCommandSignature } from '../setting/auth';
 
-// changePairPwd (0x12) is supported from Go SE 102. Pro does not support it.
-const GO_CHANGE_PAIR_PWD_SE_VERSION = 102;
+// changePairPwd (0x12) is supported from Go SE 103. Pro does not support it.
+const GO_CHANGE_PAIR_PWD_SE_VERSION = 103;
 
 /**
  * @param {Transport} transport
@@ -69,12 +69,12 @@ export const register = async (
 };
 
 /**
- * Change the pairing password. Only CoolWallet Go supports it, from SE 102.
- * Only a wrong old password uses up one of the tries shared with register.
+ * Change the pairing password without the old one. Only CoolWallet Go supports it, from SE 103.
+ * The card only checks the command signature, so the caller should verify the user (biometrics or passcode)
+ * first. No failure uses up one of the password tries shared with register.
  * @param {Transport} transport
  * @param {string} appId
  * @param {string} appPrivKey
- * @param {string} oldPassword 8 digits
  * @param {string} newPassword 8 digits
  * @param {string} SEPublicKey
  */
@@ -82,7 +82,6 @@ export const changePairingPassword = async (
   transport: Transport,
   appId: string,
   appPrivKey: string,
-  oldPassword: string,
   newPassword: string,
   SEPublicKey: string
 ): Promise<void> => {
@@ -93,10 +92,6 @@ export const changePairingPassword = async (
     throw new SDKError(changePairingPassword.name, 'SEPublicKey can not be undifined');
   }
   // The card takes a new password of 6-8 digits; Go passwords are exactly 8, so the SDK enforces that.
-  // The old password was set under the same rule, so any other old password can never match.
-  if (!/^\d{8}$/.test(oldPassword)) {
-    throw new SDKError(changePairingPassword.name, 'oldPassword must be 8 digits');
-  }
   if (!/^\d{8}$/.test(newPassword)) {
     throw new SDKError(changePairingPassword.name, 'newPassword must be 8 digits');
   }
@@ -119,21 +114,20 @@ export const changePairingPassword = async (
     );
   }
 
-  // Passwords are 4-byte BCD, as in register.
-  const passwords = oldPassword + newPassword;
-  const encryptedPasswords = crypto.encryption.ECIESenc(SEPublicKey, passwords);
+  // The password is 4-byte BCD, as in register.
+  const encryptedPassword = crypto.encryption.ECIESenc(SEPublicKey, newPassword);
   const signature = await getCommandSignature(
     transport,
     appId,
     appPrivKey,
     commands.CHANGE_PAIR_PWD,
-    encryptedPasswords
+    encryptedPassword
   );
   const { statusCode, msg } = await executeCommand(
     transport,
     commands.CHANGE_PAIR_PWD,
     target.SE,
-    encryptedPasswords + signature,
+    encryptedPassword + signature,
     undefined,
     undefined
   );
