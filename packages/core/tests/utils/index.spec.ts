@@ -20,7 +20,7 @@ describe('getReturnMsg', () => {
   it('uses renumbered messages for Pro SE >= 347', () => {
     expect(getReturnMsg('6903', CardType.Pro, 347)).toBe('appid need registered');
     expect(getReturnMsg('6A01', CardType.Pro, 347)).toBe('script signature verification failed');
-    expect(getReturnMsg('6915', CardType.Pro, 348)).toBe('old pair password is wrong');
+    expect(getReturnMsg('6916', CardType.Pro, 348)).toBe('new pair password is the same as the current one');
     expect(getReturnMsg('609D', CardType.Pro, 347)).toBe('unknown command error');
   });
 
