@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.1.0
+- ✨ [CW-21301] feat(core): add changePairingPassword for CoolWallet Go (#1239)
 - ✨ [CW-29563] feat(core): pick SE error messages by card version (#1236)
 - ✨ [CW-29371] feat(core): add signData for Go signing-only firmware (#1225)
 
