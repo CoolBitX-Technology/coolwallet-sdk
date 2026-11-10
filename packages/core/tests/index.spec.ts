@@ -7,7 +7,7 @@ import { initialize, HDWallet, CURVE, DisplayBuilder, getTxDetail } from '@coolw
 import { SignatureType } from '../src/transaction';
 import { resetCard } from '../src/setting/card';
 import { backupRegisterData, deleteBackupRegisterData } from '../src/apdu/ota/backup';
-import { getCardInfo } from '../src/info';
+import { GO_CHANGE_PAIR_PWD_SE_VERSION, getCardInfo } from '../src/info';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
@@ -462,12 +462,12 @@ describe('Change pairing password', () => {
     } else {
       transport = (await createTransport())!;
     }
-    // changePairPwd (0x12) is Go only, from SE 102; skip on Pro or an older simulator.
+    // changePairPwd (0x12) is Go only; skip on Pro or an older simulator.
     if (cardType !== CardType.Go) return;
     // getSEVersion reads a failed query as 0, so fail instead of skipping when the version cannot be read.
     const seVersion = await info.getSEVersion(transport);
     if (!seVersion) throw new Error('Failed to read the SE version from the simulator');
-    supported = seVersion >= 102;
+    supported = seVersion >= GO_CHANGE_PAIR_PWD_SE_VERSION;
     if (supported) props = await initialize(transport, mnemonic);
   });
 
@@ -480,46 +480,29 @@ describe('Change pairing password', () => {
       await fn();
     });
 
-  const change = (oldPassword: string, newPassword: string) =>
-    wallet.client.changePairingPassword(
-      transport,
-      props.appId,
-      props.appPrivateKey,
-      oldPassword,
-      newPassword,
-      props.SEPublicKey
-    );
+  const change = (newPassword: string) =>
+    wallet.client.changePairingPassword(transport, props.appId, props.appPrivateKey, newPassword, props.SEPublicKey);
 
-  // Go has no GET_PAIR_PWD (0x1A) to read the password back, so each change is verified by using
-  // the new password as the old one in the next change.
-  itIfSupported('changes the password, after which the previous one is rejected', async () => {
-    await expect(change('12345678', '87654321')).resolves.toBeUndefined();
-    await expect(change('12345678', '11112222')).rejects.toThrow('returnCode: 6915');
-  });
-
-  itIfSupported('returns 6915 for a wrong old password', async () => {
-    await expect(change('11112222', '22223333')).rejects.toThrow(
-      'returnCode: 6915, message: old pair password is wrong'
+  // Go has no GET_PAIR_PWD (0x1A) to read the password back, so each change is verified by 6916 when changing
+  // to the same password again.
+  itIfSupported('changes the password without the old one', async () => {
+    await expect(change('87654321')).resolves.toBeUndefined();
+    await expect(change('87654321')).rejects.toThrow(
+      'returnCode: 6916, message: new pair password is the same as the current one'
     );
   });
 
-  itIfSupported('returns 6917 when the new password equals the old one', async () => {
-    await expect(change('87654321', '87654321')).rejects.toThrow(
-      'returnCode: 6917, message: new pair password is the same as the old one'
-    );
-  });
-
-  itIfSupported('returns 6918 while register data is backed up', async () => {
+  itIfSupported('returns 6917 while register data is backed up', async () => {
     await backupRegisterData(transport, props.appId, props.appPrivateKey);
     try {
-      await expect(change('87654321', '12345678')).rejects.toThrow('returnCode: 6918');
+      await expect(change('12345678')).rejects.toThrow('returnCode: 6917');
     } finally {
       await deleteBackupRegisterData(transport, props.appId, props.appPrivateKey);
     }
   });
 
   itIfSupported('changes the password back after the backup is removed', async () => {
-    await expect(change('87654321', '12345678')).resolves.toBeUndefined();
-    await expect(change('12345678', '87654321')).resolves.toBeUndefined();
+    await expect(change('12345678')).resolves.toBeUndefined();
+    await expect(change('12345678')).rejects.toThrow('returnCode: 6916');
   });
 });

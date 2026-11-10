@@ -33,6 +33,9 @@ export const getSEVersion = async (transport: Transport): Promise<number> => {
 // Go SE versions are decimal: below 100 = script card, 100 and up = signing-only card (INS 0xA0 signData).
 export const GO_SIGNING_ONLY_SE_VERSION = 100;
 
+// changePairPwd (0x12) is supported from Go SE 103. Pro does not support it.
+export const GO_CHANGE_PAIR_PWD_SE_VERSION = 103;
+
 /**
  * Whether the card is a CoolWallet Go running the signing-only firmware.
  * Pro SE versions are above 100 as well, so the card type must be checked first.
