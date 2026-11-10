@@ -7,7 +7,7 @@ import { initialize, HDWallet, CURVE, DisplayBuilder, getTxDetail } from '@coolw
 import { SignatureType } from '../src/transaction';
 import { resetCard } from '../src/setting/card';
 import { backupRegisterData, deleteBackupRegisterData } from '../src/apdu/ota/backup';
-import { getCardInfo } from '../src/info';
+import { GO_CHANGE_PAIR_PWD_SE_VERSION, getCardInfo } from '../src/info';
 
 type PromiseValue<T> = T extends Promise<infer V> ? V : never;
 
@@ -462,12 +462,12 @@ describe('Change pairing password', () => {
     } else {
       transport = (await createTransport())!;
     }
-    // changePairPwd (0x12) is Go only, from SE 103; skip on Pro or an older simulator.
+    // changePairPwd (0x12) is Go only; skip on Pro or an older simulator.
     if (cardType !== CardType.Go) return;
     // getSEVersion reads a failed query as 0, so fail instead of skipping when the version cannot be read.
     const seVersion = await info.getSEVersion(transport);
     if (!seVersion) throw new Error('Failed to read the SE version from the simulator');
-    supported = seVersion >= 103;
+    supported = seVersion >= GO_CHANGE_PAIR_PWD_SE_VERSION;
     if (supported) props = await initialize(transport, mnemonic);
   });
 

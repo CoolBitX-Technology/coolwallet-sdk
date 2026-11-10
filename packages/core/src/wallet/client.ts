@@ -7,9 +7,7 @@ import Transport, { CardType } from '../transport';
 import * as crypto from '../crypto/index';
 import { mcu } from '..';
 import { getCommandSignature } from '../setting/auth';
-
-// changePairPwd (0x12) is supported from Go SE 103. Pro does not support it.
-const GO_CHANGE_PAIR_PWD_SE_VERSION = 103;
+import { GO_CHANGE_PAIR_PWD_SE_VERSION } from '../info';
 
 /**
  * @param {Transport} transport
