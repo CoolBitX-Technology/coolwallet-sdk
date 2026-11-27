@@ -1,11 +1,19 @@
-import Transport from '../../transport';
+import Transport, { CardType } from '../../transport';
 import { executeAPDU, executeCommand } from '../execute/execute';
 import { securityDomainCommands } from '../execute/command';
 import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
 import { APDUError, SDKError } from '../../error/errorHandle';
-import { assemblyCommandAndData } from '../../utils';
+import { assemblyCommandAndData, delay } from '../../utils';
 import { CARDMANAGER_AID, SSD_AID, SSD_UNROTATED_KVN, ISD_UNROTATED_KVN } from './constants';
+import {
+  KeyRotationAPIError,
+  cancelKeyRotationFlow,
+  createKeyRotationFlow,
+  startKeyRotationSession,
+  submitKeyRotationResponse,
+} from './keyRotationApi';
+import type { KeyRotationApiParams } from './keyRotationApi';
 import type { KeyInfo } from './types';
 
 interface ParsedApdu {
@@ -130,4 +138,97 @@ export const getKeyInfo = async (transport: Transport): Promise<KeyInfo> => {
     isNeedRotateSsdKey: ssd.versions.includes(SSD_UNROTATED_KVN),
     isNeedRotateIsdKey: isd.versions.includes(ISD_UNROTATED_KVN),
   };
+};
+
+// Resends of one API request: the same request gives the same result (docs section 4)
+const API_ATTEMPTS = 3;
+const DEFAULT_RETRY_AFTER_SEC = 1;
+// A flow has at most four sessions of four commands; this only stops a runaway loop
+const MAX_EXCHANGES = 40;
+
+/**
+ * Call the key rotation API, resending the same request after a temporary error or a lost response.
+ * Never used for the card: a command the card has answered is never sent again.
+ */
+const callWithResend = async <T>(call: () => Promise<T>): Promise<T> => {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await call();
+    } catch (e) {
+      // An error the API answered on purpose is final; only temporary ones and lost responses are resent
+      const final = e instanceof KeyRotationAPIError && !e.isRetryable;
+      if (final || attempt >= API_ATTEMPTS) throw e;
+      const retryAfter = e instanceof KeyRotationAPIError ? e.retryAfter : undefined;
+      await delay((retryAfter ?? DEFAULT_RETRY_AFTER_SEC) * 1000);
+    }
+  }
+};
+
+interface RotateKeyParams extends KeyRotationApiParams {
+  transport: Transport;
+  // Called after each session of the flow
+  progressCallback?: (completedSessions: number, totalSessions: number) => void;
+}
+
+/**
+ * Rotate the SSD and ISD keys of a CoolWallet Pro through the key rotation API
+ * (cp-ota-api-v2 docs/key-rotation-api.md). Firmware signed with the new token key installs only
+ * after this, and firmware signed with the old one only before it.
+ *
+ * Skips the API when neither domain has its issued keys left. Otherwise creates a flow from the key
+ * information just read and relays each command between the API and the card until the flow is done.
+ * cardId must be the id of the card on this transport.
+ *
+ * Never restarts on its own: the card locks after too many unfinished authentications, so after an
+ * error the flow is cancelled and the error thrown, and starting again is up to the user.
+ * A KeyRotationAPIError with code 40916 means the card used up its rotations: contact support.
+ * @returns whether a flow ran
+ */
+export const rotateKey = async ({ transport, progressCallback, ...api }: RotateKeyParams): Promise<boolean> => {
+  if (transport.cardType !== CardType.Pro) {
+    throw new SDKError(rotateKey.name, `Key rotation is not supported for card type ${transport.cardType}`);
+  }
+
+  const keyInfo = await getKeyInfo(transport);
+  if (!keyInfo.isNeedRotateSsdKey && !keyInfo.isNeedRotateIsdKey) return false;
+
+  // Nothing has been sent to the card yet, and a new flow for the card replaces the previous one
+  const flow = await callWithResend(() => createKeyRotationFlow(api, keyInfo.ssdKeyInfo, keyInfo.isdKeyInfo));
+  const totalSessions = flow.sessions.length;
+  let completedSessions = 0;
+  try {
+    let step = await callWithResend(() => startKeyRotationSession(api, flow.flowId));
+    for (let exchange = 0; ; exchange += 1) {
+      if (exchange >= MAX_EXCHANGES) throw new SDKError(rotateKey.name, 'Key rotation did not finish');
+
+      if (step.status === 'done') {
+        completedSessions += 1;
+        progressCallback?.(completedSessions, totalSessions);
+        if (step.flowState === 'DONE') return true;
+        step = await callWithResend(() => startKeyRotationSession(api, flow.flowId));
+      } else {
+        const { sessionId, select, step: stepNumber, apdu } = step;
+        if (stepNumber === undefined || !apdu) {
+          throw new SDKError(rotateKey.name, `Key rotation API returned no command: ${JSON.stringify(step)}`);
+        }
+        if (select) {
+          // Its response is not reported, but a failed SELECT would send the session to another applet
+          const selected = await transmitApdu(transport, select);
+          if (!selected.endsWith(CODE._9000)) {
+            throw new SDKError(rotateKey.name, `SELECT of the ${step.domain} failed: ${selected.slice(-4)}`);
+          }
+        }
+        const response = await transmitApdu(transport, apdu);
+        step = await callWithResend(() => submitKeyRotationResponse(api, flow.flowId, sessionId, stepNumber, response));
+      }
+    }
+  } catch (e) {
+    // The flow cannot go on; a new one needs the key information read again.
+    try {
+      await cancelKeyRotationFlow(api, flow.flowId);
+    } catch (cancelError) {
+      console.warn(`cancelKeyRotationFlow failed: ${cancelError}`);
+    }
+    throw e;
+  }
 };
