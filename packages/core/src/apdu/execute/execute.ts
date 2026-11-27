@@ -16,15 +16,26 @@ const commandCounter = {
 // Transports whose SE version is being queried, so the query's own response cannot trigger another query.
 const fetchingSEVersion = new WeakSet<Transport>();
 
+export interface ExecuteAPDUOptions {
+  /**
+   * Send this command only: no SE power off before it and no SE version query after it. For secure
+   * channel sessions, where any other command to the card ends the session. Its data is not logged:
+   * the commands of a session can carry keys.
+   */
+  isolated?: boolean;
+}
+
 /**
  * @param {Transport} transport
  * @param {{command:string, data:string}} apdu
  * @param {string} executedTarget SE or MCU
+ * @param {ExecuteAPDUOptions} options
  */
 export const executeAPDU = async (
   transport: Transport,
   apdu: { command: string; data: string },
-  executedTarget: string
+  executedTarget: string,
+  { isolated = false }: ExecuteAPDUOptions = {}
 ): Promise<{
   statusCode: string;
   msg: string;
@@ -37,16 +48,16 @@ export const executeAPDU = async (
   console.debug(`
   {
     command: ${apdu.command}
-    data: ${apdu.data}
+    data: ${isolated ? `(not logged, ${apdu.data.length / 2} bytes)` : apdu.data}
   }
   `);
 
   try {
+    if (executedTarget === target.SE && apdu.data.length > 4096) {
+      throw new Error('data too long!!');
+    }
     // trigger SE_POWER_OFF to prevent from disconnection
-    if (executedTarget === target.SE) {
-      if (apdu.data.length > 4096) {
-        throw new Error('data too long!!');
-      }
+    if (executedTarget === target.SE && !isolated) {
       if (commandCounter.command !== apdu.command) {
         commandCounter.command = apdu.command;
         commandCounter.count = 0;
@@ -68,7 +79,7 @@ export const executeAPDU = async (
     if (transport.requestAPDUV2) {
       const response = await transport.requestAPDUV2(apdu, executedTarget === target.SE ? 'BLE_CMD' : 'MCU_CMD');
       const statusCode = response.status.toUpperCase();
-      const msg = await getMsgByTarget(transport, statusCode, executedTarget);
+      const msg = await getMsgByTarget(transport, statusCode, executedTarget, isolated);
       return { statusCode, msg, outputData: response.outputData };
     }
     const response = await transport.request(apdu.command, apdu.data);
@@ -89,7 +100,7 @@ export const executeAPDU = async (
     }
 
     statusCode = statusCode.toUpperCase();
-    const msg = await getMsgByTarget(transport, statusCode, executedTarget);
+    const msg = await getMsgByTarget(transport, statusCode, executedTarget, isolated);
     return { statusCode, msg, outputData };
   } catch (err) {
     throw new SDKError(executeAPDU.name, `executeAPDU error: ${err}`);
@@ -120,9 +131,15 @@ async function ensureSEVersion(transport: Transport): Promise<void> {
 }
 
 // Only SE status words depend on the SE version; MCU responses keep the legacy messages.
-async function getMsgByTarget(transport: Transport, statusCode: string, executedTarget: string): Promise<string> {
+// An isolated command uses the version already cached instead of querying the card.
+async function getMsgByTarget(
+  transport: Transport,
+  statusCode: string,
+  executedTarget: string,
+  isolated = false
+): Promise<string> {
   if (executedTarget !== target.SE) return util.getReturnMsg(statusCode);
-  if (!isVersionIndependentCode(statusCode)) await ensureSEVersion(transport);
+  if (!isolated && !isVersionIndependentCode(statusCode)) await ensureSEVersion(transport);
   return util.getReturnMsg(statusCode, transport.cardType, transport.seVersion);
 }
 

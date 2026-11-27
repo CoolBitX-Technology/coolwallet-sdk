@@ -110,3 +110,62 @@ describe('executeAPDU error message', () => {
     expect(msg).toBe('unsupported script command');
   });
 });
+
+describe('executeAPDU isolated', () => {
+  const POWER_OFF = '00097F8000000000000000';
+  const sentCommands = (transport: Transport) =>
+    (transport.request as jest.Mock).mock.calls.map(([command]: [string]) => command);
+
+  it('inserts a power off before the third repeated command when not isolated', async () => {
+    const transport = mockTransport(CardType.Pro);
+    const apdu = nextApdu();
+    for (let i = 0; i < 3; i += 1) await executeAPDU(transport, apdu, target.SE);
+    expect(sentCommands(transport)).toEqual([apdu.command, apdu.command, POWER_OFF, apdu.command]);
+  });
+
+  it('never inserts a power off', async () => {
+    const transport = mockTransport(CardType.Pro);
+    const apdu = nextApdu();
+    for (let i = 0; i < 4; i += 1) await executeAPDU(transport, apdu, target.SE, { isolated: true });
+    expect(sentCommands(transport)).toEqual(Array(4).fill(apdu.command));
+  });
+
+  it('does not count toward the power off of other commands', async () => {
+    const transport = mockTransport(CardType.Pro);
+    const apdu = nextApdu();
+    await executeAPDU(transport, apdu, target.SE);
+    await executeAPDU(transport, apdu, target.SE, { isolated: true });
+    await executeAPDU(transport, apdu, target.SE);
+    expect(sentCommands(transport)).not.toContain(POWER_OFF);
+  });
+
+  it('does not query the SE version on a version-dependent status word', async () => {
+    const transport = mockTransport(CardType.Pro, ['6903']);
+    const { statusCode, msg } = await executeAPDU(transport, nextApdu(), target.SE, { isolated: true });
+    expect(statusCode).toBe('6903');
+    expect(msg).toBe('unknown command error'); // legacy table, as no version is cached
+    expect(transport.request).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not log the data', async () => {
+    const debug = jest.spyOn(console, 'debug').mockImplementation(() => undefined);
+    try {
+      const transport = mockTransport(CardType.Pro);
+      const secret = 'c0ffee'.repeat(8);
+      await executeAPDU(transport, { ...nextApdu(), data: secret }, target.SE, { isolated: true });
+      const logged = debug.mock.calls.flat().join('\n');
+      expect(logged).not.toContain(secret);
+      expect(logged).toContain('(not logged, 24 bytes)');
+    } finally {
+      debug.mockRestore();
+    }
+  });
+
+  it('uses the cached SE version for the message', async () => {
+    const transport = mockTransport(CardType.Pro, ['6903']);
+    transport.seVersion = 347;
+    const { msg } = await executeAPDU(transport, nextApdu(), target.SE, { isolated: true });
+    expect(msg).toBe('appid need registered');
+    expect(transport.request).toHaveBeenCalledTimes(1);
+  });
+});

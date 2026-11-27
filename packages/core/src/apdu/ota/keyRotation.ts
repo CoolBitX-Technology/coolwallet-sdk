@@ -1,11 +1,57 @@
 import Transport from '../../transport';
-import { executeCommand } from '../execute/execute';
+import { executeAPDU, executeCommand } from '../execute/execute';
 import { securityDomainCommands } from '../execute/command';
 import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
 import { APDUError, SDKError } from '../../error/errorHandle';
+import { assemblyCommandAndData } from '../../utils';
 import { CARDMANAGER_AID, SSD_AID, SSD_UNROTATED_KVN, ISD_UNROTATED_KVN } from './constants';
 import type { KeyInfo } from './types';
+
+interface ParsedApdu {
+  CLA: string;
+  INS: string;
+  P1: string;
+  P2: string;
+  data: string;
+}
+
+/**
+ * Split a short command APDU (hex) into its header and data. The transport takes the header and
+ * the data only and adds the length itself, so Lc and Le are dropped.
+ *   case 1: CLA INS P1 P2            case 3: CLA INS P1 P2 Lc data
+ *   case 2: CLA INS P1 P2 Le         case 4: CLA INS P1 P2 Lc data Le
+ */
+export const parseApdu = (apdu: string): ParsedApdu => {
+  if (!/^([0-9a-fA-F]{2})+$/.test(apdu)) {
+    throw new SDKError(parseApdu.name, `Invalid APDU: ${apdu}`);
+  }
+  const hex = apdu.toUpperCase();
+  const length = hex.length / 2;
+  const header = { CLA: hex.slice(0, 2), INS: hex.slice(2, 4), P1: hex.slice(4, 6), P2: hex.slice(6, 8) };
+  if (length === 4 || length === 5) return { ...header, data: '' };
+  const lc = parseInt(hex.slice(8, 10), 16);
+  if (length > 5 && lc > 0 && (length === 5 + lc || length === 6 + lc)) {
+    return { ...header, data: hex.slice(10, 10 + lc * 2) };
+  }
+  throw new SDKError(parseApdu.name, `Invalid APDU length: ${apdu}`);
+};
+
+/**
+ * Send a command the key rotation API gave to the card as is and return the card's response
+ * (data ‖ SW, hex), whatever the SW: the API judges it. The command is sent isolated, because
+ * within a session any other command to the card ends the secure channel.
+ */
+export const transmitApdu = async (transport: Transport, apdu: string): Promise<string> => {
+  const { CLA, INS, P1, P2, data } = parseApdu(apdu);
+  const { statusCode, outputData } = await executeAPDU(
+    transport,
+    assemblyCommandAndData(CLA, INS, P1, P2, data),
+    target.SE,
+    { isolated: true }
+  );
+  return outputData + statusCode;
+};
 
 /**
  * Read the key version numbers from a key information template:

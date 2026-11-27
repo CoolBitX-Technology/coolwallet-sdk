@@ -1,5 +1,5 @@
 import { CardType, Transport } from '../../../src';
-import { getKeyInfo, parseKeyVersions } from '../../../src/apdu/ota/keyRotation';
+import { getKeyInfo, parseApdu, parseKeyVersions, transmitApdu } from '../../../src/apdu/ota/keyRotation';
 
 const SSD_AID = 'A000000151535041';
 const ISD_AID = 'A000000151000000';
@@ -126,5 +126,81 @@ describe('getKeyInfo', () => {
   it('throws when the key information cannot be parsed', async () => {
     const { transport } = mockTransport({ ssdKeyInfo: 'E000' });
     await expect(getKeyInfo(transport)).rejects.toThrow('Invalid key information E000');
+  });
+});
+
+describe('parseApdu', () => {
+  const header = { CLA: '80', INS: '50', P1: '00', P2: '00' };
+  const challenge = '0102030405060708';
+
+  it.each([
+    ['case 1', '80500000', ''],
+    ['case 2', '8050000000', ''],
+    ['case 3', `8050000008${challenge}`, challenge],
+    ['case 4', `8050000008${challenge}00`, challenge],
+    ['lower case', `8050000008${challenge}00`.toLowerCase(), challenge],
+  ])('reads %s', (_, apdu, data) => {
+    expect(parseApdu(apdu)).toEqual({ ...header, data: data.toUpperCase() });
+  });
+
+  it('reads the longest command, the token key PUT KEY (151 bytes)', () => {
+    const data = 'ab'.repeat(0x91);
+    expect(parseApdu(`84D8700191${data}00`)).toEqual({
+      CLA: '84',
+      INS: 'D8',
+      P1: '70',
+      P2: '01',
+      data: data.toUpperCase(),
+    });
+  });
+
+  it.each([
+    ['', 'Invalid APDU'],
+    ['805000', 'Invalid APDU length'],
+    ['8050000', 'Invalid APDU'],
+    ['8050000z', 'Invalid APDU'],
+    [`8050000009${challenge}`, 'Invalid APDU length'], // Lc longer than the data
+    [`8050000006${challenge}`, 'Invalid APDU length'], // data longer than Lc and Le
+    ['805000000000', 'Invalid APDU length'], // Lc 0
+  ])('rejects %p', (apdu, message) => {
+    expect(() => parseApdu(apdu)).toThrow(message);
+  });
+});
+
+describe('transmitApdu', () => {
+  const POWER_OFF = '00097F8000000000000000';
+  const transportReturning = (responses: string[]) => {
+    let index = 0;
+    return {
+      cardType: CardType.Pro,
+      request: jest.fn(async () => {
+        const response = responses[index] ?? '9000';
+        index += 1;
+        return response;
+      }),
+    } as unknown as Transport;
+  };
+
+  it('sends the header and data, and returns data and SW', async () => {
+    const transport = transportReturning(['00112233' + '9000']);
+    await expect(transmitApdu(transport, '8050000008010203040506070800')).resolves.toBe('001122339000');
+    const [command, data] = (transport.request as jest.Mock).mock.calls[0];
+    expect(command.slice(4, 12)).toBe('80500000');
+    expect(data.slice(0, -2)).toBe('0102030405060708'); // without Lc, Le and the checksum
+  });
+
+  it('returns a failing SW without throwing or sending anything else', async () => {
+    const transport = transportReturning(['6982']);
+    await expect(transmitApdu(transport, '8482110010' + '00'.repeat(16))).resolves.toBe('6982');
+    expect(transport.request).toHaveBeenCalledTimes(1);
+  });
+
+  it('never inserts a power off between the commands of a session', async () => {
+    const transport = transportReturning([]);
+    const putKey = '84D80A814B' + '00'.repeat(0x4b) + '00';
+    for (let i = 0; i < 4; i += 1) await transmitApdu(transport, putKey);
+    const commands = (transport.request as jest.Mock).mock.calls.map(([command]: [string]) => command);
+    expect(commands).toHaveLength(4);
+    expect(commands).not.toContain(POWER_OFF);
   });
 });
