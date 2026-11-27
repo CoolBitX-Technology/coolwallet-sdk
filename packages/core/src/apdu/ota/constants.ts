@@ -5,6 +5,7 @@ const SE_UPDATE_VER_GO = 103;
 
 const CHALLENGE_URL_V2 = 'https://vas.wallet.cbx.io/ota/api/challenge';
 const CRYPTOGRAM_URL_V2 = 'https://vas.wallet.cbx.io/ota/api/cryptogram';
+const KEY_ROTATION_URL = 'https://vas.wallet.cbx.io/ota/api/key-rotation';
 const MAIN_AID_PRO = '436f6f6c57616c6c657450524f'; // CoolWalletPRO
 const MAIN_AID_GO = '436f6f6c57616c6c65744c495445'; // CoolWalletLITE
 const BACKUP_AID = '4261636b75704170706c6574';
@@ -73,6 +74,7 @@ export {
   SSD_AID,
   SSD_UNROTATED_KVN,
   ISD_UNROTATED_KVN,
+  KEY_ROTATION_URL,
   getNewSeVersion,
   getMainAppletAid,
   getChallengeUrl,
