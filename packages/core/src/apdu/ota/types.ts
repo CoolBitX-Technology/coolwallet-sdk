@@ -24,4 +24,13 @@ type Command = {
   packets: string;
 } & CommandType;
 
-export type { AppletStatus, SEUpdateInfo, Command, APIOptions };
+interface KeyInfo {
+  // GET DATA (80CA00E0) responses of the two security domains, data ‖ SW in hex
+  ssdKeyInfo: string;
+  isdKeyInfo: string;
+  // The domain still has the keys the card was issued with (SSD KVN 0x0A, ISD KVN 0x01)
+  isNeedRotateSsdKey: boolean;
+  isNeedRotateIsdKey: boolean;
+}
+
+export type { AppletStatus, SEUpdateInfo, Command, APIOptions, KeyInfo };

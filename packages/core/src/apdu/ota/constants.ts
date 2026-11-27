@@ -11,6 +11,10 @@ const BACKUP_AID = '4261636b75704170706c6574';
 const CARDMANAGER_AID = 'A000000151000000';
 const SSD_AID = 'A000000151535041';
 
+// Key version numbers of the keys a card is issued with; a domain still using them needs key rotation
+const SSD_UNROTATED_KVN = 0x0a;
+const ISD_UNROTATED_KVN = 0x01;
+
 interface OtaConfig {
   getNewSeVersion: () => number;
   getMainAppletAid: () => string;
@@ -67,6 +71,8 @@ export {
   BACKUP_AID,
   CARDMANAGER_AID,
   SSD_AID,
+  SSD_UNROTATED_KVN,
+  ISD_UNROTATED_KVN,
   getNewSeVersion,
   getMainAppletAid,
   getChallengeUrl,

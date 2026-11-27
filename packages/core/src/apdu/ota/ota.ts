@@ -1,6 +1,6 @@
 import { executeCommand } from '../execute/execute';
 import Transport, { CardType } from '../../transport';
-import { commands } from '../execute/command';
+import { securityDomainCommands } from '../execute/command';
 import { target } from '../../config/param';
 import { CODE } from '../../config/status/code';
 import * as ProScript from '../script/pro/otaScript';
@@ -50,7 +50,12 @@ export const selectApplet = async (
   transport: Transport,
   appletCommand: string = MAIN_AID_PRO
 ): Promise<AppletStatus> => {
-  const { statusCode } = await executeCommand(transport, commands.SELECT_APPLET, target.SE, appletCommand);
+  const { statusCode } = await executeCommand(
+    transport,
+    securityDomainCommands.SELECT_APPLET,
+    target.SE,
+    appletCommand
+  );
   if (statusCode === CODE._9000) {
     return { status: true, statusCode };
   }

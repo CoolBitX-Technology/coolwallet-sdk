@@ -5,6 +5,7 @@ export type CommandType = {
   P2: string | undefined;
 };
 
+// Commands of the main applet (and the MCU). Commands to the security domains are in securityDomainCommands.
 export const commands = {
   ECHO: {
     CLA: '80',
@@ -313,12 +314,6 @@ export const commands = {
     P1: undefined,
     P2: undefined,
   },
-  SELECT_APPLET: {
-    CLA: '00',
-    INS: 'A4',
-    P1: '04',
-    P2: '00',
-  },
   SET_ERC20_TOKEN: {
     CLA: '80',
     INS: '3E',
@@ -409,5 +404,25 @@ export const commands = {
     INS: '14',
     P1: '00',
     P2: '00',
+  },
+};
+
+/**
+ * ISO 7816 / GlobalPlatform commands to the security domains (SSD, ISD) used by the firmware update
+ * and key rotation, not to the main applet. SELECT is handled by the card OS.
+ */
+export const securityDomainCommands = {
+  SELECT_APPLET: {
+    CLA: '00',
+    INS: 'A4',
+    P1: '04',
+    P2: '00',
+  },
+  // GET DATA: key information template (tag E0) of the selected security domain
+  GET_KEY_INFO: {
+    CLA: '80',
+    INS: 'CA',
+    P1: '00',
+    P2: 'E0',
   },
 };
