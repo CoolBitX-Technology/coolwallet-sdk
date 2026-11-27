@@ -26,11 +26,20 @@ const parseOTAScript = (OTAScript: string): Command[] => {
   });
 };
 
+// 6982 on DELETE / INSTALL / LOAD: the card did not accept the script's token signature, or the SSD
+// session was not authenticated. The usual cause is firmware signed with a token key the card does
+// not hold: a key-rotated card takes only firmware signed with the new token key, and a card not
+// rotated only firmware signed with the old one.
+const statusDetail = (statusCode: string) =>
+  statusCode === CODE._6982
+    ? `${statusCode} (script signature rejected or SSD not authenticated: the firmware may be signed with a token key this card does not hold)`
+    : statusCode;
+
 // LOAD / INSTALL must succeed on every line; otherwise the old applet is already deleted
 // and continuing would report a successful update on a card without the new applet.
 const checkScriptStatus = (name: string, script: Command, line: number, statusCode: string) => {
   if (statusCode !== CODE._9000) {
-    throw new SDKError(name, `INS ${script.INS} failed at line ${line}, status code: ${statusCode}`);
+    throw new SDKError(name, `INS ${script.INS} failed at line ${line}, status code: ${statusDetail(statusCode)}`);
   }
 };
 
@@ -79,9 +88,8 @@ const insertDeleteScript = async (transport: Transport, scriptHex: string): Prom
       // Applet is not exits mean applet already deleted!
       const deleteStatus = statusCode === CODE._6A88 || statusCode === CODE._9000;
       if (!deleteStatus) {
-        throw new SDKError(insertDeleteScript.name, `Delete failed, status code: ${statusCode}`);
+        throw new SDKError(insertDeleteScript.name, `Delete failed, status code: ${statusDetail(statusCode)}`);
       }
-      // throw 'test error';
     }
   } catch (e) {
     throw new SDKError(insertDeleteScript.name, `Delete Script Failed! ${e}`);

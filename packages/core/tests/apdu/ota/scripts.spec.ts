@@ -53,9 +53,35 @@ describe('insertLoadScript', () => {
   });
 });
 
+describe('6982 on LOAD / INSTALL', () => {
+  it('is explained as a token key mismatch', async () => {
+    const transport = mockTransport(['6982']);
+    await expect(insertLoadScript(transport, LOAD_SCRIPT, jest.fn(), 50, 88)).rejects.toThrow(
+      'INS E6 failed at line 0, status code: 6982 (script signature rejected'
+    );
+  });
+});
+
 describe('insertDeleteScript', () => {
   it.each(['9000', '6A88'])('still accepts %s (applet already deleted)', async (statusCode) => {
     const transport = mockTransport([statusCode]);
     await expect(insertDeleteScript(transport, '80E40000' + 'ee'.repeat(8))).resolves.toBeUndefined();
+  });
+
+  it('explains 6982 as a token key mismatch and stops at the first line', async () => {
+    const transport = mockTransport(['6982']);
+    // A command not sent before, so executeAPDU's repeated-command counter inserts no power off
+    const script = ['80E40000' + 'ee'.repeat(9), '80E40080' + 'ee'.repeat(9)].join('\n');
+    await expect(insertDeleteScript(transport, script)).rejects.toThrow(
+      'Delete failed, status code: 6982 (script signature rejected or SSD not authenticated'
+    );
+    expect(transport.request).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps other status codes as they are', async () => {
+    const transport = mockTransport(['6985']);
+    const error = await insertDeleteScript(transport, '80E40000' + 'ee'.repeat(10)).catch((e) => e);
+    expect(error.message).toContain('Delete failed, status code: 6985');
+    expect(error.message).not.toContain('signature');
   });
 });
