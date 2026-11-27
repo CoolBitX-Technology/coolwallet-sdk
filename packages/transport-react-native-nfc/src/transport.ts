@@ -26,8 +26,9 @@ class NFCTransport implements Transport {
   request = async (command: string, packets: string): Promise<string> => {
     const start = Date.now();
 
+    // Log the header and lengths only: the data and the response can carry keys (e.g. key rotation).
     console.log('NFCTransport.request >> command=', command);
-    console.log('NFCTransport.request >> packets=', packets);
+    console.log('NFCTransport.request >> packets length=', packets.length / 2);
 
     if (!command.startsWith(PID + CMD_LEN)) {
       throw new TransportError(this.request.name, 'Unknown command payload.');
@@ -52,7 +53,7 @@ class NFCTransport implements Transport {
       const response = await NfcManager.isoDepHandler.transceive(commandBytes);
       console.log('NFCTransport.request >> responseBytes length=', response.length);
       const responseHex = numberArrayToHexString(response);
-      console.log('NFCTransport.request >> responseHex=', responseHex);
+      console.log('NFCTransport.request >> status=', responseHex.slice(-4));
       const end = Date.now();
       console.log('NFCTransport.request >> time taken=', end - start);
       return responseHex;
