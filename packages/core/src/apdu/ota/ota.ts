@@ -10,6 +10,7 @@ import Progress from './Progress';
 import { getAPIOption, formatAPIResponse } from './api';
 import { insertScript, insertLoadScript, insertDeleteScript } from './scripts';
 import { backupRegisterData, recoverBackupData } from './backup';
+import { rotateKey } from './keyRotation';
 import {
   MAIN_AID_PRO,
   CARDMANAGER_AID,
@@ -175,6 +176,32 @@ const performApiChallenge = async (
   console.debug('mutual Authorization Done----');
 };
 
+/**
+ * Rotate the keys of a Pro card before its firmware is replaced: the bundled Pro firmware is signed
+ * with the new token key, which a card accepts only after rotation. A card already rotated only has
+ * its key information read. Runs before the register data backup, so a failed rotation leaves
+ * nothing to recover. Reports progress from 0 up to `upTo`.
+ */
+const performKeyRotation = async (
+  transport: Transport,
+  cardId: string,
+  callAPI: (url: string, options: APIOptions) => Promise<Response>,
+  apiSecret: string,
+  progressCallback: (progress: number) => void,
+  upTo: number
+): Promise<void> => {
+  if (transport.cardType !== CardType.Pro) return;
+  console.debug('performKeyRotation start');
+  const rotated = await rotateKey({
+    transport,
+    cardId,
+    apiSecret,
+    callAPI,
+    progressCallback: (completed, total) => progressCallback(Math.floor((upTo * completed) / total)),
+  });
+  console.debug(`performKeyRotation done, rotated: ${rotated}`);
+};
+
 interface UpdateSeParams {
   transport: Transport;
   cardId: string;
@@ -220,6 +247,8 @@ export const updateSE = async ({
 
   try {
     if (transport.cardType === CardType.Pro) await mcu.display.showUpdate(transport);
+
+    await performKeyRotation(transport, cardId, callAPI, apiSecret, progressCallback, progress.current()); // up to 14
 
     progressCallback(progress.current()); // progress 14
     await performBackupRegisterData({
@@ -295,6 +324,9 @@ export const updateSEPart1 = async ({
     if (transport.cardType === CardType.Pro) {
       await mcu.display.showUpdate(transport);
     }
+
+    console.log('updateSEPart1 >> performKeyRotation');
+    await performKeyRotation(transport, cardId, callAPI, apiSecret, progressCallback, progress.current()); // up to 14
 
     progressCallback(progress.current()); // progress 14
     console.log('updateSEPart1 >> performBackupRegisterData');
